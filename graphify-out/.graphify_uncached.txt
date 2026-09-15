@@ -1,0 +1,12 @@
+C:\Users\user\Documents\ANDREI_FILES\PDM_FILES\3RD YEAR\1st sem\IT31-SAD\FinLITE\export_report_engine.py
+C:\Users\user\Documents\ANDREI_FILES\PDM_FILES\3RD YEAR\1st sem\IT31-SAD\FinLITE\inspect_tables.py
+C:\Users\user\Documents\ANDREI_FILES\PDM_FILES\3RD YEAR\1st sem\IT31-SAD\FinLITE\logos.js
+C:\Users\user\Documents\ANDREI_FILES\PDM_FILES\3RD YEAR\1st sem\IT31-SAD\FinLITE\temp_check.js
+C:\Users\user\Documents\ANDREI_FILES\PDM_FILES\3RD YEAR\1st sem\IT31-SAD\FinLITE\document_xml_dump.txt
+C:\Users\user\Documents\ANDREI_FILES\PDM_FILES\3RD YEAR\1st sem\IT31-SAD\FinLITE\graphify-out\converted\FinLITE-Exported-Report_38ec849a.md
+C:\Users\user\Documents\ANDREI_FILES\PDM_FILES\3RD YEAR\1st sem\IT31-SAD\FinLITE\index.html
+C:\Users\user\Documents\ANDREI_FILES\PDM_FILES\3RD YEAR\1st sem\IT31-SAD\FinLITE\graphify-out\converted\LITE-Financial-Report-Master-Template_7f2769a4.md
+C:\Users\user\Documents\ANDREI_FILES\PDM_FILES\3RD YEAR\1st sem\IT31-SAD\FinLITE\graphify-out\converted\LITE-Financial-Report-Template_aec3d10f.md
+C:\Users\user\Documents\ANDREI_FILES\PDM_FILES\3RD YEAR\1st sem\IT31-SAD\FinLITE\graphify-out\converted\LITE-Financial-Report-Universal-Template_5a1ba7be.md
+C:\Users\user\Documents\ANDREI_FILES\PDM_FILES\3RD YEAR\1st sem\IT31-SAD\FinLITE\graphify-out\converted\Project Context_08cd0430.md
+C:\Users\user\Documents\ANDREI_FILES\PDM_FILES\3RD YEAR\1st sem\IT31-SAD\FinLITE\.agents\rules\RTK.md

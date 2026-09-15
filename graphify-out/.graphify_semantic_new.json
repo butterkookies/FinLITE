@@ -1,0 +1,943 @@
+{
+  "nodes": [
+    {
+      "id": "export_report_engine_replace_text_in_paragraph",
+      "label": "replace_text_in_paragraph",
+      "file_type": "code",
+      "source_file": "export_report_engine.py",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "export_report_engine_replace_placeholders",
+      "label": "replace_placeholders",
+      "file_type": "code",
+      "source_file": "export_report_engine.py",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "export_report_engine_populate_report",
+      "label": "populate_report",
+      "file_type": "code",
+      "source_file": "export_report_engine.py",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "export_report_engine_default_template",
+      "label": "DEFAULT_TEMPLATE",
+      "file_type": "code",
+      "source_file": "export_report_engine.py",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "inspect_tables_xml_table_parser",
+      "label": "XML Table Style & Shading Inspector",
+      "file_type": "code",
+      "source_file": "inspect_tables.py",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "logos_pdm_logo_base64",
+      "label": "PDM_LOGO_BASE64",
+      "file_type": "code",
+      "source_file": "logos.js",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "logos_lite_logo_base64",
+      "label": "LITE_LOGO_BASE64",
+      "file_type": "code",
+      "source_file": "logos.js",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "temp_check_appstate",
+      "label": "temp_check appState",
+      "file_type": "code",
+      "source_file": "temp_check.js",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "temp_check_renderfeed",
+      "label": "temp_check renderFeed",
+      "file_type": "code",
+      "source_file": "temp_check.js",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "temp_check_opendetailsheet",
+      "label": "temp_check openDetailSheet",
+      "file_type": "code",
+      "source_file": "temp_check.js",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "temp_check_verifytx",
+      "label": "temp_check verifyTx",
+      "file_type": "code",
+      "source_file": "temp_check.js",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "temp_check_reimbursetx",
+      "label": "temp_check reimburseTx",
+      "file_type": "code",
+      "source_file": "temp_check.js",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "temp_check_voidtx",
+      "label": "temp_check voidTx",
+      "file_type": "code",
+      "source_file": "temp_check.js",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "temp_check_handlenewtransaction",
+      "label": "temp_check handleNewTransaction",
+      "file_type": "code",
+      "source_file": "temp_check.js",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "temp_check_updatereconcount",
+      "label": "temp_check updateReconCount",
+      "file_type": "code",
+      "source_file": "temp_check.js",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "temp_check_advancereport",
+      "label": "temp_check advanceReport",
+      "file_type": "code",
+      "source_file": "temp_check.js",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "temp_check_renderdocxpreview",
+      "label": "temp_check renderDocxPreview",
+      "file_type": "code",
+      "source_file": "temp_check.js",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "temp_check_exportformatteddocx",
+      "label": "temp_check exportFormattedDocx",
+      "file_type": "code",
+      "source_file": "temp_check.js",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "temp_check_askaiquery",
+      "label": "temp_check askAiQuery",
+      "file_type": "code",
+      "source_file": "temp_check.js",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "document_xml_dump_openxml_content",
+      "label": "WordprocessingML Document XML Dump",
+      "file_type": "document",
+      "source_file": "document_xml_dump.txt",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "converted_finlite_exported_report_38ec849a_financial_report",
+      "label": "FinLITE Exported Report Docx Document",
+      "file_type": "document",
+      "source_file": "graphify-out/converted/FinLITE-Exported-Report_38ec849a.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "index_html_ui",
+      "label": "FinLITE Web Application UI Interface",
+      "file_type": "code",
+      "source_file": "index.html",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "index_appstate",
+      "label": "index.html appState",
+      "file_type": "code",
+      "source_file": "index.html",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "index_renderfeed",
+      "label": "index.html renderFeed",
+      "file_type": "code",
+      "source_file": "index.html",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "index_opendetailsheet",
+      "label": "index.html openDetailSheet",
+      "file_type": "code",
+      "source_file": "index.html",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "index_verifytx",
+      "label": "index.html verifyTx",
+      "file_type": "code",
+      "source_file": "index.html",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "index_reimbursetx",
+      "label": "index.html reimburseTx",
+      "file_type": "code",
+      "source_file": "index.html",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "index_voidtx",
+      "label": "index.html voidTx",
+      "file_type": "code",
+      "source_file": "index.html",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "index_handlenewtransaction",
+      "label": "index.html handleNewTransaction",
+      "file_type": "code",
+      "source_file": "index.html",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "index_updatereconcount",
+      "label": "index.html updateReconCount",
+      "file_type": "code",
+      "source_file": "index.html",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "index_advancereport",
+      "label": "index.html advanceReport",
+      "file_type": "code",
+      "source_file": "index.html",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "index_renderdocxpreview",
+      "label": "index.html renderDocxPreview",
+      "file_type": "code",
+      "source_file": "index.html",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "index_exportformatteddocx",
+      "label": "index.html exportFormattedDocx",
+      "file_type": "code",
+      "source_file": "index.html",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "index_askaiquery",
+      "label": "index.html askAiQuery",
+      "file_type": "code",
+      "source_file": "index.html",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "converted_lite_financial_report_master_template_7f2769a4_master_template",
+      "label": "LITE Financial Report Master Template",
+      "file_type": "document",
+      "source_file": "graphify-out/converted/LITE-Financial-Report-Master-Template_7f2769a4.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "converted_lite_financial_report_template_aec3d10f_template_report",
+      "label": "LITE Financial Report AY 2025-2026 Template",
+      "file_type": "document",
+      "source_file": "graphify-out/converted/LITE-Financial-Report-Template_aec3d10f.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "converted_lite_financial_report_universal_template_5a1ba7be_universal_template",
+      "label": "LITE Financial Report Universal Template",
+      "file_type": "document",
+      "source_file": "graphify-out/converted/LITE-Financial-Report-Universal-Template_5a1ba7be.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "converted_project_context_08cd0430_project_context",
+      "label": "FinLITE Project Context & Background",
+      "file_type": "document",
+      "source_file": "graphify-out/converted/Project Context_08cd0430.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "converted_project_context_08cd0430_manual_process_problems",
+      "label": "Manual Financial Recordkeeping Deficiencies",
+      "file_type": "concept",
+      "source_file": "graphify-out/converted/Project Context_08cd0430.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "converted_project_context_08cd0430_finlite_solution",
+      "label": "FinLITE Automated Financial System Architecture",
+      "file_type": "concept",
+      "source_file": "graphify-out/converted/Project Context_08cd0430.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "rules_rtk_project_rules",
+      "label": "FinLITE RTK Project Rules & Directives",
+      "file_type": "rationale",
+      "source_file": ".agents/rules/RTK.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "rules_rtk_financial_governance",
+      "label": "Multi-Role Financial Governance & Segregation of Duties",
+      "file_type": "rationale",
+      "source_file": ".agents/rules/RTK.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    }
+  ],
+  "edges": [
+    {
+      "source": "export_report_engine_populate_report",
+      "target": "export_report_engine_replace_placeholders",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "export_report_engine.py",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "export_report_engine_replace_placeholders",
+      "target": "export_report_engine_replace_text_in_paragraph",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "export_report_engine.py",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "export_report_engine_populate_report",
+      "target": "export_report_engine_default_template",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "export_report_engine.py",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "export_report_engine_default_template",
+      "target": "converted_lite_financial_report_universal_template_5a1ba7be_universal_template",
+      "relation": "references",
+      "confidence": "INFERRED",
+      "confidence_score": 0.95,
+      "source_file": "export_report_engine.py",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "inspect_tables_xml_table_parser",
+      "target": "document_xml_dump_openxml_content",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "inspect_tables.py",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "index_html_ui",
+      "target": "logos_pdm_logo_base64",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "index.html",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "index_html_ui",
+      "target": "logos_lite_logo_base64",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "index.html",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "index_renderfeed",
+      "target": "index_renderdocxpreview",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "index.html",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "index_verifytx",
+      "target": "index_renderfeed",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "index.html",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "index_reimbursetx",
+      "target": "index_renderfeed",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "index.html",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "index_voidtx",
+      "target": "index_renderfeed",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "index.html",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "index_handlenewtransaction",
+      "target": "index_renderfeed",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "index.html",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "index_renderfeed",
+      "target": "index_appstate",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "index.html",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "index_renderdocxpreview",
+      "target": "index_appstate",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "index.html",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "index_exportformatteddocx",
+      "target": "index_appstate",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "index.html",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "index_renderdocxpreview",
+      "target": "logos_pdm_logo_base64",
+      "relation": "references",
+      "confidence": "INFERRED",
+      "confidence_score": 0.95,
+      "source_file": "index.html",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "index_renderdocxpreview",
+      "target": "logos_lite_logo_base64",
+      "relation": "references",
+      "confidence": "INFERRED",
+      "confidence_score": 0.95,
+      "source_file": "index.html",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "index_exportformatteddocx",
+      "target": "logos_pdm_logo_base64",
+      "relation": "references",
+      "confidence": "INFERRED",
+      "confidence_score": 0.95,
+      "source_file": "index.html",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "index_exportformatteddocx",
+      "target": "logos_lite_logo_base64",
+      "relation": "references",
+      "confidence": "INFERRED",
+      "confidence_score": 0.95,
+      "source_file": "index.html",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "temp_check_renderfeed",
+      "target": "temp_check_renderdocxpreview",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "temp_check.js",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "temp_check_verifytx",
+      "target": "temp_check_renderfeed",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "temp_check.js",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "temp_check_reimbursetx",
+      "target": "temp_check_renderfeed",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "temp_check.js",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "temp_check_voidtx",
+      "target": "temp_check_renderfeed",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "temp_check.js",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "temp_check_handlenewtransaction",
+      "target": "temp_check_renderfeed",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "temp_check.js",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "temp_check_renderfeed",
+      "target": "temp_check_appstate",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "temp_check.js",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "temp_check_renderdocxpreview",
+      "target": "logos_pdm_logo_base64",
+      "relation": "references",
+      "confidence": "INFERRED",
+      "confidence_score": 0.95,
+      "source_file": "temp_check.js",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "temp_check_renderdocxpreview",
+      "target": "logos_lite_logo_base64",
+      "relation": "references",
+      "confidence": "INFERRED",
+      "confidence_score": 0.95,
+      "source_file": "temp_check.js",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "index_html_ui",
+      "target": "converted_project_context_08cd0430_finlite_solution",
+      "relation": "implements",
+      "confidence": "INFERRED",
+      "confidence_score": 0.95,
+      "source_file": "index.html",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "index_html_ui",
+      "target": "rules_rtk_financial_governance",
+      "relation": "implements",
+      "confidence": "INFERRED",
+      "confidence_score": 0.95,
+      "source_file": "index.html",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "index_exportformatteddocx",
+      "target": "converted_lite_financial_report_master_template_7f2769a4_master_template",
+      "relation": "implements",
+      "confidence": "INFERRED",
+      "confidence_score": 0.95,
+      "source_file": "index.html",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "export_report_engine_populate_report",
+      "target": "converted_lite_financial_report_universal_template_5a1ba7be_universal_template",
+      "relation": "implements",
+      "confidence": "INFERRED",
+      "confidence_score": 0.95,
+      "source_file": "export_report_engine.py",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "rules_rtk_project_rules",
+      "target": "converted_project_context_08cd0430_project_context",
+      "relation": "conceptually_related_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.95,
+      "source_file": ".agents/rules/RTK.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "converted_project_context_08cd0430_finlite_solution",
+      "target": "converted_project_context_08cd0430_manual_process_problems",
+      "relation": "conceptually_related_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.95,
+      "source_file": "graphify-out/converted/Project Context_08cd0430.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "document_xml_dump_openxml_content",
+      "target": "converted_lite_financial_report_template_aec3d10f_template_report",
+      "relation": "conceptually_related_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.95,
+      "source_file": "document_xml_dump.txt",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "rules_rtk_financial_governance",
+      "target": "index_verifytx",
+      "relation": "rationale_for",
+      "confidence": "INFERRED",
+      "confidence_score": 0.95,
+      "source_file": ".agents/rules/RTK.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "rules_rtk_financial_governance",
+      "target": "index_advancereport",
+      "relation": "rationale_for",
+      "confidence": "INFERRED",
+      "confidence_score": 0.95,
+      "source_file": ".agents/rules/RTK.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "converted_project_context_08cd0430_manual_process_problems",
+      "target": "index_updatereconcount",
+      "relation": "rationale_for",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "source_file": "graphify-out/converted/Project Context_08cd0430.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "index_exportformatteddocx",
+      "target": "export_report_engine_populate_report",
+      "relation": "semantically_similar_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.95,
+      "source_file": "index.html",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "converted_finlite_exported_report_38ec849a_financial_report",
+      "target": "converted_lite_financial_report_universal_template_5a1ba7be_universal_template",
+      "relation": "semantically_similar_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.95,
+      "source_file": "graphify-out/converted/FinLITE-Exported-Report_38ec849a.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "converted_lite_financial_report_master_template_7f2769a4_master_template",
+      "target": "converted_lite_financial_report_universal_template_5a1ba7be_universal_template",
+      "relation": "semantically_similar_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.95,
+      "source_file": "graphify-out/converted/LITE-Financial-Report-Master-Template_7f2769a4.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "converted_lite_financial_report_template_aec3d10f_template_report",
+      "target": "converted_lite_financial_report_master_template_7f2769a4_master_template",
+      "relation": "semantically_similar_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "source_file": "graphify-out/converted/LITE-Financial-Report-Template_aec3d10f.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "temp_check_exportformatteddocx",
+      "target": "index_exportformatteddocx",
+      "relation": "semantically_similar_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.95,
+      "source_file": "temp_check.js",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "temp_check_renderdocxpreview",
+      "target": "index_renderdocxpreview",
+      "relation": "semantically_similar_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.95,
+      "source_file": "temp_check.js",
+      "source_location": null,
+      "weight": 1.0
+    }
+  ],
+  "hyperedges": [
+    {
+      "id": "audit_and_governance_flow",
+      "label": "Audit and Segregation of Duties Governance Flow",
+      "nodes": [
+        "index_verifytx",
+        "index_advancereport",
+        "index_voidtx",
+        "rules_rtk_financial_governance"
+      ],
+      "relation": "implement",
+      "confidence": "INFERRED",
+      "confidence_score": 0.95,
+      "source_file": "index.html"
+    },
+    {
+      "id": "automated_docx_generation_pipeline",
+      "label": "Official Word Document Financial Report Pipeline",
+      "nodes": [
+        "export_report_engine_populate_report",
+        "index_exportformatteddocx",
+        "converted_lite_financial_report_universal_template_5a1ba7be_universal_template",
+        "converted_finlite_exported_report_38ec849a_financial_report"
+      ],
+      "relation": "form",
+      "confidence": "INFERRED",
+      "confidence_score": 0.95,
+      "source_file": "export_report_engine.py"
+    },
+    {
+      "id": "cash_reconciliation_and_discrepancy_monitoring",
+      "label": "Physical Cash Reconciliation and Variance Monitoring Flow",
+      "nodes": [
+        "index_updatereconcount",
+        "index_appstate",
+        "converted_project_context_08cd0430_manual_process_problems"
+      ],
+      "relation": "participate_in",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "source_file": "index.html"
+    }
+  ],
+  "input_tokens": 0,
+  "output_tokens": 0
+}
