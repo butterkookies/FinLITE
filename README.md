@@ -8,7 +8,7 @@
 
 # FinLITE
 
-**A web-based financial assistant system engineered for the League of Information Technology Enthusiasts.**
+**A web-based financial assistant system for the League of Information Technology Enthusiasts.**
 
 Grounded AI co-pilot • Strict segregation of duties • Physical cash reconciliation • 1:1 institutional DOCX export
 
