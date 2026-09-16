@@ -1,0 +1,49 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --bg-canvas: #f8faf9;
+    --bg-surface: #ffffff;
+    --bg-subtle: #f3f5f4;
+    --bg-inset: #eef2f0;
+
+    --primary: #15803d;
+    --primary-hover: #166534;
+    --primary-tint: #ecfdf5;
+    --primary-light: #d1fae5;
+
+    --text-main: #111827;
+    --text-secondary: #4b5563;
+    --text-muted: #9ca3af;
+
+    --hairline: rgba(0, 0, 0, 0.06);
+    --hairline-light: rgba(0, 0, 0, 0.03);
+
+    --shadow-card: 0 2px 8px -1px rgba(0, 0, 0, 0.04), 0 1px 3px 0 rgba(0, 0, 0, 0.02);
+    --shadow-float: 0 12px 32px -4px rgba(0, 0, 0, 0.08), 0 4px 12px -2px rgba(0, 0, 0, 0.03);
+    --shadow-sheet: 0 24px 48px -12px rgba(0, 0, 0, 0.16);
+  }
+
+  body {
+    background-color: var(--bg-canvas);
+    color: var(--text-main);
+    font-family: -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Roboto, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+}
+
+/* Custom scrollbar for modern subtle aesthetics */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.12);
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.2);
+}
