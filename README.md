@@ -41,7 +41,7 @@ Rapid inflow, disbursement, and out-of-pocket advance logging with personal GCas
 <td width="33%" align="center">
 <b>Audit & reconciliation</b>
 <br /><br />
-Physical lunchbox denomination counts, receipt verification, and variance audits with abono alerts.
+Physical small cashbox denomination counts, receipt verification, and variance audits with abono alerts.
 </td>
 <td width="33%" align="center">
 <b>Institutional clearance</b>
@@ -63,7 +63,7 @@ Instant compilation into approved borderless tables and formatted signatory bloc
 
 </div>
 
-- **Physical cash reconciliation**: Provides an interactive denomination counter (₱1,000 down to ₱1 coins) to verify the physical lunchbox cash box against system ledger totals, prompting for justified shortages or officer abono.
+- **Physical cash reconciliation**: Provides an interactive denomination counter (₱1,000 down to ₱1 coins) to verify the physical small cashbox against system ledger totals, prompting for justified shortages or officer abono.
 - **Personal advance ("abono") tracking**: Dedicated Accounts Payable queue protecting faculty advisers and student officers from unreimbursed out-of-pocket expenses incurred during urgent campus events.
 - **Non-receipted expense documentation**: Attaches structured acknowledgment slips and photographic proof for informal travel fares, neighborhood supplies, and emergency printing.
 - **Sequential wet-ink routing**: Automatically formats signatory blocks in exact institutional order: Treasurer &rarr; Auditor &rarr; President &rarr; Advisers &rarr; Program Director &rarr; Dean.

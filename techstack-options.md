@@ -2,7 +2,7 @@
 
 **Status:** Decision proposal; no implementation stack has been approved  
 **Research date:** 2026-08-15  
-**Project:** FinLITE: A Web-Based Financial Management System with AI-Assisted Reporting and Intelligent Chatbot  
+**Project:** FinLITE: A Web-Based Financial Assistant System for the League of Information Technology Enthusiasts  
 **Team:** Four third-year BSIT-31A students, ITE-SAD final-term case study  
 
 ## Executive recommendation

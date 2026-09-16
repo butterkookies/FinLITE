@@ -2,7 +2,7 @@ import './globals.css';
 
 export const metadata = {
   title: 'FinLITE — Financial Assistant System',
-  description: 'A Web-Based Financial Management System with AI-Assisted Reporting and Intelligent Chatbot for the League of Information Technology Enthusiasts (LITE)',
+  description: 'A Web-Based Financial Assistant System for the League of Information Technology Enthusiasts (LITE)',
 };
 
 export default function RootLayout({ children }) {

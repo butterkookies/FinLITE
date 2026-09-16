@@ -125,7 +125,7 @@ export default function NewTransactionModal({ isOpen, onClose, onSave, categorie
                       : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                   }`}
                 >
-                  {m === 'CASH' ? 'Cash Lunchbox' : 'GCash Wallet'}
+                  {m === 'CASH' ? 'Physical Cashbox' : 'GCash Wallet'}
                 </button>
               ))}
             </div>

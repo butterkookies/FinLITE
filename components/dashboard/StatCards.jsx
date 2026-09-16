@@ -25,7 +25,7 @@ export default function StatCards({ summary, onOpenDenominations }) {
             Physical Cash
           </span>
           <span className="text-[10px] bg-emerald-50 text-emerald-700 font-semibold px-1.5 py-0.5 rounded">
-            Lunchbox
+            Cashbox
           </span>
         </div>
         <p className="text-xl font-bold text-gray-950 tracking-tight">

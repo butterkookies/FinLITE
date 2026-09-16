@@ -9,8 +9,7 @@
    - Role-gated Google OAuth access (Treasurer, Auditor, President, Advisers).
    - Inflow and expense logging with receipt verification.
    - Out-of-pocket personal advances & reimbursement queue for both **faculty advisers and officers**.
-   - Physical cash denomination counter verifying physical cash in the lunchbox cash box vs ledger balance.
+   - Physical cash denomination counter verifying physical cash in the small cashbox vs ledger balance.
    - Grounded AI Financial Assistant (100% database-bound, Taglish natural query with quick prompt chips, zero hallucination).
    - Live pre-formatted HTML preview and 1:1 automated institutional `.docx` report exporter ready for physical wet-ink routing.
-4. Ensure all design choices respect LITE's real operational environment (no permanent office, lunchbox cash box stored in faculty consultation room desk, annual turnover with strict face-value handoffs).
-
+4. Ensure all design choices respect LITE's real operational environment (no permanent office, small cashbox stored in faculty room desk, digital GCash inflows pooled into the account of who's available—mainly the Club Adviser/s, or the assigned student—and annual turnover with strict face-value handoffs).

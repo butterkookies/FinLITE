@@ -70,8 +70,8 @@ This questionnaire is designed to be deployed via Google Forms to the LITE Club 
    - [ ] Tiered approach: Minor purchases (under ₱500) can be approved via chat; major expenses require a signed proposal
    - [ ] Other: [Short Answer]
 
-8. **Where do you prefer the physical lunchbox money box to be stored when not in active use?**
-   - [ ] Locked drawer in the faculty consultation room / adviser's desk
+8. **Where do you prefer the physical small cashbox to be stored when not in active use?**
+   - [ ] Locked drawer in the faculty room / adviser's desk
    - [ ] In the Treasurer's personal custody/possession
    - [ ] Transferred to the President's custody
    - [ ] Other: [Short Answer]
@@ -88,10 +88,10 @@ This questionnaire is designed to be deployed via Google Forms to the LITE Club 
    - [ ] Other: [Short Answer]
 
 10. **How often should physical cash counts and reconciliation be conducted between the Treasurer and Auditor?**
-    - [ ] After every single event / collection activity
-    - [ ] Weekly or bi-weekly
-    - [ ] Once a month
-    - [ ] Strictly at the end of each semester
+    - [ ] Daily during events / collection periods
+    - [ ] Weekly
+    - [ ] Monthly
+    - [ ] Only at the end of each major event or semester
 
 ---
 
@@ -100,7 +100,7 @@ This questionnaire is designed to be deployed via Google Forms to the LITE Club 
 
 11. **What are the most common reasons financial liquidation reports are delayed or sent back for revision by you or the CCS Department?** *(Check all that apply)*
     - [ ] Arithmetic errors / totals not tallying with receipt totals
-    - [ ] Non-compliance with the required university table layout / font formatting
+    - [ ] Non-compliance with the required college / institutional table layout / font formatting
     - [ ] Missing receipts, missing signatures, or wrong signatory titles
     - [ ] Unreconciled variances between cash on hand and reported balances
     - [ ] Scrambled submission right before final exam deadlines

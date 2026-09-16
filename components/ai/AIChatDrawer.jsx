@@ -58,7 +58,7 @@ export default function AIChatDrawer({ isOpen, onClose, summary, transactions = 
         const amt = jatulan ? jatulan.amount : 1250;
         fallbackReply = `Batay sa ating database, may pending advance (abono) si **Ms. Kimberly Dawn Jatulan** na nagkakahalaga ng **₱${amt.toLocaleString('en-PH', { minimumFractionDigits: 2 })}** para sa *Judge Tokens & Certificates* (Club Week 2026). Hindi pa ito nailalabas mula sa physical cash box.`;
       } else if (lower.includes('cash') || lower.includes('on hand')) {
-        fallbackReply = `Ang kasalukuyang verified **Physical Cash on Hand** sa ating lunchbox ay **₱${(summary.cash_on_hand || 0).toLocaleString('en-PH', { minimumFractionDigits: 2 })}**, habang may **₱${(summary.gcash_balance || 0).toLocaleString('en-PH', { minimumFractionDigits: 2 })}** sa GCash.`;
+        fallbackReply = `Ang kasalukuyang verified **Physical Cash on Hand** sa ating cashbox ay **₱${(summary.cash_on_hand || 0).toLocaleString('en-PH', { minimumFractionDigits: 2 })}**, habang may **₱${(summary.gcash_balance || 0).toLocaleString('en-PH', { minimumFractionDigits: 2 })}** sa GCash.`;
       } else if (lower.includes('shortage')) {
         fallbackReply = `Mayroong isang aprubadong **₱161.00 Cash Shortage** na naitala noong Club Week booth sales dahil sa loose coin change discrepancies. Ito ay pormal nang naaprubahan ng ating Club Adviser.`;
       } else {

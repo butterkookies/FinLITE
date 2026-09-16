@@ -48,319 +48,2146 @@
   },
   "nodes": [
     {
+      "label": "jsconfig.json",
+      "file_type": "code",
+      "source_file": "jsconfig.json",
+      "source_location": "L1",
+      "id": "jsconfig_json",
+      "community": 7,
+      "norm_label": "jsconfig.json"
+    },
+    {
+      "label": "compilerOptions",
+      "file_type": "code",
+      "source_file": "jsconfig.json",
+      "source_location": "L2",
+      "id": "finlite_jsconfig_compileroptions",
+      "community": 7,
+      "norm_label": "compileroptions"
+    },
+    {
+      "label": "target",
+      "file_type": "code",
+      "source_file": "jsconfig.json",
+      "source_location": "L3",
+      "id": "finlite_jsconfig_compileroptions_target",
+      "community": 7,
+      "norm_label": "target"
+    },
+    {
+      "label": "lib",
+      "file_type": "code",
+      "source_file": "jsconfig.json",
+      "source_location": "L4",
+      "id": "finlite_jsconfig_compileroptions_lib",
+      "community": 7,
+      "norm_label": "lib"
+    },
+    {
+      "label": "allowJs",
+      "file_type": "code",
+      "source_file": "jsconfig.json",
+      "source_location": "L5",
+      "id": "finlite_jsconfig_compileroptions_allowjs",
+      "community": 7,
+      "norm_label": "allowjs"
+    },
+    {
+      "label": "skipLibCheck",
+      "file_type": "code",
+      "source_file": "jsconfig.json",
+      "source_location": "L6",
+      "id": "finlite_jsconfig_compileroptions_skiplibcheck",
+      "community": 7,
+      "norm_label": "skiplibcheck"
+    },
+    {
+      "label": "strict",
+      "file_type": "code",
+      "source_file": "jsconfig.json",
+      "source_location": "L7",
+      "id": "finlite_jsconfig_compileroptions_strict",
+      "community": 7,
+      "norm_label": "strict"
+    },
+    {
+      "label": "noEmit",
+      "file_type": "code",
+      "source_file": "jsconfig.json",
+      "source_location": "L8",
+      "id": "finlite_jsconfig_compileroptions_noemit",
+      "community": 7,
+      "norm_label": "noemit"
+    },
+    {
+      "label": "module",
+      "file_type": "code",
+      "source_file": "jsconfig.json",
+      "source_location": "L9",
+      "id": "finlite_jsconfig_compileroptions_module",
+      "community": 7,
+      "norm_label": "module"
+    },
+    {
+      "label": "moduleResolution",
+      "file_type": "code",
+      "source_file": "jsconfig.json",
+      "source_location": "L10",
+      "id": "finlite_jsconfig_compileroptions_moduleresolution",
+      "community": 7,
+      "norm_label": "moduleresolution"
+    },
+    {
+      "label": "resolveJsonModule",
+      "file_type": "code",
+      "source_file": "jsconfig.json",
+      "source_location": "L11",
+      "id": "finlite_jsconfig_compileroptions_resolvejsonmodule",
+      "community": 7,
+      "norm_label": "resolvejsonmodule"
+    },
+    {
+      "label": "isolatedModules",
+      "file_type": "code",
+      "source_file": "jsconfig.json",
+      "source_location": "L12",
+      "id": "finlite_jsconfig_compileroptions_isolatedmodules",
+      "community": 7,
+      "norm_label": "isolatedmodules"
+    },
+    {
+      "label": "jsx",
+      "file_type": "code",
+      "source_file": "jsconfig.json",
+      "source_location": "L13",
+      "id": "finlite_jsconfig_compileroptions_jsx",
+      "community": 7,
+      "norm_label": "jsx"
+    },
+    {
+      "label": "baseUrl",
+      "file_type": "code",
+      "source_file": "jsconfig.json",
+      "source_location": "L14",
+      "id": "finlite_jsconfig_compileroptions_baseurl",
+      "community": 7,
+      "norm_label": "baseurl"
+    },
+    {
+      "label": "paths",
+      "file_type": "code",
+      "source_file": "jsconfig.json",
+      "source_location": "L15",
+      "id": "finlite_jsconfig_compileroptions_paths",
+      "community": 7,
+      "norm_label": "paths"
+    },
+    {
+      "label": "@/*",
+      "file_type": "code",
+      "source_file": "jsconfig.json",
+      "source_location": "L16",
+      "id": "finlite_jsconfig_paths",
+      "community": 7,
+      "norm_label": "@/*"
+    },
+    {
+      "label": "include",
+      "file_type": "code",
+      "source_file": "jsconfig.json",
+      "source_location": "L19",
+      "id": "finlite_jsconfig_include",
+      "community": 7,
+      "norm_label": "include"
+    },
+    {
+      "label": "exclude",
+      "file_type": "code",
+      "source_file": "jsconfig.json",
+      "source_location": "L20",
+      "id": "finlite_jsconfig_exclude",
+      "community": 7,
+      "norm_label": "exclude"
+    },
+    {
+      "label": "next.config.mjs",
+      "file_type": "code",
+      "source_file": "next.config.mjs",
+      "source_location": "L1",
+      "id": "next_config_mjs",
+      "community": 32,
+      "norm_label": "next.config.mjs"
+    },
+    {
+      "label": "nextConfig",
+      "file_type": "code",
+      "source_file": "next.config.mjs",
+      "source_location": "L2",
+      "id": "finlite_next_config_nextconfig",
+      "community": 32,
+      "norm_label": "nextconfig"
+    },
+    {
+      "label": "package.json",
+      "file_type": "code",
+      "source_file": "package.json",
+      "source_location": "L1",
+      "id": "package_json",
+      "community": 5,
+      "norm_label": "package.json"
+    },
+    {
+      "label": "name",
+      "file_type": "code",
+      "source_file": "package.json",
+      "source_location": "L2",
+      "id": "finlite_package_name",
+      "community": 5,
+      "norm_label": "name"
+    },
+    {
+      "label": "version",
+      "file_type": "code",
+      "source_file": "package.json",
+      "source_location": "L3",
+      "id": "finlite_package_version",
+      "community": 5,
+      "norm_label": "version"
+    },
+    {
+      "label": "type",
+      "file_type": "code",
+      "source_file": "package.json",
+      "source_location": "L4",
+      "id": "finlite_package_type",
+      "community": 5,
+      "norm_label": "type"
+    },
+    {
+      "label": "private",
+      "file_type": "code",
+      "source_file": "package.json",
+      "source_location": "L5",
+      "id": "finlite_package_private",
+      "community": 5,
+      "norm_label": "private"
+    },
+    {
+      "label": "scripts",
+      "file_type": "code",
+      "source_file": "package.json",
+      "source_location": "L6",
+      "id": "finlite_package_scripts",
+      "community": 5,
+      "norm_label": "scripts"
+    },
+    {
+      "label": "dev",
+      "file_type": "code",
+      "source_file": "package.json",
+      "source_location": "L7",
+      "id": "finlite_package_scripts_dev",
+      "community": 5,
+      "norm_label": "dev"
+    },
+    {
+      "label": "build",
+      "file_type": "code",
+      "source_file": "package.json",
+      "source_location": "L8",
+      "id": "finlite_package_scripts_build",
+      "community": 5,
+      "norm_label": "build"
+    },
+    {
+      "label": "start",
+      "file_type": "code",
+      "source_file": "package.json",
+      "source_location": "L9",
+      "id": "finlite_package_scripts_start",
+      "community": 5,
+      "norm_label": "start"
+    },
+    {
+      "label": "dependencies",
+      "file_type": "code",
+      "source_file": "package.json",
+      "source_location": "L11",
+      "id": "finlite_package_dependencies",
+      "community": 5,
+      "norm_label": "dependencies"
+    },
+    {
+      "label": "@google/generative-ai",
+      "file_type": "code",
+      "source_file": "package.json",
+      "source_location": "L12",
+      "id": "finlite_package_dependencies_google_generative_ai",
+      "community": 5,
+      "norm_label": "@google/generative-ai"
+    },
+    {
+      "label": "@supabase/ssr",
+      "file_type": "code",
+      "source_file": "package.json",
+      "source_location": "L13",
+      "id": "finlite_package_dependencies_supabase_ssr",
+      "community": 5,
+      "norm_label": "@supabase/ssr"
+    },
+    {
+      "label": "@supabase/supabase-js",
+      "file_type": "code",
+      "source_file": "package.json",
+      "source_location": "L14",
+      "id": "finlite_package_dependencies_supabase_supabase_js",
+      "community": 5,
+      "norm_label": "@supabase/supabase-js"
+    },
+    {
+      "label": "browser-image-compression",
+      "file_type": "code",
+      "source_file": "package.json",
+      "source_location": "L15",
+      "id": "finlite_package_dependencies_browser_image_compression",
+      "community": 5,
+      "norm_label": "browser-image-compression"
+    },
+    {
+      "label": "clsx",
+      "file_type": "code",
+      "source_file": "package.json",
+      "source_location": "L16",
+      "id": "finlite_package_dependencies_clsx",
+      "community": 5,
+      "norm_label": "clsx"
+    },
+    {
+      "label": "date-fns",
+      "file_type": "code",
+      "source_file": "package.json",
+      "source_location": "L17",
+      "id": "finlite_package_dependencies_date_fns",
+      "community": 5,
+      "norm_label": "date-fns"
+    },
+    {
+      "label": "docx",
+      "file_type": "code",
+      "source_file": "package.json",
+      "source_location": "L18",
+      "id": "finlite_package_dependencies_docx",
+      "community": 5,
+      "norm_label": "docx"
+    },
+    {
+      "label": "lucide-react",
+      "file_type": "code",
+      "source_file": "package.json",
+      "source_location": "L19",
+      "id": "finlite_package_dependencies_lucide_react",
+      "community": 5,
+      "norm_label": "lucide-react"
+    },
+    {
+      "label": "next",
+      "file_type": "code",
+      "source_file": "package.json",
+      "source_location": "L20",
+      "id": "finlite_package_dependencies_next",
+      "community": 5,
+      "norm_label": "next"
+    },
+    {
+      "label": "react",
+      "file_type": "code",
+      "source_file": "package.json",
+      "source_location": "L21",
+      "id": "finlite_package_dependencies_react",
+      "community": 5,
+      "norm_label": "react"
+    },
+    {
+      "label": "react-dom",
+      "file_type": "code",
+      "source_file": "package.json",
+      "source_location": "L22",
+      "id": "finlite_package_dependencies_react_dom",
+      "community": 5,
+      "norm_label": "react-dom"
+    },
+    {
+      "label": "tailwind-merge",
+      "file_type": "code",
+      "source_file": "package.json",
+      "source_location": "L23",
+      "id": "finlite_package_dependencies_tailwind_merge",
+      "community": 5,
+      "norm_label": "tailwind-merge"
+    },
+    {
+      "label": "devDependencies",
+      "file_type": "code",
+      "source_file": "package.json",
+      "source_location": "L25",
+      "id": "finlite_package_devdependencies",
+      "community": 5,
+      "norm_label": "devdependencies"
+    },
+    {
+      "label": "@tailwindcss/postcss",
+      "file_type": "code",
+      "source_file": "package.json",
+      "source_location": "L26",
+      "id": "finlite_package_devdependencies_tailwindcss_postcss",
+      "community": 5,
+      "norm_label": "@tailwindcss/postcss"
+    },
+    {
+      "label": "postcss",
+      "file_type": "code",
+      "source_file": "package.json",
+      "source_location": "L27",
+      "id": "finlite_package_devdependencies_postcss",
+      "community": 5,
+      "norm_label": "postcss"
+    },
+    {
+      "label": "tailwindcss",
+      "file_type": "code",
+      "source_file": "package.json",
+      "source_location": "L28",
+      "id": "finlite_package_devdependencies_tailwindcss",
+      "community": 5,
+      "norm_label": "tailwindcss"
+    },
+    {
+      "label": "postcss.config.mjs",
+      "file_type": "code",
+      "source_file": "postcss.config.mjs",
+      "source_location": "L1",
+      "id": "postcss_config_mjs",
+      "community": 42,
+      "norm_label": "postcss.config.mjs"
+    },
+    {
+      "label": "layout.jsx",
+      "file_type": "code",
+      "source_file": "app/layout.jsx",
+      "source_location": "L1",
+      "id": "app_layout_jsx",
+      "community": 24,
+      "norm_label": "layout.jsx"
+    },
+    {
+      "label": "metadata",
+      "file_type": "code",
+      "source_file": "app/layout.jsx",
+      "source_location": "L3",
+      "id": "app_layout_metadata",
+      "community": 24,
+      "norm_label": "metadata"
+    },
+    {
+      "label": "RootLayout()",
+      "file_type": "code",
+      "source_file": "app/layout.jsx",
+      "source_location": "L8",
+      "id": "app_layout_rootlayout",
+      "community": 24,
+      "norm_label": "rootlayout()"
+    },
+    {
+      "label": "page.jsx",
+      "file_type": "code",
+      "source_file": "app/page.jsx",
+      "source_location": "L1",
+      "id": "app_page_jsx",
+      "community": 25,
+      "norm_label": "page.jsx"
+    },
+    {
+      "label": "INITIAL_TRANSACTIONS",
+      "file_type": "code",
+      "source_file": "app/page.jsx",
+      "source_location": "L11",
+      "id": "app_page_initial_transactions",
+      "community": 25,
+      "norm_label": "initial_transactions"
+    },
+    {
+      "label": "Dashboard()",
+      "file_type": "code",
+      "source_file": "app/page.jsx",
+      "source_location": "L120",
+      "id": "app_page_dashboard",
+      "community": 25,
+      "norm_label": "dashboard()"
+    },
+    {
+      "label": "route.js",
+      "file_type": "code",
+      "source_file": "app/api/chat/route.js",
+      "source_location": "L1",
+      "id": "app_api_chat_route_js",
+      "community": 28,
+      "norm_label": "route.js"
+    },
+    {
+      "label": "POST()",
+      "file_type": "code",
+      "source_file": "app/api/chat/route.js",
+      "source_location": "L4",
+      "id": "chat_route_post",
+      "community": 28,
+      "norm_label": "post()"
+    },
+    {
+      "label": "route.js",
+      "file_type": "code",
+      "source_file": "app/api/reports/docx/route.js",
+      "source_location": "L1",
+      "id": "app_api_reports_docx_route_js",
+      "community": 29,
+      "norm_label": "route.js"
+    },
+    {
+      "label": "POST()",
+      "file_type": "code",
+      "source_file": "app/api/reports/docx/route.js",
+      "source_location": "L16",
+      "id": "docx_route_post",
+      "community": 29,
+      "norm_label": "post()"
+    },
+    {
+      "label": "logos.js",
+      "file_type": "code",
+      "source_file": "assets/logos.js",
+      "source_location": "L1",
+      "id": "assets_logos_js",
+      "community": 37,
+      "norm_label": "logos.js"
+    },
+    {
+      "label": "AIChatDrawer.jsx",
+      "file_type": "code",
+      "source_file": "components/ai/AIChatDrawer.jsx",
+      "source_location": "L1",
+      "id": "components_ai_aichatdrawer_jsx",
+      "community": 27,
+      "norm_label": "aichatdrawer.jsx"
+    },
+    {
+      "label": "AIChatDrawer()",
+      "file_type": "code",
+      "source_file": "components/ai/AIChatDrawer.jsx",
+      "source_location": "L5",
+      "id": "ai_aichatdrawer_aichatdrawer",
+      "community": 27,
+      "norm_label": "aichatdrawer()"
+    },
+    {
+      "label": "StatCards.jsx",
+      "file_type": "code",
+      "source_file": "components/dashboard/StatCards.jsx",
+      "source_location": "L1",
+      "id": "components_dashboard_statcards_jsx",
+      "community": 8,
+      "norm_label": "statcards.jsx"
+    },
+    {
+      "label": "StatCards()",
+      "file_type": "code",
+      "source_file": "components/dashboard/StatCards.jsx",
+      "source_location": "L5",
+      "id": "dashboard_statcards_statcards",
+      "community": 8,
+      "norm_label": "statcards()"
+    },
+    {
+      "label": "Navbar.jsx",
+      "file_type": "code",
+      "source_file": "components/layout/Navbar.jsx",
+      "source_location": "L1",
+      "id": "components_layout_navbar_jsx",
+      "community": 30,
+      "norm_label": "navbar.jsx"
+    },
+    {
+      "label": "Navbar()",
+      "file_type": "code",
+      "source_file": "components/layout/Navbar.jsx",
+      "source_location": "L5",
+      "id": "layout_navbar_navbar",
+      "community": 30,
+      "norm_label": "navbar()"
+    },
+    {
+      "label": "NewTransactionModal.jsx",
+      "file_type": "code",
+      "source_file": "components/ledger/NewTransactionModal.jsx",
+      "source_location": "L1",
+      "id": "components_ledger_newtransactionmodal_jsx",
+      "community": 31,
+      "norm_label": "newtransactionmodal.jsx"
+    },
+    {
+      "label": "NewTransactionModal()",
+      "file_type": "code",
+      "source_file": "components/ledger/NewTransactionModal.jsx",
+      "source_location": "L6",
+      "id": "ledger_newtransactionmodal_newtransactionmodal",
+      "community": 31,
+      "norm_label": "newtransactionmodal()"
+    },
+    {
+      "label": "TransactionTable.jsx",
+      "file_type": "code",
+      "source_file": "components/ledger/TransactionTable.jsx",
+      "source_location": "L1",
+      "id": "components_ledger_transactiontable_jsx",
+      "community": 8,
+      "norm_label": "transactiontable.jsx"
+    },
+    {
+      "label": "TransactionTable()",
+      "file_type": "code",
+      "source_file": "components/ledger/TransactionTable.jsx",
+      "source_location": "L17",
+      "id": "ledger_transactiontable_transactiontable",
+      "community": 8,
+      "norm_label": "transactiontable()"
+    },
+    {
+      "label": "DenominationCounter.jsx",
+      "file_type": "code",
+      "source_file": "components/reconciliation/DenominationCounter.jsx",
+      "source_location": "L1",
+      "id": "components_reconciliation_denominationcounter_jsx",
+      "community": 8,
+      "norm_label": "denominationcounter.jsx"
+    },
+    {
+      "label": "DenominationCounter()",
+      "file_type": "code",
+      "source_file": "components/reconciliation/DenominationCounter.jsx",
+      "source_location": "L6",
+      "id": "reconciliation_denominationcounter_denominationcounter",
+      "community": 8,
+      "norm_label": "denominationcounter()"
+    },
+    {
+      "label": "client.js",
+      "file_type": "code",
+      "source_file": "lib/supabase/client.js",
+      "source_location": "L1",
+      "id": "lib_supabase_client_js",
+      "community": 33,
+      "norm_label": "client.js"
+    },
+    {
+      "label": "createClient()",
+      "file_type": "code",
+      "source_file": "lib/supabase/client.js",
+      "source_location": "L3",
+      "id": "supabase_client_createclient",
+      "community": 33,
+      "norm_label": "createclient()"
+    },
+    {
+      "label": "server.js",
+      "file_type": "code",
+      "source_file": "lib/supabase/server.js",
+      "source_location": "L1",
+      "id": "lib_supabase_server_js",
+      "community": 34,
+      "norm_label": "server.js"
+    },
+    {
+      "label": "createClient()",
+      "file_type": "code",
+      "source_file": "lib/supabase/server.js",
+      "source_location": "L4",
+      "id": "supabase_server_createclient",
+      "community": 34,
+      "norm_label": "createclient()"
+    },
+    {
+      "label": "compression.js",
+      "file_type": "code",
+      "source_file": "lib/utils/compression.js",
+      "source_location": "L1",
+      "id": "lib_utils_compression_js",
+      "community": 35,
+      "norm_label": "compression.js"
+    },
+    {
+      "label": "compressReceiptImage()",
+      "file_type": "code",
+      "source_file": "lib/utils/compression.js",
+      "source_location": "L7",
+      "id": "utils_compression_compressreceiptimage",
+      "community": 35,
+      "norm_label": "compressreceiptimage()"
+    },
+    {
+      "label": "currency.js",
+      "file_type": "code",
+      "source_file": "lib/utils/currency.js",
+      "source_location": "L1",
+      "id": "lib_utils_currency_js",
+      "community": 8,
+      "norm_label": "currency.js"
+    },
+    {
+      "label": "DENOMINATION_VALUES",
+      "file_type": "code",
+      "source_file": "lib/utils/currency.js",
+      "source_location": "L6",
+      "id": "utils_currency_denomination_values",
+      "community": 8,
+      "norm_label": "denomination_values"
+    },
+    {
+      "label": "formatPHP()",
+      "file_type": "code",
+      "source_file": "lib/utils/currency.js",
+      "source_location": "L25",
+      "id": "utils_currency_formatphp",
+      "community": 8,
+      "norm_label": "formatphp()"
+    },
+    {
+      "label": "toCentavos()",
+      "file_type": "code",
+      "source_file": "lib/utils/currency.js",
+      "source_location": "L38",
+      "id": "utils_currency_tocentavos",
+      "community": 8,
+      "norm_label": "tocentavos()"
+    },
+    {
+      "label": "fromCentavos()",
+      "file_type": "code",
+      "source_file": "lib/utils/currency.js",
+      "source_location": "L46",
+      "id": "utils_currency_fromcentavos",
+      "community": 8,
+      "norm_label": "fromcentavos()"
+    },
+    {
+      "label": "calculatePhysicalTotal()",
+      "file_type": "code",
+      "source_file": "lib/utils/currency.js",
+      "source_location": "L55",
+      "id": "utils_currency_calculatephysicaltotal",
+      "community": 8,
+      "norm_label": "calculatephysicaltotal()"
+    },
+    {
+      "label": "calculateVariance()",
+      "file_type": "code",
+      "source_file": "lib/utils/currency.js",
+      "source_location": "L78",
+      "id": "utils_currency_calculatevariance",
+      "community": 8,
+      "norm_label": "calculatevariance()"
+    },
+    {
+      "label": "logos.js",
+      "file_type": "code",
+      "source_file": "public/assets/logos.js",
+      "source_location": "L1",
+      "id": "public_assets_logos_js",
+      "community": 44,
+      "norm_label": "logos.js"
+    },
+    {
       "label": "export_report_engine.py",
       "file_type": "code",
-      "source_file": "export_report_engine.py",
+      "source_file": "scripts/export_report_engine.py",
       "source_location": "L1",
-      "id": "export_report_engine_py",
-      "community": 6,
+      "id": "scripts_export_report_engine_py",
+      "community": 23,
       "norm_label": "export_report_engine.py"
     },
     {
       "label": "replace_text_in_paragraph()",
       "file_type": "code",
-      "source_file": "export_report_engine.py",
-      "source_location": "L8",
-      "id": "finlite_export_report_engine_replace_text_in_paragraph",
-      "community": 6,
+      "source_file": "scripts/export_report_engine.py",
+      "source_location": "L10",
+      "id": "scripts_export_report_engine_replace_text_in_paragraph",
+      "community": 23,
       "norm_label": "replace_text_in_paragraph()"
     },
     {
       "label": "replace_placeholders()",
       "file_type": "code",
-      "source_file": "export_report_engine.py",
-      "source_location": "L16",
-      "id": "finlite_export_report_engine_replace_placeholders",
-      "community": 6,
+      "source_file": "scripts/export_report_engine.py",
+      "source_location": "L18",
+      "id": "scripts_export_report_engine_replace_placeholders",
+      "community": 23,
       "norm_label": "replace_placeholders()"
     },
     {
       "label": "populate_report()",
       "file_type": "code",
-      "source_file": "export_report_engine.py",
-      "source_location": "L30",
-      "id": "finlite_export_report_engine_populate_report",
-      "community": 6,
+      "source_file": "scripts/export_report_engine.py",
+      "source_location": "L32",
+      "id": "scripts_export_report_engine_populate_report",
+      "community": 23,
       "norm_label": "populate_report()"
     },
     {
       "label": "inspect_tables.py",
       "file_type": "code",
-      "source_file": "inspect_tables.py",
+      "source_file": "scripts/inspect_tables.py",
       "source_location": "L1",
-      "id": "inspect_tables_py",
-      "community": 12,
+      "id": "scripts_inspect_tables_py",
+      "community": 45,
       "norm_label": "inspect_tables.py"
-    },
-    {
-      "label": "logos.js",
-      "file_type": "code",
-      "source_file": "logos.js",
-      "source_location": "L1",
-      "id": "logos_js",
-      "community": 13,
-      "norm_label": "logos.js"
     },
     {
       "label": "temp_check.js",
       "file_type": "code",
-      "source_file": "temp_check.js",
+      "source_file": "scripts/temp_check.js",
       "source_location": "L1",
-      "id": "temp_check_js",
-      "community": 2,
+      "id": "scripts_temp_check_js",
+      "community": 3,
       "norm_label": "temp_check.js"
     },
     {
       "label": "appState",
       "file_type": "code",
-      "source_file": "temp_check.js",
+      "source_file": "scripts/temp_check.js",
       "source_location": "L2",
-      "id": "finlite_temp_check_appstate",
-      "community": 2,
+      "id": "scripts_temp_check_appstate",
+      "community": 3,
       "norm_label": "appstate"
     },
     {
       "label": "dt",
       "file_type": "code",
-      "source_file": "temp_check.js",
+      "source_file": "scripts/temp_check.js",
       "source_location": "L59",
-      "id": "finlite_temp_check_dt",
-      "community": 2,
+      "id": "scripts_temp_check_dt",
+      "community": 3,
       "norm_label": "dt"
     },
     {
       "label": "switchView()",
       "file_type": "code",
-      "source_file": "temp_check.js",
+      "source_file": "scripts/temp_check.js",
       "source_location": "L67",
-      "id": "finlite_temp_check_switchview",
-      "community": 2,
+      "id": "scripts_temp_check_switchview",
+      "community": 3,
       "norm_label": "switchview()"
     },
     {
       "label": "setRole()",
       "file_type": "code",
-      "source_file": "temp_check.js",
+      "source_file": "scripts/temp_check.js",
       "source_location": "L88",
-      "id": "finlite_temp_check_setrole",
-      "community": 8,
+      "id": "scripts_temp_check_setrole",
+      "community": 3,
       "norm_label": "setrole()"
     },
     {
       "label": "renderFeed()",
       "file_type": "code",
-      "source_file": "temp_check.js",
+      "source_file": "scripts/temp_check.js",
       "source_location": "L95",
-      "id": "finlite_temp_check_renderfeed",
+      "id": "scripts_temp_check_renderfeed",
       "community": 3,
       "norm_label": "renderfeed()"
     },
     {
       "label": "filterFeed()",
       "file_type": "code",
-      "source_file": "temp_check.js",
+      "source_file": "scripts/temp_check.js",
       "source_location": "L176",
-      "id": "finlite_temp_check_filterfeed",
+      "id": "scripts_temp_check_filterfeed",
       "community": 3,
       "norm_label": "filterfeed()"
     },
     {
       "label": "openDetailSheet()",
       "file_type": "code",
-      "source_file": "temp_check.js",
+      "source_file": "scripts/temp_check.js",
       "source_location": "L186",
-      "id": "finlite_temp_check_opendetailsheet",
-      "community": 2,
+      "id": "scripts_temp_check_opendetailsheet",
+      "community": 3,
       "norm_label": "opendetailsheet()"
     },
     {
       "label": "verifyTx()",
       "file_type": "code",
-      "source_file": "temp_check.js",
+      "source_file": "scripts/temp_check.js",
       "source_location": "L255",
-      "id": "finlite_temp_check_verifytx",
+      "id": "scripts_temp_check_verifytx",
       "community": 3,
       "norm_label": "verifytx()"
     },
     {
       "label": "reimburseTx()",
       "file_type": "code",
-      "source_file": "temp_check.js",
+      "source_file": "scripts/temp_check.js",
       "source_location": "L265",
-      "id": "finlite_temp_check_reimbursetx",
+      "id": "scripts_temp_check_reimbursetx",
       "community": 3,
       "norm_label": "reimbursetx()"
     },
     {
       "label": "voidTx()",
       "file_type": "code",
-      "source_file": "temp_check.js",
+      "source_file": "scripts/temp_check.js",
       "source_location": "L275",
-      "id": "finlite_temp_check_voidtx",
+      "id": "scripts_temp_check_voidtx",
       "community": 3,
       "norm_label": "voidtx()"
     },
     {
       "label": "openEntrySheet()",
       "file_type": "code",
-      "source_file": "temp_check.js",
+      "source_file": "scripts/temp_check.js",
       "source_location": "L288",
-      "id": "finlite_temp_check_openentrysheet",
-      "community": 10,
+      "id": "scripts_temp_check_openentrysheet",
+      "community": 3,
       "norm_label": "openentrysheet()"
     },
     {
       "label": "toggleSourceField()",
       "file_type": "code",
-      "source_file": "temp_check.js",
+      "source_file": "scripts/temp_check.js",
       "source_location": "L294",
-      "id": "finlite_temp_check_togglesourcefield",
-      "community": 10,
+      "id": "scripts_temp_check_togglesourcefield",
+      "community": 3,
       "norm_label": "togglesourcefield()"
     },
     {
       "label": "closeSheet()",
       "file_type": "code",
-      "source_file": "temp_check.js",
+      "source_file": "scripts/temp_check.js",
       "source_location": "L299",
-      "id": "finlite_temp_check_closesheet",
+      "id": "scripts_temp_check_closesheet",
       "community": 3,
       "norm_label": "closesheet()"
     },
     {
       "label": "handleNewTransaction()",
       "file_type": "code",
-      "source_file": "temp_check.js",
+      "source_file": "scripts/temp_check.js",
       "source_location": "L303",
-      "id": "finlite_temp_check_handlenewtransaction",
+      "id": "scripts_temp_check_handlenewtransaction",
       "community": 3,
       "norm_label": "handlenewtransaction()"
     },
     {
       "label": "stepDenom()",
       "file_type": "code",
-      "source_file": "temp_check.js",
+      "source_file": "scripts/temp_check.js",
       "source_location": "L334",
-      "id": "finlite_temp_check_stepdenom",
-      "community": 11,
+      "id": "scripts_temp_check_stepdenom",
+      "community": 3,
       "norm_label": "stepdenom()"
     },
     {
       "label": "updateReconCount()",
       "file_type": "code",
-      "source_file": "temp_check.js",
+      "source_file": "scripts/temp_check.js",
       "source_location": "L342",
-      "id": "finlite_temp_check_updatereconcount",
-      "community": 11,
+      "id": "scripts_temp_check_updatereconcount",
+      "community": 3,
       "norm_label": "updatereconcount()"
     },
     {
       "label": "saveReconRecord()",
       "file_type": "code",
-      "source_file": "temp_check.js",
+      "source_file": "scripts/temp_check.js",
       "source_location": "L372",
-      "id": "finlite_temp_check_savereconrecord",
-      "community": 2,
+      "id": "scripts_temp_check_savereconrecord",
+      "community": 3,
       "norm_label": "savereconrecord()"
     },
     {
       "label": "advanceReport()",
       "file_type": "code",
-      "source_file": "temp_check.js",
+      "source_file": "scripts/temp_check.js",
       "source_location": "L377",
-      "id": "finlite_temp_check_advancereport",
-      "community": 8,
+      "id": "scripts_temp_check_advancereport",
+      "community": 3,
       "norm_label": "advancereport()"
     },
     {
       "label": "updateReportActionBtn()",
       "file_type": "code",
-      "source_file": "temp_check.js",
+      "source_file": "scripts/temp_check.js",
       "source_location": "L405",
-      "id": "finlite_temp_check_updatereportactionbtn",
-      "community": 8,
+      "id": "scripts_temp_check_updatereportactionbtn",
+      "community": 3,
       "norm_label": "updatereportactionbtn()"
     },
     {
       "label": "toggleDocxView()",
       "file_type": "code",
-      "source_file": "temp_check.js",
+      "source_file": "scripts/temp_check.js",
       "source_location": "L420",
-      "id": "finlite_temp_check_toggledocxview",
-      "community": 2,
+      "id": "scripts_temp_check_toggledocxview",
+      "community": 3,
       "norm_label": "toggledocxview()"
     },
     {
       "label": "toggleAssistantFlyout()",
       "file_type": "code",
-      "source_file": "temp_check.js",
+      "source_file": "scripts/temp_check.js",
       "source_location": "L440",
-      "id": "finlite_temp_check_toggleassistantflyout",
-      "community": 2,
+      "id": "scripts_temp_check_toggleassistantflyout",
+      "community": 3,
       "norm_label": "toggleassistantflyout()"
     },
     {
       "label": "askAiQuery()",
       "file_type": "code",
-      "source_file": "temp_check.js",
+      "source_file": "scripts/temp_check.js",
       "source_location": "L445",
-      "id": "finlite_temp_check_askaiquery",
-      "community": 5,
+      "id": "scripts_temp_check_askaiquery",
+      "community": 3,
       "norm_label": "askaiquery()"
     },
     {
       "label": "simulateTaglishDraft()",
       "file_type": "code",
-      "source_file": "temp_check.js",
+      "source_file": "scripts/temp_check.js",
       "source_location": "L467",
-      "id": "finlite_temp_check_simulatetaglishdraft",
-      "community": 5,
+      "id": "scripts_temp_check_simulatetaglishdraft",
+      "community": 3,
       "norm_label": "simulatetaglishdraft()"
     },
     {
       "label": "confirmAiDraft()",
       "file_type": "code",
-      "source_file": "temp_check.js",
+      "source_file": "scripts/temp_check.js",
       "source_location": "L488",
-      "id": "finlite_temp_check_confirmaidraft",
-      "community": 5,
+      "id": "scripts_temp_check_confirmaidraft",
+      "community": 3,
       "norm_label": "confirmaidraft()"
     },
     {
       "label": "sendAiMessage()",
       "file_type": "code",
-      "source_file": "temp_check.js",
+      "source_file": "scripts/temp_check.js",
       "source_location": "L507",
-      "id": "finlite_temp_check_sendaimessage",
-      "community": 5,
+      "id": "scripts_temp_check_sendaimessage",
+      "community": 3,
       "norm_label": "sendaimessage()"
     },
     {
       "label": "appendMsg()",
       "file_type": "code",
-      "source_file": "temp_check.js",
+      "source_file": "scripts/temp_check.js",
       "source_location": "L518",
-      "id": "finlite_temp_check_appendmsg",
-      "community": 5,
+      "id": "scripts_temp_check_appendmsg",
+      "community": 3,
       "norm_label": "appendmsg()"
     },
     {
       "label": "renderDocxPreview()",
       "file_type": "code",
-      "source_file": "temp_check.js",
+      "source_file": "scripts/temp_check.js",
       "source_location": "L530",
-      "id": "finlite_temp_check_renderdocxpreview",
+      "id": "scripts_temp_check_renderdocxpreview",
       "community": 3,
       "norm_label": "renderdocxpreview()"
     },
     {
       "label": "exportFormattedDocx()",
       "file_type": "code",
+      "source_file": "scripts/temp_check.js",
+      "source_location": "L592",
+      "id": "scripts_temp_check_exportformatteddocx",
+      "community": 3,
+      "norm_label": "exportformatteddocx()"
+    },
+    {
+      "label": "test_currency_math.js",
+      "file_type": "code",
+      "source_file": "scripts/test_currency_math.js",
+      "source_location": "L1",
+      "id": "scripts_test_currency_math_js",
+      "community": 8,
+      "norm_label": "test_currency_math.js"
+    },
+    {
+      "label": "runTests()",
+      "file_type": "code",
+      "source_file": "scripts/test_currency_math.js",
+      "source_location": "L12",
+      "id": "scripts_test_currency_math_runtests",
+      "community": 8,
+      "norm_label": "runtests()"
+    },
+    {
+      "label": "test_docx_generation.js",
+      "file_type": "code",
+      "source_file": "scripts/test_docx_generation.js",
+      "source_location": "L1",
+      "id": "scripts_test_docx_generation_js",
+      "community": 36,
+      "norm_label": "test_docx_generation.js"
+    },
+    {
+      "label": "testDocx()",
+      "file_type": "code",
+      "source_file": "scripts/test_docx_generation.js",
+      "source_location": "L18",
+      "id": "scripts_test_docx_generation_testdocx",
+      "community": 36,
+      "norm_label": "testdocx()"
+    },
+    {
+      "label": "Project Context.md",
+      "file_type": "document",
+      "source_file": "Project Context.md",
+      "source_location": "L1",
+      "id": "project_context_md",
+      "community": 43,
+      "norm_label": "project context.md"
+    },
+    {
+      "label": "README.md",
+      "file_type": "document",
+      "source_file": "README.md",
+      "source_location": "L1",
+      "id": "readme_md",
+      "community": 21,
+      "norm_label": "readme.md"
+    },
+    {
+      "label": "FinLITE",
+      "file_type": "document",
+      "source_file": "README.md",
+      "source_location": "L9",
+      "id": "finlite_readme_finlite",
+      "community": 21,
+      "norm_label": "finlite"
+    },
+    {
+      "label": "Overview",
+      "file_type": "document",
+      "source_file": "README.md",
+      "source_location": "L21",
+      "id": "finlite_readme_overview",
+      "community": 21,
+      "norm_label": "overview"
+    },
+    {
+      "label": "Three fluid states",
+      "file_type": "document",
+      "source_file": "README.md",
+      "source_location": "L32",
+      "id": "finlite_readme_three_fluid_states",
+      "community": 21,
+      "norm_label": "three fluid states"
+    },
+    {
+      "label": "Crafted details",
+      "file_type": "document",
+      "source_file": "README.md",
+      "source_location": "L56",
+      "id": "finlite_readme_crafted_details",
+      "community": 21,
+      "norm_label": "crafted details"
+    },
+    {
+      "label": "Quick start",
+      "file_type": "document",
+      "source_file": "README.md",
+      "source_location": "L73",
+      "id": "finlite_readme_quick_start",
+      "community": 21,
+      "norm_label": "quick start"
+    },
+    {
+      "label": "code:bash (# Clone the repository)",
+      "file_type": "document",
+      "source_file": "README.md",
+      "source_location": "L75",
+      "id": "finlite_readme_codeblock_1",
+      "community": 21,
+      "norm_label": "code:bash (# clone the repository)"
+    },
+    {
+      "label": "techstack-options.md",
+      "file_type": "document",
+      "source_file": "techstack-options.md",
+      "source_location": "L1",
+      "id": "techstack_options_md",
+      "community": 4,
+      "norm_label": "techstack-options.md"
+    },
+    {
+      "label": "FinLITE Technology Stack Decision Guide",
+      "file_type": "document",
+      "source_file": "techstack-options.md",
+      "source_location": "L1",
+      "id": "finlite_techstack_options_finlite_technology_stack_decision_guide",
+      "community": 4,
+      "norm_label": "finlite technology stack decision guide"
+    },
+    {
+      "label": "Executive recommendation",
+      "file_type": "document",
+      "source_file": "techstack-options.md",
+      "source_location": "L8",
+      "id": "finlite_techstack_options_executive_recommendation",
+      "community": 4,
+      "norm_label": "executive recommendation"
+    },
+    {
+      "label": "What this guide is based on",
+      "file_type": "document",
+      "source_file": "techstack-options.md",
+      "source_location": "L25",
+      "id": "finlite_techstack_options_what_this_guide_is_based_on",
+      "community": 4,
+      "norm_label": "what this guide is based on"
+    },
+    {
+      "label": "Corrections to the earlier generated proposal",
+      "file_type": "document",
+      "source_file": "techstack-options.md",
+      "source_location": "L45",
+      "id": "finlite_techstack_options_corrections_to_the_earlier_generated_proposal",
+      "community": 4,
+      "norm_label": "corrections to the earlier generated proposal"
+    },
+    {
+      "label": "Evaluation method",
+      "file_type": "document",
+      "source_file": "techstack-options.md",
+      "source_location": "L58",
+      "id": "finlite_techstack_options_evaluation_method",
+      "community": 4,
+      "norm_label": "evaluation method"
+    },
+    {
+      "label": "Ranked comparison",
+      "file_type": "document",
+      "source_file": "techstack-options.md",
+      "source_location": "L80",
+      "id": "finlite_techstack_options_ranked_comparison",
+      "community": 4,
+      "norm_label": "ranked comparison"
+    },
+    {
+      "label": "Score detail",
+      "file_type": "document",
+      "source_file": "techstack-options.md",
+      "source_location": "L95",
+      "id": "finlite_techstack_options_score_detail",
+      "community": 4,
+      "norm_label": "score detail"
+    },
+    {
+      "label": "Current version baseline",
+      "file_type": "document",
+      "source_file": "techstack-options.md",
+      "source_location": "L112",
+      "id": "finlite_techstack_options_current_version_baseline",
+      "community": 4,
+      "norm_label": "current version baseline"
+    },
+    {
+      "label": "Detailed options",
+      "file_type": "document",
+      "source_file": "techstack-options.md",
+      "source_location": "L133",
+      "id": "finlite_techstack_options_detailed_options",
+      "community": 11,
+      "norm_label": "detailed options"
+    },
+    {
+      "label": "1. Next.js 16 + Supabase PostgreSQL/Auth/Storage + AI SDK 6",
+      "file_type": "document",
+      "source_file": "techstack-options.md",
+      "source_location": "L135",
+      "id": "finlite_techstack_options_1_next_js_16_supabase_postgresql_auth_storage_ai_sdk_6",
+      "community": 11,
+      "norm_label": "1. next.js 16 + supabase postgresql/auth/storage + ai sdk 6"
+    },
+    {
+      "label": "2. Laravel 13 + Inertia + Vue 3 + PostgreSQL",
+      "file_type": "document",
+      "source_file": "techstack-options.md",
+      "source_location": "L166",
+      "id": "finlite_techstack_options_2_laravel_13_inertia_vue_3_postgresql",
+      "community": 11,
+      "norm_label": "2. laravel 13 + inertia + vue 3 + postgresql"
+    },
+    {
+      "label": "3. Django 6 + HTMX + PostgreSQL",
+      "file_type": "document",
+      "source_file": "techstack-options.md",
+      "source_location": "L194",
+      "id": "finlite_techstack_options_3_django_6_htmx_postgresql",
+      "community": 11,
+      "norm_label": "3. django 6 + htmx + postgresql"
+    },
+    {
+      "label": "4. React 19 + Vite 8 + FastAPI + PostgreSQL",
+      "file_type": "document",
+      "source_file": "techstack-options.md",
+      "source_location": "L219",
+      "id": "finlite_techstack_options_4_react_19_vite_8_fastapi_postgresql",
+      "community": 11,
+      "norm_label": "4. react 19 + vite 8 + fastapi + postgresql"
+    },
+    {
+      "label": "5. React 19 + Vite 8 + Express 5 + Prisma 7 + PostgreSQL",
+      "file_type": "document",
+      "source_file": "techstack-options.md",
+      "source_location": "L243",
+      "id": "finlite_techstack_options_5_react_19_vite_8_express_5_prisma_7_postgresql",
+      "community": 11,
+      "norm_label": "5. react 19 + vite 8 + express 5 + prisma 7 + postgresql"
+    },
+    {
+      "label": "6. Nuxt 4 + Supabase PostgreSQL/Auth/Storage",
+      "file_type": "document",
+      "source_file": "techstack-options.md",
+      "source_location": "L267",
+      "id": "finlite_techstack_options_6_nuxt_4_supabase_postgresql_auth_storage",
+      "community": 11,
+      "norm_label": "6. nuxt 4 + supabase postgresql/auth/storage"
+    },
+    {
+      "label": "7. ASP.NET Core 10 LTS + Blazor + EF Core + PostgreSQL",
+      "file_type": "document",
+      "source_file": "techstack-options.md",
+      "source_location": "L289",
+      "id": "finlite_techstack_options_7_asp_net_core_10_lts_blazor_ef_core_postgresql",
+      "community": 11,
+      "norm_label": "7. asp.net core 10 lts + blazor + ef core + postgresql"
+    },
+    {
+      "label": "8. Svelte 5 + SvelteKit + Supabase PostgreSQL",
+      "file_type": "document",
+      "source_file": "techstack-options.md",
+      "source_location": "L313",
+      "id": "finlite_techstack_options_8_svelte_5_sveltekit_supabase_postgresql",
+      "community": 11,
+      "norm_label": "8. svelte 5 + sveltekit + supabase postgresql"
+    },
+    {
+      "label": "9. Spring Boot 4.1 + React + PostgreSQL",
+      "file_type": "document",
+      "source_file": "techstack-options.md",
+      "source_location": "L335",
+      "id": "finlite_techstack_options_9_spring_boot_4_1_react_postgresql",
+      "community": 11,
+      "norm_label": "9. spring boot 4.1 + react + postgresql"
+    },
+    {
+      "label": "10. React 19 + Express 5 + MongoDB",
+      "file_type": "document",
+      "source_file": "techstack-options.md",
+      "source_location": "L358",
+      "id": "finlite_techstack_options_10_react_19_express_5_mongodb",
+      "community": 11,
+      "norm_label": "10. react 19 + express 5 + mongodb"
+    },
+    {
+      "label": "Recommended architecture for Option 1",
+      "file_type": "document",
+      "source_file": "techstack-options.md",
+      "source_location": "L380",
+      "id": "finlite_techstack_options_recommended_architecture_for_option_1",
+      "community": 4,
+      "norm_label": "recommended architecture for option 1"
+    },
+    {
+      "label": "Data-integrity baseline",
+      "file_type": "document",
+      "source_file": "techstack-options.md",
+      "source_location": "L407",
+      "id": "finlite_techstack_options_data_integrity_baseline",
+      "community": 4,
+      "norm_label": "data-integrity baseline"
+    },
+    {
+      "label": "AI boundary",
+      "file_type": "document",
+      "source_file": "techstack-options.md",
+      "source_location": "L420",
+      "id": "finlite_techstack_options_ai_boundary",
+      "community": 4,
+      "norm_label": "ai boundary"
+    },
+    {
+      "label": "Reporting baseline",
+      "file_type": "document",
+      "source_file": "techstack-options.md",
+      "source_location": "L436",
+      "id": "finlite_techstack_options_reporting_baseline",
+      "community": 4,
+      "norm_label": "reporting baseline"
+    },
+    {
+      "label": "Recommended development model",
+      "file_type": "document",
+      "source_file": "techstack-options.md",
+      "source_location": "L447",
+      "id": "finlite_techstack_options_recommended_development_model",
+      "community": 4,
+      "norm_label": "recommended development model"
+    },
+    {
+      "label": "Working cycle",
+      "file_type": "document",
+      "source_file": "techstack-options.md",
+      "source_location": "L451",
+      "id": "finlite_techstack_options_working_cycle",
+      "community": 4,
+      "norm_label": "working cycle"
+    },
+    {
+      "label": "Suggested increments",
+      "file_type": "document",
+      "source_file": "techstack-options.md",
+      "source_location": "L459",
+      "id": "finlite_techstack_options_suggested_increments",
+      "community": 4,
+      "norm_label": "suggested increments"
+    },
+    {
+      "label": "Recommended repository structure",
+      "file_type": "document",
+      "source_file": "techstack-options.md",
+      "source_location": "L473",
+      "id": "finlite_techstack_options_recommended_repository_structure",
+      "community": 4,
+      "norm_label": "recommended repository structure"
+    },
+    {
+      "label": "Structure rules",
+      "file_type": "document",
+      "source_file": "techstack-options.md",
+      "source_location": "L560",
+      "id": "finlite_techstack_options_structure_rules",
+      "community": 4,
+      "norm_label": "structure rules"
+    },
+    {
+      "label": "Hosting and cost reality",
+      "file_type": "document",
+      "source_file": "techstack-options.md",
+      "source_location": "L570",
+      "id": "finlite_techstack_options_hosting_and_cost_reality",
+      "community": 4,
+      "norm_label": "hosting and cost reality"
+    },
+    {
+      "label": "Recommended student demo baseline",
+      "file_type": "document",
+      "source_file": "techstack-options.md",
+      "source_location": "L572",
+      "id": "finlite_techstack_options_recommended_student_demo_baseline",
+      "community": 4,
+      "norm_label": "recommended student demo baseline"
+    },
+    {
+      "label": "Before real organizational use",
+      "file_type": "document",
+      "source_file": "techstack-options.md",
+      "source_location": "L579",
+      "id": "finlite_techstack_options_before_real_organizational_use",
+      "community": 4,
+      "norm_label": "before real organizational use"
+    },
+    {
+      "label": "Decision checklist",
+      "file_type": "document",
+      "source_file": "techstack-options.md",
+      "source_location": "L588",
+      "id": "finlite_techstack_options_decision_checklist",
+      "community": 4,
+      "norm_label": "decision checklist"
+    },
+    {
+      "label": "Final recommendation",
+      "file_type": "document",
+      "source_file": "techstack-options.md",
+      "source_location": "L605",
+      "id": "finlite_techstack_options_final_recommendation",
+      "community": 4,
+      "norm_label": "final recommendation"
+    },
+    {
+      "label": "Official references",
+      "file_type": "document",
+      "source_file": "techstack-options.md",
+      "source_location": "L620",
+      "id": "finlite_techstack_options_official_references",
+      "community": 4,
+      "norm_label": "official references"
+    },
+    {
+      "label": "Current platforms and versions",
+      "file_type": "document",
+      "source_file": "techstack-options.md",
+      "source_location": "L622",
+      "id": "finlite_techstack_options_current_platforms_and_versions",
+      "community": 4,
+      "norm_label": "current platforms and versions"
+    },
+    {
+      "label": "Database, deployment, and AI constraints",
+      "file_type": "document",
+      "source_file": "techstack-options.md",
+      "source_location": "L643",
+      "id": "finlite_techstack_options_database_deployment_and_ai_constraints",
+      "community": 4,
+      "norm_label": "database, deployment, and ai constraints"
+    },
+    {
+      "label": "Process and security",
+      "file_type": "document",
+      "source_file": "techstack-options.md",
+      "source_location": "L655",
+      "id": "finlite_techstack_options_process_and_security",
+      "community": 4,
+      "norm_label": "process and security"
+    },
+    {
+      "label": "RTK.md",
+      "file_type": "document",
+      "source_file": ".agents/rules/RTK.md",
+      "source_location": "L1",
+      "id": "agents_rules_rtk_md",
+      "community": 26,
+      "norm_label": "rtk.md"
+    },
+    {
+      "label": "Rule: FinLITE Project Context (RTK)",
+      "file_type": "document",
+      "source_file": ".agents/rules/RTK.md",
+      "source_location": "L1",
+      "id": "rules_rtk_rule_finlite_project_context_rtk",
+      "community": 26,
+      "norm_label": "rule: finlite project context (rtk)"
+    },
+    {
+      "label": "ADVISER_QUESTIONNAIRE.md",
+      "file_type": "document",
+      "source_file": "docs/ADVISER_QUESTIONNAIRE.md",
+      "source_location": "L1",
+      "id": "docs_adviser_questionnaire_md",
+      "community": 20,
+      "norm_label": "adviser_questionnaire.md"
+    },
+    {
+      "label": "LITE Club Adviser Financial Operations Questionnaire (Google Form Draft)",
+      "file_type": "document",
+      "source_file": "docs/ADVISER_QUESTIONNAIRE.md",
+      "source_location": "L1",
+      "id": "docs_adviser_questionnaire_lite_club_adviser_financial_operations_questionnaire_google_form_draft",
+      "community": 20,
+      "norm_label": "lite club adviser financial operations questionnaire (google form draft)"
+    },
+    {
+      "label": "Form Title:",
+      "file_type": "document",
+      "source_file": "docs/ADVISER_QUESTIONNAIRE.md",
+      "source_location": "L7",
+      "id": "docs_adviser_questionnaire_form_title",
+      "community": 20,
+      "norm_label": "form title:"
+    },
+    {
+      "label": "Form Description:",
+      "file_type": "document",
+      "source_file": "docs/ADVISER_QUESTIONNAIRE.md",
+      "source_location": "L10",
+      "id": "docs_adviser_questionnaire_form_description",
+      "community": 20,
+      "norm_label": "form description:"
+    },
+    {
+      "label": "SECTION 1: Personal Advances & Out-of-Pocket Reimbursements (Accounts Payable)",
+      "file_type": "document",
+      "source_file": "docs/ADVISER_QUESTIONNAIRE.md",
+      "source_location": "L15",
+      "id": "docs_adviser_questionnaire_section_1_personal_advances_out_of_pocket_reimbursements_accounts_payable",
+      "community": 20,
+      "norm_label": "section 1: personal advances & out-of-pocket reimbursements (accounts payable)"
+    },
+    {
+      "label": "SECTION 2: Merchandise Sales, Fees, and \"Utang\" Policy (Accounts Receivable)",
+      "file_type": "document",
+      "source_file": "docs/ADVISER_QUESTIONNAIRE.md",
+      "source_location": "L46",
+      "id": "docs_adviser_questionnaire_section_2_merchandise_sales_fees_and_utang_policy_accounts_receivable",
+      "community": 20,
+      "norm_label": "section 2: merchandise sales, fees, and \"utang\" policy (accounts receivable)"
+    },
+    {
+      "label": "SECTION 3: Budget Approval & Petty Expense Governance",
+      "file_type": "document",
+      "source_file": "docs/ADVISER_QUESTIONNAIRE.md",
+      "source_location": "L64",
+      "id": "docs_adviser_questionnaire_section_3_budget_approval_petty_expense_governance",
+      "community": 20,
+      "norm_label": "section 3: budget approval & petty expense governance"
+    },
+    {
+      "label": "SECTION 4: Discrepancy Tolerance & Cash Reconciliation",
+      "file_type": "document",
+      "source_file": "docs/ADVISER_QUESTIONNAIRE.md",
+      "source_location": "L81",
+      "id": "docs_adviser_questionnaire_section_4_discrepancy_tolerance_cash_reconciliation",
+      "community": 20,
+      "norm_label": "section 4: discrepancy tolerance & cash reconciliation"
+    },
+    {
+      "label": "SECTION 5: End-of-Term Liquidation & Submission Pet Peeves",
+      "file_type": "document",
+      "source_file": "docs/ADVISER_QUESTIONNAIRE.md",
+      "source_location": "L98",
+      "id": "docs_adviser_questionnaire_section_5_end_of_term_liquidation_submission_pet_peeves",
+      "community": 20,
+      "norm_label": "section 5: end-of-term liquidation & submission pet peeves"
+    },
+    {
+      "label": "Project Context_752a6544.md",
+      "file_type": "document",
+      "source_file": "graphify-out/converted/Project Context_752a6544.md",
+      "source_location": "L1",
+      "id": "graphify_out_converted_project_context_752a6544_md",
+      "community": 22,
+      "norm_label": "project context_752a6544.md"
+    },
+    {
+      "label": "1.1 Project Context",
+      "file_type": "document",
+      "source_file": "graphify-out/converted/Project Context_752a6544.md",
+      "source_location": "L3",
+      "id": "converted_project_context_752a6544_1_1_project_context",
+      "community": 22,
+      "norm_label": "1.1 project context"
+    },
+    {
+      "label": "The Current Manual Process (Crucial for your DFD)",
+      "file_type": "document",
+      "source_file": "graphify-out/converted/Project Context_752a6544.md",
+      "source_location": "L8",
+      "id": "converted_project_context_752a6544_the_current_manual_process_crucial_for_your_dfd",
+      "community": 22,
+      "norm_label": "the current manual process (crucial for your dfd)"
+    },
+    {
+      "label": "Statement of the Problem",
+      "file_type": "document",
+      "source_file": "graphify-out/converted/Project Context_752a6544.md",
+      "source_location": "L11",
+      "id": "converted_project_context_752a6544_statement_of_the_problem",
+      "community": 22,
+      "norm_label": "statement of the problem"
+    },
+    {
+      "label": "Proposed Solution",
+      "file_type": "document",
+      "source_file": "graphify-out/converted/Project Context_752a6544.md",
+      "source_location": "L17",
+      "id": "converted_project_context_752a6544_proposed_solution",
+      "community": 22,
+      "norm_label": "proposed solution"
+    },
+    {
+      "label": "PROJECT_CONTEXT.md",
+      "file_type": "document",
+      "source_file": "docs/PROJECT_CONTEXT.md",
+      "source_location": "L1",
+      "id": "docs_project_context_md",
+      "community": 10,
+      "norm_label": "project_context.md"
+    },
+    {
+      "label": "PROJECT CONTEXT",
+      "file_type": "document",
+      "source_file": "docs/PROJECT_CONTEXT.md",
+      "source_location": "L1",
+      "id": "docs_project_context_project_context",
+      "community": 10,
+      "norm_label": "project context"
+    },
+    {
+      "label": "1.1 Project Title",
+      "file_type": "document",
+      "source_file": "docs/PROJECT_CONTEXT.md",
+      "source_location": "L3",
+      "id": "docs_project_context_1_1_project_title",
+      "community": 10,
+      "norm_label": "1.1 project title"
+    },
+    {
+      "label": "1.2 Organizational Setting & Operational Environment",
+      "file_type": "document",
+      "source_file": "docs/PROJECT_CONTEXT.md",
+      "source_location": "L8",
+      "id": "docs_project_context_1_2_organizational_setting_operational_environment",
+      "community": 10,
+      "norm_label": "1.2 organizational setting & operational environment"
+    },
+    {
+      "label": "1.3 As-Is Process & Real-World Failure Modes",
+      "file_type": "document",
+      "source_file": "docs/PROJECT_CONTEXT.md",
+      "source_location": "L19",
+      "id": "docs_project_context_1_3_as_is_process_real_world_failure_modes",
+      "community": 10,
+      "norm_label": "1.3 as-is process & real-world failure modes"
+    },
+    {
+      "label": "1. The Personal \"Abono\" & Reimbursement Dilemma (Faculty Advisers & Officers)",
+      "file_type": "document",
+      "source_file": "docs/PROJECT_CONTEXT.md",
+      "source_location": "L24",
+      "id": "docs_project_context_1_the_personal_abono_reimbursement_dilemma_faculty_advisers_officers",
+      "community": 10,
+      "norm_label": "1. the personal \"abono\" & reimbursement dilemma (faculty advisers & officers)"
+    },
+    {
+      "label": "2. Documenting Non-Receipted Micro-Disbursements",
+      "file_type": "document",
+      "source_file": "docs/PROJECT_CONTEXT.md",
+      "source_location": "L29",
+      "id": "docs_project_context_2_documenting_non_receipted_micro_disbursements",
+      "community": 10,
+      "norm_label": "2. documenting non-receipted micro-disbursements"
+    },
+    {
+      "label": "3. Personal GCash Co-mingling & Cash-Out Lag",
+      "file_type": "document",
+      "source_file": "docs/PROJECT_CONTEXT.md",
+      "source_location": "L34",
+      "id": "docs_project_context_3_personal_gcash_co_mingling_cash_out_lag",
+      "community": 10,
+      "norm_label": "3. personal gcash co-mingling & cash-out lag"
+    },
+    {
+      "label": "4. Informal Budget Authorizations",
+      "file_type": "document",
+      "source_file": "docs/PROJECT_CONTEXT.md",
+      "source_location": "L37",
+      "id": "docs_project_context_4_informal_budget_authorizations",
+      "community": 10,
+      "norm_label": "4. informal budget authorizations"
+    },
+    {
+      "label": "5. Cash Variances and Shortage Declarations",
+      "file_type": "document",
+      "source_file": "docs/PROJECT_CONTEXT.md",
+      "source_location": "L40",
+      "id": "docs_project_context_5_cash_variances_and_shortage_declarations",
+      "community": 10,
+      "norm_label": "5. cash variances and shortage declarations"
+    },
+    {
+      "label": "6. The End-of-Term Institutional Routing Bottleneck",
+      "file_type": "document",
+      "source_file": "docs/PROJECT_CONTEXT.md",
+      "source_location": "L45",
+      "id": "docs_project_context_6_the_end_of_term_institutional_routing_bottleneck",
+      "community": 10,
+      "norm_label": "6. the end-of-term institutional routing bottleneck"
+    },
+    {
+      "label": "1.4 The Paradigm Shift: Why a \"Financial Assistant\" Rather than an ERP",
+      "file_type": "document",
+      "source_file": "docs/PROJECT_CONTEXT.md",
+      "source_location": "L54",
+      "id": "docs_project_context_1_4_the_paradigm_shift_why_a_financial_assistant_rather_than_an_erp",
+      "community": 10,
+      "norm_label": "1.4 the paradigm shift: why a \"financial assistant\" rather than an erp"
+    },
+    {
+      "label": "1.5 System Capabilities Architecture",
+      "file_type": "document",
+      "source_file": "docs/PROJECT_CONTEXT.md",
+      "source_location": "L66",
+      "id": "docs_project_context_1_5_system_capabilities_architecture",
+      "community": 10,
+      "norm_label": "1.5 system capabilities architecture"
+    },
+    {
+      "label": "code:block1 (\u250c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500)",
+      "file_type": "document",
+      "source_file": "docs/PROJECT_CONTEXT.md",
+      "source_location": "L68",
+      "id": "docs_project_context_codeblock_1",
+      "community": 10,
+      "norm_label": "code:block1 (\u250c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500)"
+    },
+    {
+      "label": "1.6 Academic & Practical Impact",
+      "file_type": "document",
+      "source_file": "docs/PROJECT_CONTEXT.md",
+      "source_location": "L110",
+      "id": "docs_project_context_1_6_academic_practical_impact",
+      "community": 10,
+      "norm_label": "1.6 academic & practical impact"
+    },
+    {
+      "label": "FinLITE-Exported-Report_f5bbbc7c.md",
+      "file_type": "document",
+      "source_file": "graphify-out/converted/FinLITE-Exported-Report_f5bbbc7c.md",
+      "source_location": "L1",
+      "id": "graphify_out_converted_finlite_exported_report_f5bbbc7c_md",
+      "community": 38,
+      "norm_label": "finlite-exported-report_f5bbbc7c.md"
+    },
+    {
+      "label": "LITE-Financial-Report-Master-Template_32077a9a.md",
+      "file_type": "document",
+      "source_file": "graphify-out/converted/LITE-Financial-Report-Master-Template_32077a9a.md",
+      "source_location": "L1",
+      "id": "graphify_out_converted_lite_financial_report_master_template_32077a9a_md",
+      "community": 39,
+      "norm_label": "lite-financial-report-master-template_32077a9a.md"
+    },
+    {
+      "label": "LITE-Financial-Report-Template_1fa68de1.md",
+      "file_type": "document",
+      "source_file": "graphify-out/converted/LITE-Financial-Report-Template_1fa68de1.md",
+      "source_location": "L1",
+      "id": "graphify_out_converted_lite_financial_report_template_1fa68de1_md",
+      "community": 40,
+      "norm_label": "lite-financial-report-template_1fa68de1.md"
+    },
+    {
+      "label": "LITE-Financial-Report-Universal-Template_cf228f5f.md",
+      "file_type": "document",
+      "source_file": "graphify-out/converted/LITE-Financial-Report-Universal-Template_cf228f5f.md",
+      "source_location": "L1",
+      "id": "graphify_out_converted_lite_financial_report_universal_template_cf228f5f_md",
+      "community": 41,
+      "norm_label": "lite-financial-report-universal-template_cf228f5f.md"
+    },
+    {
+      "label": "export_report_engine.py",
+      "file_type": "code",
+      "source_file": "export_report_engine.py",
+      "source_location": "L1",
+      "community": 6,
+      "norm_label": "export_report_engine.py",
+      "id": "export_report_engine_py"
+    },
+    {
+      "label": "replace_text_in_paragraph()",
+      "file_type": "code",
+      "source_file": "export_report_engine.py",
+      "source_location": "L8",
+      "community": 6,
+      "norm_label": "replace_text_in_paragraph()",
+      "id": "finlite_export_report_engine_replace_text_in_paragraph"
+    },
+    {
+      "label": "replace_placeholders()",
+      "file_type": "code",
+      "source_file": "export_report_engine.py",
+      "source_location": "L16",
+      "community": 6,
+      "norm_label": "replace_placeholders()",
+      "id": "finlite_export_report_engine_replace_placeholders"
+    },
+    {
+      "label": "populate_report()",
+      "file_type": "code",
+      "source_file": "export_report_engine.py",
+      "source_location": "L30",
+      "community": 6,
+      "norm_label": "populate_report()",
+      "id": "finlite_export_report_engine_populate_report"
+    },
+    {
+      "label": "inspect_tables.py",
+      "file_type": "code",
+      "source_file": "inspect_tables.py",
+      "source_location": "L1",
+      "community": 12,
+      "norm_label": "inspect_tables.py",
+      "id": "inspect_tables_py"
+    },
+    {
+      "label": "logos.js",
+      "file_type": "code",
+      "source_file": "logos.js",
+      "source_location": "L1",
+      "community": 13,
+      "norm_label": "logos.js",
+      "id": "logos_js"
+    },
+    {
+      "label": "temp_check.js",
+      "file_type": "code",
+      "source_file": "temp_check.js",
+      "source_location": "L1",
+      "community": 2,
+      "norm_label": "temp_check.js",
+      "id": "temp_check_js"
+    },
+    {
+      "label": "appState",
+      "file_type": "code",
+      "source_file": "temp_check.js",
+      "source_location": "L2",
+      "community": 2,
+      "norm_label": "appstate",
+      "id": "finlite_temp_check_appstate"
+    },
+    {
+      "label": "dt",
+      "file_type": "code",
+      "source_file": "temp_check.js",
+      "source_location": "L59",
+      "community": 2,
+      "norm_label": "dt",
+      "id": "finlite_temp_check_dt"
+    },
+    {
+      "label": "switchView()",
+      "file_type": "code",
+      "source_file": "temp_check.js",
+      "source_location": "L67",
+      "community": 2,
+      "norm_label": "switchview()",
+      "id": "finlite_temp_check_switchview"
+    },
+    {
+      "label": "setRole()",
+      "file_type": "code",
+      "source_file": "temp_check.js",
+      "source_location": "L88",
+      "community": 2,
+      "norm_label": "setrole()",
+      "id": "finlite_temp_check_setrole"
+    },
+    {
+      "label": "renderFeed()",
+      "file_type": "code",
+      "source_file": "temp_check.js",
+      "source_location": "L95",
+      "community": 2,
+      "norm_label": "renderfeed()",
+      "id": "finlite_temp_check_renderfeed"
+    },
+    {
+      "label": "filterFeed()",
+      "file_type": "code",
+      "source_file": "temp_check.js",
+      "source_location": "L176",
+      "community": 2,
+      "norm_label": "filterfeed()",
+      "id": "finlite_temp_check_filterfeed"
+    },
+    {
+      "label": "openDetailSheet()",
+      "file_type": "code",
+      "source_file": "temp_check.js",
+      "source_location": "L186",
+      "community": 2,
+      "norm_label": "opendetailsheet()",
+      "id": "finlite_temp_check_opendetailsheet"
+    },
+    {
+      "label": "verifyTx()",
+      "file_type": "code",
+      "source_file": "temp_check.js",
+      "source_location": "L255",
+      "community": 2,
+      "norm_label": "verifytx()",
+      "id": "finlite_temp_check_verifytx"
+    },
+    {
+      "label": "reimburseTx()",
+      "file_type": "code",
+      "source_file": "temp_check.js",
+      "source_location": "L265",
+      "community": 2,
+      "norm_label": "reimbursetx()",
+      "id": "finlite_temp_check_reimbursetx"
+    },
+    {
+      "label": "voidTx()",
+      "file_type": "code",
+      "source_file": "temp_check.js",
+      "source_location": "L275",
+      "community": 2,
+      "norm_label": "voidtx()",
+      "id": "finlite_temp_check_voidtx"
+    },
+    {
+      "label": "openEntrySheet()",
+      "file_type": "code",
+      "source_file": "temp_check.js",
+      "source_location": "L288",
+      "community": 2,
+      "norm_label": "openentrysheet()",
+      "id": "finlite_temp_check_openentrysheet"
+    },
+    {
+      "label": "toggleSourceField()",
+      "file_type": "code",
+      "source_file": "temp_check.js",
+      "source_location": "L294",
+      "community": 2,
+      "norm_label": "togglesourcefield()",
+      "id": "finlite_temp_check_togglesourcefield"
+    },
+    {
+      "label": "closeSheet()",
+      "file_type": "code",
+      "source_file": "temp_check.js",
+      "source_location": "L299",
+      "community": 2,
+      "norm_label": "closesheet()",
+      "id": "finlite_temp_check_closesheet"
+    },
+    {
+      "label": "handleNewTransaction()",
+      "file_type": "code",
+      "source_file": "temp_check.js",
+      "source_location": "L303",
+      "community": 2,
+      "norm_label": "handlenewtransaction()",
+      "id": "finlite_temp_check_handlenewtransaction"
+    },
+    {
+      "label": "stepDenom()",
+      "file_type": "code",
+      "source_file": "temp_check.js",
+      "source_location": "L334",
+      "community": 2,
+      "norm_label": "stepdenom()",
+      "id": "finlite_temp_check_stepdenom"
+    },
+    {
+      "label": "updateReconCount()",
+      "file_type": "code",
+      "source_file": "temp_check.js",
+      "source_location": "L342",
+      "community": 2,
+      "norm_label": "updatereconcount()",
+      "id": "finlite_temp_check_updatereconcount"
+    },
+    {
+      "label": "saveReconRecord()",
+      "file_type": "code",
+      "source_file": "temp_check.js",
+      "source_location": "L372",
+      "community": 2,
+      "norm_label": "savereconrecord()",
+      "id": "finlite_temp_check_savereconrecord"
+    },
+    {
+      "label": "advanceReport()",
+      "file_type": "code",
+      "source_file": "temp_check.js",
+      "source_location": "L377",
+      "community": 2,
+      "norm_label": "advancereport()",
+      "id": "finlite_temp_check_advancereport"
+    },
+    {
+      "label": "updateReportActionBtn()",
+      "file_type": "code",
+      "source_file": "temp_check.js",
+      "source_location": "L405",
+      "community": 2,
+      "norm_label": "updatereportactionbtn()",
+      "id": "finlite_temp_check_updatereportactionbtn"
+    },
+    {
+      "label": "toggleDocxView()",
+      "file_type": "code",
+      "source_file": "temp_check.js",
+      "source_location": "L420",
+      "community": 2,
+      "norm_label": "toggledocxview()",
+      "id": "finlite_temp_check_toggledocxview"
+    },
+    {
+      "label": "toggleAssistantFlyout()",
+      "file_type": "code",
+      "source_file": "temp_check.js",
+      "source_location": "L440",
+      "community": 2,
+      "norm_label": "toggleassistantflyout()",
+      "id": "finlite_temp_check_toggleassistantflyout"
+    },
+    {
+      "label": "askAiQuery()",
+      "file_type": "code",
+      "source_file": "temp_check.js",
+      "source_location": "L445",
+      "community": 2,
+      "norm_label": "askaiquery()",
+      "id": "finlite_temp_check_askaiquery"
+    },
+    {
+      "label": "simulateTaglishDraft()",
+      "file_type": "code",
+      "source_file": "temp_check.js",
+      "source_location": "L467",
+      "community": 2,
+      "norm_label": "simulatetaglishdraft()",
+      "id": "finlite_temp_check_simulatetaglishdraft"
+    },
+    {
+      "label": "confirmAiDraft()",
+      "file_type": "code",
+      "source_file": "temp_check.js",
+      "source_location": "L488",
+      "community": 2,
+      "norm_label": "confirmaidraft()",
+      "id": "finlite_temp_check_confirmaidraft"
+    },
+    {
+      "label": "sendAiMessage()",
+      "file_type": "code",
+      "source_file": "temp_check.js",
+      "source_location": "L507",
+      "community": 2,
+      "norm_label": "sendaimessage()",
+      "id": "finlite_temp_check_sendaimessage"
+    },
+    {
+      "label": "appendMsg()",
+      "file_type": "code",
+      "source_file": "temp_check.js",
+      "source_location": "L518",
+      "community": 2,
+      "norm_label": "appendmsg()",
+      "id": "finlite_temp_check_appendmsg"
+    },
+    {
+      "label": "renderDocxPreview()",
+      "file_type": "code",
+      "source_file": "temp_check.js",
+      "source_location": "L530",
+      "community": 2,
+      "norm_label": "renderdocxpreview()",
+      "id": "finlite_temp_check_renderdocxpreview"
+    },
+    {
+      "label": "exportFormattedDocx()",
+      "file_type": "code",
       "source_file": "temp_check.js",
       "source_location": "L592",
-      "id": "finlite_temp_check_exportformatteddocx",
       "community": 2,
-      "norm_label": "exportformatteddocx()"
+      "norm_label": "exportformatteddocx()",
+      "id": "finlite_temp_check_exportformatteddocx"
     },
     {
       "label": "replace_text_in_paragraph",
@@ -371,9 +2198,9 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "id": "export_report_engine_replace_text_in_paragraph",
       "community": 1,
-      "norm_label": "replace_text_in_paragraph"
+      "norm_label": "replace_text_in_paragraph",
+      "id": "export_report_engine_replace_text_in_paragraph"
     },
     {
       "label": "replace_placeholders",
@@ -384,9 +2211,9 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "id": "export_report_engine_replace_placeholders",
       "community": 1,
-      "norm_label": "replace_placeholders"
+      "norm_label": "replace_placeholders",
+      "id": "export_report_engine_replace_placeholders"
     },
     {
       "label": "populate_report",
@@ -397,9 +2224,9 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "id": "export_report_engine_populate_report",
       "community": 1,
-      "norm_label": "populate_report"
+      "norm_label": "populate_report",
+      "id": "export_report_engine_populate_report"
     },
     {
       "label": "DEFAULT_TEMPLATE",
@@ -410,9 +2237,9 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "id": "export_report_engine_default_template",
       "community": 1,
-      "norm_label": "default_template"
+      "norm_label": "default_template",
+      "id": "export_report_engine_default_template"
     },
     {
       "label": "XML Table Style & Shading Inspector",
@@ -423,9 +2250,9 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "id": "inspect_tables_xml_table_parser",
       "community": 1,
-      "norm_label": "xml table style & shading inspector"
+      "norm_label": "xml table style & shading inspector",
+      "id": "inspect_tables_xml_table_parser"
     },
     {
       "label": "PDM_LOGO_BASE64",
@@ -436,9 +2263,9 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "id": "logos_pdm_logo_base64",
       "community": 0,
-      "norm_label": "pdm_logo_base64"
+      "norm_label": "pdm_logo_base64",
+      "id": "logos_pdm_logo_base64"
     },
     {
       "label": "LITE_LOGO_BASE64",
@@ -449,9 +2276,9 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "id": "logos_lite_logo_base64",
       "community": 0,
-      "norm_label": "lite_logo_base64"
+      "norm_label": "lite_logo_base64",
+      "id": "logos_lite_logo_base64"
     },
     {
       "label": "temp_check appState",
@@ -462,9 +2289,9 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "id": "temp_check_appstate",
-      "community": 4,
-      "norm_label": "temp_check appstate"
+      "community": 0,
+      "norm_label": "temp_check appstate",
+      "id": "temp_check_appstate"
     },
     {
       "label": "temp_check renderFeed",
@@ -475,9 +2302,9 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "id": "temp_check_renderfeed",
-      "community": 4,
-      "norm_label": "temp_check renderfeed"
+      "community": 0,
+      "norm_label": "temp_check renderfeed",
+      "id": "temp_check_renderfeed"
     },
     {
       "label": "temp_check openDetailSheet",
@@ -488,9 +2315,9 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "id": "temp_check_opendetailsheet",
       "community": 14,
-      "norm_label": "temp_check opendetailsheet"
+      "norm_label": "temp_check opendetailsheet",
+      "id": "temp_check_opendetailsheet"
     },
     {
       "label": "temp_check verifyTx",
@@ -501,9 +2328,9 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "id": "temp_check_verifytx",
-      "community": 4,
-      "norm_label": "temp_check verifytx"
+      "community": 0,
+      "norm_label": "temp_check verifytx",
+      "id": "temp_check_verifytx"
     },
     {
       "label": "temp_check reimburseTx",
@@ -514,9 +2341,9 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "id": "temp_check_reimbursetx",
-      "community": 4,
-      "norm_label": "temp_check reimbursetx"
+      "community": 0,
+      "norm_label": "temp_check reimbursetx",
+      "id": "temp_check_reimbursetx"
     },
     {
       "label": "temp_check voidTx",
@@ -527,9 +2354,9 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "id": "temp_check_voidtx",
-      "community": 4,
-      "norm_label": "temp_check voidtx"
+      "community": 0,
+      "norm_label": "temp_check voidtx",
+      "id": "temp_check_voidtx"
     },
     {
       "label": "temp_check handleNewTransaction",
@@ -540,9 +2367,9 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "id": "temp_check_handlenewtransaction",
-      "community": 4,
-      "norm_label": "temp_check handlenewtransaction"
+      "community": 0,
+      "norm_label": "temp_check handlenewtransaction",
+      "id": "temp_check_handlenewtransaction"
     },
     {
       "label": "temp_check updateReconCount",
@@ -553,9 +2380,9 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "id": "temp_check_updatereconcount",
       "community": 15,
-      "norm_label": "temp_check updatereconcount"
+      "norm_label": "temp_check updatereconcount",
+      "id": "temp_check_updatereconcount"
     },
     {
       "label": "temp_check advanceReport",
@@ -566,9 +2393,9 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "id": "temp_check_advancereport",
       "community": 16,
-      "norm_label": "temp_check advancereport"
+      "norm_label": "temp_check advancereport",
+      "id": "temp_check_advancereport"
     },
     {
       "label": "temp_check renderDocxPreview",
@@ -579,9 +2406,9 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "id": "temp_check_renderdocxpreview",
       "community": 0,
-      "norm_label": "temp_check renderdocxpreview"
+      "norm_label": "temp_check renderdocxpreview",
+      "id": "temp_check_renderdocxpreview"
     },
     {
       "label": "temp_check exportFormattedDocx",
@@ -592,9 +2419,9 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "id": "temp_check_exportformatteddocx",
       "community": 0,
-      "norm_label": "temp_check exportformatteddocx"
+      "norm_label": "temp_check exportformatteddocx",
+      "id": "temp_check_exportformatteddocx"
     },
     {
       "label": "temp_check askAiQuery",
@@ -605,9 +2432,9 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "id": "temp_check_askaiquery",
       "community": 17,
-      "norm_label": "temp_check askaiquery"
+      "norm_label": "temp_check askaiquery",
+      "id": "temp_check_askaiquery"
     },
     {
       "label": "WordprocessingML Document XML Dump",
@@ -618,9 +2445,9 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "id": "document_xml_dump_openxml_content",
       "community": 1,
-      "norm_label": "wordprocessingml document xml dump"
+      "norm_label": "wordprocessingml document xml dump",
+      "id": "document_xml_dump_openxml_content"
     },
     {
       "label": "FinLITE Exported Report Docx Document",
@@ -631,9 +2458,9 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "id": "converted_finlite_exported_report_38ec849a_financial_report",
       "community": 1,
-      "norm_label": "finlite exported report docx document"
+      "norm_label": "finlite exported report docx document",
+      "id": "converted_finlite_exported_report_38ec849a_financial_report"
     },
     {
       "label": "FinLITE Web Application UI Interface",
@@ -644,9 +2471,9 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "id": "index_html_ui",
       "community": 0,
-      "norm_label": "finlite web application ui interface"
+      "norm_label": "finlite web application ui interface",
+      "id": "index_html_ui"
     },
     {
       "label": "index.html appState",
@@ -657,9 +2484,9 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "id": "index_appstate",
       "community": 0,
-      "norm_label": "index.html appstate"
+      "norm_label": "index.html appstate",
+      "id": "index_appstate"
     },
     {
       "label": "index.html renderFeed",
@@ -670,9 +2497,9 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "id": "index_renderfeed",
       "community": 0,
-      "norm_label": "index.html renderfeed"
+      "norm_label": "index.html renderfeed",
+      "id": "index_renderfeed"
     },
     {
       "label": "index.html openDetailSheet",
@@ -683,9 +2510,9 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "id": "index_opendetailsheet",
       "community": 18,
-      "norm_label": "index.html opendetailsheet"
+      "norm_label": "index.html opendetailsheet",
+      "id": "index_opendetailsheet"
     },
     {
       "label": "index.html verifyTx",
@@ -696,9 +2523,9 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "id": "index_verifytx",
       "community": 0,
-      "norm_label": "index.html verifytx"
+      "norm_label": "index.html verifytx",
+      "id": "index_verifytx"
     },
     {
       "label": "index.html reimburseTx",
@@ -709,9 +2536,9 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "id": "index_reimbursetx",
       "community": 0,
-      "norm_label": "index.html reimbursetx"
+      "norm_label": "index.html reimbursetx",
+      "id": "index_reimbursetx"
     },
     {
       "label": "index.html voidTx",
@@ -722,9 +2549,9 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "id": "index_voidtx",
       "community": 0,
-      "norm_label": "index.html voidtx"
+      "norm_label": "index.html voidtx",
+      "id": "index_voidtx"
     },
     {
       "label": "index.html handleNewTransaction",
@@ -735,9 +2562,9 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "id": "index_handlenewtransaction",
       "community": 0,
-      "norm_label": "index.html handlenewtransaction"
+      "norm_label": "index.html handlenewtransaction",
+      "id": "index_handlenewtransaction"
     },
     {
       "label": "index.html updateReconCount",
@@ -748,9 +2575,9 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "id": "index_updatereconcount",
-      "community": 7,
-      "norm_label": "index.html updatereconcount"
+      "community": 0,
+      "norm_label": "index.html updatereconcount",
+      "id": "index_updatereconcount"
     },
     {
       "label": "index.html advanceReport",
@@ -761,9 +2588,9 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "id": "index_advancereport",
       "community": 0,
-      "norm_label": "index.html advancereport"
+      "norm_label": "index.html advancereport",
+      "id": "index_advancereport"
     },
     {
       "label": "index.html renderDocxPreview",
@@ -774,9 +2601,9 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "id": "index_renderdocxpreview",
       "community": 0,
-      "norm_label": "index.html renderdocxpreview"
+      "norm_label": "index.html renderdocxpreview",
+      "id": "index_renderdocxpreview"
     },
     {
       "label": "index.html exportFormattedDocx",
@@ -787,9 +2614,9 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "id": "index_exportformatteddocx",
       "community": 0,
-      "norm_label": "index.html exportformatteddocx"
+      "norm_label": "index.html exportformatteddocx",
+      "id": "index_exportformatteddocx"
     },
     {
       "label": "index.html askAiQuery",
@@ -800,9 +2627,9 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "id": "index_askaiquery",
       "community": 19,
-      "norm_label": "index.html askaiquery"
+      "norm_label": "index.html askaiquery",
+      "id": "index_askaiquery"
     },
     {
       "label": "LITE Financial Report Master Template",
@@ -813,9 +2640,9 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "id": "converted_lite_financial_report_master_template_7f2769a4_master_template",
       "community": 1,
-      "norm_label": "lite financial report master template"
+      "norm_label": "lite financial report master template",
+      "id": "converted_lite_financial_report_master_template_7f2769a4_master_template"
     },
     {
       "label": "LITE Financial Report AY 2025-2026 Template",
@@ -826,9 +2653,9 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "id": "converted_lite_financial_report_template_aec3d10f_template_report",
       "community": 1,
-      "norm_label": "lite financial report ay 2025-2026 template"
+      "norm_label": "lite financial report ay 2025-2026 template",
+      "id": "converted_lite_financial_report_template_aec3d10f_template_report"
     },
     {
       "label": "LITE Financial Report Universal Template",
@@ -839,9 +2666,9 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "id": "converted_lite_financial_report_universal_template_5a1ba7be_universal_template",
       "community": 1,
-      "norm_label": "lite financial report universal template"
+      "norm_label": "lite financial report universal template",
+      "id": "converted_lite_financial_report_universal_template_5a1ba7be_universal_template"
     },
     {
       "label": "FinLITE Project Context & Background",
@@ -852,9 +2679,9 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "id": "converted_project_context_08cd0430_project_context",
       "community": 9,
-      "norm_label": "finlite project context & background"
+      "norm_label": "finlite project context & background",
+      "id": "converted_project_context_08cd0430_project_context"
     },
     {
       "label": "Manual Financial Recordkeeping Deficiencies",
@@ -865,9 +2692,9 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "id": "converted_project_context_08cd0430_manual_process_problems",
-      "community": 7,
-      "norm_label": "manual financial recordkeeping deficiencies"
+      "community": 0,
+      "norm_label": "manual financial recordkeeping deficiencies",
+      "id": "converted_project_context_08cd0430_manual_process_problems"
     },
     {
       "label": "FinLITE Automated Financial System Architecture",
@@ -878,9 +2705,9 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "id": "converted_project_context_08cd0430_finlite_solution",
-      "community": 7,
-      "norm_label": "finlite automated financial system architecture"
+      "community": 0,
+      "norm_label": "finlite automated financial system architecture",
+      "id": "converted_project_context_08cd0430_finlite_solution"
     },
     {
       "label": "FinLITE RTK Project Rules & Directives",
@@ -891,9 +2718,9 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "id": "rules_rtk_project_rules",
       "community": 9,
-      "norm_label": "finlite rtk project rules & directives"
+      "norm_label": "finlite rtk project rules & directives",
+      "id": "rules_rtk_project_rules"
     },
     {
       "label": "Multi-Role Financial Governance & Segregation of Duties",
@@ -904,21 +2731,2142 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "id": "rules_rtk_financial_governance",
       "community": 0,
-      "norm_label": "multi-role financial governance & segregation of duties"
+      "norm_label": "multi-role financial governance & segregation of duties",
+      "id": "rules_rtk_financial_governance"
     }
   ],
   "links": [
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
+      "source_file": "jsconfig.json",
+      "source_location": "L2",
+      "weight": 1.0,
+      "source": "jsconfig_json",
+      "target": "finlite_jsconfig_compileroptions",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "jsconfig.json",
+      "source_location": "L19",
+      "weight": 1.0,
+      "source": "jsconfig_json",
+      "target": "finlite_jsconfig_include",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "jsconfig.json",
+      "source_location": "L20",
+      "weight": 1.0,
+      "source": "jsconfig_json",
+      "target": "finlite_jsconfig_exclude",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "jsconfig.json",
+      "source_location": "L3",
+      "weight": 1.0,
+      "source": "finlite_jsconfig_compileroptions",
+      "target": "finlite_jsconfig_compileroptions_target",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "jsconfig.json",
+      "source_location": "L4",
+      "weight": 1.0,
+      "source": "finlite_jsconfig_compileroptions",
+      "target": "finlite_jsconfig_compileroptions_lib",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "jsconfig.json",
+      "source_location": "L5",
+      "weight": 1.0,
+      "source": "finlite_jsconfig_compileroptions",
+      "target": "finlite_jsconfig_compileroptions_allowjs",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "jsconfig.json",
+      "source_location": "L6",
+      "weight": 1.0,
+      "source": "finlite_jsconfig_compileroptions",
+      "target": "finlite_jsconfig_compileroptions_skiplibcheck",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "jsconfig.json",
+      "source_location": "L7",
+      "weight": 1.0,
+      "source": "finlite_jsconfig_compileroptions",
+      "target": "finlite_jsconfig_compileroptions_strict",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "jsconfig.json",
+      "source_location": "L8",
+      "weight": 1.0,
+      "source": "finlite_jsconfig_compileroptions",
+      "target": "finlite_jsconfig_compileroptions_noemit",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "jsconfig.json",
+      "source_location": "L9",
+      "weight": 1.0,
+      "source": "finlite_jsconfig_compileroptions",
+      "target": "finlite_jsconfig_compileroptions_module",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "jsconfig.json",
+      "source_location": "L10",
+      "weight": 1.0,
+      "source": "finlite_jsconfig_compileroptions",
+      "target": "finlite_jsconfig_compileroptions_moduleresolution",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "jsconfig.json",
+      "source_location": "L11",
+      "weight": 1.0,
+      "source": "finlite_jsconfig_compileroptions",
+      "target": "finlite_jsconfig_compileroptions_resolvejsonmodule",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "jsconfig.json",
+      "source_location": "L12",
+      "weight": 1.0,
+      "source": "finlite_jsconfig_compileroptions",
+      "target": "finlite_jsconfig_compileroptions_isolatedmodules",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "jsconfig.json",
+      "source_location": "L13",
+      "weight": 1.0,
+      "source": "finlite_jsconfig_compileroptions",
+      "target": "finlite_jsconfig_compileroptions_jsx",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "jsconfig.json",
+      "source_location": "L14",
+      "weight": 1.0,
+      "source": "finlite_jsconfig_compileroptions",
+      "target": "finlite_jsconfig_compileroptions_baseurl",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "jsconfig.json",
+      "source_location": "L15",
+      "weight": 1.0,
+      "source": "finlite_jsconfig_compileroptions",
+      "target": "finlite_jsconfig_compileroptions_paths",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "jsconfig.json",
+      "source_location": "L16",
+      "weight": 1.0,
+      "source": "finlite_jsconfig_compileroptions_paths",
+      "target": "finlite_jsconfig_paths",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "next.config.mjs",
+      "source_location": "L2",
+      "weight": 1.0,
+      "source": "next_config_mjs",
+      "target": "finlite_next_config_nextconfig",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "package.json",
+      "source_location": "L2",
+      "weight": 1.0,
+      "source": "package_json",
+      "target": "finlite_package_name",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "package.json",
+      "source_location": "L3",
+      "weight": 1.0,
+      "source": "package_json",
+      "target": "finlite_package_version",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "package.json",
+      "source_location": "L4",
+      "weight": 1.0,
+      "source": "package_json",
+      "target": "finlite_package_type",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "package.json",
+      "source_location": "L5",
+      "weight": 1.0,
+      "source": "package_json",
+      "target": "finlite_package_private",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "package.json",
+      "source_location": "L6",
+      "weight": 1.0,
+      "source": "package_json",
+      "target": "finlite_package_scripts",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "package.json",
+      "source_location": "L11",
+      "weight": 1.0,
+      "source": "package_json",
+      "target": "finlite_package_dependencies",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "package.json",
+      "source_location": "L25",
+      "weight": 1.0,
+      "source": "package_json",
+      "target": "finlite_package_devdependencies",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "package.json",
+      "source_location": "L7",
+      "weight": 1.0,
+      "source": "finlite_package_scripts",
+      "target": "finlite_package_scripts_dev",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "package.json",
+      "source_location": "L8",
+      "weight": 1.0,
+      "source": "finlite_package_scripts",
+      "target": "finlite_package_scripts_build",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "package.json",
+      "source_location": "L9",
+      "weight": 1.0,
+      "source": "finlite_package_scripts",
+      "target": "finlite_package_scripts_start",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "package.json",
+      "source_location": "L12",
+      "weight": 1.0,
+      "source": "finlite_package_dependencies",
+      "target": "finlite_package_dependencies_google_generative_ai",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "package.json",
+      "source_location": "L13",
+      "weight": 1.0,
+      "source": "finlite_package_dependencies",
+      "target": "finlite_package_dependencies_supabase_ssr",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "package.json",
+      "source_location": "L14",
+      "weight": 1.0,
+      "source": "finlite_package_dependencies",
+      "target": "finlite_package_dependencies_supabase_supabase_js",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "package.json",
+      "source_location": "L15",
+      "weight": 1.0,
+      "source": "finlite_package_dependencies",
+      "target": "finlite_package_dependencies_browser_image_compression",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "package.json",
+      "source_location": "L16",
+      "weight": 1.0,
+      "source": "finlite_package_dependencies",
+      "target": "finlite_package_dependencies_clsx",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "package.json",
+      "source_location": "L17",
+      "weight": 1.0,
+      "source": "finlite_package_dependencies",
+      "target": "finlite_package_dependencies_date_fns",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "package.json",
+      "source_location": "L18",
+      "weight": 1.0,
+      "source": "finlite_package_dependencies",
+      "target": "finlite_package_dependencies_docx",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "package.json",
+      "source_location": "L19",
+      "weight": 1.0,
+      "source": "finlite_package_dependencies",
+      "target": "finlite_package_dependencies_lucide_react",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "package.json",
+      "source_location": "L20",
+      "weight": 1.0,
+      "source": "finlite_package_dependencies",
+      "target": "finlite_package_dependencies_next",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "package.json",
+      "source_location": "L21",
+      "weight": 1.0,
+      "source": "finlite_package_dependencies",
+      "target": "finlite_package_dependencies_react",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "package.json",
+      "source_location": "L22",
+      "weight": 1.0,
+      "source": "finlite_package_dependencies",
+      "target": "finlite_package_dependencies_react_dom",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "package.json",
+      "source_location": "L23",
+      "weight": 1.0,
+      "source": "finlite_package_dependencies",
+      "target": "finlite_package_dependencies_tailwind_merge",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "package.json",
+      "source_location": "L26",
+      "weight": 1.0,
+      "source": "finlite_package_devdependencies",
+      "target": "finlite_package_devdependencies_tailwindcss_postcss",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "package.json",
+      "source_location": "L27",
+      "weight": 1.0,
+      "source": "finlite_package_devdependencies",
+      "target": "finlite_package_devdependencies_postcss",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "package.json",
+      "source_location": "L28",
+      "weight": 1.0,
+      "source": "finlite_package_devdependencies",
+      "target": "finlite_package_devdependencies_tailwindcss",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "app/layout.jsx",
+      "source_location": "L3",
+      "weight": 1.0,
+      "source": "app_layout_jsx",
+      "target": "app_layout_metadata",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "app/layout.jsx",
+      "source_location": "L8",
+      "weight": 1.0,
+      "source": "app_layout_jsx",
+      "target": "app_layout_rootlayout",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "app/page.jsx",
+      "source_location": "L11",
+      "weight": 1.0,
+      "source": "app_page_jsx",
+      "target": "app_page_initial_transactions",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "app/page.jsx",
+      "source_location": "L120",
+      "weight": 1.0,
+      "source": "app_page_jsx",
+      "target": "app_page_dashboard",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "app/api/chat/route.js",
+      "source_location": "L4",
+      "weight": 1.0,
+      "source": "app_api_chat_route_js",
+      "target": "chat_route_post",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "app/api/reports/docx/route.js",
+      "source_location": "L16",
+      "weight": 1.0,
+      "source": "app_api_reports_docx_route_js",
+      "target": "docx_route_post",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "components/ai/AIChatDrawer.jsx",
+      "source_location": "L5",
+      "weight": 1.0,
+      "source": "components_ai_aichatdrawer_jsx",
+      "target": "ai_aichatdrawer_aichatdrawer",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "components/dashboard/StatCards.jsx",
+      "source_location": "L5",
+      "weight": 1.0,
+      "source": "components_dashboard_statcards_jsx",
+      "target": "dashboard_statcards_statcards",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "components/dashboard/StatCards.jsx",
+      "source_location": "L32",
+      "weight": 1.0,
+      "source": "dashboard_statcards_statcards",
+      "target": "utils_currency_formatphp"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "components/layout/Navbar.jsx",
+      "source_location": "L5",
+      "weight": 1.0,
+      "source": "components_layout_navbar_jsx",
+      "target": "layout_navbar_navbar",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "components/ledger/NewTransactionModal.jsx",
+      "source_location": "L6",
+      "weight": 1.0,
+      "source": "components_ledger_newtransactionmodal_jsx",
+      "target": "ledger_newtransactionmodal_newtransactionmodal",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "components/ledger/TransactionTable.jsx",
+      "source_location": "L17",
+      "weight": 1.0,
+      "source": "components_ledger_transactiontable_jsx",
+      "target": "ledger_transactiontable_transactiontable",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "components/ledger/TransactionTable.jsx",
+      "source_location": "L230",
+      "weight": 1.0,
+      "source": "ledger_transactiontable_transactiontable",
+      "target": "utils_currency_formatphp"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "components/reconciliation/DenominationCounter.jsx",
+      "source_location": "L6",
+      "weight": 1.0,
+      "source": "components_reconciliation_denominationcounter_jsx",
+      "target": "reconciliation_denominationcounter_denominationcounter",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "components/reconciliation/DenominationCounter.jsx",
+      "source_location": "L40",
+      "weight": 1.0,
+      "source": "reconciliation_denominationcounter_denominationcounter",
+      "target": "utils_currency_calculatephysicaltotal"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "components/reconciliation/DenominationCounter.jsx",
+      "source_location": "L41",
+      "weight": 1.0,
+      "source": "reconciliation_denominationcounter_denominationcounter",
+      "target": "utils_currency_calculatevariance"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "components/reconciliation/DenominationCounter.jsx",
+      "source_location": "L85",
+      "weight": 1.0,
+      "source": "reconciliation_denominationcounter_denominationcounter",
+      "target": "utils_currency_formatphp"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "lib/supabase/client.js",
+      "source_location": "L3",
+      "weight": 1.0,
+      "source": "lib_supabase_client_js",
+      "target": "supabase_client_createclient",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "lib/supabase/server.js",
+      "source_location": "L4",
+      "weight": 1.0,
+      "source": "lib_supabase_server_js",
+      "target": "supabase_server_createclient",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "lib/utils/compression.js",
+      "source_location": "L7",
+      "weight": 1.0,
+      "source": "lib_utils_compression_js",
+      "target": "utils_compression_compressreceiptimage",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "lib/utils/currency.js",
+      "source_location": "L6",
+      "weight": 1.0,
+      "source": "lib_utils_currency_js",
+      "target": "utils_currency_denomination_values",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "lib/utils/currency.js",
+      "source_location": "L25",
+      "weight": 1.0,
+      "source": "lib_utils_currency_js",
+      "target": "utils_currency_formatphp",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "lib/utils/currency.js",
+      "source_location": "L38",
+      "weight": 1.0,
+      "source": "lib_utils_currency_js",
+      "target": "utils_currency_tocentavos",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "lib/utils/currency.js",
+      "source_location": "L46",
+      "weight": 1.0,
+      "source": "lib_utils_currency_js",
+      "target": "utils_currency_fromcentavos",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "lib/utils/currency.js",
+      "source_location": "L55",
+      "weight": 1.0,
+      "source": "lib_utils_currency_js",
+      "target": "utils_currency_calculatephysicaltotal",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "lib/utils/currency.js",
+      "source_location": "L78",
+      "weight": 1.0,
+      "source": "lib_utils_currency_js",
+      "target": "utils_currency_calculatevariance",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/test_currency_math.js",
+      "source_location": "L4",
+      "weight": 1.0,
+      "source": "scripts_test_currency_math_js",
+      "target": "lib_utils_currency_js",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/test_currency_math.js",
+      "source_location": "L4",
+      "weight": 1.0,
+      "source": "scripts_test_currency_math_js",
+      "target": "utils_currency_formatphp",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/test_currency_math.js",
+      "source_location": "L46",
+      "weight": 1.0,
+      "source": "scripts_test_currency_math_runtests",
+      "target": "utils_currency_formatphp",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "lib/utils/currency.js",
+      "source_location": "L79",
+      "weight": 1.0,
+      "source": "utils_currency_calculatevariance",
+      "target": "utils_currency_tocentavos",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/test_currency_math.js",
+      "source_location": "L4",
+      "weight": 1.0,
+      "source": "scripts_test_currency_math_js",
+      "target": "utils_currency_tocentavos",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/test_currency_math.js",
+      "source_location": "L17",
+      "weight": 1.0,
+      "source": "scripts_test_currency_math_runtests",
+      "target": "utils_currency_tocentavos",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "lib/utils/currency.js",
+      "source_location": "L67",
+      "weight": 1.0,
+      "source": "utils_currency_calculatephysicaltotal",
+      "target": "utils_currency_fromcentavos",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "lib/utils/currency.js",
+      "source_location": "L82",
+      "weight": 1.0,
+      "source": "utils_currency_calculatevariance",
+      "target": "utils_currency_fromcentavos",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/test_currency_math.js",
+      "source_location": "L4",
+      "weight": 1.0,
+      "source": "scripts_test_currency_math_js",
+      "target": "utils_currency_fromcentavos",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/test_currency_math.js",
+      "source_location": "L23",
+      "weight": 1.0,
+      "source": "scripts_test_currency_math_runtests",
+      "target": "utils_currency_fromcentavos",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/test_currency_math.js",
+      "source_location": "L4",
+      "weight": 1.0,
+      "source": "scripts_test_currency_math_js",
+      "target": "utils_currency_calculatephysicaltotal",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/test_currency_math.js",
+      "source_location": "L36",
+      "weight": 1.0,
+      "source": "scripts_test_currency_math_runtests",
+      "target": "utils_currency_calculatephysicaltotal",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/test_currency_math.js",
+      "source_location": "L4",
+      "weight": 1.0,
+      "source": "scripts_test_currency_math_js",
+      "target": "utils_currency_calculatevariance",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/test_currency_math.js",
+      "source_location": "L41",
+      "weight": 1.0,
+      "source": "scripts_test_currency_math_runtests",
+      "target": "utils_currency_calculatevariance",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/export_report_engine.py",
+      "source_location": "L10",
+      "weight": 1.0,
+      "source": "scripts_export_report_engine_py",
+      "target": "scripts_export_report_engine_replace_text_in_paragraph",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/export_report_engine.py",
+      "source_location": "L18",
+      "weight": 1.0,
+      "source": "scripts_export_report_engine_py",
+      "target": "scripts_export_report_engine_replace_placeholders",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/export_report_engine.py",
+      "source_location": "L32",
+      "weight": 1.0,
+      "source": "scripts_export_report_engine_py",
+      "target": "scripts_export_report_engine_populate_report",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/export_report_engine.py",
+      "source_location": "L22",
+      "weight": 1.0,
+      "source": "scripts_export_report_engine_replace_placeholders",
+      "target": "scripts_export_report_engine_replace_text_in_paragraph",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/export_report_engine.py",
+      "source_location": "L91",
+      "weight": 1.0,
+      "source": "scripts_export_report_engine_populate_report",
+      "target": "scripts_export_report_engine_replace_placeholders",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/temp_check.js",
+      "source_location": "L2",
+      "weight": 1.0,
+      "source": "scripts_temp_check_js",
+      "target": "scripts_temp_check_appstate",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/temp_check.js",
+      "source_location": "L59",
+      "weight": 1.0,
+      "source": "scripts_temp_check_js",
+      "target": "scripts_temp_check_dt",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/temp_check.js",
+      "source_location": "L67",
+      "weight": 1.0,
+      "source": "scripts_temp_check_js",
+      "target": "scripts_temp_check_switchview",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/temp_check.js",
+      "source_location": "L88",
+      "weight": 1.0,
+      "source": "scripts_temp_check_js",
+      "target": "scripts_temp_check_setrole",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/temp_check.js",
+      "source_location": "L95",
+      "weight": 1.0,
+      "source": "scripts_temp_check_js",
+      "target": "scripts_temp_check_renderfeed",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/temp_check.js",
+      "source_location": "L176",
+      "weight": 1.0,
+      "source": "scripts_temp_check_js",
+      "target": "scripts_temp_check_filterfeed",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/temp_check.js",
+      "source_location": "L186",
+      "weight": 1.0,
+      "source": "scripts_temp_check_js",
+      "target": "scripts_temp_check_opendetailsheet",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/temp_check.js",
+      "source_location": "L255",
+      "weight": 1.0,
+      "source": "scripts_temp_check_js",
+      "target": "scripts_temp_check_verifytx",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/temp_check.js",
+      "source_location": "L265",
+      "weight": 1.0,
+      "source": "scripts_temp_check_js",
+      "target": "scripts_temp_check_reimbursetx",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/temp_check.js",
+      "source_location": "L275",
+      "weight": 1.0,
+      "source": "scripts_temp_check_js",
+      "target": "scripts_temp_check_voidtx",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/temp_check.js",
+      "source_location": "L288",
+      "weight": 1.0,
+      "source": "scripts_temp_check_js",
+      "target": "scripts_temp_check_openentrysheet",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/temp_check.js",
+      "source_location": "L294",
+      "weight": 1.0,
+      "source": "scripts_temp_check_js",
+      "target": "scripts_temp_check_togglesourcefield",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/temp_check.js",
+      "source_location": "L299",
+      "weight": 1.0,
+      "source": "scripts_temp_check_js",
+      "target": "scripts_temp_check_closesheet",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/temp_check.js",
+      "source_location": "L303",
+      "weight": 1.0,
+      "source": "scripts_temp_check_js",
+      "target": "scripts_temp_check_handlenewtransaction",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/temp_check.js",
+      "source_location": "L334",
+      "weight": 1.0,
+      "source": "scripts_temp_check_js",
+      "target": "scripts_temp_check_stepdenom",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/temp_check.js",
+      "source_location": "L342",
+      "weight": 1.0,
+      "source": "scripts_temp_check_js",
+      "target": "scripts_temp_check_updatereconcount",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/temp_check.js",
+      "source_location": "L372",
+      "weight": 1.0,
+      "source": "scripts_temp_check_js",
+      "target": "scripts_temp_check_savereconrecord",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/temp_check.js",
+      "source_location": "L377",
+      "weight": 1.0,
+      "source": "scripts_temp_check_js",
+      "target": "scripts_temp_check_advancereport",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/temp_check.js",
+      "source_location": "L405",
+      "weight": 1.0,
+      "source": "scripts_temp_check_js",
+      "target": "scripts_temp_check_updatereportactionbtn",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/temp_check.js",
+      "source_location": "L420",
+      "weight": 1.0,
+      "source": "scripts_temp_check_js",
+      "target": "scripts_temp_check_toggledocxview",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/temp_check.js",
+      "source_location": "L440",
+      "weight": 1.0,
+      "source": "scripts_temp_check_js",
+      "target": "scripts_temp_check_toggleassistantflyout",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/temp_check.js",
+      "source_location": "L445",
+      "weight": 1.0,
+      "source": "scripts_temp_check_js",
+      "target": "scripts_temp_check_askaiquery",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/temp_check.js",
+      "source_location": "L467",
+      "weight": 1.0,
+      "source": "scripts_temp_check_js",
+      "target": "scripts_temp_check_simulatetaglishdraft",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/temp_check.js",
+      "source_location": "L488",
+      "weight": 1.0,
+      "source": "scripts_temp_check_js",
+      "target": "scripts_temp_check_confirmaidraft",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/temp_check.js",
+      "source_location": "L507",
+      "weight": 1.0,
+      "source": "scripts_temp_check_js",
+      "target": "scripts_temp_check_sendaimessage",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/temp_check.js",
+      "source_location": "L518",
+      "weight": 1.0,
+      "source": "scripts_temp_check_js",
+      "target": "scripts_temp_check_appendmsg",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/temp_check.js",
+      "source_location": "L530",
+      "weight": 1.0,
+      "source": "scripts_temp_check_js",
+      "target": "scripts_temp_check_renderdocxpreview",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/temp_check.js",
+      "source_location": "L592",
+      "weight": 1.0,
+      "source": "scripts_temp_check_js",
+      "target": "scripts_temp_check_exportformatteddocx",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/temp_check.js",
+      "source_location": "L90",
+      "weight": 1.0,
+      "source": "scripts_temp_check_setrole",
+      "target": "scripts_temp_check_renderfeed",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/temp_check.js",
+      "source_location": "L91",
+      "weight": 1.0,
+      "source": "scripts_temp_check_setrole",
+      "target": "scripts_temp_check_updatereportactionbtn",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/temp_check.js",
+      "source_location": "L172",
+      "weight": 1.0,
+      "source": "scripts_temp_check_renderfeed",
+      "target": "scripts_temp_check_renderdocxpreview",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/temp_check.js",
+      "source_location": "L182",
+      "weight": 1.0,
+      "source": "scripts_temp_check_filterfeed",
+      "target": "scripts_temp_check_renderfeed",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/temp_check.js",
+      "source_location": "L260",
+      "weight": 1.0,
+      "source": "scripts_temp_check_verifytx",
+      "target": "scripts_temp_check_renderfeed",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/temp_check.js",
+      "source_location": "L270",
+      "weight": 1.0,
+      "source": "scripts_temp_check_reimbursetx",
+      "target": "scripts_temp_check_renderfeed",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/temp_check.js",
+      "source_location": "L282",
+      "weight": 1.0,
+      "source": "scripts_temp_check_voidtx",
+      "target": "scripts_temp_check_renderfeed",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/temp_check.js",
+      "source_location": "L329",
+      "weight": 1.0,
+      "source": "scripts_temp_check_handlenewtransaction",
+      "target": "scripts_temp_check_renderfeed",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/temp_check.js",
+      "source_location": "L503",
+      "weight": 1.0,
+      "source": "scripts_temp_check_confirmaidraft",
+      "target": "scripts_temp_check_renderfeed",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/temp_check.js",
+      "source_location": "L259",
+      "weight": 1.0,
+      "source": "scripts_temp_check_verifytx",
+      "target": "scripts_temp_check_closesheet",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/temp_check.js",
+      "source_location": "L269",
+      "weight": 1.0,
+      "source": "scripts_temp_check_reimbursetx",
+      "target": "scripts_temp_check_closesheet",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/temp_check.js",
+      "source_location": "L281",
+      "weight": 1.0,
+      "source": "scripts_temp_check_voidtx",
+      "target": "scripts_temp_check_closesheet",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/temp_check.js",
+      "source_location": "L290",
+      "weight": 1.0,
+      "source": "scripts_temp_check_openentrysheet",
+      "target": "scripts_temp_check_togglesourcefield",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/temp_check.js",
+      "source_location": "L328",
+      "weight": 1.0,
+      "source": "scripts_temp_check_handlenewtransaction",
+      "target": "scripts_temp_check_closesheet",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/temp_check.js",
+      "source_location": "L339",
+      "weight": 1.0,
+      "source": "scripts_temp_check_stepdenom",
+      "target": "scripts_temp_check_updatereconcount",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/temp_check.js",
+      "source_location": "L388",
+      "weight": 1.0,
+      "source": "scripts_temp_check_advancereport",
+      "target": "scripts_temp_check_updatereportactionbtn",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/temp_check.js",
+      "source_location": "L447",
+      "weight": 1.0,
+      "source": "scripts_temp_check_askaiquery",
+      "target": "scripts_temp_check_appendmsg",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/temp_check.js",
+      "source_location": "L469",
+      "weight": 1.0,
+      "source": "scripts_temp_check_simulatetaglishdraft",
+      "target": "scripts_temp_check_appendmsg",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/temp_check.js",
+      "source_location": "L504",
+      "weight": 1.0,
+      "source": "scripts_temp_check_confirmaidraft",
+      "target": "scripts_temp_check_appendmsg",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/temp_check.js",
+      "source_location": "L511",
+      "weight": 1.0,
+      "source": "scripts_temp_check_sendaimessage",
+      "target": "scripts_temp_check_appendmsg",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/test_currency_math.js",
+      "source_location": "L12",
+      "weight": 1.0,
+      "source": "scripts_test_currency_math_js",
+      "target": "scripts_test_currency_math_runtests",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "scripts/test_docx_generation.js",
+      "source_location": "L18",
+      "weight": 1.0,
+      "source": "scripts_test_docx_generation_js",
+      "target": "scripts_test_docx_generation_testdocx",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "README.md",
+      "source_location": "L9",
+      "weight": 1.0,
+      "source": "readme_md",
+      "target": "finlite_readme_finlite",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "README.md",
+      "source_location": "L21",
+      "weight": 1.0,
+      "source": "finlite_readme_finlite",
+      "target": "finlite_readme_overview",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "README.md",
+      "source_location": "L32",
+      "weight": 1.0,
+      "source": "finlite_readme_finlite",
+      "target": "finlite_readme_three_fluid_states",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "README.md",
+      "source_location": "L56",
+      "weight": 1.0,
+      "source": "finlite_readme_finlite",
+      "target": "finlite_readme_crafted_details",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "README.md",
+      "source_location": "L73",
+      "weight": 1.0,
+      "source": "finlite_readme_finlite",
+      "target": "finlite_readme_quick_start",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "README.md",
+      "source_location": "L75",
+      "weight": 1.0,
+      "source": "finlite_readme_quick_start",
+      "target": "finlite_readme_codeblock_1",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "techstack-options.md",
+      "source_location": "L1",
+      "weight": 1.0,
+      "source": "techstack_options_md",
+      "target": "finlite_techstack_options_finlite_technology_stack_decision_guide",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "techstack-options.md",
+      "source_location": "L8",
+      "weight": 1.0,
+      "source": "finlite_techstack_options_finlite_technology_stack_decision_guide",
+      "target": "finlite_techstack_options_executive_recommendation",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "techstack-options.md",
+      "source_location": "L25",
+      "weight": 1.0,
+      "source": "finlite_techstack_options_finlite_technology_stack_decision_guide",
+      "target": "finlite_techstack_options_what_this_guide_is_based_on",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "techstack-options.md",
+      "source_location": "L45",
+      "weight": 1.0,
+      "source": "finlite_techstack_options_finlite_technology_stack_decision_guide",
+      "target": "finlite_techstack_options_corrections_to_the_earlier_generated_proposal",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "techstack-options.md",
+      "source_location": "L58",
+      "weight": 1.0,
+      "source": "finlite_techstack_options_finlite_technology_stack_decision_guide",
+      "target": "finlite_techstack_options_evaluation_method",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "techstack-options.md",
+      "source_location": "L80",
+      "weight": 1.0,
+      "source": "finlite_techstack_options_finlite_technology_stack_decision_guide",
+      "target": "finlite_techstack_options_ranked_comparison",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "techstack-options.md",
+      "source_location": "L112",
+      "weight": 1.0,
+      "source": "finlite_techstack_options_finlite_technology_stack_decision_guide",
+      "target": "finlite_techstack_options_current_version_baseline",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "techstack-options.md",
+      "source_location": "L133",
+      "weight": 1.0,
+      "source": "finlite_techstack_options_finlite_technology_stack_decision_guide",
+      "target": "finlite_techstack_options_detailed_options",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "techstack-options.md",
+      "source_location": "L380",
+      "weight": 1.0,
+      "source": "finlite_techstack_options_finlite_technology_stack_decision_guide",
+      "target": "finlite_techstack_options_recommended_architecture_for_option_1",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "techstack-options.md",
+      "source_location": "L447",
+      "weight": 1.0,
+      "source": "finlite_techstack_options_finlite_technology_stack_decision_guide",
+      "target": "finlite_techstack_options_recommended_development_model",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "techstack-options.md",
+      "source_location": "L473",
+      "weight": 1.0,
+      "source": "finlite_techstack_options_finlite_technology_stack_decision_guide",
+      "target": "finlite_techstack_options_recommended_repository_structure",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "techstack-options.md",
+      "source_location": "L570",
+      "weight": 1.0,
+      "source": "finlite_techstack_options_finlite_technology_stack_decision_guide",
+      "target": "finlite_techstack_options_hosting_and_cost_reality",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "techstack-options.md",
+      "source_location": "L588",
+      "weight": 1.0,
+      "source": "finlite_techstack_options_finlite_technology_stack_decision_guide",
+      "target": "finlite_techstack_options_decision_checklist",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "techstack-options.md",
+      "source_location": "L605",
+      "weight": 1.0,
+      "source": "finlite_techstack_options_finlite_technology_stack_decision_guide",
+      "target": "finlite_techstack_options_final_recommendation",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "techstack-options.md",
+      "source_location": "L620",
+      "weight": 1.0,
+      "source": "finlite_techstack_options_finlite_technology_stack_decision_guide",
+      "target": "finlite_techstack_options_official_references",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "techstack-options.md",
+      "source_location": "L95",
+      "weight": 1.0,
+      "source": "finlite_techstack_options_ranked_comparison",
+      "target": "finlite_techstack_options_score_detail",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "techstack-options.md",
+      "source_location": "L135",
+      "weight": 1.0,
+      "source": "finlite_techstack_options_detailed_options",
+      "target": "finlite_techstack_options_1_next_js_16_supabase_postgresql_auth_storage_ai_sdk_6",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "techstack-options.md",
+      "source_location": "L166",
+      "weight": 1.0,
+      "source": "finlite_techstack_options_detailed_options",
+      "target": "finlite_techstack_options_2_laravel_13_inertia_vue_3_postgresql",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "techstack-options.md",
+      "source_location": "L194",
+      "weight": 1.0,
+      "source": "finlite_techstack_options_detailed_options",
+      "target": "finlite_techstack_options_3_django_6_htmx_postgresql",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "techstack-options.md",
+      "source_location": "L219",
+      "weight": 1.0,
+      "source": "finlite_techstack_options_detailed_options",
+      "target": "finlite_techstack_options_4_react_19_vite_8_fastapi_postgresql",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "techstack-options.md",
+      "source_location": "L243",
+      "weight": 1.0,
+      "source": "finlite_techstack_options_detailed_options",
+      "target": "finlite_techstack_options_5_react_19_vite_8_express_5_prisma_7_postgresql",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "techstack-options.md",
+      "source_location": "L267",
+      "weight": 1.0,
+      "source": "finlite_techstack_options_detailed_options",
+      "target": "finlite_techstack_options_6_nuxt_4_supabase_postgresql_auth_storage",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "techstack-options.md",
+      "source_location": "L289",
+      "weight": 1.0,
+      "source": "finlite_techstack_options_detailed_options",
+      "target": "finlite_techstack_options_7_asp_net_core_10_lts_blazor_ef_core_postgresql",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "techstack-options.md",
+      "source_location": "L313",
+      "weight": 1.0,
+      "source": "finlite_techstack_options_detailed_options",
+      "target": "finlite_techstack_options_8_svelte_5_sveltekit_supabase_postgresql",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "techstack-options.md",
+      "source_location": "L335",
+      "weight": 1.0,
+      "source": "finlite_techstack_options_detailed_options",
+      "target": "finlite_techstack_options_9_spring_boot_4_1_react_postgresql",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "techstack-options.md",
+      "source_location": "L358",
+      "weight": 1.0,
+      "source": "finlite_techstack_options_detailed_options",
+      "target": "finlite_techstack_options_10_react_19_express_5_mongodb",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "techstack-options.md",
+      "source_location": "L407",
+      "weight": 1.0,
+      "source": "finlite_techstack_options_recommended_architecture_for_option_1",
+      "target": "finlite_techstack_options_data_integrity_baseline",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "techstack-options.md",
+      "source_location": "L420",
+      "weight": 1.0,
+      "source": "finlite_techstack_options_recommended_architecture_for_option_1",
+      "target": "finlite_techstack_options_ai_boundary",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "techstack-options.md",
+      "source_location": "L436",
+      "weight": 1.0,
+      "source": "finlite_techstack_options_recommended_architecture_for_option_1",
+      "target": "finlite_techstack_options_reporting_baseline",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "techstack-options.md",
+      "source_location": "L451",
+      "weight": 1.0,
+      "source": "finlite_techstack_options_recommended_development_model",
+      "target": "finlite_techstack_options_working_cycle",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "techstack-options.md",
+      "source_location": "L459",
+      "weight": 1.0,
+      "source": "finlite_techstack_options_recommended_development_model",
+      "target": "finlite_techstack_options_suggested_increments",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "techstack-options.md",
+      "source_location": "L560",
+      "weight": 1.0,
+      "source": "finlite_techstack_options_recommended_repository_structure",
+      "target": "finlite_techstack_options_structure_rules",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "techstack-options.md",
+      "source_location": "L572",
+      "weight": 1.0,
+      "source": "finlite_techstack_options_hosting_and_cost_reality",
+      "target": "finlite_techstack_options_recommended_student_demo_baseline",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "techstack-options.md",
+      "source_location": "L579",
+      "weight": 1.0,
+      "source": "finlite_techstack_options_hosting_and_cost_reality",
+      "target": "finlite_techstack_options_before_real_organizational_use",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "techstack-options.md",
+      "source_location": "L622",
+      "weight": 1.0,
+      "source": "finlite_techstack_options_official_references",
+      "target": "finlite_techstack_options_current_platforms_and_versions",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "techstack-options.md",
+      "source_location": "L643",
+      "weight": 1.0,
+      "source": "finlite_techstack_options_official_references",
+      "target": "finlite_techstack_options_database_deployment_and_ai_constraints",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "techstack-options.md",
+      "source_location": "L655",
+      "weight": 1.0,
+      "source": "finlite_techstack_options_official_references",
+      "target": "finlite_techstack_options_process_and_security",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": ".agents/rules/RTK.md",
+      "source_location": "L1",
+      "weight": 1.0,
+      "source": "agents_rules_rtk_md",
+      "target": "rules_rtk_rule_finlite_project_context_rtk",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/ADVISER_QUESTIONNAIRE.md",
+      "source_location": "L1",
+      "weight": 1.0,
+      "source": "docs_adviser_questionnaire_md",
+      "target": "docs_adviser_questionnaire_lite_club_adviser_financial_operations_questionnaire_google_form_draft",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/ADVISER_QUESTIONNAIRE.md",
+      "source_location": "L7",
+      "weight": 1.0,
+      "source": "docs_adviser_questionnaire_lite_club_adviser_financial_operations_questionnaire_google_form_draft",
+      "target": "docs_adviser_questionnaire_form_title",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/ADVISER_QUESTIONNAIRE.md",
+      "source_location": "L10",
+      "weight": 1.0,
+      "source": "docs_adviser_questionnaire_lite_club_adviser_financial_operations_questionnaire_google_form_draft",
+      "target": "docs_adviser_questionnaire_form_description",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/ADVISER_QUESTIONNAIRE.md",
+      "source_location": "L15",
+      "weight": 1.0,
+      "source": "docs_adviser_questionnaire_form_description",
+      "target": "docs_adviser_questionnaire_section_1_personal_advances_out_of_pocket_reimbursements_accounts_payable",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/ADVISER_QUESTIONNAIRE.md",
+      "source_location": "L46",
+      "weight": 1.0,
+      "source": "docs_adviser_questionnaire_form_description",
+      "target": "docs_adviser_questionnaire_section_2_merchandise_sales_fees_and_utang_policy_accounts_receivable",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/ADVISER_QUESTIONNAIRE.md",
+      "source_location": "L64",
+      "weight": 1.0,
+      "source": "docs_adviser_questionnaire_form_description",
+      "target": "docs_adviser_questionnaire_section_3_budget_approval_petty_expense_governance",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/ADVISER_QUESTIONNAIRE.md",
+      "source_location": "L81",
+      "weight": 1.0,
+      "source": "docs_adviser_questionnaire_form_description",
+      "target": "docs_adviser_questionnaire_section_4_discrepancy_tolerance_cash_reconciliation",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/ADVISER_QUESTIONNAIRE.md",
+      "source_location": "L98",
+      "weight": 1.0,
+      "source": "docs_adviser_questionnaire_form_description",
+      "target": "docs_adviser_questionnaire_section_5_end_of_term_liquidation_submission_pet_peeves",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "graphify-out/converted/Project Context_752a6544.md",
+      "source_location": "L3",
+      "weight": 1.0,
+      "source": "graphify_out_converted_project_context_752a6544_md",
+      "target": "converted_project_context_752a6544_1_1_project_context",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "graphify-out/converted/Project Context_752a6544.md",
+      "source_location": "L8",
+      "weight": 1.0,
+      "source": "converted_project_context_752a6544_1_1_project_context",
+      "target": "converted_project_context_752a6544_the_current_manual_process_crucial_for_your_dfd",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "graphify-out/converted/Project Context_752a6544.md",
+      "source_location": "L11",
+      "weight": 1.0,
+      "source": "converted_project_context_752a6544_1_1_project_context",
+      "target": "converted_project_context_752a6544_statement_of_the_problem",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "graphify-out/converted/Project Context_752a6544.md",
+      "source_location": "L17",
+      "weight": 1.0,
+      "source": "converted_project_context_752a6544_1_1_project_context",
+      "target": "converted_project_context_752a6544_proposed_solution",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/PROJECT_CONTEXT.md",
+      "source_location": "L1",
+      "weight": 1.0,
+      "source": "docs_project_context_md",
+      "target": "docs_project_context_project_context",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/PROJECT_CONTEXT.md",
+      "source_location": "L3",
+      "weight": 1.0,
+      "source": "docs_project_context_project_context",
+      "target": "docs_project_context_1_1_project_title",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/PROJECT_CONTEXT.md",
+      "source_location": "L8",
+      "weight": 1.0,
+      "source": "docs_project_context_project_context",
+      "target": "docs_project_context_1_2_organizational_setting_operational_environment",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/PROJECT_CONTEXT.md",
+      "source_location": "L19",
+      "weight": 1.0,
+      "source": "docs_project_context_project_context",
+      "target": "docs_project_context_1_3_as_is_process_real_world_failure_modes",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/PROJECT_CONTEXT.md",
+      "source_location": "L54",
+      "weight": 1.0,
+      "source": "docs_project_context_project_context",
+      "target": "docs_project_context_1_4_the_paradigm_shift_why_a_financial_assistant_rather_than_an_erp",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/PROJECT_CONTEXT.md",
+      "source_location": "L66",
+      "weight": 1.0,
+      "source": "docs_project_context_project_context",
+      "target": "docs_project_context_1_5_system_capabilities_architecture",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/PROJECT_CONTEXT.md",
+      "source_location": "L110",
+      "weight": 1.0,
+      "source": "docs_project_context_project_context",
+      "target": "docs_project_context_1_6_academic_practical_impact",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/PROJECT_CONTEXT.md",
+      "source_location": "L24",
+      "weight": 1.0,
+      "source": "docs_project_context_1_3_as_is_process_real_world_failure_modes",
+      "target": "docs_project_context_1_the_personal_abono_reimbursement_dilemma_faculty_advisers_officers",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/PROJECT_CONTEXT.md",
+      "source_location": "L29",
+      "weight": 1.0,
+      "source": "docs_project_context_1_3_as_is_process_real_world_failure_modes",
+      "target": "docs_project_context_2_documenting_non_receipted_micro_disbursements",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/PROJECT_CONTEXT.md",
+      "source_location": "L34",
+      "weight": 1.0,
+      "source": "docs_project_context_1_3_as_is_process_real_world_failure_modes",
+      "target": "docs_project_context_3_personal_gcash_co_mingling_cash_out_lag",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/PROJECT_CONTEXT.md",
+      "source_location": "L37",
+      "weight": 1.0,
+      "source": "docs_project_context_1_3_as_is_process_real_world_failure_modes",
+      "target": "docs_project_context_4_informal_budget_authorizations",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/PROJECT_CONTEXT.md",
+      "source_location": "L40",
+      "weight": 1.0,
+      "source": "docs_project_context_1_3_as_is_process_real_world_failure_modes",
+      "target": "docs_project_context_5_cash_variances_and_shortage_declarations",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/PROJECT_CONTEXT.md",
+      "source_location": "L45",
+      "weight": 1.0,
+      "source": "docs_project_context_1_3_as_is_process_real_world_failure_modes",
+      "target": "docs_project_context_6_the_end_of_term_institutional_routing_bottleneck",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/PROJECT_CONTEXT.md",
+      "source_location": "L68",
+      "weight": 1.0,
+      "source": "docs_project_context_1_5_system_capabilities_architecture",
+      "target": "docs_project_context_codeblock_1",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
       "source_file": "export_report_engine.py",
       "source_location": "L8",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "export_report_engine_py",
-      "target": "finlite_export_report_engine_replace_text_in_paragraph",
-      "confidence_score": 1.0
+      "target": "finlite_export_report_engine_replace_text_in_paragraph"
     },
     {
       "relation": "contains",
@@ -926,9 +4874,9 @@
       "source_file": "export_report_engine.py",
       "source_location": "L16",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "export_report_engine_py",
-      "target": "finlite_export_report_engine_replace_placeholders",
-      "confidence_score": 1.0
+      "target": "finlite_export_report_engine_replace_placeholders"
     },
     {
       "relation": "contains",
@@ -936,9 +4884,9 @@
       "source_file": "export_report_engine.py",
       "source_location": "L30",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "export_report_engine_py",
-      "target": "finlite_export_report_engine_populate_report",
-      "confidence_score": 1.0
+      "target": "finlite_export_report_engine_populate_report"
     },
     {
       "relation": "calls",
@@ -947,9 +4895,9 @@
       "source_file": "export_report_engine.py",
       "source_location": "L20",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "finlite_export_report_engine_replace_placeholders",
-      "target": "finlite_export_report_engine_replace_text_in_paragraph",
-      "confidence_score": 1.0
+      "target": "finlite_export_report_engine_replace_text_in_paragraph"
     },
     {
       "relation": "calls",
@@ -958,9 +4906,9 @@
       "source_file": "export_report_engine.py",
       "source_location": "L89",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "finlite_export_report_engine_populate_report",
-      "target": "finlite_export_report_engine_replace_placeholders",
-      "confidence_score": 1.0
+      "target": "finlite_export_report_engine_replace_placeholders"
     },
     {
       "relation": "contains",
@@ -968,9 +4916,9 @@
       "source_file": "temp_check.js",
       "source_location": "L2",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "temp_check_js",
-      "target": "finlite_temp_check_appstate",
-      "confidence_score": 1.0
+      "target": "finlite_temp_check_appstate"
     },
     {
       "relation": "contains",
@@ -978,9 +4926,9 @@
       "source_file": "temp_check.js",
       "source_location": "L59",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "temp_check_js",
-      "target": "finlite_temp_check_dt",
-      "confidence_score": 1.0
+      "target": "finlite_temp_check_dt"
     },
     {
       "relation": "contains",
@@ -988,9 +4936,9 @@
       "source_file": "temp_check.js",
       "source_location": "L67",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "temp_check_js",
-      "target": "finlite_temp_check_switchview",
-      "confidence_score": 1.0
+      "target": "finlite_temp_check_switchview"
     },
     {
       "relation": "contains",
@@ -998,9 +4946,9 @@
       "source_file": "temp_check.js",
       "source_location": "L88",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "temp_check_js",
-      "target": "finlite_temp_check_setrole",
-      "confidence_score": 1.0
+      "target": "finlite_temp_check_setrole"
     },
     {
       "relation": "contains",
@@ -1008,9 +4956,9 @@
       "source_file": "temp_check.js",
       "source_location": "L95",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "temp_check_js",
-      "target": "finlite_temp_check_renderfeed",
-      "confidence_score": 1.0
+      "target": "finlite_temp_check_renderfeed"
     },
     {
       "relation": "contains",
@@ -1018,9 +4966,9 @@
       "source_file": "temp_check.js",
       "source_location": "L176",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "temp_check_js",
-      "target": "finlite_temp_check_filterfeed",
-      "confidence_score": 1.0
+      "target": "finlite_temp_check_filterfeed"
     },
     {
       "relation": "contains",
@@ -1028,9 +4976,9 @@
       "source_file": "temp_check.js",
       "source_location": "L186",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "temp_check_js",
-      "target": "finlite_temp_check_opendetailsheet",
-      "confidence_score": 1.0
+      "target": "finlite_temp_check_opendetailsheet"
     },
     {
       "relation": "contains",
@@ -1038,9 +4986,9 @@
       "source_file": "temp_check.js",
       "source_location": "L255",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "temp_check_js",
-      "target": "finlite_temp_check_verifytx",
-      "confidence_score": 1.0
+      "target": "finlite_temp_check_verifytx"
     },
     {
       "relation": "contains",
@@ -1048,9 +4996,9 @@
       "source_file": "temp_check.js",
       "source_location": "L265",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "temp_check_js",
-      "target": "finlite_temp_check_reimbursetx",
-      "confidence_score": 1.0
+      "target": "finlite_temp_check_reimbursetx"
     },
     {
       "relation": "contains",
@@ -1058,9 +5006,9 @@
       "source_file": "temp_check.js",
       "source_location": "L275",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "temp_check_js",
-      "target": "finlite_temp_check_voidtx",
-      "confidence_score": 1.0
+      "target": "finlite_temp_check_voidtx"
     },
     {
       "relation": "contains",
@@ -1068,9 +5016,9 @@
       "source_file": "temp_check.js",
       "source_location": "L288",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "temp_check_js",
-      "target": "finlite_temp_check_openentrysheet",
-      "confidence_score": 1.0
+      "target": "finlite_temp_check_openentrysheet"
     },
     {
       "relation": "contains",
@@ -1078,9 +5026,9 @@
       "source_file": "temp_check.js",
       "source_location": "L294",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "temp_check_js",
-      "target": "finlite_temp_check_togglesourcefield",
-      "confidence_score": 1.0
+      "target": "finlite_temp_check_togglesourcefield"
     },
     {
       "relation": "contains",
@@ -1088,9 +5036,9 @@
       "source_file": "temp_check.js",
       "source_location": "L299",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "temp_check_js",
-      "target": "finlite_temp_check_closesheet",
-      "confidence_score": 1.0
+      "target": "finlite_temp_check_closesheet"
     },
     {
       "relation": "contains",
@@ -1098,9 +5046,9 @@
       "source_file": "temp_check.js",
       "source_location": "L303",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "temp_check_js",
-      "target": "finlite_temp_check_handlenewtransaction",
-      "confidence_score": 1.0
+      "target": "finlite_temp_check_handlenewtransaction"
     },
     {
       "relation": "contains",
@@ -1108,9 +5056,9 @@
       "source_file": "temp_check.js",
       "source_location": "L334",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "temp_check_js",
-      "target": "finlite_temp_check_stepdenom",
-      "confidence_score": 1.0
+      "target": "finlite_temp_check_stepdenom"
     },
     {
       "relation": "contains",
@@ -1118,9 +5066,9 @@
       "source_file": "temp_check.js",
       "source_location": "L342",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "temp_check_js",
-      "target": "finlite_temp_check_updatereconcount",
-      "confidence_score": 1.0
+      "target": "finlite_temp_check_updatereconcount"
     },
     {
       "relation": "contains",
@@ -1128,9 +5076,9 @@
       "source_file": "temp_check.js",
       "source_location": "L372",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "temp_check_js",
-      "target": "finlite_temp_check_savereconrecord",
-      "confidence_score": 1.0
+      "target": "finlite_temp_check_savereconrecord"
     },
     {
       "relation": "contains",
@@ -1138,9 +5086,9 @@
       "source_file": "temp_check.js",
       "source_location": "L377",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "temp_check_js",
-      "target": "finlite_temp_check_advancereport",
-      "confidence_score": 1.0
+      "target": "finlite_temp_check_advancereport"
     },
     {
       "relation": "contains",
@@ -1148,9 +5096,9 @@
       "source_file": "temp_check.js",
       "source_location": "L405",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "temp_check_js",
-      "target": "finlite_temp_check_updatereportactionbtn",
-      "confidence_score": 1.0
+      "target": "finlite_temp_check_updatereportactionbtn"
     },
     {
       "relation": "contains",
@@ -1158,9 +5106,9 @@
       "source_file": "temp_check.js",
       "source_location": "L420",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "temp_check_js",
-      "target": "finlite_temp_check_toggledocxview",
-      "confidence_score": 1.0
+      "target": "finlite_temp_check_toggledocxview"
     },
     {
       "relation": "contains",
@@ -1168,9 +5116,9 @@
       "source_file": "temp_check.js",
       "source_location": "L440",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "temp_check_js",
-      "target": "finlite_temp_check_toggleassistantflyout",
-      "confidence_score": 1.0
+      "target": "finlite_temp_check_toggleassistantflyout"
     },
     {
       "relation": "contains",
@@ -1178,9 +5126,9 @@
       "source_file": "temp_check.js",
       "source_location": "L445",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "temp_check_js",
-      "target": "finlite_temp_check_askaiquery",
-      "confidence_score": 1.0
+      "target": "finlite_temp_check_askaiquery"
     },
     {
       "relation": "contains",
@@ -1188,9 +5136,9 @@
       "source_file": "temp_check.js",
       "source_location": "L467",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "temp_check_js",
-      "target": "finlite_temp_check_simulatetaglishdraft",
-      "confidence_score": 1.0
+      "target": "finlite_temp_check_simulatetaglishdraft"
     },
     {
       "relation": "contains",
@@ -1198,9 +5146,9 @@
       "source_file": "temp_check.js",
       "source_location": "L488",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "temp_check_js",
-      "target": "finlite_temp_check_confirmaidraft",
-      "confidence_score": 1.0
+      "target": "finlite_temp_check_confirmaidraft"
     },
     {
       "relation": "contains",
@@ -1208,9 +5156,9 @@
       "source_file": "temp_check.js",
       "source_location": "L507",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "temp_check_js",
-      "target": "finlite_temp_check_sendaimessage",
-      "confidence_score": 1.0
+      "target": "finlite_temp_check_sendaimessage"
     },
     {
       "relation": "contains",
@@ -1218,9 +5166,9 @@
       "source_file": "temp_check.js",
       "source_location": "L518",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "temp_check_js",
-      "target": "finlite_temp_check_appendmsg",
-      "confidence_score": 1.0
+      "target": "finlite_temp_check_appendmsg"
     },
     {
       "relation": "contains",
@@ -1228,9 +5176,9 @@
       "source_file": "temp_check.js",
       "source_location": "L530",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "temp_check_js",
-      "target": "finlite_temp_check_renderdocxpreview",
-      "confidence_score": 1.0
+      "target": "finlite_temp_check_renderdocxpreview"
     },
     {
       "relation": "contains",
@@ -1238,9 +5186,9 @@
       "source_file": "temp_check.js",
       "source_location": "L592",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "temp_check_js",
-      "target": "finlite_temp_check_exportformatteddocx",
-      "confidence_score": 1.0
+      "target": "finlite_temp_check_exportformatteddocx"
     },
     {
       "relation": "calls",
@@ -1249,9 +5197,9 @@
       "source_file": "temp_check.js",
       "source_location": "L90",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "finlite_temp_check_setrole",
-      "target": "finlite_temp_check_renderfeed",
-      "confidence_score": 1.0
+      "target": "finlite_temp_check_renderfeed"
     },
     {
       "relation": "calls",
@@ -1260,9 +5208,9 @@
       "source_file": "temp_check.js",
       "source_location": "L91",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "finlite_temp_check_setrole",
-      "target": "finlite_temp_check_updatereportactionbtn",
-      "confidence_score": 1.0
+      "target": "finlite_temp_check_updatereportactionbtn"
     },
     {
       "relation": "calls",
@@ -1271,9 +5219,9 @@
       "source_file": "temp_check.js",
       "source_location": "L172",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "finlite_temp_check_renderfeed",
-      "target": "finlite_temp_check_renderdocxpreview",
-      "confidence_score": 1.0
+      "target": "finlite_temp_check_renderdocxpreview"
     },
     {
       "relation": "calls",
@@ -1282,9 +5230,9 @@
       "source_file": "temp_check.js",
       "source_location": "L182",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "finlite_temp_check_filterfeed",
-      "target": "finlite_temp_check_renderfeed",
-      "confidence_score": 1.0
+      "target": "finlite_temp_check_renderfeed"
     },
     {
       "relation": "calls",
@@ -1293,9 +5241,9 @@
       "source_file": "temp_check.js",
       "source_location": "L260",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "finlite_temp_check_verifytx",
-      "target": "finlite_temp_check_renderfeed",
-      "confidence_score": 1.0
+      "target": "finlite_temp_check_renderfeed"
     },
     {
       "relation": "calls",
@@ -1304,9 +5252,9 @@
       "source_file": "temp_check.js",
       "source_location": "L270",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "finlite_temp_check_reimbursetx",
-      "target": "finlite_temp_check_renderfeed",
-      "confidence_score": 1.0
+      "target": "finlite_temp_check_renderfeed"
     },
     {
       "relation": "calls",
@@ -1315,9 +5263,9 @@
       "source_file": "temp_check.js",
       "source_location": "L282",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "finlite_temp_check_voidtx",
-      "target": "finlite_temp_check_renderfeed",
-      "confidence_score": 1.0
+      "target": "finlite_temp_check_renderfeed"
     },
     {
       "relation": "calls",
@@ -1326,9 +5274,9 @@
       "source_file": "temp_check.js",
       "source_location": "L329",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "finlite_temp_check_handlenewtransaction",
-      "target": "finlite_temp_check_renderfeed",
-      "confidence_score": 1.0
+      "target": "finlite_temp_check_renderfeed"
     },
     {
       "relation": "calls",
@@ -1337,9 +5285,9 @@
       "source_file": "temp_check.js",
       "source_location": "L503",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "finlite_temp_check_confirmaidraft",
-      "target": "finlite_temp_check_renderfeed",
-      "confidence_score": 1.0
+      "target": "finlite_temp_check_renderfeed"
     },
     {
       "relation": "calls",
@@ -1348,9 +5296,9 @@
       "source_file": "temp_check.js",
       "source_location": "L259",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "finlite_temp_check_verifytx",
-      "target": "finlite_temp_check_closesheet",
-      "confidence_score": 1.0
+      "target": "finlite_temp_check_closesheet"
     },
     {
       "relation": "calls",
@@ -1359,9 +5307,9 @@
       "source_file": "temp_check.js",
       "source_location": "L269",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "finlite_temp_check_reimbursetx",
-      "target": "finlite_temp_check_closesheet",
-      "confidence_score": 1.0
+      "target": "finlite_temp_check_closesheet"
     },
     {
       "relation": "calls",
@@ -1370,9 +5318,9 @@
       "source_file": "temp_check.js",
       "source_location": "L281",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "finlite_temp_check_voidtx",
-      "target": "finlite_temp_check_closesheet",
-      "confidence_score": 1.0
+      "target": "finlite_temp_check_closesheet"
     },
     {
       "relation": "calls",
@@ -1381,9 +5329,9 @@
       "source_file": "temp_check.js",
       "source_location": "L290",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "finlite_temp_check_openentrysheet",
-      "target": "finlite_temp_check_togglesourcefield",
-      "confidence_score": 1.0
+      "target": "finlite_temp_check_togglesourcefield"
     },
     {
       "relation": "calls",
@@ -1392,9 +5340,9 @@
       "source_file": "temp_check.js",
       "source_location": "L328",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "finlite_temp_check_handlenewtransaction",
-      "target": "finlite_temp_check_closesheet",
-      "confidence_score": 1.0
+      "target": "finlite_temp_check_closesheet"
     },
     {
       "relation": "calls",
@@ -1403,9 +5351,9 @@
       "source_file": "temp_check.js",
       "source_location": "L339",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "finlite_temp_check_stepdenom",
-      "target": "finlite_temp_check_updatereconcount",
-      "confidence_score": 1.0
+      "target": "finlite_temp_check_updatereconcount"
     },
     {
       "relation": "calls",
@@ -1414,9 +5362,9 @@
       "source_file": "temp_check.js",
       "source_location": "L388",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "finlite_temp_check_advancereport",
-      "target": "finlite_temp_check_updatereportactionbtn",
-      "confidence_score": 1.0
+      "target": "finlite_temp_check_updatereportactionbtn"
     },
     {
       "relation": "calls",
@@ -1425,9 +5373,9 @@
       "source_file": "temp_check.js",
       "source_location": "L447",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "finlite_temp_check_askaiquery",
-      "target": "finlite_temp_check_appendmsg",
-      "confidence_score": 1.0
+      "target": "finlite_temp_check_appendmsg"
     },
     {
       "relation": "calls",
@@ -1436,9 +5384,9 @@
       "source_file": "temp_check.js",
       "source_location": "L469",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "finlite_temp_check_simulatetaglishdraft",
-      "target": "finlite_temp_check_appendmsg",
-      "confidence_score": 1.0
+      "target": "finlite_temp_check_appendmsg"
     },
     {
       "relation": "calls",
@@ -1447,9 +5395,9 @@
       "source_file": "temp_check.js",
       "source_location": "L504",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "finlite_temp_check_confirmaidraft",
-      "target": "finlite_temp_check_appendmsg",
-      "confidence_score": 1.0
+      "target": "finlite_temp_check_appendmsg"
     },
     {
       "relation": "calls",
@@ -1458,9 +5406,9 @@
       "source_file": "temp_check.js",
       "source_location": "L511",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "finlite_temp_check_sendaimessage",
-      "target": "finlite_temp_check_appendmsg",
-      "confidence_score": 1.0
+      "target": "finlite_temp_check_appendmsg"
     },
     {
       "relation": "calls",
@@ -1935,5 +5883,6 @@
       "confidence_score": 0.85,
       "source_file": "index.html"
     }
-  ]
+  ],
+  "built_at_commit": "a1d422471cc9d3eb75d135934b370ad65c38ebdd"
 }

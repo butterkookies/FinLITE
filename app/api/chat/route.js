@@ -12,7 +12,7 @@ export async function POST(req) {
     // Context summary for grounding
     const ledgerContext = `
 Current FinLITE System Ledger Status:
-- Physical Cash on Hand (in lunchbox): ₱${(summary.cash_on_hand || 0).toFixed(2)}
+- Physical Cash on Hand (in cashbox): ₱${(summary.cash_on_hand || 0).toFixed(2)}
 - GCash Account Balance: ₱${(summary.gcash_balance || 0).toFixed(2)}
 - Total Semester Inflows: ₱${(summary.total_inflows || 0).toFixed(2)}
 - Total Semester Outflows: ₱${(summary.total_outflows || 0).toFixed(2)}
@@ -30,7 +30,7 @@ ${transactions.slice(0, 10).map(t => `- [${t.type}] ${t.title}: ₱${t.amount} (
       if (q.includes('jatulan') || q.includes('abono') || q.includes('reimburse')) {
         reply = `Ayon sa ating database record, may nakabinbing advance (abono) si **Ms. Kimberly Dawn Jatulan** na nagkakahalaga ng **₱1,250.00** para sa *Judge Tokens & Certificates* (Club Week 2026). Ito ay naghihintay pa ng cash box refund kapag na-liquidate na ang event.`;
       } else if (q.includes('cash') || q.includes('on hand')) {
-        reply = `Ang kabuuang **Physical Cash on Hand** sa ating lunchbox ay **₱${(summary.cash_on_hand || 0).toLocaleString('en-PH', { minimumFractionDigits: 2 })}**. Samantala, ang digital balance sa **GCash** ay **₱${(summary.gcash_balance || 0).toLocaleString('en-PH', { minimumFractionDigits: 2 })}**.`;
+        reply = `Ang kabuuang **Physical Cash on Hand** sa ating cashbox ay **₱${(summary.cash_on_hand || 0).toLocaleString('en-PH', { minimumFractionDigits: 2 })}**. Samantala, ang digital balance sa **GCash** ay **₱${(summary.gcash_balance || 0).toLocaleString('en-PH', { minimumFractionDigits: 2 })}**.`;
       } else if (q.includes('shortage')) {
         reply = `Mayroong naitalang **₱161.00 Cash Shortage** noong Club Week dahil sa kakulangan ng baryang panukli sa booth sales. Ito ay pormal nang ini-log at inaprubahan ng ating Club Adviser.`;
       } else {

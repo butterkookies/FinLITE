@@ -70,7 +70,7 @@ CREATE TABLE IF NOT EXISTS transactions (
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
--- 5. Physical Cash Reconciliations (Lunchbox Denomination Count)
+-- 5. Physical Cash Reconciliations (Cashbox Denomination Count)
 CREATE TABLE IF NOT EXISTS cash_reconciliations (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   reconciliation_date TIMESTAMPTZ NOT NULL DEFAULT NOW(),
