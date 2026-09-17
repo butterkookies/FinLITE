@@ -20,7 +20,7 @@ flowchart TD
     P1(("1.0<br/>Event, Merch &<br/>Booth Fee Collection")):::proc
     P2(("2.0<br/>Personal Advance<br/>(Abono) & Petty<br/>Disbursement")):::proc
     P3(("3.0<br/>End-of-Term Cash<br/>Count & Variance<br/>Reconciliation")):::proc
-    P4(("4.0<br/>Manual Report<br/>Drafting & 6-Tier<br/>Wet-Ink Routing")):::proc
+    P4(("4.0<br/>Manual Financial Report<br/>Drafting & 6-Tier<br/>Wet-Ink Routing")):::proc
 
     %% Process 1.0 (Collections: Events, Merch, Booth Rent/Percentage - Pure Inflows)
     STUDENT -->|"Tournament fees & ad-hoc merch payments"| P1
@@ -31,20 +31,20 @@ flowchart TD
     D2 -->|"Liquidated cash remittance"| P1
 
     %% Process 2.0 (Abono & Operating Expenses)
-    CLAIMANT -->|"Abono expense claim & voucher"| P2
-    P2 -->|"Disbursement payment"| VENDORS
+    CLAIMANT -->|"Abono details, purchase receipts & expense slips"| P2
+    P2 -->|"Disbursement cash payment"| VENDORS
     VENDORS -->|"Sales invoices & petty cash slips"| P2
-    P2 -->|"Archive physical paper slips"| D3
+    P2 -->|"Archive physical receipts & expense slips"| D3
     D1 -->|"Disburse cash for settlement"| P2
-    P2 -->|"Reimbursement payout & acknowledgment"| CLAIMANT
+    P2 -->|"Cash reimbursement payout"| CLAIMANT
 
     %% Process 3.0 (Cashbox Reconciliation)
     D1 -->|"Count physical bills & coins"| P3
-    D3 -->|"Retrieve paper expense vouchers"| P3
+    D3 -->|"Retrieve paper receipts & expense slips"| P3
     P3 -->|"Tally ledger & record ₱161 shortage"| D4
 
-    %% Process 4.0 (Liquidation Report Routing)
-    D4 -->|"Compile financial statement data"| P4
-    P4 -->|"Printed bond paper report"| ADMIN
+    %% Process 4.0 (Financial Report Routing)
+    D4 -->|"Compile financial report data"| P4
+    P4 -->|"Printed bond paper financial report"| ADMIN
     ADMIN -->|"Rejection & revision directive"| P4
-    ADMIN -->|"Final signed clearance"| D4
+    ADMIN -->|"Final signed approval clearance"| D4

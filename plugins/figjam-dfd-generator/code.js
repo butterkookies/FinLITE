@@ -52,7 +52,7 @@ async function run() {
   createdNodes.push(title1);
 
   // Central Process Bubble
-  const sys0 = createNode('ELLIPSE', "0.0\nExisting LITE Manual\nFinancial & Liquidation\nSystem", 0, 0, 240, 240, C_GREEN);
+  const sys0 = createNode('ELLIPSE', "0.0\nExisting LITE Manual\nFinancial Management &\nReporting System", 0, 0, 240, 240, C_GREEN);
 
   // External Entities (6 Entities)
   const entStudents = createNode('ROUNDED_RECTANGLE', "Students & Event Participants", -420, -140, 220, 70, C_DARK);
@@ -66,16 +66,16 @@ async function run() {
   connect(entStudents, sys0, "Event registration & merch payments");
   connect(entSellers, sys0, "Booth rental fees ('arkila') & % share");
 
-  connect(entOfficers, sys0, "Expense vouchers, abono details & receipts");
-  connect(sys0, entOfficers, "Reimbursement payout & acknowledgment");
+  connect(entOfficers, sys0, "Abono details, receipts & slips");
+  connect(sys0, entOfficers, "Cash reimbursement payout");
 
-  connect(entAdvisers, sys0, "Personal advance details & budget approval");
-  connect(sys0, entAdvisers, "Liquidation summary & refund slip");
+  connect(entAdvisers, sys0, "Personal advance & activity approval");
+  connect(sys0, entAdvisers, "Cash reimbursement & draft report");
 
-  connect(sys0, entVendors, "Disbursement details & payment");
+  connect(sys0, entVendors, "Disbursement cash payment");
   connect(entVendors, sys0, "Sales invoices & handwritten fare slips");
 
-  connect(sys0, entAdmin, "Printed multi-page liquidation report");
+  connect(sys0, entAdmin, "Printed multi-page financial report");
   connect(entAdmin, sys0, "Signed clearance OR rejection directive");
 
   // ========================================================
@@ -99,7 +99,7 @@ async function run() {
   const p1 = createNode('ELLIPSE', "1.0\nEvent, Merch &\nBooth Fee Collection", 1150, -60, 170, 170, C_TEAL);
   const p2 = createNode('ELLIPSE', "2.0\nPersonal Advance\n(Abono) & Petty Pay", 1150, 180, 170, 170, C_TEAL);
   const p3 = createNode('ELLIPSE', "3.0\nEnd-of-Term Cash\nReconciliation", 1600, -20, 170, 170, C_TEAL);
-  const p4 = createNode('ELLIPSE', "4.0\nReport Drafting &\n6-Tier Routing", 1800, 160, 170, 170, C_TEAL);
+  const p4 = createNode('ELLIPSE', "4.0\nFinancial Report\nDrafting & Routing", 1800, 160, 170, 170, C_TEAL);
 
   // Data Stores
   const dsCashbox = createNode('ROUNDED_RECTANGLE', "D1: Small Metal Cashbox\n(Program Director's Room)", 1450, -160, 220, 60, C_STORE, C_STORE_TXT);
@@ -115,19 +115,19 @@ async function run() {
   connect(p1, dsGcash, "Record digital GCash balance");
   connect(dsGcash, p1, "Liquidated cash remittance");
 
-  connect(d0Claimants, p2, "Abono expense claim & voucher");
-  connect(p2, d0Vendors, "Disbursement payment");
+  connect(d0Claimants, p2, "Abono details, receipts & slips");
+  connect(p2, d0Vendors, "Disbursement cash payment");
   connect(d0Vendors, p2, "Sales invoices & petty cash slips");
-  connect(p2, dsSlips, "Archive physical paper slips");
+  connect(p2, dsSlips, "Archive receipts & expense slips");
   connect(dsCashbox, p2, "Disburse cash for settlement");
-  connect(p2, d0Claimants, "Reimbursement payout & acknowledgment");
+  connect(p2, d0Claimants, "Cash reimbursement payout");
 
   connect(dsCashbox, p3, "Count physical bills & coins");
-  connect(dsSlips, p3, "Retrieve paper expense vouchers");
+  connect(dsSlips, p3, "Retrieve receipts & expense slips");
   connect(p3, dsDrafts, "Tally ledger & record shortage");
 
-  connect(dsDrafts, p4, "Compile financial statement data");
-  connect(p4, d0Admin, "Printed bond paper report");
+  connect(dsDrafts, p4, "Compile financial report data");
+  connect(p4, d0Admin, "Printed bond paper financial report");
   connect(d0Admin, p4, "Rejection & revision directive");
   connect(d0Admin, dsDrafts, "Final signed clearance");
 
