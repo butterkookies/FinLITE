@@ -54,78 +54,88 @@ async function run() {
   // Central Process Bubble
   const sys0 = createNode('ELLIPSE', "0.0\nExisting LITE Manual\nFinancial & Liquidation\nSystem", 0, 0, 240, 240, C_GREEN);
 
-  // External Entities
-  const entStudents = createNode('ROUNDED_RECTANGLE', "Students / Club Members", -380, -120, 200, 70, C_DARK);
-  const entOfficers = createNode('ROUNDED_RECTANGLE', "LITE Executive Officers\n& Committees", -380, 150, 200, 70, C_DARK);
-  const entAdvisers = createNode('ROUNDED_RECTANGLE', "Faculty Club Advisers", 320, -120, 200, 70, C_DARK);
-  const entVendors = createNode('ROUNDED_RECTANGLE', "Suppliers & Vendors\n(Commercial & Informal)", 320, 150, 200, 70, C_DARK);
-  const entAdmin = createNode('ROUNDED_RECTANGLE', "BSIT Program Director\n& CCS Dean", -30, 360, 220, 70, C_DARK);
+  // External Entities (6 Entities)
+  const entStudents = createNode('ROUNDED_RECTANGLE', "Students & Event Participants", -420, -140, 220, 70, C_DARK);
+  const entSellers = createNode('ROUNDED_RECTANGLE', "Student Sellers & Booth\nConcessionaires", -420, 60, 220, 70, C_DARK);
+  const entOfficers = createNode('ROUNDED_RECTANGLE', "LITE Executive Officers\n& Committees", -420, 240, 220, 70, C_DARK);
+  const entAdvisers = createNode('ROUNDED_RECTANGLE', "Faculty Club Advisers", 320, -140, 200, 70, C_DARK);
+  const entVendors = createNode('ROUNDED_RECTANGLE', "Suppliers & Stores\n(Commercial & Informal)", 320, 100, 200, 70, C_DARK);
+  const entAdmin = createNode('ROUNDED_RECTANGLE', "BSIT Program Director\n& CCS Dean", -30, 380, 220, 70, C_DARK);
 
   // Context Flows
-  connect(entStudents, sys0, "Dues & merch payments");
-  connect(sys0, entStudents, "Merch items & paper slips");
+  connect(entStudents, sys0, "Event registration & merch payments");
+  connect(sys0, entStudents, "Official receipt, entry pass & claim stub");
 
-  connect(entOfficers, sys0, "Personal abono & receipts");
-  connect(sys0, entOfficers, "Delayed reimbursement");
+  connect(entSellers, sys0, "Booth rental fees ('arkila') & % share");
+  connect(sys0, entSellers, "Rental acknowledgment & booth clearance");
 
-  connect(entAdvisers, sys0, "Advances & chat approvals");
-  connect(sys0, entAdvisers, "Liquidated refunds");
+  connect(entOfficers, sys0, "Expense vouchers, abono details & receipts");
+  connect(sys0, entOfficers, "Reimbursement payout & acknowledgment");
 
-  connect(sys0, entVendors, "Cash disbursements");
-  connect(entVendors, sys0, "Receipts & fare slips");
+  connect(entAdvisers, sys0, "Personal advance details & budget approval");
+  connect(sys0, entAdvisers, "Liquidation summary & refund slip");
 
-  connect(sys0, entAdmin, "Printed liquidation report");
-  connect(entAdmin, sys0, "Signed clearance / Rejections");
+  connect(sys0, entVendors, "Disbursement details & payment");
+  connect(entVendors, sys0, "Sales invoices & handwritten fare slips");
+
+  connect(sys0, entAdmin, "Printed multi-page liquidation report");
+  connect(entAdmin, sys0, "Signed clearance OR rejection directive");
 
   // ========================================================
-  // 2. DIAGRAM 0 (LEVEL 1 DFD) - Placed at x: 1200, y: 0
+  // 2. DIAGRAM 0 (LEVEL 1 DFD) - Placed at x: 1300, y: 0
   // ========================================================
   const title2 = figma.createText();
-  title2.x = 1100;
+  title2.x = 1200;
   title2.y = -220;
   title2.characters = "FINLITE: DIAGRAM 0 (LEVEL 1 DFD EXPLOSION)";
   title2.fontSize = 24;
   createdNodes.push(title2);
 
   // Entities
-  const d0Students = createNode('ROUNDED_RECTANGLE', "Students / Payors", 800, -80, 180, 60, C_DARK);
-  const d0Claimants = createNode('ROUNDED_RECTANGLE', "Faculty Advisers\n& Officers", 800, 200, 180, 60, C_DARK);
-  const d0Vendors = createNode('ROUNDED_RECTANGLE', "Vendors & Drivers", 1300, 340, 180, 60, C_DARK);
-  const d0Admin = createNode('ROUNDED_RECTANGLE', "BSIT Director\n& CCS Dean", 1900, 340, 180, 60, C_DARK);
+  const d0Students = createNode('ROUNDED_RECTANGLE', "Students & Event Participants", 800, -120, 200, 60, C_DARK);
+  const d0Sellers = createNode('ROUNDED_RECTANGLE', "Student Sellers & Booths", 800, 40, 200, 60, C_DARK);
+  const d0Claimants = createNode('ROUNDED_RECTANGLE', "Faculty Advisers & Officers", 800, 240, 200, 60, C_DARK);
+  const d0Vendors = createNode('ROUNDED_RECTANGLE', "Vendors & Drivers", 1350, 360, 180, 60, C_DARK);
+  const d0Admin = createNode('ROUNDED_RECTANGLE', "BSIT Director & CCS Dean", 1950, 360, 180, 60, C_DARK);
 
   // Processes
-  const p1 = createNode('ELLIPSE', "1.0\nFee Collection &\nGCash Pooling", 1100, -80, 170, 170, C_TEAL);
-  const p2 = createNode('ELLIPSE', "2.0\nPersonal Advance\n(Abono) & Petty Pay", 1100, 150, 170, 170, C_TEAL);
-  const p3 = createNode('ELLIPSE', "3.0\nEnd-of-Term Cash\nReconciliation", 1550, -20, 170, 170, C_TEAL);
-  const p4 = createNode('ELLIPSE', "4.0\nReport Drafting &\n6-Tier Routing", 1750, 150, 170, 170, C_TEAL);
+  const p1 = createNode('ELLIPSE', "1.0\nEvent, Merch &\nBooth Fee Collection", 1150, -60, 170, 170, C_TEAL);
+  const p2 = createNode('ELLIPSE', "2.0\nPersonal Advance\n(Abono) & Petty Pay", 1150, 180, 170, 170, C_TEAL);
+  const p3 = createNode('ELLIPSE', "3.0\nEnd-of-Term Cash\nReconciliation", 1600, -20, 170, 170, C_TEAL);
+  const p4 = createNode('ELLIPSE', "4.0\nReport Drafting &\n6-Tier Routing", 1800, 160, 170, 170, C_TEAL);
 
   // Data Stores
-  const dsCashbox = createNode('ROUNDED_RECTANGLE', "D1: Small Metal Cashbox\n(Program Director's Room)", 1400, -160, 220, 60, C_STORE, C_STORE_TXT);
-  const dsGcash = createNode('ROUNDED_RECTANGLE', "D2: Personal GCash Accounts\n(Treasurer / On-Duty Officer)", 1100, -230, 220, 60, C_STORE, C_STORE_TXT);
-  const dsSlips = createNode('ROUNDED_RECTANGLE', "D3: Loose Paper Slips & Receipts\n(Folders / Envelopes)", 1450, 200, 220, 60, C_STORE, C_STORE_TXT);
-  const dsDrafts = createNode('ROUNDED_RECTANGLE', "D4: Manual Excel & Word Drafts\n(Treasurer's Laptop)", 1800, -40, 220, 60, C_STORE, C_STORE_TXT);
+  const dsCashbox = createNode('ROUNDED_RECTANGLE', "D1: Small Metal Cashbox\n(Program Director's Room)", 1450, -160, 220, 60, C_STORE, C_STORE_TXT);
+  const dsGcash = createNode('ROUNDED_RECTANGLE', "D2: Personal GCash Accounts\n(Treasurer / On-Duty Officer)", 1150, -230, 220, 60, C_STORE, C_STORE_TXT);
+  const dsSlips = createNode('ROUNDED_RECTANGLE', "D3: Loose Paper Slips & Receipts\n(Folders / Envelopes)", 1500, 200, 220, 60, C_STORE, C_STORE_TXT);
+  const dsDrafts = createNode('ROUNDED_RECTANGLE', "D4: Manual Excel & Word Drafts\n(Treasurer's Laptop)", 1850, -40, 220, 60, C_STORE, C_STORE_TXT);
 
   // Diagram 0 Connections
-  connect(d0Students, p1, "Cash / GCash fees");
-  connect(p1, dsCashbox, "Store physical cash");
-  connect(p1, dsGcash, "Hold digital balance");
-  connect(dsGcash, p1, "Cash-out (minus fee)");
+  connect(d0Students, p1, "Tournament fees & ad-hoc merch");
+  connect(p1, d0Students, "Receipts & entry/claim stubs");
 
-  connect(d0Claimants, p2, "Advance personal funds");
-  connect(p2, d0Vendors, "Disburse payment");
-  connect(d0Vendors, p2, "ORs & fare slips");
-  connect(p2, dsSlips, "Keep paper slips");
-  connect(dsCashbox, p2, "Extract cash refund");
-  connect(p2, d0Claimants, "Reimbursement");
+  connect(d0Sellers, p1, "Booth rental ('arkila') & % share");
+  connect(p1, d0Sellers, "Rental receipt & booth clearance");
 
-  connect(dsCashbox, p3, "Extract bills & coins");
-  connect(dsSlips, p3, "Retrieve slips");
-  connect(p3, dsDrafts, "Tally math & log shortage");
+  connect(p1, dsCashbox, "Remit collected physical currency");
+  connect(p1, dsGcash, "Record digital GCash balance");
+  connect(dsGcash, p1, "Liquidated cash remittance");
 
-  connect(dsDrafts, p4, "Compile table figures");
-  connect(p4, d0Admin, "Printed bond paper");
-  connect(d0Admin, p4, "Rejection loop");
-  connect(d0Admin, dsDrafts, "Final clearance");
+  connect(d0Claimants, p2, "Abono expense claim & voucher");
+  connect(p2, d0Vendors, "Disbursement payment");
+  connect(d0Vendors, p2, "Sales invoices & petty cash slips");
+  connect(p2, dsSlips, "Archive physical paper slips");
+  connect(dsCashbox, p2, "Disburse cash for settlement");
+  connect(p2, d0Claimants, "Reimbursement payout & acknowledgment");
+
+  connect(dsCashbox, p3, "Count physical bills & coins");
+  connect(dsSlips, p3, "Retrieve paper expense vouchers");
+  connect(p3, dsDrafts, "Tally ledger & record shortage");
+
+  connect(dsDrafts, p4, "Compile financial statement data");
+  connect(p4, d0Admin, "Printed bond paper report");
+  connect(d0Admin, p4, "Rejection & revision directive");
+  connect(d0Admin, dsDrafts, "Final signed clearance");
 
   // Zoom into view
   figma.viewport.scrollAndZoomIntoView(createdNodes);

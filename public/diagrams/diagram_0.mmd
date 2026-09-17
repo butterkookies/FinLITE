@@ -3,27 +3,37 @@ flowchart TD
     classDef ent fill:#1e293b,stroke:#0f172a,stroke-width:1.5px,color:#fff;
     classDef store fill:#fef3c7,stroke:#d97706,stroke-width:1.5px,color:#78350f;
 
-    STUDENT["Students / Payors"]:::ent
+    %% Entities
+    STUDENT["Students & Event Participants"]:::ent
+    SELLERS["Student Sellers & Booth Concessionaires"]:::ent
     CLAIMANT["Faculty Advisers & Officers"]:::ent
     VENDORS["Vendors / Transport Drivers"]:::ent
     ADMIN["BSIT Director & CCS Dean"]:::ent
 
+    %% Data Stores
     D1[("D1: Small Metal Cashbox<br/>(Program Director's Room)")]:::store
     D2[("D2: Personal GCash Accounts<br/>(Treasurer / On-duty Officer)")]:::store
     D3[("D3: Loose Paper Slips & Receipts<br/>(Envelopes / Folders)")]:::store
     D4[("D4: Manual Excel & Word Drafts<br/>(Treasurer's Laptop)")]:::store
 
-    P1(("1.0<br/>Fee Collection &<br/>GCash Pooling")):::proc
+    %% Sub-Processes
+    P1(("1.0<br/>Event, Merch &<br/>Booth Fee Collection")):::proc
     P2(("2.0<br/>Personal Advance<br/>(Abono) & Petty<br/>Disbursement")):::proc
     P3(("3.0<br/>End-of-Term Cash<br/>Count & Variance<br/>Reconciliation")):::proc
     P4(("4.0<br/>Manual Report<br/>Drafting & 6-Tier<br/>Wet-Ink Routing")):::proc
 
-    STUDENT -->|"Dues & merchandise fee payments"| P1
-    STUDENT -->|"Digital GCash payment confirmations"| P1
+    %% Process 1.0 (Collections: Events, Merch, Booth Rent/Percentage)
+    STUDENT -->|"Tournament fees & ad-hoc merch payments"| P1
+    P1 -->|"Official receipts, entry passes & claim stubs"| STUDENT
+
+    SELLERS -->|"Booth rental fees & sales commission remittances"| P1
+    P1 -->|"Rental acknowledgment & booth clearance"| SELLERS
+
     P1 -->|"Remit collected physical currency"| D1
-    P1 -->|"Record digital wallet balance"| D2
+    P1 -->|"Record digital GCash wallet balance"| D2
     D2 -->|"Liquidated cash remittance"| P1
 
+    %% Process 2.0 (Abono & Operating Expenses)
     CLAIMANT -->|"Abono expense claim & voucher"| P2
     P2 -->|"Disbursement payment"| VENDORS
     VENDORS -->|"Sales invoices & petty cash slips"| P2
@@ -31,10 +41,12 @@ flowchart TD
     D1 -->|"Disburse cash for settlement"| P2
     P2 -->|"Reimbursement payout & acknowledgment"| CLAIMANT
 
+    %% Process 3.0 (Cashbox Reconciliation)
     D1 -->|"Count physical bills & coins"| P3
     D3 -->|"Retrieve paper expense vouchers"| P3
     P3 -->|"Tally ledger & record ₱161 shortage"| D4
 
+    %% Process 4.0 (Liquidation Report Routing)
     D4 -->|"Compile financial statement data"| P4
     P4 -->|"Printed bond paper report"| ADMIN
     ADMIN -->|"Rejection & revision directive"| P4

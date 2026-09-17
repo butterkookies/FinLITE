@@ -2,7 +2,9 @@ flowchart TD
     classDef sys fill:#064e3b,stroke:#022c22,stroke-width:2px,color:#fff;
     classDef ent fill:#1e293b,stroke:#0f172a,stroke-width:1.5px,color:#fff;
 
-    STUDENT["Students / Club Members"]:::ent
+    %% 6 External Entities (Paraan 2: Detailed Real-World Entities)
+    STUDENT["Students & Event Participants"]:::ent
+    SELLERS["Student Sellers & Booth Concessionaires"]:::ent
     OFFICERS["LITE Executive Officers & Committees"]:::ent
     ADVISERS["Faculty Club Advisers"]:::ent
     ADMIN["BSIT Program Director & CCS Dean"]:::ent
@@ -10,17 +12,26 @@ flowchart TD
 
     SYS(("0.0<br/>Existing LITE Manual<br/>Financial & Liquidation<br/>System")):::sys
 
-    STUDENT -->|"Membership & merch order details"| SYS
-    SYS -->|"Official collection receipt & claim stub"| STUDENT
+    %% 1. Students & Event Participants (Events & Ad-hoc Merch)
+    STUDENT -->|"Event registration fees & ad-hoc merch payments"| SYS
+    SYS -->|"Official collection receipt, entry pass & claim stub"| STUDENT
 
+    %% 2. Student Sellers & Booth Concessionaires (Arkila & Percentage Sharing)
+    SELLERS -->|"Booth rental fees ('arkila') & sales percentage remittances"| SYS
+    SYS -->|"Rental acknowledgment receipt & booth clearance"| SELLERS
+
+    %% 3. Executive Officers (Abono & Petty Expenses)
     OFFICERS -->|"Expense vouchers, abono details & receipts"| SYS
     SYS -->|"Reimbursement payout & acknowledgment"| OFFICERS
 
+    %% 4. Faculty Club Advisers
     ADVISERS -->|"Personal advance details & budget approval"| SYS
     SYS -->|"Liquidation summary & refund slip"| ADVISERS
 
+    %% 5. Vendors & Suppliers
     SYS -->|"Disbursement details & payment"| VENDORS
     VENDORS -->|"Sales invoices & handwritten fare/stall slips"| SYS
 
+    %% 6. Department Administration
     SYS -->|"Printed multi-page liquidation report"| ADMIN
     ADMIN -->|"Signed clearance OR rejection directive"| SYS
