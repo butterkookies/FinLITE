@@ -119,8 +119,8 @@ async function run() {
   // Data Stores
   const dsCashbox = createNode('ROUNDED_RECTANGLE', "D1: Small Metal Cashbox\n(Program Director's Room)", 1650, -180, 230, 60, C_STORE, C_STORE_TXT);
   const dsGcash = createNode('ROUNDED_RECTANGLE', "D2: Personal GCash Accounts\n(Treasurer / On-Duty Officer)", 1225, -310, 230, 60, C_STORE, C_STORE_TXT);
-  const dsSlips = createNode('ROUNDED_RECTANGLE', "D3: Loose Paper Receipts & Slips\n(Envelopes / Folders)", 1650, 260, 230, 60, C_STORE, C_STORE_TXT);
-  const dsDrafts = createNode('ROUNDED_RECTANGLE', "D4: Manual Excel & Word Drafts\n(Treasurer's Laptop)", 2025, -20, 230, 60, C_STORE, C_STORE_TXT);
+  const dsSlips = createNode('ROUNDED_RECTANGLE', "D3: Physical Receipts & Paper Records\n(Envelopes / Document Folders)", 1650, 260, 230, 60, C_STORE, C_STORE_TXT);
+  const dsDrafts = createNode('ROUNDED_RECTANGLE', "D4: Manual Excel Spreadsheets\n& Word Documents", 2025, -20, 230, 60, C_STORE, C_STORE_TXT);
 
   // Phase 1 Connections (Collections & Inflows)
   connect(d0Students, p1, "Tournament and event registration fees");
@@ -152,7 +152,6 @@ async function run() {
   connect(dsCashbox, p3, "Count physical bills and coins");
   connect(dsSlips, p3, "Retrieve paper receipts and expense slips");
   connect(p3, dsDrafts, "Tally book ledger records");
-  connect(p3, dsDrafts, "Record allowable ₱161 shortage");
 
   // Phase 4 Connections (Financial Report & Clearance)
   connect(dsDrafts, p4, "Compile financial report data");
@@ -160,7 +159,8 @@ async function run() {
   connect(d0Advisers, p4, "Financial report verification");
   connect(p4, d0Admin, "Printed multi-page financial report");
   connect(d0Admin, p4, "Report revision directive");
-  connect(d0Admin, dsDrafts, "Signed financial clearance");
+  connect(d0Admin, p4, "Signed financial clearance");
+  connect(p4, dsSlips, "Archive signed clearance document");
 
   // Zoom into view
   figma.viewport.scrollAndZoomIntoView(createdNodes);

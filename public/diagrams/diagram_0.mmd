@@ -18,8 +18,8 @@ flowchart TD
     %% ========================================================
     D1[("D1: Small Metal Cashbox<br/>(Program Director's Room)")]:::store
     D2[("D2: Personal GCash Accounts<br/>(Treasurer / On-Duty Officer)")]:::store
-    D3[("D3: Loose Paper Receipts & Expense Slips<br/>(Envelopes / Folders)")]:::store
-    D4[("D4: Manual Excel & Word Drafts<br/>(Treasurer's Laptop)")]:::store
+    D3[("D3: Physical Receipts & Paper Records<br/>(Envelopes / Document Folders)")]:::store
+    D4[("D4: Manual Excel Spreadsheets<br/>& Word Documents")]:::store
 
     %% ========================================================
     %% SUB-PROCESSES (4-Phase Chronological Lifecycle)
@@ -65,7 +65,6 @@ flowchart TD
     D1 -->|"Count physical bills and coins"| P3
     D3 -->|"Retrieve paper receipts and expense slips"| P3
     P3 -->|"Tally book ledger records"| D4
-    P3 -->|"Record allowable ₱161 shortage"| D4
 
     %% --------------------------------------------------------
     %% PHASE 4: FINANCIAL REPORT CLEARANCE (End of Academic Cycle)
@@ -75,4 +74,5 @@ flowchart TD
     ADVISERS -->|"Financial report verification"| P4
     P4 -->|"Printed multi-page financial report"| ADMIN
     ADMIN -->|"Report revision directive"| P4
-    ADMIN -->|"Signed financial clearance"| D4
+    ADMIN -->|"Signed financial clearance"| P4
+    P4 -->|"Archive signed clearance document"| D3
