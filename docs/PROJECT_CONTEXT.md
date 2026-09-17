@@ -127,10 +127,11 @@ The organizational hierarchy of LITE comprises a multi-tiered leadership structu
 
 ### 2.4 Operational Setting, Venue Constraints, and Custodial Protocols
 Unlike administrative offices of the institution, LITE operates under severe collegiate physical constraints:
-- **Absence of Dedicated Office Infrastructure:** LITE possesses no dedicated physical office, private conference space, or institutional desktop workstation. Administrative planning, dues collection, and liquidation deliberations occur transiently across campus corridors, student lounges, event booths, or within the **2nd-floor faculty room**.
-- **Custodial Base at Adviser's Desk:** Official record archives and physical assets are centralized exclusively at the **faculty room / adviser's desk** on the second floor of the PDM academic building. All official financial consultations, physical audit sessions, and ledger inspections are conducted at this specific faculty station.
-- **Physical Money Custody via Small Metal Cashbox:** All physical cash holdings, petty cash reserves, and accumulated coin collections are stored inside a single **small metal cashbox**. For physical security and institutional accountability, this small metal cashbox is housed inside a locked drawer at the adviser's desk in the faculty room. It is retrieved exclusively by authorized officers during scheduled collection drives, campus events, or formal audit reconciliations.
-- **Strict Face-Value Annual Turnover Handoff Protocol:** Organizational leadership transitions occur annually at the conclusion of the academic year. Incoming student officers do not commence operations from a null balance; they inherit the physical small metal cashbox, physical receipt archives, and the carried-over cash surplus certified in the audited Final Financial Report of the outgoing administration. Crucially, institutional tradition and departmental oversight enforce a **strict face-value turnover protocol**: the physical cash contained within the small metal cashbox must match the exact numerical face value attested on the signed report. Under no circumstances may an administration hand over an unresolved ledger deficit. If an unverified cash shortage exists at the close of the academic year, outgoing custodians are required to cover the missing balance out-of-pocket (*"abono"*) before the incoming administration will execute the transfer of custodial responsibility.
+- **Absence of Dedicated Office Infrastructure:** LITE possesses no dedicated physical office, private conference space, or institutional desktop workstation. Administrative planning, event coordination, and liquidation deliberations occur transiently across campus corridors, student lounges, event booths, or within the **2nd-floor faculty room**.
+- **Custodial Base & Financial Consultation Station:** Official record archives, physical audit sessions, and ledger consultations are conducted at the **faculty room / adviser's desk** on the second floor of the PDM academic building.
+- **Physical Money Custody in Program Director's (PD's) Room:** All physical cash holdings, petty cash reserves, and accumulated coin collections are secured inside a single **small metal cashbox**. Certified institutional policy dictates that the cashbox is stored inside a locked drawer within the **Program Director's (PD's) Room** (the executive office of BSIT Program Director Jovylyn Ortiz-Cesar, MBA, MSIT). It is retrieved exclusively by authorized officers during scheduled collection drives, campus events, or formal audit reconciliations.
+- **Strict Campus Boundary for Physical Cashbox:** The small metal cashbox **never leaves the PDM campus**. During weekend events or off-campus purchasing expeditions (e.g., procurement of decorative materials, hardware components, or certificates at commercial centers), the cashbox remains secured inside the PD's room. All off-campus purchases must be funded via out-of-pocket personal advances (*"abono"*) by officers or advisers, which are formally liquidated and reimbursed upon return to campus.
+- **Strict Face-Value Annual Turnover & Accounts Payable Carryover Protocol:** Organizational leadership transitions occur annually at the conclusion of the academic year. Incoming student officers inherit the physical small metal cashbox, physical receipt archives, and the carried-over cash surplus certified in the audited Final Financial Report of the outgoing administration. Institutional tradition and departmental oversight enforce a **strict face-value turnover protocol**: the physical cash contained within the small metal cashbox must match the exact numerical face value attested on the signed report. Under no circumstances may an administration hand over an unresolved ledger deficit without covering it out-of-pocket (*"abono"*). Crucially, institutional policy dictates that any legitimate unpaid reimbursement claims (*"Abono"*) remaining at the close of the academic year do not vanish; they are formally certified and carried over to the next academic year as an **Accounts Payable liability**, to be settled from the incoming administration's future event revenues.
 
 ---
 
@@ -146,94 +147,103 @@ flowchart TD
     classDef alert fill:#fee2e2,stroke:#ef4444,color:#7f1d1d;
 
     %% Inflows
-    IN_CASH["Physical Cash Dues & Merchandise"] -->|"Direct Collection"| BOX[("Small Metal Cashbox<br/>Faculty Room Locked Drawer")]
-    IN_GCASH["Digital GCash Payments"] -->|"Ad-hoc Mobile Transfer"| GCASH_HOLD["Personal GCash of Adviser/s or Assigned Student"]
-    GCASH_HOLD -->|"Manual Cash-Out Lag<br/>& Withdrawal Fees"| BOX
+    IN_CASH["Physical Cash Inflows<br/>(Tournaments, Upfront Merch, Booth Arkila/Commission)"] -->|"Direct Collection & 24–48h Rep Remittance"| BOX[("Small Metal Cashbox<br/>Program Director's Room Locked Drawer")]
+    IN_GCASH["Digital GCash Payments"] -->|"Ad-hoc Mobile Transfer"| GCASH_HOLD["Personal GCash of Treasurer or On-Duty Officer"]
+    GCASH_HOLD -->|"Cash-Out Lag & Official ₱15–₱20<br/>Bank / Cash-Out Fee Logged"| BOX
+
+    %% Rep Emergency Deduction
+    IN_CASH -.->|"Emergency Booth Supplies<br/>(Immediate Receipt Required)"| DEDUCT["Direct Emergency Deduction by Rep/Head"]
 
     %% Expenses & Abono
-    EXP_NEED["Urgent Event Need<br/>(Club Week, E-sports, Outreaches)"] --> CHAT_APP["Informal Messenger / Verbal Consultation"]
-    CHAT_APP --> ABONO["Personal Out-of-Pocket Advance (Abono)<br/>by Faculty Advisers or Student Officers"]
+    EXP_NEED["Urgent Event Need<br/>(Club Week, E-sports, Seminars)"] --> AUTH_CHK{"Expense Ceiling Check"}
+    AUTH_CHK -->|"> ₱1,000.00"| CHAT_APP["Mandatory Prior Written/Chat Approval<br/>from Both Club Advisers"]
+    AUTH_CHK -->|"≤ ₱1,000.00"| ABONO["Personal Advance (Abono)<br/>by Adviser or Student Officer"]
+    CHAT_APP --> ABONO
     
-    ABONO --> EXP_TYPE{"Expense Documentation Type"}
+    ABONO --> EXP_TYPE{"Receipt Type & 7-Day Cutoff"}
     EXP_TYPE -->|"Commercial Purchase"| REC_COM["Official Printed Commercial Receipt"]
-    EXP_TYPE -->|"Informal Micro-Expense<br/>(Transit Fares, Stalls, Rush Print)"| REC_SLIP["Handwritten Petty Cash Slip<br/>+ Messenger Photo Proof"]
+    EXP_TYPE -->|"Informal Micro-Expense<br/>(Transit, Stalls, Rush Print)"| REC_SLIP["Handwritten Petty Cash Slip<br/>(Claimant Name, Date, Route, Purpose)"]
 
-    REC_COM --> AUD_REV["Auditor Physical Verification"]
+    REC_COM --> AUD_REV["Auditor Verification & Grace Period Check"]
     REC_SLIP --> AUD_REV
-    AUD_REV --> TRES_PAY["Treasurer Cashbox Reimbursement Disbursed"]
+    AUD_REV --> PAY_CHK{"Cashbox Liquidity vs Claim"}
+    PAY_CHK -->|"Sufficient Cash"| TRES_PAY["Full Cashbox Reimbursement Payout"]
+    PAY_CHK -->|"Insufficient Cash"| PARTIAL_PAY["Partial Payout Executed<br/>(Residual Stays in Accounts Payable)"]
     TRES_PAY --> BOX
+    PARTIAL_PAY --> BOX
 
     %% Reconciliation
     AUD_REV -.-> RECON["Periodic Denomination Count at Adviser's Desk<br/>(₱1,000 down to ₱1 Coins)"]
     BOX -.-> RECON
     RECON --> VAR_CHK{"Discrepancy Variance?"}
-    VAR_CHK -->|"Balanced (₱0.00)"| REP_GEN["Compile Final Financial Report"]
-    VAR_CHK -->|"Minor Untraceable Deficit<br/>(e.g., ₱161.00 Shortage)"| SHORT_DEC["Formally Declared as 'Cash Shortage'<br/>under Club Adviser Approval"]
-    VAR_CHK -->|"Material / Unjustified Deficit"| ABONO_SETTLE["Mandatory Custodial Officer Abono<br/>to Preserve Face-Value Handoff"]
-    SHORT_DEC --> REP_GEN
-    ABONO_SETTLE --> REP_GEN
+    VAR_CHK -->|"Balanced (₱0.00)"| REP_GEN["Compile Final Financial Report<br/>(Digital Draft Preview First)"]
+    VAR_CHK -->|"Overage Detected (+₱)"| OVER_BUF["Retained in Cashbox as<br/>Unrecorded Emergency Petty Cash Buffer"]
+    VAR_CHK -->|"Shortage Detected (-₱)"| FREEZE["Immediate Spending & Activity Freeze<br/>Trace Variance / Declare Historical ₱161 Shortage"]:::alert
+    OVER_BUF --> REP_GEN
+    FREEZE --> REP_GEN
 
     %% Institutional Routing
     REP_GEN --> PRNT["Printed on Institutional Bond Paper"]
     PRNT --> S1["1. Treasurer Sign-off"]
     S1 --> S2["2. Auditor Sign-off"]
     S2 --> S3["3. President Sign-off"]
-    S3 --> S4["4. Club Advisers Sign-off"]
+    S3 --> S4["4. Faculty Club Advisers Joint Endorsement<br/>(Dual Sign-Off / 2-of-2 Multisig)"]
     S4 --> S5["5. BSIT Program Director Sign-off"]
     S5 --> S6["6. CCS Dean Final Approval"]
 
-    S5 -->|"Single Layout or Math Error"| REJ["Immediate Rejection & Total Reprint Cycle"]:::alert
+    S5 -->|"Defect or Math Error"| REJ["Immediate Rejection -> Report Unlocked for<br/>In-Place Line-Item Fix & 1-Click Re-Export"]:::alert
     S6 -->|"Defect Detected"| REJ
-    REJ -.->|"Restart from Stage 1"| S1
+    REJ -.->|"Rapid Re-print & Re-route"| S1
 ```
 
 ### 3.1 Revenue Generation and Inflow Processing Logic
-Financial inflows into LITE originate from four primary operational activities:
-1. *Academic Membership Dues & Merchandise Sales:* Periodic collection of membership fees, departmental lanyards, and official LITE organizational t-shirts.
-2. *Event & Competition Registration Fees:* Registration fees collected for competitive computing brackets (e.g., E-sports tournaments, programming hackathons, cybersecurity challenges).
-3. *Commercial Booth Proceeds:* Concession, merchandise, and recreational booth revenues generated during campus-wide celebrations such as Institutional Club Week.
-4. *Carried-Over Surplus Reserves:* Certified cash balances transferred from the preceding academic administration under the face-value handoff protocol.
+Under certified institutional policy, **LITE does not collect mandatory student membership dues**. Instead, operational and activity funds originate strictly from four legitimate revenue streams:
+1. *Event & Tournament Registration Fees:* Entry and bracket fees collected from student participants during competitive departmental events (e.g., E-sports tournaments, programming hackathons, and cybersecurity capture-the-flag competitions).
+2. *Ad-Hoc Batch Merchandise Orders:* Departmental lanyards and official LITE organizational t-shirts ordered on a scheduled batch basis. Under strict institutional governance, **100% upfront payment is mandatory** before any order is submitted to vendors or merchandise is released; deferred payments ("utang") and partial down payments are strictly prohibited to prevent uncollected receivables.
+3. *Booth Rental ("Arkila") & Sales Commission:* Rental fees paid by student sellers leasing table space, alongside agreed sales percentages/commissions collected from commercial concessionaires during Institutional Club Week.
+4. *Carried-Over Surplus Reserves & Certified Opening Liabilities:* Audited net cash surplus and certified unpaid Accounts Payable balances officially transferred from the preceding academic year under the face-value handoff protocol.
 
-These inflows traverse two distinct physical and digital collection channels:
-- **Direct Physical Cash Inflow:** Physical currency collected directly by the Treasurer or designated Year-Level Representatives at collection desks. Collected cash is directly transported to the 2nd-floor faculty room and placed inside the small metal cashbox.
-- **Digital GCash Inflow via Ad-Hoc Pooling:** Because student organizations at the local college level cannot legally secure institutional merchant accounts with commercial financial technology providers, digital payments (which constitute an increasingly high percentage of student transactions) are collected through personal GCash mobile wallets. Inflows are temporarily pooled into the personal mobile wallet of **whomever is available on duty**—principally the personal account of the **Club Adviser/s**, or the designated student officer managing the collection desk. 
-- **Cash-Out & Replenishment Logic:** Digital funds accumulated in personal mobile wallets do not instantly reflect inside the small metal cashbox. The holder must execute a manual cash-out transaction via automated teller machines, convenience marts, or local pawnshops—frequently absorbing third-party transaction fees (e.g., ₱15 to ₱20 per withdrawal). Once liquidated, the physical currency is manually remitted to the Treasurer to replenish the physical cashbox, creating a temporal latency between digital payment confirmation and physical cash custody.
+These inflows traverse two distinct collection channels:
+- **Direct Physical Cash Inflow & Delegation Protocol:** Physical currency collected by the Treasurer or designated Year-Level Representatives and Sub-Committee Chairpersons at event booths. 
+  - *Holding Window:* Authorized student representatives are permitted to hold physical collections for a **maximum of 24 to 48 hours** before turning over the full amount to the Treasurer for deposit into the small metal cashbox in the PD's room.
+  - *Emergency Supply Deduction Exception:* If an urgent logistical need arises during an active event booth, representatives are permitted to deduct cash directly from unremitted collections, provided an official commercial receipt or signed petty cash slip is immediately submitted for the exact deducted amount upon turnover.
+- **Digital GCash Inflow & Reconciliation Logic:** Student organizations cannot maintain institutional fintech corporate accounts. Digital payments are captured through the personal GCash mobile wallet of the **Treasurer or the on-duty executive officer**.
+  - *Bank / Cash-Out Fee Absorption:* Third-party withdrawal charges (₱15.00 to ₱20.00 per cash-out) incurred when liquidating digital balances into physical banknotes are formally recognized and logged as an official club operating expense line item labeled `"Bank / Cash-Out Fee"`.
+  - *Odd Digital Balances:* Fractional coin amounts that cannot be dispensed by physical automated teller machines or cash-out outlets are formally settled and transferred into the Treasurer's personal account to maintain mathematical parity.
 
 ### 3.2 Spending Authorization and Out-of-Pocket Personal Advances ("Abono")
-Activity operational budgets (e.g., procurement of decorative craft items, certificate paper, satin sashes, acrylic trophies, guest judge honorarium tokens, and committee refreshments) are established through informal, ad-hoc administrative channels. Spending authorizations are typically approved via verbal discussions or unstructured instant messaging threads (Messenger group chats) between the Executive Board and the Faculty Club Advisers.
-
-Because the small metal cashbox is secured inside the faculty room locked drawer and cannot be freely transported off campus during purchasing expeditions, upfront petty cash disbursements are rarely feasible. Consequently, the operational lifecycle of LITE relies fundamentally on the **Personal Advance ("Abono") Mechanism**:
-- **Personal Capital Advances:** Both **Faculty Club Advisers and Student Executive Officers** routinely advance personal financial resources out of their personal salaries, student allowances, or personal wallets to procure urgent materials for LITE activities.
-- **Accounts Payable Status:** From the instant personal capital is expended, the transaction represents an unliquidated organizational debt (*Accounts Payable*). The individual advancing the funds retains the physical receipt or expense proof, awaiting cash reimbursement.
+Activity operational budgets (e.g., procurement of decorative craft items, certificate paper, satin sashes, acrylic trophies, guest judge honorarium tokens, and committee refreshments) are governed by strict institutional authorization ceilings:
+- **₱1,000.00 Spending Ceiling:** Any expenditure exceeding **₱1,000.00** strictly requires prior written or instant messaging approval from both Faculty Club Advisers. Purchases below this ceiling may proceed at the discretion of the executive officers for urgent logistical requirements.
+- **Strict Campus Boundary for Cashbox:** Because the small metal cashbox is permanently secured inside the Program Director's (PD's) room and cannot leave campus grounds, off-campus purchasing runs (e.g., weekend supply shopping at commercial hubs) cannot utilize upfront cashbox disbursements.
+- **Personal Capital Advances ("Abono"):** Faculty Club Advisers and student executive officers routinely advance personal financial resources out of their personal salaries, allowances, or private accounts to procure necessary materials.
+- **Accounts Payable Status & Claimant Tracking:** From the instant an advance is made, the transaction represents an unliquidated organizational liability (*Accounts Payable*). To resolve historical ambiguity, the system explicitly records both the **name of the person who paid the advance** and the **designated claimant requesting reimbursement**.
 
 ### 3.3 Expense Documentation, Micro-Disbursement Acknowledgment, and Reimbursement Protocol
-The liquidation and settlement of personal advances follow a strict receipt-gated operational protocol:
-- **Commercial Purchases:** For procurement conducted at commercial retail establishments, supermarkets, or registered printing presses, claimants must present official printed commercial receipts or machine-validated sales invoices.
-- **Non-Receipted Micro-Disbursements:** A substantial portion of student organization operational spending involves informal micro-transactions where formal commercial receipts are legally and practically unobtainable. These specifically include:
-  - Local public transit fares (*jeepney and tricycle travel*) incurred while transporting supplies between campus and procurement centers.
-  - Raw crafting and decoration materials purchased from informal neighborhood market stalls.
-  - Emergency thesis and documentation printing conducted at local, informal computer rental shops.
-- **Petty Cash Acknowledgment Slips:** To validate non-receipted micro-disbursements, LITE enforces a manual acknowledgment protocol. The purchasing officer must draft a handwritten petty cash acknowledgment slip specifying the date, exact monetary expenditure, vehicular route or item description, and signature of the purchasing officer, supplemented whenever feasible by photographic proof or message screenshots forwarded to the Executive Board chat.
-- **Reimbursement Execution:** The claimant submits the compiled physical receipts and acknowledgment slips to the Auditor. Upon the Auditor’s verification of arithmetical accuracy and validity, the document is endorsed to the Treasurer. The Treasurer extracts the corresponding physical currency from the small metal cashbox and disburses the cash reimbursement, formally extinguishing the out-of-pocket advance.
+The liquidation and settlement of personal advances follow a standardized, receipt-gated operational protocol:
+- **7-Day Receipt Submission Cutoff:** To prevent historical reporting paralysis caused by tardy documentation, all official receipts and petty cash slips must be submitted within a strict **7-day grace period** following the conclusion of the activity. Submissions beyond 7 days require special adviser dispensation.
+- **Commercial Purchases:** Claimants must present official printed commercial receipts, cash register tapes, or machine-validated sales invoices for purchases made at retail stores and registered printing presses.
+- **Non-Receipted Micro-Disbursements:** For informal expenditures where commercial receipts are unobtainable (tricycle and jeepney fares, market crafting materials, rush computer shop printouts), claimants must execute a **handwritten petty cash acknowledgment slip** recording the exact date, monetary amount, travel route or item purpose, and claimant signature.
+- **Partial Payout State Machine:** When an approved reimbursement claim exceeds the liquid physical currency currently available inside the cashbox, FinLITE permits a **partial cash payout** (e.g., paying ₱1,200 immediately while logging the residual ₱1,800 as an active pending liability), preventing cashbox insolvency while safeguarding the claimant's debt.
 
 ### 3.4 Physical Denomination Counting and Cash Variance Settlement Logic
-Financial audits are conducted periodically at the adviser's desk in the 2nd-floor faculty room, typically preceding major event closeouts and semester-end liquidations. The verification procedure requires a complete **Physical Denomination Count**:
-- **Systematic Bill and Coin Breakdown:** The Auditor and Treasurer extract all physical cash from the small metal cashbox and categorize the physical currency into standard Philippine denomination brackets:
+Audits are conducted periodically at the adviser's desk in the 2nd-floor faculty room. The procedure requires an exhaustive **Physical Denomination Count**:
+- **Systematic Bill and Coin Breakdown:** Physical currency is extracted from the small metal cashbox and itemized across Philippine legal tender denominations:
   $$\text{Banknotes: } ₱1,000,\ ₱500,\ ₱200,\ ₱100,\ ₱50,\ ₱20 \quad\Big|\quad \text{Coins: } ₱20,\ ₱10,\ ₱5,\ ₱1$$
-- **Reconciliation Mathematical Logic:** The total counted physical cash is balanced against theoretical book records:
+- **Reconciliation Mathematical Logic:**
   $$\text{Theoretical Ledger Balance} = \text{Opening Carryover Balance} + \sum \text{Inflows} - \sum \text{Reimbursed Disbursements}$$
   $$\text{Discrepancy Variance} = \text{Total Counted Physical Cash} - \text{Theoretical Ledger Balance}$$
-- **Variance Handling Rules:**
-  - *Zero Variance:* Theoretical records match physical currency exactly; records are certified balanced.
-  - *Minor Untraceable Cash Shortage:* Due to untraceable fractional change discrepancies or unrecorded loose coin losses during rapid booth transactions, minor variances occasionally emerge. In accordance with historical departmental precedent (such as the **₱161.00 Cash Shortage** documented and approved during the AY 2025–2026 liquidation), minor untraceable shortfalls may be formally declared on the financial statement as an allowable operating expense line item labeled *"Cash Shortage"*, requiring written justification by the Treasurer and formal concurrence by the Club Advisers.
-  - *Material Unjustified Discrepancies:* If a discrepancy exceeds minor allowable thresholds or cannot be justified through operational context, the deficit must be covered out-of-pocket (*"abono"*) by the responsible custodial officers to preserve the face-value integrity of the organization's funds.
+- **Institutional Variance Handling Rules:**
+  - *Zero Variance:* Theoretical ledger matches physical cashbox count exactly (₱0.00 variance); records certified balanced.
+  - *Cash Shortage & Activity Freeze Protocol:* If physical cash is lower than the computed ledger balance, **all organizational spending and club activities must immediately freeze** until the discrepancy is investigated and resolved. If an untraceable minor discrepancy remains after investigation, historical departmental precedent (e.g., the **₱161.00 Cash Shortage** documented and approved during the AY 2025–2026 liquidation) permits the shortfall to be formally declared as an allowable operating expense line item labeled *"Cash Shortage"*, requiring written justification and dual adviser sign-off.
+  - *Cash Overage & Emergency Buffer:* If physical cash exceeds theoretical book records, the surplus is retained inside the physical cashbox as an unrecorded emergency petty cash buffer.
 
 ### 3.5 Institutional Liquidation Standards and Sequential Wet-Ink Signatory Routing
-At the termination of each academic term, LITE must prepare and submit an exhaustive, institutional-grade Final Financial Liquidation Report. The document must strictly adhere to the formatting and typographical mandates established by the College of Computer Studies:
-- **Format Rigidity:** The statement must be formatted in Times New Roman typography, utilizing standardized institutional margins, exact borderless table hierarchies for itemized schedules, and formal transmittal headers addressed to the College leadership.
-- **Sequential 6-Tier Wet-Ink Routing Chain:** Once drafted and verified, the report must be printed on official hard-copy institutional bond paper and physically routed across campus through six sequential administrative authorities. Each signatory must review, verify, and execute a physical wet-ink signature in strict, unbroken hierarchy:
+At the close of each academic term, LITE prepares and submits an exhaustive Final Financial Liquidation Report:
+- **Format Rigidity:** Formatted in Times New Roman typography, utilizing standardized institutional margins, exact borderless table hierarchies, and formal transmittal headers addressed to the College leadership.
+- **Digital Draft Review First:** Faculty Club Advisers conduct a digital draft review (via FinLITE web preview or DOCX share) prior to physical bond paper printing.
+- **Sequential 6-Tier Wet-Ink Routing Chain:** Hard copies printed on institutional bond paper must be routed sequentially across six administrative stations:
 
-$$\text{1. Treasurer} \longrightarrow \text{2. Auditor} \longrightarrow \text{3. President} \longrightarrow \text{4. Club Advisers} \longrightarrow \text{5. BSIT Program Director} \longrightarrow \text{6. CCS Dean}$$
+$$\text{1. Treasurer} \longrightarrow \text{2. Auditor} \longrightarrow \text{3. President} \longrightarrow \text{4. Club Advisers (Dual Sign-Off)} \longrightarrow \text{5. BSIT Program Director} \longrightarrow \text{6. CCS Dean}$$
 
 ```mermaid
 sequenceDiagram
@@ -241,8 +251,8 @@ sequenceDiagram
     actor T as 1. LITE Treasurer
     actor A as 2. LITE Auditor
     actor P as 3. LITE President
-    actor ADV as 4. Club Advisers<br/>(Jatulan & Genovia)
-    actor DIR as 5. BSIT Program Director<br/>(Ortiz-Cesar)
+    actor ADV as 4. Club Advisers<br/>(Dual Sign-Off: Jatulan & Genovia)
+    actor DIR as 5. BSIT Program Director<br/>(Dr. Ortiz-Cesar)
     actor DEAN as 6. CCS Dean<br/>(Dr. Manucom)
 
     Note over T: Prepares & certifies numerical accuracy of records
@@ -251,7 +261,7 @@ sequenceDiagram
     A->>P: Endorses Audited Liquidation Report
     Note over P: Attests executive alignment & signs
     P->>ADV: Transmits for Faculty Club Endorsement
-    Note over ADV: Reviews custodial compliance & signs
+    Note over ADV: Dual Joint Sign-Off (2-of-2 Multisig)
     ADV->>DIR: Submits for Departmental Clearance
     Note over DIR: Conducts academic & administrative review
     DIR->>DEAN: Recommends for Executive College Approval
@@ -263,11 +273,12 @@ sequenceDiagram
 | **Stage 1** | **LITE Treasurer** | Prepares and certifies numerical accuracy of records |
 | **Stage 2** | **LITE Auditor** | Verifies receipts, vouchers, and physical cashbox balance |
 | **Stage 3** | **LITE President** | Attests executive alignment and endorses formal submission |
-| **Stage 4** | **Faculty Club Advisers**<br/>*(Ms. Jatulan & Ms. Genovia)* | Reviews custodial compliance and officially endorses to the department |
+| **Stage 4** | **Faculty Club Advisers**<br/>*(Ms. Kimberly Dawn Jatulan & Ms. Krizia Mae Genovia)* | **Dual Sign-Off (2-of-2 Multisig):** Joint review and official endorsement to the department |
 | **Stage 5** | **BSIT Program Director**<br/>*(Jovylyn Ortiz-Cesar, MBA, MSIT)* | Departmental administrative review and recommendation for college approval |
 | **Stage 6** | **Dean, College of Computer Studies**<br/>*(Dr. Emraida Marie M. Manucom)* | Executive academic clearance; validates student organization clearance |
 
-- **Institutional Rejection Protocol:** The review chain enforces zero tolerance for arithmetical discrepancies, receipt omissions, or layout defects. If the BSIT Program Director or College Dean detects a single computational mismatch, unverified voucher line, or improper margin alignment, the document is immediately rejected. The officers must re-compute, re-edit, re-print, and completely restart the physical wet-ink signing process from Stage 1, creating severe administrative bottlenecks that threaten semester clearance and student graduation sign-offs.
+- **Instant Rejection Recovery Protocol:** If the BSIT Program Director or College Dean identifies a formatting defect, unverified voucher line, or computational error, the report is rejected. Rather than requiring laborious manual recreation, FinLITE unlocks the existing report into an editable state, enabling officers to correct the specific line item and generate an instant, 1-click re-export for accelerated re-routing.
+- **Annual Turnover Accounts Payable Carryover:** If legitimate unpaid reimbursement claims (*"Abono"*) remain at the end of the academic year, they carry over to the incoming administration as certified Accounts Payable liabilities to be liquidated from future revenues.
 
 ---
 
@@ -276,25 +287,28 @@ sequenceDiagram
 Primary field interviews with executive officers across successive administrations (spanning tenure as Auditor, Treasurer, and President from 2024 to 2026), corroborated by adviser questionnaires, reveal six critical operational failure modes within LITE’s current manual business logic:
 
 | Operational Failure Mode | Root Cause & Institutional Consequence | Severity |
-| :--- | :--- | :---: |
-| **1. Personal Abono Vulnerability & Queuing Delays** | Out-of-pocket funding by faculty advisers and officers creates personal financial liabilities when loose paper receipts are crumpled, faded, or misplaced. | **CRITICAL** |
-| **2. Digital Inflow Co-Mingling & Cash-Out Lag** | Accepting dues via personal GCash accounts causes holding lag, personal/club fund commingling, unrecorded withdrawal fees, and temporary ledger drift. | **HIGH** |
+| :--- | :--- | :--- |
+| **1. Personal Abono Vulnerability & Queuing Delays** | Out-of-pocket funding by faculty advisers and officers creates personal financial liabilities when loose paper receipts are crumpled, faded, or submitted past the 7-day deadline. | **CRITICAL** |
+| **2. Digital Inflow Co-Mingling & Cash-Out Lag** | Collecting event registrations and merch payments via personal GCash accounts causes holding lag, personal/club fund commingling, unrecorded ₱15–₱20 withdrawal fees, and ledger drift. | **HIGH** |
 | **3. Ephemeral Documentation & Micro-Disbursement Leakage** | Loose paper slips and Messenger chats result in missing metadata for informal transit and rush print expenses, causing audit disagreement and unliquidated leakage. | **HIGH** |
-| **4. Physical Cashbox Custodial Vulnerability & Turnover Stress** | Storing physical funds in a portable metal box without real-time logs forces outgoing officers to shoulder year-end deficits under the strict face-value handoff protocol. | **CRITICAL** |
-| **5. Latent Discrepancies & Post-Hoc Reconciliation Bottlenecks** | Physical denomination counts happen weeks after events; arithmetic errors remain undetected until final reporting, creating chaotic audit sessions. | **HIGH** |
+| **4. Physical Cashbox Custodial Vulnerability & Turnover Stress** | Storing physical funds in a small metal box in the PD's room without real-time logs forces outgoing officers to shoulder year-end deficits under the strict face-value handoff protocol. | **CRITICAL** |
+| **5. Latent Discrepancies & Post-Hoc Reconciliation Bottlenecks** | Physical denomination counts happen weeks after events; arithmetic errors remain undetected until final reporting, creating chaotic audit sessions and risking activity freezes. | **HIGH** |
 | **6. Institutional Routing Gridlock & Signatory Rejection Risks** | Formatting defects or math errors trigger rejection by the Program Director or Dean, restarting the 6-stage physical wet-ink routing and stalling clearances. | **CRITICAL** |
 
 ### 4.1 Personal Financial Vulnerability and Delayed Reimbursement of "Abono"
 Because LITE cannot maintain pre-disbursed operational bank accounts, **both faculty club advisers and student executive officers routinely advance personal funds** to cover critical operational expenses. During fast-paced events such as Institutional Club Week, advisers and officers frequently expend thousands of pesos of their personal income for competition tokens, student food, certificates, and booth materials and supplies. 
 - Settling these personal advances requires navigating an unstandardized, receipt-gated reimbursement queue.
 - Thermal paper receipts gathered during stressful campus events frequently fade, become crumpled in pockets, or are misplaced entirely.
-- When an original receipt is lost, the expenditure cannot be officially audited. Consequently, faculty advisers and student officers are forced to absorb these expenses out-of-pocket, transforming volunteer academic service into personal financial liability.
+- **Tardy Submission Bottleneck:** As certified by Club Adviser Ms. Krizia Mae Genovia, the single greatest pet peeve and operational vulnerability is the **late submission of receipts** by student officers, leaving reimbursement queues stalled for weeks and clouding the organization's true financial liabilities.
+- **Unclear Creditor Metadata:** Loose receipt slips lack explicit metadata denoting who originally advanced the personal funds versus who is authorized to claim the physical reimbursement payout.
+- When an original receipt is lost or submitted long past event conclusion without prior approval (violating the ₱1,000 spending threshold), the expenditure cannot be officially audited. Consequently, faculty advisers and student officers are forced to absorb these expenses out-of-pocket, transforming volunteer academic service into personal financial liability.
 
 ### 4.2 Co-Mingling of Personal and Organizational Capital via Ad-Hoc GCash Pooling
-The reliance on personal mobile wallets (predominantly belonging to the **Club Adviser/s**, or the designated student on duty) to capture digital collections introduces severe internal control vulnerabilities:
+The reliance on personal mobile wallets (predominantly belonging to the **Treasurer or the on-duty executive officer**) to capture digital collections for tournament brackets, merchandise orders, and booth concessions introduces severe internal control vulnerabilities:
 - Organizational funds sit directly co-mingled with personal savings, creating significant risks of accidental personal spending.
-- The temporal lag between receiving a digital payment and executing a physical cash-out produces **"ledger drift"**: digital transaction records show funds as collected, but the physical small metal cashbox lacks the corresponding cash on hand.
+- The temporal lag between receiving a digital payment and executing a physical cash-out produces **"ledger drift"**: digital transaction records show funds as collected, but the physical small metal cashbox in the PD's room lacks the corresponding cash on hand.
 - Third-party withdrawal service fees (e.g., ₱15.00–₱20.00 cash-out surcharges) are rarely logged consistently, creating recurring minor cash deficits that compound over the academic year.
+- Odd fractional balances (e.g., ₱3.50 or ₱47.00) remain stuck in personal digital wallets due to ATM bill denomination limitations, complicating exact arithmetic parity.
 
 ### 4.3 Ephemeral Documentation and Administrative Leakage in Non-Receipted Micro-Disbursements
 A vast proportion of collegiate event expenditures consists of non-receipted micro-disbursements—specifically jeepney and tricycle transportation fares between campus and supply vendors, raw craft purchases from local public markets, and emergency photocopies or printouts from campus stalls. 
@@ -303,8 +317,9 @@ A vast proportion of collegiate event expenditures consists of non-receipted mic
 - Over a multi-month semester, paper slips are easily mislaid or smudged, depriving the Auditor of verifiable audit trails and resulting in unliquidated expense leakage.
 
 ### 4.4 Physical Cashbox Custodial Risks and High-Stress Face-Value Turnover Obligations
-Physical cash custody governed by a portable small metal cashbox stored in a faculty room drawer presents continuous custodial exposure:
-- During hectic campus-wide activities, the metal cashbox is carried to outdoor booths or student corridors, exposing it to theft, misplacement, or unmonitored coin change distribution.
+Physical cash custody governed by a small metal cashbox secured inside a locked drawer in the Program Director's (PD's) room presents continuous custodial exposure:
+- While the cashbox strictly remains on campus and does not travel during off-campus procurement runs, physical currency is transported across corridors and event booths during active campus celebrations.
+- Year-Level Representatives and Sub-Committees holding cash collections during the allowable 24–48 hour remittance window create temporary blind spots in cash visibility.
 - Under the mandatory **strict face-value turnover handoff protocol**, incoming administrations will not accept organizational custody if the physical cash inside the box deviates by even a single peso from the final audited balance.
 - Because transaction tracking is currently performed post-hoc on loose paper, historical errors accumulate invisibly. At the end of the academic year, the outgoing Treasurer and Auditor face severe personal stress, frequently compelled to pay out-of-pocket (*"abono"*) to rectify accumulated year-long balance discrepancies before receiving graduation or leadership clearance.
 
@@ -312,14 +327,14 @@ Physical cash custody governed by a portable small metal cashbox stored in a fac
 Physical cash reconciliations are rarely conducted on a daily or event-by-event cadence. Instead, physical denomination counts (sorting bills from ₱1,000 down to coins of ₱1) are performed weeks or months after events conclude.
 - In the absence of an automated reconciliation tool, the Treasurer and Auditor must perform manual cross-multiplication of currency counts against loose paper expenditure tallies.
 - Arithmetic errors in manual calculations mask discrepancies until the final semester report is assembled.
-- When cash variances do emerge, officers cannot determine whether the disparity represents an unrecorded GCash cash-out, an unlogged petty micro-disbursement, or an untraceable coin variance (such as the historical ₱161.00 cash shortage), preventing timely operational remediation.
+- When cash variances do emerge, institutional protocol dictates an immediate **spending and activity freeze**, paralyzing ongoing club operations until the variance is investigated. Officers struggle to determine whether the disparity represents an unrecorded GCash cash-out, an unlogged petty micro-disbursement, or an untraceable coin variance (such as the historical ₱161.00 cash shortage), preventing timely operational remediation.
 
 ### 4.6 Institutional Liquidation Bottlenecks and Signatory Rejections
 The preparation of the end-of-term Final Financial Report is currently conducted through rudimentary word processors or manual spreadsheets. This process represents an acute operational bottleneck:
 - Student officers struggle to reproduce the exacting layout standards demanded by the College of Computer Studies, frequently producing uneven table borders, misaligned decimal figures, inconsistent Times New Roman font sizings, and incorrectly formatted transmittal memoranda.
-- The physical routing workflow requires navigating **six sequential wet-ink signatories**:
-  $$\text{Treasurer} \longrightarrow \text{Auditor} \longrightarrow \text{President} \longrightarrow \text{Club Advisers} \longrightarrow \text{BSIT Program Director} \longrightarrow \text{CCS Dean}$$
-- If a calculation error, missing receipt attachment, or typographical defect is identified by Program Director Jovylyn Ortiz-Cesar or Dean Dr. Emraida Marie M. Manucom at the fifth or sixth stage, the report is summarily rejected. The officers must manually correct the error, reprint the entire multi-page document on hard-copy institutional bond paper, and physically re-route the document from the Treasurer onward. During final examination weeks and graduation clearance periods, this recurring routing gridlock creates immense administrative stress and paralyzes institutional operations.
+- The physical routing workflow requires navigating **six sequential wet-ink signatories**, including the mandatory **Dual Sign-Off (2-of-2 Multisig)** by both Faculty Club Advisers:
+  $$\text{Treasurer} \longrightarrow \text{Auditor} \longrightarrow \text{President} \longrightarrow \text{Club Advisers (Joint Dual Sign-Off)} \longrightarrow \text{BSIT Program Director} \longrightarrow \text{CCS Dean}$$
+- If a calculation error, missing receipt attachment, or typographical defect is identified by Program Director Jovylyn Ortiz-Cesar or Dean Dr. Emraida Marie M. Manucom at the fifth or sixth stage, the report is summarily rejected. Under manual operations, officers must manually re-compute, re-edit, reprint the entire multi-page document on hard-copy institutional bond paper, and restart physical wet-ink routing from Stage 1. During final examination weeks and graduation clearance periods, this recurring routing gridlock creates immense administrative stress and paralyzes institutional operations.
 
 ---
 
@@ -334,22 +349,22 @@ flowchart LR
     classDef prob fill:#fee2e2,stroke:#ef4444,stroke-width:1.5px,color:#7f1d1d;
     classDef mod fill:#ecfdf5,stroke:#059669,stroke-width:2px,color:#065f46;
 
-    P1["1. Unaudited Personal Abono &<br/>Delayed Reimbursements"]:::prob --> M1["Personal Advance Abono Queue<br/>& Accounts Payable Subsystem"]:::mod
-    P2["2. GCash Fund Co-Mingling &<br/>Cash-Out Withdrawal Lag"]:::prob --> M2["Dual-Source Inflow Reconciliation<br/>(Cash vs. GCash Holding Balances)"]:::mod
+    P1["1. Unaudited Personal Abono, Missing Metadata<br/>& Late Receipt Submissions"]:::prob --> M1["Personal Advance Abono Queue,<br/>Claimant Tracking & 7-Day Deadline Engine"]:::mod
+    P2["2. GCash Fund Co-Mingling,<br/>Cash-Out Lag & Unlogged Fees"]:::prob --> M2["Dual-Source Inflow Reconciliation<br/>& Official Bank Fee Subsystem"]:::mod
     P3["3. Ephemeral Slips & Micro-Disbursement<br/>Leakage (Fares, Stalls, Prints)"]:::prob --> M3["Digital Petty Cash Voucher Engine<br/>with Image Attachment Archival"]:::mod
-    P4["4. Portable Metal Cashbox Risks &<br/>Stressful Face-Value Turnovers"]:::prob --> M4["Custodial Turnover Engine &<br/>Audited Closing Balance Certificate"]:::mod
-    P5["5. Latent Discrepancies & Post-Hoc<br/>Denomination Math Errors"]:::prob --> M5["Interactive Denomination Keypad (₱1,000-₱1)<br/>& Variance Settlement Auditor"]:::mod
-    P6["6. Institutional Routing Gridlock &<br/>Administrative Signatory Rejections"]:::prob --> M6["Live PDM CCS Layout Simulator &<br/>1-Click 1:1 DOCX Master Exporter"]:::mod
+    P4["4. Cashbox Custody in PD's Room &<br/>Stressful Face-Value Turnovers"]:::prob --> M4["Custodial Turnover Engine &<br/>Accounts Payable Carryover Certificate"]:::mod
+    P5["5. Latent Discrepancies, Activity Freezes<br/>& Denomination Math Errors"]:::prob --> M5["Interactive Denomination Keypad (₱1,000-₱1)<br/>& Discrepancy Freeze Auditor"]:::mod
+    P6["6. Institutional Routing Gridlock,<br/>Multisig Approvals & Rejections"]:::prob --> M6["Dual Adviser Multisig Gate, Layout Simulator<br/>& 1-Click Re-Export Master Engine"]:::mod
 ```
 
 | Identified Problem in Business Logic | Root Operational Failure Mode | FinLITE Functional Module & Architectural Capability | Specific Operational Mechanism & Institutional Governance Impact |
 | :--- | :--- | :--- | :--- |
-| **1. Personal Abono Vulnerability & Delayed Reimbursements** | Advisers and officers shoulder urgent out-of-pocket event costs but suffer personal loss when paper receipts fade or are lost. | **Personal Advance ("Abono") & Reimbursement Queue Management Module** | • Dedicated Accounts Payable ledger.<br/>• Tracks claimant name, timestamp, amount, and attached digital receipt proof.<br/>• Automated Auditor review & Treasurer payout status; zero lost personal funds. |
-| **2. Digital Inflow GCash Co-Mingling & Cash-Out Lag** | Digital payments pooled into personal wallets of whoever is on duty, causing ledger drift and unlogged withdrawal fees. | **Digital Mobile Inflow & GCash Liquidation Reconciliation Module** | • Explicit transaction tagging for GCash dues.<br/>• Logs temporary holding custodian (Adviser / officer) and tracked cash-out balances.<br/>• Deducts withdrawal fees; reconciles cashbox replenishment to eliminate ledger drift. |
-| **3. Ephemeral Documentation & Micro-Disbursement Leakage** | Fares (jeepney/tricycle), local craft stalls, and emergency printing lack commercial receipts and rely on loose paper scraps. | **Unified Transaction Ledger & Digital Petty Cash Voucher Engine** | • Standardized input modal capturing non-receipted transit, supplies, and printing.<br/>• Digital image attachment of handwritten petty cash acknowledgment slips and photos.<br/>• Permanent immutable audit trail in DB. |
-| **4. Physical Cashbox Custodial Vulnerability & Face-Value Turnover Stress** | Funds held in small metal cashbox in faculty room; outgoing team forced to shoulder missing cash at year-end turnover. | **Custodial Turnover & Multi-Year Balance Certification Engine** | • Automated session-based transaction logging.<br/>• Freezes historical academic year ledgers.<br/>• Generates audited Closing Balance Transmittal Certificate, guaranteeing exact face-value handoff without officer abono stress. |
-| **5. Latent Discrepancies & Post-Hoc Reconciliation Bottlenecks** | Physical cash counts (₱1,000 down to ₱1) are done manually months late; math errors hide variances until final report submission. | **Interactive Denomination Counter & Variance Settlement Audit Engine** | • Digital denomination keypad (₱1,000 to ₱1).<br/>• Instant cross-calculation against theoretical book ledger balance.<br/>• Governed options: declare allowable "Cash Shortage" or log structured officer abono. |
-| **6. Institutional Routing Gridlock & Signatory Rejections** | Manual Word/spreadsheet reports deviate from CCS standards, triggering rejection across the 6-tier wet-ink signatory chain. | **Live College Layout Simulator & 1:1 Institutional DOCX Report Exporter Engine** | • Live in-browser report rendering strictly matching PDM College of Computer Studies.<br/>• 1-click export of verified Word (`.docx`) document with borderless tables and exact sequential 6-stage wet-ink signatory lines. |
+| **1. Personal Abono Vulnerability & Delayed Reimbursements** | Advisers and officers shoulder urgent out-of-pocket costs but suffer personal loss when paper receipts fade, are lost, or exceed deadlines. | **Personal Advance ("Abono") & Reimbursement Queue Management Module** | • Dedicated Accounts Payable ledger.<br/>• Explicitly tracks both the individual who advanced the money and the authorized claimant.<br/>• ₱1,000.00 spending ceiling warning & 7-day receipt submission cutoff enforcement.<br/>• Partial payout state machine when cashbox liquidity is temporarily insufficient. |
+| **2. Digital Inflow GCash Co-Mingling & Cash-Out Lag** | Digital payments pooled into personal wallets of Treasurer/officer on duty, causing ledger drift and unlogged ₱15–₱20 withdrawal fees. | **Digital Mobile Inflow & GCash Liquidation Reconciliation Module** | • Explicit transaction tagging for GCash tournament entries and upfront merchandise orders.<br/>• Automatic logging of ₱15.00–₱20.00 withdrawal charges as `"Bank / Cash-Out Fee"` operating expense.<br/>• Reconciles cashbox replenishment to eliminate ledger drift; tracks odd coin balance digital settlements. |
+| **3. Ephemeral Documentation & Micro-Disbursement Leakage** | Fares (jeepney/tricycle), local craft stalls, and emergency printing lack commercial receipts and rely on loose paper scraps. | **Unified Transaction Ledger & Digital Petty Cash Voucher Engine** | • Standardized input modal capturing non-receipted transit, craft supplies, and emergency printing.<br/>• Digital image attachment of signed handwritten petty cash acknowledgment slips.<br/>• Permanent immutable audit trail in DB with timestamp and officer endorsement. |
+| **4. Physical Cashbox Custodial Vulnerability & Face-Value Turnover Stress** | Funds held in small metal box in PD's room; outgoing team forced to shoulder missing cash at year-end turnover. | **Custodial Turnover & Multi-Year Balance Certification Engine** | • Enforces strict on-campus cashbox boundary and monitors 24–48h representative remittance windows.<br/>• Generates audited Closing Balance Transmittal Certificate.<br/>• Formally certifies legitimate unpaid Abono balances as carried-over Accounts Payable liabilities for the next academic year. |
+| **5. Latent Discrepancies & Post-Hoc Reconciliation Bottlenecks** | Physical cash counts (₱1,000 down to ₱1) are done manually months late; math errors hide variances until final report submission. | **Interactive Denomination Counter & Variance Settlement Audit Engine** | • Digital denomination keypad spanning Philippine banknotes and coins (₱1,000 down to ₱1).<br/>• Instant cross-calculation against theoretical ledger balance.<br/>• Governed discrepancy protocol: triggers visual activity freeze warning on shortages, justifies historical ₱161.00 shortage, and logs cash overages as cashbox emergency buffers. |
+| **6. Institutional Routing Gridlock & Signatory Rejections** | Manual Word/spreadsheet reports deviate from CCS standards, triggering rejection across the 6-tier wet-ink signatory chain. | **Live College Layout Simulator & 1:1 Institutional DOCX Report Exporter Engine** | • Live in-browser report rendering strictly matching PDM College of Computer Studies standards.<br/>• 1-click export of verified Word (`.docx`) document with borderless tables and exact 6-stage wet-ink signatory lines.<br/>• Programmatic Dual Sign-Off (2-of-2 Multisig) gate for Faculty Club Advisers.<br/>• Instant report unlocking upon administrative rejection for rapid in-place correction and re-export. |
 | *** Cross-Cutting Operational Intelligence** | Officers struggle to quickly extract financial figures during executive meetings or audits. | **Grounded Natural-Language AI Financial Co-Pilot (Zero-Hallucination Engine)** | • Conversational Taglish/English NLP query interface for instant mobile status checks.<br/>• 100% database-grounded SQL calculations; strict zero-hallucination arithmetic. |
 
 ### 5.2 Architectural Synthesis & Functional Module Description
@@ -357,29 +372,35 @@ flowchart LR
 1. **Role-Gated Security, PDM Google OAuth, and Segregation of Duties:**
    - Enforces zero unauthorized entry through an institutional domain whitelist (`@pdm.edu.ph`).
    - Distinct system permissions prevent the centralization of financial power: Treasurers cannot audit their own transactions; Auditors cannot unilaterally disburse funds; Advisers maintain oversight and authorization authority.
+   - Programmatic **Dual Sign-Off (2-of-2 Multisig)**: high-level institutional approvals strictly require joint authorization from both designated Faculty Club Advisers (Ms. Kimberly Dawn Jatulan and Ms. Krizia Mae Genovia).
 
 2. **Personal Advance ("Abono") & Accounts Payable Tracking Subsystem:**
    - Instantiates an auditable state machine for all out-of-pocket expenditures incurred by faculty advisers and student leaders:
-     $$\text{Status: } [\text{Submitted}] \longrightarrow [\text{Under Auditor Inspection}] \longrightarrow [\text{Approved}] \longrightarrow [\text{Reimbursed Payout}]$$
-   - Ensures full protection of personal finances for Ms. Jatulan, Ms. Genovia, and the student officers by maintaining a visible record of unreimbursed advances until physical cashbox settlement is confirmed.
+     $$\text{Status: } [\text{Submitted}] \longrightarrow [\text{Under Auditor Inspection}] \longrightarrow [\text{Approved}] \longrightarrow [\text{Partially Reimbursed}] \longrightarrow [\text{Fully Settled}]$$
+   - Explicitly records both the individual who advanced personal funds and the authorized claimant requesting reimbursement.
+   - Enforces the **₱1,000.00 prior-approval threshold** and validates submissions against the **7-day post-activity cutoff** to eliminate reporting delays.
+   - Supports **partial cash payouts** when cashbox liquidity is insufficient, safeguarding creditor balances without risking cashbox insolvency.
 
 3. **Digital Mobile Inflow (GCash) & Petty Micro-Disbursement Voucher Subsystem:**
    - Features structured input forms that accommodate both commercial receipts and handwritten petty cash acknowledgment slips for tricycle fares, raw craft supplies, and emergency printing.
-   - Provides designated holding-account tracking for digital GCash balances, capturing withdrawal transaction fees and prompting physical cashbox replenishment to prevent ledger drift.
+   - Accurately tracks GCash inflows from tournament entry fees, upfront merchandise payments, and booth concession commissions.
+   - Automatically logs ₱15.00–₱20.00 withdrawal fees under `"Bank / Cash-Out Fee"` and accounts for 24–48 hour representative remittance timelines.
 
 4. **Physical Denomination Counter & Variance Settlement Audit Engine:**
    - Provides an intuitive, visual currency calculator spanning all legal tender denominations in the Philippines (₱1,000, ₱500, ₱200, ₱100, ₱50, ₱20 bills; ₱20, ₱10, ₱5, ₱1 coins).
    - Automatically computes total physical liquidity and matches it in real time against system ledger balances.
-   - Embeds institutional governance policies for discrepancy resolution: allows the formal justification of allowable minor shortfalls (such as the verified ₱161.00 shortage) as approved expense line items, or guides custodians through structured liability settlement prior to annual leadership turnover.
+   - Embeds institutional governance policies: triggers an immediate visual **spending and activity freeze** upon detecting unverified cash shortages, permits formal justification of minor historical shortfalls (such as the verified ₱161.00 shortage), and records positive cash overages as an unrecorded emergency cashbox buffer.
 
 5. **Institutional 1:1 DOCX Master Exporter & 6-Stage Wet-Ink Routing Generator:**
    - Eliminates formatting rejections by automating document compilation directly from verified database records into a pixel-perfect, 1:1 Microsoft Word (`.docx`) file.
+   - Provides a live web preview and digital draft sharing for Club Advisers prior to physical printing.
    - Pre-populates formal transmittal metadata, borderless financial schedules, itemized disbursement summaries, and the exact six-tier sequential wet-ink signatory blocks:
-     $$\text{Treasurer} \longrightarrow \text{Auditor} \longrightarrow \text{President} \longrightarrow \text{Club Advisers} \longrightarrow \text{BSIT Program Director} \longrightarrow \text{CCS Dean}$$
-   - Guarantees immediate, error-free institutional clearance and protects students and advisers from administrative gridlock.
+     $$\text{Treasurer} \longrightarrow \text{Auditor} \longrightarrow \text{President} \longrightarrow \text{Club Advisers (Dual Sign-Off)} \longrightarrow \text{BSIT Program Director} \longrightarrow \text{CCS Dean}$$
+   - Features **instant report unlocking**: if returned by the Program Director or Dean, the document switches back to editable mode for instant line-item correction and 1-click re-export, bypassing manual reprint paralysis.
+   - Formally carries over verified unpaid Abono claims into next year's opening ledger as certified **Accounts Payable liabilities**.
 
 6. **Grounded Natural-Language AI Financial Co-Pilot:**
-   - Powers frictionless mobile interaction for officers and advisers via Taglish-capable conversational querying (e.g., *"Ilan pa ang pending reimbursement para sa Club Week?"*).
+   - Powers frictionless mobile interaction for officers and advisers via Taglish-capable conversational querying (e.g., *"Ilan pa ang pending reimbursement para sa Club Week?"* or *"Magkano ang natitirang Accounts Payable kay Ma'am Genovia?"*).
    - Architecturally restricted to deterministic database aggregations, guaranteeing that every response is 100% mathematically grounded in verified database tables with zero hallucination.
 
 ---
