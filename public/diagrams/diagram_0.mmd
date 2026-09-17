@@ -3,48 +3,76 @@ flowchart TD
     classDef ent fill:#1e293b,stroke:#0f172a,stroke-width:1.5px,color:#fff;
     classDef store fill:#fef3c7,stroke:#d97706,stroke-width:1.5px,color:#78350f;
 
-    %% Entities
+    %% ========================================================
+    %% EXTERNAL ENTITIES (Strictly Balanced with Context Diagram)
+    %% ========================================================
     STUDENT["Students & Event Participants"]:::ent
     SELLERS["Student Sellers & Booth Concessionaires"]:::ent
-    CLAIMANT["Faculty Advisers & Officers"]:::ent
-    VENDORS["Vendors / Transport Drivers"]:::ent
-    ADMIN["BSIT Director & CCS Dean"]:::ent
+    OFFICERS["LITE Executive Officers & Committees"]:::ent
+    ADVISERS["Faculty Club Advisers"]:::ent
+    VENDORS["Suppliers & Stores (Commercial & Informal)"]:::ent
+    ADMIN["BSIT Program Director & CCS Dean"]:::ent
 
-    %% Data Stores
+    %% ========================================================
+    %% DATA STORES (Physical Repositories of Current System)
+    %% ========================================================
     D1[("D1: Small Metal Cashbox<br/>(Program Director's Room)")]:::store
-    D2[("D2: Personal GCash Accounts<br/>(Treasurer / On-duty Officer)")]:::store
-    D3[("D3: Loose Paper Slips & Receipts<br/>(Envelopes / Folders)")]:::store
+    D2[("D2: Personal GCash Accounts<br/>(Treasurer / On-Duty Officer)")]:::store
+    D3[("D3: Loose Paper Receipts & Expense Slips<br/>(Envelopes / Folders)")]:::store
     D4[("D4: Manual Excel & Word Drafts<br/>(Treasurer's Laptop)")]:::store
 
-    %% Sub-Processes
+    %% ========================================================
+    %% SUB-PROCESSES (4-Phase Chronological Lifecycle)
+    %% ========================================================
     P1(("1.0<br/>Event, Merch &<br/>Booth Fee Collection")):::proc
-    P2(("2.0<br/>Personal Advance<br/>(Abono) & Petty<br/>Disbursement")):::proc
+    P2(("2.0<br/>Personal Advance (Abono)<br/>& Petty Cash<br/>Disbursement")):::proc
     P3(("3.0<br/>End-of-Term Cash<br/>Count & Variance<br/>Reconciliation")):::proc
     P4(("4.0<br/>Manual Financial Report<br/>Drafting & 6-Tier<br/>Wet-Ink Routing")):::proc
 
-    %% Process 1.0 (Collections: Events, Merch, Booth Rent/Percentage - Pure Inflows)
-    STUDENT -->|"Tournament fees & ad-hoc merch payments"| P1
-    SELLERS -->|"Booth rental fees & sales commission remittances"| P1
+    %% --------------------------------------------------------
+    %% PHASE 1: INFLOW COLLECTIONS (Start of Term / Pre-Event)
+    %% --------------------------------------------------------
+    STUDENT -->|"Tournament and event registration fees"| P1
+    STUDENT -->|"Merchandise pre-order payments"| P1
+    SELLERS -->|"Booth rental fees ('arkila')"| P1
+    SELLERS -->|"Sales commission remittances"| P1
 
     P1 -->|"Remit collected physical currency"| D1
     P1 -->|"Record digital GCash wallet balance"| D2
     D2 -->|"Liquidated cash remittance"| P1
 
-    %% Process 2.0 (Abono & Operating Expenses)
-    CLAIMANT -->|"Abono details, purchase receipts & expense slips"| P2
+    %% --------------------------------------------------------
+    %% PHASE 2: ABONO & OPERATING DISBURSEMENTS (Mid-Term)
+    %% --------------------------------------------------------
+    OFFICERS -->|"Abono reimbursement claims"| P2
+    OFFICERS -->|"Official receipts and expense slips"| P2
+    P2 -->|"Cash reimbursement payout"| OFFICERS
+
+    ADVISERS -->|"Activity spending approvals"| P2
+    ADVISERS -->|"Personal advance (abono) claims"| P2
+    P2 -->|"Cash reimbursement payout"| ADVISERS
+
     P2 -->|"Disbursement cash payment"| VENDORS
-    VENDORS -->|"Sales invoices & petty cash slips"| P2
-    P2 -->|"Archive physical receipts & expense slips"| D3
+    VENDORS -->|"Commercial sales invoices"| P2
+    VENDORS -->|"Handwritten fare and stall slips"| P2
+
     D1 -->|"Disburse cash for settlement"| P2
-    P2 -->|"Cash reimbursement payout"| CLAIMANT
+    P2 -->|"Archive physical receipts and slips"| D3
 
-    %% Process 3.0 (Cashbox Reconciliation)
-    D1 -->|"Count physical bills & coins"| P3
-    D3 -->|"Retrieve paper receipts & expense slips"| P3
-    P3 -->|"Tally ledger & record ₱161 shortage"| D4
+    %% --------------------------------------------------------
+    %% PHASE 3: CASHBOX RECONCILIATION (Post-Event / End of Term)
+    %% --------------------------------------------------------
+    D1 -->|"Count physical bills and coins"| P3
+    D3 -->|"Retrieve paper receipts and expense slips"| P3
+    P3 -->|"Tally book ledger records"| D4
+    P3 -->|"Record allowable ₱161 shortage"| D4
 
-    %% Process 4.0 (Financial Report Routing)
+    %% --------------------------------------------------------
+    %% PHASE 4: FINANCIAL REPORT CLEARANCE (End of Academic Cycle)
+    %% --------------------------------------------------------
     D4 -->|"Compile financial report data"| P4
-    P4 -->|"Printed bond paper financial report"| ADMIN
-    ADMIN -->|"Rejection & revision directive"| P4
-    ADMIN -->|"Final signed approval clearance"| D4
+    P4 -->|"Draft financial report for review"| ADVISERS
+    ADVISERS -->|"Financial report verification"| P4
+    P4 -->|"Printed multi-page financial report"| ADMIN
+    ADMIN -->|"Report revision directive"| P4
+    ADMIN -->|"Signed financial clearance"| D4

@@ -93,57 +93,74 @@ async function run() {
   connect(entAdmin, sys0, "Report revision directive");
 
   // ========================================================
-  // 2. DIAGRAM 0 (LEVEL 1 DFD) - Placed at x: 1300, y: 0
+  // 2. DIAGRAM 0 (LEVEL 1 DFD) - Chronological Lifecycle Flow
   // ========================================================
   const title2 = figma.createText();
-  title2.x = 1200;
-  title2.y = -220;
-  title2.characters = "FINLITE: DIAGRAM 0 (LEVEL 1 DFD EXPLOSION)";
+  title2.x = 1000;
+  title2.y = -360;
+  title2.characters = "FINLITE: DIAGRAM 0 (LEVEL 1 DFD - 4-PHASE CHRONOLOGICAL LIFECYCLE)";
   title2.fontSize = 24;
   createdNodes.push(title2);
 
-  // Entities
-  const d0Students = createNode('ROUNDED_RECTANGLE', "Students & Event Participants", 800, -120, 200, 60, C_DARK);
-  const d0Sellers = createNode('ROUNDED_RECTANGLE', "Student Sellers & Booths", 800, 40, 200, 60, C_DARK);
-  const d0Claimants = createNode('ROUNDED_RECTANGLE', "Faculty Advisers & Officers", 800, 240, 200, 60, C_DARK);
-  const d0Vendors = createNode('ROUNDED_RECTANGLE', "Vendors & Drivers", 1350, 360, 180, 60, C_DARK);
-  const d0Admin = createNode('ROUNDED_RECTANGLE', "BSIT Director & CCS Dean", 1950, 360, 180, 60, C_DARK);
+  // Entities (Balanced with Context Diagram)
+  const d0Students = createNode('ROUNDED_RECTANGLE', "Students & Event Participants", 900, -220, 220, 60, C_DARK);
+  const d0Sellers = createNode('ROUNDED_RECTANGLE', "Student Sellers & Booth Concessionaires", 900, -110, 220, 60, C_DARK);
+  const d0Vendors = createNode('ROUNDED_RECTANGLE', "Suppliers & Stores\n(Commercial & Informal)", 1250, 420, 220, 60, C_DARK);
+  const d0Officers = createNode('ROUNDED_RECTANGLE', "LITE Executive Officers & Committees", 900, 110, 220, 60, C_DARK);
+  const d0Advisers = createNode('ROUNDED_RECTANGLE', "Faculty Club Advisers", 900, 240, 220, 60, C_DARK);
+  const d0Admin = createNode('ROUNDED_RECTANGLE', "BSIT Program Director & CCS Dean", 2350, 360, 220, 60, C_DARK);
 
-  // Processes
-  const p1 = createNode('ELLIPSE', "1.0\nEvent, Merch &\nBooth Fee Collection", 1150, -60, 170, 170, C_TEAL);
-  const p2 = createNode('ELLIPSE', "2.0\nPersonal Advance\n(Abono) & Petty Pay", 1150, 180, 170, 170, C_TEAL);
-  const p3 = createNode('ELLIPSE', "3.0\nEnd-of-Term Cash\nReconciliation", 1600, -20, 170, 170, C_TEAL);
-  const p4 = createNode('ELLIPSE', "4.0\nFinancial Report\nDrafting & Routing", 1800, 160, 170, 170, C_TEAL);
+  // Processes (4 Sequential Phases)
+  const p1 = createNode('ELLIPSE', "1.0\nEvent, Merch &\nBooth Fee Collection", 1250, -180, 180, 180, C_TEAL);
+  const p2 = createNode('ELLIPSE', "2.0\nPersonal Advance (Abono)\n& Petty Cash Disbursement", 1250, 140, 180, 180, C_TEAL);
+  const p3 = createNode('ELLIPSE', "3.0\nEnd-of-Term Cash Count\n& Variance Reconciliation", 1700, -20, 180, 180, C_TEAL);
+  const p4 = createNode('ELLIPSE', "4.0\nManual Financial Report\nDrafting & Routing", 2050, 180, 180, 180, C_TEAL);
 
   // Data Stores
-  const dsCashbox = createNode('ROUNDED_RECTANGLE', "D1: Small Metal Cashbox\n(Program Director's Room)", 1450, -160, 220, 60, C_STORE, C_STORE_TXT);
-  const dsGcash = createNode('ROUNDED_RECTANGLE', "D2: Personal GCash Accounts\n(Treasurer / On-Duty Officer)", 1150, -230, 220, 60, C_STORE, C_STORE_TXT);
-  const dsSlips = createNode('ROUNDED_RECTANGLE', "D3: Loose Paper Slips & Receipts\n(Folders / Envelopes)", 1500, 200, 220, 60, C_STORE, C_STORE_TXT);
-  const dsDrafts = createNode('ROUNDED_RECTANGLE', "D4: Manual Excel & Word Drafts\n(Treasurer's Laptop)", 1850, -40, 220, 60, C_STORE, C_STORE_TXT);
+  const dsCashbox = createNode('ROUNDED_RECTANGLE', "D1: Small Metal Cashbox\n(Program Director's Room)", 1650, -180, 230, 60, C_STORE, C_STORE_TXT);
+  const dsGcash = createNode('ROUNDED_RECTANGLE', "D2: Personal GCash Accounts\n(Treasurer / On-Duty Officer)", 1225, -310, 230, 60, C_STORE, C_STORE_TXT);
+  const dsSlips = createNode('ROUNDED_RECTANGLE', "D3: Loose Paper Receipts & Slips\n(Envelopes / Folders)", 1650, 260, 230, 60, C_STORE, C_STORE_TXT);
+  const dsDrafts = createNode('ROUNDED_RECTANGLE', "D4: Manual Excel & Word Drafts\n(Treasurer's Laptop)", 2025, -20, 230, 60, C_STORE, C_STORE_TXT);
 
-  // Diagram 0 Connections
-  connect(d0Students, p1, "Tournament fees & ad-hoc merch");
-  connect(d0Sellers, p1, "Booth rental ('arkila') & % share");
+  // Phase 1 Connections (Collections & Inflows)
+  connect(d0Students, p1, "Tournament and event registration fees");
+  connect(d0Students, p1, "Merchandise pre-order payments");
+  connect(d0Sellers, p1, "Booth rental fees ('arkila')");
+  connect(d0Sellers, p1, "Sales commission remittances");
 
   connect(p1, dsCashbox, "Remit collected physical currency");
-  connect(p1, dsGcash, "Record digital GCash balance");
+  connect(p1, dsGcash, "Record digital GCash wallet balance");
   connect(dsGcash, p1, "Liquidated cash remittance");
 
-  connect(d0Claimants, p2, "Abono details, receipts & slips");
+  // Phase 2 Connections (Abono & Operations)
+  connect(d0Officers, p2, "Abono reimbursement claims");
+  connect(d0Officers, p2, "Official receipts and expense slips");
+  connect(p2, d0Officers, "Cash reimbursement payout");
+
+  connect(d0Advisers, p2, "Activity spending approvals");
+  connect(d0Advisers, p2, "Personal advance (abono) claims");
+  connect(p2, d0Advisers, "Cash reimbursement payout");
+
   connect(p2, d0Vendors, "Disbursement cash payment");
-  connect(d0Vendors, p2, "Sales invoices & petty cash slips");
-  connect(p2, dsSlips, "Archive receipts & expense slips");
+  connect(d0Vendors, p2, "Commercial sales invoices");
+  connect(d0Vendors, p2, "Handwritten fare and stall slips");
+
   connect(dsCashbox, p2, "Disburse cash for settlement");
-  connect(p2, d0Claimants, "Cash reimbursement payout");
+  connect(p2, dsSlips, "Archive physical receipts and slips");
 
-  connect(dsCashbox, p3, "Count physical bills & coins");
-  connect(dsSlips, p3, "Retrieve receipts & expense slips");
-  connect(p3, dsDrafts, "Tally ledger & record shortage");
+  // Phase 3 Connections (Audit & Reconciliation)
+  connect(dsCashbox, p3, "Count physical bills and coins");
+  connect(dsSlips, p3, "Retrieve paper receipts and expense slips");
+  connect(p3, dsDrafts, "Tally book ledger records");
+  connect(p3, dsDrafts, "Record allowable ₱161 shortage");
 
+  // Phase 4 Connections (Financial Report & Clearance)
   connect(dsDrafts, p4, "Compile financial report data");
-  connect(p4, d0Admin, "Printed bond paper financial report");
-  connect(d0Admin, p4, "Rejection & revision directive");
-  connect(d0Admin, dsDrafts, "Final signed clearance");
+  connect(p4, d0Advisers, "Draft financial report for review");
+  connect(d0Advisers, p4, "Financial report verification");
+  connect(p4, d0Admin, "Printed multi-page financial report");
+  connect(d0Admin, p4, "Report revision directive");
+  connect(d0Admin, dsDrafts, "Signed financial clearance");
 
   // Zoom into view
   figma.viewport.scrollAndZoomIntoView(createdNodes);
