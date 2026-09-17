@@ -10,17 +10,17 @@ flowchart TD
 
     SYS(("0.0<br/>Existing LITE Manual<br/>Financial & Liquidation<br/>System")):::sys
 
-    STUDENT -->|"Cash dues & merchandise payments"| SYS
-    SYS -->|"Merchandise items & manual paper receipts"| STUDENT
+    STUDENT -->|"Membership & merch order details"| SYS
+    SYS -->|"Official collection receipt & claim stub"| STUDENT
 
-    OFFICERS -->|"Out-of-pocket expenses (Abono) & receipts"| SYS
-    SYS -->|"Delayed cashbox reimbursements"| OFFICERS
+    OFFICERS -->|"Expense vouchers, abono details & receipts"| SYS
+    SYS -->|"Reimbursement payout & acknowledgment"| OFFICERS
 
-    ADVISERS -->|"Personal advances & verbal/chat approvals"| SYS
-    SYS -->|"Liquidated cash refunds & draft reports"| ADVISERS
+    ADVISERS -->|"Personal advance details & budget approval"| SYS
+    SYS -->|"Liquidation summary & refund slip"| ADVISERS
 
-    SYS -->|"Disbursement payments"| VENDORS
+    SYS -->|"Disbursement details & payment"| VENDORS
     VENDORS -->|"Sales invoices & handwritten fare/stall slips"| SYS
 
     SYS -->|"Printed multi-page liquidation report"| ADMIN
-    ADMIN -->|"Signed clearance OR rejection/reprint directive"| SYS
+    ADMIN -->|"Signed clearance OR rejection directive"| SYS

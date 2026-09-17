@@ -18,24 +18,24 @@ flowchart TD
     P3(("3.0<br/>End-of-Term Cash<br/>Count & Variance<br/>Reconciliation")):::proc
     P4(("4.0<br/>Manual Report<br/>Drafting & 6-Tier<br/>Wet-Ink Routing")):::proc
 
-    STUDENT -->|"Cash dues & merch fees"| P1
-    STUDENT -->|"Digital GCash payments"| P1
-    P1 -->|"Deposit physical bills/coins"| D1
-    P1 -->|"Accumulate digital balance"| D2
-    D2 -->|"Manual cash-out (minus ₱15-20 fee)"| P1
+    STUDENT -->|"Dues & merchandise fee payments"| P1
+    STUDENT -->|"Digital GCash payment confirmations"| P1
+    P1 -->|"Remit collected physical currency"| D1
+    P1 -->|"Record digital wallet balance"| D2
+    D2 -->|"Liquidated cash remittance"| P1
 
-    CLAIMANT -->|"Advance personal funds for urgent supplies"| P2
-    P2 -->|"Cash payment"| VENDORS
-    VENDORS -->|"Paper ORs & handwritten fare slips"| P2
-    P2 -->|"Store crumpled/faded receipts"| D3
-    D1 -->|"Extract physical cash for reimbursement"| P2
-    P2 -->|"Delayed cash refund"| CLAIMANT
+    CLAIMANT -->|"Abono expense claim & voucher"| P2
+    P2 -->|"Disbursement payment"| VENDORS
+    VENDORS -->|"Sales invoices & petty cash slips"| P2
+    P2 -->|"Archive physical paper slips"| D3
+    D1 -->|"Disburse cash for settlement"| P2
+    P2 -->|"Reimbursement payout & acknowledgment"| CLAIMANT
 
-    D1 -->|"Extract physical bills & coins"| P3
-    D3 -->|"Retrieve loose paper expense slips"| P3
-    P3 -->|"Tally mental math & declare ₱161 shortage or officer abono"| D4
+    D1 -->|"Count physical bills & coins"| P3
+    D3 -->|"Retrieve paper expense vouchers"| P3
+    P3 -->|"Tally ledger & record ₱161 shortage"| D4
 
-    D4 -->|"Compile figures into Times New Roman layout"| P4
-    P4 -->|"Printed hard copy on bond paper"| ADMIN
-    ADMIN -->|"Rejection due to layout/math error"| P4
+    D4 -->|"Compile financial statement data"| P4
+    P4 -->|"Printed bond paper report"| ADMIN
+    ADMIN -->|"Rejection & revision directive"| P4
     ADMIN -->|"Final signed clearance"| D4
