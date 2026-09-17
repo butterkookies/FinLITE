@@ -1,0 +1,26 @@
+flowchart TD
+    classDef sys fill:#064e3b,stroke:#022c22,stroke-width:2px,color:#fff;
+    classDef ent fill:#1e293b,stroke:#0f172a,stroke-width:1.5px,color:#fff;
+
+    STUDENT["Students / Club Members"]:::ent
+    OFFICERS["LITE Executive Officers & Committees"]:::ent
+    ADVISERS["Faculty Club Advisers"]:::ent
+    ADMIN["BSIT Program Director & CCS Dean"]:::ent
+    VENDORS["Suppliers & Stores (Commercial & Informal)"]:::ent
+
+    SYS(("0.0<br/>Existing LITE Manual<br/>Financial & Liquidation<br/>System")):::sys
+
+    STUDENT -->|"Cash dues & merchandise payments"| SYS
+    SYS -->|"Merchandise items & manual paper receipts"| STUDENT
+
+    OFFICERS -->|"Out-of-pocket expenses (Abono) & receipts"| SYS
+    SYS -->|"Delayed cashbox reimbursements"| OFFICERS
+
+    ADVISERS -->|"Personal advances & verbal/chat approvals"| SYS
+    SYS -->|"Liquidated cash refunds & draft reports"| ADVISERS
+
+    SYS -->|"Disbursement payments"| VENDORS
+    VENDORS -->|"Sales invoices & handwritten fare/stall slips"| SYS
+
+    SYS -->|"Printed multi-page liquidation report"| ADMIN
+    ADMIN -->|"Signed clearance OR rejection/reprint directive"| SYS
