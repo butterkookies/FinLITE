@@ -42,41 +42,55 @@ async function run() {
   const C_STORE_TXT = { r: 0.47, g: 0.21, b: 0.06 };
 
   // ========================================================
-  // 1. CONTEXT DIAGRAM (LEVEL 0) - Placed at x: 0, y: 0
+  // 1. CONTEXT DIAGRAM (LEVEL 0) - Timeline Layout (LR Flow)
   // ========================================================
   const title1 = figma.createText();
-  title1.x = -150;
-  title1.y = -220;
-  title1.characters = "FINLITE: CONTEXT DIAGRAM (LEVEL 0 DFD)";
+  title1.x = -200;
+  title1.y = -360;
+  title1.characters = "FINLITE: CONTEXT DIAGRAM (CHRONOLOGICAL LIFECYCLE)";
   title1.fontSize = 24;
   createdNodes.push(title1);
 
-  // Central Process Bubble
-  const sys0 = createNode('ELLIPSE', "0.0\nExisting LITE Manual\nFinancial Management &\nReporting System", 0, 0, 240, 240, C_GREEN);
+  // Central Process Bubble (Center)
+  const sys0 = createNode('ELLIPSE', "0.0\nExisting LITE Manual\nFinancial Management &\nReporting System", -120, -120, 240, 240, C_GREEN);
 
-  // External Entities (6 Entities)
-  const entStudents = createNode('ROUNDED_RECTANGLE', "Students & Event Participants", -420, -140, 220, 70, C_DARK);
-  const entSellers = createNode('ROUNDED_RECTANGLE', "Student Sellers & Booth\nConcessionaires", -420, 60, 220, 70, C_DARK);
-  const entOfficers = createNode('ROUNDED_RECTANGLE', "LITE Executive Officers\n& Committees", -420, 240, 220, 70, C_DARK);
-  const entAdvisers = createNode('ROUNDED_RECTANGLE', "Faculty Club Advisers", 320, -140, 200, 70, C_DARK);
-  const entVendors = createNode('ROUNDED_RECTANGLE', "Suppliers & Stores\n(Commercial & Informal)", 320, 100, 200, 70, C_DARK);
-  const entAdmin = createNode('ROUNDED_RECTANGLE', "BSIT Program Director\n& CCS Dean", -30, 380, 220, 70, C_DARK);
+  // Phase 1: Inflow Sources (LEFT - Academic Term Inflows)
+  const entStudents = createNode('ROUNDED_RECTANGLE', "Students & Event Participants", -660, -180, 250, 70, C_DARK);
+  const entSellers = createNode('ROUNDED_RECTANGLE', "Student Sellers & Booth\nConcessionaires", -660, 60, 250, 70, C_DARK);
 
-  // Context Flows
-  connect(entStudents, sys0, "Event registration & merch payments");
-  connect(entSellers, sys0, "Booth rental fees ('arkila') & % share");
+  // Phase 2: Operations & Reimbursements (CENTER TOP & BOTTOM)
+  const entVendors = createNode('ROUNDED_RECTANGLE', "Suppliers & Stores\n(Commercial & Informal)", -125, -280, 250, 70, C_DARK);
+  const entOfficers = createNode('ROUNDED_RECTANGLE', "LITE Executive Officers\n& Committees", -300, 240, 240, 70, C_DARK);
+  const entAdvisers = createNode('ROUNDED_RECTANGLE', "Faculty Club Advisers", 40, 240, 240, 70, C_DARK);
 
-  connect(entOfficers, sys0, "Abono details, receipts & slips");
+  // Phase 3: Administrative Clearance (RIGHT - End of Semester)
+  const entAdmin = createNode('ROUNDED_RECTANGLE', "BSIT Program Director\n& CCS Dean", 480, -35, 240, 70, C_DARK);
+
+  // --- Phase 1 Inflow Connections (Left to Center) ---
+  connect(entStudents, sys0, "Tournament & event registration fees");
+  connect(entStudents, sys0, "Merchandise pre-order payments");
+
+  connect(entSellers, sys0, "Booth rental fees ('arkila')");
+  connect(entSellers, sys0, "Sales commission remittances");
+
+  // --- Phase 2 Operations Connections (Center / Internal) ---
+  connect(sys0, entVendors, "Disbursement cash payment");
+  connect(entVendors, sys0, "Commercial sales invoices");
+  connect(entVendors, sys0, "Handwritten fare and stall slips");
+
+  connect(entOfficers, sys0, "Abono reimbursement claims");
+  connect(entOfficers, sys0, "Official receipts & expense slips");
   connect(sys0, entOfficers, "Cash reimbursement payout");
 
-  connect(entAdvisers, sys0, "Personal advance & activity approval");
-  connect(sys0, entAdvisers, "Cash reimbursement & draft report");
+  connect(entAdvisers, sys0, "Activity spending approvals");
+  connect(entAdvisers, sys0, "Personal advance (abono) claims");
+  connect(sys0, entAdvisers, "Cash reimbursement payout");
+  connect(sys0, entAdvisers, "Draft financial report for review");
 
-  connect(sys0, entVendors, "Disbursement cash payment");
-  connect(entVendors, sys0, "Sales invoices & handwritten fare slips");
-
+  // --- Phase 3 Clearance Connections (Center to Right) ---
   connect(sys0, entAdmin, "Printed multi-page financial report");
-  connect(entAdmin, sys0, "Signed clearance OR rejection directive");
+  connect(entAdmin, sys0, "Signed financial clearance");
+  connect(entAdmin, sys0, "Report revision directive");
 
   // ========================================================
   // 2. DIAGRAM 0 (LEVEL 1 DFD) - Placed at x: 1300, y: 0
