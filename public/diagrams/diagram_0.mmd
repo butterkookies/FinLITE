@@ -1,48 +1,64 @@
-flowchart TD
+flowchart LR
     classDef proc fill:#0f766e,stroke:#115e59,stroke-width:1.5px,color:#fff;
     classDef ent fill:#1e293b,stroke:#0f172a,stroke-width:1.5px,color:#fff;
     classDef store fill:#fef3c7,stroke:#d97706,stroke-width:1.5px,color:#78350f;
 
     %% ========================================================
-    %% EXTERNAL ENTITIES (Strictly Balanced with Context Diagram)
+    %% PHASE 1 SWIMLANE: INFLOW SOURCES & DIGITAL INTAKE
     %% ========================================================
-    STUDENT["Students & Event Participants"]:::ent
-    SELLERS["Student Sellers & Booth Concessionaires"]:::ent
-    OFFICERS["LITE Executive Officers & Committees"]:::ent
-    ADVISERS["Faculty Club Advisers"]:::ent
-    VENDORS["Suppliers & Stores (Commercial & Informal)"]:::ent
-    ADMIN["BSIT Program Director & CCS Dean"]:::ent
+    subgraph PHASE1 ["Phase 1: Inflows & Fee Collection"]
+        direction TB
+        STUDENT["Students & Event Participants"]:::ent
+        SELLERS["Student Sellers & Booth Concessionaires"]:::ent
+        P1(("1.0<br/>Event, Merch &<br/>Booth Fee Collection")):::proc
+        D2[("D2: Personal GCash Accounts<br/>(Treasurer / On-Duty Officer)")]:::store
+    end
 
     %% ========================================================
-    %% DATA STORES (Physical Repositories of Current System)
+    %% PHASE 2 SWIMLANE: OPERATING ADVANCES & DISBURSEMENTS
     %% ========================================================
-    D1[("D1: Small Metal Cashbox<br/>(Program Director's Room)")]:::store
-    D2[("D2: Personal GCash Accounts<br/>(Treasurer / On-Duty Officer)")]:::store
-    D3[("D3: Physical Receipts & Paper Records<br/>(Envelopes / Document Folders)")]:::store
-    D4[("D4: Manual Excel Spreadsheets<br/>& Word Documents")]:::store
+    subgraph PHASE2 ["Phase 2: Abono & Operating Disbursements"]
+        direction TB
+        OFFICERS["LITE Executive Officers & Committees"]:::ent
+        ADVISERS["Faculty Club Advisers<br/>(Approvals & Advances)"]:::ent
+        P2(("2.0<br/>Personal Advance (Abono)<br/>& Petty Cash Disbursement")):::proc
+        VENDORS["Suppliers & Stores<br/>(Commercial & Informal)"]:::ent
+    end
 
     %% ========================================================
-    %% SUB-PROCESSES (4-Phase Chronological Lifecycle)
+    %% CENTRAL REPOSITORIES (PHYSICAL STORAGE VAULT)
     %% ========================================================
-    P1(("1.0<br/>Event, Merch &<br/>Booth Fee Collection")):::proc
-    P2(("2.0<br/>Personal Advance (Abono)<br/>& Petty Cash<br/>Disbursement")):::proc
-    P3(("3.0<br/>End-of-Term Cash<br/>Count & Variance<br/>Reconciliation")):::proc
-    P4(("4.0<br/>Manual Financial Report<br/>Drafting & 6-Tier<br/>Wet-Ink Routing")):::proc
+    subgraph STORES ["Physical Storage Repositories"]
+        direction TB
+        D1[("D1: Small Metal Cashbox<br/>(Program Director's Room)")]:::store
+        D3[("D3: Physical Receipts & Paper Records<br/>(Envelopes / Document Folders)")]:::store
+    end
+
+    %% ========================================================
+    %% PHASE 3 & 4 SWIMLANE: AUDIT, REPORTING & CLEARANCE
+    %% ========================================================
+    subgraph PHASE34 ["Phase 3 & 4: Reconciliation & Clearance"]
+        direction TB
+        P3(("3.0<br/>End-of-Term Cash Count<br/>& Variance Reconciliation")):::proc
+        D4[("D4: Manual Excel Spreadsheets<br/>& Word Documents")]:::store
+        P4(("4.0<br/>Manual Financial Report<br/>Drafting & 6-Tier Routing")):::proc
+        ADMIN["BSIT Program Director<br/>& CCS Dean"]:::ent
+        ADVISERS_REV["Faculty Club Advisers<br/>(Report Verification)"]:::ent
+    end
 
     %% --------------------------------------------------------
-    %% PHASE 1: INFLOW COLLECTIONS (Start of Term / Pre-Event)
+    %% Phase 1 Connections (Collections & Digital Intake)
     %% --------------------------------------------------------
     STUDENT -->|"Tournament and event registration fees"| P1
     STUDENT -->|"Merchandise pre-order payments"| P1
     SELLERS -->|"Booth rental fees ('arkila')"| P1
     SELLERS -->|"Sales commission remittances"| P1
-
-    P1 -->|"Remit collected physical currency"| D1
     P1 -->|"Record digital GCash wallet balance"| D2
     D2 -->|"Liquidated cash remittance"| P1
+    P1 -->|"Remit collected physical currency"| D1
 
     %% --------------------------------------------------------
-    %% PHASE 2: ABONO & OPERATING DISBURSEMENTS (Mid-Term)
+    %% Phase 2 Connections (Abono Advances & Settlements)
     %% --------------------------------------------------------
     OFFICERS -->|"Abono reimbursement claims"| P2
     OFFICERS -->|"Official receipts and expense slips"| P2
@@ -60,18 +76,18 @@ flowchart TD
     P2 -->|"Archive physical receipts and slips"| D3
 
     %% --------------------------------------------------------
-    %% PHASE 3: CASHBOX RECONCILIATION (Post-Event / End of Term)
+    %% Phase 3 Connections (Cashbox Audit & Reconciliation)
     %% --------------------------------------------------------
     D1 -->|"Count physical bills and coins"| P3
     D3 -->|"Retrieve paper receipts and expense slips"| P3
     P3 -->|"Tally book ledger records"| D4
 
     %% --------------------------------------------------------
-    %% PHASE 4: FINANCIAL REPORT CLEARANCE (End of Academic Cycle)
+    %% Phase 4 Connections (Report Drafting & Wet-Ink Routing)
     %% --------------------------------------------------------
     D4 -->|"Compile financial report data"| P4
-    P4 -->|"Draft financial report for review"| ADVISERS
-    ADVISERS -->|"Financial report verification"| P4
+    P4 -->|"Draft financial report for review"| ADVISERS_REV
+    ADVISERS_REV -->|"Financial report verification"| P4
     P4 -->|"Printed multi-page financial report"| ADMIN
     ADMIN -->|"Report revision directive"| P4
     ADMIN -->|"Signed financial clearance"| P4

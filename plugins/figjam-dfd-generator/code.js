@@ -94,34 +94,39 @@ async function run() {
     connect(entAdmin, sys0, "Report revision directive");
 
     // ========================================================
-    // 2. DIAGRAM 0 (LEVEL 1 DFD) - Chronological Lifecycle Flow
+    // 2. DIAGRAM 0 (LEVEL 1 DFD) - 5-Column Air-Gapped Grid
     // ========================================================
     const title2 = figma.createText();
-    title2.x = 1000;
-    title2.y = -360;
+    title2.x = 1200;
+    title2.y = -460;
     title2.characters = "FINLITE: DIAGRAM 0 (LEVEL 1 DFD - 4-PHASE CHRONOLOGICAL LIFECYCLE)";
-    title2.fontSize = 24;
+    title2.fontSize = 26;
     createdNodes.push(title2);
 
-    // Entities (Balanced with Context Diagram)
-    const d0Students = createNode('ROUNDED_RECTANGLE', "Students & Event Participants", 900, -220, 220, 60, C_DARK);
-    const d0Sellers = createNode('ROUNDED_RECTANGLE', "Student Sellers & Booth Concessionaires", 900, -110, 220, 60, C_DARK);
-    const d0Vendors = createNode('ROUNDED_RECTANGLE', "Suppliers & Stores\n(Commercial & Informal)", 1250, 420, 220, 60, C_DARK);
-    const d0Officers = createNode('ROUNDED_RECTANGLE', "LITE Executive Officers & Committees", 900, 110, 220, 60, C_DARK);
-    const d0Advisers = createNode('ROUNDED_RECTANGLE', "Faculty Club Advisers", 900, 240, 220, 60, C_DARK);
-    const d0Admin = createNode('ROUNDED_RECTANGLE', "BSIT Program Director & CCS Dean", 2350, 360, 220, 60, C_DARK);
+    // --- COLUMN 1: INFLOW SOURCES & CLAIMANTS (x: 1200) ---
+    const d0Students = createNode('ROUNDED_RECTANGLE', "Students & Event Participants", 1200, -260, 260, 70, C_DARK);
+    const d0Sellers = createNode('ROUNDED_RECTANGLE', "Student Sellers & Booth\nConcessionaires", 1200, -100, 260, 70, C_DARK);
+    const d0Officers = createNode('ROUNDED_RECTANGLE', "LITE Executive Officers\n& Committees", 1200, 180, 260, 70, C_DARK);
+    const d0Advisers = createNode('ROUNDED_RECTANGLE', "Faculty Club Advisers\n(Approvals & Advances)", 1200, 340, 260, 70, C_DARK);
 
-    // Processes (4 Sequential Phases)
-    const p1 = createNode('ELLIPSE', "1.0\nEvent, Merch &\nBooth Fee Collection", 1250, -180, 180, 180, C_TEAL);
-    const p2 = createNode('ELLIPSE', "2.0\nPersonal Advance (Abono)\n& Petty Cash Disbursement", 1250, 140, 180, 180, C_TEAL);
-    const p3 = createNode('ELLIPSE', "3.0\nEnd-of-Term Cash Count\n& Variance Reconciliation", 1700, -20, 180, 180, C_TEAL);
-    const p4 = createNode('ELLIPSE', "4.0\nManual Financial Report\nDrafting & Routing", 2050, 180, 180, 180, C_TEAL);
+    // --- COLUMN 2: OPERATIONS PROCESSES (x: 1750) ---
+    const p1 = createNode('ELLIPSE', "1.0\nEvent, Merch &\nBooth Fee Collection", 1750, -220, 200, 200, C_TEAL);
+    const p2 = createNode('ELLIPSE', "2.0\nPersonal Advance (Abono)\n& Petty Cash Disbursement", 1750, 220, 200, 200, C_TEAL);
+    const d0Vendors = createNode('ROUNDED_RECTANGLE', "Suppliers & Stores\n(Commercial & Informal)", 1720, 540, 260, 70, C_DARK);
 
-    // Data Stores
-    const dsCashbox = createNode('ROUNDED_RECTANGLE', "D1: Small Metal Cashbox\n(Program Director's Room)", 1650, -180, 230, 60, C_STORE, C_STORE_TXT);
-    const dsGcash = createNode('ROUNDED_RECTANGLE', "D2: Personal GCash Accounts\n(Treasurer / On-Duty Officer)", 1225, -310, 230, 60, C_STORE, C_STORE_TXT);
-    const dsSlips = createNode('ROUNDED_RECTANGLE', "D3: Physical Receipts & Paper Records\n(Envelopes / Document Folders)", 1650, 260, 230, 60, C_STORE, C_STORE_TXT);
-    const dsDrafts = createNode('ROUNDED_RECTANGLE', "D4: Manual Excel Spreadsheets\n& Word Documents", 2025, -20, 230, 60, C_STORE, C_STORE_TXT);
+    // --- COLUMN 3: REPOSITORIES / VAULT (x: 2300) ---
+    const dsGcash = createNode('ROUNDED_RECTANGLE', "D2: Personal GCash Accounts\n(Treasurer / On-Duty Officer)", 2300, -340, 260, 70, C_STORE, C_STORE_TXT);
+    const dsCashbox = createNode('ROUNDED_RECTANGLE', "D1: Small Metal Cashbox\n(Program Director's Room)", 2300, -100, 260, 70, C_STORE, C_STORE_TXT);
+    const dsSlips = createNode('ROUNDED_RECTANGLE', "D3: Physical Receipts & Paper Records\n(Envelopes / Document Folders)", 2300, 220, 260, 70, C_STORE, C_STORE_TXT);
+
+    // --- COLUMN 4: AUDIT & CLEARANCE PROCESSES (x: 2850) ---
+    const p3 = createNode('ELLIPSE', "3.0\nEnd-of-Term Cash Count\n& Variance Reconciliation", 2850, -100, 200, 200, C_TEAL);
+    const p4 = createNode('ELLIPSE', "4.0\nManual Financial Report\nDrafting & 6-Tier Routing", 2850, 220, 200, 200, C_TEAL);
+
+    // --- COLUMN 5: FINAL REGISTRY & CLEARANCE (x: 3400) ---
+    const dsDrafts = createNode('ROUNDED_RECTANGLE', "D4: Manual Excel Spreadsheets\n& Word Documents", 3400, -100, 260, 70, C_STORE, C_STORE_TXT);
+    const d0Admin = createNode('ROUNDED_RECTANGLE', "BSIT Program Director\n& CCS Dean", 3400, 180, 260, 70, C_DARK);
+    const d0AdvisersRev = createNode('ROUNDED_RECTANGLE', "Faculty Club Advisers\n(Financial Report Review)", 3400, 340, 260, 70, C_DARK);
 
     // Phase 1 Connections (Collections & Inflows)
     connect(d0Students, p1, "Tournament and event registration fees");
@@ -156,8 +161,8 @@ async function run() {
 
     // Phase 4 Connections (Financial Report & Clearance)
     connect(dsDrafts, p4, "Compile financial report data");
-    connect(p4, d0Advisers, "Draft financial report for review");
-    connect(d0Advisers, p4, "Financial report verification");
+    connect(p4, d0AdvisersRev, "Draft financial report for review");
+    connect(d0AdvisersRev, p4, "Financial report verification");
     connect(p4, d0Admin, "Printed multi-page financial report");
     connect(d0Admin, p4, "Report revision directive");
     connect(d0Admin, p4, "Signed financial clearance");
