@@ -12,13 +12,11 @@ flowchart TD
 
     SYS(("0.0<br/>Existing LITE Manual<br/>Financial & Liquidation<br/>System")):::sys
 
-    %% 1. Students & Event Participants (Events & Ad-hoc Merch)
+    %% 1. Students & Event Participants (Events & Ad-hoc Merch - Pure Inflow / Source Only)
     STUDENT -->|"Event registration fees & ad-hoc merch payments"| SYS
-    SYS -->|"Official collection receipt, entry pass & claim stub"| STUDENT
 
-    %% 2. Student Sellers & Booth Concessionaires (Arkila & Percentage Sharing)
+    %% 2. Student Sellers & Booth Concessionaires (Arkila & Percentage Sharing - Pure Inflow / Source Only)
     SELLERS -->|"Booth rental fees ('arkila') & sales percentage remittances"| SYS
-    SYS -->|"Rental acknowledgment receipt & booth clearance"| SELLERS
 
     %% 3. Executive Officers (Abono & Petty Expenses)
     OFFICERS -->|"Expense vouchers, abono details & receipts"| SYS

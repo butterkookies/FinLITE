@@ -22,12 +22,9 @@ flowchart TD
     P3(("3.0<br/>End-of-Term Cash<br/>Count & Variance<br/>Reconciliation")):::proc
     P4(("4.0<br/>Manual Report<br/>Drafting & 6-Tier<br/>Wet-Ink Routing")):::proc
 
-    %% Process 1.0 (Collections: Events, Merch, Booth Rent/Percentage)
+    %% Process 1.0 (Collections: Events, Merch, Booth Rent/Percentage - Pure Inflows)
     STUDENT -->|"Tournament fees & ad-hoc merch payments"| P1
-    P1 -->|"Official receipts, entry passes & claim stubs"| STUDENT
-
     SELLERS -->|"Booth rental fees & sales commission remittances"| P1
-    P1 -->|"Rental acknowledgment & booth clearance"| SELLERS
 
     P1 -->|"Remit collected physical currency"| D1
     P1 -->|"Record digital GCash wallet balance"| D2

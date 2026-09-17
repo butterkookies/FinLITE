@@ -64,10 +64,7 @@ async function run() {
 
   // Context Flows
   connect(entStudents, sys0, "Event registration & merch payments");
-  connect(sys0, entStudents, "Official receipt, entry pass & claim stub");
-
   connect(entSellers, sys0, "Booth rental fees ('arkila') & % share");
-  connect(sys0, entSellers, "Rental acknowledgment & booth clearance");
 
   connect(entOfficers, sys0, "Expense vouchers, abono details & receipts");
   connect(sys0, entOfficers, "Reimbursement payout & acknowledgment");
@@ -112,10 +109,7 @@ async function run() {
 
   // Diagram 0 Connections
   connect(d0Students, p1, "Tournament fees & ad-hoc merch");
-  connect(p1, d0Students, "Receipts & entry/claim stubs");
-
   connect(d0Sellers, p1, "Booth rental ('arkila') & % share");
-  connect(p1, d0Sellers, "Rental receipt & booth clearance");
 
   connect(p1, dsCashbox, "Remit collected physical currency");
   connect(p1, dsGcash, "Record digital GCash balance");
