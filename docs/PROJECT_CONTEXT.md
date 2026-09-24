@@ -1,4 +1,4 @@
-# PROJECT CONTEXT: FINLITE FINANCIAL ASSISTANT SYSTEM
+# PROJECT CONTEXT: FINLITE FINANCIAL MANAGEMENT & AUTOMATED DOCUMENT GENERATION SYSTEM
 **Academic Course & Requirement:** ITE-SAD (Systems Analysis and Design) | BSIT-31A  
 **Host Higher Education Institution:** Pambayang Dalubhasaan ng Marilao (PDM) – College of Computer Studies (CCS)  
 **Institutional Classification:** Local College / Local University and College (LUC) | Abangan Norte, Marilao, Bulacan  
@@ -6,7 +6,7 @@
 **Project Proponents:** Andrei John P. Geronimo, Christian Rey C. Kasilag (*Technical Writer*), Emanuel Malbarosa, Ervin James Ramos  
 **Designated Faculty Club Advisers:** Ms. Kimberly Dawn Jatulan and Ms. Krizia Mae Genovia  
 **Institutional Approving Authorities:** BSIT Program Director Jovylyn Ortiz-Cesar, MBA, MSIT; CCS Dean Dr. Emraida Marie M. Manucom  
-**Project Title:** **FinLITE: A Web-Based Financial Assistant System for the League of Information Technology Enthusiasts**
+**Project Title:** **FinLITE: A Web-Based Financial Management and Automated Document Generation System for the League of Information Technology Enthusiasts**
 
 ---
 
@@ -15,7 +15,7 @@
 ### 1.1 Conceptual Foundation & The "Financial Assistant" Paradigm
 In collegiate academic governance, computerized financial systems frequently fail to achieve operational adoption due to an architectural mismatch: the imposition of heavyweight Enterprise Resource Planning (ERP) frameworks upon volunteer-driven student organizations. Conventional corporate accounting software (e.g., SAP, QuickBooks, or Odoo) mandates rigorous double-entry bookkeeping, multi-layered procurement requisitions, formal chart-of-accounts maintenance, and certified accounting expertise. For academic student organizations operating within local tertiary colleges, such platforms introduce severe cognitive and operational friction. Student officers—elected primarily for leadership and technical capabilities rather than professional bookkeeping proficiency—invariably abandon high-friction platforms, reverting to unstructured paper slips, loose notebooks, and informal mobile messaging threads.
 
-**FinLITE: A Web-Based Financial Assistant System for the League of Information Technology Enthusiasts** resolves this systemic vulnerability by intentionally discarding the rigid ERP paradigm in favor of an **Operational Financial Co-Pilot**. FinLITE is engineered specifically around the empirical constraints of collegiate student leadership at Pambayang Dalubhasaan ng Marilao (PDM). Rather than functioning as an administrative barrier, FinLITE operates as an agile, low-friction, single-entry operational ledger paired with automated cognitive assistance, mathematical verification, and institutional document compilation. It provides student treasurers, auditors, and faculty advisers with an intelligent operational assistant that eliminates manual arithmetic errors, provides continuous visibility over physical and digital funds, and automates institutional report generation without demanding formal accounting credentials.
+**FinLITE: A Web-Based Financial Management and Automated Document Generation System for the League of Information Technology Enthusiasts** resolves this systemic vulnerability by intentionally discarding the rigid ERP paradigm in favor of an **Operational Financial Co-Pilot and Automated Document Generator**. FinLITE is engineered specifically around the empirical constraints of collegiate student leadership at Pambayang Dalubhasaan ng Marilao (PDM). Rather than functioning as an administrative barrier, FinLITE operates as an agile, low-friction, single-entry operational ledger paired with automated cognitive assistance, mathematical verification, and institutional document compilation. It provides student treasurers, auditors, and faculty advisers with an intelligent operational assistant that eliminates manual arithmetic errors, provides continuous visibility over physical and digital funds, and automates institutional report and proposal generation without demanding formal accounting credentials. Furthermore, while piloted for LITE in SAD, the system architecture is structured for campus-wide scalability to all recognized student organizations in PDM for the Capstone project.
 
 ```mermaid
 graph TD
@@ -54,8 +54,8 @@ FinLITE encompasses five purpose-built functional subsystems that systematically
 4. **Grounded, Deterministic AI Financial Co-Pilot (Zero-Hallucination Query Engine):**
    FinLITE integrates an intelligent, natural-language query interface capable of parsing inquiries in English and colloquial Filipino/Taglish (e.g., *"Magkano pa ang hindi nare-reimburse kay Ma'am Jatulan?"* or *"What is our net liquidity after Club Week?"*). Crucially, the AI co-pilot operates under strict **deterministic grounding**: it generates read-only Structured Query Language (SQL) aggregations against the verified PostgreSQL database and is strictly prohibited from estimating, extrapolating, or synthesizing mathematical figures. If data does not exist, the assistant explicitly reports its absence, guaranteeing absolute arithmetical integrity.
 
-5. **Automated Institutional Exporter & 1:1 Word (`.docx`) Report Compiler:**
-   To resolve the severe administrative bottleneck of end-of-term academic clearances, FinLITE features a live in-browser report simulation engine coupled with a serverless Microsoft Word (`.docx`) compiler. The system compiles live transaction data directly into the approved, standardized College of Computer Studies (CCS) financial layout—faithfully reproducing Times New Roman typography, formal transmittal headers, exact borderless financial tables, and the mandatory six-tier sequential wet-ink signatory block ready for immediate institutional printing and administrative routing.
+5. **Automated Institutional Document Compiler & Interactive HTML Pre-Generation Preview:**
+   To resolve the severe administrative bottleneck of document rejections and lengthy academic clearances, FinLITE features an automated document generation engine paired with an **Interactive HTML Pre-Generation Preview**. The system automates both pre-activity **Business Proposals** (e.g., Club Week booth product sales, pricing markup, unit forecasts, and budget requests) and post-activity **Financial Liquidation Reports**. Before compiling the final Microsoft Word (`.docx`) file, the system renders a 1:1 "digital paper" preview in the browser where officers can inspect the layout, verify line items, and make in-place manual edits (e.g., transmittal dates, signatory designations, remarks). Once verified, the Node.js OpenXML engine compiles the document directly into the approved College of Computer Studies (CCS) layout—faithfully reproducing Times New Roman typography, formal transmittal headers, exact borderless financial tables, and the mandatory six-tier sequential wet-ink signatory block ready for immediate printing and physical wet-ink administrative routing.
 
 ---
 
@@ -391,13 +391,15 @@ flowchart LR
    - Automatically computes total physical liquidity and matches it in real time against system ledger balances.
    - Embeds institutional governance policies: triggers an immediate visual **spending and activity freeze** upon detecting unverified cash shortages, permits formal justification of minor historical shortfalls (such as the verified ₱161.00 shortage), and records positive cash overages as an unrecorded emergency cashbox buffer.
 
-5. **Institutional 1:1 DOCX Master Exporter & 6-Stage Wet-Ink Routing Generator:**
-   - Eliminates formatting rejections by automating document compilation directly from verified database records into a pixel-perfect, 1:1 Microsoft Word (`.docx`) file.
-   - Provides a live web preview and digital draft sharing for Club Advisers prior to physical printing.
-   - Pre-populates formal transmittal metadata, borderless financial schedules, itemized disbursement summaries, and the exact six-tier sequential wet-ink signatory blocks:
+5. **Automated Institutional Proposal & Report Compiler with Interactive HTML Preview:**
+   - **Automated Business Proposals & Liquidations:** Directly addresses the acute difficulty student officers face when drafting documentation. Generates compliant pre-activity **Business Proposals** (itemized product catalog, pricing, cost calculations, target revenue for Club Week booths) and post-activity **Financial Liquidation Reports** derived from verified ledger data.
+   - **Interactive HTML Pre-Generation Preview & In-Place Editing:** Displays a pixel-accurate 1:1 "digital paper" view in the browser before exporting to `.docx`. Enables officers to catch typographical errors, verify line items, and make in-place manual edits (e.g., transmittal dates, signatory titles, narrative objectives) directly on the preview sheet.
+   - **1:1 Institutional DOCX Master Compilation:** Eliminates formatting rejections by automating document compilation directly from verified data into a pixel-perfect, 1:1 Microsoft Word (`.docx`) file matching the approved College of Computer Studies (CCS) template.
+   - **6-Stage Sequential Wet-Ink Routing Generator:** Pre-populates formal transmittal metadata, borderless financial schedules, itemized disbursement summaries, and the exact six-tier sequential wet-ink signatory blocks:
      $$\text{Treasurer} \longrightarrow \text{Auditor} \longrightarrow \text{President} \longrightarrow \text{Club Advisers (Dual Sign-Off)} \longrightarrow \text{BSIT Program Director} \longrightarrow \text{CCS Dean}$$
    - Features **instant report unlocking**: if returned by the Program Director or Dean, the document switches back to editable mode for instant line-item correction and 1-click re-export, bypassing manual reprint paralysis.
    - Formally carries over verified unpaid Abono claims into next year's opening ledger as certified **Accounts Payable liabilities**.
+   - **Full-Stack Implementation Architecture:** Powered by HTML5, CSS (Tailwind), React 19, Node.js (Next.js server runtime), Supabase (PostgreSQL), and the Node.js `docx` OpenXML library. Engineered with multi-tenant scalability to expand across all student organizations in PDM for the Capstone phase.
 
 6. **Grounded Natural-Language AI Financial Co-Pilot:**
    - Powers frictionless mobile interaction for officers and advisers via Taglish-capable conversational querying (e.g., *"Ilan pa ang pending reimbursement para sa Club Week?"* or *"Magkano ang natitirang Accounts Payable kay Ma'am Genovia?"*).

@@ -1,26 +1,49 @@
-# FinLITE Technology Stack Decision Guide
+# FinLITE Technology Stack Decision & Guidelines
 
-**Status:** Decision proposal; no implementation stack has been approved  
-**Research date:** 2026-08-15  
-**Project:** FinLITE: A Web-Based Financial Assistant System for the League of Information Technology Enthusiasts  
-**Team:** Four third-year BSIT-31A students, ITE-SAD final-term case study  
+**Status:** Finalized & Approved Technical Architecture (Signed off: September 2026)  
+**Research date:** 2026-08-15 (Updated: September 2026)  
+**Project:** FinLITE: A Web-Based Financial Management and Automated Document Generation System for the League of Information Technology Enthusiasts  
+**Team:** Four third-year BSIT-31A students, ITE-SAD case study (Scalable for Capstone)  
 
-## Executive recommendation
+## Final Approved Tech Stack
 
-Choose **Option 1: Next.js 16 + Supabase PostgreSQL + Supabase Auth/Storage + AI SDK 6** unless the team is substantially stronger in PHP/Laravel. It best balances delivery speed, one-language development, relational data integrity, authentication, private file storage, AI tool calling, and a presentable modern interface.
+The team has officially selected and approved the full-stack JavaScript/Node.js ecosystem: **HTML5 + React, CSS (Tailwind), JavaScript, and Node.js (via Next.js App Router) with Supabase PostgreSQL**.
 
-Before committing, build the same small vertical slice in Option 1 and Option 2:
+| Layer | Selected Technology | Role in FinLITE |
+|---|---|---|
+| **Presentation / Client** | **HTML5 + React 19 + JavaScript** | High-performance, reactive user interface handling ledger tables, live denomination keypads, modal workflows, and the **interactive pre-generation document preview canvas**. |
+| **Styling & Design System** | **CSS3 (Tailwind CSS v4)** | Clean styling replicating official school document dimensions, typography, and responsive modern dashboard components. |
+| **Backend & Runtime** | **Node.js (Next.js 15+ Server Handlers)** | Unified full-stack JavaScript environment running secure API route handlers (`/api/reports/docx`, `/api/chat`), server logic, and authentication validation. |
+| **Document Generation Engine** | **`docx` (Node.js OpenXML Engine)** | Compiles dynamic data into official Microsoft Word (`.docx`) reports with pixel-perfect margins, borderless financial schedules, and multi-tier institutional signatory blocks. |
+| **Database & Cloud Storage** | **Supabase (PostgreSQL)** | Relational PostgreSQL database enforcing ACID transactions, Row-Level Security (RLS), and secure object storage for uploaded receipt proofs and voucher attachments. |
+| **AI Co-Pilot** | **`@google/generative-ai` (Gemini API)** | Deterministic conversational co-pilot for Taglish/English queries, strictly bounded to structured database aggregations with zero mathematical hallucination. |
 
-1. Sign in as two different roles.
-2. Create an income or expense record.
-3. Reject an unauthorized edit at both the application and database layers.
-4. Show a filtered total calculated by PostgreSQL.
-5. Ask the AI assistant for that total through a read-only tool.
-6. Deploy the slice and document its actual cost, cold-start behavior, and setup difficulty.
+---
 
-Time-box each spike to one working session. Choose the stack that the whole team can explain and maintain, not the stack with the most fashionable components.
+## Key Functional Focus: Automated Document Generation
 
-The closest alternative is **Option 2: Laravel 13 + Inertia + Vue 3 + PostgreSQL**. If at least two members already know PHP/Laravel better than TypeScript/React, move it to rank 1. Existing team skill levels were not documented, so the ranking cannot responsibly treat framework familiarity as known.
+Per institutional directive from BSIT Program Director Prof. Jovylyn Ortiz-Cesar, **Automated Report and Proposal Generation is a primary core function** of the system:
+
+1. **Pre-Event Business Proposals (e.g., Club Week / Booth Sales):**
+   - Officers input product catalogs, expected unit sales, capital expenditures, and target pricing.
+   - The system automatically calculates profit margins and generates the standardized institutional **Business Proposal & Activity Budget Request** document.
+2. **Post-Event Liquidation Reports:**
+   - As real transactions, receipts, and cash amounts are entered, the system compiles the official **Liquidation Report** comparing actuals vs. budget.
+3. **Interactive HTML Pre-Generation Preview & In-Place Editing:**
+   - **Crucial Requirement:** Before exporting to `.docx`, the system displays an exact 1:1 HTML/CSS "digital paper" preview of the document.
+   - **In-Place Live Editing:** Officers can inspect the preview, catch typos or misalignments, and make manual edits (e.g., transmittal dates, signatory titles, remarks) directly in the preview canvas.
+   - Once verified, 1-click export triggers the Node.js OpenXML compiler to output the finalized `.docx` file, eliminating document rejections by the Program Director or Dean.
+
+---
+
+## Academic Roadmap: SAD to Capstone Scalability
+
+- **ITE-SAD Phase (Current Scope):** Piloted directly on the **League of Information Technology Enthusiasts (LITE)** with its specific templates, officer roles, and financial practices.
+- **Capstone Phase (Target Scope):** Architecture generalized to serve **all accredited student clubs and organizations across Pambayang Dalubhasaan ng Marilao (PDM)**, allowing any club to generate compliant proposals, liquidation reports, and financial statements.
+
+---
+
+## Executive recommendation (Historical Record)
 
 ## What this guide is based on
 

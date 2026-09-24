@@ -8,9 +8,9 @@
 
 # FinLITE
 
-**A web-based financial assistant system engineered for the League of Information Technology Enthusiasts.**
+**A web-based financial management and automated document generation system engineered for the League of Information Technology Enthusiasts.**
 
-Grounded AI co-pilot • Strict segregation of duties • Physical cash reconciliation • 1:1 institutional DOCX export
+Grounded AI co-pilot • Strict segregation of duties • Interactive HTML preview • Automated proposals & 1:1 institutional DOCX export
 
 <br />
 
@@ -20,16 +20,31 @@ Grounded AI co-pilot • Strict segregation of duties • Physical cash reconcil
 
 ## Overview
 
-FinLITE replaces unorganized paper receipts and informal chat tallies with an agile, role-gated financial co-pilot. Built specifically around the operational realities of collegiate student governance, it eliminates the bureaucratic friction of enterprise ERPs while enforcing strict financial accountability and automated institutional reporting.
+FinLITE replaces unorganized paper receipts, informal chat tallies, and tedious manual Word formatting with an agile, role-gated financial management and automated document generation platform. Built specifically around the operational realities of collegiate student governance at Pambayang Dalubhasaan ng Marilao (PDM), it eliminates the friction of enterprise ERPs while automating the exact documents student officers struggle to create: **pre-event Business Proposals** (for Club Week/Day product booths) and **post-event Financial Liquidation Reports**.
 
-- **Operational co-pilot**: Streamlines transaction logging across campus events without requiring complex double-entry accounting configurations.
-- **Segregation of duties**: Enforces financial integrity where Treasurers log transactions, Auditors inspect receipts and count cash, and Advisers authorize liquidations.
+- **Automated document generation**: Compiles compliance-ready Business Proposals and Liquidation Reports directly from input data and verified ledgers.
+- **Interactive HTML pre-generation preview**: Displays an exact 1:1 "digital paper" view in the browser with in-place live editing so officers can catch mistakes and eliminate document rejections before generating the `.docx` file.
+- **Operational co-pilot & ledger**: Streamlines transaction logging, cashbox tracking, and personal advances (*"abono"*) without requiring complex double-entry accounting configurations.
+- **Segregation of duties**: Enforces financial integrity where Treasurers log transactions, Auditors inspect receipts and count cash, and Advisers authorize liquidations via dual sign-off.
 - **Deterministic grounding**: Houses an intelligent Taglish-capable assistant strictly bounded to verified database tables, ensuring zero hallucination on financial inquiries.
-- **Institutional compliance**: Features live in-browser report simulation and direct compilation into the approved College of Computer Studies Word template.
+- **Capstone scalability**: Piloted on LITE for ITE-SAD with an architectural foundation designed to expand across all student organizations in PDM for the Capstone project.
 
 ---
 
-## Three fluid states
+## Technical Stack
+
+| Layer | Technology | Description |
+|---|---|---|
+| **Frontend Presentation** | **HTML5 + React 19 + JavaScript** | High-performance interactive UI for ledgers, denomination counters, and digital document previews. |
+| **Styling & Design System** | **CSS3 (Tailwind CSS v4)** | Clean Apple-inspired minimal aesthetics replicating official school document standards. |
+| **Application & Server Runtime** | **Node.js (Next.js 15+ App Router)** | Unified full-stack JavaScript environment powering server route handlers (`/api/reports/docx`, `/api/chat`). |
+| **Document Generation Engine** | **`docx` (Node.js OpenXML Engine)** | Assembles dynamic transaction and proposal data into 1:1 institutional Word (`.docx`) files. |
+| **Database & Cloud Storage** | **Supabase (PostgreSQL)** | Relational database enforcing ACID constraints, Row-Level Security (RLS), and secure receipt storage. |
+| **AI Co-Pilot** | **`@google/generative-ai` (Gemini API)** | Deterministic conversational co-pilot for Taglish/English queries, bounded to structured database aggregations. |
+
+---
+
+## Three Fluid States
 
 <table width="100%">
 <tr>
@@ -44,16 +59,16 @@ Rapid inflow, disbursement, and out-of-pocket advance logging with personal GCas
 Physical small cashbox denomination counts, receipt verification, and variance audits with abono alerts.
 </td>
 <td width="33%" align="center">
-<b>Institutional clearance</b>
+<b>Automated Institutional Clearance</b>
 <br /><br />
-Instant compilation into approved borderless tables and formatted signatory blocks for physical wet-ink routing.
+Interactive HTML paper preview with in-place live editing, compiling into approved borderless tables and formatted signatory blocks for physical wet-ink routing.
 </td>
 </tr>
 </table>
 
 ---
 
-## Crafted details
+## Crafted Details
 
 <div align="center">
 
@@ -63,6 +78,8 @@ Instant compilation into approved borderless tables and formatted signatory bloc
 
 </div>
 
+- **Interactive HTML document preview**: Allows officers to preview the generated proposal or liquidation report on an 8.5" × 11" paper canvas and edit transmittal dates, signatory designations, and remarks in-place prior to export.
+- **Pre-event business proposals**: Automates proposal creation for Club Week booth concessions, calculating product unit costs, projected revenue, and expected margins.
 - **Physical cash reconciliation**: Provides an interactive denomination counter (₱1,000 down to ₱1 coins) to verify the physical small cashbox against system ledger totals, prompting for justified shortages or officer abono.
 - **Personal advance ("abono") tracking**: Dedicated Accounts Payable queue protecting faculty advisers and student officers from unreimbursed out-of-pocket expenses incurred during urgent campus events.
 - **Non-receipted expense documentation**: Attaches structured acknowledgment slips and photographic proof for informal travel fares, neighborhood supplies, and emergency printing.
@@ -70,19 +87,21 @@ Instant compilation into approved borderless tables and formatted signatory bloc
 
 ---
 
-## Quick start
+## Quick Start
 
 ```bash
 # Clone the repository
 git clone https://github.com/butterkookies/FinLITE.git
 cd FinLITE
 
-# Launch the web application (zero runtime dependencies)
-start index.html
+# Install Node.js dependencies
+npm install
 
-# Run the Python institutional report engine
-python scripts/export_report_engine.py
+# Launch the Next.js development server
+npm run dev
 ```
+
+Open [http://localhost:3000](http://localhost:3000) with your browser to view the application.
 
 ---
 
