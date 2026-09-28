@@ -22,12 +22,12 @@ export async function POST(req) {
     const body = await req.json();
     const {
       type = 'LIQUIDATION',
-      activityTitle = 'Club Week 2026',
-      eventName = 'Club Week 2026',
-      transmittalDate = 'October 14, 2026',
-      datePrepared = 'October 14, 2026',
+      activityTitle = 'Financial Operations',
+      eventName = 'Financial Operations',
+      transmittalDate = new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }),
+      datePrepared = new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }),
       proponentCommittee = 'League of Information Technology Enthusiasts (LITE)',
-      venue = 'PDM Quadrangle',
+      venue = 'PDM Campus',
       targetDate = 'Academic Year 2025–2026',
       objectives = '',
       remarks = '',
@@ -609,7 +609,7 @@ export async function POST(req) {
         new Paragraph({
           alignment: AlignmentType.CENTER,
           children: [
-            new TextRun({ text: `Activity / Event: ${activityTitle || eventName} • Academic Year 2025–2026`, bold: true, size: 20, font: 'Calibri' }),
+            new TextRun({ text: `Activity / Event: ${activityTitle || eventName} • Academic Year ${body.academicYear || targetDate || '2025–2026'}`, bold: true, size: 20, font: 'Calibri' }),
           ],
         }),
         new Paragraph({ text: '' }),

@@ -11,132 +11,6 @@ import DocumentPreviewModal from '@/components/reports/DocumentPreviewModal';
 import NewSemesterModal from '@/components/semesters/NewSemesterModal';
 import { createClient } from '@/lib/supabase/client';
 
-// Initial realistic records matching AY 2025–2026 LITE historical data (used only as fallback if DB offline)
-const INITIAL_TRANSACTIONS = [
-  {
-    id: 'tx-1',
-    title: 'Club Week Booth Revenue Day 1',
-    description: 'Gross sales from snacks and drinks booth',
-    amount: 8500.00,
-    type: 'INFLOW',
-    payment_method: 'CASH',
-    category_name: 'Booth Sales',
-    transaction_date: '2026-09-02',
-    academic_year: '2025-2026',
-    semester: '2nd Sem',
-    is_reimbursement: false,
-    event_name: 'Club Week 2026',
-    status: 'COMPLETED',
-  },
-  {
-    id: 'tx-2',
-    title: 'Club Week Booth Revenue Day 2',
-    description: 'Snacks and custom LITE stickers sales',
-    amount: 6200.00,
-    type: 'INFLOW',
-    payment_method: 'CASH',
-    category_name: 'Booth Sales',
-    transaction_date: '2026-09-03',
-    academic_year: '2025-2026',
-    semester: '2nd Sem',
-    is_reimbursement: false,
-    event_name: 'Club Week 2026',
-    status: 'COMPLETED',
-  },
-  {
-    id: 'tx-3',
-    title: 'E-Sports MLBB Tournament Registration',
-    description: '16 teams registered @ ₱300 per team',
-    amount: 4800.00,
-    type: 'INFLOW',
-    payment_method: 'GCASH',
-    category_name: 'E-Sports Registrations',
-    transaction_date: '2026-09-06',
-    academic_year: '2025-2026',
-    semester: '2nd Sem',
-    is_reimbursement: false,
-    event_name: 'E-Sports Cup 2026',
-    status: 'COMPLETED',
-  },
-  {
-    id: 'tx-4',
-    title: 'Booth Setup Tarpaulin & Décor',
-    description: 'Official event backdrop printed at Marilao Commercial Center',
-    amount: 1450.00,
-    type: 'OUTFLOW',
-    payment_method: 'CASH',
-    category_name: 'Supplies & Materials',
-    transaction_date: '2026-09-01',
-    academic_year: '2025-2026',
-    semester: '2nd Sem',
-    is_reimbursement: false,
-    event_name: 'Club Week 2026',
-    status: 'COMPLETED',
-    receipt_url: 'https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?auto=format&fit=crop&w=400&q=80',
-  },
-  {
-    id: 'tx-5',
-    title: 'Committee Working Lunch Day 1',
-    description: 'Packed meals for volunteer student marshals (Jollibee)',
-    amount: 2100.00,
-    type: 'OUTFLOW',
-    payment_method: 'CASH',
-    category_name: 'Food & Refreshments',
-    transaction_date: '2026-09-02',
-    academic_year: '2025-2026',
-    semester: '2nd Sem',
-    is_reimbursement: false,
-    event_name: 'Club Week 2026',
-    status: 'COMPLETED',
-  },
-  {
-    id: 'tx-6',
-    title: 'E-Sports Champion Cash Prize',
-    description: 'Grand winner 1st place cash prize payout',
-    amount: 3000.00,
-    type: 'OUTFLOW',
-    payment_method: 'CASH',
-    category_name: 'Tournament Prizes',
-    transaction_date: '2026-09-07',
-    academic_year: '2025-2026',
-    semester: '2nd Sem',
-    is_reimbursement: false,
-    event_name: 'E-Sports Cup 2026',
-    status: 'COMPLETED',
-  },
-  {
-    id: 'tx-7',
-    title: 'Judge Tokens & Certificates (Adviser Advance)',
-    description: 'Out-of-pocket advance for guest speaker tokens',
-    amount: 1250.00,
-    type: 'OUTFLOW',
-    payment_method: 'CASH',
-    category_name: 'Food & Refreshments',
-    transaction_date: '2026-09-09',
-    academic_year: '2025-2026',
-    semester: '2nd Sem',
-    is_reimbursement: true,
-    reimbursement_recipient: 'Ms. Kimberly Dawn Jatulan',
-    event_name: 'Club Week 2026',
-    status: 'PENDING_REIMBURSEMENT',
-  },
-  {
-    id: 'tx-8',
-    title: 'Declared Cash Box Shortage',
-    description: 'Approved minor discrepancy from loose coins during peak booth rush',
-    amount: 161.00,
-    type: 'OUTFLOW',
-    payment_method: 'CASH',
-    category_name: 'Cash Shortage Discrepancy',
-    transaction_date: '2026-09-11',
-    academic_year: '2025-2026',
-    semester: '2nd Sem',
-    is_reimbursement: false,
-    event_name: 'Club Week 2026',
-    status: 'COMPLETED',
-  },
-];
-
 const DEFAULT_SEMESTERS = [
   { id: 'sem-25-26-2', academicYear: '2025-2026', semester: '2nd Sem', label: 'AY 2025–2026 • 2nd Sem' },
   { id: 'sem-26-27-1', academicYear: '2026-2027', semester: '1st Sem', label: 'AY 2026–2027 • 1st Sem' },
@@ -165,7 +39,7 @@ export default function Dashboard() {
   useEffect(() => {
     async function loadData() {
       if (!supabase) {
-        setTransactions(INITIAL_TRANSACTIONS);
+        setTransactions([]);
         setIsLoading(false);
         return;
       }
@@ -178,16 +52,15 @@ export default function Dashboard() {
           .order('transaction_date', { ascending: false });
 
         if (error) {
-          console.warn('Supabase fetch failed, falling back to local demo:', error.message);
-          setTransactions(INITIAL_TRANSACTIONS);
+          console.warn('Supabase fetch failed:', error.message);
+          setTransactions([]);
         } else {
           setIsDbConnected(true);
-          // If clean slate (0 rows in DB), start fresh with empty array
           setTransactions(data || []);
         }
       } catch (err) {
         console.error('Database connection error:', err);
-        setTransactions(INITIAL_TRANSACTIONS);
+        setTransactions([]);
       } finally {
         setIsLoading(false);
       }
@@ -356,14 +229,16 @@ export default function Dashboard() {
   const handleDeclareShortage = async ({ amount, notes }) => {
     const shortageTx = {
       title: 'Declared Cash Shortage (Adviser Approved)',
-      description: notes || 'Declared minor discrepancy from loose coins during peak booth rush',
+      description: notes || 'Discrepancy identified during physical cash count audit',
       amount: parseFloat(amount),
       type: 'OUTFLOW',
       payment_method: 'CASH',
       category_name: 'Cash Shortage Discrepancy',
       transaction_date: new Date().toISOString().split('T')[0],
+      academic_year: currentSemester.academicYear,
+      semester: currentSemester.semester,
       is_reimbursement: false,
-      event_name: 'Club Week 2026',
+      event_name: 'Cash Count Audit',
       status: 'COMPLETED',
     };
 
@@ -381,6 +256,8 @@ export default function Dashboard() {
             type: shortageTx.type,
             payment_method: shortageTx.payment_method,
             transaction_date: shortageTx.transaction_date,
+            academic_year: shortageTx.academic_year,
+            semester: shortageTx.semester,
             is_reimbursement: false,
             status: 'COMPLETED',
             event_name: shortageTx.event_name,

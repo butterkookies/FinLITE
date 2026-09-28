@@ -11,7 +11,7 @@ export default function NewTransactionModal({ isOpen, onClose, onSave, categorie
   const [title, setTitle] = useState('');
   const [amount, setAmount] = useState('');
   const [categoryName, setCategoryName] = useState('Supplies & Materials');
-  const [eventName, setEventName] = useState('Club Week 2026');
+  const [eventName, setEventName] = useState('');
   const [isReimbursement, setIsReimbursement] = useState(false);
   const [recipient, setRecipient] = useState('');
   const [receiptImage, setReceiptImage] = useState(null);

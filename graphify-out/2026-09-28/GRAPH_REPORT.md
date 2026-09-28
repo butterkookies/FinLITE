@@ -1,7 +1,7 @@
 # Graph Report - FinLITE  (2026-09-28)
 
 ## Corpus Check
-- 39 files · ~84,707 words
+- 39 files · ~84,991 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary

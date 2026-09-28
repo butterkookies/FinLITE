@@ -15,9 +15,9 @@ export default function AIChatDrawer({ isOpen, onClose, summary, transactions = 
   const [loading, setLoading] = useState(false);
 
   const promptChips = [
-    'Magkano pa ang abono ni Ma\'am Jatulan?',
+    'Mayroon bang pending reimbursement (abono)?',
     'What is our current physical cash on hand?',
-    'Summary of Club Week 2026 income and expenses',
+    'Magkano ang kabuuang inflows at outflows ngayong semestre?',
     'Were there any cash shortages declared?',
   ];
 
@@ -49,18 +49,30 @@ export default function AIChatDrawer({ isOpen, onClose, summary, transactions = 
       ]);
     } catch (err) {
       console.error(err);
-      // Fallback deterministic response based on live client data if API fails or offline
+      // Fallback deterministic response based strictly on live client data if API fails or offline
       let fallbackReply = 'Nakuha ko ang iyong katanungan. Batay sa kasalukuyang talaan sa ating ledger:';
       const lower = text.toLowerCase();
 
       if (lower.includes('jatulan') || lower.includes('abono') || lower.includes('reimburse')) {
-        const jatulan = transactions.find((t) => t.reimbursement_recipient?.toLowerCase().includes('jatulan'));
-        const amt = jatulan ? jatulan.amount : 1250;
-        fallbackReply = `Batay sa ating database, may pending advance (abono) si **Ms. Kimberly Dawn Jatulan** na nagkakahalaga ng **₱${amt.toLocaleString('en-PH', { minimumFractionDigits: 2 })}** para sa *Judge Tokens & Certificates* (Club Week 2026). Hindi pa ito nailalabas mula sa physical cash box.`;
+        const reimbursements = transactions.filter((t) => t.is_reimbursement && t.status === 'PENDING_REIMBURSEMENT');
+        if (reimbursements.length > 0) {
+          const list = reimbursements
+            .map((r) => `**${r.reimbursement_recipient || 'Officer'}** (₱${Number(r.amount).toLocaleString('en-PH', { minimumFractionDigits: 2 })} para sa *${r.title}*)`)
+            .join(', ');
+          fallbackReply = `Batay sa ating database, may mga sumusunod na pending advance (abono): ${list}. Hindi pa ito nailalabas mula sa physical cash box.`;
+        } else {
+          fallbackReply = 'Batay sa ating database, walang nakatalang pending reimbursement (abono) sa kasalukuyan.';
+        }
       } else if (lower.includes('cash') || lower.includes('on hand')) {
         fallbackReply = `Ang kasalukuyang verified **Physical Cash on Hand** sa ating cashbox ay **₱${(summary.cash_on_hand || 0).toLocaleString('en-PH', { minimumFractionDigits: 2 })}**, habang may **₱${(summary.gcash_balance || 0).toLocaleString('en-PH', { minimumFractionDigits: 2 })}** sa GCash.`;
       } else if (lower.includes('shortage')) {
-        fallbackReply = `Mayroong isang aprubadong **₱161.00 Cash Shortage** na naitala noong Club Week booth sales dahil sa loose coin change discrepancies. Ito ay pormal nang naaprubahan ng ating Club Adviser.`;
+        const shortages = transactions.filter((t) => (t.category_name && t.category_name.toLowerCase().includes('shortage')) || (t.title && t.title.toLowerCase().includes('shortage')));
+        if (shortages.length > 0) {
+          const totalShortage = shortages.reduce((sum, s) => sum + (Number(s.amount) || 0), 0);
+          fallbackReply = `Mayroong naitalang kabuuang **₱${totalShortage.toLocaleString('en-PH', { minimumFractionDigits: 2 })} Cash Shortage** sa ating talaan na pormal nang ini-log at dumaan sa beripikasyon.`;
+        } else {
+          fallbackReply = 'Walang naitalang cash shortage discrepancy sa ating kasalukuyang talaan.';
+        }
       } else {
         fallbackReply = `Ang ating kabuuang Inflows ngayong semestre ay **₱${(summary.total_inflows || 0).toLocaleString('en-PH', { minimumFractionDigits: 2 })}** at ang kabuuang Outflows ay **₱${(summary.total_outflows || 0).toLocaleString('en-PH', { minimumFractionDigits: 2 })}**. Ang ating Net Balance ay **₱${((summary.total_inflows || 0) - (summary.total_outflows || 0)).toLocaleString('en-PH', { minimumFractionDigits: 2 })}**.`;
       }

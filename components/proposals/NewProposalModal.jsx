@@ -2,21 +2,15 @@
 import { useState } from 'react';
 import { Plus, Trash2, FileText, Sparkles, X, Calculator, ArrowRight } from 'lucide-react';
 
-const INITIAL_ITEMS = [
-  { id: '1', name: 'Custom LITE Holographic Tech Stickers', unitCost: 8.00, sellingPrice: 25.00, projectedUnits: 150 },
-  { id: '2', name: 'Iced Caramel Macchiato (16oz)', unitCost: 22.00, sellingPrice: 50.00, projectedUnits: 100 },
-  { id: '3', name: 'LITE Official Lanyard AY 2025–2026', unitCost: 45.00, sellingPrice: 85.00, projectedUnits: 60 },
-];
-
 export default function NewProposalModal({ isOpen, onClose, onOpenPreview }) {
-  const [activityTitle, setActivityTitle] = useState('Club Week 2026: LITE Tech & Concession Booth');
-  const [proponentCommittee, setProponentCommittee] = useState('LITE Executive Board & Multimedia Committee');
-  const [targetDate, setTargetDate] = useState('October 14–16, 2026');
-  const [venue, setVenue] = useState('PDM Quadrangle — Concession Booth #3');
-  const [objectives, setObjectives] = useState(
-    '1. Generate organizational operating funds for upcoming BSIT technical workshops and seminars.\n2. Promote LITE brand awareness and student engagement during Institutional Club Week.'
-  );
-  const [items, setItems] = useState(INITIAL_ITEMS);
+  const [activityTitle, setActivityTitle] = useState('');
+  const [proponentCommittee, setProponentCommittee] = useState('League of Information Technology Enthusiasts (LITE)');
+  const [targetDate, setTargetDate] = useState('');
+  const [venue, setVenue] = useState('');
+  const [objectives, setObjectives] = useState('');
+  const [items, setItems] = useState([
+    { id: '1', name: '', unitCost: 0, sellingPrice: 0, projectedUnits: 0 }
+  ]);
 
   if (!isOpen) return null;
 

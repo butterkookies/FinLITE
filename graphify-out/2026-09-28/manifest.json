@@ -55,23 +55,23 @@
     "semantic_hash": ""
   },
   "C:\\Users\\user\\Documents\\ANDREI_FILES\\PDM_FILES\\3RD YEAR\\1st sem\\IT31-SAD\\FinLITE\\app\\page.jsx": {
-    "mtime": 1790601856.5203042,
-    "ast_hash": "a98821a2dd83383d2cca2d1f21cc2b5c",
+    "mtime": 1790599202.6626801,
+    "ast_hash": "4a7b3fdb34dbd5beb43e5a0ef6100038",
     "semantic_hash": ""
   },
   "C:\\Users\\user\\Documents\\ANDREI_FILES\\PDM_FILES\\3RD YEAR\\1st sem\\IT31-SAD\\FinLITE\\app\\api\\chat\\route.js": {
-    "mtime": 1790601918.990245,
-    "ast_hash": "2b94ace765e3e517d9e58b7e8a28547d",
+    "mtime": 1790585632.4529927,
+    "ast_hash": "b807f252910ec506b5bf3c6cdc2f35a4",
     "semantic_hash": ""
   },
   "C:\\Users\\user\\Documents\\ANDREI_FILES\\PDM_FILES\\3RD YEAR\\1st sem\\IT31-SAD\\FinLITE\\app\\api\\reports\\docx\\route.js": {
-    "mtime": 1790601992.9346929,
-    "ast_hash": "34ed0cac083f831df63664d098eecc5f",
+    "mtime": 1790596894.8407273,
+    "ast_hash": "62ae5928db1c0768dd243c7114cc5c4e",
     "semantic_hash": ""
   },
   "C:\\Users\\user\\Documents\\ANDREI_FILES\\PDM_FILES\\3RD YEAR\\1st sem\\IT31-SAD\\FinLITE\\components\\ai\\AIChatDrawer.jsx": {
-    "mtime": 1790601902.3341143,
-    "ast_hash": "7500bfafa605c63e63bfff3cd877a0c2",
+    "mtime": 1790580731.1832654,
+    "ast_hash": "8facd879da7e57888048da07661732f7",
     "semantic_hash": ""
   },
   "C:\\Users\\user\\Documents\\ANDREI_FILES\\PDM_FILES\\3RD YEAR\\1st sem\\IT31-SAD\\FinLITE\\components\\dashboard\\StatCards.jsx": {
@@ -85,8 +85,8 @@
     "semantic_hash": ""
   },
   "C:\\Users\\user\\Documents\\ANDREI_FILES\\PDM_FILES\\3RD YEAR\\1st sem\\IT31-SAD\\FinLITE\\components\\ledger\\NewTransactionModal.jsx": {
-    "mtime": 1790601888.0940492,
-    "ast_hash": "3da83a4348b42965d3704ca93960366f",
+    "mtime": 1790587598.7025852,
+    "ast_hash": "f28f91bd71d7875f9a392f696729ee9d",
     "semantic_hash": ""
   },
   "C:\\Users\\user\\Documents\\ANDREI_FILES\\PDM_FILES\\3RD YEAR\\1st sem\\IT31-SAD\\FinLITE\\components\\ledger\\TransactionTable.jsx": {
@@ -210,8 +210,8 @@
     "semantic_hash": ""
   },
   "C:\\Users\\user\\Documents\\ANDREI_FILES\\PDM_FILES\\3RD YEAR\\1st sem\\IT31-SAD\\FinLITE\\components\\proposals\\NewProposalModal.jsx": {
-    "mtime": 1790601874.7662766,
-    "ast_hash": "a4248412017fd3f610752d9edebde0c1",
+    "mtime": 1790580626.4164748,
+    "ast_hash": "7934b09fa0b7b8f7ce1b43d1e59de3e7",
     "semantic_hash": ""
   },
   "C:\\Users\\user\\Documents\\ANDREI_FILES\\PDM_FILES\\3RD YEAR\\1st sem\\IT31-SAD\\FinLITE\\components\\reports\\DocumentPreviewModal.jsx": {

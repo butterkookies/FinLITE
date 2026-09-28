@@ -525,10 +525,19 @@
       "norm_label": "page.jsx"
     },
     {
+      "label": "INITIAL_TRANSACTIONS",
+      "file_type": "code",
+      "source_file": "app/page.jsx",
+      "source_location": "L15",
+      "id": "app_page_initial_transactions",
+      "community": 25,
+      "norm_label": "initial_transactions"
+    },
+    {
       "label": "DEFAULT_SEMESTERS",
       "file_type": "code",
       "source_file": "app/page.jsx",
-      "source_location": "L14",
+      "source_location": "L140",
       "id": "app_page_default_semesters",
       "community": 25,
       "norm_label": "default_semesters"
@@ -537,7 +546,7 @@
       "label": "Dashboard()",
       "file_type": "code",
       "source_file": "app/page.jsx",
-      "source_location": "L19",
+      "source_location": "L145",
       "id": "app_page_dashboard",
       "community": 25,
       "norm_label": "dashboard()"
@@ -678,10 +687,19 @@
       "norm_label": "newproposalmodal.jsx"
     },
     {
-      "label": "NewProposalModal()",
+      "label": "INITIAL_ITEMS",
       "file_type": "code",
       "source_file": "components/proposals/NewProposalModal.jsx",
       "source_location": "L5",
+      "id": "proposals_newproposalmodal_initial_items",
+      "community": 48,
+      "norm_label": "initial_items"
+    },
+    {
+      "label": "NewProposalModal()",
+      "file_type": "code",
+      "source_file": "components/proposals/NewProposalModal.jsx",
+      "source_location": "L11",
       "id": "proposals_newproposalmodal_newproposalmodal",
       "community": 48,
       "norm_label": "newproposalmodal()"
@@ -1972,24 +1990,6 @@
       "id": "docs_project_context_5_2_architectural_synthesis_functional_module_description",
       "community": 10,
       "norm_label": "5.2 architectural synthesis & functional module description"
-    },
-    {
-      "label": "INITIAL_TRANSACTIONS",
-      "file_type": "code",
-      "source_file": "app/page.jsx",
-      "source_location": "L15",
-      "community": 25,
-      "norm_label": "initial_transactions",
-      "id": "app_page_initial_transactions"
-    },
-    {
-      "label": "INITIAL_ITEMS",
-      "file_type": "code",
-      "source_file": "components/proposals/NewProposalModal.jsx",
-      "source_location": "L5",
-      "community": 48,
-      "norm_label": "initial_items",
-      "id": "proposals_newproposalmodal_initial_items"
     },
     {
       "label": "logos.js",
@@ -3624,9 +3624,9 @@
       "source_file": "next.config.mjs",
       "source_location": "L4",
       "weight": 1.0,
-      "confidence_score": 1.0,
       "source": "next_config_mjs",
-      "target": "finlite_next_config_filename"
+      "target": "finlite_next_config_filename",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -3634,9 +3634,9 @@
       "source_file": "next.config.mjs",
       "source_location": "L5",
       "weight": 1.0,
-      "confidence_score": 1.0,
       "source": "next_config_mjs",
-      "target": "finlite_next_config_dirname"
+      "target": "finlite_next_config_dirname",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -3922,11 +3922,21 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "app/page.jsx",
-      "source_location": "L140",
+      "source_location": "L11",
       "weight": 1.0,
       "confidence_score": 1.0,
       "source": "app_page_jsx",
-      "target": "app_page_default_semesters"
+      "target": "app_page_initial_transactions"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "app/page.jsx",
+      "source_location": "L140",
+      "weight": 1.0,
+      "source": "app_page_jsx",
+      "target": "app_page_default_semesters",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -3937,16 +3947,6 @@
       "confidence_score": 1.0,
       "source": "app_page_jsx",
       "target": "app_page_dashboard"
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "app/page.jsx",
-      "source_location": "L11",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "app_page_jsx",
-      "target": "app_page_initial_transactions"
     },
     {
       "relation": "contains",
@@ -4044,21 +4044,21 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "components/proposals/NewProposalModal.jsx",
-      "source_location": "L11",
+      "source_location": "L5",
       "weight": 1.0,
-      "confidence_score": 1.0,
       "source": "components_proposals_newproposalmodal_jsx",
-      "target": "proposals_newproposalmodal_newproposalmodal"
+      "target": "proposals_newproposalmodal_initial_items",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "components/proposals/NewProposalModal.jsx",
-      "source_location": "L5",
+      "source_location": "L11",
       "weight": 1.0,
-      "confidence_score": 1.0,
       "source": "components_proposals_newproposalmodal_jsx",
-      "target": "proposals_newproposalmodal_initial_items"
+      "target": "proposals_newproposalmodal_newproposalmodal",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -4109,9 +4109,9 @@
       "source_file": "components/reports/DocumentPreviewModal.jsx",
       "source_location": "L7",
       "weight": 1.0,
-      "confidence_score": 1.0,
       "source": "components_reports_documentpreviewmodal_jsx",
-      "target": "reports_documentpreviewmodal_officialheaderbanner"
+      "target": "reports_documentpreviewmodal_officialheaderbanner",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -4119,9 +4119,9 @@
       "source_file": "components/reports/DocumentPreviewModal.jsx",
       "source_location": "L26",
       "weight": 1.0,
-      "confidence_score": 1.0,
       "source": "components_reports_documentpreviewmodal_jsx",
-      "target": "reports_documentpreviewmodal_documentpreviewmodal"
+      "target": "reports_documentpreviewmodal_documentpreviewmodal",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -4129,9 +4129,9 @@
       "source_file": "components/semesters/NewSemesterModal.jsx",
       "source_location": "L6",
       "weight": 1.0,
-      "confidence_score": 1.0,
       "source": "components_semesters_newsemestermodal_jsx",
-      "target": "semesters_newsemestermodal_newsemestermodal"
+      "target": "semesters_newsemestermodal_newsemestermodal",
+      "confidence_score": 1.0
     },
     {
       "relation": "calls",
@@ -4150,9 +4150,9 @@
       "source_file": "docs/CREATE_GFORM_SCRIPT.js",
       "source_location": "L13",
       "weight": 1.0,
-      "confidence_score": 1.0,
       "source": "docs_create_gform_script_js",
-      "target": "docs_create_gform_script_createfinliteadviserform"
+      "target": "docs_create_gform_script_createfinliteadviserform",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -4404,9 +4404,9 @@
       "source_file": "plugins/figjam-dfd-generator/code.js",
       "source_location": "L4",
       "weight": 1.0,
-      "confidence_score": 1.0,
       "source": "plugins_figjam_dfd_generator_code_js",
-      "target": "figjam_dfd_generator_code_run"
+      "target": "figjam_dfd_generator_code_run",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -4414,9 +4414,9 @@
       "source_file": "plugins/figjam-dfd-generator/manifest.json",
       "source_location": "L2",
       "weight": 1.0,
-      "confidence_score": 1.0,
       "source": "plugins_figjam_dfd_generator_manifest_json",
-      "target": "figjam_dfd_generator_manifest_name"
+      "target": "figjam_dfd_generator_manifest_name",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -4424,9 +4424,9 @@
       "source_file": "plugins/figjam-dfd-generator/manifest.json",
       "source_location": "L3",
       "weight": 1.0,
-      "confidence_score": 1.0,
       "source": "plugins_figjam_dfd_generator_manifest_json",
-      "target": "figjam_dfd_generator_manifest_id"
+      "target": "figjam_dfd_generator_manifest_id",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -4434,9 +4434,9 @@
       "source_file": "plugins/figjam-dfd-generator/manifest.json",
       "source_location": "L4",
       "weight": 1.0,
-      "confidence_score": 1.0,
       "source": "plugins_figjam_dfd_generator_manifest_json",
-      "target": "figjam_dfd_generator_manifest_api"
+      "target": "figjam_dfd_generator_manifest_api",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -4444,9 +4444,9 @@
       "source_file": "plugins/figjam-dfd-generator/manifest.json",
       "source_location": "L5",
       "weight": 1.0,
-      "confidence_score": 1.0,
       "source": "plugins_figjam_dfd_generator_manifest_json",
-      "target": "figjam_dfd_generator_manifest_main"
+      "target": "figjam_dfd_generator_manifest_main",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -4454,9 +4454,9 @@
       "source_file": "plugins/figjam-dfd-generator/manifest.json",
       "source_location": "L6",
       "weight": 1.0,
-      "confidence_score": 1.0,
       "source": "plugins_figjam_dfd_generator_manifest_json",
-      "target": "figjam_dfd_generator_manifest_editortype"
+      "target": "figjam_dfd_generator_manifest_editortype",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -4464,9 +4464,9 @@
       "source_file": "scripts/render_diagrams.py",
       "source_location": "L6",
       "weight": 1.0,
-      "confidence_score": 1.0,
       "source": "scripts_render_diagrams_py",
-      "target": "scripts_render_diagrams_render"
+      "target": "scripts_render_diagrams_render",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -4514,9 +4514,9 @@
       "source_file": "README.md",
       "source_location": "L34",
       "weight": 1.0,
-      "confidence_score": 1.0,
       "source": "finlite_readme_finlite",
-      "target": "finlite_readme_technical_stack"
+      "target": "finlite_readme_technical_stack",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -4564,9 +4564,9 @@
       "source_file": "techstack-options.md",
       "source_location": "L1",
       "weight": 1.0,
-      "confidence_score": 1.0,
       "source": "techstack_options_md",
-      "target": "finlite_techstack_options_finlite_technology_stack_decision_guidelines"
+      "target": "finlite_techstack_options_finlite_technology_stack_decision_guidelines",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -4584,9 +4584,9 @@
       "source_file": "techstack-options.md",
       "source_location": "L8",
       "weight": 1.0,
-      "confidence_score": 1.0,
       "source": "finlite_techstack_options_finlite_technology_stack_decision_guidelines",
-      "target": "finlite_techstack_options_final_approved_tech_stack"
+      "target": "finlite_techstack_options_final_approved_tech_stack",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -4594,9 +4594,9 @@
       "source_file": "techstack-options.md",
       "source_location": "L23",
       "weight": 1.0,
-      "confidence_score": 1.0,
       "source": "finlite_techstack_options_finlite_technology_stack_decision_guidelines",
-      "target": "finlite_techstack_options_key_functional_focus_automated_document_generation"
+      "target": "finlite_techstack_options_key_functional_focus_automated_document_generation",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -4604,9 +4604,9 @@
       "source_file": "techstack-options.md",
       "source_location": "L39",
       "weight": 1.0,
-      "confidence_score": 1.0,
       "source": "finlite_techstack_options_finlite_technology_stack_decision_guidelines",
-      "target": "finlite_techstack_options_academic_roadmap_sad_to_capstone_scalability"
+      "target": "finlite_techstack_options_academic_roadmap_sad_to_capstone_scalability",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -4614,9 +4614,9 @@
       "source_file": "techstack-options.md",
       "source_location": "L46",
       "weight": 1.0,
-      "confidence_score": 1.0,
       "source": "finlite_techstack_options_finlite_technology_stack_decision_guidelines",
-      "target": "finlite_techstack_options_executive_recommendation_historical_record"
+      "target": "finlite_techstack_options_executive_recommendation_historical_record",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -4624,9 +4624,9 @@
       "source_file": "techstack-options.md",
       "source_location": "L48",
       "weight": 1.0,
-      "confidence_score": 1.0,
       "source": "finlite_techstack_options_finlite_technology_stack_decision_guidelines",
-      "target": "finlite_techstack_options_what_this_guide_is_based_on"
+      "target": "finlite_techstack_options_what_this_guide_is_based_on",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -4634,9 +4634,9 @@
       "source_file": "techstack-options.md",
       "source_location": "L68",
       "weight": 1.0,
-      "confidence_score": 1.0,
       "source": "finlite_techstack_options_finlite_technology_stack_decision_guidelines",
-      "target": "finlite_techstack_options_corrections_to_the_earlier_generated_proposal"
+      "target": "finlite_techstack_options_corrections_to_the_earlier_generated_proposal",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -4644,9 +4644,9 @@
       "source_file": "techstack-options.md",
       "source_location": "L81",
       "weight": 1.0,
-      "confidence_score": 1.0,
       "source": "finlite_techstack_options_finlite_technology_stack_decision_guidelines",
-      "target": "finlite_techstack_options_evaluation_method"
+      "target": "finlite_techstack_options_evaluation_method",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -4654,9 +4654,9 @@
       "source_file": "techstack-options.md",
       "source_location": "L103",
       "weight": 1.0,
-      "confidence_score": 1.0,
       "source": "finlite_techstack_options_finlite_technology_stack_decision_guidelines",
-      "target": "finlite_techstack_options_ranked_comparison"
+      "target": "finlite_techstack_options_ranked_comparison",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -4664,9 +4664,9 @@
       "source_file": "techstack-options.md",
       "source_location": "L135",
       "weight": 1.0,
-      "confidence_score": 1.0,
       "source": "finlite_techstack_options_finlite_technology_stack_decision_guidelines",
-      "target": "finlite_techstack_options_current_version_baseline"
+      "target": "finlite_techstack_options_current_version_baseline",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -4674,9 +4674,9 @@
       "source_file": "techstack-options.md",
       "source_location": "L156",
       "weight": 1.0,
-      "confidence_score": 1.0,
       "source": "finlite_techstack_options_finlite_technology_stack_decision_guidelines",
-      "target": "finlite_techstack_options_detailed_options"
+      "target": "finlite_techstack_options_detailed_options",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -4684,9 +4684,9 @@
       "source_file": "techstack-options.md",
       "source_location": "L403",
       "weight": 1.0,
-      "confidence_score": 1.0,
       "source": "finlite_techstack_options_finlite_technology_stack_decision_guidelines",
-      "target": "finlite_techstack_options_recommended_architecture_for_option_1"
+      "target": "finlite_techstack_options_recommended_architecture_for_option_1",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -4694,9 +4694,9 @@
       "source_file": "techstack-options.md",
       "source_location": "L470",
       "weight": 1.0,
-      "confidence_score": 1.0,
       "source": "finlite_techstack_options_finlite_technology_stack_decision_guidelines",
-      "target": "finlite_techstack_options_recommended_development_model"
+      "target": "finlite_techstack_options_recommended_development_model",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -4704,9 +4704,9 @@
       "source_file": "techstack-options.md",
       "source_location": "L496",
       "weight": 1.0,
-      "confidence_score": 1.0,
       "source": "finlite_techstack_options_finlite_technology_stack_decision_guidelines",
-      "target": "finlite_techstack_options_recommended_repository_structure"
+      "target": "finlite_techstack_options_recommended_repository_structure",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -4714,9 +4714,9 @@
       "source_file": "techstack-options.md",
       "source_location": "L593",
       "weight": 1.0,
-      "confidence_score": 1.0,
       "source": "finlite_techstack_options_finlite_technology_stack_decision_guidelines",
-      "target": "finlite_techstack_options_hosting_and_cost_reality"
+      "target": "finlite_techstack_options_hosting_and_cost_reality",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -4724,9 +4724,9 @@
       "source_file": "techstack-options.md",
       "source_location": "L611",
       "weight": 1.0,
-      "confidence_score": 1.0,
       "source": "finlite_techstack_options_finlite_technology_stack_decision_guidelines",
-      "target": "finlite_techstack_options_decision_checklist"
+      "target": "finlite_techstack_options_decision_checklist",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -4734,9 +4734,9 @@
       "source_file": "techstack-options.md",
       "source_location": "L628",
       "weight": 1.0,
-      "confidence_score": 1.0,
       "source": "finlite_techstack_options_finlite_technology_stack_decision_guidelines",
-      "target": "finlite_techstack_options_final_recommendation"
+      "target": "finlite_techstack_options_final_recommendation",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -4744,9 +4744,9 @@
       "source_file": "techstack-options.md",
       "source_location": "L643",
       "weight": 1.0,
-      "confidence_score": 1.0,
       "source": "finlite_techstack_options_finlite_technology_stack_decision_guidelines",
-      "target": "finlite_techstack_options_official_references"
+      "target": "finlite_techstack_options_official_references",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -5114,9 +5114,9 @@
       "source_file": "docs/ADVISER_QUESTIONNAIRE.md",
       "source_location": "L1",
       "weight": 1.0,
-      "confidence_score": 1.0,
       "source": "docs_adviser_questionnaire_md",
-      "target": "docs_adviser_questionnaire_lite_club_adviser_financial_operations_system_rules_questionnaire"
+      "target": "docs_adviser_questionnaire_lite_club_adviser_financial_operations_system_rules_questionnaire",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -5134,9 +5134,9 @@
       "source_file": "docs/ADVISER_QUESTIONNAIRE.md",
       "source_location": "L2",
       "weight": 1.0,
-      "confidence_score": 1.0,
       "source": "docs_adviser_questionnaire_lite_club_adviser_financial_operations_system_rules_questionnaire",
-      "target": "docs_adviser_questionnaire_form_guide_template_for_google_forms_deployment"
+      "target": "docs_adviser_questionnaire_form_guide_template_for_google_forms_deployment",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -5144,9 +5144,9 @@
       "source_file": "docs/ADVISER_QUESTIONNAIRE.md",
       "source_location": "L9",
       "weight": 1.0,
-      "confidence_score": 1.0,
       "source": "docs_adviser_questionnaire_lite_club_adviser_financial_operations_system_rules_questionnaire",
-      "target": "docs_adviser_questionnaire_google_form_setup_details"
+      "target": "docs_adviser_questionnaire_google_form_setup_details",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -5154,9 +5154,9 @@
       "source_file": "docs/ADVISER_QUESTIONNAIRE.md",
       "source_location": "L59",
       "weight": 1.0,
-      "confidence_score": 1.0,
       "source": "docs_adviser_questionnaire_lite_club_adviser_financial_operations_system_rules_questionnaire",
-      "target": "docs_adviser_questionnaire_section_1_personal_advances_abono_reimbursement_governance"
+      "target": "docs_adviser_questionnaire_section_1_personal_advances_abono_reimbursement_governance",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -5164,9 +5164,9 @@
       "source_file": "docs/ADVISER_QUESTIONNAIRE.md",
       "source_location": "L110",
       "weight": 1.0,
-      "confidence_score": 1.0,
       "source": "docs_adviser_questionnaire_lite_club_adviser_financial_operations_system_rules_questionnaire",
-      "target": "docs_adviser_questionnaire_section_2_physical_cashbox_custody_event_logistics"
+      "target": "docs_adviser_questionnaire_section_2_physical_cashbox_custody_event_logistics",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -5174,9 +5174,9 @@
       "source_file": "docs/ADVISER_QUESTIONNAIRE.md",
       "source_location": "L139",
       "weight": 1.0,
-      "confidence_score": 1.0,
       "source": "docs_adviser_questionnaire_lite_club_adviser_financial_operations_system_rules_questionnaire",
-      "target": "docs_adviser_questionnaire_section_3_digital_payments_gcash_fee_handling"
+      "target": "docs_adviser_questionnaire_section_3_digital_payments_gcash_fee_handling",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -5184,9 +5184,9 @@
       "source_file": "docs/ADVISER_QUESTIONNAIRE.md",
       "source_location": "L161",
       "weight": 1.0,
-      "confidence_score": 1.0,
       "source": "docs_adviser_questionnaire_lite_club_adviser_financial_operations_system_rules_questionnaire",
-      "target": "docs_adviser_questionnaire_section_4_merchandise_dues_and_discrepancy_policies"
+      "target": "docs_adviser_questionnaire_section_4_merchandise_dues_and_discrepancy_policies",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -5194,9 +5194,9 @@
       "source_file": "docs/ADVISER_QUESTIONNAIRE.md",
       "source_location": "L191",
       "weight": 1.0,
-      "confidence_score": 1.0,
       "source": "docs_adviser_questionnaire_lite_club_adviser_financial_operations_system_rules_questionnaire",
-      "target": "docs_adviser_questionnaire_section_5_approval_governance_revisions_annual_turnover"
+      "target": "docs_adviser_questionnaire_section_5_approval_governance_revisions_annual_turnover",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -5204,9 +5204,9 @@
       "source_file": "docs/ADVISER_QUESTIONNAIRE.md",
       "source_location": "L218",
       "weight": 1.0,
-      "confidence_score": 1.0,
       "source": "docs_adviser_questionnaire_lite_club_adviser_financial_operations_system_rules_questionnaire",
-      "target": "docs_adviser_questionnaire_section_6_adviser_feedback_recommendations"
+      "target": "docs_adviser_questionnaire_section_6_adviser_feedback_recommendations",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -5214,9 +5214,9 @@
       "source_file": "docs/ADVISER_QUESTIONNAIRE.md",
       "source_location": "L11",
       "weight": 1.0,
-      "confidence_score": 1.0,
       "source": "docs_adviser_questionnaire_google_form_setup_details",
-      "target": "docs_adviser_questionnaire_form_title"
+      "target": "docs_adviser_questionnaire_form_title",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -5224,9 +5224,9 @@
       "source_file": "docs/ADVISER_QUESTIONNAIRE.md",
       "source_location": "L14",
       "weight": 1.0,
-      "confidence_score": 1.0,
       "source": "docs_adviser_questionnaire_google_form_setup_details",
-      "target": "docs_adviser_questionnaire_form_description_executive_overview_developer_pitch"
+      "target": "docs_adviser_questionnaire_form_description_executive_overview_developer_pitch",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -5244,9 +5244,9 @@
       "source_file": "docs/ADVISER_QUESTIONNAIRE.md",
       "source_location": "L15",
       "weight": 1.0,
-      "confidence_score": 1.0,
       "source": "docs_adviser_questionnaire_form_description_executive_overview_developer_pitch",
-      "target": "docs_adviser_questionnaire_codeblock_1"
+      "target": "docs_adviser_questionnaire_codeblock_1",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -5254,9 +5254,9 @@
       "source_file": "docs/KRIZIA_MAE_GENOVIA_RESPONSES.md",
       "source_location": "L1",
       "weight": 1.0,
-      "confidence_score": 1.0,
       "source": "docs_krizia_mae_genovia_responses_md",
-      "target": "docs_krizia_mae_genovia_responses_lite_club_adviser_assessment_snapshot_ms_krizia_mae_genovia"
+      "target": "docs_krizia_mae_genovia_responses_lite_club_adviser_assessment_snapshot_ms_krizia_mae_genovia",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -5264,9 +5264,9 @@
       "source_file": "docs/KRIZIA_MAE_GENOVIA_RESPONSES.md",
       "source_location": "L11",
       "weight": 1.0,
-      "confidence_score": 1.0,
       "source": "docs_krizia_mae_genovia_responses_lite_club_adviser_assessment_snapshot_ms_krizia_mae_genovia",
-      "target": "docs_krizia_mae_genovia_responses_1_raw_questionnaire_responses"
+      "target": "docs_krizia_mae_genovia_responses_1_raw_questionnaire_responses",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -5274,9 +5274,9 @@
       "source_file": "docs/KRIZIA_MAE_GENOVIA_RESPONSES.md",
       "source_location": "L106",
       "weight": 1.0,
-      "confidence_score": 1.0,
       "source": "docs_krizia_mae_genovia_responses_lite_club_adviser_assessment_snapshot_ms_krizia_mae_genovia",
-      "target": "docs_krizia_mae_genovia_responses_2_derived_institutional_policies_for_finlite_system_architecture"
+      "target": "docs_krizia_mae_genovia_responses_2_derived_institutional_policies_for_finlite_system_architecture",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -5284,9 +5284,9 @@
       "source_file": "docs/KRIZIA_MAE_GENOVIA_RESPONSES.md",
       "source_location": "L13",
       "weight": 1.0,
-      "confidence_score": 1.0,
       "source": "docs_krizia_mae_genovia_responses_1_raw_questionnaire_responses",
-      "target": "docs_krizia_mae_genovia_responses_section_1_personal_advances_abono_reimbursement_governance"
+      "target": "docs_krizia_mae_genovia_responses_section_1_personal_advances_abono_reimbursement_governance",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -5294,9 +5294,9 @@
       "source_file": "docs/KRIZIA_MAE_GENOVIA_RESPONSES.md",
       "source_location": "L40",
       "weight": 1.0,
-      "confidence_score": 1.0,
       "source": "docs_krizia_mae_genovia_responses_1_raw_questionnaire_responses",
-      "target": "docs_krizia_mae_genovia_responses_section_2_physical_cashbox_custody_event_logistics"
+      "target": "docs_krizia_mae_genovia_responses_section_2_physical_cashbox_custody_event_logistics",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -5304,9 +5304,9 @@
       "source_file": "docs/KRIZIA_MAE_GENOVIA_RESPONSES.md",
       "source_location": "L55",
       "weight": 1.0,
-      "confidence_score": 1.0,
       "source": "docs_krizia_mae_genovia_responses_1_raw_questionnaire_responses",
-      "target": "docs_krizia_mae_genovia_responses_section_3_digital_payments_gcash_fee_handling"
+      "target": "docs_krizia_mae_genovia_responses_section_3_digital_payments_gcash_fee_handling",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -5314,9 +5314,9 @@
       "source_file": "docs/KRIZIA_MAE_GENOVIA_RESPONSES.md",
       "source_location": "L67",
       "weight": 1.0,
-      "confidence_score": 1.0,
       "source": "docs_krizia_mae_genovia_responses_1_raw_questionnaire_responses",
-      "target": "docs_krizia_mae_genovia_responses_section_4_merchandise_dues_and_discrepancy_policies"
+      "target": "docs_krizia_mae_genovia_responses_section_4_merchandise_dues_and_discrepancy_policies",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -5324,9 +5324,9 @@
       "source_file": "docs/KRIZIA_MAE_GENOVIA_RESPONSES.md",
       "source_location": "L82",
       "weight": 1.0,
-      "confidence_score": 1.0,
       "source": "docs_krizia_mae_genovia_responses_1_raw_questionnaire_responses",
-      "target": "docs_krizia_mae_genovia_responses_section_5_approval_governance_revisions_annual_turnover"
+      "target": "docs_krizia_mae_genovia_responses_section_5_approval_governance_revisions_annual_turnover",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -5334,9 +5334,9 @@
       "source_file": "docs/KRIZIA_MAE_GENOVIA_RESPONSES.md",
       "source_location": "L97",
       "weight": 1.0,
-      "confidence_score": 1.0,
       "source": "docs_krizia_mae_genovia_responses_1_raw_questionnaire_responses",
-      "target": "docs_krizia_mae_genovia_responses_section_6_adviser_feedback_priority_feature_request"
+      "target": "docs_krizia_mae_genovia_responses_section_6_adviser_feedback_priority_feature_request",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -5344,9 +5344,9 @@
       "source_file": "docs/PROJECT_CONTEXT.md",
       "source_location": "L1",
       "weight": 1.0,
-      "confidence_score": 1.0,
       "source": "docs_project_context_md",
-      "target": "docs_project_context_project_context_finlite_financial_management_automated_document_generation_system"
+      "target": "docs_project_context_project_context_finlite_financial_management_automated_document_generation_system",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -5364,9 +5364,9 @@
       "source_file": "docs/PROJECT_CONTEXT.md",
       "source_location": "L13",
       "weight": 1.0,
-      "confidence_score": 1.0,
       "source": "docs_project_context_project_context_finlite_financial_management_automated_document_generation_system",
-      "target": "docs_project_context_1_new_system_overview"
+      "target": "docs_project_context_1_new_system_overview",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -5374,9 +5374,9 @@
       "source_file": "docs/PROJECT_CONTEXT.md",
       "source_location": "L62",
       "weight": 1.0,
-      "confidence_score": 1.0,
       "source": "docs_project_context_project_context_finlite_financial_management_automated_document_generation_system",
-      "target": "docs_project_context_2_background_of_the_organization"
+      "target": "docs_project_context_2_background_of_the_organization",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -5384,9 +5384,9 @@
       "source_file": "docs/PROJECT_CONTEXT.md",
       "source_location": "L138",
       "weight": 1.0,
-      "confidence_score": 1.0,
       "source": "docs_project_context_project_context_finlite_financial_management_automated_document_generation_system",
-      "target": "docs_project_context_3_business_logic_the_as_is_financial_operations_workflows"
+      "target": "docs_project_context_3_business_logic_the_as_is_financial_operations_workflows",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -5394,9 +5394,9 @@
       "source_file": "docs/PROJECT_CONTEXT.md",
       "source_location": "L285",
       "weight": 1.0,
-      "confidence_score": 1.0,
       "source": "docs_project_context_project_context_finlite_financial_management_automated_document_generation_system",
-      "target": "docs_project_context_4_problems_in_the_business_logic"
+      "target": "docs_project_context_4_problems_in_the_business_logic",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -5404,9 +5404,9 @@
       "source_file": "docs/PROJECT_CONTEXT.md",
       "source_location": "L341",
       "weight": 1.0,
-      "confidence_score": 1.0,
       "source": "docs_project_context_project_context_finlite_financial_management_automated_document_generation_system",
-      "target": "docs_project_context_5_bridge_to_project_scope_matrix_architectural_traceability"
+      "target": "docs_project_context_5_bridge_to_project_scope_matrix_architectural_traceability",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -5414,9 +5414,9 @@
       "source_file": "docs/PROJECT_CONTEXT.md",
       "source_location": "L15",
       "weight": 1.0,
-      "confidence_score": 1.0,
       "source": "docs_project_context_1_new_system_overview",
-      "target": "docs_project_context_1_1_conceptual_foundation_the_financial_assistant_paradigm"
+      "target": "docs_project_context_1_1_conceptual_foundation_the_financial_assistant_paradigm",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -5424,9 +5424,9 @@
       "source_file": "docs/PROJECT_CONTEXT.md",
       "source_location": "L39",
       "weight": 1.0,
-      "confidence_score": 1.0,
       "source": "docs_project_context_1_new_system_overview",
-      "target": "docs_project_context_1_2_core_architectural_capabilities_modular_subsystems"
+      "target": "docs_project_context_1_2_core_architectural_capabilities_modular_subsystems",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -5434,9 +5434,9 @@
       "source_file": "docs/PROJECT_CONTEXT.md",
       "source_location": "L20",
       "weight": 1.0,
-      "confidence_score": 1.0,
       "source": "docs_project_context_1_1_conceptual_foundation_the_financial_assistant_paradigm",
-      "target": "docs_project_context_codeblock_1"
+      "target": "docs_project_context_codeblock_1",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -5454,9 +5454,9 @@
       "source_file": "docs/PROJECT_CONTEXT.md",
       "source_location": "L64",
       "weight": 1.0,
-      "confidence_score": 1.0,
       "source": "docs_project_context_2_background_of_the_organization",
-      "target": "docs_project_context_2_1_the_host_institution_pambayang_dalubhasaan_ng_marilao_pdm"
+      "target": "docs_project_context_2_1_the_host_institution_pambayang_dalubhasaan_ng_marilao_pdm",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -5464,9 +5464,9 @@
       "source_file": "docs/PROJECT_CONTEXT.md",
       "source_location": "L69",
       "weight": 1.0,
-      "confidence_score": 1.0,
       "source": "docs_project_context_2_background_of_the_organization",
-      "target": "docs_project_context_2_2_the_target_student_organization_league_of_information_technology_enthusiasts_lite"
+      "target": "docs_project_context_2_2_the_target_student_organization_league_of_information_technology_enthusiasts_lite",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -5474,9 +5474,9 @@
       "source_file": "docs/PROJECT_CONTEXT.md",
       "source_location": "L113",
       "weight": 1.0,
-      "confidence_score": 1.0,
       "source": "docs_project_context_2_background_of_the_organization",
-      "target": "docs_project_context_2_3_governance_structure_and_committee_ecosystem"
+      "target": "docs_project_context_2_3_governance_structure_and_committee_ecosystem",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -5484,9 +5484,9 @@
       "source_file": "docs/PROJECT_CONTEXT.md",
       "source_location": "L128",
       "weight": 1.0,
-      "confidence_score": 1.0,
       "source": "docs_project_context_2_background_of_the_organization",
-      "target": "docs_project_context_2_4_operational_setting_venue_constraints_and_custodial_protocols"
+      "target": "docs_project_context_2_4_operational_setting_venue_constraints_and_custodial_protocols",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -5494,9 +5494,9 @@
       "source_file": "docs/PROJECT_CONTEXT.md",
       "source_location": "L72",
       "weight": 1.0,
-      "confidence_score": 1.0,
       "source": "docs_project_context_2_2_the_target_student_organization_league_of_information_technology_enthusiasts_lite",
-      "target": "docs_project_context_codeblock_2"
+      "target": "docs_project_context_codeblock_2",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -5504,9 +5504,9 @@
       "source_file": "docs/PROJECT_CONTEXT.md",
       "source_location": "L142",
       "weight": 1.0,
-      "confidence_score": 1.0,
       "source": "docs_project_context_3_business_logic_the_as_is_financial_operations_workflows",
-      "target": "docs_project_context_codeblock_3"
+      "target": "docs_project_context_codeblock_3",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -5514,9 +5514,9 @@
       "source_file": "docs/PROJECT_CONTEXT.md",
       "source_location": "L199",
       "weight": 1.0,
-      "confidence_score": 1.0,
       "source": "docs_project_context_3_business_logic_the_as_is_financial_operations_workflows",
-      "target": "docs_project_context_3_1_revenue_generation_and_inflow_processing_logic"
+      "target": "docs_project_context_3_1_revenue_generation_and_inflow_processing_logic",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -5524,9 +5524,9 @@
       "source_file": "docs/PROJECT_CONTEXT.md",
       "source_location": "L214",
       "weight": 1.0,
-      "confidence_score": 1.0,
       "source": "docs_project_context_3_business_logic_the_as_is_financial_operations_workflows",
-      "target": "docs_project_context_3_2_spending_authorization_and_out_of_pocket_personal_advances_abono"
+      "target": "docs_project_context_3_2_spending_authorization_and_out_of_pocket_personal_advances_abono",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -5534,9 +5534,9 @@
       "source_file": "docs/PROJECT_CONTEXT.md",
       "source_location": "L221",
       "weight": 1.0,
-      "confidence_score": 1.0,
       "source": "docs_project_context_3_business_logic_the_as_is_financial_operations_workflows",
-      "target": "docs_project_context_3_3_expense_documentation_micro_disbursement_acknowledgment_and_reimbursement_protocol"
+      "target": "docs_project_context_3_3_expense_documentation_micro_disbursement_acknowledgment_and_reimbursement_protocol",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -5544,9 +5544,9 @@
       "source_file": "docs/PROJECT_CONTEXT.md",
       "source_location": "L228",
       "weight": 1.0,
-      "confidence_score": 1.0,
       "source": "docs_project_context_3_business_logic_the_as_is_financial_operations_workflows",
-      "target": "docs_project_context_3_4_physical_denomination_counting_and_cash_variance_settlement_logic"
+      "target": "docs_project_context_3_4_physical_denomination_counting_and_cash_variance_settlement_logic",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -5554,9 +5554,9 @@
       "source_file": "docs/PROJECT_CONTEXT.md",
       "source_location": "L240",
       "weight": 1.0,
-      "confidence_score": 1.0,
       "source": "docs_project_context_3_business_logic_the_as_is_financial_operations_workflows",
-      "target": "docs_project_context_3_5_institutional_liquidation_standards_and_sequential_wet_ink_signatory_routing"
+      "target": "docs_project_context_3_5_institutional_liquidation_standards_and_sequential_wet_ink_signatory_routing",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -5564,9 +5564,9 @@
       "source_file": "docs/PROJECT_CONTEXT.md",
       "source_location": "L248",
       "weight": 1.0,
-      "confidence_score": 1.0,
       "source": "docs_project_context_3_5_institutional_liquidation_standards_and_sequential_wet_ink_signatory_routing",
-      "target": "docs_project_context_codeblock_4"
+      "target": "docs_project_context_codeblock_4",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -5574,9 +5574,9 @@
       "source_file": "docs/PROJECT_CONTEXT.md",
       "source_location": "L298",
       "weight": 1.0,
-      "confidence_score": 1.0,
       "source": "docs_project_context_4_problems_in_the_business_logic",
-      "target": "docs_project_context_4_1_personal_financial_vulnerability_and_delayed_reimbursement_of_abono"
+      "target": "docs_project_context_4_1_personal_financial_vulnerability_and_delayed_reimbursement_of_abono",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -5584,9 +5584,9 @@
       "source_file": "docs/PROJECT_CONTEXT.md",
       "source_location": "L306",
       "weight": 1.0,
-      "confidence_score": 1.0,
       "source": "docs_project_context_4_problems_in_the_business_logic",
-      "target": "docs_project_context_4_2_co_mingling_of_personal_and_organizational_capital_via_ad_hoc_gcash_pooling"
+      "target": "docs_project_context_4_2_co_mingling_of_personal_and_organizational_capital_via_ad_hoc_gcash_pooling",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -5594,9 +5594,9 @@
       "source_file": "docs/PROJECT_CONTEXT.md",
       "source_location": "L313",
       "weight": 1.0,
-      "confidence_score": 1.0,
       "source": "docs_project_context_4_problems_in_the_business_logic",
-      "target": "docs_project_context_4_3_ephemeral_documentation_and_administrative_leakage_in_non_receipted_micro_disbursements"
+      "target": "docs_project_context_4_3_ephemeral_documentation_and_administrative_leakage_in_non_receipted_micro_disbursements",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -5604,9 +5604,9 @@
       "source_file": "docs/PROJECT_CONTEXT.md",
       "source_location": "L319",
       "weight": 1.0,
-      "confidence_score": 1.0,
       "source": "docs_project_context_4_problems_in_the_business_logic",
-      "target": "docs_project_context_4_4_physical_cashbox_custodial_risks_and_high_stress_face_value_turnover_obligations"
+      "target": "docs_project_context_4_4_physical_cashbox_custodial_risks_and_high_stress_face_value_turnover_obligations",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -5614,9 +5614,9 @@
       "source_file": "docs/PROJECT_CONTEXT.md",
       "source_location": "L326",
       "weight": 1.0,
-      "confidence_score": 1.0,
       "source": "docs_project_context_4_problems_in_the_business_logic",
-      "target": "docs_project_context_4_5_latent_discrepancies_and_arithmetical_reconciliation_bottlenecks"
+      "target": "docs_project_context_4_5_latent_discrepancies_and_arithmetical_reconciliation_bottlenecks",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -5624,9 +5624,9 @@
       "source_file": "docs/PROJECT_CONTEXT.md",
       "source_location": "L332",
       "weight": 1.0,
-      "confidence_score": 1.0,
       "source": "docs_project_context_4_problems_in_the_business_logic",
-      "target": "docs_project_context_4_6_institutional_liquidation_bottlenecks_and_signatory_rejections"
+      "target": "docs_project_context_4_6_institutional_liquidation_bottlenecks_and_signatory_rejections",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -5634,9 +5634,9 @@
       "source_file": "docs/PROJECT_CONTEXT.md",
       "source_location": "L345",
       "weight": 1.0,
-      "confidence_score": 1.0,
       "source": "docs_project_context_5_bridge_to_project_scope_matrix_architectural_traceability",
-      "target": "docs_project_context_5_1_business_logic_problems_vs_system_capabilities_traceability_matrix"
+      "target": "docs_project_context_5_1_business_logic_problems_vs_system_capabilities_traceability_matrix",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -5644,9 +5644,9 @@
       "source_file": "docs/PROJECT_CONTEXT.md",
       "source_location": "L370",
       "weight": 1.0,
-      "confidence_score": 1.0,
       "source": "docs_project_context_5_bridge_to_project_scope_matrix_architectural_traceability",
-      "target": "docs_project_context_5_2_architectural_synthesis_functional_module_description"
+      "target": "docs_project_context_5_2_architectural_synthesis_functional_module_description",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -5654,9 +5654,9 @@
       "source_file": "docs/PROJECT_CONTEXT.md",
       "source_location": "L347",
       "weight": 1.0,
-      "confidence_score": 1.0,
       "source": "docs_project_context_5_1_business_logic_problems_vs_system_capabilities_traceability_matrix",
-      "target": "docs_project_context_codeblock_5"
+      "target": "docs_project_context_codeblock_5",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",

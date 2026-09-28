@@ -28,11 +28,25 @@ ${transactions.slice(0, 10).map(t => `- [${t.type}] ${t.title}: ₱${t.amount} (
       const q = lastMessage.toLowerCase();
 
       if (q.includes('jatulan') || q.includes('abono') || q.includes('reimburse')) {
-        reply = `Ayon sa ating database record, may nakabinbing advance (abono) si **Ms. Kimberly Dawn Jatulan** na nagkakahalaga ng **₱1,250.00** para sa *Judge Tokens & Certificates* (Club Week 2026). Ito ay naghihintay pa ng cash box refund kapag na-liquidate na ang event.`;
+        const reimbursements = transactions.filter((t) => t.is_reimbursement && t.status === 'PENDING_REIMBURSEMENT');
+        if (reimbursements.length > 0) {
+          const list = reimbursements
+            .map((r) => `**${r.reimbursement_recipient || 'Officer'}** (₱${Number(r.amount).toLocaleString('en-PH', { minimumFractionDigits: 2 })} para sa *${r.title}*)`)
+            .join(', ');
+          reply = `Ayon sa ating verified database records, may mga nakabinbing advance (abono): ${list}. Ito ay naghihintay pa ng cash box refund kapag na-liquidate na ang event.`;
+        } else {
+          reply = 'Ayon sa ating verified database records, walang nakatalang pending reimbursement (abono) sa kasalukuyan.';
+        }
       } else if (q.includes('cash') || q.includes('on hand')) {
         reply = `Ang kabuuang **Physical Cash on Hand** sa ating cashbox ay **₱${(summary.cash_on_hand || 0).toLocaleString('en-PH', { minimumFractionDigits: 2 })}**. Samantala, ang digital balance sa **GCash** ay **₱${(summary.gcash_balance || 0).toLocaleString('en-PH', { minimumFractionDigits: 2 })}**.`;
       } else if (q.includes('shortage')) {
-        reply = `Mayroong naitalang **₱161.00 Cash Shortage** noong Club Week dahil sa kakulangan ng baryang panukli sa booth sales. Ito ay pormal nang ini-log at inaprubahan ng ating Club Adviser.`;
+        const shortages = transactions.filter((t) => (t.category_name && t.category_name.toLowerCase().includes('shortage')) || (t.title && t.title.toLowerCase().includes('shortage')));
+        if (shortages.length > 0) {
+          const totalShortage = shortages.reduce((sum, s) => sum + (Number(s.amount) || 0), 0);
+          reply = `Mayroong naitalang kabuuang **₱${totalShortage.toLocaleString('en-PH', { minimumFractionDigits: 2 })} Cash Shortage** sa ating talaan na pormal nang ini-log at inaprubahan ng ating Club Adviser.`;
+        } else {
+          reply = 'Walang naitalang cash shortage discrepancy sa ating kasalukuyang talaan.';
+        }
       } else {
         reply = `Ang FinLITE ledger ay nagpapakita ng kabuuang Inflows na **₱${(summary.total_inflows || 0).toLocaleString('en-PH', { minimumFractionDigits: 2 })}** at Outflows na **₱${(summary.total_outflows || 0).toLocaleString('en-PH', { minimumFractionDigits: 2 })}**, na may net balance na **₱${((summary.total_inflows || 0) - (summary.total_outflows || 0)).toLocaleString('en-PH', { minimumFractionDigits: 2 })}**.`;
       }
@@ -65,7 +79,15 @@ ${ledgerContext}`,
       const q = lastMessage.toLowerCase();
       let fallbackReply = `Ayon sa ating kasalukuyang FinLITE ledger: May kabuuang Physical Cash on Hand na ₱${(summary.cash_on_hand || 0).toLocaleString('en-PH', { minimumFractionDigits: 2 })} at GCash na ₱${(summary.gcash_balance || 0).toLocaleString('en-PH', { minimumFractionDigits: 2 })}.`;
       if (q.includes('jatulan') || q.includes('abono') || q.includes('reimburse')) {
-        fallbackReply = `May nakabinbing advance (abono) si **Ms. Kimberly Dawn Jatulan** na nagkakahalaga ng **₱1,250.00** para sa *Judge Tokens & Certificates* (Club Week 2026).`;
+        const reimbursements = transactions.filter((t) => t.is_reimbursement && t.status === 'PENDING_REIMBURSEMENT');
+        if (reimbursements.length > 0) {
+          const list = reimbursements
+            .map((r) => `**${r.reimbursement_recipient || 'Officer'}** (₱${Number(r.amount).toLocaleString('en-PH', { minimumFractionDigits: 2 })} para sa *${r.title}*)`)
+            .join(', ');
+          fallbackReply = `May nakabinbing advance (abono): ${list}.`;
+        } else {
+          fallbackReply = 'Walang nakatalang pending reimbursement (abono) sa kasalukuyang ledger.';
+        }
       }
       return NextResponse.json({ reply: fallbackReply });
     }
