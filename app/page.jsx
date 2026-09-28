@@ -8,6 +8,7 @@ import DenominationCounter from '@/components/reconciliation/DenominationCounter
 import AIChatDrawer from '@/components/ai/AIChatDrawer';
 import NewProposalModal from '@/components/proposals/NewProposalModal';
 import DocumentPreviewModal from '@/components/reports/DocumentPreviewModal';
+import NewSemesterModal from '@/components/semesters/NewSemesterModal';
 import { createClient } from '@/lib/supabase/client';
 
 // Initial realistic records matching AY 2025–2026 LITE historical data (used only as fallback if DB offline)
@@ -21,6 +22,8 @@ const INITIAL_TRANSACTIONS = [
     payment_method: 'CASH',
     category_name: 'Booth Sales',
     transaction_date: '2026-09-02',
+    academic_year: '2025-2026',
+    semester: '2nd Sem',
     is_reimbursement: false,
     event_name: 'Club Week 2026',
     status: 'COMPLETED',
@@ -34,6 +37,8 @@ const INITIAL_TRANSACTIONS = [
     payment_method: 'CASH',
     category_name: 'Booth Sales',
     transaction_date: '2026-09-03',
+    academic_year: '2025-2026',
+    semester: '2nd Sem',
     is_reimbursement: false,
     event_name: 'Club Week 2026',
     status: 'COMPLETED',
@@ -47,6 +52,8 @@ const INITIAL_TRANSACTIONS = [
     payment_method: 'GCASH',
     category_name: 'E-Sports Registrations',
     transaction_date: '2026-09-06',
+    academic_year: '2025-2026',
+    semester: '2nd Sem',
     is_reimbursement: false,
     event_name: 'E-Sports Cup 2026',
     status: 'COMPLETED',
@@ -60,6 +67,8 @@ const INITIAL_TRANSACTIONS = [
     payment_method: 'CASH',
     category_name: 'Supplies & Materials',
     transaction_date: '2026-09-01',
+    academic_year: '2025-2026',
+    semester: '2nd Sem',
     is_reimbursement: false,
     event_name: 'Club Week 2026',
     status: 'COMPLETED',
@@ -74,6 +83,8 @@ const INITIAL_TRANSACTIONS = [
     payment_method: 'CASH',
     category_name: 'Food & Refreshments',
     transaction_date: '2026-09-02',
+    academic_year: '2025-2026',
+    semester: '2nd Sem',
     is_reimbursement: false,
     event_name: 'Club Week 2026',
     status: 'COMPLETED',
@@ -87,6 +98,8 @@ const INITIAL_TRANSACTIONS = [
     payment_method: 'CASH',
     category_name: 'Tournament Prizes',
     transaction_date: '2026-09-07',
+    academic_year: '2025-2026',
+    semester: '2nd Sem',
     is_reimbursement: false,
     event_name: 'E-Sports Cup 2026',
     status: 'COMPLETED',
@@ -100,6 +113,8 @@ const INITIAL_TRANSACTIONS = [
     payment_method: 'CASH',
     category_name: 'Food & Refreshments',
     transaction_date: '2026-09-09',
+    academic_year: '2025-2026',
+    semester: '2nd Sem',
     is_reimbursement: true,
     reimbursement_recipient: 'Ms. Kimberly Dawn Jatulan',
     event_name: 'Club Week 2026',
@@ -114,10 +129,17 @@ const INITIAL_TRANSACTIONS = [
     payment_method: 'CASH',
     category_name: 'Cash Shortage Discrepancy',
     transaction_date: '2026-09-11',
+    academic_year: '2025-2026',
+    semester: '2nd Sem',
     is_reimbursement: false,
     event_name: 'Club Week 2026',
     status: 'COMPLETED',
   },
+];
+
+const DEFAULT_SEMESTERS = [
+  { id: 'sem-25-26-2', academicYear: '2025-2026', semester: '2nd Sem', label: 'AY 2025–2026 • 2nd Sem' },
+  { id: 'sem-26-27-1', academicYear: '2026-2027', semester: '1st Sem', label: 'AY 2026–2027 • 1st Sem' },
 ];
 
 export default function Dashboard() {
@@ -131,6 +153,11 @@ export default function Dashboard() {
   const [isProposalOpen, setIsProposalOpen] = useState(false);
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   const [previewData, setPreviewData] = useState(null);
+
+  // Multi-Semester State Management
+  const [semesters, setSemesters] = useState(DEFAULT_SEMESTERS);
+  const [currentSemester, setCurrentSemester] = useState(DEFAULT_SEMESTERS[0]);
+  const [isNewSemesterOpen, setIsNewSemesterOpen] = useState(false);
 
   const supabase = createClient();
 
@@ -169,6 +196,14 @@ export default function Dashboard() {
     loadData();
   }, []);
 
+  // Filter transactions strictly for the active semester
+  const activeTransactions = transactions.filter((tx) => {
+    // If transaction has academic_year / semester, match it
+    if (tx.academic_year && tx.academic_year !== currentSemester.academicYear) return false;
+    if (tx.semester && tx.semester !== currentSemester.semester) return false;
+    return true;
+  });
+
   // Recalculate summary totals atomically
   const calculateSummary = (txs) => {
     let total_inflows = 0;
@@ -205,13 +240,15 @@ export default function Dashboard() {
     };
   };
 
-  const summary = calculateSummary(transactions);
+  const summary = calculateSummary(activeTransactions);
 
   const handleSaveTransaction = async (newTx) => {
     const tempId = `tx-${Date.now()}`;
     const optimisticTx = {
       ...newTx,
       id: tempId,
+      academic_year: newTx.academic_year || currentSemester.academicYear,
+      semester: newTx.semester || currentSemester.semester,
     };
     setTransactions((prev) => [optimisticTx, ...prev]);
 
@@ -262,11 +299,57 @@ export default function Dashboard() {
         if (error) {
           console.error('Supabase transaction insert failed:', error);
         } else if (data) {
-          setTransactions((prev) => prev.map((t) => (t.id === tempId ? data : t)));
+          setTransactions((prev) => prev.map((t) => (t.id === tempId ? { ...data, academic_year: optimisticTx.academic_year, semester: optimisticTx.semester } : t)));
         }
       } catch (err) {
         console.error('Failed to save transaction to database:', err);
       }
+    }
+  };
+
+  // Handler for starting a new semester with carry-over rollover balance
+  const handleStartSemester = async ({ academicYear, semester, label, rolloverCash, rolloverGcash, previousTermLabel }) => {
+    const newSemObj = {
+      id: `sem-${academicYear.replace(/[^0-9]/g, '')}-${semester.toLowerCase().replace(/[^a-z0-9]/g, '')}`,
+      academicYear,
+      semester,
+      label,
+    };
+
+    setSemesters((prev) => [...prev.filter((s) => s.id !== newSemObj.id), newSemObj]);
+    setCurrentSemester(newSemObj);
+
+    // If rollover cash is requested, record an official Beginning Balance Inflow
+    if (rolloverCash > 0) {
+      await handleSaveTransaction({
+        title: `Beginning Cash on Hand (Rolled over from ${previousTermLabel})`,
+        description: `Official starting balance forwarded from the verified ending cashbox of ${previousTermLabel}`,
+        amount: rolloverCash,
+        type: 'INFLOW',
+        payment_method: 'CASH',
+        category_name: 'Initial Budget Rollover',
+        transaction_date: new Date().toISOString().split('T')[0],
+        academic_year: academicYear,
+        semester: semester,
+        event_name: 'Semester Opening Turnover',
+        status: 'COMPLETED',
+      });
+    }
+
+    if (rolloverGcash > 0) {
+      await handleSaveTransaction({
+        title: `Beginning GCash Balance (Forwarded from ${previousTermLabel})`,
+        description: `Starting electronic funds forwarded from ${previousTermLabel}`,
+        amount: rolloverGcash,
+        type: 'INFLOW',
+        payment_method: 'GCASH',
+        category_name: 'Initial Budget Rollover',
+        transaction_date: new Date().toISOString().split('T')[0],
+        academic_year: academicYear,
+        semester: semester,
+        event_name: 'Semester Opening Turnover',
+        status: 'COMPLETED',
+      });
     }
   };
 
@@ -345,8 +428,10 @@ export default function Dashboard() {
       eventName: 'Club Week 2026 & E-Sports Cup',
       activityTitle: 'Club Week 2026 & E-Sports Cup',
       transmittalDate: 'October 14, 2026',
+      academicYear: currentSemester.academicYear,
+      semester: currentSemester.semester,
       summary,
-      transactions,
+      transactions: activeTransactions,
       remarks: 'All transactions recorded conform with the 7-day receipt submission policy and dual club adviser audit verification.',
       signatories: {
         preparedBy: 'ANDREI JOHN P. GERONIMO',
@@ -381,6 +466,13 @@ export default function Dashboard() {
         onRoleChange={setCurrentRole}
         onOpenAI={() => setIsAIOpen(true)}
         onOpenDenominations={() => setIsDenomOpen(true)}
+        currentSemester={currentSemester}
+        semesters={semesters}
+        onSelectSemester={(semId) => {
+          const found = semesters.find((s) => s.id === semId);
+          if (found) setCurrentSemester(found);
+        }}
+        onOpenNewSemester={() => setIsNewSemesterOpen(true)}
       />
 
       {/* Main Content Area */}
@@ -394,7 +486,7 @@ export default function Dashboard() {
 
         {/* Ledger & Transaction Table */}
         <TransactionTable
-          transactions={transactions}
+          transactions={activeTransactions}
           onNewTransaction={() => setIsNewTxOpen(true)}
           onExportReport={handleOpenLiquidationPreview}
           onNewProposal={() => setIsProposalOpen(true)}
@@ -405,6 +497,14 @@ export default function Dashboard() {
       </main>
 
       {/* Modals & Slide-overs */}
+      <NewSemesterModal
+        isOpen={isNewSemesterOpen}
+        onClose={() => setIsNewSemesterOpen(false)}
+        currentSemester={currentSemester}
+        currentSummary={summary}
+        onStartSemester={handleStartSemester}
+      />
+
       <NewTransactionModal
         isOpen={isNewTxOpen}
         onClose={() => setIsNewTxOpen(false)}
@@ -438,7 +538,7 @@ export default function Dashboard() {
         isOpen={isAIOpen}
         onClose={() => setIsAIOpen(false)}
         summary={summary}
-        transactions={transactions}
+        transactions={activeTransactions}
       />
 
     </div>

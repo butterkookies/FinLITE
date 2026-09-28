@@ -98,6 +98,13 @@ export default function DocumentPreviewModal({ isOpen, onClose, documentData }) 
     if (documentData) {
       if (documentData.transmittalDate) setTransmittalDate(documentData.transmittalDate);
       if (documentData.eventName) setPeriodDesc(`As of ${documentData.eventName}`);
+      if (documentData.semester) {
+        const semClean = documentData.semester.toUpperCase().includes('SEM') 
+          ? documentData.semester.toUpperCase().replace('SEM', 'SEMESTER')
+          : documentData.semester.toUpperCase();
+        setSemester(semClean);
+      }
+      if (documentData.academicYear) setAcademicYear(documentData.academicYear);
       
       // If documentData has transaction outflows, use them as expenses
       if (documentData.transactions && documentData.transactions.length > 0) {
@@ -106,6 +113,17 @@ export default function DocumentPreviewModal({ isOpen, onClose, documentData }) 
           .map(t => ({ desc: t.title, amount: Number(t.amount) || 0 }));
         if (outflows.length > 0) {
           setExpenseRows(outflows);
+        }
+
+        // Auto-detect rollover beginning balance
+        const rolloverTx = documentData.transactions.find(t => 
+          t.type === 'INFLOW' && (
+            (t.category_name && t.category_name.toLowerCase().includes('rollover')) || 
+            (t.title && t.title.toLowerCase().includes('beginning'))
+          )
+        );
+        if (rolloverTx) {
+          setInitialBudget(Number(rolloverTx.amount) || 0);
         }
       }
     }

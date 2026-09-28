@@ -1,8 +1,17 @@
 'use client';
-import { Shield, Sparkles, UserCheck, Wallet } from 'lucide-react';
+import { Calendar, Shield, Sparkles, UserCheck, Wallet } from 'lucide-react';
 import Image from 'next/image';
 
-export default function Navbar({ currentRole, onRoleChange, onOpenAI, onOpenDenominations }) {
+export default function Navbar({ 
+  currentRole, 
+  onRoleChange, 
+  onOpenAI, 
+  onOpenDenominations,
+  currentSemester,
+  semesters = [],
+  onSelectSemester,
+  onOpenNewSemester
+}) {
   const roles = [
     { id: 'treasurer', label: 'Treasurer', name: 'Andrei Geronimo' },
     { id: 'auditor', label: 'Auditor', name: 'Christian Kasilag' },
@@ -14,7 +23,7 @@ export default function Navbar({ currentRole, onRoleChange, onOpenAI, onOpenDeno
     <header className="sticky top-0 z-30 bg-white/85 backdrop-blur-md border-b border-black/[0.06] transition-all">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
         
-        {/* Left: Organization Branding */}
+        {/* Left: Organization Branding & Semester Switcher */}
         <div className="flex items-center gap-2 sm:gap-3 min-w-0">
           <div className="flex items-center gap-2 min-w-0">
             <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-emerald-50 border border-emerald-100 flex items-center justify-center overflow-hidden shrink-0">
@@ -41,10 +50,32 @@ export default function Navbar({ currentRole, onRoleChange, onOpenAI, onOpenDeno
             </div>
           </div>
 
-          <div className="hidden lg:flex items-center gap-2 pl-3 border-l border-gray-200">
-            <span className="text-xs font-medium text-gray-500 bg-gray-100 px-2.5 py-1 rounded-full">
-              AY 2025–2026 • 2nd Sem
-            </span>
+          {/* Interactive Semester Switcher */}
+          <div className="flex items-center pl-2 sm:pl-3 border-l border-gray-200">
+            <div className="relative flex items-center">
+              <Calendar className="w-3.5 h-3.5 text-emerald-700 absolute left-2 sm:left-2.5 pointer-events-none" />
+              <select
+                value={currentSemester?.id || ''}
+                onChange={(e) => {
+                  if (e.target.value === 'NEW') {
+                    onOpenNewSemester();
+                  } else {
+                    onSelectSemester(e.target.value);
+                  }
+                }}
+                className="text-[11px] sm:text-xs font-semibold text-gray-700 bg-gray-50 hover:bg-gray-100 border border-black/[0.08] pl-6 sm:pl-7 pr-5 sm:pr-7 py-1.5 rounded-xl appearance-none cursor-pointer focus:outline-none focus:ring-2 focus:ring-emerald-500/20 max-w-[105px] xs:max-w-[140px] sm:max-w-none truncate"
+                title="Select Academic Year / Semester or Start New Term"
+              >
+                {semesters.map((s) => (
+                  <option key={s.id} value={s.id}>
+                    {s.label}
+                  </option>
+                ))}
+                <option value="NEW" className="text-emerald-700 font-bold">
+                  + Start New Semester...
+                </option>
+              </select>
+            </div>
           </div>
         </div>
 
