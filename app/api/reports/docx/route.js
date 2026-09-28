@@ -105,25 +105,25 @@ export async function POST(req) {
       new Paragraph({
         alignment: AlignmentType.CENTER,
         children: [
-          new TextRun({ text: 'PAMBAYANG DALUBHASAAN NG MARILAO', bold: true, size: 24, font: 'Times New Roman' }),
+          new TextRun({ text: 'PAMBAYANG DALUBHASAAN NG MARILAO', bold: true, size: 24, font: 'Calibri' }),
         ],
       }),
       new Paragraph({
         alignment: AlignmentType.CENTER,
         children: [
-          new TextRun({ text: 'COLLEGE OF COMPUTER STUDIES', size: 20, font: 'Times New Roman' }),
+          new TextRun({ text: 'COLLEGE OF COMPUTER STUDIES', size: 20, font: 'Calibri' }),
         ],
       }),
       new Paragraph({
         alignment: AlignmentType.CENTER,
         children: [
-          new TextRun({ text: 'LEAGUE OF INFORMATION TECHNOLOGY ENTHUSIASTS (LITE)', bold: true, size: 22, font: 'Times New Roman' }),
+          new TextRun({ text: 'LEAGUE OF INFORMATION TECHNOLOGY ENTHUSIASTS (LITE)', bold: true, size: 22, font: 'Calibri' }),
         ],
       }),
       new Paragraph({
         alignment: AlignmentType.CENTER,
         children: [
-          new TextRun({ text: 'Abangan Norte, Marilao, Bulacan', italics: true, size: 18, font: 'Times New Roman' }),
+          new TextRun({ text: 'Abangan Norte, Marilao, Bulacan', italics: true, size: 18, font: 'Calibri' }),
         ],
       }),
       new Paragraph({ text: '' }),
@@ -137,41 +137,18 @@ export async function POST(req) {
             borders: borderNone,
             width: { size: 50, type: WidthType.PERCENTAGE },
             children: [
-              new Paragraph({ children: [new TextRun({ text: 'Prepared by:\n\n\n', font: 'Times New Roman' })] }),
-              new Paragraph({ children: [new TextRun({ text: (signatories.preparedBy || 'ANDREI JOHN P. GERONIMO').toUpperCase(), bold: true, font: 'Times New Roman' })] }),
-              new Paragraph({ children: [new TextRun({ text: signatories.preparedRole || 'LITE Treasurer', italics: true, font: 'Times New Roman' })] }),
+              new Paragraph({ children: [new TextRun({ text: 'Prepared by:\n\n\n', font: 'Calibri' })] }),
+              new Paragraph({ children: [new TextRun({ text: (signatories.preparedBy || 'ANDREI JOHN P. GERONIMO').toUpperCase(), bold: true, font: 'Calibri' })] }),
+              new Paragraph({ children: [new TextRun({ text: signatories.preparedRole || 'LITE Treasurer', italics: true, font: 'Calibri' })] }),
             ],
           }),
           new TableCell({
             borders: borderNone,
             width: { size: 50, type: WidthType.PERCENTAGE },
             children: [
-              new Paragraph({ children: [new TextRun({ text: 'Audited & Verified by:\n\n\n', font: 'Times New Roman' })] }),
-              new Paragraph({ children: [new TextRun({ text: (signatories.reviewedBy || 'CHRISTIAN REY C. KASILAG').toUpperCase(), bold: true, font: 'Times New Roman' })] }),
-              new Paragraph({ children: [new TextRun({ text: signatories.reviewedRole || 'LITE Auditor', italics: true, font: 'Times New Roman' })] }),
-            ],
-          }),
-        ],
-      }),
-      new TableRow({
-        children: [
-          new TableCell({
-            borders: borderNone,
-            width: { size: 50, type: WidthType.PERCENTAGE },
-            children: [
-              new Paragraph({ children: [new TextRun({ text: '\n\nNoted by:\n\n\n', font: 'Times New Roman' })] }),
-              new Paragraph({ children: [new TextRun({ text: (signatories.notedBy || 'EMANUEL MALBAROSA').toUpperCase(), bold: true, font: 'Times New Roman' })] }),
-              new Paragraph({ children: [new TextRun({ text: signatories.notedRole || 'LITE President', italics: true, font: 'Times New Roman' })] }),
-            ],
-          }),
-          new TableCell({
-            borders: borderNone,
-            width: { size: 50, type: WidthType.PERCENTAGE },
-            children: [
-              new Paragraph({ children: [new TextRun({ text: '\n\nApproved by:\n\n\n', font: 'Times New Roman' })] }),
-              new Paragraph({ children: [new TextRun({ text: (signatories.adviser1 || 'MS. KIMBERLY DAWN JATULAN').toUpperCase(), bold: true, font: 'Times New Roman' })] }),
-              new Paragraph({ children: [new TextRun({ text: (signatories.adviser2 || 'MS. KRIZIA MAE GENOVIA').toUpperCase(), bold: true, font: 'Times New Roman' })] }),
-              new Paragraph({ children: [new TextRun({ text: signatories.adviserRole || 'LITE Club Advisers', italics: true, font: 'Times New Roman' })] }),
+              new Paragraph({ children: [new TextRun({ text: 'Audited & Verified by:\n\n\n', font: 'Calibri' })] }),
+              new Paragraph({ children: [new TextRun({ text: (signatories.reviewedBy || 'CHRISTIAN REY C. KASILAG').toUpperCase(), bold: true, font: 'Calibri' })] }),
+              new Paragraph({ children: [new TextRun({ text: signatories.reviewedRole || 'LITE Auditor', italics: true, font: 'Calibri' })] }),
             ],
           }),
         ],
@@ -182,18 +159,41 @@ export async function POST(req) {
             borders: borderNone,
             width: { size: 50, type: WidthType.PERCENTAGE },
             children: [
-              new Paragraph({ children: [new TextRun({ text: '\n\nEndorsed by:\n\n\n', font: 'Times New Roman' })] }),
-              new Paragraph({ children: [new TextRun({ text: (signatories.directorName || 'JOVYLYN ORTIZ-CESAR, MBA, MSIT').toUpperCase(), bold: true, font: 'Times New Roman' })] }),
-              new Paragraph({ children: [new TextRun({ text: signatories.directorRole || 'Program Director, BSIT', italics: true, font: 'Times New Roman' })] }),
+              new Paragraph({ children: [new TextRun({ text: '\n\nNoted by:\n\n\n', font: 'Calibri' })] }),
+              new Paragraph({ children: [new TextRun({ text: (signatories.notedBy || 'EMANUEL MALBAROSA').toUpperCase(), bold: true, font: 'Calibri' })] }),
+              new Paragraph({ children: [new TextRun({ text: signatories.notedRole || 'LITE President', italics: true, font: 'Calibri' })] }),
             ],
           }),
           new TableCell({
             borders: borderNone,
             width: { size: 50, type: WidthType.PERCENTAGE },
             children: [
-              new Paragraph({ children: [new TextRun({ text: '\n\nFinal Approval:\n\n\n', font: 'Times New Roman' })] }),
-              new Paragraph({ children: [new TextRun({ text: (signatories.deanName || 'DR. EMRAIDA MARIE M. MANUCOM').toUpperCase(), bold: true, font: 'Times New Roman' })] }),
-              new Paragraph({ children: [new TextRun({ text: signatories.deanRole || 'Dean, College of Computer Studies', italics: true, font: 'Times New Roman' })] }),
+              new Paragraph({ children: [new TextRun({ text: '\n\nApproved by:\n\n\n', font: 'Calibri' })] }),
+              new Paragraph({ children: [new TextRun({ text: (signatories.adviser1 || 'MS. KIMBERLY DAWN JATULAN').toUpperCase(), bold: true, font: 'Calibri' })] }),
+              new Paragraph({ children: [new TextRun({ text: (signatories.adviser2 || 'MS. KRIZIA MAE GENOVIA').toUpperCase(), bold: true, font: 'Calibri' })] }),
+              new Paragraph({ children: [new TextRun({ text: signatories.adviserRole || 'LITE Club Advisers', italics: true, font: 'Calibri' })] }),
+            ],
+          }),
+        ],
+      }),
+      new TableRow({
+        children: [
+          new TableCell({
+            borders: borderNone,
+            width: { size: 50, type: WidthType.PERCENTAGE },
+            children: [
+              new Paragraph({ children: [new TextRun({ text: '\n\nEndorsed by:\n\n\n', font: 'Calibri' })] }),
+              new Paragraph({ children: [new TextRun({ text: (signatories.directorName || 'JOVYLYN ORTIZ-CESAR, MBA, MSIT').toUpperCase(), bold: true, font: 'Calibri' })] }),
+              new Paragraph({ children: [new TextRun({ text: signatories.directorRole || 'Program Director, BSIT', italics: true, font: 'Calibri' })] }),
+            ],
+          }),
+          new TableCell({
+            borders: borderNone,
+            width: { size: 50, type: WidthType.PERCENTAGE },
+            children: [
+              new Paragraph({ children: [new TextRun({ text: '\n\nFinal Approval:\n\n\n', font: 'Calibri' })] }),
+              new Paragraph({ children: [new TextRun({ text: (signatories.deanName || 'DR. EMRAIDA MARIE M. MANUCOM').toUpperCase(), bold: true, font: 'Calibri' })] }),
+              new Paragraph({ children: [new TextRun({ text: signatories.deanRole || 'Dean, College of Computer Studies', italics: true, font: 'Calibri' })] }),
             ],
           }),
         ],
@@ -210,32 +210,32 @@ export async function POST(req) {
           children: [
             new TableCell({
               borders: borderSingle,
-              children: [new Paragraph({ children: [new TextRun({ text: 'Item Description', bold: true, font: 'Times New Roman' })] })],
+              children: [new Paragraph({ children: [new TextRun({ text: 'Item Description', bold: true, font: 'Calibri' })] })],
               width: { size: 35, type: WidthType.PERCENTAGE },
             }),
             new TableCell({
               borders: borderSingle,
-              children: [new Paragraph({ alignment: AlignmentType.RIGHT, children: [new TextRun({ text: 'Unit Cost', bold: true, font: 'Times New Roman' })] })],
+              children: [new Paragraph({ alignment: AlignmentType.RIGHT, children: [new TextRun({ text: 'Unit Cost', bold: true, font: 'Calibri' })] })],
               width: { size: 15, type: WidthType.PERCENTAGE },
             }),
             new TableCell({
               borders: borderSingle,
-              children: [new Paragraph({ alignment: AlignmentType.RIGHT, children: [new TextRun({ text: 'Selling Price', bold: true, font: 'Times New Roman' })] })],
+              children: [new Paragraph({ alignment: AlignmentType.RIGHT, children: [new TextRun({ text: 'Selling Price', bold: true, font: 'Calibri' })] })],
               width: { size: 15, type: WidthType.PERCENTAGE },
             }),
             new TableCell({
               borders: borderSingle,
-              children: [new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text: 'Units', bold: true, font: 'Times New Roman' })] })],
+              children: [new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text: 'Units', bold: true, font: 'Calibri' })] })],
               width: { size: 10, type: WidthType.PERCENTAGE },
             }),
             new TableCell({
               borders: borderSingle,
-              children: [new Paragraph({ alignment: AlignmentType.RIGHT, children: [new TextRun({ text: 'Gross (₱)', bold: true, font: 'Times New Roman' })] })],
+              children: [new Paragraph({ alignment: AlignmentType.RIGHT, children: [new TextRun({ text: 'Gross (₱)', bold: true, font: 'Calibri' })] })],
               width: { size: 12, type: WidthType.PERCENTAGE },
             }),
             new TableCell({
               borders: borderSingle,
-              children: [new Paragraph({ alignment: AlignmentType.RIGHT, children: [new TextRun({ text: 'Profit (₱)', bold: true, font: 'Times New Roman' })] })],
+              children: [new Paragraph({ alignment: AlignmentType.RIGHT, children: [new TextRun({ text: 'Profit (₱)', bold: true, font: 'Calibri' })] })],
               width: { size: 13, type: WidthType.PERCENTAGE },
             }),
           ],
@@ -250,27 +250,27 @@ export async function POST(req) {
             children: [
               new TableCell({
                 borders: borderNone,
-                children: [new Paragraph({ children: [new TextRun({ text: item.name || '', font: 'Times New Roman' })] })],
+                children: [new Paragraph({ children: [new TextRun({ text: item.name || '', font: 'Calibri' })] })],
               }),
               new TableCell({
                 borders: borderNone,
-                children: [new Paragraph({ alignment: AlignmentType.RIGHT, children: [new TextRun({ text: `₱${Number(item.unitCost || 0).toFixed(2)}`, font: 'Times New Roman' })] })],
+                children: [new Paragraph({ alignment: AlignmentType.RIGHT, children: [new TextRun({ text: `₱${Number(item.unitCost || 0).toFixed(2)}`, font: 'Calibri' })] })],
               }),
               new TableCell({
                 borders: borderNone,
-                children: [new Paragraph({ alignment: AlignmentType.RIGHT, children: [new TextRun({ text: `₱${Number(item.sellingPrice || 0).toFixed(2)}`, font: 'Times New Roman' })] })],
+                children: [new Paragraph({ alignment: AlignmentType.RIGHT, children: [new TextRun({ text: `₱${Number(item.sellingPrice || 0).toFixed(2)}`, font: 'Calibri' })] })],
               }),
               new TableCell({
                 borders: borderNone,
-                children: [new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text: `${item.projectedUnits || 0}`, font: 'Times New Roman' })] })],
+                children: [new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text: `${item.projectedUnits || 0}`, font: 'Calibri' })] })],
               }),
               new TableCell({
                 borders: borderNone,
-                children: [new Paragraph({ alignment: AlignmentType.RIGHT, children: [new TextRun({ text: `₱${itemGross.toLocaleString('en-PH', { minimumFractionDigits: 2 })}`, font: 'Times New Roman' })] })],
+                children: [new Paragraph({ alignment: AlignmentType.RIGHT, children: [new TextRun({ text: `₱${itemGross.toLocaleString('en-PH', { minimumFractionDigits: 2 })}`, font: 'Calibri' })] })],
               }),
               new TableCell({
                 borders: borderNone,
-                children: [new Paragraph({ alignment: AlignmentType.RIGHT, children: [new TextRun({ text: `₱${itemProfit.toLocaleString('en-PH', { minimumFractionDigits: 2 })}`, font: 'Times New Roman' })] })],
+                children: [new Paragraph({ alignment: AlignmentType.RIGHT, children: [new TextRun({ text: `₱${itemProfit.toLocaleString('en-PH', { minimumFractionDigits: 2 })}`, font: 'Calibri' })] })],
               }),
             ],
           })
@@ -283,27 +283,27 @@ export async function POST(req) {
           children: [
             new TableCell({
               borders: borderDoubleBottom,
-              children: [new Paragraph({ children: [new TextRun({ text: 'TOTALS & RETURN FORECAST', bold: true, font: 'Times New Roman' })] })],
+              children: [new Paragraph({ children: [new TextRun({ text: 'TOTALS & RETURN FORECAST', bold: true, font: 'Calibri' })] })],
             }),
             new TableCell({
               borders: borderDoubleBottom,
-              children: [new Paragraph({ alignment: AlignmentType.RIGHT, children: [new TextRun({ text: `₱${Number(totalCapital).toLocaleString('en-PH', { minimumFractionDigits: 2 })}`, bold: true, font: 'Times New Roman' })] })],
+              children: [new Paragraph({ alignment: AlignmentType.RIGHT, children: [new TextRun({ text: `₱${Number(totalCapital).toLocaleString('en-PH', { minimumFractionDigits: 2 })}`, bold: true, font: 'Calibri' })] })],
             }),
             new TableCell({
               borders: borderDoubleBottom,
-              children: [new Paragraph({ alignment: AlignmentType.RIGHT, children: [new TextRun({ text: '—', font: 'Times New Roman' })] })],
+              children: [new Paragraph({ alignment: AlignmentType.RIGHT, children: [new TextRun({ text: '—', font: 'Calibri' })] })],
             }),
             new TableCell({
               borders: borderDoubleBottom,
-              children: [new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text: '—', font: 'Times New Roman' })] })],
+              children: [new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text: '—', font: 'Calibri' })] })],
             }),
             new TableCell({
               borders: borderDoubleBottom,
-              children: [new Paragraph({ alignment: AlignmentType.RIGHT, children: [new TextRun({ text: `₱${Number(totalRevenue).toLocaleString('en-PH', { minimumFractionDigits: 2 })}`, bold: true, font: 'Times New Roman' })] })],
+              children: [new Paragraph({ alignment: AlignmentType.RIGHT, children: [new TextRun({ text: `₱${Number(totalRevenue).toLocaleString('en-PH', { minimumFractionDigits: 2 })}`, bold: true, font: 'Calibri' })] })],
             }),
             new TableCell({
               borders: borderDoubleBottom,
-              children: [new Paragraph({ alignment: AlignmentType.RIGHT, children: [new TextRun({ text: `₱${Number(netProfit).toLocaleString('en-PH', { minimumFractionDigits: 2 })}`, bold: true, font: 'Times New Roman' })] })],
+              children: [new Paragraph({ alignment: AlignmentType.RIGHT, children: [new TextRun({ text: `₱${Number(netProfit).toLocaleString('en-PH', { minimumFractionDigits: 2 })}`, bold: true, font: 'Calibri' })] })],
             }),
           ],
         })
@@ -314,13 +314,13 @@ export async function POST(req) {
         new Paragraph({
           alignment: AlignmentType.CENTER,
           children: [
-            new TextRun({ text: 'ACTIVITY & BUSINESS PROPOSAL', bold: true, size: 26, underline: {}, font: 'Times New Roman' }),
+            new TextRun({ text: 'ACTIVITY & BUSINESS PROPOSAL', bold: true, size: 26, underline: {}, font: 'Calibri' }),
           ],
         }),
         new Paragraph({
           alignment: AlignmentType.CENTER,
           children: [
-            new TextRun({ text: `${activityTitle} • ${targetDate}`, bold: true, size: 20, font: 'Times New Roman' }),
+            new TextRun({ text: `${activityTitle} • ${targetDate}`, bold: true, size: 20, font: 'Calibri' }),
           ],
         }),
         new Paragraph({ text: '' }),
@@ -328,14 +328,14 @@ export async function POST(req) {
         // Metadata block
         new Paragraph({
           children: [
-            new TextRun({ text: `Date Prepared: `, bold: true, font: 'Times New Roman' }),
-            new TextRun({ text: `${docDate || datePrepared}\n`, font: 'Times New Roman' }),
-            new TextRun({ text: `Proponent Committee: `, bold: true, font: 'Times New Roman' }),
-            new TextRun({ text: `${proponentCommittee}\n`, font: 'Times New Roman' }),
-            new TextRun({ text: `Target Schedule: `, bold: true, font: 'Times New Roman' }),
-            new TextRun({ text: `${targetDate}\n`, font: 'Times New Roman' }),
-            new TextRun({ text: `Target Venue: `, bold: true, font: 'Times New Roman' }),
-            new TextRun({ text: `${venue}`, font: 'Times New Roman' }),
+            new TextRun({ text: `Date Prepared: `, bold: true, font: 'Calibri' }),
+            new TextRun({ text: `${docDate || datePrepared}\n`, font: 'Calibri' }),
+            new TextRun({ text: `Proponent Committee: `, bold: true, font: 'Calibri' }),
+            new TextRun({ text: `${proponentCommittee}\n`, font: 'Calibri' }),
+            new TextRun({ text: `Target Schedule: `, bold: true, font: 'Calibri' }),
+            new TextRun({ text: `${targetDate}\n`, font: 'Calibri' }),
+            new TextRun({ text: `Target Venue: `, bold: true, font: 'Calibri' }),
+            new TextRun({ text: `${venue}`, font: 'Calibri' }),
           ],
         }),
         new Paragraph({ text: '' }),
@@ -343,12 +343,12 @@ export async function POST(req) {
         // Objectives
         new Paragraph({
           children: [
-            new TextRun({ text: 'I. ACTIVITY OBJECTIVES & RATIONALE', bold: true, size: 20, font: 'Times New Roman' }),
+            new TextRun({ text: 'I. ACTIVITY OBJECTIVES & RATIONALE', bold: true, size: 20, font: 'Calibri' }),
           ],
         }),
         new Paragraph({
           children: [
-            new TextRun({ text: objectives || '1. Promote student engagement.\n2. Generate operating funds for upcoming academic workshops.', font: 'Times New Roman' }),
+            new TextRun({ text: objectives || '1. Promote student engagement.\n2. Generate operating funds for upcoming academic workshops.', font: 'Calibri' }),
           ],
         }),
         new Paragraph({ text: '' }),
@@ -356,7 +356,7 @@ export async function POST(req) {
         // Product Budget Schedule
         new Paragraph({
           children: [
-            new TextRun({ text: 'II. CONCESSION BUDGET & PROJECTED REVENUE SCHEDULE', bold: true, size: 20, font: 'Times New Roman' }),
+            new TextRun({ text: 'II. CONCESSION BUDGET & PROJECTED REVENUE SCHEDULE', bold: true, size: 20, font: 'Calibri' }),
           ],
         }),
         new Table({
@@ -366,7 +366,7 @@ export async function POST(req) {
         new Paragraph({ text: '' }),
         new Paragraph({
           children: [
-            new TextRun({ text: `* Projected Return on Investment (ROI): ${marginPercent}% assuming 100% sell-through.`, italics: true, size: 18, font: 'Times New Roman' }),
+            new TextRun({ text: `* Projected Return on Investment (ROI): ${marginPercent}% assuming 100% sell-through.`, italics: true, size: 18, font: 'Calibri' }),
           ],
         }),
         new Paragraph({ text: '' }),
@@ -374,7 +374,7 @@ export async function POST(req) {
         // Signatories
         new Paragraph({
           children: [
-            new TextRun({ text: 'III. INSTITUTIONAL APPROVAL ROUTING', bold: true, size: 20, font: 'Times New Roman' }),
+            new TextRun({ text: 'III. INSTITUTIONAL APPROVAL ROUTING', bold: true, size: 20, font: 'Calibri' }),
           ],
         }),
         new Table({
@@ -390,22 +390,22 @@ export async function POST(req) {
           children: [
             new TableCell({
               borders: borderSingle,
-              children: [new Paragraph({ children: [new TextRun({ text: 'Date', bold: true, font: 'Times New Roman' })] })],
+              children: [new Paragraph({ children: [new TextRun({ text: 'Date', bold: true, font: 'Calibri' })] })],
               width: { size: 15, type: WidthType.PERCENTAGE },
             }),
             new TableCell({
               borders: borderSingle,
-              children: [new Paragraph({ children: [new TextRun({ text: 'Particulars / Description', bold: true, font: 'Times New Roman' })] })],
+              children: [new Paragraph({ children: [new TextRun({ text: 'Particulars / Description', bold: true, font: 'Calibri' })] })],
               width: { size: 50, type: WidthType.PERCENTAGE },
             }),
             new TableCell({
               borders: borderSingle,
-              children: [new Paragraph({ children: [new TextRun({ text: 'Category', bold: true, font: 'Times New Roman' })] })],
+              children: [new Paragraph({ children: [new TextRun({ text: 'Category', bold: true, font: 'Calibri' })] })],
               width: { size: 20, type: WidthType.PERCENTAGE },
             }),
             new TableCell({
               borders: borderSingle,
-              children: [new Paragraph({ alignment: AlignmentType.RIGHT, children: [new TextRun({ text: 'Amount (₱)', bold: true, font: 'Times New Roman' })] })],
+              children: [new Paragraph({ alignment: AlignmentType.RIGHT, children: [new TextRun({ text: 'Amount (₱)', bold: true, font: 'Calibri' })] })],
               width: { size: 15, type: WidthType.PERCENTAGE },
             }),
           ],
@@ -418,22 +418,22 @@ export async function POST(req) {
             children: [
               new TableCell({
                 borders: borderNone,
-                children: [new Paragraph({ children: [new TextRun({ text: tx.transaction_date || '', font: 'Times New Roman' })] })],
+                children: [new Paragraph({ children: [new TextRun({ text: tx.transaction_date || '', font: 'Calibri' })] })],
               }),
               new TableCell({
                 borders: borderNone,
                 children: [
                   new Paragraph({
                     children: [
-                      new TextRun({ text: tx.title || '', font: 'Times New Roman' }),
-                      tx.is_reimbursement ? new TextRun({ text: ` [Advance: ${tx.reimbursement_recipient}]`, italics: true, font: 'Times New Roman' }) : new TextRun(''),
+                      new TextRun({ text: tx.title || '', font: 'Calibri' }),
+                      tx.is_reimbursement ? new TextRun({ text: ` [Advance: ${tx.reimbursement_recipient}]`, italics: true, font: 'Calibri' }) : new TextRun(''),
                     ],
                   }),
                 ],
               }),
               new TableCell({
                 borders: borderNone,
-                children: [new Paragraph({ children: [new TextRun({ text: tx.category_name || (tx.type === 'INFLOW' ? 'Revenue' : 'Expense'), font: 'Times New Roman' })] })],
+                children: [new Paragraph({ children: [new TextRun({ text: tx.category_name || (tx.type === 'INFLOW' ? 'Revenue' : 'Expense'), font: 'Calibri' })] })],
               }),
               new TableCell({
                 borders: borderNone,
@@ -443,7 +443,7 @@ export async function POST(req) {
                     children: [
                       new TextRun({
                         text: `${tx.type === 'INFLOW' ? '+' : '-'}${Number(tx.amount || 0).toLocaleString('en-PH', { minimumFractionDigits: 2 })}`,
-                        font: 'Times New Roman',
+                        font: 'Calibri',
                       }),
                     ],
                   }),
@@ -460,15 +460,15 @@ export async function POST(req) {
           children: [
             new TableCell({
               borders: borderDoubleBottom,
-              children: [new Paragraph({ children: [new TextRun({ text: 'CLOSING CASH-ON-HAND', bold: true, font: 'Times New Roman' })] })],
+              children: [new Paragraph({ children: [new TextRun({ text: 'CLOSING CASH-ON-HAND', bold: true, font: 'Calibri' })] })],
             }),
             new TableCell({
               borders: borderDoubleBottom,
-              children: [new Paragraph({ children: [new TextRun({ text: 'Reconciled Physical Cash Count', italics: true, font: 'Times New Roman' })] })],
+              children: [new Paragraph({ children: [new TextRun({ text: 'Reconciled Physical Cash Count', italics: true, font: 'Calibri' })] })],
             }),
             new TableCell({
               borders: borderDoubleBottom,
-              children: [new Paragraph({ children: [new TextRun({ text: 'Liquid Balance', font: 'Times New Roman' })] })],
+              children: [new Paragraph({ children: [new TextRun({ text: 'Liquid Balance', font: 'Calibri' })] })],
             }),
             new TableCell({
               borders: borderDoubleBottom,
@@ -479,7 +479,7 @@ export async function POST(req) {
                     new TextRun({
                       text: `₱${(summary.cash_on_hand || 0).toLocaleString('en-PH', { minimumFractionDigits: 2 })}`,
                       bold: true,
-                      font: 'Times New Roman',
+                      font: 'Calibri',
                     }),
                   ],
                 }),
@@ -494,13 +494,13 @@ export async function POST(req) {
         new Paragraph({
           alignment: AlignmentType.CENTER,
           children: [
-            new TextRun({ text: 'FORMAL FINANCIAL LIQUIDATION REPORT', bold: true, size: 26, underline: {}, font: 'Times New Roman' }),
+            new TextRun({ text: 'FORMAL FINANCIAL LIQUIDATION REPORT', bold: true, size: 26, underline: {}, font: 'Calibri' }),
           ],
         }),
         new Paragraph({
           alignment: AlignmentType.CENTER,
           children: [
-            new TextRun({ text: `Activity / Event: ${activityTitle || eventName} • Academic Year 2025–2026`, bold: true, size: 20, font: 'Times New Roman' }),
+            new TextRun({ text: `Activity / Event: ${activityTitle || eventName} • Academic Year 2025–2026`, bold: true, size: 20, font: 'Calibri' }),
           ],
         }),
         new Paragraph({ text: '' }),
@@ -508,18 +508,18 @@ export async function POST(req) {
         // Financial Summary Block
         new Paragraph({
           children: [
-            new TextRun({ text: 'I. EXECUTIVE FINANCIAL SUMMARY', bold: true, size: 20, font: 'Times New Roman' }),
+            new TextRun({ text: 'I. EXECUTIVE FINANCIAL SUMMARY', bold: true, size: 20, font: 'Calibri' }),
           ],
         }),
         new Paragraph({
           children: [
-            new TextRun({ text: `Transmittal Date: `, bold: true, font: 'Times New Roman' }),
-            new TextRun({ text: `${transmittalDate}\n`, font: 'Times New Roman' }),
-            new TextRun({ text: `Total Inflows (Revenue): ₱${(summary.total_inflows || 0).toLocaleString('en-PH', { minimumFractionDigits: 2 })}\n`, font: 'Times New Roman' }),
-            new TextRun({ text: `Total Outflows (Disbursements): ₱${(summary.total_outflows || 0).toLocaleString('en-PH', { minimumFractionDigits: 2 })}\n`, font: 'Times New Roman' }),
-            new TextRun({ text: `Net Balance Remaining: ₱${((summary.total_inflows || 0) - (summary.total_outflows || 0)).toLocaleString('en-PH', { minimumFractionDigits: 2 })}\n`, font: 'Times New Roman', bold: true }),
-            new TextRun({ text: `Physical Cash-on-Hand: ₱${(summary.cash_on_hand || 0).toLocaleString('en-PH', { minimumFractionDigits: 2 })}\n`, font: 'Times New Roman' }),
-            new TextRun({ text: `Pending Advances (Abono): ₱${(summary.pending_reimbursements || 0).toLocaleString('en-PH', { minimumFractionDigits: 2 })}`, font: 'Times New Roman' }),
+            new TextRun({ text: `Transmittal Date: `, bold: true, font: 'Calibri' }),
+            new TextRun({ text: `${transmittalDate}\n`, font: 'Calibri' }),
+            new TextRun({ text: `Total Inflows (Revenue): ₱${(summary.total_inflows || 0).toLocaleString('en-PH', { minimumFractionDigits: 2 })}\n`, font: 'Calibri' }),
+            new TextRun({ text: `Total Outflows (Disbursements): ₱${(summary.total_outflows || 0).toLocaleString('en-PH', { minimumFractionDigits: 2 })}\n`, font: 'Calibri' }),
+            new TextRun({ text: `Net Balance Remaining: ₱${((summary.total_inflows || 0) - (summary.total_outflows || 0)).toLocaleString('en-PH', { minimumFractionDigits: 2 })}\n`, font: 'Calibri', bold: true }),
+            new TextRun({ text: `Physical Cash-on-Hand: ₱${(summary.cash_on_hand || 0).toLocaleString('en-PH', { minimumFractionDigits: 2 })}\n`, font: 'Calibri' }),
+            new TextRun({ text: `Pending Advances (Abono): ₱${(summary.pending_reimbursements || 0).toLocaleString('en-PH', { minimumFractionDigits: 2 })}`, font: 'Calibri' }),
           ],
         }),
         new Paragraph({ text: '' }),
@@ -527,7 +527,7 @@ export async function POST(req) {
         // Itemized Transactions Table
         new Paragraph({
           children: [
-            new TextRun({ text: 'II. ITEMIZED SCHEDULE OF INFLOWS & DISBURSEMENTS', bold: true, size: 20, font: 'Times New Roman' }),
+            new TextRun({ text: 'II. ITEMIZED SCHEDULE OF INFLOWS & DISBURSEMENTS', bold: true, size: 20, font: 'Calibri' }),
           ],
         }),
         new Table({
@@ -539,12 +539,12 @@ export async function POST(req) {
         // Audit Remarks
         new Paragraph({
           children: [
-            new TextRun({ text: 'III. AUDIT REMARKS & GOVERNANCE NOTES', bold: true, size: 20, font: 'Times New Roman' }),
+            new TextRun({ text: 'III. AUDIT REMARKS & GOVERNANCE NOTES', bold: true, size: 20, font: 'Calibri' }),
           ],
         }),
         new Paragraph({
           children: [
-            new TextRun({ text: remarks || 'All transactions recorded conform with the 7-day receipt submission policy and dual club adviser audit verification.', font: 'Times New Roman' }),
+            new TextRun({ text: remarks || 'All transactions recorded conform with the 7-day receipt submission policy and dual club adviser audit verification.', font: 'Calibri' }),
           ],
         }),
         new Paragraph({ text: '' }),
@@ -552,7 +552,7 @@ export async function POST(req) {
         // Signatories
         new Paragraph({
           children: [
-            new TextRun({ text: 'IV. INSTITUTIONAL ROUTING & SIGNATORIES', bold: true, size: 20, font: 'Times New Roman' }),
+            new TextRun({ text: 'IV. INSTITUTIONAL ROUTING & SIGNATORIES', bold: true, size: 20, font: 'Calibri' }),
           ],
         }),
         new Table({
