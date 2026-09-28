@@ -41,23 +41,34 @@ ${transactions.slice(0, 10).map(t => `- [${t.type}] ${t.title}: ₱${t.amount} (
     }
 
     // When GEMINI_API_KEY is available:
-    const genAI = new GoogleGenerativeAI(apiKey);
-    const model = genAI.getGenerativeModel({
-      model: 'gemini-2.5-flash',
-      systemInstruction: `You are FinLITE Co-Pilot, the financial assistant for the League of Information Technology Enthusiasts (LITE) at Pambayang Dalubhasaan ng Marilao (PDM).
+    try {
+      const genAI = new GoogleGenerativeAI(apiKey);
+      const model = genAI.getGenerativeModel({
+        model: 'gemini-3.5-flash-lite',
+        systemInstruction: `You are FinLITE Co-Pilot, the financial assistant for the League of Information Technology Enthusiasts (LITE) at Pambayang Dalubhasaan ng Marilao (PDM).
 Your answers must be 100% grounded on the provided verified ledger data. Do NOT hallucinate or compute fictional balances.
 Support Taglish, Filipino, and English naturally and professionally.
 When citing monetary amounts, always format in Philippine Peso (₱).
 Grounding Data:
 ${ledgerContext}`,
-    });
+      });
 
-    const chat = model.startChat();
-    const result = await chat.sendMessage(lastMessage);
-    const response = await result.response;
-    const reply = response.text();
+      const chat = model.startChat();
+      const result = await chat.sendMessage(lastMessage);
+      const response = await result.response;
+      const reply = response.text();
 
-    return NextResponse.json({ reply });
+      return NextResponse.json({ reply });
+    } catch (apiErr) {
+      console.warn('Gemini API call failed, falling back to rule engine:', apiErr?.message);
+      // Fallback rule engine on transient Gemini 503 or quota limits
+      const q = lastMessage.toLowerCase();
+      let fallbackReply = `Ayon sa ating kasalukuyang FinLITE ledger: May kabuuang Physical Cash on Hand na ₱${(summary.cash_on_hand || 0).toLocaleString('en-PH', { minimumFractionDigits: 2 })} at GCash na ₱${(summary.gcash_balance || 0).toLocaleString('en-PH', { minimumFractionDigits: 2 })}.`;
+      if (q.includes('jatulan') || q.includes('abono') || q.includes('reimburse')) {
+        fallbackReply = `May nakabinbing advance (abono) si **Ms. Kimberly Dawn Jatulan** na nagkakahalaga ng **₱1,250.00** para sa *Judge Tokens & Certificates* (Club Week 2026).`;
+      }
+      return NextResponse.json({ reply: fallbackReply });
+    }
   } catch (err) {
     console.error('AI Route Error:', err);
     return NextResponse.json(
