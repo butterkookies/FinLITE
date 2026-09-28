@@ -1,4 +1,8 @@
 import { NextResponse } from 'next/server';
+import fs from 'fs';
+import path from 'path';
+import os from 'os';
+import { execFileSync } from 'child_process';
 import {
   AlignmentType,
   BorderStyle,
@@ -36,6 +40,44 @@ export async function POST(req) {
       netProfit = 0,
       marginPercent = 0,
     } = body;
+
+    // 1. If LIQUIDATION report, attempt exact institutional rendering via master template populator
+    if (type === 'LIQUIDATION') {
+      const templatePath = path.join(process.cwd(), 'templates', 'LITE-Financial-Report-Universal-Template.docx');
+      const scriptPath = path.join(process.cwd(), 'scripts', 'export_report_engine.py');
+
+      if (fs.existsSync(templatePath) && fs.existsSync(scriptPath)) {
+        const tmpInput = path.join(os.tmpdir(), `finlite-in-${Date.now()}-${Math.random().toString(36).slice(2)}.json`);
+        const tmpOutput = path.join(os.tmpdir(), `finlite-out-${Date.now()}-${Math.random().toString(36).slice(2)}.docx`);
+
+        try {
+          fs.writeFileSync(tmpInput, JSON.stringify(body), 'utf8');
+          execFileSync('python', [scriptPath, tmpInput, tmpOutput], {
+            timeout: 15000,
+            windowsHide: true,
+          });
+
+          if (fs.existsSync(tmpOutput)) {
+            const buffer = fs.readFileSync(tmpOutput);
+            try { fs.unlinkSync(tmpInput); } catch (_) {}
+            try { fs.unlinkSync(tmpOutput); } catch (_) {}
+
+            const cleanFileName = `LITE-Financial-Report-${(body.academicYear || '2025-2026').replace(/[^a-zA-Z0-9]/g, '-')}.docx`;
+            return new Response(buffer, {
+              headers: {
+                'Content-Type': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+                'Content-Disposition': `attachment; filename="${cleanFileName}"`,
+              },
+            });
+          }
+        } catch (pyErr) {
+          console.warn('Python master template populator error, falling back to programmatic docx:', pyErr.message);
+        } finally {
+          try { if (fs.existsSync(tmpInput)) fs.unlinkSync(tmpInput); } catch (_) {}
+          try { if (fs.existsSync(tmpOutput)) fs.unlinkSync(tmpOutput); } catch (_) {}
+        }
+      }
+    }
 
     const borderNone = {
       top: { style: BorderStyle.NONE, size: 0, color: 'auto' },
