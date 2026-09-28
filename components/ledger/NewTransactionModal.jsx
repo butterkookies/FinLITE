@@ -50,6 +50,7 @@ export default function NewTransactionModal({ isOpen, onClose, onSave, categorie
       is_reimbursement: isReimbursement,
       reimbursement_recipient: isReimbursement ? recipient : null,
       receipt_url: previewUrl || null,
+      receiptFile: receiptImage || null,
       transaction_date: new Date().toISOString().split('T')[0],
       status: isReimbursement ? 'PENDING_REIMBURSEMENT' : 'COMPLETED',
     });

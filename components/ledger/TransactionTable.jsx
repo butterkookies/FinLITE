@@ -21,7 +21,8 @@ export default function TransactionTable({
   onNewTransaction, 
   onExportReport,
   onNewProposal,
-  currentRole 
+  currentRole,
+  isDbConnected = false
 }) {
   const [filterType, setFilterType] = useState('ALL');
   const [searchQuery, setSearchQuery] = useState('');
@@ -48,9 +49,17 @@ export default function TransactionTable({
       {/* Table Header Controls */}
       <div className="p-4 sm:p-5 border-b border-black/[0.06] flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
-          <h2 className="text-base font-bold text-gray-950 tracking-tight">
-            Financial Ledger & Transactions
-          </h2>
+          <div className="flex items-center gap-2">
+            <h2 className="text-base font-bold text-gray-950 tracking-tight">
+              Financial Ledger & Transactions
+            </h2>
+            {isDbConnected && (
+              <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-50 text-emerald-800 border border-emerald-200 shadow-2xs">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                Live PostgreSQL
+              </span>
+            )}
+          </div>
           <p className="text-xs text-gray-500 font-medium">
             Real-time auditable record of organization inflows and disbursements
           </p>
