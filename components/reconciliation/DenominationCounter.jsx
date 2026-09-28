@@ -50,50 +50,53 @@ export default function DenominationCounter({
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-xs flex items-center justify-center p-4">
-      <div className="bg-white rounded-3xl max-w-xl w-full border border-black/10 shadow-2xl overflow-hidden max-h-[90vh] flex flex-col animate-in fade-in zoom-in-95 duration-150">
+    <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-xs flex items-end sm:items-center justify-center p-0 sm:p-4">
+      <div className="bg-white rounded-t-3xl sm:rounded-3xl max-w-xl w-full border border-black/10 shadow-2xl overflow-hidden max-h-[92vh] sm:max-h-[90vh] flex flex-col animate-in fade-in slide-in-from-bottom-4 sm:zoom-in-95 duration-150">
         
+        {/* Mobile Pull Handle */}
+        <div className="w-10 h-1 bg-gray-300 rounded-full mx-auto mt-2.5 -mb-1 sm:hidden shrink-0" />
+
         {/* Modal Header */}
-        <div className="px-6 py-4 border-b border-black/[0.06] flex items-center justify-between shrink-0 bg-gray-50/50">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-xl bg-emerald-100 flex items-center justify-center text-emerald-800">
+        <div className="px-5 sm:px-6 py-3.5 sm:py-4 border-b border-black/[0.06] flex items-center justify-between shrink-0 bg-gray-50/50">
+          <div className="flex items-center gap-2 min-w-0">
+            <div className="w-8 h-8 rounded-xl bg-emerald-100 flex items-center justify-center text-emerald-800 shrink-0">
               <Wallet className="w-4 h-4" />
             </div>
-            <div>
-              <h3 className="text-base font-bold text-gray-950">Cash Box Denomination Counter</h3>
-              <p className="text-xs text-gray-500 font-medium">
+            <div className="min-w-0">
+              <h3 className="text-sm sm:text-base font-bold text-gray-950 truncate">Cash Box Denomination Counter</h3>
+              <p className="text-[11px] sm:text-xs text-gray-500 font-medium truncate">
                 Physical count audit vs. Book ledger balance
               </p>
             </div>
           </div>
           <button 
             onClick={onClose}
-            className="p-1.5 rounded-full text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
+            className="p-1.5 rounded-full text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors shrink-0 ml-2"
           >
             <X className="w-4 h-4" />
           </button>
         </div>
 
         {/* Scrollable Content */}
-        <div className="p-6 overflow-y-auto space-y-5 text-xs">
+        <div className="p-4 sm:p-6 overflow-y-auto space-y-4 sm:space-y-5 text-xs">
           
           {/* Comparison Bar */}
-          <div className="grid grid-cols-3 gap-3 p-4 bg-gray-50 rounded-2xl border border-black/[0.05]">
+          <div className="grid grid-cols-3 gap-2 sm:gap-3 p-3 sm:p-4 bg-gray-50 rounded-2xl border border-black/[0.05]">
             <div>
-              <span className="text-gray-500 font-medium text-[11px] block">Counted Cash</span>
-              <span className="text-base font-bold text-gray-900 block mt-0.5">
+              <span className="text-gray-500 font-medium text-[10px] sm:text-[11px] block truncate">Counted Cash</span>
+              <span className="text-sm sm:text-base font-bold text-gray-900 block mt-0.5 truncate">
                 {formatPHP(physicalTotal)}
               </span>
             </div>
             <div>
-              <span className="text-gray-500 font-medium text-[11px] block">Book Ledger</span>
-              <span className="text-base font-bold text-gray-900 block mt-0.5">
+              <span className="text-gray-500 font-medium text-[10px] sm:text-[11px] block truncate">Book Ledger</span>
+              <span className="text-sm sm:text-base font-bold text-gray-900 block mt-0.5 truncate">
                 {formatPHP(ledgerCashBalance)}
               </span>
             </div>
             <div>
-              <span className="text-gray-500 font-medium text-[11px] block">Variance</span>
-              <span className={`text-base font-bold block mt-0.5 ${
+              <span className="text-gray-500 font-medium text-[10px] sm:text-[11px] block truncate">Variance</span>
+              <span className={`text-sm sm:text-base font-bold block mt-0.5 truncate ${
                 status === 'BALANCED' ? 'text-emerald-700' :
                 status === 'SHORTAGE' ? 'text-red-600' : 'text-blue-600'
               }`}>

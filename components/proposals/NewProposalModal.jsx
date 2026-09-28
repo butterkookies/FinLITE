@@ -85,30 +85,33 @@ export default function NewProposalModal({ isOpen, onClose, onOpenPreview }) {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 overflow-y-auto">
-      <div className="bg-white w-full max-w-3xl rounded-2xl shadow-2xl border border-gray-100 flex flex-col max-h-[90vh] overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/50 backdrop-blur-sm p-0 sm:p-4 overflow-y-auto">
+      <div className="bg-white w-full max-w-3xl rounded-t-3xl sm:rounded-2xl shadow-2xl border border-gray-100 flex flex-col max-h-[92vh] sm:max-h-[90vh] overflow-hidden animate-in fade-in slide-in-from-bottom-4 sm:zoom-in-95 duration-200">
         
+        {/* Mobile Pull Handle */}
+        <div className="w-10 h-1 bg-gray-300 rounded-full mx-auto mt-2.5 -mb-1 sm:hidden shrink-0" />
+
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 bg-gray-50/70">
-          <div className="flex items-center gap-2.5">
-            <div className="w-9 h-9 rounded-xl bg-emerald-100 text-emerald-800 flex items-center justify-center font-bold">
-              <Calculator className="w-5 h-5 text-emerald-700" />
+        <div className="flex items-center justify-between px-4 sm:px-6 py-3.5 sm:py-4 border-b border-gray-100 bg-gray-50/70 shrink-0">
+          <div className="flex items-center gap-2 sm:gap-2.5 min-w-0">
+            <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-emerald-100 text-emerald-800 flex items-center justify-center font-bold shrink-0">
+              <Calculator className="w-4 h-4 sm:w-5 sm:h-5 text-emerald-700" />
             </div>
-            <div>
-              <h2 className="text-lg font-bold text-gray-900 leading-tight">Create Club Activity & Business Proposal</h2>
-              <p className="text-xs text-gray-500">Auto-calculates product capital, projected revenue, and formats the official PDM proposal.</p>
+            <div className="min-w-0">
+              <h2 className="text-base sm:text-lg font-bold text-gray-900 leading-tight truncate">Create Activity & Business Proposal</h2>
+              <p className="text-[11px] sm:text-xs text-gray-500 truncate">Auto-calculates product capital, projected revenue, and formats PDM proposal.</p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="w-8 h-8 rounded-full flex items-center justify-center text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
+            className="w-8 h-8 rounded-full flex items-center justify-center text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors shrink-0 ml-2"
           >
-            <X className="w-5 h-5" />
+            <X className="w-4 h-4 sm:w-5 sm:h-5" />
           </button>
         </div>
 
         {/* Content Body */}
-        <div className="p-6 overflow-y-auto space-y-6 flex-1 text-sm text-gray-700">
+        <div className="p-4 sm:p-6 overflow-y-auto space-y-5 sm:space-y-6 flex-1 text-sm text-gray-700">
           
           {/* General Metadata */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -197,8 +200,8 @@ export default function NewProposalModal({ isOpen, onClose, onOpenPreview }) {
               </button>
             </div>
 
-            <div className="border border-gray-200 rounded-xl overflow-hidden shadow-sm">
-              <table className="w-full text-left text-xs border-collapse">
+            <div className="border border-gray-200 rounded-xl overflow-x-auto shadow-sm">
+              <table className="w-full min-w-[540px] text-left text-xs border-collapse">
                 <thead className="bg-gray-50 border-b border-gray-200 font-semibold text-gray-700">
                   <tr>
                     <th className="py-2.5 px-3">Item Description</th>

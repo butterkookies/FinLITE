@@ -58,25 +58,28 @@ export default function NewTransactionModal({ isOpen, onClose, onSave, categorie
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-xs flex items-center justify-center p-4">
-      <div className="bg-white rounded-3xl max-w-md w-full border border-black/10 shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-150">
+    <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-xs flex items-end sm:items-center justify-center p-0 sm:p-4">
+      <div className="bg-white rounded-t-3xl sm:rounded-3xl max-w-md w-full border border-black/10 shadow-2xl overflow-hidden max-h-[90vh] flex flex-col animate-in fade-in slide-in-from-bottom-4 sm:zoom-in-95 duration-150">
         
+        {/* Mobile Pull Handle */}
+        <div className="w-10 h-1 bg-gray-300 rounded-full mx-auto mt-2.5 -mb-1 sm:hidden shrink-0" />
+
         {/* Modal Header */}
-        <div className="px-6 py-4 border-b border-black/[0.06] flex items-center justify-between">
+        <div className="px-5 sm:px-6 py-4 border-b border-black/[0.06] flex items-center justify-between shrink-0">
           <div>
             <h3 className="text-base font-bold text-gray-950">Record Transaction</h3>
             <p className="text-xs text-gray-500">Log an authorized inflow or disbursement</p>
           </div>
           <button 
             onClick={onClose}
-            className="p-1 rounded-full text-gray-400 hover:text-gray-600 hover:bg-gray-100"
+            className="p-1.5 rounded-full text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
           >
             <X className="w-4 h-4" />
           </button>
         </div>
 
         {/* Form Body */}
-        <form onSubmit={handleSubmit} className="p-6 space-y-4 text-xs">
+        <form onSubmit={handleSubmit} className="p-5 sm:p-6 space-y-4 text-xs overflow-y-auto">
           
           {/* Type Toggle: Inflow vs Outflow */}
           <div className="grid grid-cols-2 gap-2 bg-gray-100/80 p-1 rounded-2xl">

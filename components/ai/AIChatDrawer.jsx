@@ -76,7 +76,7 @@ export default function AIChatDrawer({ isOpen, onClose, summary, transactions = 
 
   return (
     <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-xs flex justify-end">
-      <div className="bg-white w-full max-w-md h-full flex flex-col border-l border-black/10 shadow-2xl animate-in slide-in-from-right duration-200">
+      <div className="bg-white w-full sm:max-w-md h-full flex flex-col border-l border-black/10 shadow-2xl animate-in slide-in-from-right duration-200">
         
         {/* Drawer Header */}
         <div className="px-5 py-4 border-b border-black/[0.06] flex items-center justify-between bg-emerald-950 text-white">

@@ -56,24 +56,24 @@ export default function TransactionTable({
           </p>
         </div>
 
-        <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap">
+        <div className="grid grid-cols-2 sm:flex sm:items-center gap-2 w-full sm:w-auto">
           {/* Create Business Proposal Button */}
           <button
             onClick={onNewProposal}
-            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-emerald-800 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 rounded-xl transition-all shadow-xs"
+            className="flex items-center justify-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-emerald-800 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 rounded-xl transition-all shadow-xs"
             title="Create Pre-Activity Business Proposal & Booth Budget"
           >
-            <Calculator className="w-3.5 h-3.5 text-emerald-700" />
+            <Calculator className="w-3.5 h-3.5 text-emerald-700 shrink-0" />
             <span>Create Proposal</span>
           </button>
 
           {/* Review & Export Report Button */}
           <button
             onClick={onExportReport}
-            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-gray-700 bg-gray-50 hover:bg-gray-100 border border-black/[0.08] rounded-xl transition-all shadow-xs"
+            className="flex items-center justify-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-gray-700 bg-gray-50 hover:bg-gray-100 border border-black/[0.08] rounded-xl transition-all shadow-xs"
             title="Preview 1:1 PDM CCS Formal Word Liquidation Report & Live Edit"
           >
-            <FileText className="w-3.5 h-3.5 text-emerald-700" />
+            <FileText className="w-3.5 h-3.5 text-emerald-700 shrink-0" />
             <span>Preview Report</span>
           </button>
 
@@ -81,9 +81,9 @@ export default function TransactionTable({
           {(currentRole === 'treasurer' || currentRole === 'auditor') && (
             <button
               onClick={onNewTransaction}
-              className="flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-semibold text-white bg-emerald-700 hover:bg-emerald-800 rounded-xl transition-all shadow-xs"
+              className="col-span-2 sm:col-span-1 flex items-center justify-center gap-1.5 px-3.5 py-1.5 text-xs font-semibold text-white bg-emerald-700 hover:bg-emerald-800 rounded-xl transition-all shadow-xs"
             >
-              <Plus className="w-3.5 h-3.5" />
+              <Plus className="w-3.5 h-3.5 shrink-0" />
               <span>Record Transaction</span>
             </button>
           )}
@@ -106,11 +106,11 @@ export default function TransactionTable({
         </div>
 
         {/* Filter Pills */}
-        <div className="flex items-center gap-1 w-full sm:w-auto overflow-x-auto pb-1 sm:pb-0">
+        <div className="flex items-center gap-1 w-full sm:w-auto overflow-x-auto pb-1 sm:pb-0 scrollbar-none">
           {[
             { id: 'ALL', label: 'All Records' },
-            { id: 'INFLOW', label: 'Inflows (Income)' },
-            { id: 'OUTFLOW', label: 'Outflows (Expenses)' },
+            { id: 'INFLOW', label: 'Inflows' },
+            { id: 'OUTFLOW', label: 'Outflows' },
             { id: 'REIMBURSEMENT', label: 'Pending Abono' },
           ].map((tab) => (
             <button
@@ -129,8 +129,8 @@ export default function TransactionTable({
 
       </div>
 
-      {/* Transactions List / Table */}
-      <div className="overflow-x-auto">
+      {/* Desktop/Tablet Transactions Table (>= md) */}
+      <div className="hidden md:block overflow-x-auto">
         <table className="w-full text-left border-collapse">
           <thead>
             <tr className="border-b border-black/[0.04] text-[11px] font-semibold text-gray-500 bg-gray-50/50 uppercase tracking-wider">
@@ -232,14 +232,93 @@ export default function TransactionTable({
         </table>
       </div>
 
+      {/* Mobile Transactions Card Feed (< md) */}
+      <div className="md:hidden divide-y divide-black/[0.04]">
+        {filtered.length === 0 ? (
+          <div className="py-8 text-center text-gray-400 font-medium text-xs">
+            No matching transactions found.
+          </div>
+        ) : (
+          filtered.map((tx) => (
+            <div key={tx.id} className="p-3.5 space-y-2 hover:bg-gray-50/80 transition-colors">
+              {/* Top Row: Title, Type icon & Amount */}
+              <div className="flex items-start justify-between gap-2">
+                <div className="flex items-center gap-1.5 min-w-0">
+                  {tx.type === 'INFLOW' ? (
+                    <ArrowDownRight className="w-4 h-4 text-emerald-600 shrink-0" />
+                  ) : (
+                    <ArrowUpRight className="w-4 h-4 text-amber-600 shrink-0" />
+                  )}
+                  <span className="font-semibold text-gray-900 text-xs truncate">{tx.title}</span>
+                </div>
+                <span className={`font-bold text-xs shrink-0 whitespace-nowrap ${
+                  tx.type === 'INFLOW' ? 'text-emerald-700' : 'text-gray-900'
+                }`}>
+                  {tx.type === 'INFLOW' ? '+' : '-'}{formatPHP(tx.amount)}
+                </span>
+              </div>
+
+              {/* Middle Row: Date, Channel & Category */}
+              <div className="flex items-center gap-1.5 flex-wrap text-[11px]">
+                <span className="text-gray-400 font-medium text-[10px]">{tx.transaction_date}</span>
+                <span className="text-gray-300">•</span>
+                {tx.payment_method === 'CASH' ? (
+                  <span className="inline-flex items-center gap-1 font-medium text-emerald-800 bg-emerald-50 px-1.5 py-0.5 rounded text-[10px]">
+                    <Wallet className="w-3 h-3 text-emerald-600" />
+                    Cash
+                  </span>
+                ) : (
+                  <span className="inline-flex items-center gap-1 font-medium text-blue-800 bg-blue-50 px-1.5 py-0.5 rounded text-[10px]">
+                    <Smartphone className="w-3 h-3 text-blue-600" />
+                    GCash
+                  </span>
+                )}
+                <span className="bg-gray-100 text-gray-700 px-1.5 py-0.5 rounded text-[10px] truncate max-w-[140px]">
+                  {tx.category_name || (tx.type === 'INFLOW' ? 'Revenue' : 'Disbursement')}
+                </span>
+              </div>
+
+              {/* Bottom Row: Event, Advance note & Receipt Action */}
+              {(tx.event_name || tx.is_reimbursement || tx.receipt_url) && (
+                <div className="flex items-center justify-between gap-2 pt-0.5">
+                  <div className="flex items-center gap-1.5 flex-wrap min-w-0">
+                    {tx.event_name && (
+                      <span className="text-[10px] text-gray-400 font-medium truncate">
+                        {tx.event_name}
+                      </span>
+                    )}
+                    {tx.is_reimbursement && (
+                      <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-amber-700 bg-amber-50 px-1.5 py-0.5 rounded">
+                        <Clock className="w-2.5 h-2.5 shrink-0" />
+                        Advance: {tx.reimbursement_recipient || 'Officer'}
+                      </span>
+                    )}
+                  </div>
+                  {tx.receipt_url && (
+                    <button
+                      onClick={() => setSelectedReceipt(tx)}
+                      className="inline-flex items-center gap-1 text-[11px] text-emerald-700 font-semibold bg-emerald-50 hover:bg-emerald-100 px-2 py-0.5 rounded-md transition-colors shrink-0 ml-auto"
+                    >
+                      <Receipt className="w-3 h-3" />
+                      Receipt
+                    </button>
+                  )}
+                </div>
+              )}
+            </div>
+          ))
+        )}
+      </div>
+
       {/* Receipt Modal Preview */}
       {selectedReceipt && (
-        <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl max-w-sm w-full p-5 border border-black/10 shadow-lg">
+        <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-xs flex items-end sm:items-center justify-center p-0 sm:p-4">
+          <div className="bg-white rounded-t-2xl sm:rounded-2xl max-w-sm w-full p-5 border border-black/10 shadow-lg animate-in fade-in slide-in-from-bottom-4 sm:zoom-in-95 duration-150">
+            <div className="w-10 h-1 bg-gray-300 rounded-full mx-auto mb-3 sm:hidden" />
             <h3 className="text-sm font-bold text-gray-900 mb-1">
               Receipt / Disbursement Proof
             </h3>
-            <p className="text-xs text-gray-500 mb-3">
+            <p className="text-xs text-gray-500 mb-3 truncate">
               {selectedReceipt.title} • {formatPHP(selectedReceipt.amount)}
             </p>
             <div className="rounded-xl overflow-hidden bg-gray-100 border border-black/5 aspect-4/3 flex items-center justify-center mb-4">
@@ -251,7 +330,7 @@ export default function TransactionTable({
             </div>
             <button
               onClick={() => setSelectedReceipt(null)}
-              className="w-full py-2 bg-gray-100 hover:bg-gray-200 text-gray-800 rounded-xl text-xs font-semibold transition-colors"
+              className="w-full py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-800 rounded-xl text-xs font-semibold transition-colors"
             >
               Close Preview
             </button>

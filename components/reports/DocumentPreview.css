@@ -240,6 +240,88 @@
   font-weight: bold;
 }
 
+/* Mobile & Tablet Responsive Overrides (< 860px) */
+@media screen and (max-width: 859px) {
+  .document-preview-overlay {
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+  }
+
+  .document-sheet {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-height: auto !important;
+    padding: 1.25rem 0.85rem !important;
+    margin: 0.75rem auto !important;
+    border-radius: 0.75rem;
+    font-size: 10pt !important;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+  }
+
+  .document-sheet * {
+    font-size: 10pt !important;
+  }
+
+  .pdm-banner-container {
+    margin-bottom: 12pt;
+  }
+
+  .pdm-banner-frame {
+    padding: 3px 6px;
+  }
+
+  .pdm-banner-logo {
+    width: 36px;
+    height: 36px;
+  }
+
+  .pdm-banner-school {
+    font-size: 10pt !important;
+  }
+
+  .pdm-banner-club {
+    font-size: 8.5pt !important;
+  }
+
+  .pdm-banner-course {
+    font-size: 7.5pt !important;
+  }
+
+  .transmittal-date,
+  .transmittal-recipient,
+  .transmittal-salutation {
+    margin-bottom: 12pt;
+  }
+
+  .transmittal-body {
+    text-indent: 0.25in;
+    margin-bottom: 16pt;
+  }
+
+  .transmittal-closing {
+    margin-bottom: 16pt;
+  }
+
+  .sig-row-3col {
+    grid-template-columns: 1fr;
+    gap: 12px;
+    margin-top: 12pt;
+    margin-bottom: 14pt;
+  }
+
+  .sig-row-2col {
+    grid-template-columns: 1fr;
+    gap: 12px;
+    margin-top: 12pt;
+    margin-bottom: 14pt;
+  }
+
+  .fin-table td.amount {
+    width: auto;
+    min-width: 75px;
+  }
+}
+
 /* Print Overrides */
 @media print {
   .no-print {
@@ -255,9 +337,24 @@
     box-shadow: none !important;
     margin: 0 !important;
     padding: 1.0in 1.0in 0.75in 1.0in !important;
-    width: 100% !important;
-    min-height: auto !important;
+    width: 8.5in !important;
+    min-height: 11in !important;
+    font-size: 11pt !important;
     page-break-after: always !important;
+  }
+
+  .document-sheet * {
+    font-size: 11pt !important;
+  }
+
+  .sig-row-3col {
+    grid-template-columns: 1fr 1fr 1fr !important;
+    gap: 16px !important;
+  }
+
+  .sig-row-2col {
+    grid-template-columns: 1fr 1fr !important;
+    gap: 24px !important;
   }
 
   .pdm-input {

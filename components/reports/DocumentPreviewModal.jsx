@@ -231,65 +231,33 @@ export default function DocumentPreviewModal({ isOpen, onClose, documentData }) 
     <div className="fixed inset-0 z-50 flex flex-col document-preview-overlay overflow-y-auto">
       
       {/* Top Floating Action & Navigation Bar */}
-      <header className="sticky top-0 z-50 bg-[#1e232a]/95 backdrop-blur border-b border-gray-700 text-white px-4 sm:px-8 py-3 flex flex-wrap items-center justify-between gap-3 no-print shadow-xl">
-        <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-lg bg-emerald-600 flex items-center justify-center font-bold text-white shadow-sm">
+      <header className="sticky top-0 z-50 bg-[#1e232a]/95 backdrop-blur border-b border-gray-700 text-white px-3 sm:px-6 py-2.5 sm:py-3 flex flex-wrap items-center justify-between gap-2.5 sm:gap-3 no-print shadow-xl">
+        <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+          <div className="w-8 h-8 rounded-lg bg-emerald-600 flex items-center justify-center font-bold text-white shadow-sm shrink-0">
             <FileText className="w-4 h-4" />
           </div>
-          <div>
-            <div className="flex items-center gap-2">
-              <span className="text-sm font-bold tracking-tight">1:1 Official PDM LITE Document Preview</span>
-              <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
-                Exact Template Replicant
+          <div className="min-w-0">
+            <div className="flex items-center gap-1.5 sm:gap-2">
+              <span className="text-xs sm:text-sm font-bold tracking-tight truncate">
+                {isProposal ? 'Activity Proposal Preview' : '1:1 Official PDM LITE Preview'}
+              </span>
+              <span className="hidden xs:inline-block px-1.5 py-0.5 rounded text-[9px] sm:text-[10px] font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 shrink-0">
+                Exact Replicant
               </span>
             </div>
-            <p className="text-[11px] text-gray-400 flex items-center gap-1">
-              <Edit3 className="w-3 h-3 text-amber-400" />
-              <span>In-place editing active: Click any value on the sheets below to adjust before exporting.</span>
+            <p className="text-[10px] sm:text-[11px] text-gray-400 flex items-center gap-1 truncate">
+              <Edit3 className="w-3 h-3 text-amber-400 shrink-0" />
+              <span className="truncate">In-place editing active: adjust values before export.</span>
             </p>
           </div>
         </div>
 
-        {/* Page Selector Tabs */}
-        {!isProposal && (
-          <div className="flex items-center gap-1 bg-gray-800 p-1 rounded-xl border border-gray-700 text-xs">
-            <button
-              onClick={() => setActivePage(0)}
-              className={`px-2.5 py-1 rounded-lg transition-all ${activePage === 0 ? 'bg-emerald-700 text-white font-bold' : 'text-gray-300 hover:text-white'}`}
-            >
-              All 4 Pages
-            </button>
-            <button
-              onClick={() => setActivePage(1)}
-              className={`px-2.5 py-1 rounded-lg transition-all ${activePage === 1 ? 'bg-emerald-700 text-white font-bold' : 'text-gray-300 hover:text-white'}`}
-            >
-              Page 1: Transmittal
-            </button>
-            <button
-              onClick={() => setActivePage(2)}
-              className={`px-2.5 py-1 rounded-lg transition-all ${activePage === 2 ? 'bg-emerald-700 text-white font-bold' : 'text-gray-300 hover:text-white'}`}
-            >
-              Page 2: Income
-            </button>
-            <button
-              onClick={() => setActivePage(3)}
-              className={`px-2.5 py-1 rounded-lg transition-all ${activePage === 3 ? 'bg-emerald-700 text-white font-bold' : 'text-gray-300 hover:text-white'}`}
-            >
-              Page 3: Expenses
-            </button>
-            <button
-              onClick={() => setActivePage(4)}
-              className={`px-2.5 py-1 rounded-lg transition-all ${activePage === 4 ? 'bg-emerald-700 text-white font-bold' : 'text-gray-300 hover:text-white'}`}
-            >
-              Page 4: Reconciliation
-            </button>
-          </div>
-        )}
-
-        <div className="flex items-center gap-2">
+        {/* Right Actions */}
+        <div className="flex items-center gap-1.5 sm:gap-2 ml-auto shrink-0">
           <button
             onClick={() => window.print()}
-            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-gray-300 bg-gray-800 hover:bg-gray-700 hover:text-white rounded-lg transition-colors border border-gray-700"
+            className="hidden xs:flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 text-xs font-medium text-gray-300 bg-gray-800 hover:bg-gray-700 hover:text-white rounded-lg transition-colors border border-gray-700"
+            title="Print or Save as PDF"
           >
             <Printer className="w-3.5 h-3.5" />
             <span className="hidden sm:inline">Print / PDF</span>
@@ -298,23 +266,59 @@ export default function DocumentPreviewModal({ isOpen, onClose, documentData }) 
           <button
             onClick={handleExportDocx}
             disabled={isExporting}
-            className="flex items-center gap-1.5 px-4 py-1.5 text-xs font-semibold text-white bg-emerald-600 hover:bg-emerald-500 rounded-lg shadow-sm transition-all disabled:opacity-50"
+            className="flex items-center gap-1.5 px-3 sm:px-4 py-1.5 text-xs font-semibold text-white bg-emerald-600 hover:bg-emerald-500 rounded-lg shadow-sm transition-all disabled:opacity-50"
           >
-            <Download className="w-3.5 h-3.5" />
-            <span>{isExporting ? 'Generating DOCX...' : 'Export Official .docx'}</span>
+            <Download className="w-3.5 h-3.5 shrink-0" />
+            <span>{isExporting ? 'Exporting...' : 'Export .docx'}</span>
           </button>
 
           <button
             onClick={onClose}
-            className="w-8 h-8 rounded-lg flex items-center justify-center text-gray-400 hover:text-white hover:bg-gray-800 transition-colors ml-1"
+            className="w-8 h-8 rounded-lg flex items-center justify-center text-gray-400 hover:text-white hover:bg-gray-800 transition-colors ml-0.5 sm:ml-1"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
+
+        {/* Page Selector Tabs (Row 2 on mobile, inline on desktop) */}
+        {!isProposal && (
+          <div className="w-full flex items-center gap-1 bg-gray-800/90 p-1 rounded-xl border border-gray-700 text-xs overflow-x-auto scrollbar-none order-last">
+            <button
+              onClick={() => setActivePage(0)}
+              className={`px-2.5 py-1 rounded-lg transition-all whitespace-nowrap ${activePage === 0 ? 'bg-emerald-700 text-white font-bold' : 'text-gray-300 hover:text-white'}`}
+            >
+              All 4 Pages
+            </button>
+            <button
+              onClick={() => setActivePage(1)}
+              className={`px-2.5 py-1 rounded-lg transition-all whitespace-nowrap ${activePage === 1 ? 'bg-emerald-700 text-white font-bold' : 'text-gray-300 hover:text-white'}`}
+            >
+              Page 1: Transmittal
+            </button>
+            <button
+              onClick={() => setActivePage(2)}
+              className={`px-2.5 py-1 rounded-lg transition-all whitespace-nowrap ${activePage === 2 ? 'bg-emerald-700 text-white font-bold' : 'text-gray-300 hover:text-white'}`}
+            >
+              Page 2: Income
+            </button>
+            <button
+              onClick={() => setActivePage(3)}
+              className={`px-2.5 py-1 rounded-lg transition-all whitespace-nowrap ${activePage === 3 ? 'bg-emerald-700 text-white font-bold' : 'text-gray-300 hover:text-white'}`}
+            >
+              Page 3: Expenses
+            </button>
+            <button
+              onClick={() => setActivePage(4)}
+              className={`px-2.5 py-1 rounded-lg transition-all whitespace-nowrap ${activePage === 4 ? 'bg-emerald-700 text-white font-bold' : 'text-gray-300 hover:text-white'}`}
+            >
+              Page 4: Reconciliation
+            </button>
+          </div>
+        )}
       </header>
 
       {/* Main Multi-Sheet Container */}
-      <main className="flex-1 p-4 sm:p-8 flex flex-col items-center gap-8">
+      <main className="flex-1 p-2 sm:p-6 lg:p-8 flex flex-col items-center gap-4 sm:gap-8 w-full">
 
         {/* ========================================================================= */}
         {/* PROPOSAL VIEW                                                             */}
