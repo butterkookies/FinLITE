@@ -1,6 +1,6 @@
 'use client';
 import { useState, useEffect } from 'react';
-import { Download, Printer, X, FileText, Check, Edit3, Layers } from 'lucide-react';
+import { Download, Printer, X, FileText, Edit3 } from 'lucide-react';
 import './DocumentPreview.css';
 
 // Header Banner replicating PDM CCS & LITE official template banner
@@ -317,11 +317,181 @@ export default function DocumentPreviewModal({ isOpen, onClose, documentData }) 
       <main className="flex-1 p-4 sm:p-8 flex flex-col items-center gap-8">
 
         {/* ========================================================================= */}
-        {/* PAGE 1: TRANSMITTAL LETTER (Screenshot 1)                                 */}
+        {/* PROPOSAL VIEW                                                             */}
         {/* ========================================================================= */}
-        {(activePage === 0 || activePage === 1) && (
+        {isProposal ? (
           <article className="document-sheet">
             <OfficialHeaderBanner />
+            <div className="text-center my-6">
+              <h1 className="text-base font-black tracking-wider uppercase underline underline-offset-4 text-gray-900">
+                ACTIVITY &amp; BUSINESS PROPOSAL
+              </h1>
+              <p className="text-xs font-bold text-gray-800 uppercase mt-1">
+                {documentData.activityTitle || periodDesc} &bull; {documentData.targetDate || academicYear}
+              </p>
+            </div>
+
+            {/* METADATA BLOCK */}
+            <div className="grid grid-cols-2 gap-y-2 text-xs mb-6 border-b border-gray-200 pb-4">
+              <div>
+                <span className="font-bold text-gray-800">Date Prepared: </span>
+                <span>{documentData.datePrepared || transmittalDate}</span>
+              </div>
+              <div>
+                <span className="font-bold text-gray-800">Proponent Committee: </span>
+                <span>{documentData.proponentCommittee || 'League of Information Technology Enthusiasts (LITE)'}</span>
+              </div>
+              <div>
+                <span className="font-bold text-gray-800">Target Schedule: </span>
+                <span>{documentData.targetDate || 'October 14–16, 2026'}</span>
+              </div>
+              <div>
+                <span className="font-bold text-gray-800">Target Venue: </span>
+                <span>{documentData.venue || 'PDM Quadrangle'}</span>
+              </div>
+            </div>
+
+            {/* SECTION I: OBJECTIVES */}
+            <div className="font-bold text-xs uppercase text-emerald-900 border-b border-emerald-900 pb-0.5 mb-2 mt-4">
+              I. ACTIVITY OBJECTIVES &amp; RATIONALE
+            </div>
+            <p className="text-xs text-gray-800 whitespace-pre-line mb-6">
+              {documentData.objectives || '1. Promote student engagement.\n2. Generate operating funds for upcoming academic workshops.'}
+            </p>
+
+            {/* SECTION II: CONCESSION BUDGET SCHEDULE */}
+            <div className="font-bold text-xs uppercase text-emerald-900 border-b border-emerald-900 pb-0.5 mb-2 mt-4">
+              II. CONCESSION BUDGET &amp; PROJECTED REVENUE SCHEDULE
+            </div>
+            <table className="fin-table mb-4">
+              <thead>
+                <tr className="border-b border-gray-400">
+                  <th className="text-left font-bold py-1">Item Description</th>
+                  <th className="text-right font-bold py-1">Unit Cost</th>
+                  <th className="text-right font-bold py-1">Selling Price</th>
+                  <th className="text-center font-bold py-1">Units</th>
+                  <th className="text-right font-bold py-1">Gross (₱)</th>
+                  <th className="text-right font-bold py-1">Profit (₱)</th>
+                </tr>
+              </thead>
+              <tbody>
+                {(documentData.items || []).map((item, idx) => {
+                  const gross = (item.sellingPrice || 0) * (item.projectedUnits || 0);
+                  const profit = gross - ((item.unitCost || 0) * (item.projectedUnits || 0));
+                  return (
+                    <tr key={idx} className="border-b border-gray-100">
+                      <td className="py-1 font-medium">{item.name}</td>
+                      <td className="text-right py-1">₱{Number(item.unitCost || 0).toFixed(2)}</td>
+                      <td className="text-right py-1">₱{Number(item.sellingPrice || 0).toFixed(2)}</td>
+                      <td className="text-center py-1">{item.projectedUnits || 0}</td>
+                      <td className="text-right py-1">₱{gross.toLocaleString('en-PH', { minimumFractionDigits: 2 })}</td>
+                      <td className="text-right py-1 font-semibold text-emerald-700">₱{profit.toLocaleString('en-PH', { minimumFractionDigits: 2 })}</td>
+                    </tr>
+                  );
+                })}
+                <tr className="border-t-2 border-b-2 border-black font-bold">
+                  <td className="py-2">TOTALS &amp; RETURN FORECAST</td>
+                  <td className="text-right py-2">₱{Number(documentData.totalCapital || 0).toLocaleString('en-PH', { minimumFractionDigits: 2 })}</td>
+                  <td className="text-right py-2 text-gray-400">—</td>
+                  <td className="text-center py-2 text-gray-400">—</td>
+                  <td className="text-right py-2">₱{Number(documentData.totalRevenue || 0).toLocaleString('en-PH', { minimumFractionDigits: 2 })}</td>
+                  <td className="text-right py-2 font-bold text-emerald-800">₱{Number(documentData.netProfit || 0).toLocaleString('en-PH', { minimumFractionDigits: 2 })}</td>
+                </tr>
+              </tbody>
+            </table>
+
+            <p className="text-[11px] italic text-gray-600 mb-6">
+              * Projected Return on Investment (ROI): <strong>{documentData.marginPercent || 0}%</strong> assuming 100% concession sell-through.
+            </p>
+
+            {/* SECTION III: INSTITUTIONAL APPROVAL ROUTING */}
+            <div className="font-bold text-xs uppercase text-emerald-900 border-b border-emerald-900 pb-0.5 mb-4 mt-6">
+              III. INSTITUTIONAL APPROVAL ROUTING
+            </div>
+            <div className="sig-row-3col mt-4">
+              <div>
+                <input
+                  type="text"
+                  value={signatories.treasurerName}
+                  onChange={(e) => handleUpdateSignatory('treasurerName', e.target.value)}
+                  className="pdm-input sig-name"
+                />
+                <input
+                  type="text"
+                  value={signatories.treasurerRole}
+                  onChange={(e) => handleUpdateSignatory('treasurerRole', e.target.value)}
+                  className="pdm-input sig-role"
+                />
+              </div>
+              <div>
+                <input
+                  type="text"
+                  value={signatories.auditorName}
+                  onChange={(e) => handleUpdateSignatory('auditorName', e.target.value)}
+                  className="pdm-input sig-name"
+                />
+                <input
+                  type="text"
+                  value={signatories.auditorRole}
+                  onChange={(e) => handleUpdateSignatory('auditorRole', e.target.value)}
+                  className="pdm-input sig-role"
+                />
+              </div>
+              <div>
+                <input
+                  type="text"
+                  value={signatories.presidentName}
+                  onChange={(e) => handleUpdateSignatory('presidentName', e.target.value)}
+                  className="pdm-input sig-name"
+                />
+                <input
+                  type="text"
+                  value={signatories.presidentRole}
+                  onChange={(e) => handleUpdateSignatory('presidentRole', e.target.value)}
+                  className="pdm-input sig-role"
+                />
+              </div>
+            </div>
+
+            <div className="sig-row-2col mt-6">
+              <div>
+                <input
+                  type="text"
+                  value={signatories.directorName}
+                  onChange={(e) => handleUpdateSignatory('directorName', e.target.value)}
+                  className="pdm-input sig-name"
+                />
+                <input
+                  type="text"
+                  value={signatories.directorRole}
+                  onChange={(e) => handleUpdateSignatory('directorRole', e.target.value)}
+                  className="pdm-input sig-role"
+                />
+              </div>
+              <div>
+                <input
+                  type="text"
+                  value={signatories.deanName}
+                  onChange={(e) => handleUpdateSignatory('deanName', e.target.value)}
+                  className="pdm-input sig-name"
+                />
+                <input
+                  type="text"
+                  value={signatories.deanRole}
+                  onChange={(e) => handleUpdateSignatory('deanRole', e.target.value)}
+                  className="pdm-input sig-role"
+                />
+              </div>
+            </div>
+          </article>
+        ) : (
+          <>
+            {/* ========================================================================= */}
+            {/* PAGE 1: TRANSMITTAL LETTER (Screenshot 1)                                 */}
+            {/* ========================================================================= */}
+            {(activePage === 0 || activePage === 1) && (
+              <article className="document-sheet">
+                <OfficialHeaderBanner />
 
             {/* Date */}
             <div className="transmittal-date">
@@ -837,6 +1007,8 @@ export default function DocumentPreviewModal({ isOpen, onClose, documentData }) 
               </div>
             </div>
           </article>
+        )}
+          </>
         )}
 
       </main>
