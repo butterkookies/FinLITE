@@ -269,11 +269,13 @@ export default function Dashboard() {
         onOpenPreview={handleOpenProposalPreview}
       />
 
-      <DocumentPreviewModal
-        isOpen={isPreviewOpen}
-        onClose={() => setIsPreviewOpen(false)}
-        documentData={previewData}
-      />
+      {isPreviewOpen && previewData && (
+        <DocumentPreviewModal
+          isOpen={isPreviewOpen}
+          onClose={() => setIsPreviewOpen(false)}
+          documentData={previewData}
+        />
+      )}
 
       <DenominationCounter
         isOpen={isDenomOpen}

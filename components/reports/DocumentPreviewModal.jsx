@@ -4,46 +4,44 @@ import { Download, Printer, X, Check, Edit3, AlertCircle, FileCheck } from 'luci
 import './DocumentPreview.css';
 
 export default function DocumentPreviewModal({ isOpen, onClose, documentData }) {
-  if (!isOpen || !documentData) return null;
+  const isProposal = documentData?.type === 'PROPOSAL';
 
-  const isProposal = documentData.type === 'PROPOSAL';
-
-  // State for live in-place editable fields
+  // State for live in-place editable fields (initialized with safe optional chaining)
   const [docDate, setDocDate] = useState(
-    documentData.datePrepared || documentData.transmittalDate || 'October 14, 2026'
+    documentData?.datePrepared || documentData?.transmittalDate || 'October 14, 2026'
   );
   const [activityTitle, setActivityTitle] = useState(
-    documentData.activityTitle || documentData.eventName || 'Club Week 2026 Concession Booth'
+    documentData?.activityTitle || documentData?.eventName || 'Club Week 2026 Concession Booth'
   );
   const [proponentCommittee, setProponentCommittee] = useState(
-    documentData.proponentCommittee || 'League of Information Technology Enthusiasts (LITE)'
+    documentData?.proponentCommittee || 'League of Information Technology Enthusiasts (LITE)'
   );
-  const [venue, setVenue] = useState(documentData.venue || 'PDM Quadrangle');
-  const [targetDate, setTargetDate] = useState(documentData.targetDate || 'Academic Year 2025–2026');
+  const [venue, setVenue] = useState(documentData?.venue || 'PDM Quadrangle');
+  const [targetDate, setTargetDate] = useState(documentData?.targetDate || 'Academic Year 2025–2026');
   const [objectives, setObjectives] = useState(
-    documentData.objectives ||
+    documentData?.objectives ||
       '1. Provide high quality snacks and merchandise for BSIT students.\n2. Raise organizational operating funds for upcoming academic workshops.'
   );
   const [remarks, setRemarks] = useState(
-    documentData.remarks ||
+    documentData?.remarks ||
       'All transactions recorded conform with the 7-day receipt submission policy and dual club adviser audit verification.'
   );
 
   // Signatories state
   const [signatories, setSignatories] = useState({
-    preparedBy: documentData.signatories?.preparedBy || 'ANDREI JOHN P. GERONIMO',
-    preparedRole: documentData.signatories?.preparedRole || 'LITE Treasurer',
-    reviewedBy: documentData.signatories?.reviewedBy || 'CHRISTIAN REY C. KASILAG',
-    reviewedRole: documentData.signatories?.reviewedRole || 'LITE Auditor',
-    notedBy: documentData.signatories?.notedBy || 'EMANUEL MALBAROSA',
-    notedRole: documentData.signatories?.notedRole || 'LITE President',
-    adviser1: documentData.signatories?.adviser1 || 'MS. KIMBERLY DAWN JATULAN',
-    adviser2: documentData.signatories?.adviser2 || 'MS. KRIZIA MAE GENOVIA',
-    adviserRole: documentData.signatories?.adviserRole || 'LITE Club Advisers',
-    directorName: documentData.signatories?.directorName || 'JOVYLYN ORTIZ-CESAR, MBA, MSIT',
-    directorRole: documentData.signatories?.directorRole || 'Program Director, BSIT',
-    deanName: documentData.signatories?.deanName || 'DR. EMRAIDA MARIE M. MANUCOM',
-    deanRole: documentData.signatories?.deanRole || 'Dean, College of Computer Studies',
+    preparedBy: documentData?.signatories?.preparedBy || 'ANDREI JOHN P. GERONIMO',
+    preparedRole: documentData?.signatories?.preparedRole || 'LITE Treasurer',
+    reviewedBy: documentData?.signatories?.reviewedBy || 'CHRISTIAN REY C. KASILAG',
+    reviewedRole: documentData?.signatories?.reviewedRole || 'LITE Auditor',
+    notedBy: documentData?.signatories?.notedBy || 'EMANUEL MALBAROSA',
+    notedRole: documentData?.signatories?.notedRole || 'LITE President',
+    adviser1: documentData?.signatories?.adviser1 || 'MS. KIMBERLY DAWN JATULAN',
+    adviser2: documentData?.signatories?.adviser2 || 'MS. KRIZIA MAE GENOVIA',
+    adviserRole: documentData?.signatories?.adviserRole || 'LITE Club Advisers',
+    directorName: documentData?.signatories?.directorName || 'JOVYLYN ORTIZ-CESAR, MBA, MSIT',
+    directorRole: documentData?.signatories?.directorRole || 'Program Director, BSIT',
+    deanName: documentData?.signatories?.deanName || 'DR. EMRAIDA MARIE M. MANUCOM',
+    deanRole: documentData?.signatories?.deanRole || 'Dean, College of Computer Studies',
   });
 
   const [isExporting, setIsExporting] = useState(false);
@@ -61,6 +59,9 @@ export default function DocumentPreviewModal({ isOpen, onClose, documentData }) 
       if (documentData.signatories) setSignatories(prev => ({ ...prev, ...documentData.signatories }));
     }
   }, [documentData]);
+
+  // Safe early return only after all hooks are evaluated
+  if (!isOpen || !documentData) return null;
 
   const handleUpdateSig = (key, value) => {
     setSignatories(prev => ({ ...prev, [key]: value }));
