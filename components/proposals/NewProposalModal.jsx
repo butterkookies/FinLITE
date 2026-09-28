@@ -1,0 +1,334 @@
+'use client';
+import { useState } from 'react';
+import { Plus, Trash2, FileText, Sparkles, X, Calculator, ArrowRight } from 'lucide-react';
+
+const INITIAL_ITEMS = [
+  { id: '1', name: 'Custom LITE Holographic Tech Stickers', unitCost: 8.00, sellingPrice: 25.00, projectedUnits: 150 },
+  { id: '2', name: 'Iced Caramel Macchiato (16oz)', unitCost: 22.00, sellingPrice: 50.00, projectedUnits: 100 },
+  { id: '3', name: 'LITE Official Lanyard AY 2025–2026', unitCost: 45.00, sellingPrice: 85.00, projectedUnits: 60 },
+];
+
+export default function NewProposalModal({ isOpen, onClose, onOpenPreview }) {
+  const [activityTitle, setActivityTitle] = useState('Club Week 2026: LITE Tech & Concession Booth');
+  const [proponentCommittee, setProponentCommittee] = useState('LITE Executive Board & Multimedia Committee');
+  const [targetDate, setTargetDate] = useState('October 14–16, 2026');
+  const [venue, setVenue] = useState('PDM Quadrangle — Concession Booth #3');
+  const [objectives, setObjectives] = useState(
+    '1. Generate organizational operating funds for upcoming BSIT technical workshops and seminars.\n2. Promote LITE brand awareness and student engagement during Institutional Club Week.'
+  );
+  const [items, setItems] = useState(INITIAL_ITEMS);
+
+  if (!isOpen) return null;
+
+  const handleAddItem = () => {
+    setItems([
+      ...items,
+      { id: Date.now().toString(), name: '', unitCost: 0, sellingPrice: 0, projectedUnits: 0 }
+    ]);
+  };
+
+  const handleUpdateItem = (id, field, value) => {
+    setItems(items.map(item => {
+      if (item.id === id) {
+        return {
+          ...item,
+          [field]: field === 'name' ? value : Number(value) || 0
+        };
+      }
+      return item;
+    }));
+  };
+
+  const handleRemoveItem = (id) => {
+    if (items.length <= 1) return;
+    setItems(items.filter(item => item.id !== id));
+  };
+
+  // Calculations
+  const totalCapital = items.reduce((sum, i) => sum + (i.unitCost * i.projectedUnits), 0);
+  const totalRevenue = items.reduce((sum, i) => sum + (i.sellingPrice * i.projectedUnits), 0);
+  const netProfit = totalRevenue - totalCapital;
+  const marginPercent = totalRevenue > 0 ? ((netProfit / totalRevenue) * 100).toFixed(1) : 0;
+
+  const handleProceedToPreview = () => {
+    const proposalData = {
+      type: 'PROPOSAL',
+      activityTitle,
+      proponentCommittee,
+      targetDate,
+      venue,
+      objectives,
+      items,
+      totalCapital,
+      totalRevenue,
+      netProfit,
+      marginPercent,
+      datePrepared: new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }),
+      signatories: {
+        preparedBy: 'ANDREI JOHN P. GERONIMO',
+        preparedRole: 'LITE Treasurer',
+        reviewedBy: 'CHRISTIAN REY C. KASILAG',
+        reviewedRole: 'LITE Auditor',
+        notedBy: 'EMANUEL MALBAROSA',
+        notedRole: 'LITE President',
+        adviser1: 'MS. KIMBERLY DAWN JATULAN',
+        adviser2: 'MS. KRIZIA MAE GENOVIA',
+        adviserRole: 'LITE Club Advisers',
+        directorName: 'JOVYLYN ORTIZ-CESAR, MBA, MSIT',
+        directorRole: 'Program Director, BSIT',
+        deanName: 'DR. EMRAIDA MARIE M. MANUCOM',
+        deanRole: 'Dean, College of Computer Studies',
+      }
+    };
+    onOpenPreview(proposalData);
+    onClose();
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 overflow-y-auto">
+      <div className="bg-white w-full max-w-3xl rounded-2xl shadow-2xl border border-gray-100 flex flex-col max-h-[90vh] overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+        
+        {/* Header */}
+        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 bg-gray-50/70">
+          <div className="flex items-center gap-2.5">
+            <div className="w-9 h-9 rounded-xl bg-emerald-100 text-emerald-800 flex items-center justify-center font-bold">
+              <Calculator className="w-5 h-5 text-emerald-700" />
+            </div>
+            <div>
+              <h2 className="text-lg font-bold text-gray-900 leading-tight">Create Club Activity & Business Proposal</h2>
+              <p className="text-xs text-gray-500">Auto-calculates product capital, projected revenue, and formats the official PDM proposal.</p>
+            </div>
+          </div>
+          <button
+            onClick={onClose}
+            className="w-8 h-8 rounded-full flex items-center justify-center text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
+          >
+            <X className="w-5 h-5" />
+          </button>
+        </div>
+
+        {/* Content Body */}
+        <div className="p-6 overflow-y-auto space-y-6 flex-1 text-sm text-gray-700">
+          
+          {/* General Metadata */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-xs font-semibold text-gray-700 uppercase tracking-wide mb-1">
+                Activity / Project Title
+              </label>
+              <input
+                type="text"
+                value={activityTitle}
+                onChange={(e) => setActivityTitle(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm"
+                placeholder="e.g., Club Week Concession Booth"
+              />
+            </div>
+
+            <div>
+              <label className="block text-xs font-semibold text-gray-700 uppercase tracking-wide mb-1">
+                Proponent Sub-Committee / Club
+              </label>
+              <input
+                type="text"
+                value={proponentCommittee}
+                onChange={(e) => setProponentCommittee(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm"
+                placeholder="e.g., LITE Executive Board"
+              />
+            </div>
+
+            <div>
+              <label className="block text-xs font-semibold text-gray-700 uppercase tracking-wide mb-1">
+                Target Date / Implementation Window
+              </label>
+              <input
+                type="text"
+                value={targetDate}
+                onChange={(e) => setTargetDate(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm"
+                placeholder="e.g., October 14–16, 2026"
+              />
+            </div>
+
+            <div>
+              <label className="block text-xs font-semibold text-gray-700 uppercase tracking-wide mb-1">
+                Target Venue / Location
+              </label>
+              <input
+                type="text"
+                value={venue}
+                onChange={(e) => setVenue(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm"
+                placeholder="e.g., PDM Quadrangle Booth #3"
+              />
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-xs font-semibold text-gray-700 uppercase tracking-wide mb-1">
+              Activity Objectives & Rationale
+            </label>
+            <textarea
+              rows={2}
+              value={objectives}
+              onChange={(e) => setObjectives(e.target.value)}
+              className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm"
+              placeholder="State the primary goals and educational / fundraising purpose..."
+            />
+          </div>
+
+          {/* Product Items Table */}
+          <div>
+            <div className="flex items-center justify-between mb-2">
+              <h3 className="text-xs font-bold uppercase tracking-wider text-gray-800 flex items-center gap-1.5">
+                <span>Product Concession & Budget Schedule</span>
+                <span className="px-2 py-0.5 rounded-full text-[10px] bg-emerald-50 text-emerald-700 border border-emerald-200 font-semibold">
+                  {items.length} items
+                </span>
+              </h3>
+              <button
+                type="button"
+                onClick={handleAddItem}
+                className="inline-flex items-center gap-1 text-xs font-semibold text-emerald-700 hover:text-emerald-800 bg-emerald-50 hover:bg-emerald-100 px-2.5 py-1 rounded-lg transition-colors"
+              >
+                <Plus className="w-3.5 h-3.5" />
+                <span>Add Item</span>
+              </button>
+            </div>
+
+            <div className="border border-gray-200 rounded-xl overflow-hidden shadow-sm">
+              <table className="w-full text-left text-xs border-collapse">
+                <thead className="bg-gray-50 border-b border-gray-200 font-semibold text-gray-700">
+                  <tr>
+                    <th className="py-2.5 px-3">Item Description</th>
+                    <th className="py-2.5 px-3 w-24">Unit Cost (₱)</th>
+                    <th className="py-2.5 px-3 w-24">Selling Price (₱)</th>
+                    <th className="py-2.5 px-3 w-20">Units</th>
+                    <th className="py-2.5 px-3 w-28 text-right">Est. Profit (₱)</th>
+                    <th className="py-2.5 px-2 w-10 text-center"></th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-100">
+                  {items.map((item) => {
+                    const itemProfit = (item.sellingPrice - item.unitCost) * item.projectedUnits;
+                    return (
+                      <tr key={item.id} className="hover:bg-gray-50/70 transition-colors">
+                        <td className="p-2 px-3">
+                          <input
+                            type="text"
+                            value={item.name}
+                            onChange={(e) => handleUpdateItem(item.id, 'name', e.target.value)}
+                            placeholder="e.g., Cold Brew Coffee"
+                            className="w-full px-2 py-1 border border-gray-200 rounded text-xs focus:ring-1 focus:ring-emerald-500 outline-none"
+                          />
+                        </td>
+                        <td className="p-2 px-3">
+                          <input
+                            type="number"
+                            step="0.01"
+                            min="0"
+                            value={item.unitCost}
+                            onChange={(e) => handleUpdateItem(item.id, 'unitCost', e.target.value)}
+                            className="w-full px-2 py-1 border border-gray-200 rounded text-xs focus:ring-1 focus:ring-emerald-500 outline-none"
+                          />
+                        </td>
+                        <td className="p-2 px-3">
+                          <input
+                            type="number"
+                            step="0.01"
+                            min="0"
+                            value={item.sellingPrice}
+                            onChange={(e) => handleUpdateItem(item.id, 'sellingPrice', e.target.value)}
+                            className="w-full px-2 py-1 border border-gray-200 rounded text-xs focus:ring-1 focus:ring-emerald-500 outline-none"
+                          />
+                        </td>
+                        <td className="p-2 px-3">
+                          <input
+                            type="number"
+                            min="0"
+                            value={item.projectedUnits}
+                            onChange={(e) => handleUpdateItem(item.id, 'projectedUnits', e.target.value)}
+                            className="w-full px-2 py-1 border border-gray-200 rounded text-xs focus:ring-1 focus:ring-emerald-500 outline-none"
+                          />
+                        </td>
+                        <td className="p-2 px-3 text-right font-medium text-emerald-700">
+                          ₱{itemProfit.toLocaleString('en-PH', { minimumFractionDigits: 2 })}
+                        </td>
+                        <td className="p-2 text-center">
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveItem(item.id)}
+                            disabled={items.length <= 1}
+                            className="text-gray-400 hover:text-red-500 disabled:opacity-30 disabled:hover:text-gray-400 p-1"
+                            title="Remove line item"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          {/* Metric Summary Box */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 bg-emerald-50/60 p-4 rounded-xl border border-emerald-100">
+            <div>
+              <span className="block text-[11px] font-medium text-emerald-800/80">Capital Needed (Puhunan)</span>
+              <span className="text-base font-bold text-gray-950">
+                ₱{totalCapital.toLocaleString('en-PH', { minimumFractionDigits: 2 })}
+              </span>
+            </div>
+            <div>
+              <span className="block text-[11px] font-medium text-emerald-800/80">Projected Gross Sales</span>
+              <span className="text-base font-bold text-gray-950">
+                ₱{totalRevenue.toLocaleString('en-PH', { minimumFractionDigits: 2 })}
+              </span>
+            </div>
+            <div>
+              <span className="block text-[11px] font-medium text-emerald-800/80">Estimated Net Profit</span>
+              <span className="text-base font-bold text-emerald-700">
+                ₱{netProfit.toLocaleString('en-PH', { minimumFractionDigits: 2 })}
+              </span>
+            </div>
+            <div>
+              <span className="block text-[11px] font-medium text-emerald-800/80">Profit Margin</span>
+              <span className="text-base font-bold text-emerald-700">
+                {marginPercent}% ROI
+              </span>
+            </div>
+          </div>
+
+        </div>
+
+        {/* Footer Actions */}
+        <div className="flex items-center justify-between px-6 py-4 border-t border-gray-100 bg-gray-50/60">
+          <p className="text-xs text-gray-500">
+            Proceeding will generate an interactive 1:1 on-screen paper preview for review and live edits.
+          </p>
+          <div className="flex items-center gap-2.5">
+            <button
+              type="button"
+              onClick={onClose}
+              className="px-4 py-2 text-xs font-semibold text-gray-700 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors"
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              onClick={handleProceedToPreview}
+              className="flex items-center gap-1.5 px-4 py-2 text-xs font-semibold text-white bg-emerald-700 hover:bg-emerald-800 rounded-xl shadow-sm transition-all"
+            >
+              <span>Preview & Edit Proposal</span>
+              <ArrowRight className="w-3.5 h-3.5" />
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  );
+}

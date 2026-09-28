@@ -6,6 +6,8 @@ import TransactionTable from '@/components/ledger/TransactionTable';
 import NewTransactionModal from '@/components/ledger/NewTransactionModal';
 import DenominationCounter from '@/components/reconciliation/DenominationCounter';
 import AIChatDrawer from '@/components/ai/AIChatDrawer';
+import NewProposalModal from '@/components/proposals/NewProposalModal';
+import DocumentPreviewModal from '@/components/reports/DocumentPreviewModal';
 
 // Initial realistic records matching AY 2025–2026 LITE historical data
 const INITIAL_TRANSACTIONS = [
@@ -123,6 +125,9 @@ export default function Dashboard() {
   const [isNewTxOpen, setIsNewTxOpen] = useState(false);
   const [isDenomOpen, setIsDenomOpen] = useState(false);
   const [isAIOpen, setIsAIOpen] = useState(false);
+  const [isProposalOpen, setIsProposalOpen] = useState(false);
+  const [isPreviewOpen, setIsPreviewOpen] = useState(false);
+  const [previewData, setPreviewData] = useState(null);
 
   // Recalculate summary totals atomically
   const calculateSummary = (txs) => {
@@ -187,33 +192,37 @@ export default function Dashboard() {
     setTransactions((prev) => [shortageTx, ...prev]);
   };
 
-  const handleExportReport = async () => {
-    try {
-      const res = await fetch('/api/reports/docx', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          summary,
-          transactions,
-          eventName: 'Club Week 2026 & E-Sports Cup',
-        }),
-      });
+  const handleOpenLiquidationPreview = () => {
+    setPreviewData({
+      type: 'LIQUIDATION',
+      eventName: 'Club Week 2026 & E-Sports Cup',
+      activityTitle: 'Club Week 2026 & E-Sports Cup',
+      transmittalDate: 'October 14, 2026',
+      summary,
+      transactions,
+      remarks: 'All transactions recorded conform with the 7-day receipt submission policy and dual club adviser audit verification.',
+      signatories: {
+        preparedBy: 'ANDREI JOHN P. GERONIMO',
+        preparedRole: 'LITE Treasurer',
+        reviewedBy: 'CHRISTIAN REY C. KASILAG',
+        reviewedRole: 'LITE Auditor',
+        notedBy: 'EMANUEL MALBAROSA',
+        notedRole: 'LITE President',
+        adviser1: 'MS. KIMBERLY DAWN JATULAN',
+        adviser2: 'MS. KRIZIA MAE GENOVIA',
+        adviserRole: 'LITE Club Advisers',
+        directorName: 'JOVYLYN ORTIZ-CESAR, MBA, MSIT',
+        directorRole: 'Program Director, BSIT',
+        deanName: 'DR. EMRAIDA MARIE M. MANUCOM',
+        deanRole: 'Dean, College of Computer Studies',
+      },
+    });
+    setIsPreviewOpen(true);
+  };
 
-      if (!res.ok) throw new Error('Failed to generate report');
-
-      const blob = await res.blob();
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = 'FinLITE-Liquidation-Club-Week-2026.docx';
-      document.body.appendChild(a);
-      a.click();
-      window.URL.revokeObjectURL(url);
-      document.body.removeChild(a);
-    } catch (err) {
-      console.error(err);
-      alert('Error exporting document report. Please check server logs.');
-    }
+  const handleOpenProposalPreview = (proposalPayload) => {
+    setPreviewData(proposalPayload);
+    setIsPreviewOpen(true);
   };
 
   return (
@@ -240,7 +249,8 @@ export default function Dashboard() {
         <TransactionTable
           transactions={transactions}
           onNewTransaction={() => setIsNewTxOpen(true)}
-          onExportReport={handleExportReport}
+          onExportReport={handleOpenLiquidationPreview}
+          onNewProposal={() => setIsProposalOpen(true)}
           currentRole={currentRole}
         />
 
@@ -251,6 +261,18 @@ export default function Dashboard() {
         isOpen={isNewTxOpen}
         onClose={() => setIsNewTxOpen(false)}
         onSave={handleSaveTransaction}
+      />
+
+      <NewProposalModal
+        isOpen={isProposalOpen}
+        onClose={() => setIsProposalOpen(false)}
+        onOpenPreview={handleOpenProposalPreview}
+      />
+
+      <DocumentPreviewModal
+        isOpen={isPreviewOpen}
+        onClose={() => setIsPreviewOpen(false)}
+        documentData={previewData}
       />
 
       <DenominationCounter

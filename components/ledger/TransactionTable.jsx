@@ -10,7 +10,9 @@ import {
   Receipt, 
   Search, 
   Smartphone, 
-  Wallet 
+  Wallet,
+  Calculator,
+  FileText
 } from 'lucide-react';
 import { formatPHP } from '@/lib/utils/currency';
 
@@ -18,6 +20,7 @@ export default function TransactionTable({
   transactions = [], 
   onNewTransaction, 
   onExportReport,
+  onNewProposal,
   currentRole 
 }) {
   const [filterType, setFilterType] = useState('ALL');
@@ -53,15 +56,25 @@ export default function TransactionTable({
           </p>
         </div>
 
-        <div className="flex items-center gap-2">
-          {/* Export Report (.docx) Button */}
+        <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap">
+          {/* Create Business Proposal Button */}
+          <button
+            onClick={onNewProposal}
+            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-emerald-800 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 rounded-xl transition-all shadow-xs"
+            title="Create Pre-Activity Business Proposal & Booth Budget"
+          >
+            <Calculator className="w-3.5 h-3.5 text-emerald-700" />
+            <span>Create Proposal</span>
+          </button>
+
+          {/* Review & Export Report Button */}
           <button
             onClick={onExportReport}
             className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-gray-700 bg-gray-50 hover:bg-gray-100 border border-black/[0.08] rounded-xl transition-all shadow-xs"
-            title="Export 1:1 PDM CCS Formal Word Liquidation Report"
+            title="Preview 1:1 PDM CCS Formal Word Liquidation Report & Live Edit"
           >
-            <Download className="w-3.5 h-3.5 text-emerald-700" />
-            <span>Export DOCX</span>
+            <FileText className="w-3.5 h-3.5 text-emerald-700" />
+            <span>Preview Report</span>
           </button>
 
           {/* New Transaction Button (Treasurer/Auditor) */}

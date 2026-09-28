@@ -1,0 +1,180 @@
+/* FinLITE 1:1 Institutional Document Preview Stylesheet (Times New Roman / PDM CCS Format) */
+
+.document-preview-overlay {
+  background-color: #374151; /* Dark canvas matching Word/PDF previewers */
+}
+
+.document-sheet {
+  width: 8.5in;
+  min-height: 11in;
+  padding: 1in 0.85in;
+  margin: 1.5rem auto;
+  background-color: #ffffff;
+  color: #111827;
+  font-family: 'Times New Roman', Times, serif;
+  line-height: 1.35;
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.35);
+  box-sizing: border-box;
+}
+
+/* Institutional Headings */
+.pdm-heading-1 {
+  font-size: 14pt;
+  font-weight: bold;
+  text-align: center;
+  letter-spacing: 0.25px;
+}
+
+.pdm-heading-2 {
+  font-size: 12pt;
+  text-align: center;
+  margin-top: 1px;
+}
+
+.pdm-heading-3 {
+  font-size: 13pt;
+  font-weight: bold;
+  text-align: center;
+  margin-top: 1px;
+}
+
+.pdm-heading-sub {
+  font-size: 10.5pt;
+  font-style: italic;
+  text-align: center;
+  color: #4b5563;
+  margin-bottom: 12pt;
+}
+
+.pdm-doc-title {
+  font-size: 14pt;
+  font-weight: bold;
+  text-align: center;
+  text-decoration: underline;
+  margin-top: 10pt;
+  margin-bottom: 3pt;
+}
+
+.pdm-doc-subtitle {
+  font-size: 11pt;
+  font-weight: bold;
+  text-align: center;
+  margin-bottom: 14pt;
+}
+
+.pdm-section-title {
+  font-size: 11pt;
+  font-weight: bold;
+  text-transform: uppercase;
+  margin-top: 14pt;
+  margin-bottom: 6pt;
+}
+
+/* Borderless PDM Financial Table */
+.pdm-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 10.5pt;
+  margin-bottom: 12pt;
+}
+
+.pdm-table th {
+  border-top: 1px solid #4b5563;
+  border-bottom: 1px solid #4b5563;
+  padding: 4pt 6pt;
+  font-weight: bold;
+  text-align: left;
+}
+
+.pdm-table td {
+  padding: 3pt 6pt;
+  vertical-align: top;
+  border: none;
+}
+
+.pdm-table tr.total-row td {
+  border-top: 1px solid #4b5563;
+  border-bottom: 3px double #111827;
+  font-weight: bold;
+}
+
+/* In-place Editable Input Elements */
+.pdm-editable {
+  background: transparent;
+  border: 1px dashed transparent;
+  border-radius: 2px;
+  font-family: inherit;
+  font-size: inherit;
+  color: inherit;
+  transition: all 0.15s ease;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.pdm-editable:hover {
+  background-color: #fefce8; /* Soft yellow highlight to cue editability */
+  border-color: #facc15;
+}
+
+.pdm-editable:focus {
+  outline: none;
+  background-color: #fef9c3;
+  border: 1px solid #ca8a04;
+  box-shadow: 0 0 0 2px rgba(234, 179, 8, 0.2);
+}
+
+/* Signatories Grid */
+.pdm-signatory-grid {
+  width: 100%;
+  margin-top: 18pt;
+  font-size: 10.5pt;
+}
+
+.pdm-signatory-grid td {
+  padding: 10pt 8pt;
+  vertical-align: top;
+  width: 50%;
+}
+
+.pdm-sig-name {
+  font-weight: bold;
+  text-transform: uppercase;
+  margin-top: 24pt;
+  display: block;
+}
+
+.pdm-sig-role {
+  font-style: italic;
+  font-size: 9.5pt;
+  color: #374151;
+  display: block;
+}
+
+/* Print Overrides */
+@media print {
+  body {
+    background: transparent !important;
+  }
+
+  .document-preview-overlay {
+    background: transparent !important;
+    padding: 0 !important;
+  }
+
+  .no-print {
+    display: none !important;
+  }
+
+  .document-sheet {
+    width: 100% !important;
+    min-height: auto !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    box-shadow: none !important;
+  }
+
+  .pdm-editable {
+    border: none !important;
+    background: transparent !important;
+  }
+}
