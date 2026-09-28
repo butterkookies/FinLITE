@@ -423,11 +423,16 @@ export default function Dashboard() {
   };
 
   const handleOpenLiquidationPreview = () => {
+    const formattedDate = new Date().toLocaleDateString('en-US', {
+      month: 'long',
+      day: 'numeric',
+      year: 'numeric',
+    });
     setPreviewData({
       type: 'LIQUIDATION',
-      eventName: 'Club Week 2026 & E-Sports Cup',
-      activityTitle: 'Club Week 2026 & E-Sports Cup',
-      transmittalDate: 'October 14, 2026',
+      eventName: `${currentSemester.label} Financial Operations`,
+      activityTitle: `${currentSemester.label} Financial Operations`,
+      transmittalDate: formattedDate,
       academicYear: currentSemester.academicYear,
       semester: currentSemester.semester,
       summary,

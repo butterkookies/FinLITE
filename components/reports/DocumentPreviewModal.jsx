@@ -23,30 +23,6 @@ function OfficialHeaderBanner() {
   );
 }
 
-// Default realistic sample expense list matching screenshot 3
-const DEFAULT_EXPENSES = [
-  { desc: 'Candle', amount: 7.00 },
-  { desc: 'Glue Stick', amount: 10.00 },
-  { desc: 'Envelope', amount: 20.00 },
-  { desc: 'Green Folder', amount: 48.00 },
-  { desc: 'BestBuy Certificate Holder', amount: 135.00 },
-  { desc: 'Ribbon', amount: 150.00 },
-  { desc: 'Vellum Board A4', amount: 152.00 },
-  { desc: "Students' Travel Fare", amount: 200.00 },
-  { desc: 'Sash', amount: 380.00 },
-  { desc: 'Cosplay Tarpaulin', amount: 670.00 },
-  { desc: 'Career Day', amount: 1840.00 },
-  { desc: 'Judge Token', amount: 2510.00 },
-  { desc: 'Outreach Donation', amount: 1000.00 },
-  { desc: 'Leadership Seminar', amount: 500.00 },
-  { desc: 'Day 1 & 2 Lunch', amount: 3655.00 },
-  { desc: 'Big Brew Drinks', amount: 800.00 },
-  { desc: 'Cash Prize', amount: 4000.00 },
-  { desc: 'Dinner', amount: 5000.00 },
-  { desc: 'Public Forum (Net)', amount: 1750.00 },
-  { desc: 'Cash Shortage', amount: 161.00 },
-];
-
 export default function DocumentPreviewModal({ isOpen, onClose, documentData }) {
   const isProposal = documentData?.type === 'PROPOSAL';
 
@@ -54,50 +30,52 @@ export default function DocumentPreviewModal({ isOpen, onClose, documentData }) 
   const [activePage, setActivePage] = useState(0);
 
   // Editable Transmittal Metadata
-  const [transmittalDate, setTransmittalDate] = useState('April 29, 2026');
+  const [transmittalDate, setTransmittalDate] = useState(
+    new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })
+  );
   const [coordinatorName, setCoordinatorName] = useState('Ms. Ligaya H. Estrella');
   const [coordinatorRole, setCoordinatorRole] = useState('Co-curricular Affairs Coordinator');
   const [salutation, setSalutation] = useState('Dear Mrs. Estrella,');
   const [semester, setSemester] = useState('2nd SEMESTER');
   const [academicYear, setAcademicYear] = useState('2025–2026');
-  const [periodDesc, setPeriodDesc] = useState('As of Club Week 2026');
-  const [finalAsOf, setFinalAsOf] = useState('As of April 2026');
+  const [periodDesc, setPeriodDesc] = useState('Financial Operations');
+  const [finalAsOf, setFinalAsOf] = useState(
+    `As of ${new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}`
+  );
 
-  // Initial Budget & Income Rows
-  const [initialBudget, setInitialBudget] = useState(5308.00);
-  const [cosplayVote, setCosplayVote] = useState(9760.00);
-  const [shirtRebate, setShirtRebate] = useState(8820.00);
-  const [honorOfKings, setHonorOfKings] = useState(1000.00);
-  const [crossfire, setCrossfire] = useState(1000.00);
-  const [exhibitDay1, setExhibitDay1] = useState(5230.00);
-  const [exhibitDay2, setExhibitDay2] = useState(320.00);
+  // Dynamic Initial Budget & Transaction Rows (Zero Fake Data)
+  const [initialBudget, setInitialBudget] = useState(0);
+  const [inflowRows, setInflowRows] = useState([]);
+  const [expenseRows, setExpenseRows] = useState([]);
 
-  // Expenses Rows
-  const [expenseRows, setExpenseRows] = useState(DEFAULT_EXPENSES);
-
-  // Signatories
+  // Active Signatories
   const [signatories, setSignatories] = useState({
-    presidentName: 'EULYSIES DOMANTAY',
+    presidentName: 'EMANUEL MALBAROSA',
     presidentRole: 'LITE PRESIDENT',
-    treasurerName: 'ANDREI GERONIMO',
+    treasurerName: 'ANDREI JOHN P. GERONIMO',
     treasurerRole: 'LITE TREASURER',
-    auditorName: 'MARIELLE CABANAG',
+    auditorName: 'CHRISTIAN REY C. KASILAG',
     auditorRole: 'LITE AUDITOR',
-    adviserName: 'KIMBERLY DAWN JATULAN',
-    adviserRole: 'LITE ADVISER',
+    adviserName: 'MS. KIMBERLY DAWN JATULAN',
+    adviserRole: 'LITE CLUB ADVISER',
     directorName: 'JOVYLYN ORTIZ-CESAR, MBA, MSIT',
-    directorRole: 'PROGRAM DIRECTOR',
+    directorRole: 'PROGRAM DIRECTOR, BSIT',
     deanName: 'DR. EMRAIDA MARIE M. MANUCOM',
     deanRole: 'DEAN, COLLEGE OF COMPUTER STUDIES',
   });
 
   const [isExporting, setIsExporting] = useState(false);
 
-  // Sync state with incoming documentData
+  // Sync state strictly with incoming real documentData
   useEffect(() => {
     if (documentData) {
-      if (documentData.transmittalDate) setTransmittalDate(documentData.transmittalDate);
-      if (documentData.eventName) setPeriodDesc(`As of ${documentData.eventName}`);
+      if (documentData.transmittalDate) {
+        setTransmittalDate(documentData.transmittalDate);
+        setFinalAsOf(`As of ${documentData.transmittalDate}`);
+      }
+      if (documentData.eventName) setPeriodDesc(documentData.eventName);
+      else if (documentData.activityTitle) setPeriodDesc(documentData.activityTitle);
+
       if (documentData.semester) {
         const semClean = documentData.semester.toUpperCase().includes('SEM') 
           ? documentData.semester.toUpperCase().replace('SEM', 'SEMESTER')
@@ -106,34 +84,66 @@ export default function DocumentPreviewModal({ isOpen, onClose, documentData }) 
       }
       if (documentData.academicYear) setAcademicYear(documentData.academicYear);
       
-      // If documentData has transaction outflows, use them as expenses
-      if (documentData.transactions && documentData.transactions.length > 0) {
-        const outflows = documentData.transactions
-          .filter(t => t.type === 'OUTFLOW')
-          .map(t => ({ desc: t.title, amount: Number(t.amount) || 0 }));
-        if (outflows.length > 0) {
-          setExpenseRows(outflows);
-        }
-
-        // Auto-detect rollover beginning balance
-        const rolloverTx = documentData.transactions.find(t => 
-          t.type === 'INFLOW' && (
-            (t.category_name && t.category_name.toLowerCase().includes('rollover')) || 
-            (t.title && t.title.toLowerCase().includes('beginning'))
-          )
-        );
-        if (rolloverTx) {
-          setInitialBudget(Number(rolloverTx.amount) || 0);
-        }
+      // Sync real signatories if provided
+      if (documentData.signatories) {
+        setSignatories(prev => ({
+          ...prev,
+          presidentName: (documentData.signatories.notedBy || documentData.signatories.presidentName || prev.presidentName).toUpperCase(),
+          presidentRole: (documentData.signatories.notedRole || documentData.signatories.presidentRole || prev.presidentRole).toUpperCase(),
+          treasurerName: (documentData.signatories.preparedBy || documentData.signatories.treasurerName || prev.treasurerName).toUpperCase(),
+          treasurerRole: (documentData.signatories.preparedRole || documentData.signatories.treasurerRole || prev.treasurerRole).toUpperCase(),
+          auditorName: (documentData.signatories.reviewedBy || documentData.signatories.auditorName || prev.auditorName).toUpperCase(),
+          auditorRole: (documentData.signatories.reviewedRole || documentData.signatories.auditorRole || prev.auditorRole).toUpperCase(),
+          adviserName: (documentData.signatories.adviser1 || documentData.signatories.adviserName || prev.adviserName).toUpperCase(),
+          adviserRole: (documentData.signatories.adviserRole || prev.adviserRole).toUpperCase(),
+          directorName: (documentData.signatories.directorName || prev.directorName).toUpperCase(),
+          directorRole: (documentData.signatories.directorRole || prev.directorRole).toUpperCase(),
+          deanName: (documentData.signatories.deanName || prev.deanName).toUpperCase(),
+          deanRole: (documentData.signatories.deanRole || prev.deanRole).toUpperCase(),
+        }));
       }
+
+      const txs = documentData.transactions || [];
+
+      // 1. Auto-detect rollover beginning balance
+      const rolloverTxs = txs.filter(t => 
+        t.type === 'INFLOW' && (
+          (t.category_name && t.category_name.toLowerCase().includes('rollover')) || 
+          (t.title && t.title.toLowerCase().includes('beginning'))
+        )
+      );
+      const rolloverIds = new Set(rolloverTxs.map(t => t.id));
+      const totalRollover = rolloverTxs.reduce((sum, t) => sum + (Number(t.amount) || 0), 0);
+      setInitialBudget(totalRollover);
+
+      // 2. Real inflows (excluding rollover to prevent double-counting)
+      const realInflows = txs
+        .filter(t => t.type === 'INFLOW' && !rolloverIds.has(t.id))
+        .map(t => ({
+          id: t.id,
+          desc: t.title,
+          amount: Number(t.amount) || 0,
+          category: t.category_name || 'Income Collection',
+          date: t.transaction_date,
+        }));
+      setInflowRows(realInflows);
+
+      // 3. Real outflows / disbursements
+      const realOutflows = txs
+        .filter(t => t.type === 'OUTFLOW')
+        .map(t => ({
+          id: t.id,
+          desc: t.title,
+          amount: Number(t.amount) || 0,
+          category: t.category_name || 'Operating Expense',
+          date: t.transaction_date,
+        }));
+      setExpenseRows(realOutflows);
     }
   }, [documentData]);
 
-  // Derived Calculations
-  const incomeSubtotal1 = cosplayVote + shirtRebate;
-  const incomeSubtotal2 = honorOfKings + crossfire;
-  const exhibitSubtotal = exhibitDay1 + exhibitDay2;
-  const totalInflows = incomeSubtotal1 + incomeSubtotal2 + exhibitSubtotal;
+  // Derived Calculations from Real Ledger Data
+  const totalInflows = inflowRows.reduce((sum, item) => sum + (Number(item.amount) || 0), 0);
   const totalFunds = initialBudget + totalInflows;
   const totalExpenses = expenseRows.reduce((sum, item) => sum + (Number(item.amount) || 0), 0);
   const cashOnHand = totalFunds - totalExpenses;
@@ -142,15 +152,61 @@ export default function DocumentPreviewModal({ isOpen, onClose, documentData }) 
     setSignatories(prev => ({ ...prev, [field]: val }));
   };
 
+  const handleUpdateInflow = (idx, field, val) => {
+    const next = [...inflowRows];
+    next[idx] = { ...next[idx], [field]: field === 'amount' ? (parseFloat(val) || 0) : val };
+    setInflowRows(next);
+  };
+
+  const handleAddInflow = () => {
+    setInflowRows(prev => [...prev, { id: `manual-in-${Date.now()}`, desc: 'New Income Particulars', amount: 0, category: 'Income Collection' }]);
+  };
+
+  const handleRemoveInflow = (idx) => {
+    setInflowRows(prev => prev.filter((_, i) => i !== idx));
+  };
+
   const handleUpdateExpense = (idx, field, val) => {
     const next = [...expenseRows];
     next[idx] = { ...next[idx], [field]: field === 'amount' ? (parseFloat(val) || 0) : val };
     setExpenseRows(next);
   };
 
+  const handleAddExpense = () => {
+    setExpenseRows(prev => [...prev, { id: `manual-out-${Date.now()}`, desc: 'New Expense Particulars', amount: 0, category: 'Operating Expense' }]);
+  };
+
+  const handleRemoveExpense = (idx) => {
+    setExpenseRows(prev => prev.filter((_, i) => i !== idx));
+  };
+
   const handleExportDocx = async () => {
     try {
       setIsExporting(true);
+      const allExportTransactions = [
+        ...(initialBudget > 0 ? [{
+          transaction_date: transmittalDate,
+          title: 'Beginning Balance / Rollover Fund',
+          category_name: 'Initial Budget Rollover',
+          type: 'INFLOW',
+          amount: initialBudget,
+        }] : []),
+        ...inflowRows.map(r => ({
+          transaction_date: r.date || transmittalDate,
+          title: r.desc,
+          category_name: r.category || 'Income Collection',
+          type: 'INFLOW',
+          amount: r.amount,
+        })),
+        ...expenseRows.map(r => ({
+          transaction_date: r.date || transmittalDate,
+          title: r.desc,
+          category_name: r.category || 'Operating Expense',
+          type: 'OUTFLOW',
+          amount: r.amount,
+        })),
+      ];
+
       const payload = {
         type: isProposal ? 'PROPOSAL' : 'LIQUIDATION',
         activityTitle: periodDesc,
@@ -201,20 +257,16 @@ export default function DocumentPreviewModal({ isOpen, onClose, documentData }) 
         total_funds: totalFunds,
         total_expenses: totalExpenses,
         cash_on_hand: cashOnHand,
-        income_items: [
-          { particulars: 'Cosplay 5-Peso Vote & Org-Shirt Rebate', desc: 'Cosplay 5-Peso Vote & Org-Shirt Rebate', amount: incomeSubtotal1 },
-          { particulars: 'E-sports: Honor of Kings & Crossfire', desc: 'E-sports: Honor of Kings & Crossfire', amount: incomeSubtotal2 },
-          { particulars: 'Game Exhibit: Day 1 & Day 2', desc: 'Game Exhibit: Day 1 & Day 2', amount: exhibitSubtotal },
-        ],
+        income_items: inflowRows.map(r => ({ particulars: r.desc, desc: r.desc, amount: r.amount })),
+        expense_items: expenseRows.map(r => ({ particulars: r.desc, desc: r.desc, amount: r.amount })),
         summary: {
           initial_budget: initialBudget,
-          total_inflows: totalInflows,
-          total_funds: totalFunds,
+          total_inflows: totalFunds,
           total_outflows: totalExpenses,
           cash_on_hand: cashOnHand,
         },
         items: documentData.items || [],
-        expense_items: expenseRows,
+        transactions: allExportTransactions,
       };
 
       const res = await fetch('/api/reports/docx', {
@@ -793,125 +845,85 @@ export default function DocumentPreviewModal({ isOpen, onClose, documentData }) 
             </div>
 
             {/* Initial Budget */}
-            <div className="mb-6 font-bold text-xs">
-              INITIAL BUDGET AS OF FEBRUARY (Carried over from 1st Sem)
+            <div className="mb-2 font-bold text-xs uppercase text-gray-800">
+              INITIAL BUDGET / BEGINNING BALANCE (Carried over from prior semester)
             </div>
             <table className="fin-table mb-6">
               <tbody>
                 <tr>
-                  <td>Cash from the Box</td>
+                  <td>Beginning Cash-on-Hand / Rollover Balance</td>
                   <td className="amount">
-                    P{initialBudget.toLocaleString('en-PH', { minimumFractionDigits: 2 })}
+                    <input
+                      type="number"
+                      step="0.01"
+                      value={initialBudget}
+                      onChange={(e) => setInitialBudget(parseFloat(e.target.value) || 0)}
+                      className="pdm-input text-right font-semibold"
+                    />
                   </td>
                 </tr>
               </tbody>
             </table>
 
-            {/* Inflow Section 1: General Income */}
-            <div className="font-bold text-xs mb-1">Income:</div>
+            {/* Inflow Section: Revenue & Collections */}
+            <div className="flex justify-between items-center mb-1">
+              <span className="font-bold text-xs uppercase text-gray-800">Income & Collections:</span>
+              <button
+                type="button"
+                onClick={handleAddInflow}
+                className="text-xs text-blue-600 hover:text-blue-800 font-semibold no-print"
+                title="Add income row"
+              >
+                + Add Income Row
+              </button>
+            </div>
             <table className="fin-table mb-6">
               <tbody>
+                {inflowRows.length > 0 ? (
+                  inflowRows.map((item, idx) => (
+                    <tr key={item.id || idx}>
+                      <td>
+                        <div className="flex items-center gap-2">
+                          <input
+                            type="text"
+                            value={item.desc}
+                            onChange={(e) => handleUpdateInflow(idx, 'desc', e.target.value)}
+                            className="pdm-input flex-1"
+                            placeholder="Income description / event particulars"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveInflow(idx)}
+                            className="text-gray-400 hover:text-red-500 text-xs px-1 no-print"
+                            title="Remove row"
+                          >
+                            ×
+                          </button>
+                        </div>
+                      </td>
+                      <td className="amount">
+                        <input
+                          type="number"
+                          step="0.01"
+                          value={item.amount}
+                          onChange={(e) => handleUpdateInflow(idx, 'amount', e.target.value)}
+                          className="pdm-input text-right"
+                        />
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan="2" className="text-gray-400 italic py-4 text-center">
+                      No income or revenue transactions recorded for this period.
+                    </td>
+                  </tr>
+                )}
                 <tr>
-                  <td>Cosplay 5-Peso Vote</td>
-                  <td className="amount">
-                    <input
-                      type="number"
-                      value={cosplayVote}
-                      onChange={(e) => setCosplayVote(parseFloat(e.target.value) || 0)}
-                      className="pdm-input text-right"
-                    />
-                  </td>
-                </tr>
-                <tr>
-                  <td>Org-Shirt Rebate</td>
-                  <td className="amount">
-                    <input
-                      type="number"
-                      value={shirtRebate}
-                      onChange={(e) => setShirtRebate(parseFloat(e.target.value) || 0)}
-                      className="pdm-input text-right"
-                    />
-                  </td>
-                </tr>
-                <tr>
-                  <td></td>
-                  <td className="amount">
-                    <span className="subtotal-line">
-                      P{incomeSubtotal1.toLocaleString('en-PH', { minimumFractionDigits: 2 })}
-                    </span>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-
-            {/* Inflow Section 2: E-sports */}
-            <div className="font-bold text-xs mb-1">E-sports: Day 1 – 2</div>
-            <table className="fin-table mb-6">
-              <tbody>
-                <tr>
-                  <td>Honor Of Kings</td>
-                  <td className="amount">
-                    <input
-                      type="number"
-                      value={honorOfKings}
-                      onChange={(e) => setHonorOfKings(parseFloat(e.target.value) || 0)}
-                      className="pdm-input text-right"
-                    />
-                  </td>
-                </tr>
-                <tr>
-                  <td>Crossfire: Legends</td>
-                  <td className="amount">
-                    <input
-                      type="number"
-                      value={crossfire}
-                      onChange={(e) => setCrossfire(parseFloat(e.target.value) || 0)}
-                      className="pdm-input text-right"
-                    />
-                  </td>
-                </tr>
-                <tr>
-                  <td></td>
-                  <td className="amount">
-                    <span className="subtotal-line">
-                      P{incomeSubtotal2.toLocaleString('en-PH', { minimumFractionDigits: 2 })}
-                    </span>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-
-            {/* Inflow Section 3: Game Exhibit */}
-            <div className="font-bold text-xs mb-1">Game Exhibit: Day 1 – 2</div>
-            <table className="fin-table mb-8">
-              <tbody>
-                <tr>
-                  <td>February 26, 2026</td>
-                  <td className="amount">
-                    <input
-                      type="number"
-                      value={exhibitDay1}
-                      onChange={(e) => setExhibitDay1(parseFloat(e.target.value) || 0)}
-                      className="pdm-input text-right"
-                    />
-                  </td>
-                </tr>
-                <tr>
-                  <td>February 27, 2026</td>
-                  <td className="amount">
-                    <input
-                      type="number"
-                      value={exhibitDay2}
-                      onChange={(e) => setExhibitDay2(parseFloat(e.target.value) || 0)}
-                      className="pdm-input text-right"
-                    />
-                  </td>
-                </tr>
-                <tr>
-                  <td></td>
-                  <td className="amount">
-                    <span className="subtotal-line">
-                      P{exhibitSubtotal.toLocaleString('en-PH', { minimumFractionDigits: 2 })}
+                  <td className="font-bold pt-2">Subtotal Income:</td>
+                  <td className="amount pt-2">
+                    <span className="subtotal-line font-bold">
+                      P{totalInflows.toLocaleString('en-PH', { minimumFractionDigits: 2 })}
                     </span>
                   </td>
                 </tr>
@@ -920,7 +932,7 @@ export default function DocumentPreviewModal({ isOpen, onClose, documentData }) 
 
             {/* Total Funds Available */}
             <div className="flex justify-between items-center font-bold text-sm pt-4 border-t border-gray-300">
-              <span>Total Income:</span>
+              <span>Total Funds:</span>
               <span className="text-right">
                 P{totalFunds.toLocaleString('en-PH', { minimumFractionDigits: 2 })}
               </span>
@@ -929,38 +941,69 @@ export default function DocumentPreviewModal({ isOpen, onClose, documentData }) 
         )}
 
         {/* ========================================================================= */}
-        {/* PAGE 3: MISCELLANEOUS EXPENSES (Screenshot 3 Left)                       */}
+        {/* PAGE 3: MISCELLANEOUS EXPENSES                                           */}
         {/* ========================================================================= */}
         {(activePage === 0 || activePage === 3) && (
           <article className="document-sheet">
             <OfficialHeaderBanner />
 
-            <div className="font-bold text-xs mb-1">Expenses:</div>
-            <div className="font-bold text-xs mb-3">Miscellaneous Expenses</div>
+            <div className="flex justify-between items-center mb-1">
+              <div>
+                <div className="font-bold text-xs uppercase text-gray-800">Expenses:</div>
+                <div className="font-bold text-xs mb-3 text-gray-700">Itemized Operating & Event Expenses</div>
+              </div>
+              <button
+                type="button"
+                onClick={handleAddExpense}
+                className="text-xs text-blue-600 hover:text-blue-800 font-semibold no-print mb-3"
+                title="Add expense row"
+              >
+                + Add Expense Row
+              </button>
+            </div>
 
             <table className="fin-table mb-4">
               <tbody>
-                {expenseRows.map((exp, idx) => (
-                  <tr key={idx}>
-                    <td>
-                      <input
-                        type="text"
-                        value={exp.desc}
-                        onChange={(e) => handleUpdateExpense(idx, 'desc', e.target.value)}
-                        className="pdm-input"
-                      />
-                    </td>
-                    <td className="amount">
-                      <input
-                        type="number"
-                        step="0.01"
-                        value={exp.amount}
-                        onChange={(e) => handleUpdateExpense(idx, 'amount', e.target.value)}
-                        className="pdm-input text-right"
-                      />
+                {expenseRows.length > 0 ? (
+                  expenseRows.map((exp, idx) => (
+                    <tr key={exp.id || idx}>
+                      <td>
+                        <div className="flex items-center gap-2">
+                          <input
+                            type="text"
+                            value={exp.desc}
+                            onChange={(e) => handleUpdateExpense(idx, 'desc', e.target.value)}
+                            className="pdm-input flex-1"
+                            placeholder="Expense particulars / item description"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveExpense(idx)}
+                            className="text-gray-400 hover:text-red-500 text-xs px-1 no-print"
+                            title="Remove row"
+                          >
+                            ×
+                          </button>
+                        </div>
+                      </td>
+                      <td className="amount">
+                        <input
+                          type="number"
+                          step="0.01"
+                          value={exp.amount}
+                          onChange={(e) => handleUpdateExpense(idx, 'amount', e.target.value)}
+                          className="pdm-input text-right"
+                        />
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan="2" className="text-gray-400 italic py-4 text-center">
+                      No expense or disbursement transactions recorded for this period.
                     </td>
                   </tr>
-                ))}
+                )}
                 <tr>
                   <td className="font-bold pt-2">Total Expenses:</td>
                   <td className="amount pt-2">
