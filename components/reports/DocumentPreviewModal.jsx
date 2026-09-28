@@ -430,81 +430,117 @@ export default function DocumentPreviewModal({ isOpen, onClose, documentData }) 
             <div className="font-bold text-xs uppercase text-emerald-900 border-b border-emerald-900 pb-0.5 mb-4 mt-6">
               III. INSTITUTIONAL APPROVAL ROUTING
             </div>
-            <div className="sig-row-3col mt-4">
-              <div>
-                <input
-                  type="text"
-                  value={signatories.treasurerName}
-                  onChange={(e) => handleUpdateSignatory('treasurerName', e.target.value)}
-                  className="pdm-input sig-name"
-                />
-                <input
-                  type="text"
-                  value={signatories.treasurerRole}
-                  onChange={(e) => handleUpdateSignatory('treasurerRole', e.target.value)}
-                  className="pdm-input sig-role"
-                />
-              </div>
-              <div>
-                <input
-                  type="text"
-                  value={signatories.auditorName}
-                  onChange={(e) => handleUpdateSignatory('auditorName', e.target.value)}
-                  className="pdm-input sig-name"
-                />
-                <input
-                  type="text"
-                  value={signatories.auditorRole}
-                  onChange={(e) => handleUpdateSignatory('auditorRole', e.target.value)}
-                  className="pdm-input sig-role"
-                />
-              </div>
-              <div>
-                <input
-                  type="text"
-                  value={signatories.presidentName}
-                  onChange={(e) => handleUpdateSignatory('presidentName', e.target.value)}
-                  className="pdm-input sig-name"
-                />
-                <input
-                  type="text"
-                  value={signatories.presidentRole}
-                  onChange={(e) => handleUpdateSignatory('presidentRole', e.target.value)}
-                  className="pdm-input sig-role"
-                />
-              </div>
-            </div>
 
-            <div className="sig-row-2col mt-6">
-              <div>
-                <input
-                  type="text"
-                  value={signatories.directorName}
-                  onChange={(e) => handleUpdateSignatory('directorName', e.target.value)}
-                  className="pdm-input sig-name"
-                />
-                <input
-                  type="text"
-                  value={signatories.directorRole}
-                  onChange={(e) => handleUpdateSignatory('directorRole', e.target.value)}
-                  className="pdm-input sig-role"
-                />
-              </div>
-              <div>
-                <input
-                  type="text"
-                  value={signatories.deanName}
-                  onChange={(e) => handleUpdateSignatory('deanName', e.target.value)}
-                  className="pdm-input sig-name"
-                />
-                <input
-                  type="text"
-                  value={signatories.deanRole}
-                  onChange={(e) => handleUpdateSignatory('deanRole', e.target.value)}
-                  className="pdm-input sig-role"
-                />
-              </div>
-            </div>
+            {/* Table 1: Prepared & Endorsed by (Student Officers - 3 Columns) */}
+            <table className="sig-table">
+              <thead>
+                <tr>
+                  <th colSpan="3" className="sig-section-header">Prepared &amp; Endorsed by:</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style={{ width: '33.33%' }}>
+                    <div className="sig-cell">
+                      <div className="sig-space" />
+                      <input
+                        type="text"
+                        value={signatories.treasurerName}
+                        onChange={(e) => handleUpdateSignatory('treasurerName', e.target.value)}
+                        className="pdm-input sig-name"
+                      />
+                      <input
+                        type="text"
+                        value={signatories.treasurerRole}
+                        onChange={(e) => handleUpdateSignatory('treasurerRole', e.target.value)}
+                        className="pdm-input sig-role"
+                      />
+                    </div>
+                  </td>
+                  <td style={{ width: '33.33%' }}>
+                    <div className="sig-cell">
+                      <div className="sig-space" />
+                      <input
+                        type="text"
+                        value={signatories.auditorName}
+                        onChange={(e) => handleUpdateSignatory('auditorName', e.target.value)}
+                        className="pdm-input sig-name"
+                      />
+                      <input
+                        type="text"
+                        value={signatories.auditorRole}
+                        onChange={(e) => handleUpdateSignatory('auditorRole', e.target.value)}
+                        className="pdm-input sig-role"
+                      />
+                    </div>
+                  </td>
+                  <td style={{ width: '33.33%' }}>
+                    <div className="sig-cell">
+                      <div className="sig-space" />
+                      <input
+                        type="text"
+                        value={signatories.presidentName}
+                        onChange={(e) => handleUpdateSignatory('presidentName', e.target.value)}
+                        className="pdm-input sig-name"
+                      />
+                      <input
+                        type="text"
+                        value={signatories.presidentRole}
+                        onChange={(e) => handleUpdateSignatory('presidentRole', e.target.value)}
+                        className="pdm-input sig-role"
+                      />
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+
+            {/* Table 2: Recommending & Final Approval (Administrators - 2 Columns) */}
+            <table className="sig-table">
+              <thead>
+                <tr>
+                  <th colSpan="2" className="sig-section-header">Recommending Approval:</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style={{ width: '50%' }}>
+                    <div className="sig-cell">
+                      <div className="sig-space" />
+                      <input
+                        type="text"
+                        value={signatories.directorName}
+                        onChange={(e) => handleUpdateSignatory('directorName', e.target.value)}
+                        className="pdm-input sig-name"
+                      />
+                      <input
+                        type="text"
+                        value={signatories.directorRole}
+                        onChange={(e) => handleUpdateSignatory('directorRole', e.target.value)}
+                        className="pdm-input sig-role"
+                      />
+                    </div>
+                  </td>
+                  <td style={{ width: '50%' }}>
+                    <div className="sig-cell">
+                      <div className="sig-space" />
+                      <input
+                        type="text"
+                        value={signatories.deanName}
+                        onChange={(e) => handleUpdateSignatory('deanName', e.target.value)}
+                        className="pdm-input sig-name"
+                      />
+                      <input
+                        type="text"
+                        value={signatories.deanRole}
+                        onChange={(e) => handleUpdateSignatory('deanRole', e.target.value)}
+                        className="pdm-input sig-role"
+                      />
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
           </article>
         ) : (
           <>
@@ -580,101 +616,150 @@ export default function DocumentPreviewModal({ isOpen, onClose, documentData }) 
               <div className="mt-4">LITE Officers</div>
             </div>
 
-            {/* Signatories Block */}
+            {/* Signatories Block (Table-Based) */}
             <div className="mt-8">
-              <div className="text-sm font-normal">Prepared by:</div>
-              <div className="sig-row-3col">
-                <div>
-                  <input
-                    type="text"
-                    value={signatories.presidentName}
-                    onChange={(e) => handleUpdateSignatory('presidentName', e.target.value)}
-                    className="pdm-input sig-name"
-                  />
-                  <input
-                    type="text"
-                    value={signatories.presidentRole}
-                    onChange={(e) => handleUpdateSignatory('presidentRole', e.target.value)}
-                    className="pdm-input sig-role"
-                  />
-                </div>
-                <div>
-                  <input
-                    type="text"
-                    value={signatories.treasurerName}
-                    onChange={(e) => handleUpdateSignatory('treasurerName', e.target.value)}
-                    className="pdm-input sig-name"
-                  />
-                  <input
-                    type="text"
-                    value={signatories.treasurerRole}
-                    onChange={(e) => handleUpdateSignatory('treasurerRole', e.target.value)}
-                    className="pdm-input sig-role"
-                  />
-                </div>
-                <div>
-                  <input
-                    type="text"
-                    value={signatories.auditorName}
-                    onChange={(e) => handleUpdateSignatory('auditorName', e.target.value)}
-                    className="pdm-input sig-name"
-                  />
-                  <input
-                    type="text"
-                    value={signatories.auditorRole}
-                    onChange={(e) => handleUpdateSignatory('auditorRole', e.target.value)}
-                    className="pdm-input sig-role"
-                  />
-                </div>
-              </div>
+              {/* Table 1: Prepared by (Student Officers - 3 Columns) */}
+              <table className="sig-table">
+                <thead>
+                  <tr>
+                    <th colSpan="3" className="sig-section-header">Prepared by:</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td style={{ width: '33.33%' }}>
+                      <div className="sig-cell">
+                        <div className="sig-space" />
+                        <input
+                          type="text"
+                          value={signatories.presidentName}
+                          onChange={(e) => handleUpdateSignatory('presidentName', e.target.value)}
+                          className="pdm-input sig-name"
+                        />
+                        <input
+                          type="text"
+                          value={signatories.presidentRole}
+                          onChange={(e) => handleUpdateSignatory('presidentRole', e.target.value)}
+                          className="pdm-input sig-role"
+                        />
+                      </div>
+                    </td>
+                    <td style={{ width: '33.33%' }}>
+                      <div className="sig-cell">
+                        <div className="sig-space" />
+                        <input
+                          type="text"
+                          value={signatories.treasurerName}
+                          onChange={(e) => handleUpdateSignatory('treasurerName', e.target.value)}
+                          className="pdm-input sig-name"
+                        />
+                        <input
+                          type="text"
+                          value={signatories.treasurerRole}
+                          onChange={(e) => handleUpdateSignatory('treasurerRole', e.target.value)}
+                          className="pdm-input sig-role"
+                        />
+                      </div>
+                    </td>
+                    <td style={{ width: '33.33%' }}>
+                      <div className="sig-cell">
+                        <div className="sig-space" />
+                        <input
+                          type="text"
+                          value={signatories.auditorName}
+                          onChange={(e) => handleUpdateSignatory('auditorName', e.target.value)}
+                          className="pdm-input sig-name"
+                        />
+                        <input
+                          type="text"
+                          value={signatories.auditorRole}
+                          onChange={(e) => handleUpdateSignatory('auditorRole', e.target.value)}
+                          className="pdm-input sig-role"
+                        />
+                      </div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
 
-              <div className="text-sm font-normal mt-4">Approved by:</div>
-              <div className="mt-6 mb-6">
-                <input
-                  type="text"
-                  value={signatories.adviserName}
-                  onChange={(e) => handleUpdateSignatory('adviserName', e.target.value)}
-                  className="pdm-input sig-name w-72"
-                />
-                <input
-                  type="text"
-                  value={signatories.adviserRole}
-                  onChange={(e) => handleUpdateSignatory('adviserRole', e.target.value)}
-                  className="pdm-input sig-role w-72"
-                />
-              </div>
+              {/* Table 2: Approved by (Advisers - 2 Columns) */}
+              <table className="sig-table">
+                <thead>
+                  <tr>
+                    <th className="sig-section-header" style={{ width: '50%' }}>Approved by:</th>
+                    <th style={{ width: '50%' }}></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td style={{ width: '50%' }}>
+                      <div className="sig-cell">
+                        <div className="sig-space" />
+                        <input
+                          type="text"
+                          value={signatories.adviserName}
+                          onChange={(e) => handleUpdateSignatory('adviserName', e.target.value)}
+                          className="pdm-input sig-name w-72"
+                        />
+                        <input
+                          type="text"
+                          value={signatories.adviserRole}
+                          onChange={(e) => handleUpdateSignatory('adviserRole', e.target.value)}
+                          className="pdm-input sig-role w-72"
+                        />
+                      </div>
+                    </td>
+                    <td style={{ width: '50%' }}></td>
+                  </tr>
+                </tbody>
+              </table>
 
-              <div className="text-sm font-normal mt-4">Noted by:</div>
-              <div className="sig-row-2col">
-                <div>
-                  <input
-                    type="text"
-                    value={signatories.directorName}
-                    onChange={(e) => handleUpdateSignatory('directorName', e.target.value)}
-                    className="pdm-input sig-name"
-                  />
-                  <input
-                    type="text"
-                    value={signatories.directorRole}
-                    onChange={(e) => handleUpdateSignatory('directorRole', e.target.value)}
-                    className="pdm-input sig-role"
-                  />
-                </div>
-                <div>
-                  <input
-                    type="text"
-                    value={signatories.deanName}
-                    onChange={(e) => handleUpdateSignatory('deanName', e.target.value)}
-                    className="pdm-input sig-name"
-                  />
-                  <input
-                    type="text"
-                    value={signatories.deanRole}
-                    onChange={(e) => handleUpdateSignatory('deanRole', e.target.value)}
-                    className="pdm-input sig-role"
-                  />
-                </div>
-              </div>
+              {/* Table 3: Noted by (Administrators - 2 Columns) */}
+              <table className="sig-table">
+                <thead>
+                  <tr>
+                    <th colSpan="2" className="sig-section-header">Noted by:</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td style={{ width: '50%' }}>
+                      <div className="sig-cell">
+                        <div className="sig-space" />
+                        <input
+                          type="text"
+                          value={signatories.directorName}
+                          onChange={(e) => handleUpdateSignatory('directorName', e.target.value)}
+                          className="pdm-input sig-name"
+                        />
+                        <input
+                          type="text"
+                          value={signatories.directorRole}
+                          onChange={(e) => handleUpdateSignatory('directorRole', e.target.value)}
+                          className="pdm-input sig-role"
+                        />
+                      </div>
+                    </td>
+                    <td style={{ width: '50%' }}>
+                      <div className="sig-cell">
+                        <div className="sig-space" />
+                        <input
+                          type="text"
+                          value={signatories.deanName}
+                          onChange={(e) => handleUpdateSignatory('deanName', e.target.value)}
+                          className="pdm-input sig-name"
+                        />
+                        <input
+                          type="text"
+                          value={signatories.deanRole}
+                          onChange={(e) => handleUpdateSignatory('deanRole', e.target.value)}
+                          className="pdm-input sig-role"
+                        />
+                      </div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
 
               <div className="text-xs text-gray-700 mt-6 space-y-0.5">
                 <div>cc: Co-Curricular</div>
@@ -932,101 +1017,150 @@ export default function DocumentPreviewModal({ isOpen, onClose, documentData }) 
               </tbody>
             </table>
 
-            {/* Signatories Block (Repeated) */}
+            {/* Signatories Block (Table-Based) */}
             <div className="mt-12">
-              <div className="text-sm font-normal">Prepared by:</div>
-              <div className="sig-row-3col">
-                <div>
-                  <input
-                    type="text"
-                    value={signatories.presidentName}
-                    onChange={(e) => handleUpdateSignatory('presidentName', e.target.value)}
-                    className="pdm-input sig-name"
-                  />
-                  <input
-                    type="text"
-                    value={signatories.presidentRole}
-                    onChange={(e) => handleUpdateSignatory('presidentRole', e.target.value)}
-                    className="pdm-input sig-role"
-                  />
-                </div>
-                <div>
-                  <input
-                    type="text"
-                    value={signatories.treasurerName}
-                    onChange={(e) => handleUpdateSignatory('treasurerName', e.target.value)}
-                    className="pdm-input sig-name"
-                  />
-                  <input
-                    type="text"
-                    value={signatories.treasurerRole}
-                    onChange={(e) => handleUpdateSignatory('treasurerRole', e.target.value)}
-                    className="pdm-input sig-role"
-                  />
-                </div>
-                <div>
-                  <input
-                    type="text"
-                    value={signatories.auditorName}
-                    onChange={(e) => handleUpdateSignatory('auditorName', e.target.value)}
-                    className="pdm-input sig-name"
-                  />
-                  <input
-                    type="text"
-                    value={signatories.auditorRole}
-                    onChange={(e) => handleUpdateSignatory('auditorRole', e.target.value)}
-                    className="pdm-input sig-role"
-                  />
-                </div>
-              </div>
+              {/* Table 1: Prepared by (Student Officers - 3 Columns) */}
+              <table className="sig-table">
+                <thead>
+                  <tr>
+                    <th colSpan="3" className="sig-section-header">Prepared by:</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td style={{ width: '33.33%' }}>
+                      <div className="sig-cell">
+                        <div className="sig-space" />
+                        <input
+                          type="text"
+                          value={signatories.presidentName}
+                          onChange={(e) => handleUpdateSignatory('presidentName', e.target.value)}
+                          className="pdm-input sig-name"
+                        />
+                        <input
+                          type="text"
+                          value={signatories.presidentRole}
+                          onChange={(e) => handleUpdateSignatory('presidentRole', e.target.value)}
+                          className="pdm-input sig-role"
+                        />
+                      </div>
+                    </td>
+                    <td style={{ width: '33.33%' }}>
+                      <div className="sig-cell">
+                        <div className="sig-space" />
+                        <input
+                          type="text"
+                          value={signatories.treasurerName}
+                          onChange={(e) => handleUpdateSignatory('treasurerName', e.target.value)}
+                          className="pdm-input sig-name"
+                        />
+                        <input
+                          type="text"
+                          value={signatories.treasurerRole}
+                          onChange={(e) => handleUpdateSignatory('treasurerRole', e.target.value)}
+                          className="pdm-input sig-role"
+                        />
+                      </div>
+                    </td>
+                    <td style={{ width: '33.33%' }}>
+                      <div className="sig-cell">
+                        <div className="sig-space" />
+                        <input
+                          type="text"
+                          value={signatories.auditorName}
+                          onChange={(e) => handleUpdateSignatory('auditorName', e.target.value)}
+                          className="pdm-input sig-name"
+                        />
+                        <input
+                          type="text"
+                          value={signatories.auditorRole}
+                          onChange={(e) => handleUpdateSignatory('auditorRole', e.target.value)}
+                          className="pdm-input sig-role"
+                        />
+                      </div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
 
-              <div className="text-sm font-normal mt-4">Approved by:</div>
-              <div className="mt-6 mb-6">
-                <input
-                  type="text"
-                  value={signatories.adviserName}
-                  onChange={(e) => handleUpdateSignatory('adviserName', e.target.value)}
-                  className="pdm-input sig-name w-72"
-                />
-                <input
-                  type="text"
-                  value={signatories.adviserRole}
-                  onChange={(e) => handleUpdateSignatory('adviserRole', e.target.value)}
-                  className="pdm-input sig-role w-72"
-                />
-              </div>
+              {/* Table 2: Approved by (Advisers - 2 Columns) */}
+              <table className="sig-table">
+                <thead>
+                  <tr>
+                    <th className="sig-section-header" style={{ width: '50%' }}>Approved by:</th>
+                    <th style={{ width: '50%' }}></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td style={{ width: '50%' }}>
+                      <div className="sig-cell">
+                        <div className="sig-space" />
+                        <input
+                          type="text"
+                          value={signatories.adviserName}
+                          onChange={(e) => handleUpdateSignatory('adviserName', e.target.value)}
+                          className="pdm-input sig-name w-72"
+                        />
+                        <input
+                          type="text"
+                          value={signatories.adviserRole}
+                          onChange={(e) => handleUpdateSignatory('adviserRole', e.target.value)}
+                          className="pdm-input sig-role w-72"
+                        />
+                      </div>
+                    </td>
+                    <td style={{ width: '50%' }}></td>
+                  </tr>
+                </tbody>
+              </table>
 
-              <div className="text-sm font-normal mt-4">Noted by:</div>
-              <div className="sig-row-2col">
-                <div>
-                  <input
-                    type="text"
-                    value={signatories.directorName}
-                    onChange={(e) => handleUpdateSignatory('directorName', e.target.value)}
-                    className="pdm-input sig-name"
-                  />
-                  <input
-                    type="text"
-                    value={signatories.directorRole}
-                    onChange={(e) => handleUpdateSignatory('directorRole', e.target.value)}
-                    className="pdm-input sig-role"
-                  />
-                </div>
-                <div>
-                  <input
-                    type="text"
-                    value={signatories.deanName}
-                    onChange={(e) => handleUpdateSignatory('deanName', e.target.value)}
-                    className="pdm-input sig-name"
-                  />
-                  <input
-                    type="text"
-                    value={signatories.deanRole}
-                    onChange={(e) => handleUpdateSignatory('deanRole', e.target.value)}
-                    className="pdm-input sig-role"
-                  />
-                </div>
-              </div>
+              {/* Table 3: Noted by (Administrators - 2 Columns) */}
+              <table className="sig-table">
+                <thead>
+                  <tr>
+                    <th colSpan="2" className="sig-section-header">Noted by:</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td style={{ width: '50%' }}>
+                      <div className="sig-cell">
+                        <div className="sig-space" />
+                        <input
+                          type="text"
+                          value={signatories.directorName}
+                          onChange={(e) => handleUpdateSignatory('directorName', e.target.value)}
+                          className="pdm-input sig-name"
+                        />
+                        <input
+                          type="text"
+                          value={signatories.directorRole}
+                          onChange={(e) => handleUpdateSignatory('directorRole', e.target.value)}
+                          className="pdm-input sig-role"
+                        />
+                      </div>
+                    </td>
+                    <td style={{ width: '50%' }}>
+                      <div className="sig-cell">
+                        <div className="sig-space" />
+                        <input
+                          type="text"
+                          value={signatories.deanName}
+                          onChange={(e) => handleUpdateSignatory('deanName', e.target.value)}
+                          className="pdm-input sig-name"
+                        />
+                        <input
+                          type="text"
+                          value={signatories.deanRole}
+                          onChange={(e) => handleUpdateSignatory('deanRole', e.target.value)}
+                          className="pdm-input sig-role"
+                        />
+                      </div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
             </div>
           </article>
         )}

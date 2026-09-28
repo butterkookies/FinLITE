@@ -136,7 +136,44 @@
   margin-bottom: 30pt;
 }
 
-/* Signatories 3-Column Grid */
+/* Signatories Table (STRICT INVISIBLE BORDERS - Guaranteed Zero Misalignment) */
+.sig-table {
+  width: 100%;
+  table-layout: fixed;
+  border-collapse: collapse;
+  border: none !important;
+  margin-top: 6pt;
+  margin-bottom: 16pt;
+}
+
+.sig-table tr,
+.sig-table th,
+.sig-table td {
+  border: none !important;
+  padding: 0 !important;
+  vertical-align: top;
+  font-family: Calibri, 'Segoe UI', Arial, sans-serif !important;
+  text-align: left;
+}
+
+.sig-section-header {
+  font-size: 11pt !important;
+  font-weight: normal !important;
+  color: #000000;
+  padding-bottom: 20pt !important;
+  text-align: left;
+}
+
+.sig-cell {
+  padding-right: 14px;
+  box-sizing: border-box;
+}
+
+.sig-space {
+  height: 20pt;
+}
+
+/* Signatories 3-Column Grid (Retained for legacy backward compatibility) */
 .sig-row-3col {
   display: grid;
   grid-template-columns: 1fr 1fr 1fr;
@@ -145,7 +182,7 @@
   margin-bottom: 22pt;
 }
 
-/* Signatories 2-Column Grid */
+/* Signatories 2-Column Grid (Retained for legacy backward compatibility) */
 .sig-row-2col {
   display: grid;
   grid-template-columns: 1fr 1fr;

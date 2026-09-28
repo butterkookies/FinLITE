@@ -129,76 +129,187 @@ export async function POST(req) {
       new Paragraph({ text: '' }),
     ];
 
-    // Standard 6-Stage Signatory Grid Table
-    const signatoryRows = [
-      new TableRow({
-        children: [
-          new TableCell({
-            borders: borderNone,
-            width: { size: 50, type: WidthType.PERCENTAGE },
+    // Function to generate 1:1 PDM institutional signatory tables with strict borderless alignment
+    function createSignatoryTables(signatories = {}, borderNone, docType = 'LIQUIDATION') {
+      const presName = (signatories.presidentName || signatories.notedBy || 'EMANUEL MALBAROSA').toUpperCase();
+      const presRole = signatories.presidentRole || signatories.notedRole || 'LITE President';
+      const treasName = (signatories.treasurerName || signatories.preparedBy || 'ANDREI JOHN P. GERONIMO').toUpperCase();
+      const treasRole = signatories.treasurerRole || signatories.preparedRole || 'LITE Treasurer';
+      const audName = (signatories.auditorName || signatories.reviewedBy || 'CHRISTIAN REY C. KASILAG').toUpperCase();
+      const audRole = signatories.auditorRole || signatories.reviewedRole || 'LITE Auditor';
+      const adv1Name = (signatories.adviserName || signatories.adviser1 || 'MS. KIMBERLY DAWN JATULAN').toUpperCase();
+      const adv2Name = (signatories.adviser2 || 'MS. KRIZIA MAE GENOVIA').toUpperCase();
+      const advRole = signatories.adviserRole || 'LITE Club Advisers';
+      const dirName = (signatories.directorName || 'JOVYLYN ORTIZ-CESAR, MBA, MSIT').toUpperCase();
+      const dirRole = signatories.directorRole || 'Program Director, BSIT';
+      const deanName = (signatories.deanName || 'DR. EMRAIDA MARIE M. MANUCOM').toUpperCase();
+      const deanRole = signatories.deanRole || 'Dean, College of Computer Studies';
+
+      if (docType === 'PROPOSAL') {
+        const officersTable = new Table({
+          width: { size: 100, type: WidthType.PERCENTAGE },
+          rows: [
+            new TableRow({
+              children: [
+                new TableCell({
+                  borders: borderNone,
+                  width: { size: 33, type: WidthType.PERCENTAGE },
+                  children: [
+                    new Paragraph({ children: [new TextRun({ text: 'Prepared by:\n\n\n', font: 'Calibri' })] }),
+                    new Paragraph({ children: [new TextRun({ text: treasName, bold: true, font: 'Calibri' })] }),
+                    new Paragraph({ children: [new TextRun({ text: treasRole, italics: true, font: 'Calibri' })] }),
+                  ],
+                }),
+                new TableCell({
+                  borders: borderNone,
+                  width: { size: 34, type: WidthType.PERCENTAGE },
+                  children: [
+                    new Paragraph({ children: [new TextRun({ text: 'Audited & Verified by:\n\n\n', font: 'Calibri' })] }),
+                    new Paragraph({ children: [new TextRun({ text: audName, bold: true, font: 'Calibri' })] }),
+                    new Paragraph({ children: [new TextRun({ text: audRole, italics: true, font: 'Calibri' })] }),
+                  ],
+                }),
+                new TableCell({
+                  borders: borderNone,
+                  width: { size: 33, type: WidthType.PERCENTAGE },
+                  children: [
+                    new Paragraph({ children: [new TextRun({ text: 'Noted by:\n\n\n', font: 'Calibri' })] }),
+                    new Paragraph({ children: [new TextRun({ text: presName, bold: true, font: 'Calibri' })] }),
+                    new Paragraph({ children: [new TextRun({ text: presRole, italics: true, font: 'Calibri' })] }),
+                  ],
+                }),
+              ],
+            }),
+          ],
+        });
+
+        const adminTable = new Table({
+          width: { size: 100, type: WidthType.PERCENTAGE },
+          rows: [
+            new TableRow({
+              children: [
+                new TableCell({
+                  borders: borderNone,
+                  width: { size: 50, type: WidthType.PERCENTAGE },
+                  children: [
+                    new Paragraph({ children: [new TextRun({ text: 'Recommending Approval:\n\n\n', font: 'Calibri' })] }),
+                    new Paragraph({ children: [new TextRun({ text: dirName, bold: true, font: 'Calibri' })] }),
+                    new Paragraph({ children: [new TextRun({ text: dirRole, italics: true, font: 'Calibri' })] }),
+                  ],
+                }),
+                new TableCell({
+                  borders: borderNone,
+                  width: { size: 50, type: WidthType.PERCENTAGE },
+                  children: [
+                    new Paragraph({ children: [new TextRun({ text: 'Approved by:\n\n\n', font: 'Calibri' })] }),
+                    new Paragraph({ children: [new TextRun({ text: deanName, bold: true, font: 'Calibri' })] }),
+                    new Paragraph({ children: [new TextRun({ text: deanRole, italics: true, font: 'Calibri' })] }),
+                  ],
+                }),
+              ],
+            }),
+          ],
+        });
+
+        return [officersTable, new Paragraph({ text: '' }), adminTable];
+      }
+
+      // Liquidation Report 3-Tier Tables
+      const studentTable = new Table({
+        width: { size: 100, type: WidthType.PERCENTAGE },
+        rows: [
+          new TableRow({
             children: [
-              new Paragraph({ children: [new TextRun({ text: 'Prepared by:\n\n\n', font: 'Calibri' })] }),
-              new Paragraph({ children: [new TextRun({ text: (signatories.preparedBy || 'ANDREI JOHN P. GERONIMO').toUpperCase(), bold: true, font: 'Calibri' })] }),
-              new Paragraph({ children: [new TextRun({ text: signatories.preparedRole || 'LITE Treasurer', italics: true, font: 'Calibri' })] }),
-            ],
-          }),
-          new TableCell({
-            borders: borderNone,
-            width: { size: 50, type: WidthType.PERCENTAGE },
-            children: [
-              new Paragraph({ children: [new TextRun({ text: 'Audited & Verified by:\n\n\n', font: 'Calibri' })] }),
-              new Paragraph({ children: [new TextRun({ text: (signatories.reviewedBy || 'CHRISTIAN REY C. KASILAG').toUpperCase(), bold: true, font: 'Calibri' })] }),
-              new Paragraph({ children: [new TextRun({ text: signatories.reviewedRole || 'LITE Auditor', italics: true, font: 'Calibri' })] }),
+              new TableCell({
+                borders: borderNone,
+                width: { size: 33, type: WidthType.PERCENTAGE },
+                children: [
+                  new Paragraph({ children: [new TextRun({ text: 'Prepared by:\n\n\n', font: 'Calibri' })] }),
+                  new Paragraph({ children: [new TextRun({ text: presName, bold: true, font: 'Calibri' })] }),
+                  new Paragraph({ children: [new TextRun({ text: presRole, italics: true, font: 'Calibri' })] }),
+                ],
+              }),
+              new TableCell({
+                borders: borderNone,
+                width: { size: 34, type: WidthType.PERCENTAGE },
+                children: [
+                  new Paragraph({ children: [new TextRun({ text: '\n\n\n', font: 'Calibri' })] }),
+                  new Paragraph({ children: [new TextRun({ text: treasName, bold: true, font: 'Calibri' })] }),
+                  new Paragraph({ children: [new TextRun({ text: treasRole, italics: true, font: 'Calibri' })] }),
+                ],
+              }),
+              new TableCell({
+                borders: borderNone,
+                width: { size: 33, type: WidthType.PERCENTAGE },
+                children: [
+                  new Paragraph({ children: [new TextRun({ text: '\n\n\n', font: 'Calibri' })] }),
+                  new Paragraph({ children: [new TextRun({ text: audName, bold: true, font: 'Calibri' })] }),
+                  new Paragraph({ children: [new TextRun({ text: audRole, italics: true, font: 'Calibri' })] }),
+                ],
+              }),
             ],
           }),
         ],
-      }),
-      new TableRow({
-        children: [
-          new TableCell({
-            borders: borderNone,
-            width: { size: 50, type: WidthType.PERCENTAGE },
+      });
+
+      const adviserTable = new Table({
+        width: { size: 100, type: WidthType.PERCENTAGE },
+        rows: [
+          new TableRow({
             children: [
-              new Paragraph({ children: [new TextRun({ text: '\n\nNoted by:\n\n\n', font: 'Calibri' })] }),
-              new Paragraph({ children: [new TextRun({ text: (signatories.notedBy || 'EMANUEL MALBAROSA').toUpperCase(), bold: true, font: 'Calibri' })] }),
-              new Paragraph({ children: [new TextRun({ text: signatories.notedRole || 'LITE President', italics: true, font: 'Calibri' })] }),
-            ],
-          }),
-          new TableCell({
-            borders: borderNone,
-            width: { size: 50, type: WidthType.PERCENTAGE },
-            children: [
-              new Paragraph({ children: [new TextRun({ text: '\n\nApproved by:\n\n\n', font: 'Calibri' })] }),
-              new Paragraph({ children: [new TextRun({ text: (signatories.adviser1 || 'MS. KIMBERLY DAWN JATULAN').toUpperCase(), bold: true, font: 'Calibri' })] }),
-              new Paragraph({ children: [new TextRun({ text: (signatories.adviser2 || 'MS. KRIZIA MAE GENOVIA').toUpperCase(), bold: true, font: 'Calibri' })] }),
-              new Paragraph({ children: [new TextRun({ text: signatories.adviserRole || 'LITE Club Advisers', italics: true, font: 'Calibri' })] }),
-            ],
-          }),
-        ],
-      }),
-      new TableRow({
-        children: [
-          new TableCell({
-            borders: borderNone,
-            width: { size: 50, type: WidthType.PERCENTAGE },
-            children: [
-              new Paragraph({ children: [new TextRun({ text: '\n\nEndorsed by:\n\n\n', font: 'Calibri' })] }),
-              new Paragraph({ children: [new TextRun({ text: (signatories.directorName || 'JOVYLYN ORTIZ-CESAR, MBA, MSIT').toUpperCase(), bold: true, font: 'Calibri' })] }),
-              new Paragraph({ children: [new TextRun({ text: signatories.directorRole || 'Program Director, BSIT', italics: true, font: 'Calibri' })] }),
-            ],
-          }),
-          new TableCell({
-            borders: borderNone,
-            width: { size: 50, type: WidthType.PERCENTAGE },
-            children: [
-              new Paragraph({ children: [new TextRun({ text: '\n\nFinal Approval:\n\n\n', font: 'Calibri' })] }),
-              new Paragraph({ children: [new TextRun({ text: (signatories.deanName || 'DR. EMRAIDA MARIE M. MANUCOM').toUpperCase(), bold: true, font: 'Calibri' })] }),
-              new Paragraph({ children: [new TextRun({ text: signatories.deanRole || 'Dean, College of Computer Studies', italics: true, font: 'Calibri' })] }),
+              new TableCell({
+                borders: borderNone,
+                width: { size: 50, type: WidthType.PERCENTAGE },
+                children: [
+                  new Paragraph({ children: [new TextRun({ text: 'Approved by:\n\n\n', font: 'Calibri' })] }),
+                  new Paragraph({ children: [new TextRun({ text: adv1Name, bold: true, font: 'Calibri' })] }),
+                  new Paragraph({ children: [new TextRun({ text: advRole, italics: true, font: 'Calibri' })] }),
+                ],
+              }),
+              new TableCell({
+                borders: borderNone,
+                width: { size: 50, type: WidthType.PERCENTAGE },
+                children: [
+                  new Paragraph({ children: [new TextRun({ text: '\n\n\n', font: 'Calibri' })] }),
+                  new Paragraph({ children: [new TextRun({ text: adv2Name, bold: true, font: 'Calibri' })] }),
+                  new Paragraph({ children: [new TextRun({ text: advRole, italics: true, font: 'Calibri' })] }),
+                ],
+              }),
             ],
           }),
         ],
-      }),
-    ];
+      });
+
+      const adminTable = new Table({
+        width: { size: 100, type: WidthType.PERCENTAGE },
+        rows: [
+          new TableRow({
+            children: [
+              new TableCell({
+                borders: borderNone,
+                width: { size: 50, type: WidthType.PERCENTAGE },
+                children: [
+                  new Paragraph({ children: [new TextRun({ text: 'Noted by:\n\n\n', font: 'Calibri' })] }),
+                  new Paragraph({ children: [new TextRun({ text: dirName, bold: true, font: 'Calibri' })] }),
+                  new Paragraph({ children: [new TextRun({ text: dirRole, italics: true, font: 'Calibri' })] }),
+                ],
+              }),
+              new TableCell({
+                borders: borderNone,
+                width: { size: 50, type: WidthType.PERCENTAGE },
+                children: [
+                  new Paragraph({ children: [new TextRun({ text: '\n\n\n', font: 'Calibri' })] }),
+                  new Paragraph({ children: [new TextRun({ text: deanName, bold: true, font: 'Calibri' })] }),
+                  new Paragraph({ children: [new TextRun({ text: deanRole, italics: true, font: 'Calibri' })] }),
+                ],
+              }),
+            ],
+          }),
+        ],
+      });
+
+      return [studentTable, new Paragraph({ text: '' }), adviserTable, new Paragraph({ text: '' }), adminTable];
+    }
 
     let sectionChildren = [];
 
@@ -329,7 +440,7 @@ export async function POST(req) {
         new Paragraph({
           children: [
             new TextRun({ text: `Date Prepared: `, bold: true, font: 'Calibri' }),
-            new TextRun({ text: `${docDate || datePrepared}\n`, font: 'Calibri' }),
+            new TextRun({ text: `${datePrepared || transmittalDate}\n`, font: 'Calibri' }),
             new TextRun({ text: `Proponent Committee: `, bold: true, font: 'Calibri' }),
             new TextRun({ text: `${proponentCommittee}\n`, font: 'Calibri' }),
             new TextRun({ text: `Target Schedule: `, bold: true, font: 'Calibri' }),
@@ -377,10 +488,8 @@ export async function POST(req) {
             new TextRun({ text: 'III. INSTITUTIONAL APPROVAL ROUTING', bold: true, size: 20, font: 'Calibri' }),
           ],
         }),
-        new Table({
-          width: { size: 100, type: WidthType.PERCENTAGE },
-          rows: signatoryRows,
-        }),
+        new Paragraph({ text: '' }),
+        ...createSignatoryTables(signatories, borderNone, 'PROPOSAL'),
       ];
     } else {
       // Build Liquidation Transaction Rows
@@ -555,10 +664,8 @@ export async function POST(req) {
             new TextRun({ text: 'IV. INSTITUTIONAL ROUTING & SIGNATORIES', bold: true, size: 20, font: 'Calibri' }),
           ],
         }),
-        new Table({
-          width: { size: 100, type: WidthType.PERCENTAGE },
-          rows: signatoryRows,
-        }),
+        new Paragraph({ text: '' }),
+        ...createSignatoryTables(signatories, borderNone, 'LIQUIDATION'),
       ];
     }
 
