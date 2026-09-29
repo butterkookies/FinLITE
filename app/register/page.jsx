@@ -189,11 +189,11 @@ function RegisterForm() {
 
         {/* Logo & Header */}
         <div className="text-center mb-7">
-          <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-emerald-600 shadow-lg mb-4">
-            <Image src="/assets/lite-logo.png" alt="LITE" width={36} height={36} className="rounded-lg" />
+          <div className="inline-flex items-center justify-center w-14 h-14 mb-3">
+            <Image src="/assets/lite-logo.png" alt="LITE Logo" width={48} height={48} className="object-contain" priority />
           </div>
-          <h1 className="text-2xl font-bold text-gray-900 tracking-tight">Request Access</h1>
-          <p className="text-sm text-gray-500 mt-1">
+          <h1 className="text-2xl font-bold text-gray-950 tracking-tight">Request Access</h1>
+          <p className="text-xs text-gray-500 mt-1">
             {isGoogleFlow
               ? 'Complete your profile to request access to FinLITE'
               : 'Register to join the LITE Financial System'}
@@ -201,20 +201,20 @@ function RegisterForm() {
         </div>
 
         {/* Card */}
-        <div className="bg-white rounded-2xl shadow-[0_4px_24px_-2px_rgba(0,0,0,0.08)] border border-black/5 p-7">
+        <div className="bg-white rounded-2xl shadow-xs border border-black/[0.08] p-7">
 
           {/* Google OAuth pre-fill notice */}
           {isGoogleFlow && (
-            <div className="flex items-start gap-2.5 bg-blue-50 border border-blue-100 text-blue-700 rounded-xl px-4 py-3 mb-5 text-sm">
-              <Info className="w-4 h-4 mt-0.5 shrink-0" />
+            <div className="flex items-start gap-2.5 bg-gray-50 border border-black/[0.08] text-blue-800 rounded-xl px-4 py-3 mb-5 text-xs font-medium">
+              <Info className="w-4 h-4 mt-0.5 shrink-0 text-blue-600" />
               <span>You&apos;re registering via Google as <strong>{googleEmail}</strong>. Review your details and submit your request.</span>
             </div>
           )}
 
           {/* Error Banner */}
           {error && (
-            <div className="flex items-start gap-2.5 bg-red-50 border border-red-100 text-red-700 rounded-xl px-4 py-3 mb-5 text-sm">
-              <AlertCircle className="w-4 h-4 mt-0.5 shrink-0" />
+            <div className="flex items-start gap-2.5 bg-gray-50 border border-black/[0.08] text-rose-700 rounded-xl px-4 py-3 mb-5 text-xs font-medium">
+              <AlertCircle className="w-4 h-4 mt-0.5 shrink-0 text-rose-600" />
               <span>{error}</span>
             </div>
           )}
@@ -226,7 +226,7 @@ function RegisterForm() {
                 type="button"
                 onClick={handleGoogleRegister}
                 disabled={isGoogleLoading || isLoading}
-                className="w-full flex items-center justify-center gap-3 px-4 py-2.5 border border-gray-200 rounded-xl text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 hover:border-gray-300 transition-all disabled:opacity-50 mb-5"
+                className="w-full h-11 flex items-center justify-center gap-3 px-4 border border-black/[0.08] rounded-xl text-xs font-semibold text-gray-800 bg-white hover:bg-gray-50 active:bg-gray-100 transition-all disabled:opacity-50 mb-5 cursor-pointer shadow-2xs"
               >
                 {isGoogleLoading ? (
                   <div className="w-5 h-5 border-2 border-gray-300 border-t-gray-600 rounded-full animate-spin" />

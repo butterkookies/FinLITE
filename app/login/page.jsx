@@ -90,20 +90,20 @@ function LoginForm() {
 
         {/* Logo & Header */}
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-emerald-600 shadow-lg mb-4">
-            <Image src="/assets/lite-logo.png" alt="LITE" width={36} height={36} className="rounded-lg" />
+          <div className="inline-flex items-center justify-center w-14 h-14 mb-3">
+            <Image src="/assets/lite-logo.png" alt="LITE" width={48} height={48} className="object-contain" priority />
           </div>
-          <h1 className="text-2xl font-bold text-gray-900 tracking-tight">Welcome back</h1>
-          <p className="text-sm text-gray-500 mt-1">Sign in to FinLITE — LITE Financial System</p>
+          <h1 className="text-2xl font-bold text-gray-950 tracking-tight">Welcome back</h1>
+          <p className="text-xs text-gray-500 mt-1">Sign in to FinLITE — LITE Financial System</p>
         </div>
 
         {/* Card */}
-        <div className="bg-white rounded-2xl shadow-[0_4px_24px_-2px_rgba(0,0,0,0.08)] border border-black/5 p-7">
+        <div className="bg-white rounded-2xl shadow-xs border border-black/[0.08] p-7">
 
           {/* Error Banner */}
           {error && (
-            <div className="flex items-start gap-2.5 bg-red-50 border border-red-100 text-red-700 rounded-xl px-4 py-3 mb-5 text-sm">
-              <AlertCircle className="w-4 h-4 mt-0.5 shrink-0" />
+            <div className="flex items-start gap-2.5 bg-gray-50 border border-black/[0.08] text-rose-700 rounded-xl px-4 py-3 mb-5 text-xs font-medium">
+              <AlertCircle className="w-4 h-4 mt-0.5 shrink-0 text-rose-600" />
               <span>{error}</span>
             </div>
           )}
@@ -113,10 +113,10 @@ function LoginForm() {
             type="button"
             onClick={handleGoogleLogin}
             disabled={isGoogleLoading || isLoading}
-            className="w-full flex items-center justify-center gap-3 px-4 py-2.5 border border-gray-200 rounded-xl text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 hover:border-gray-300 transition-all disabled:opacity-50 mb-5"
+            className="w-full h-11 flex items-center justify-center gap-3 px-4 border border-black/[0.08] rounded-xl text-xs font-semibold text-gray-800 bg-white hover:bg-gray-50 active:bg-gray-100 transition-all disabled:opacity-50 mb-5 cursor-pointer shadow-2xs"
           >
             {isGoogleLoading ? (
-              <div className="w-5 h-5 border-2 border-gray-300 border-t-gray-600 rounded-full animate-spin" />
+              <div className="w-4 h-4 border-2 border-gray-300 border-t-gray-600 rounded-full animate-spin" />
             ) : <GoogleIcon />}
             <span>{isGoogleLoading ? 'Redirecting...' : 'Continue with Google'}</span>
           </button>
@@ -139,7 +139,7 @@ function LoginForm() {
                 placeholder="yourname@gmail.com"
                 required
                 autoComplete="email"
-                className="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all"
+                className="w-full h-10 px-3.5 rounded-xl border border-black/[0.08] text-xs text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 transition-all select-text"
               />
             </div>
 
@@ -153,12 +153,12 @@ function LoginForm() {
                   placeholder="Enter your password"
                   required
                   autoComplete="current-password"
-                  className="w-full px-3.5 py-2.5 pr-10 rounded-xl border border-gray-200 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all"
+                  className="w-full h-10 px-3.5 pr-10 rounded-xl border border-black/[0.08] text-xs text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 transition-all select-text"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPass(!showPass)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 cursor-pointer"
                   tabIndex={-1}
                 >
                   {showPass ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
@@ -169,7 +169,7 @@ function LoginForm() {
             <button
               type="submit"
               disabled={isLoading || isGoogleLoading}
-              className="w-full flex items-center justify-center gap-2 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-sm font-semibold transition-all shadow-sm disabled:opacity-50 mt-1"
+              className="w-full h-11 flex items-center justify-center gap-2 bg-emerald-700 hover:bg-emerald-800 active:bg-emerald-900 text-white rounded-xl text-xs font-semibold transition-all shadow-xs disabled:opacity-50 mt-1 cursor-pointer"
             >
               {isLoading ? (
                 <div className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" />

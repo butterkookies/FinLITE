@@ -180,16 +180,16 @@ export default function NewProposalModal({ isOpen, onClose, onOpenPreview }) {
             <div className="flex items-center justify-between mb-2">
               <h3 className="text-xs font-bold uppercase tracking-wider text-gray-800 flex items-center gap-1.5">
                 <span>Product Concession & Budget Schedule</span>
-                <span className="px-2 py-0.5 rounded-full text-[10px] bg-emerald-50 text-emerald-700 border border-emerald-200 font-semibold">
+                <span className="px-2 py-0.5 rounded-md text-[10px] bg-gray-50 text-gray-700 border border-black/[0.08] font-semibold">
                   {items.length} items
                 </span>
               </h3>
               <button
                 type="button"
                 onClick={handleAddItem}
-                className="inline-flex items-center gap-1 text-xs font-semibold text-emerald-700 hover:text-emerald-800 bg-emerald-50 hover:bg-emerald-100 px-2.5 py-1 rounded-lg transition-colors"
+                className="h-8 inline-flex items-center gap-1 text-xs font-semibold text-gray-900 bg-white hover:bg-gray-50 active:bg-gray-100 border border-black/[0.08] px-2.5 rounded-lg transition-colors cursor-pointer shadow-2xs"
               >
-                <Plus className="w-3.5 h-3.5" />
+                <Plus className="w-3.5 h-3.5 text-emerald-700" />
                 <span>Add Item</span>
               </button>
             </div>
@@ -272,28 +272,28 @@ export default function NewProposalModal({ isOpen, onClose, onOpenPreview }) {
           </div>
 
           {/* Metric Summary Box */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 bg-emerald-50/60 p-4 rounded-xl border border-emerald-100">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 bg-gray-50 p-4 rounded-xl border border-black/[0.08]">
             <div>
-              <span className="block text-[11px] font-medium text-emerald-800/80">Capital Needed (Puhunan)</span>
-              <span className="text-base font-bold text-gray-950">
+              <span className="block text-[11px] font-semibold text-gray-500 uppercase tracking-wider">Capital Needed (Puhunan)</span>
+              <span className="text-base font-bold text-gray-950 mt-0.5 block tabular-nums whitespace-nowrap">
                 ₱{totalCapital.toLocaleString('en-PH', { minimumFractionDigits: 2 })}
               </span>
             </div>
             <div>
-              <span className="block text-[11px] font-medium text-emerald-800/80">Projected Gross Sales</span>
-              <span className="text-base font-bold text-gray-950">
+              <span className="block text-[11px] font-semibold text-gray-500 uppercase tracking-wider">Projected Gross Sales</span>
+              <span className="text-base font-bold text-gray-950 mt-0.5 block tabular-nums whitespace-nowrap">
                 ₱{totalRevenue.toLocaleString('en-PH', { minimumFractionDigits: 2 })}
               </span>
             </div>
             <div>
-              <span className="block text-[11px] font-medium text-emerald-800/80">Estimated Net Profit</span>
-              <span className="text-base font-bold text-emerald-700">
+              <span className="block text-[11px] font-semibold text-gray-500 uppercase tracking-wider">Estimated Net Profit</span>
+              <span className="text-base font-bold text-emerald-700 mt-0.5 block tabular-nums whitespace-nowrap">
                 ₱{netProfit.toLocaleString('en-PH', { minimumFractionDigits: 2 })}
               </span>
             </div>
             <div>
-              <span className="block text-[11px] font-medium text-emerald-800/80">Profit Margin</span>
-              <span className="text-base font-bold text-emerald-700">
+              <span className="block text-[11px] font-semibold text-gray-500 uppercase tracking-wider">Profit Margin</span>
+              <span className="text-base font-bold text-emerald-700 mt-0.5 block tabular-nums whitespace-nowrap">
                 {marginPercent}% ROI
               </span>
             </div>
@@ -302,7 +302,7 @@ export default function NewProposalModal({ isOpen, onClose, onOpenPreview }) {
         </div>
 
         {/* Footer Actions */}
-        <div className="flex items-center justify-between px-6 py-4 border-t border-gray-100 bg-gray-50/60">
+        <div className="flex items-center justify-between px-6 py-4 border-t border-black/[0.06] bg-gray-50/60">
           <p className="text-xs text-gray-500">
             Proceeding will generate an interactive 1:1 on-screen paper preview for review and live edits.
           </p>
@@ -310,14 +310,14 @@ export default function NewProposalModal({ isOpen, onClose, onOpenPreview }) {
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 text-xs font-semibold text-gray-700 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors"
+              className="h-10 px-4 text-xs font-semibold text-gray-700 bg-white border border-black/[0.08] hover:bg-gray-50 active:bg-gray-100 rounded-xl transition-colors cursor-pointer"
             >
               Cancel
             </button>
             <button
               type="button"
               onClick={handleProceedToPreview}
-              className="flex items-center gap-1.5 px-4 py-2 text-xs font-semibold text-white bg-emerald-700 hover:bg-emerald-800 rounded-xl shadow-sm transition-all"
+              className="h-10 flex items-center gap-1.5 px-4 text-xs font-semibold text-white bg-emerald-700 hover:bg-emerald-800 active:bg-emerald-900 rounded-xl shadow-xs transition-all cursor-pointer whitespace-nowrap"
             >
               <span>Preview & Edit Proposal</span>
               <ArrowRight className="w-3.5 h-3.5" />

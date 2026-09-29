@@ -81,24 +81,24 @@ export default function DenominationCounter({
         <div className="p-4 sm:p-6 overflow-y-auto space-y-4 sm:space-y-5 text-xs">
           
           {/* Comparison Bar */}
-          <div className="grid grid-cols-3 gap-2 sm:gap-3 p-3 sm:p-4 bg-gray-50 rounded-2xl border border-black/[0.05]">
+          <div className="grid grid-cols-3 gap-2 sm:gap-3 p-3 sm:p-4 bg-gray-50 rounded-2xl border border-black/[0.08]">
             <div>
               <span className="text-gray-500 font-medium text-[10px] sm:text-[11px] block truncate">Counted Cash</span>
-              <span className="text-sm sm:text-base font-bold text-gray-900 block mt-0.5 truncate">
+              <span className="text-sm sm:text-base font-bold text-gray-900 block mt-0.5 truncate tabular-nums">
                 {formatPHP(physicalTotal)}
               </span>
             </div>
             <div>
               <span className="text-gray-500 font-medium text-[10px] sm:text-[11px] block truncate">Book Ledger</span>
-              <span className="text-sm sm:text-base font-bold text-gray-900 block mt-0.5 truncate">
+              <span className="text-sm sm:text-base font-bold text-gray-900 block mt-0.5 truncate tabular-nums">
                 {formatPHP(ledgerCashBalance)}
               </span>
             </div>
             <div>
               <span className="text-gray-500 font-medium text-[10px] sm:text-[11px] block truncate">Variance</span>
-              <span className={`text-sm sm:text-base font-bold block mt-0.5 truncate ${
+              <span className={`text-sm sm:text-base font-bold block mt-0.5 truncate tabular-nums ${
                 status === 'BALANCED' ? 'text-emerald-700' :
-                status === 'SHORTAGE' ? 'text-red-600' : 'text-blue-600'
+                status === 'SHORTAGE' ? 'text-rose-700' : 'text-blue-700'
               }`}>
                 {status === 'SHORTAGE' ? `-${formatPHP(variance)}` :
                  status === 'OVERAGE' ? `+${formatPHP(variance)}` : '₱0.00'}
@@ -108,16 +108,16 @@ export default function DenominationCounter({
 
           {/* Variance Notice / Shortage Justification Box */}
           {status === 'SHORTAGE' && (
-            <div className="p-4 bg-red-50/70 border border-red-200/70 rounded-2xl space-y-2.5">
-              <div className="flex items-center gap-2 text-red-900 font-bold">
-                <AlertCircle className="w-4 h-4 text-red-600 shrink-0" />
+            <div className="p-4 bg-gray-50 border border-black/[0.08] rounded-2xl space-y-2.5">
+              <div className="flex items-center gap-2 text-rose-900 font-bold">
+                <AlertCircle className="w-4 h-4 text-rose-600 shrink-0" />
                 <span>Physical Shortage Detected (-{formatPHP(variance)})</span>
               </div>
-              <p className="text-[11px] text-red-800 leading-relaxed">
+              <p className="text-[11px] text-gray-600 leading-relaxed">
                 As per LITE AY 2025–2026 governance rules, physical variances from loose coin change or booth rush may be formally declared as a justified expense line item under Adviser approval.
               </p>
               <div>
-                <label className="block font-semibold text-red-950 mb-1">
+                <label className="block font-semibold text-gray-800 mb-1">
                   Adviser Shortage Justification Notes:
                 </label>
                 <input
@@ -125,13 +125,13 @@ export default function DenominationCounter({
                   placeholder="e.g. Minor variance incurred during Club Week booth rush (₱161.00 approved)"
                   value={justificationNotes}
                   onChange={(e) => setJustificationNotes(e.target.value)}
-                  className="w-full px-3 py-1.5 bg-white border border-red-300 rounded-xl focus:outline-none text-xs"
+                  className="w-full h-9 px-3 bg-white border border-black/[0.08] rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/20 text-xs text-gray-900 select-text"
                 />
               </div>
               <button
                 type="button"
                 onClick={handleDeclareShortageClick}
-                className="px-3.5 py-1.5 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-xl text-xs transition-colors shadow-xs"
+                className="h-9 px-3.5 bg-rose-700 hover:bg-rose-800 active:bg-rose-900 text-white font-semibold rounded-xl text-xs transition-colors shadow-xs cursor-pointer"
               >
                 Log Approved Shortage Expense (-{formatPHP(variance)})
               </button>
@@ -139,7 +139,7 @@ export default function DenominationCounter({
           )}
 
           {status === 'BALANCED' && (
-            <div className="p-3 bg-emerald-50 border border-emerald-200/60 rounded-xl flex items-center gap-2 text-emerald-800 font-medium">
+            <div className="p-3 bg-gray-50 border border-black/[0.08] rounded-xl flex items-center gap-2 text-emerald-800 font-medium">
               <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
               <span>Cash box perfectly reconciles with ledger records.</span>
             </div>
@@ -227,7 +227,7 @@ export default function DenominationCounter({
           <div className="flex items-center gap-2">
             <button
               onClick={onClose}
-              className="px-4 py-2 text-gray-600 hover:bg-gray-200/60 rounded-xl font-semibold transition-colors"
+              className="h-10 px-4 text-gray-700 hover:bg-gray-100 active:bg-gray-200 rounded-xl text-xs font-semibold transition-colors cursor-pointer"
             >
               Close
             </button>
@@ -242,7 +242,7 @@ export default function DenominationCounter({
                 });
                 onClose();
               }}
-              className="px-5 py-2 bg-emerald-700 hover:bg-emerald-800 text-white rounded-xl font-semibold shadow-xs transition-all"
+              className="h-10 px-5 bg-emerald-700 hover:bg-emerald-800 active:bg-emerald-900 text-white rounded-xl text-xs font-semibold shadow-xs transition-all cursor-pointer whitespace-nowrap"
             >
               Save Audit Count
             </button>

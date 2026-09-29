@@ -1,6 +1,6 @@
 'use client';
-import { useState } from 'react';
-import { ArrowRight, Calendar, CheckCircle2, DollarSign, Wallet, X } from 'lucide-react';
+import { useState, useRef, useEffect } from 'react';
+import { ArrowRight, Calendar, CheckCircle2, ChevronDown, Check, DollarSign, Wallet, X } from 'lucide-react';
 import { formatPHP } from '@/lib/utils/currency';
 
 export default function NewSemesterModal({
@@ -23,8 +23,21 @@ export default function NewSemesterModal({
   const [newSemester, setNewSemester] = useState(
     currentSemester?.semester === '2nd Sem' ? '1st Sem' : '2nd Sem'
   );
+  const [isSemesterOpen, setIsSemesterOpen] = useState(false);
+  const semesterRef = useRef(null);
+
   const [rolloverCash, setRolloverCash] = useState(true);
   const [rolloverGcash, setRolloverGcash] = useState(true);
+
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (semesterRef.current && !semesterRef.current.contains(event.target)) {
+        setIsSemesterOpen(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   const endingCash = currentSummary?.cash_on_hand || 0;
   const endingGcash = currentSummary?.gcash_balance || 0;
@@ -79,30 +92,30 @@ export default function NewSemesterModal({
         <form onSubmit={handleSubmit} className="p-5 sm:p-6 overflow-y-auto space-y-5 text-xs text-gray-700">
           
           {/* Ending Balance Summary Card */}
-          <div className="bg-emerald-50/70 border border-emerald-200/70 rounded-2xl p-4 space-y-2.5">
+          <div className="bg-gray-50 border border-black/[0.08] rounded-2xl p-4 space-y-2.5">
             <div className="flex items-center justify-between">
-              <span className="text-[11px] font-bold text-emerald-900 uppercase tracking-wider">
+              <span className="text-[11px] font-semibold text-gray-700 uppercase tracking-wider">
                 Ending Balances: {currentSemester?.label}
               </span>
-              <span className="text-[10px] bg-emerald-200/60 text-emerald-800 px-2 py-0.5 rounded-md font-semibold">
+              <span className="text-[10px] bg-white border border-black/[0.08] text-gray-700 px-2 py-0.5 rounded-md font-semibold">
                 To Be Archived
               </span>
             </div>
             <div className="grid grid-cols-2 gap-3 pt-1">
-              <div className="bg-white/80 p-2.5 rounded-xl border border-emerald-100">
+              <div className="bg-white p-3 rounded-xl border border-black/[0.06]">
                 <span className="text-[10px] text-gray-500 block">Physical Cash in Box</span>
-                <span className="text-base font-bold text-gray-950 mt-0.5 block">
+                <span className="text-base font-bold text-gray-950 mt-0.5 block tabular-nums whitespace-nowrap">
                   {formatPHP(endingCash)}
                 </span>
               </div>
-              <div className="bg-white/80 p-2.5 rounded-xl border border-emerald-100">
+              <div className="bg-white p-3 rounded-xl border border-black/[0.06]">
                 <span className="text-[10px] text-gray-500 block">GCash Account</span>
-                <span className="text-base font-bold text-gray-950 mt-0.5 block">
+                <span className="text-base font-bold text-gray-950 mt-0.5 block tabular-nums whitespace-nowrap">
                   {formatPHP(endingGcash)}
                 </span>
               </div>
             </div>
-            <p className="text-[11px] text-emerald-800/80 leading-relaxed">
+            <p className="text-[11px] text-gray-500 leading-relaxed">
               Ang mga transaksyon sa kasalukuyang semester ay mananatiling naka-save at ligtas sa archive.
             </p>
           </div>
@@ -115,7 +128,7 @@ export default function NewSemesterModal({
             
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="block text-gray-600 font-semibold mb-1">
+                <label className="block text-gray-700 font-semibold mb-1">
                   Academic Year
                 </label>
                 <input
@@ -123,24 +136,48 @@ export default function NewSemesterModal({
                   value={newAcademicYear}
                   onChange={(e) => setNewAcademicYear(e.target.value)}
                   placeholder="e.g. 2026–2027"
-                  className="w-full px-3 py-2 bg-gray-50 border border-black/[0.08] rounded-xl text-xs font-semibold text-gray-900 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
+                  className="w-full h-10 px-3 bg-white border border-black/[0.08] rounded-xl text-xs font-semibold text-gray-900 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 select-text"
                   required
                 />
               </div>
 
-              <div>
-                <label className="block text-gray-600 font-semibold mb-1">
+              <div className="relative" ref={semesterRef}>
+                <label className="block text-gray-700 font-semibold mb-1">
                   Semester
                 </label>
-                <select
-                  value={newSemester}
-                  onChange={(e) => setNewSemester(e.target.value)}
-                  className="w-full px-3 py-2 bg-gray-50 border border-black/[0.08] rounded-xl text-xs font-semibold text-gray-900 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
+                <button
+                  type="button"
+                  onClick={() => setIsSemesterOpen(!isSemesterOpen)}
+                  className="w-full h-10 px-3 bg-white hover:bg-gray-50 active:bg-gray-100 border border-black/[0.08] rounded-xl flex items-center justify-between text-gray-900 font-semibold text-xs transition-colors cursor-pointer text-left"
                 >
-                  <option value="1st Sem">1st Semester</option>
-                  <option value="2nd Sem">2nd Semester</option>
-                  <option value="Summer">Summer / Mid-Year</option>
-                </select>
+                  <span className="truncate">{newSemester}</span>
+                  <ChevronDown className="w-3.5 h-3.5 text-gray-400 shrink-0 ml-1" />
+                </button>
+
+                {isSemesterOpen && (
+                  <div className="absolute left-0 right-0 mt-1 bg-white border border-black/[0.08] rounded-xl shadow-lg py-1 z-50 animate-in fade-in zoom-in-95 duration-100">
+                    {['1st Sem', '2nd Sem', 'Summer'].map((s) => (
+                      <button
+                        key={s}
+                        type="button"
+                        onClick={() => {
+                          setNewSemester(s);
+                          setIsSemesterOpen(false);
+                        }}
+                        className={`w-full h-9 flex items-center justify-between px-3 text-xs text-left cursor-pointer transition-colors ${
+                          newSemester === s 
+                            ? 'bg-gray-50 font-semibold text-gray-950' 
+                            : 'text-gray-700 hover:bg-gray-50'
+                        }`}
+                      >
+                        <span>{s === '1st Sem' ? '1st Semester' : s === '2nd Sem' ? '2nd Semester' : 'Summer / Mid-Year'}</span>
+                        {newSemester === s && (
+                          <Check className="w-3.5 h-3.5 text-emerald-700 shrink-0 ml-1" />
+                        )}
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -191,13 +228,13 @@ export default function NewSemesterModal({
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-xl font-semibold transition-colors"
+              className="h-10 px-4 text-xs font-semibold text-gray-700 hover:bg-gray-100 active:bg-gray-200 rounded-xl transition-colors cursor-pointer"
             >
               Cancel
             </button>
             <button
               type="submit"
-              className="flex items-center gap-1.5 px-5 py-2.5 bg-emerald-700 hover:bg-emerald-800 text-white rounded-xl font-semibold shadow-xs transition-all"
+              className="h-10 flex items-center gap-1.5 px-5 bg-emerald-700 hover:bg-emerald-800 active:bg-emerald-900 text-white rounded-xl text-xs font-semibold shadow-xs transition-all cursor-pointer whitespace-nowrap"
             >
               <span>Activate AY {newAcademicYear}</span>
               <ArrowRight className="w-3.5 h-3.5" />

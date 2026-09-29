@@ -235,13 +235,13 @@ export default function AdminPage() {
             <div className="h-6 w-px bg-gray-200" />
 
             <div className="flex items-center gap-2.5">
-              <div className="w-9 h-9 rounded-xl bg-emerald-600 flex items-center justify-center text-white shadow-xs">
+              <div className="w-9 h-9 rounded-xl bg-emerald-800 flex items-center justify-center text-emerald-100 shadow-xs">
                 <ShieldCheck className="w-5 h-5" />
               </div>
               <div>
                 <div className="flex items-center gap-2">
                   <span className="text-base font-bold text-gray-950">FinLITE Admin Console</span>
-                  <span className="px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider bg-emerald-100 text-emerald-800 rounded-md">
+                  <span className="px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider bg-gray-100 text-gray-800 border border-black/[0.08] rounded-md">
                     Access Control
                   </span>
                 </div>
@@ -254,8 +254,8 @@ export default function AdminPage() {
 
           {/* Right: Identity & Actions */}
           <div className="flex items-center gap-2.5">
-            <div className="hidden md:flex items-center gap-2 px-3 py-1.5 bg-gray-50 border border-gray-200/80 rounded-xl">
-              <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+            <div className="hidden md:flex items-center gap-2 px-3 py-1.5 bg-gray-50 border border-black/[0.08] rounded-xl">
+              <ShieldCheck className="w-3.5 h-3.5 text-emerald-700 shrink-0" />
               <div className="text-right">
                 <p className="text-xs font-semibold text-gray-800">geronimoandreijohn.pdm@gmail.com</p>
                 <p className="text-[10px] text-gray-500 font-medium">Super Administrator</p>
@@ -265,7 +265,7 @@ export default function AdminPage() {
             <button
               onClick={() => fetchData(true)}
               disabled={isRefreshing}
-              className="p-2 sm:px-3 sm:py-2 text-xs font-semibold text-gray-700 bg-white hover:bg-gray-50 border border-gray-200 rounded-xl transition-all shadow-xs flex items-center gap-1.5 disabled:opacity-50"
+              className="h-9 px-3 text-xs font-semibold text-gray-800 bg-white hover:bg-gray-50 active:bg-gray-100 border border-black/[0.08] rounded-xl transition-all shadow-xs flex items-center gap-1.5 disabled:opacity-50 cursor-pointer"
               title="Refresh Records"
             >
               <RefreshCw className={`w-3.5 h-3.5 text-gray-600 ${isRefreshing ? 'animate-spin' : ''}`} />

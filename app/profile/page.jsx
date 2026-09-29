@@ -131,16 +131,16 @@ export default function ProfilePage() {
             {isAdmin && (
               <Link
                 href="/admin"
-                className="px-3 py-1.5 text-xs font-semibold text-amber-900 bg-amber-50 hover:bg-amber-100 border border-amber-200 rounded-xl transition-all shadow-xs flex items-center gap-1.5"
+                className="h-9 px-3 text-xs font-semibold text-gray-900 bg-white hover:bg-gray-50 active:bg-gray-100 border border-black/[0.08] rounded-xl transition-all shadow-xs flex items-center gap-1.5 cursor-pointer whitespace-nowrap"
               >
-                <ShieldCheck className="w-3.5 h-3.5 text-amber-700" />
+                <ShieldCheck className="w-3.5 h-3.5 text-amber-600" />
                 <span className="hidden sm:inline">Admin Console</span>
               </Link>
             )}
 
             <button
               onClick={handleSignOut}
-              className="px-3 py-1.5 text-xs font-semibold text-rose-700 bg-rose-50 hover:bg-rose-100 border border-rose-200/80 rounded-xl transition-all shadow-xs flex items-center gap-1.5 cursor-pointer"
+              className="h-9 px-3 text-xs font-semibold text-rose-700 bg-white hover:bg-rose-50 active:bg-rose-100 border border-black/[0.08] rounded-xl transition-all shadow-xs flex items-center gap-1.5 cursor-pointer whitespace-nowrap"
             >
               <LogOut className="w-3.5 h-3.5 text-rose-600" />
               <span>Sign Out</span>
@@ -153,13 +153,13 @@ export default function ProfilePage() {
       <main className="max-w-4xl mx-auto px-4 sm:px-6 py-8 w-full flex-1 space-y-6">
         
         {/* Profile Card */}
-        <div className="bg-white rounded-3xl border border-black/[0.06] p-6 sm:p-8 shadow-xs">
+        <div className="bg-white rounded-3xl border border-black/[0.08] p-6 sm:p-8 shadow-xs">
           <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6 text-center sm:text-left">
             
             {/* Avatar / Picture */}
             <div className="relative shrink-0">
               {avatarUrl ? (
-                <div className="w-24 h-24 rounded-3xl overflow-hidden border-2 border-emerald-500/20 shadow-sm relative">
+                <div className="w-24 h-24 rounded-3xl overflow-hidden border border-black/[0.08] shadow-sm relative">
                   <img
                     src={avatarUrl}
                     alt={fullName}
@@ -171,11 +171,11 @@ export default function ProfilePage() {
                   />
                 </div>
               ) : (
-                <div className="w-24 h-24 rounded-3xl bg-emerald-100 border-2 border-emerald-200 flex items-center justify-center text-emerald-800 text-3xl font-black shadow-xs">
+                <div className="w-24 h-24 rounded-3xl bg-gray-100 border border-black/[0.08] flex items-center justify-center text-gray-800 text-3xl font-black shadow-xs">
                   {fullName[0]?.toUpperCase() || 'U'}
                 </div>
               )}
-              <div className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-emerald-500 border-2 border-white flex items-center justify-center text-white" title="Verified Account">
+              <div className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-emerald-600 border-2 border-white flex items-center justify-center text-white" title="Verified Account">
                 <CheckCircle2 className="w-3.5 h-3.5" />
               </div>
             </div>
@@ -186,11 +186,7 @@ export default function ProfilePage() {
                 <h2 className="text-xl sm:text-2xl font-black tracking-tight text-gray-950">
                   {fullName}
                 </h2>
-                <span className={`px-2.5 py-0.5 rounded-full text-xs font-bold uppercase tracking-wider ${
-                  isAdmin 
-                    ? 'bg-purple-100 text-purple-800 border border-purple-200' 
-                    : 'bg-emerald-100 text-emerald-800 border border-emerald-200'
-                }`}>
+                <span className="px-2.5 py-0.5 rounded-md text-xs font-semibold uppercase tracking-wider bg-gray-100 text-gray-800 border border-black/[0.08]">
                   {roleLabelMap[role] || role}
                 </span>
               </div>
@@ -201,12 +197,12 @@ export default function ProfilePage() {
               </p>
 
               <div className="flex items-center justify-center sm:justify-start gap-2 mt-4 flex-wrap">
-                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl text-xs font-semibold bg-emerald-50 text-emerald-800 border border-emerald-200/60">
-                  <span className="w-2 h-2 rounded-full bg-emerald-500" />
+                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold bg-gray-50 text-gray-800 border border-black/[0.08]">
+                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-700" />
                   Account Approved & Active
                 </span>
 
-                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl text-xs font-medium bg-gray-100 text-gray-700">
+                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium bg-gray-100 text-gray-700 border border-black/[0.06]">
                   Provider: Google OAuth
                 </span>
               </div>
