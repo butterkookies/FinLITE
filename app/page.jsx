@@ -17,6 +17,8 @@ const DEFAULT_SEMESTERS = [
 ];
 
 export default function Dashboard() {
+  const [currentUser, setCurrentUser] = useState(null);
+  const [userProfile, setUserProfile] = useState(null);
   const [currentRole, setCurrentRole] = useState('treasurer');
   const [transactions, setTransactions] = useState([]);
   const [isDbConnected, setIsDbConnected] = useState(false);
@@ -35,7 +37,7 @@ export default function Dashboard() {
 
   const supabase = createClient();
 
-  // Load transactions from Supabase on mount
+  // Load user profile & transactions from Supabase on mount
   useEffect(() => {
     async function loadData() {
       if (!supabase) {
@@ -46,6 +48,35 @@ export default function Dashboard() {
 
       setIsLoading(true);
       try {
+        // 1. Load Current User & Profile
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+          setCurrentUser(user);
+          const email = user.email?.toLowerCase();
+          const isSuperAdmin = email === 'geronimoandreijohn.pdm@gmail.com';
+
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('*')
+            .eq('auth_user_id', user.id)
+            .maybeSingle();
+
+          if (profile) {
+            setUserProfile(profile);
+            setCurrentRole(isSuperAdmin ? 'admin' : (profile.role || 'member'));
+          } else if (isSuperAdmin) {
+            setUserProfile({
+              email,
+              full_name: user.user_metadata?.full_name || 'Andrei John Geronimo',
+              role: 'admin',
+              status: 'approved',
+              avatar_url: user.user_metadata?.avatar_url || user.user_metadata?.picture || null,
+            });
+            setCurrentRole('admin');
+          }
+        }
+
+        // 2. Load Transactions
         const { data, error } = await supabase
           .from('transactions')
           .select('*')
@@ -345,7 +376,8 @@ export default function Dashboard() {
       {/* Top Navigation */}
       <Navbar
         currentRole={currentRole}
-        onRoleChange={setCurrentRole}
+        userProfile={userProfile}
+        currentUser={currentUser}
         onOpenAI={() => setIsAIOpen(true)}
         onOpenDenominations={() => setIsDenomOpen(true)}
         currentSemester={currentSemester}

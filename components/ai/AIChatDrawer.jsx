@@ -9,7 +9,7 @@ export default function AIChatDrawer({ isOpen, onClose, summary, transactions = 
   const [messages, setMessages] = useState([
     {
       role: 'assistant',
-      content: 'Kamusta! I am your FinLITE Co-Pilot. I am directly connected to your PostgreSQL ledger. You can ask me questions in English or Taglish regarding cash on hand, adviser reimbursements (abono), or event totals.',
+      content: 'Kamusta! I am your FinLITE Co-Pilot. I am directly connected to your live financial ledger. You can ask me questions in English or Taglish regarding cash on hand, adviser reimbursements (abono), or event totals.',
     },
   ]);
   const [loading, setLoading] = useState(false);

@@ -56,7 +56,7 @@ export default function TransactionTable({
             {isDbConnected && (
               <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-50 text-emerald-800 border border-emerald-200 shadow-2xs">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                Live PostgreSQL
+                Live
               </span>
             )}
           </div>
@@ -86,8 +86,8 @@ export default function TransactionTable({
             <span>Preview Report</span>
           </button>
 
-          {/* New Transaction Button (Treasurer/Auditor) */}
-          {(currentRole === 'treasurer' || currentRole === 'auditor') && (
+          {/* New Transaction Button (Admin/Treasurer/Auditor) */}
+          {(currentRole === 'admin' || currentRole === 'treasurer' || currentRole === 'auditor') && (
             <button
               onClick={onNewTransaction}
               className="col-span-2 sm:col-span-1 flex items-center justify-center gap-1.5 px-3.5 py-1.5 text-xs font-semibold text-white bg-emerald-700 hover:bg-emerald-800 rounded-xl transition-all shadow-xs"

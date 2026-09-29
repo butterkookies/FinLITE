@@ -32,6 +32,8 @@ dist/
 
 # Test outputs
 exports/test-verification.docx
+exports/stress_test_*
+exports/FinLITE-Exported-Report.docx
 
 # Graphify Cache
 graphify-out/cache/
