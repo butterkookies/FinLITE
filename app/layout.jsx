@@ -13,6 +13,8 @@ export const metadata = {
 export const viewport = {
   width: 'device-width',
   initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
   viewportFit: 'cover',
   themeColor: '#047857',
 };
@@ -21,7 +23,7 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en" suppressHydrationWarning>
       <body 
-        className="min-h-screen bg-[#f8faf9] text-gray-900 selection:bg-emerald-100 selection:text-emerald-900"
+        className="min-h-screen bg-[#f8faf9] text-gray-900 selection:bg-emerald-100 selection:text-emerald-900 select-none overscroll-none"
         suppressHydrationWarning
       >
         {children}

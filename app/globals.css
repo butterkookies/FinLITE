@@ -41,6 +41,18 @@
   .tabular-nums {
     font-variant-numeric: tabular-nums;
   }
+
+  /* Mobile Ergonomics & Native App Feel */
+  * {
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-touch-callout: none;
+  }
+
+  input, textarea, [contenteditable="true"], .select-text {
+    -webkit-user-select: text;
+    user-select: text;
+  }
 }
 
 /* Custom scrollbar for modern subtle aesthetics */

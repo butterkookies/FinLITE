@@ -54,8 +54,7 @@ export default function TransactionTable({
               Financial Ledger & Transactions
             </h2>
             {isDbConnected && (
-              <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-50 text-emerald-800 border border-emerald-200 shadow-2xs">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+              <span className="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-semibold uppercase tracking-wider bg-gray-50 text-gray-700 border border-black/[0.08]">
                 Live
               </span>
             )}
@@ -69,7 +68,7 @@ export default function TransactionTable({
           {/* Create Business Proposal Button */}
           <button
             onClick={onNewProposal}
-            className="flex items-center justify-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-emerald-800 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 rounded-xl transition-all shadow-xs"
+            className="h-9 flex items-center justify-center gap-1.5 px-3 text-xs font-semibold text-gray-900 bg-white hover:bg-gray-50 active:bg-gray-100 border border-black/[0.08] rounded-xl transition-all shadow-xs whitespace-nowrap cursor-pointer"
             title="Create Pre-Activity Business Proposal & Booth Budget"
           >
             <Calculator className="w-3.5 h-3.5 text-emerald-700 shrink-0" />
@@ -79,7 +78,7 @@ export default function TransactionTable({
           {/* Review & Export Report Button */}
           <button
             onClick={onExportReport}
-            className="flex items-center justify-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-gray-700 bg-gray-50 hover:bg-gray-100 border border-black/[0.08] rounded-xl transition-all shadow-xs"
+            className="h-9 flex items-center justify-center gap-1.5 px-3 text-xs font-semibold text-gray-900 bg-white hover:bg-gray-50 active:bg-gray-100 border border-black/[0.08] rounded-xl transition-all shadow-xs whitespace-nowrap cursor-pointer"
             title="Preview 1:1 PDM CCS Formal Word Liquidation Report & Live Edit"
           >
             <FileText className="w-3.5 h-3.5 text-emerald-700 shrink-0" />
@@ -90,7 +89,7 @@ export default function TransactionTable({
           {(currentRole === 'admin' || currentRole === 'treasurer' || currentRole === 'auditor') && (
             <button
               onClick={onNewTransaction}
-              className="col-span-2 sm:col-span-1 flex items-center justify-center gap-1.5 px-3.5 py-1.5 text-xs font-semibold text-white bg-emerald-700 hover:bg-emerald-800 rounded-xl transition-all shadow-xs"
+              className="col-span-2 sm:col-span-1 h-9 flex items-center justify-center gap-1.5 px-3.5 text-xs font-semibold text-white bg-emerald-700 hover:bg-emerald-800 active:bg-emerald-900 rounded-xl transition-all shadow-xs whitespace-nowrap cursor-pointer"
             >
               <Plus className="w-3.5 h-3.5 shrink-0" />
               <span>Record Transaction</span>
@@ -110,7 +109,7 @@ export default function TransactionTable({
             placeholder="Search items, events, recipients..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full text-xs bg-white pl-8 pr-3 py-1.5 border border-black/[0.08] rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
+            className="w-full h-9 text-xs bg-white pl-8 pr-3 border border-black/[0.08] rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/20 text-gray-900 select-text"
           />
         </div>
 
@@ -125,7 +124,7 @@ export default function TransactionTable({
             <button
               key={tab.id}
               onClick={() => setFilterType(tab.id)}
-              className={`px-2.5 py-1 text-xs font-medium rounded-lg transition-all whitespace-nowrap ${
+              className={`h-7 px-2.5 text-xs font-medium rounded-lg transition-all whitespace-nowrap cursor-pointer ${
                 filterType === tab.id
                   ? 'bg-emerald-700 text-white font-semibold shadow-xs'
                   : 'text-gray-600 hover:bg-gray-200/60'
@@ -178,8 +177,8 @@ export default function TransactionTable({
                       </span>
                     )}
                     {tx.is_reimbursement && (
-                      <span className="inline-flex items-center gap-1 mt-1 text-[10px] font-semibold text-amber-700 bg-amber-50 px-1.5 py-0.5 rounded">
-                        <Clock className="w-2.5 h-2.5" />
+                      <span className="inline-flex items-center gap-1 mt-1 text-[10px] font-semibold text-gray-700 bg-gray-50 border border-black/[0.06] px-1.5 py-0.5 rounded-md">
+                        <Clock className="w-2.5 h-2.5 text-amber-600" />
                         Advance by: {tx.reimbursement_recipient || 'Officer'}
                       </span>
                     )}
@@ -193,12 +192,12 @@ export default function TransactionTable({
                   {/* Payment Channel */}
                   <td className="py-3 px-3 whitespace-nowrap">
                     {tx.payment_method === 'CASH' ? (
-                      <span className="inline-flex items-center gap-1 text-[11px] font-medium text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded-md">
-                        <Wallet className="w-3 h-3 text-emerald-600" />
+                      <span className="inline-flex items-center gap-1 text-[11px] font-medium text-gray-700 bg-gray-50 border border-black/[0.06] px-2 py-0.5 rounded-md">
+                        <Wallet className="w-3 h-3 text-emerald-700" />
                         Cash
                       </span>
                     ) : (
-                      <span className="inline-flex items-center gap-1 text-[11px] font-medium text-blue-800 bg-blue-50 px-2 py-0.5 rounded-md">
+                      <span className="inline-flex items-center gap-1 text-[11px] font-medium text-gray-700 bg-gray-50 border border-black/[0.06] px-2 py-0.5 rounded-md">
                         <Smartphone className="w-3 h-3 text-blue-600" />
                         GCash
                       </span>
@@ -207,13 +206,13 @@ export default function TransactionTable({
 
                   {/* Category */}
                   <td className="py-3 px-3 text-gray-600 font-medium whitespace-nowrap">
-                    <span className="bg-gray-100 text-gray-700 text-[11px] px-2 py-0.5 rounded-md">
+                    <span className="bg-gray-50 border border-black/[0.06] text-gray-700 text-[11px] px-2 py-0.5 rounded-md">
                       {tx.category_name || (tx.type === 'INFLOW' ? 'Revenue' : 'Disbursement')}
                     </span>
                   </td>
 
                   {/* Amount */}
-                  <td className={`py-3 px-3 text-right font-bold whitespace-nowrap ${
+                  <td className={`py-3 px-3 text-right font-bold whitespace-nowrap tabular-nums ${
                     tx.type === 'INFLOW' ? 'text-emerald-700' : 'text-gray-900'
                   }`}>
                     {tx.type === 'INFLOW' ? '+' : '-'}{formatPHP(tx.amount)}
@@ -224,9 +223,9 @@ export default function TransactionTable({
                     {tx.receipt_url ? (
                       <button
                         onClick={() => setSelectedReceipt(tx)}
-                        className="inline-flex items-center gap-1 text-[11px] text-emerald-700 hover:text-emerald-800 font-medium bg-emerald-50 hover:bg-emerald-100 px-2 py-1 rounded-md transition-colors"
+                        className="h-7 inline-flex items-center gap-1 text-[11px] text-gray-700 hover:text-gray-900 font-medium bg-white hover:bg-gray-50 active:bg-gray-100 border border-black/[0.08] px-2.5 rounded-lg transition-colors shadow-2xs cursor-pointer"
                       >
-                        <Receipt className="w-3 h-3" />
+                        <Receipt className="w-3 h-3 text-emerald-700" />
                         View
                       </button>
                     ) : (
@@ -260,7 +259,7 @@ export default function TransactionTable({
                   )}
                   <span className="font-semibold text-gray-900 text-xs truncate">{tx.title}</span>
                 </div>
-                <span className={`font-bold text-xs shrink-0 whitespace-nowrap ${
+                <span className={`font-bold text-xs shrink-0 whitespace-nowrap tabular-nums ${
                   tx.type === 'INFLOW' ? 'text-emerald-700' : 'text-gray-900'
                 }`}>
                   {tx.type === 'INFLOW' ? '+' : '-'}{formatPHP(tx.amount)}
@@ -270,19 +269,19 @@ export default function TransactionTable({
               {/* Middle Row: Date, Channel & Category */}
               <div className="flex items-center gap-1.5 flex-wrap text-[11px]">
                 <span className="text-gray-400 font-medium text-[10px]">{tx.transaction_date}</span>
-                <span className="text-gray-300">•</span>
+                <span className="text-gray-300 mx-0.5">/</span>
                 {tx.payment_method === 'CASH' ? (
-                  <span className="inline-flex items-center gap-1 font-medium text-emerald-800 bg-emerald-50 px-1.5 py-0.5 rounded text-[10px]">
-                    <Wallet className="w-3 h-3 text-emerald-600" />
+                  <span className="inline-flex items-center gap-1 font-medium text-gray-700 bg-gray-50 border border-black/[0.06] px-1.5 py-0.5 rounded text-[10px]">
+                    <Wallet className="w-3 h-3 text-emerald-700" />
                     Cash
                   </span>
                 ) : (
-                  <span className="inline-flex items-center gap-1 font-medium text-blue-800 bg-blue-50 px-1.5 py-0.5 rounded text-[10px]">
+                  <span className="inline-flex items-center gap-1 font-medium text-gray-700 bg-gray-50 border border-black/[0.06] px-1.5 py-0.5 rounded text-[10px]">
                     <Smartphone className="w-3 h-3 text-blue-600" />
                     GCash
                   </span>
                 )}
-                <span className="bg-gray-100 text-gray-700 px-1.5 py-0.5 rounded text-[10px] truncate max-w-[140px]">
+                <span className="bg-gray-50 border border-black/[0.06] text-gray-700 px-1.5 py-0.5 rounded text-[10px] truncate max-w-[140px]">
                   {tx.category_name || (tx.type === 'INFLOW' ? 'Revenue' : 'Disbursement')}
                 </span>
               </div>
@@ -297,8 +296,8 @@ export default function TransactionTable({
                       </span>
                     )}
                     {tx.is_reimbursement && (
-                      <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-amber-700 bg-amber-50 px-1.5 py-0.5 rounded">
-                        <Clock className="w-2.5 h-2.5 shrink-0" />
+                      <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-gray-700 bg-gray-50 border border-black/[0.06] px-1.5 py-0.5 rounded-md">
+                        <Clock className="w-2.5 h-2.5 text-amber-600 shrink-0" />
                         Advance: {tx.reimbursement_recipient || 'Officer'}
                       </span>
                     )}
@@ -306,9 +305,9 @@ export default function TransactionTable({
                   {tx.receipt_url && (
                     <button
                       onClick={() => setSelectedReceipt(tx)}
-                      className="inline-flex items-center gap-1 text-[11px] text-emerald-700 font-semibold bg-emerald-50 hover:bg-emerald-100 px-2 py-0.5 rounded-md transition-colors shrink-0 ml-auto"
+                      className="h-7 inline-flex items-center gap-1 text-[11px] text-gray-700 hover:text-gray-900 font-medium bg-white hover:bg-gray-50 active:bg-gray-100 border border-black/[0.08] px-2.5 rounded-lg transition-colors shrink-0 ml-auto cursor-pointer"
                     >
-                      <Receipt className="w-3 h-3" />
+                      <Receipt className="w-3 h-3 text-emerald-700" />
                       Receipt
                     </button>
                   )}
@@ -322,15 +321,17 @@ export default function TransactionTable({
       {/* Receipt Modal Preview */}
       {selectedReceipt && (
         <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-xs flex items-end sm:items-center justify-center p-0 sm:p-4">
-          <div className="bg-white rounded-t-2xl sm:rounded-2xl max-w-sm w-full p-5 border border-black/10 shadow-lg animate-in fade-in slide-in-from-bottom-4 sm:zoom-in-95 duration-150">
+          <div className="bg-white rounded-t-2xl sm:rounded-2xl max-w-sm w-full p-5 border border-black/[0.08] shadow-lg animate-in fade-in slide-in-from-bottom-4 sm:zoom-in-95 duration-150">
             <div className="w-10 h-1 bg-gray-300 rounded-full mx-auto mb-3 sm:hidden" />
             <h3 className="text-sm font-bold text-gray-900 mb-1">
               Receipt / Disbursement Proof
             </h3>
-            <p className="text-xs text-gray-500 mb-3 truncate">
-              {selectedReceipt.title} • {formatPHP(selectedReceipt.amount)}
+            <p className="text-xs text-gray-500 mb-3 truncate flex items-center gap-1">
+              <span>{selectedReceipt.title}</span>
+              <span className="text-gray-300 mx-1">/</span>
+              <span className="tabular-nums font-semibold text-gray-800">{formatPHP(selectedReceipt.amount)}</span>
             </p>
-            <div className="rounded-xl overflow-hidden bg-gray-100 border border-black/5 aspect-4/3 flex items-center justify-center mb-4">
+            <div className="rounded-xl overflow-hidden bg-gray-100 border border-black/[0.06] aspect-4/3 flex items-center justify-center mb-4">
               <img 
                 src={selectedReceipt.receipt_url} 
                 alt="Receipt" 
@@ -339,7 +340,7 @@ export default function TransactionTable({
             </div>
             <button
               onClick={() => setSelectedReceipt(null)}
-              className="w-full py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-800 rounded-xl text-xs font-semibold transition-colors"
+              className="w-full h-9 bg-gray-100 hover:bg-gray-200 active:bg-gray-300 text-gray-800 rounded-xl text-xs font-semibold transition-colors cursor-pointer"
             >
               Close Preview
             </button>

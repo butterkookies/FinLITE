@@ -149,19 +149,19 @@ export default function AIChatDrawer({ isOpen, onClose, summary, transactions = 
 
           {loading && (
             <div className="flex items-center gap-2 text-gray-400 text-xs pl-8">
-              <div className="w-2 h-2 rounded-full bg-emerald-600 animate-pulse" />
+              <Sparkles className="w-3.5 h-3.5 text-emerald-600 animate-spin" />
               <span>Querying verified ledger tables...</span>
             </div>
           )}
         </div>
 
         {/* Prompt Chips */}
-        <div className="p-3 bg-gray-50 border-t border-black/[0.04] flex items-center gap-1.5 overflow-x-auto">
+        <div className="p-3 bg-gray-50 border-t border-black/[0.04] flex items-center gap-1.5 overflow-x-auto scrollbar-none">
           {promptChips.map((chip, idx) => (
             <button
               key={idx}
               onClick={() => handleSend(chip)}
-              className="text-[11px] px-2.5 py-1 bg-white hover:bg-gray-100 text-gray-700 border border-black/[0.06] rounded-full whitespace-nowrap transition-colors"
+              className="h-7 text-[11px] px-3 bg-white hover:bg-gray-50 active:bg-gray-100 text-gray-700 border border-black/[0.08] rounded-lg whitespace-nowrap transition-colors cursor-pointer shadow-2xs"
             >
               {chip}
             </button>
@@ -182,12 +182,12 @@ export default function AIChatDrawer({ isOpen, onClose, summary, transactions = 
               placeholder="Ask anything in English or Taglish..."
               value={input}
               onChange={(e) => setInput(e.target.value)}
-              className="flex-1 text-xs bg-gray-50 border border-black/[0.08] px-3.5 py-2.5 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
+              className="flex-1 h-10 text-xs bg-white border border-black/[0.08] px-3.5 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/20 text-gray-900 select-text"
             />
             <button
               type="submit"
               disabled={!input.trim() || loading}
-              className="p-2.5 bg-emerald-700 hover:bg-emerald-800 disabled:opacity-50 text-white rounded-xl transition-all shadow-xs"
+              className="h-10 w-10 flex items-center justify-center bg-emerald-700 hover:bg-emerald-800 active:bg-emerald-900 disabled:opacity-50 text-white rounded-xl transition-all shadow-xs shrink-0 cursor-pointer"
             >
               <Send className="w-3.5 h-3.5" />
             </button>

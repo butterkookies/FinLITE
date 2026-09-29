@@ -57,7 +57,8 @@ export default function Navbar({
         {/* Left: Organization Branding & Semester Switcher */}
         <div className="flex items-center gap-2 sm:gap-3 min-w-0">
           <div className="flex items-center gap-2 min-w-0">
-            <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-emerald-50 border border-emerald-100 flex items-center justify-center overflow-hidden shrink-0">
+            {/* Flat Transparent LITE Logo without squircle container */}
+            <div className="w-8 h-8 sm:w-9 sm:h-9 flex items-center justify-center shrink-0">
               <Image 
                 src="/assets/lite-logo.png" 
                 alt="LITE Logo" 
@@ -72,16 +73,16 @@ export default function Navbar({
                 <span className="text-sm sm:text-base font-bold tracking-tight text-gray-950">FinLITE</span>
               </div>
               <p className="text-[10px] sm:text-[11px] text-gray-500 font-medium leading-none truncate">
-                <span className="md:hidden">LITE • PDM</span>
-                <span className="hidden md:inline">LITE • Pambayang Dalubhasaan ng Marilao</span>
+                <span className="md:hidden">LITE <span className="text-gray-300 mx-0.5">/</span> PDM</span>
+                <span className="hidden md:inline">LITE <span className="text-gray-300 mx-0.5">/</span> Pambayang Dalubhasaan ng Marilao</span>
               </p>
             </div>
           </div>
 
           {/* Interactive Semester Switcher */}
-          <div className="flex items-center pl-2 sm:pl-3 border-l border-gray-200">
+          <div className="flex items-center pl-2 sm:pl-3 border-l border-black/[0.08]">
             <div className="relative flex items-center">
-              <Calendar className="w-3.5 h-3.5 text-emerald-700 absolute left-2 sm:left-2.5 pointer-events-none" />
+              <Calendar className="w-3.5 h-3.5 text-emerald-700 absolute left-2.5 pointer-events-none" />
               <select
                 value={currentSemester?.id || ''}
                 onChange={(e) => {
@@ -91,7 +92,7 @@ export default function Navbar({
                     onSelectSemester(e.target.value);
                   }
                 }}
-                className="text-[11px] sm:text-xs font-semibold text-gray-700 bg-gray-50 hover:bg-gray-100 border border-black/[0.08] pl-6 sm:pl-7 pr-5 sm:pr-7 py-1.5 rounded-xl appearance-none cursor-pointer focus:outline-none focus:ring-2 focus:ring-emerald-500/20 max-w-[105px] xs:max-w-[140px] sm:max-w-none truncate"
+                className="h-9 text-[11px] sm:text-xs font-semibold text-gray-700 bg-white hover:bg-gray-50 border border-black/[0.08] pl-7 pr-6 rounded-xl appearance-none cursor-pointer focus:outline-none focus:ring-2 focus:ring-emerald-500/20 max-w-[110px] xs:max-w-[140px] sm:max-w-none truncate transition-colors"
                 title="Select Academic Year / Semester or Start New Term"
               >
                 {semesters.map((s) => (
@@ -110,13 +111,13 @@ export default function Navbar({
         </div>
 
         {/* Right: Actions, AI Co-Pilot & Google Profile */}
-        <div className="flex items-center gap-1.5 sm:gap-2.5 shrink-0">
+        <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
           
           {/* Quick Cash Reconciliation Button (Officer Gated) */}
           {isOfficer && (
             <button
               onClick={onOpenDenominations}
-              className="flex items-center justify-center gap-1.5 p-2 sm:px-3 sm:py-1.5 text-xs font-semibold text-gray-700 bg-gray-50 hover:bg-gray-100 border border-black/[0.06] rounded-xl transition-all shadow-xs cursor-pointer"
+              className="h-9 flex items-center justify-center gap-1.5 px-2.5 sm:px-3 text-xs font-semibold text-gray-700 bg-white hover:bg-gray-50 active:bg-gray-100 border border-black/[0.08] rounded-xl transition-all shadow-xs cursor-pointer whitespace-nowrap"
               title="Open Cash Box & Denomination Counter"
             >
               <Wallet className="w-3.5 h-3.5 text-emerald-700 shrink-0" />
@@ -127,7 +128,7 @@ export default function Navbar({
           {/* AI Co-Pilot Button */}
           <button
             onClick={onOpenAI}
-            className="flex items-center justify-center gap-1.5 p-2 sm:px-3 sm:py-1.5 text-xs font-semibold text-emerald-900 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200/60 rounded-xl transition-all shadow-xs cursor-pointer"
+            className="h-9 flex items-center justify-center gap-1.5 px-2.5 sm:px-3 text-xs font-semibold text-gray-900 bg-white hover:bg-gray-50 active:bg-gray-100 border border-black/[0.08] rounded-xl transition-all shadow-xs cursor-pointer whitespace-nowrap"
             title="FinLITE Grounded AI Co-Pilot"
           >
             <Sparkles className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
@@ -139,23 +140,23 @@ export default function Navbar({
           {isAdmin && (
             <Link
               href="/admin"
-              className="flex items-center justify-center gap-1.5 p-2 sm:px-3 sm:py-1.5 text-xs font-semibold text-amber-900 bg-amber-50 hover:bg-amber-100 border border-amber-200/60 rounded-xl transition-all shadow-xs"
+              className="h-9 flex items-center justify-center gap-1.5 px-2.5 sm:px-3 text-xs font-semibold text-gray-900 bg-white hover:bg-gray-50 active:bg-gray-100 border border-black/[0.08] rounded-xl transition-all shadow-xs whitespace-nowrap"
               title="Open Admin Console & Approvals"
             >
-              <ShieldCheck className="w-3.5 h-3.5 text-amber-700 shrink-0" />
+              <ShieldCheck className="w-3.5 h-3.5 text-amber-600 shrink-0" />
               <span className="hidden sm:inline">Admin</span>
             </Link>
           )}
 
           {/* User Profile Section (Top Right Corner) */}
-          <div className="relative pl-1.5 sm:pl-2 border-l border-gray-200" ref={profileMenuRef}>
+          <div className="relative pl-1.5 sm:pl-2 border-l border-black/[0.08]" ref={profileMenuRef}>
             <button
               onClick={() => setIsProfileOpen(!isProfileOpen)}
               className="flex items-center gap-2 p-1 rounded-xl hover:bg-gray-100 transition-all cursor-pointer focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
               title="View Account Profile"
             >
               {avatarUrl ? (
-                <div className="w-8 h-8 rounded-xl overflow-hidden border border-emerald-300 shadow-2xs relative">
+                <div className="w-8 h-8 rounded-xl overflow-hidden border border-black/[0.08] shadow-2xs relative">
                   <img
                     src={avatarUrl}
                     alt={fullName}
@@ -167,7 +168,7 @@ export default function Navbar({
                   />
                 </div>
               ) : (
-                <div className="w-8 h-8 rounded-xl bg-emerald-100 border border-emerald-200 flex items-center justify-center text-emerald-800 text-xs font-bold shadow-2xs">
+                <div className="w-8 h-8 rounded-xl bg-gray-100 border border-black/[0.08] flex items-center justify-center text-gray-800 text-xs font-bold shadow-2xs">
                   {initial}
                 </div>
               )}
@@ -188,10 +189,10 @@ export default function Navbar({
             {isProfileOpen && (
               <div className="absolute right-0 mt-2 w-64 bg-white rounded-2xl border border-black/[0.08] shadow-lg py-2 z-50 animate-in fade-in zoom-in-95 duration-100">
                 {/* User Header Info */}
-                <div className="px-4 py-3 border-b border-gray-100">
+                <div className="px-4 py-3 border-b border-black/[0.06]">
                   <div className="flex items-center gap-3">
                     {avatarUrl ? (
-                      <div className="w-10 h-10 rounded-xl overflow-hidden border border-emerald-200 relative shrink-0">
+                      <div className="w-10 h-10 rounded-xl overflow-hidden border border-black/[0.08] relative shrink-0">
                         <img
                           src={avatarUrl}
                           alt={fullName}
@@ -203,14 +204,14 @@ export default function Navbar({
                         />
                       </div>
                     ) : (
-                      <div className="w-10 h-10 rounded-xl bg-emerald-100 flex items-center justify-center text-emerald-800 font-bold text-sm shrink-0">
+                      <div className="w-10 h-10 rounded-xl bg-gray-100 border border-black/[0.08] flex items-center justify-center text-gray-800 font-bold text-sm shrink-0">
                         {initial}
                       </div>
                     )}
                     <div className="min-w-0">
                       <p className="text-xs font-bold text-gray-950 truncate">{fullName}</p>
                       <p className="text-[11px] text-gray-500 truncate">{email}</p>
-                      <span className="inline-block mt-1 px-1.5 py-0.2 rounded text-[9px] font-bold uppercase tracking-wider bg-emerald-100 text-emerald-800">
+                      <span className="inline-block mt-1 px-1.5 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider bg-gray-100 text-gray-700 border border-black/[0.06]">
                         {isAdmin ? 'Super Admin' : currentRole}
                       </span>
                     </div>
