@@ -3,8 +3,6 @@ import { useState } from 'react';
 import { Bot, Send, Sparkles, User, X } from 'lucide-react';
 
 export default function AIChatDrawer({ isOpen, onClose, summary, transactions = [] }) {
-  if (!isOpen) return null;
-
   const [input, setInput] = useState('');
   const [messages, setMessages] = useState([
     {
@@ -85,6 +83,9 @@ export default function AIChatDrawer({ isOpen, onClose, summary, transactions = 
       setLoading(false);
     }
   };
+
+  // Safe early return after all hooks
+  if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-xs flex justify-end">

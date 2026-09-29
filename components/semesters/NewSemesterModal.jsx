@@ -10,8 +10,6 @@ export default function NewSemesterModal({
   currentSummary,
   onStartSemester,
 }) {
-  if (!isOpen) return null;
-
   const currentYearParts = (currentSemester?.academicYear || '2025-2026').split('-');
   const nextStartYear = parseInt(currentYearParts[0], 10) + 1;
   const nextEndYear = parseInt(currentYearParts[1], 10) + 1;
@@ -57,6 +55,9 @@ export default function NewSemesterModal({
 
     onClose();
   };
+
+  // Unconditional hook execution: safe return only after all hooks are evaluated
+  if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-xs flex items-end sm:items-center justify-center p-0 sm:p-4">

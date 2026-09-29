@@ -4,8 +4,6 @@ import { Camera, Check, ChevronDown, Upload, X } from 'lucide-react';
 import { compressReceiptImage } from '@/lib/utils/compression';
 
 export default function NewTransactionModal({ isOpen, onClose, onSave, categories = [] }) {
-  if (!isOpen) return null;
-
   const [type, setType] = useState('OUTFLOW');
   const [paymentMethod, setPaymentMethod] = useState('CASH');
   const [title, setTitle] = useState('');
@@ -70,6 +68,9 @@ export default function NewTransactionModal({ isOpen, onClose, onSave, categorie
 
     onClose();
   };
+
+  // Safe early return after all hooks
+  if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-xs flex items-end sm:items-center justify-center p-0 sm:p-4">

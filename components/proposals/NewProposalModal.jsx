@@ -12,8 +12,6 @@ export default function NewProposalModal({ isOpen, onClose, onOpenPreview }) {
     { id: '1', name: '', unitCost: 0, sellingPrice: 0, projectedUnits: 0 }
   ]);
 
-  if (!isOpen) return null;
-
   const handleAddItem = () => {
     setItems([
       ...items,
@@ -77,6 +75,9 @@ export default function NewProposalModal({ isOpen, onClose, onOpenPreview }) {
     onOpenPreview(proposalData);
     onClose();
   };
+
+  // Safe early return after all hooks
+  if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/50 backdrop-blur-sm p-0 sm:p-4 overflow-y-auto">

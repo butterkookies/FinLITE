@@ -11,8 +11,6 @@ export default function DenominationCounter({
   onSaveCount,
   currentRole
 }) {
-  if (!isOpen) return null;
-
   const [counts, setCounts] = useState({
     bills_1000: 0,
     bills_500: 0,
@@ -48,6 +46,9 @@ export default function DenominationCounter({
     });
     onClose();
   };
+
+  // Safe early return after all hooks
+  if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-xs flex items-end sm:items-center justify-center p-0 sm:p-4">

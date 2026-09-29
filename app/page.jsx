@@ -9,6 +9,7 @@ import AIChatDrawer from '@/components/ai/AIChatDrawer';
 import NewProposalModal from '@/components/proposals/NewProposalModal';
 import DocumentPreviewModal from '@/components/reports/DocumentPreviewModal';
 import NewSemesterModal from '@/components/semesters/NewSemesterModal';
+import ModuleErrorBoundary from '@/components/common/ModuleErrorBoundary';
 import { createClient } from '@/lib/supabase/client';
 import { isSuperAdminEmail } from '@/lib/config/admin';
 import { toCentavos, fromCentavos } from '@/lib/utils/currency';
@@ -376,86 +377,104 @@ export default function Dashboard() {
     <div className="min-h-screen flex flex-col bg-[#f8faf9]">
       
       {/* Top Navigation */}
-      <Navbar
-        currentRole={currentRole}
-        userProfile={userProfile}
-        currentUser={currentUser}
-        onOpenAI={() => setIsAIOpen(true)}
-        onOpenDenominations={() => setIsDenomOpen(true)}
-        currentSemester={currentSemester}
-        semesters={semesters}
-        onSelectSemester={(semId) => {
-          const found = semesters.find((s) => s.id === semId);
-          if (found) setCurrentSemester(found);
-        }}
-        onOpenNewSemester={() => setIsNewSemesterOpen(true)}
-      />
+      <ModuleErrorBoundary moduleName="Navigation Bar">
+        <Navbar
+          currentRole={currentRole}
+          userProfile={userProfile}
+          currentUser={currentUser}
+          onOpenAI={() => setIsAIOpen(true)}
+          onOpenDenominations={() => setIsDenomOpen(true)}
+          currentSemester={currentSemester}
+          semesters={semesters}
+          onSelectSemester={(semId) => {
+            const found = semesters.find((s) => s.id === semId);
+            if (found) setCurrentSemester(found);
+          }}
+          onOpenNewSemester={() => setIsNewSemesterOpen(true)}
+        />
+      </ModuleErrorBoundary>
 
       {/* Main Content Area */}
       <main className="flex-1 max-w-7xl w-full mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-6">
         
         {/* KPI Metric Cards */}
-        <StatCards
-          summary={summary}
-          onOpenDenominations={() => setIsDenomOpen(true)}
-        />
+        <ModuleErrorBoundary moduleName="Financial Overview">
+          <StatCards
+            summary={summary}
+            onOpenDenominations={() => setIsDenomOpen(true)}
+          />
+        </ModuleErrorBoundary>
 
         {/* Ledger & Transaction Table */}
-        <TransactionTable
-          transactions={activeTransactions}
-          onNewTransaction={() => setIsNewTxOpen(true)}
-          onExportReport={handleOpenLiquidationPreview}
-          onNewProposal={() => setIsProposalOpen(true)}
-          currentRole={currentRole}
-          isDbConnected={isDbConnected}
-        />
+        <ModuleErrorBoundary moduleName="Financial Ledger">
+          <TransactionTable
+            transactions={activeTransactions}
+            onNewTransaction={() => setIsNewTxOpen(true)}
+            onExportReport={handleOpenLiquidationPreview}
+            onNewProposal={() => setIsProposalOpen(true)}
+            currentRole={currentRole}
+            isDbConnected={isDbConnected}
+          />
+        </ModuleErrorBoundary>
 
       </main>
 
       {/* Modals & Slide-overs */}
-      <NewSemesterModal
-        isOpen={isNewSemesterOpen}
-        onClose={() => setIsNewSemesterOpen(false)}
-        currentSemester={currentSemester}
-        currentSummary={summary}
-        onStartSemester={handleStartSemester}
-      />
-
-      <NewTransactionModal
-        isOpen={isNewTxOpen}
-        onClose={() => setIsNewTxOpen(false)}
-        onSave={handleSaveTransaction}
-      />
-
-      <NewProposalModal
-        isOpen={isProposalOpen}
-        onClose={() => setIsProposalOpen(false)}
-        onOpenPreview={handleOpenProposalPreview}
-      />
-
-      {isPreviewOpen && previewData && (
-        <DocumentPreviewModal
-          isOpen={isPreviewOpen}
-          onClose={() => setIsPreviewOpen(false)}
-          documentData={previewData}
+      <ModuleErrorBoundary moduleName="Semester Management">
+        <NewSemesterModal
+          isOpen={isNewSemesterOpen}
+          onClose={() => setIsNewSemesterOpen(false)}
+          currentSemester={currentSemester}
+          currentSummary={summary}
+          onStartSemester={handleStartSemester}
         />
-      )}
+      </ModuleErrorBoundary>
 
-      <DenominationCounter
-        isOpen={isDenomOpen}
-        onClose={() => setIsDenomOpen(false)}
-        ledgerCashBalance={summary.cash_on_hand}
-        onDeclareShortage={handleDeclareShortage}
-        onSaveCount={handleSaveAuditCount}
-        currentRole={currentRole}
-      />
+      <ModuleErrorBoundary moduleName="Transaction Entry">
+        <NewTransactionModal
+          isOpen={isNewTxOpen}
+          onClose={() => setIsNewTxOpen(false)}
+          onSave={handleSaveTransaction}
+        />
+      </ModuleErrorBoundary>
 
-      <AIChatDrawer
-        isOpen={isAIOpen}
-        onClose={() => setIsAIOpen(false)}
-        summary={summary}
-        transactions={activeTransactions}
-      />
+      <ModuleErrorBoundary moduleName="Proposal Generator">
+        <NewProposalModal
+          isOpen={isProposalOpen}
+          onClose={() => setIsProposalOpen(false)}
+          onOpenPreview={handleOpenProposalPreview}
+        />
+      </ModuleErrorBoundary>
+
+      <ModuleErrorBoundary moduleName="Document Preview">
+        {isPreviewOpen && previewData && (
+          <DocumentPreviewModal
+            isOpen={isPreviewOpen}
+            onClose={() => setIsPreviewOpen(false)}
+            documentData={previewData}
+          />
+        )}
+      </ModuleErrorBoundary>
+
+      <ModuleErrorBoundary moduleName="Cash Reconciliation">
+        <DenominationCounter
+          isOpen={isDenomOpen}
+          onClose={() => setIsDenomOpen(false)}
+          ledgerCashBalance={summary.cash_on_hand}
+          onDeclareShortage={handleDeclareShortage}
+          onSaveCount={handleSaveAuditCount}
+          currentRole={currentRole}
+        />
+      </ModuleErrorBoundary>
+
+      <ModuleErrorBoundary moduleName="AI Co-Pilot">
+        <AIChatDrawer
+          isOpen={isAIOpen}
+          onClose={() => setIsAIOpen(false)}
+          summary={summary}
+          transactions={activeTransactions}
+        />
+      </ModuleErrorBoundary>
 
     </div>
   );
