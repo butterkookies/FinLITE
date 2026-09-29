@@ -84,13 +84,25 @@ export async function middleware(request) {
 
   // Regular logged in user accessing a protected route — verify approval
   if (!isPublic) {
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('status, role')
-      .eq('auth_user_id', user.id)
-      .maybeSingle();
+    // 1. Fast-path: Check user.app_metadata first (sub-millisecond token read, 0ms DB query!)
+    let status = user.app_metadata?.status;
+    let role = user.app_metadata?.role;
 
-    if (!profile || profile.status !== 'approved') {
+    // 2. Fallback path: Query database only if token metadata is not yet populated
+    if (!status || !role) {
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('status, role')
+        .eq('auth_user_id', user.id)
+        .maybeSingle();
+
+      if (profile) {
+        status = profile.status;
+        role = profile.role;
+      }
+    }
+
+    if (status !== 'approved') {
       if (pathname.startsWith('/api/')) {
         return NextResponse.json({ error: 'Your account is pending admin approval.' }, { status: 403 });
       }
@@ -100,7 +112,7 @@ export async function middleware(request) {
     }
 
     // If attempting to access /admin or /api/admin, restrict to users with role === 'admin'
-    if (profile.role !== 'admin') {
+    if (role !== 'admin') {
       if (pathname.startsWith('/api/admin')) {
         return NextResponse.json({ error: 'Admin privileges required.' }, { status: 403 });
       }

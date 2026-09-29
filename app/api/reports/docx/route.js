@@ -52,10 +52,24 @@ export async function POST(req) {
 
         try {
           fs.writeFileSync(tmpInput, JSON.stringify(body), 'utf8');
-          execFileSync('python', [scriptPath, tmpInput, tmpOutput], {
-            timeout: 15000,
-            windowsHide: true,
-          });
+          const primaryCmd = process.platform === 'win32' ? 'python' : 'python3';
+          const fallbackCmd = primaryCmd === 'python' ? 'python3' : 'python';
+
+          try {
+            execFileSync(primaryCmd, [scriptPath, tmpInput, tmpOutput], {
+              timeout: 15000,
+              windowsHide: true,
+            });
+          } catch (primaryErr) {
+            try {
+              execFileSync(fallbackCmd, [scriptPath, tmpInput, tmpOutput], {
+                timeout: 15000,
+                windowsHide: true,
+              });
+            } catch (_) {
+              throw primaryErr;
+            }
+          }
 
           if (fs.existsSync(tmpOutput)) {
             const buffer = fs.readFileSync(tmpOutput);

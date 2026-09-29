@@ -9,6 +9,37 @@ export async function POST(req) {
     const lastMessage = messages[messages.length - 1]?.content || '';
     const { summary = {}, transactions = [] } = context || {};
 
+    // 1. Compute category breakdown from transactions
+    const categoryTotals = {};
+    transactions.forEach((t) => {
+      const cat = t.category_name || (t.type === 'INFLOW' ? 'General Inflow' : 'General Expense');
+      const amt = Number(t.amount) || 0;
+      categoryTotals[cat] = (categoryTotals[cat] || 0) + amt;
+    });
+
+    const categorySummaryText = Object.entries(categoryTotals)
+      .map(([cat, total]) => `- ${cat}: ₱${total.toFixed(2)}`)
+      .join('\n');
+
+    // 2. Identify query-relevant transactions based on keywords
+    const qLower = lastMessage.toLowerCase();
+    const keywords = qLower.split(/\s+/).filter((w) => w.length > 2);
+
+    const matchedTx = transactions.filter((t) => {
+      const searchable = `${t.title || ''} ${t.description || ''} ${t.category_name || ''} ${t.reimbursement_recipient || ''} ${t.type || ''}`.toLowerCase();
+      return keywords.some((k) => searchable.includes(k));
+    });
+
+    // Merge keyword matches with recent transactions (deduplicated, up to 25 items)
+    const combinedTxMap = new Map();
+    matchedTx.slice(0, 15).forEach((t) => combinedTxMap.set(t.id, t));
+    transactions.slice(0, 15).forEach((t) => {
+      if (!combinedTxMap.has(t.id) && combinedTxMap.size < 25) {
+        combinedTxMap.set(t.id, t);
+      }
+    });
+    const relevantTransactions = Array.from(combinedTxMap.values());
+
     // Context summary for grounding
     const ledgerContext = `
 Current FinLITE System Ledger Status:
@@ -16,10 +47,14 @@ Current FinLITE System Ledger Status:
 - GCash Account Balance: ₱${(summary.gcash_balance || 0).toFixed(2)}
 - Total Semester Inflows: ₱${(summary.total_inflows || 0).toFixed(2)}
 - Total Semester Outflows: ₱${(summary.total_outflows || 0).toFixed(2)}
+- Net Balance: ₱${((summary.total_inflows || 0) - (summary.total_outflows || 0)).toFixed(2)}
 - Pending Reimbursements / Abono: ₱${(summary.pending_reimbursements || 0).toFixed(2)}
 
-Recent Transactions:
-${transactions.slice(0, 10).map(t => `- [${t.type}] ${t.title}: ₱${t.amount} (${t.payment_method}) ${t.is_reimbursement ? `[Advance by ${t.reimbursement_recipient}]` : ''}`).join('\n')}
+Category Breakdown:
+${categorySummaryText || '- None recorded'}
+
+Relevant & Recent Transactions (${relevantTransactions.length} items):
+${relevantTransactions.map((t) => `- [${t.type}] ${t.title}: ₱${t.amount} (${t.payment_method}) [Status: ${t.status || 'COMPLETED'}] ${t.is_reimbursement ? `[Advance by ${t.reimbursement_recipient}]` : ''} ${t.category_name ? `[Category: ${t.category_name}]` : ''}`).join('\n')}
 `;
 
     if (!apiKey) {
@@ -47,6 +82,9 @@ ${transactions.slice(0, 10).map(t => `- [${t.type}] ${t.title}: ₱${t.amount} (
         } else {
           reply = 'Walang naitalang cash shortage discrepancy sa ating kasalukuyang talaan.';
         }
+      } else if (matchedTx.length > 0) {
+        const matchedList = matchedTx.slice(0, 3).map((t) => `**${t.title}** (₱${Number(t.amount).toLocaleString('en-PH', { minimumFractionDigits: 2 })})`).join(', ');
+        reply = `Ayon sa talaan kaugnay ng iyong tanong, natagpuan ang mga sumusunod: ${matchedList}. Kabuuang Net Balance: ₱${((summary.total_inflows || 0) - (summary.total_outflows || 0)).toLocaleString('en-PH', { minimumFractionDigits: 2 })}.`;
       } else {
         reply = `Ang FinLITE ledger ay nagpapakita ng kabuuang Inflows na **₱${(summary.total_inflows || 0).toLocaleString('en-PH', { minimumFractionDigits: 2 })}** at Outflows na **₱${(summary.total_outflows || 0).toLocaleString('en-PH', { minimumFractionDigits: 2 })}**, na may net balance na **₱${((summary.total_inflows || 0) - (summary.total_outflows || 0)).toLocaleString('en-PH', { minimumFractionDigits: 2 })}**.`;
       }

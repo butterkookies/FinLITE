@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { createClient } from '@/lib/supabase/server';
+import { createClient, createAdminClient } from '@/lib/supabase/server';
 import { validateGmail, validatePassword, validateContactNumber } from '@/lib/utils/validation';
 
 export async function POST(req) {
@@ -56,6 +56,64 @@ export async function POST(req) {
       return NextResponse.json({ error: 'An account with this Gmail address already exists.' }, { status: 409 });
     }
 
+    // --- Provision Supabase Auth User ---
+    let authUserId = null;
+    const adminClient = createAdminClient();
+
+    if (adminClient) {
+      const { data: adminUser, error: adminErr } = await adminClient.auth.admin.createUser({
+        email: cleanEmail,
+        password: password,
+        email_confirm: true,
+        user_metadata: {
+          first_name: firstName.trim(),
+          last_name: lastName.trim(),
+          full_name: `${firstName.trim()} ${lastName.trim()}`,
+          username: finalUsername,
+        },
+        app_metadata: {
+          status: 'pending',
+          role: 'treasurer',
+        },
+      });
+
+      if (adminErr) {
+        if (adminErr.message?.toLowerCase().includes('already registered')) {
+          return NextResponse.json({ error: 'This Gmail address is already registered in the system.' }, { status: 409 });
+        }
+        console.warn('Admin createUser failed, falling back to signUp:', adminErr.message);
+      } else if (adminUser?.user) {
+        authUserId = adminUser.user.id;
+      }
+    }
+
+    if (!authUserId) {
+      const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
+        email: cleanEmail,
+        password: password,
+        options: {
+          data: {
+            first_name: firstName.trim(),
+            last_name: lastName.trim(),
+            full_name: `${firstName.trim()} ${lastName.trim()}`,
+            username: finalUsername,
+          },
+        },
+      });
+
+      if (signUpError) {
+        if (signUpError.message?.toLowerCase().includes('already registered')) {
+          return NextResponse.json({ error: 'This Gmail address is already registered in the system.' }, { status: 409 });
+        }
+        console.error('Supabase signUp error:', signUpError);
+        return NextResponse.json({ error: signUpError.message }, { status: 400 });
+      }
+
+      if (signUpData?.user) {
+        authUserId = signUpData.user.id;
+      }
+    }
+
     // --- Insert into registration_requests ---
     const { data: request, error: insertError } = await supabase
       .from('registration_requests')
@@ -66,6 +124,7 @@ export async function POST(req) {
         email: cleanEmail,
         contact_number: contactNumber?.trim() || null,
         auth_provider: 'email',
+        google_id: authUserId, // Store the auth.users UUID for linking on approval
         status: 'pending',
       })
       .select()

@@ -62,12 +62,28 @@ export async function POST(req) {
 
     const userId = data.user?.id;
 
-    // Check profile approval status
-    const { data: profile } = await supabase
+    // Check profile approval status (first by auth_user_id, then fallback to email)
+    let { data: profile } = await supabase
       .from('profiles')
       .select('id, status, role, first_name, last_name, username')
       .eq('auth_user_id', userId)
       .maybeSingle();
+
+    if (!profile) {
+      const { data: profileByEmail } = await supabase
+        .from('profiles')
+        .select('id, status, role, first_name, last_name, username')
+        .eq('email', userEmail)
+        .maybeSingle();
+
+      if (profileByEmail) {
+        profile = profileByEmail;
+        // Link auth_user_id to profile for future sub-millisecond lookups
+        try {
+          await supabase.from('profiles').update({ auth_user_id: userId }).eq('id', profileByEmail.id);
+        } catch (_) {}
+      }
+    }
 
     const isSuperAdmin = isSuperAdminEmail(userEmail);
 

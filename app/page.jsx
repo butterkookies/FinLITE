@@ -10,6 +10,8 @@ import NewProposalModal from '@/components/proposals/NewProposalModal';
 import DocumentPreviewModal from '@/components/reports/DocumentPreviewModal';
 import NewSemesterModal from '@/components/semesters/NewSemesterModal';
 import { createClient } from '@/lib/supabase/client';
+import { isSuperAdminEmail } from '@/lib/config/admin';
+import { toCentavos, fromCentavos } from '@/lib/utils/currency';
 
 const DEFAULT_SEMESTERS = [
   { id: 'sem-25-26-2', academicYear: '2025-2026', semester: '2nd Sem', label: 'AY 2025–2026 • 2nd Sem' },
@@ -53,7 +55,7 @@ export default function Dashboard() {
         if (user) {
           setCurrentUser(user);
           const email = user.email?.toLowerCase();
-          const isSuperAdmin = email === 'geronimoandreijohn.pdm@gmail.com';
+          const isSuperAdmin = isSuperAdminEmail(email);
 
           const { data: profile } = await supabase
             .from('profiles')
@@ -108,39 +110,39 @@ export default function Dashboard() {
     return true;
   });
 
-  // Recalculate summary totals atomically
+  // Recalculate summary totals atomically with precision centavo math
   const calculateSummary = (txs) => {
-    let total_inflows = 0;
-    let total_outflows = 0;
-    let cash_on_hand = 0;
-    let gcash_balance = 0;
-    let pending_reimbursements = 0;
+    let inflows_c = 0;
+    let outflows_c = 0;
+    let cash_c = 0;
+    let gcash_c = 0;
+    let pending_reimbursements_c = 0;
 
     txs.forEach((tx) => {
-      const amt = Number(tx.amount) || 0;
+      const amt_c = toCentavos(Number(tx.amount) || 0);
 
       if (tx.type === 'INFLOW') {
-        total_inflows += amt;
-        if (tx.payment_method === 'CASH') cash_on_hand += amt;
-        if (tx.payment_method === 'GCASH') gcash_balance += amt;
+        inflows_c += amt_c;
+        if (tx.payment_method === 'CASH') cash_c += amt_c;
+        if (tx.payment_method === 'GCASH') gcash_c += amt_c;
       } else if (tx.type === 'OUTFLOW') {
         // Pending reimbursements do not deduct cash yet until disbursed
         if (tx.is_reimbursement && tx.status === 'PENDING_REIMBURSEMENT') {
-          pending_reimbursements += amt;
+          pending_reimbursements_c += amt_c;
         } else {
-          total_outflows += amt;
-          if (tx.payment_method === 'CASH') cash_on_hand -= amt;
-          if (tx.payment_method === 'GCASH') gcash_balance -= amt;
+          outflows_c += amt_c;
+          if (tx.payment_method === 'CASH') cash_c -= amt_c;
+          if (tx.payment_method === 'GCASH') gcash_c -= amt_c;
         }
       }
     });
 
     return {
-      total_inflows,
-      total_outflows,
-      cash_on_hand,
-      gcash_balance,
-      pending_reimbursements,
+      total_inflows: fromCentavos(inflows_c),
+      total_outflows: fromCentavos(outflows_c),
+      cash_on_hand: fromCentavos(cash_c),
+      gcash_balance: fromCentavos(gcash_c),
+      pending_reimbursements: fromCentavos(pending_reimbursements_c),
     };
   };
 

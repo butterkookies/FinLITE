@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { verifyAdmin } from '@/lib/auth/admin-check';
+import { createAdminClient } from '@/lib/supabase/server';
 
 const VALID_ROLES = ['treasurer', 'auditor', 'president', 'adviser', 'admin'];
 
@@ -82,6 +83,21 @@ export async function POST(req) {
 
     if (profileErr) {
       console.warn('Profile upsert note (may need migration 006 run):', profileErr.message);
+    }
+
+    // 4. Update Supabase Auth app_metadata if admin client available
+    const adminClient = createAdminClient();
+    if (adminClient && request.google_id) {
+      try {
+        await adminClient.auth.admin.updateUserById(request.google_id, {
+          app_metadata: {
+            role: normalizedRole,
+            status: 'approved',
+          },
+        });
+      } catch (metaErr) {
+        console.warn('Could not update user app_metadata in auth:', metaErr?.message);
+      }
     }
 
     return NextResponse.json({

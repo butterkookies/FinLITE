@@ -18,7 +18,7 @@ import {
   calculateVariance 
 } from '../lib/utils/currency.js';
 import { validateGmail, validateUsername, validatePassword, validateContactNumber } from '../lib/utils/validation.js';
-import { isSuperAdminEmail } from '../lib/config/admin.js';
+import { isSuperAdminEmail, getSuperAdminEmails } from '../lib/config/admin.js';
 import { createClient } from '@supabase/supabase-js';
 import { execFileSync, spawn } from 'child_process';
 import fs from 'fs';
@@ -103,6 +103,26 @@ assert(overVar.variance === 100.00, 'Over variance should equal 100.00');
 // PHP Formatting
 const fmt = formatPHP(1500.50);
 assert(fmt.includes('1,500.50'), `Formatted currency should have 1,500.50 (got ${fmt})`);
+
+// Floating-point accumulation precision test
+const testFractionalTxs = [
+  { type: 'INFLOW', payment_method: 'CASH', amount: 0.1 },
+  { type: 'INFLOW', payment_method: 'CASH', amount: 0.2 },
+  { type: 'OUTFLOW', payment_method: 'CASH', amount: 0.15 },
+];
+let testInflowsC = 0;
+let testCashC = 0;
+testFractionalTxs.forEach((t) => {
+  const c = toCentavos(t.amount);
+  if (t.type === 'INFLOW') {
+    testInflowsC += c;
+    testCashC += c;
+  } else {
+    testCashC -= c;
+  }
+});
+assert(fromCentavos(testInflowsC) === 0.3, 'Summary inflows centavo precision: 0.1 + 0.2 === 0.3 exactly');
+assert(fromCentavos(testCashC) === 0.15, 'Summary cash on hand centavo precision: 0.3 - 0.15 === 0.15 exactly');
 
 
 // ==============================================================================
@@ -232,6 +252,8 @@ async function testAuthValidation() {
   assert(isSuperAdminEmail('geronimoandreiojohn.pdm@gmail.com') === false, 'Removed account correctly rejected as non-admin');
   assert(isSuperAdminEmail(' GERONIMOANDREIJOHN.PDM@GMAIL.COM ') === true, 'Super Admin case & whitespace insensitive');
   assert(isSuperAdminEmail('random.user@gmail.com') === false, 'Non-admin email correctly rejected');
+  assert(getSuperAdminEmails().length >= 1, 'getSuperAdminEmails returns at least 1 designated super admin');
+  assert(getSuperAdminEmails().includes('geronimoandreijohn.pdm@gmail.com'), 'Default super admin included in getSuperAdminEmails');
 
   // Unit Test 1: validateGmail unit checks
   assert(validateGmail('example.gmail')?.includes("Missing '@'"), "validateGmail('example.gmail') reports missing @");
