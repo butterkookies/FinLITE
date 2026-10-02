@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { createClient } from '@/lib/supabase/server';
+import { createClient, createAdminClient } from '@/lib/supabase/server';
 import { validateContactNumber } from '@/lib/utils/validation';
 
 // POST /api/auth/google-register
@@ -21,10 +21,12 @@ export async function POST(req) {
     const fallbackUsername = cleanEmail.split('@')[0].replace(/[^a-zA-Z0-9_]/g, '') + '_' + Math.random().toString(36).substring(2, 6);
     const finalUsername = (username?.trim() || fallbackUsername).toLowerCase();
 
+    const adminClient = createAdminClient();
     const supabase = await createClient();
+    const queryClient = adminClient || supabase;
 
     // Check for duplicate registration request by email
-    const { data: dup } = await supabase
+    const { data: dup } = await queryClient
       .from('registration_requests')
       .select('id, email, status')
       .eq('email', cleanEmail)
@@ -37,7 +39,8 @@ export async function POST(req) {
     }
 
     // Insert registration request
-    const { data: request, error } = await supabase
+    const insertClient = adminClient || supabase;
+    const { data: request, error } = await insertClient
       .from('registration_requests')
       .insert({
         first_name: firstName.trim(),
@@ -54,6 +57,11 @@ export async function POST(req) {
       .single();
 
     if (error) {
+      if (error.code === '23505' || error.message?.toLowerCase().includes('duplicate') || error.message?.toLowerCase().includes('unique')) {
+        return NextResponse.json({
+          error: 'A registration request with this Gmail address or username already exists.',
+        }, { status: 409 });
+      }
       console.error('Google register insert error:', error);
       return NextResponse.json({ error: 'Failed to submit registration. Please try again.' }, { status: 500 });
     }
