@@ -30,10 +30,11 @@ export async function POST(req) {
     const fallbackUsername = cleanEmail.split('@')[0].replace(/[^a-zA-Z0-9_]/g, '') + '_' + Math.random().toString(36).substring(2, 6);
     const finalUsername = (username?.trim() || fallbackUsername).toLowerCase();
 
-    const supabase = await createClient();
+    const adminClient = createAdminClient();
+    const queryClient = adminClient || (await createClient());
 
     // --- Check for duplicate email in registration_requests ---
-    const { data: existing } = await supabase
+    const { data: existing } = await queryClient
       .from('registration_requests')
       .select('id, status, email')
       .eq('email', cleanEmail)
@@ -46,7 +47,7 @@ export async function POST(req) {
     }
 
     // --- Also check approved profiles ---
-    const { data: profileExists } = await supabase
+    const { data: profileExists } = await queryClient
       .from('profiles')
       .select('id')
       .eq('email', cleanEmail)
@@ -58,7 +59,7 @@ export async function POST(req) {
 
     // --- Provision Supabase Auth User ---
     let authUserId = null;
-    const adminClient = createAdminClient();
+    const supabase = await createClient();
 
     if (adminClient) {
       const { data: adminUser, error: adminErr } = await adminClient.auth.admin.createUser({
@@ -115,7 +116,8 @@ export async function POST(req) {
     }
 
     // --- Insert into registration_requests ---
-    const { data: request, error: insertError } = await supabase
+    const insertClient = adminClient || supabase;
+    const { data: request, error: insertError } = await insertClient
       .from('registration_requests')
       .insert({
         first_name: firstName.trim(),
@@ -131,6 +133,11 @@ export async function POST(req) {
       .single();
 
     if (insertError) {
+      if (insertError.code === '23505' || insertError.message?.toLowerCase().includes('duplicate') || insertError.message?.toLowerCase().includes('unique')) {
+        return NextResponse.json({
+          error: 'This Gmail address or username already has a registered or pending account.',
+        }, { status: 409 });
+      }
       console.error('Insert registration request error:', insertError);
       return NextResponse.json({ error: 'Failed to submit registration. Please try again.' }, { status: 500 });
     }
