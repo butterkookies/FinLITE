@@ -3,7 +3,7 @@ import { createServerClient } from '@supabase/ssr';
 import { isSuperAdminEmail } from '@/lib/config/admin';
 
 // Routes that are always public (no auth required)
-const PUBLIC_ROUTES = ['/login', '/register', '/pending-approval', '/api/auth'];
+const PUBLIC_ROUTES = ['/login', '/register', '/pending-approval', '/forgot-password', '/reset-password', '/api/auth'];
 
 function isPublicRoute(pathname) {
   return PUBLIC_ROUTES.some((r) => pathname === r || pathname.startsWith(r + '/'));

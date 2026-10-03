@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { createClient, createAdminClient } from '@/lib/supabase/server';
 import { validateGmail, validatePassword, validateContactNumber } from '@/lib/utils/validation';
+import { sendAdminRegistrationNotification } from '@/lib/email/mailer';
 
 export async function POST(req) {
   try {
@@ -141,6 +142,15 @@ export async function POST(req) {
       console.error('Insert registration request error:', insertError);
       return NextResponse.json({ error: 'Failed to submit registration. Please try again.' }, { status: 500 });
     }
+
+    // Send email notification to admins asynchronously
+    sendAdminRegistrationNotification({
+      applicantName: `${firstName.trim()} ${lastName.trim()}`,
+      email: cleanEmail,
+      username: finalUsername,
+      contactNumber: contactNumber?.trim() || null,
+      authProvider: 'email',
+    }).catch((emailErr) => console.warn('Admin notification email warning:', emailErr));
 
     return NextResponse.json({
       success: true,

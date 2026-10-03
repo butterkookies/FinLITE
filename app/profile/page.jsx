@@ -18,13 +18,17 @@ import {
   CheckCircle2,
   ExternalLink,
   Shield,
+  Pencil,
+  Camera,
 } from 'lucide-react';
+import EditProfileModal from '@/components/profile/EditProfileModal';
 
 export default function ProfilePage() {
   const router = useRouter();
   const [user, setUser] = useState(null);
   const [profile, setProfile] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isEditOpen, setIsEditOpen] = useState(false);
 
   useEffect(() => {
     async function loadProfile() {
@@ -45,11 +49,20 @@ export default function ProfilePage() {
         const email = authUser.email?.toLowerCase();
         const isSuperAdmin = email === 'geronimoandreijohn.pdm@gmail.com';
 
-        const { data: profileData } = await supabase
+        let { data: profileData } = await supabase
           .from('profiles')
           .select('*')
           .eq('auth_user_id', authUser.id)
           .maybeSingle();
+
+        if (!profileData && email) {
+          const { data: profileByEmail } = await supabase
+            .from('profiles')
+            .select('*')
+            .eq('email', email)
+            .maybeSingle();
+          profileData = profileByEmail;
+        }
 
         if (profileData) {
           setProfile(profileData);
@@ -128,6 +141,14 @@ export default function ProfilePage() {
           </div>
 
           <div className="flex items-center gap-2">
+            <button
+              onClick={() => setIsEditOpen(true)}
+              className="h-9 px-3 text-xs font-semibold text-emerald-800 bg-emerald-50 hover:bg-emerald-100 active:bg-emerald-200 border border-emerald-200 rounded-xl transition-all shadow-2xs flex items-center gap-1.5 cursor-pointer whitespace-nowrap"
+            >
+              <Pencil className="w-3.5 h-3.5 text-emerald-700" />
+              <span>Edit Profile</span>
+            </button>
+
             {isAdmin && (
               <Link
                 href="/admin"
@@ -157,7 +178,7 @@ export default function ProfilePage() {
           <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6 text-center sm:text-left">
             
             {/* Avatar / Picture */}
-            <div className="relative shrink-0">
+            <div className="relative shrink-0 group">
               {avatarUrl ? (
                 <div className="w-24 h-24 rounded-3xl overflow-hidden border border-black/[0.08] shadow-sm relative">
                   <img
@@ -175,6 +196,14 @@ export default function ProfilePage() {
                   {fullName[0]?.toUpperCase() || 'U'}
                 </div>
               )}
+              <button
+                type="button"
+                onClick={() => setIsEditOpen(true)}
+                className="absolute -top-1.5 -right-1.5 w-7 h-7 rounded-full bg-white hover:bg-gray-50 active:bg-gray-100 border border-black/[0.08] shadow-md flex items-center justify-center text-gray-700 hover:text-emerald-700 transition-colors cursor-pointer"
+                title="Change Profile Photo"
+              >
+                <Camera className="w-3.5 h-3.5" />
+              </button>
               <div className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-emerald-600 border-2 border-white flex items-center justify-center text-white" title="Verified Account">
                 <CheckCircle2 className="w-3.5 h-3.5" />
               </div>
@@ -186,9 +215,23 @@ export default function ProfilePage() {
                 <h2 className="text-xl sm:text-2xl font-black tracking-tight text-gray-950">
                   {fullName}
                 </h2>
+                {profile?.username && (
+                  <span className="text-xs font-semibold text-emerald-800 bg-emerald-50 border border-emerald-200/80 px-2 py-0.5 rounded-md">
+                    @{profile.username}
+                  </span>
+                )}
                 <span className="px-2.5 py-0.5 rounded-md text-xs font-semibold uppercase tracking-wider bg-gray-100 text-gray-800 border border-black/[0.08]">
                   {roleLabelMap[role] || role}
                 </span>
+                <button
+                  type="button"
+                  onClick={() => setIsEditOpen(true)}
+                  className="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-700 hover:text-emerald-900 hover:bg-emerald-50 px-2 py-0.5 rounded-md transition-colors cursor-pointer border border-emerald-200/60"
+                  title="Edit Profile"
+                >
+                  <Pencil className="w-2.5 h-2.5" />
+                  <span>Edit</span>
+                </button>
               </div>
 
               <p className="text-sm text-gray-600 font-medium flex items-center justify-center sm:justify-start gap-1.5">
@@ -248,12 +291,34 @@ export default function ProfilePage() {
               <h3 className="text-sm font-bold text-gray-950">Contact & Access</h3>
             </div>
 
-            <div className="space-y-2 text-xs">
+            <div className="space-y-2.5 text-xs">
+              <div>
+                <p className="text-gray-400 font-medium">Username</p>
+                <div className="flex items-center gap-1.5 mt-0.5">
+                  <p className="text-gray-900 font-semibold">
+                    {profile?.username ? `@${profile.username}` : <span className="text-gray-400 italic font-normal">Not set</span>}
+                  </p>
+                  <button
+                    onClick={() => setIsEditOpen(true)}
+                    className="text-[11px] text-emerald-700 hover:underline font-semibold cursor-pointer"
+                  >
+                    {profile?.username ? 'Change' : '+ Add'}
+                  </button>
+                </div>
+              </div>
               <div>
                 <p className="text-gray-400 font-medium">Contact Number</p>
-                <p className="text-gray-900 font-semibold">
-                  {profile?.contact_number || 'Not provided'}
-                </p>
+                <div className="flex items-center gap-1.5 mt-0.5">
+                  <p className="text-gray-900 font-semibold tabular-nums">
+                    {profile?.contact_number || <span className="text-gray-400 italic font-normal">Not provided</span>}
+                  </p>
+                  <button
+                    onClick={() => setIsEditOpen(true)}
+                    className="text-[11px] text-emerald-700 hover:underline font-semibold cursor-pointer"
+                  >
+                    {profile?.contact_number ? 'Change' : '+ Add number'}
+                  </button>
+                </div>
               </div>
               <div>
                 <p className="text-gray-400 font-medium">Financial Role Authority</p>
@@ -301,6 +366,17 @@ export default function ProfilePage() {
             )}
           </div>
         </div>
+
+        {/* Edit Profile Modal */}
+        <EditProfileModal
+          isOpen={isEditOpen}
+          onClose={() => setIsEditOpen(false)}
+          profile={profile}
+          user={user}
+          onProfileUpdated={(updatedProfile) => {
+            setProfile(updatedProfile);
+          }}
+        />
 
       </main>
     </div>

@@ -136,18 +136,6 @@ export default function Navbar({
             <span className="sm:hidden text-[11px]">AI</span>
           </button>
 
-          {/* Admin Console Link Button — STRICTLY VISIBLE TO ADMIN ONLY */}
-          {isAdmin && (
-            <Link
-              href="/admin"
-              className="h-9 flex items-center justify-center gap-1.5 px-2.5 sm:px-3 text-xs font-semibold text-gray-900 bg-white hover:bg-gray-50 active:bg-gray-100 border border-black/[0.08] rounded-xl transition-all shadow-xs whitespace-nowrap"
-              title="Open Admin Console & Approvals"
-            >
-              <ShieldCheck className="w-3.5 h-3.5 text-amber-600 shrink-0" />
-              <span className="hidden sm:inline">Admin</span>
-            </Link>
-          )}
-
           {/* User Profile Section (Top Right Corner) */}
           <div className="relative pl-1.5 sm:pl-2 border-l border-black/[0.08]" ref={profileMenuRef}>
             <button

@@ -2,6 +2,99 @@
 import { useState } from 'react';
 import { Bot, Send, Sparkles, User, X } from 'lucide-react';
 
+function FormattedMessage({ content, isUser }) {
+  if (!content) return null;
+  if (isUser) {
+    return <span className="whitespace-pre-line">{content}</span>;
+  }
+
+  const lines = content.split('\n');
+  const renderedElements = [];
+  let currentList = [];
+
+  const parseInline = (text) => {
+    const parts = [];
+    const regex = /(\*\*.*?\*\*|\*.*?\*)/g;
+    let lastIndex = 0;
+    let match;
+
+    while ((match = regex.exec(text)) !== null) {
+      if (match.index > lastIndex) {
+        parts.push(text.substring(lastIndex, match.index));
+      }
+      const raw = match[0];
+      if (raw.startsWith('**') && raw.endsWith('**')) {
+        parts.push(
+          <strong key={match.index} className="font-bold text-gray-950">
+            {raw.slice(2, -2)}
+          </strong>
+        );
+      } else if (raw.startsWith('*') && raw.endsWith('*')) {
+        parts.push(
+          <em key={match.index} className="italic font-medium text-gray-800">
+            {raw.slice(1, -1)}
+          </em>
+        );
+      }
+      lastIndex = regex.lastIndex;
+    }
+
+    if (lastIndex < text.length) {
+      parts.push(text.substring(lastIndex));
+    }
+
+    return parts.length > 0 ? parts : text;
+  };
+
+  const flushList = (key) => {
+    if (currentList.length > 0) {
+      renderedElements.push(
+        <ul key={`ul-${key}`} className="my-1.5 space-y-1 pl-4 list-disc marker:text-emerald-600">
+          {currentList.map((item, i) => (
+            <li key={i} className="leading-relaxed">
+              {parseInline(item)}
+            </li>
+          ))}
+        </ul>
+      );
+      currentList = [];
+    }
+  };
+
+  lines.forEach((line, idx) => {
+    const trimmed = line.trim();
+    if (!trimmed) {
+      flushList(idx);
+      renderedElements.push(<div key={`empty-${idx}`} className="h-1.5" />);
+      return;
+    }
+
+    if (trimmed.startsWith('* ') || trimmed.startsWith('- ') || trimmed.startsWith('• ')) {
+      const itemText = trimmed.replace(/^[\*\-•]\s*/, '');
+      currentList.push(itemText);
+    } else if (trimmed.startsWith('### ') || trimmed.startsWith('## ')) {
+      flushList(idx);
+      const headerText = trimmed.replace(/^#+\s*/, '');
+      renderedElements.push(
+        <h4 key={`h-${idx}`} className="font-bold text-gray-950 text-xs mt-2 mb-1">
+          {parseInline(headerText)}
+        </h4>
+      );
+    } else {
+      flushList(idx);
+      renderedElements.push(
+        <p key={`p-${idx}`} className="leading-relaxed my-0.5">
+          {parseInline(trimmed)}
+        </p>
+      );
+    }
+  });
+
+  flushList('final');
+
+  return <div className="space-y-0.5 text-xs text-gray-800">{renderedElements}</div>;
+}
+
 export default function AIChatDrawer({ isOpen, onClose, summary, transactions = [] }) {
   const [input, setInput] = useState('');
   const [messages, setMessages] = useState([
@@ -131,13 +224,13 @@ export default function AIChatDrawer({ isOpen, onClose, summary, transactions = 
               )}
 
               <div 
-                className={`max-w-[85%] p-3 rounded-2xl leading-relaxed whitespace-pre-line ${
+                className={`max-w-[85%] p-3 rounded-2xl leading-relaxed ${
                   m.role === 'user' 
                     ? 'bg-emerald-700 text-white rounded-tr-xs' 
                     : 'bg-gray-100/90 text-gray-900 rounded-tl-xs border border-black/[0.04]'
                 }`}
               >
-                {m.content}
+                <FormattedMessage content={m.content} isUser={m.role === 'user'} />
               </div>
 
               {m.role === 'user' && (

@@ -2,7 +2,7 @@
 import { useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
-import { Eye, EyeOff, LogIn, AlertCircle } from 'lucide-react';
+import { Eye, EyeOff, LogIn, AlertCircle, CheckCircle2 } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
 
@@ -21,6 +21,7 @@ function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const errorParam = searchParams.get('error');
+  const resetParam = searchParams.get('reset');
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -100,6 +101,14 @@ function LoginForm() {
         {/* Card */}
         <div className="bg-white rounded-2xl shadow-xs border border-black/[0.08] p-7">
 
+          {/* Reset Password Success Banner */}
+          {resetParam === 'success' && (
+            <div className="flex items-start gap-2.5 bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-xl px-4 py-3 mb-5 text-xs font-medium">
+              <CheckCircle2 className="w-4 h-4 mt-0.5 shrink-0 text-emerald-600" />
+              <span>Your password has been reset successfully! Please sign in with your new password.</span>
+            </div>
+          )}
+
           {/* Error Banner */}
           {error && (
             <div className="flex items-start gap-2.5 bg-gray-50 border border-black/[0.08] text-rose-700 rounded-xl px-4 py-3 mb-5 text-xs font-medium">
@@ -144,7 +153,15 @@ function LoginForm() {
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-gray-700 mb-1.5">Password</label>
+              <div className="flex items-center justify-between mb-1.5">
+                <label className="block text-xs font-semibold text-gray-700">Password</label>
+                <Link
+                  href="/forgot-password"
+                  className="text-[11px] font-semibold text-emerald-700 hover:text-emerald-800 transition-colors"
+                >
+                  Forgot password?
+                </Link>
+              </div>
               <div className="relative">
                 <input
                   type={showPass ? 'text' : 'password'}

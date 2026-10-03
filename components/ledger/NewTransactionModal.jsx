@@ -2,6 +2,10 @@
 import { useState, useRef, useEffect } from 'react';
 import { Camera, Check, ChevronDown, Upload, X } from 'lucide-react';
 import { compressReceiptImage } from '@/lib/utils/compression';
+import { 
+  OFFICIAL_INFLOW_CATEGORIES, 
+  OFFICIAL_OUTFLOW_CATEGORIES 
+} from '@/lib/config/categories';
 
 export default function NewTransactionModal({ isOpen, onClose, onSave, categories = [] }) {
   const [type, setType] = useState('OUTFLOW');
@@ -15,9 +19,22 @@ export default function NewTransactionModal({ isOpen, onClose, onSave, categorie
   const [eventName, setEventName] = useState('');
   const [isReimbursement, setIsReimbursement] = useState(false);
   const [recipient, setRecipient] = useState('');
-  const [receiptImage, setReceiptImage] = useState(null);
-  const [previewUrl, setPreviewUrl] = useState('');
+  const [receiptFiles, setReceiptFiles] = useState([]);
+  const [previewUrls, setPreviewUrls] = useState([]);
   const [compressing, setCompressing] = useState(false);
+
+  // Reset fields when opening modal
+  useEffect(() => {
+    if (isOpen) {
+      setTitle('');
+      setAmount('');
+      setEventName('');
+      setIsReimbursement(false);
+      setRecipient('');
+      setReceiptFiles([]);
+      setPreviewUrls([]);
+    }
+  }, [isOpen]);
 
   useEffect(() => {
     function handleClickOutside(event) {
@@ -30,21 +47,45 @@ export default function NewTransactionModal({ isOpen, onClose, onSave, categorie
   }, []);
 
   const handleImageChange = async (e) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+    const selectedFiles = Array.from(e.target.files || []);
+    if (selectedFiles.length === 0) return;
 
+    const remainingSlots = 3 - receiptFiles.length;
+    if (remainingSlots <= 0) return;
+
+    const filesToProcess = selectedFiles.slice(0, remainingSlots);
     setCompressing(true);
+
     try {
-      const compressed = await compressReceiptImage(file);
-      setReceiptImage(compressed);
-      setPreviewUrl(URL.createObjectURL(compressed));
-    } catch (err) {
-      console.error(err);
-      setReceiptImage(file);
-      setPreviewUrl(URL.createObjectURL(file));
+      const processedFiles = [];
+      const newUrls = [];
+
+      for (const file of filesToProcess) {
+        try {
+          const compressed = await compressReceiptImage(file);
+          processedFiles.push(compressed);
+          newUrls.push(URL.createObjectURL(compressed));
+        } catch (err) {
+          console.error(err);
+          processedFiles.push(file);
+          newUrls.push(URL.createObjectURL(file));
+        }
+      }
+
+      setReceiptFiles((prev) => [...prev, ...processedFiles]);
+      setPreviewUrls((prev) => [...prev, ...newUrls]);
     } finally {
       setCompressing(false);
+      e.target.value = '';
     }
+  };
+
+  const handleRemoveReceipt = (index) => {
+    setReceiptFiles((prev) => prev.filter((_, i) => i !== index));
+    setPreviewUrls((prev) => {
+      try { URL.revokeObjectURL(prev[index]); } catch (_) {}
+      return prev.filter((_, i) => i !== index);
+    });
   };
 
   const handleSubmit = (e) => {
@@ -60,8 +101,10 @@ export default function NewTransactionModal({ isOpen, onClose, onSave, categorie
       event_name: eventName,
       is_reimbursement: isReimbursement,
       reimbursement_recipient: isReimbursement ? recipient : null,
-      receipt_url: previewUrl || null,
-      receiptFile: receiptImage || null,
+      receipt_url: previewUrls[0] || null,
+      receipt_urls: previewUrls,
+      receiptFile: receiptFiles[0] || null,
+      receiptFiles: receiptFiles,
       transaction_date: new Date().toISOString().split('T')[0],
       status: isReimbursement ? 'PENDING_REIMBURSEMENT' : 'COMPLETED',
     });
@@ -102,7 +145,7 @@ export default function NewTransactionModal({ isOpen, onClose, onSave, categorie
               type="button"
               onClick={() => {
                 setType('INFLOW');
-                setCategoryName('Booth Sales');
+                setCategoryName('Tournament & E-Sports Registration Fees');
               }}
               className={`h-10 rounded-xl font-semibold transition-all cursor-pointer ${
                 type === 'INFLOW' 
@@ -202,8 +245,8 @@ export default function NewTransactionModal({ isOpen, onClose, onSave, categorie
               {isCategoryOpen && (
                 <div className="absolute left-0 right-0 mt-1 bg-white border border-black/[0.08] rounded-xl shadow-lg py-1 z-50 animate-in fade-in zoom-in-95 duration-100 max-h-48 overflow-y-auto">
                   {(type === 'INFLOW' 
-                    ? ['Booth Sales', 'E-Sports Registrations', 'Membership Dues', 'Sponsorship']
-                    : ['Supplies & Materials', 'Food & Refreshments', 'Tournament Prizes', 'Tokens & Honoraria', 'Cash Shortage Discrepancy']
+                    ? OFFICIAL_INFLOW_CATEGORIES 
+                    : OFFICIAL_OUTFLOW_CATEGORIES
                   ).map((cat) => (
                     <button
                       key={cat}
@@ -276,33 +319,59 @@ export default function NewTransactionModal({ isOpen, onClose, onSave, categorie
             </div>
           )}
 
-          {/* Receipt Image Upload with Auto-compression */}
-          <div>
-            <label className="block text-gray-700 font-semibold mb-1">
-              Receipt / Disbursement Proof
-            </label>
-            <div className="flex items-center gap-3">
-              <label className="h-10 flex items-center gap-2 px-3 bg-white hover:bg-gray-50 active:bg-gray-100 border border-black/[0.08] rounded-xl cursor-pointer transition-colors shadow-2xs">
+          {/* Receipt Image Upload with Auto-compression (Up to 3 images) */}
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <label className="block text-gray-700 font-semibold">
+                Receipts / Proofs ({receiptFiles.length}/3)
+              </label>
+              <span className="text-[10px] text-gray-400">
+                Max 3 images (OR, GCash, delivery/slip)
+              </span>
+            </div>
+
+            {/* Thumbnail Previews */}
+            {previewUrls.length > 0 && (
+              <div className="grid grid-cols-3 gap-2">
+                {previewUrls.map((url, idx) => (
+                  <div key={idx} className="relative group rounded-xl overflow-hidden border border-black/[0.08] bg-gray-100 aspect-square">
+                    <img src={url} alt={`Receipt ${idx + 1}`} className="w-full h-full object-cover" />
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveReceipt(idx)}
+                      className="absolute top-1 right-1 w-5 h-5 rounded-full bg-black/70 hover:bg-black text-white flex items-center justify-center transition-colors cursor-pointer"
+                      title="Remove image"
+                    >
+                      <X className="w-3 h-3" />
+                    </button>
+                    <span className="absolute bottom-1 left-1 px-1.5 py-0.5 bg-black/60 rounded text-[9px] font-semibold text-white">
+                      Photo {idx + 1}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Add / Upload Photo Button */}
+            {receiptFiles.length < 3 && (
+              <label className="h-10 flex items-center justify-center gap-2 px-3 bg-white hover:bg-gray-50 active:bg-gray-100 border border-black/[0.08] rounded-xl cursor-pointer transition-colors shadow-2xs">
                 <Camera className="w-4 h-4 text-emerald-700" />
                 <span className="text-gray-700 font-medium">
-                  {compressing ? 'Compressing photo...' : 'Take or Upload Photo'}
+                  {compressing ? 'Compressing photo...' : receiptFiles.length === 0 ? 'Take or Upload Photo (Up to 3)' : `Add Another Photo (${receiptFiles.length}/3)`}
                 </span>
                 <input
                   type="file"
                   accept="image/*"
+                  multiple
+                  disabled={compressing}
                   onChange={handleImageChange}
                   className="hidden"
                 />
               </label>
+            )}
 
-              {previewUrl && (
-                <div className="w-10 h-10 rounded-xl overflow-hidden border border-black/[0.08] bg-gray-100">
-                  <img src={previewUrl} alt="Receipt preview" className="w-full h-full object-cover" />
-                </div>
-              )}
-            </div>
-            <p className="text-[10px] text-gray-400 mt-1">
-              Automatically compressed to &lt;350KB before cloud storage.
+            <p className="text-[10px] text-gray-400">
+              Automatically compressed to &lt;350KB each before cloud storage.
             </p>
           </div>
 

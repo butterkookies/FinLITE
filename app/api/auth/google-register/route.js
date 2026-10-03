@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { createClient, createAdminClient } from '@/lib/supabase/server';
 import { validateContactNumber } from '@/lib/utils/validation';
+import { sendAdminRegistrationNotification } from '@/lib/email/mailer';
 
 // POST /api/auth/google-register
 // Called when a new Google OAuth user completes profile setup
@@ -65,6 +66,15 @@ export async function POST(req) {
       console.error('Google register insert error:', error);
       return NextResponse.json({ error: 'Failed to submit registration. Please try again.' }, { status: 500 });
     }
+
+    // Send email notification to admins asynchronously
+    sendAdminRegistrationNotification({
+      applicantName: `${firstName.trim()} ${lastName.trim()}`,
+      email: cleanEmail,
+      username: finalUsername,
+      contactNumber: contactNumber?.trim() || null,
+      authProvider: 'google',
+    }).catch((emailErr) => console.warn('Admin notification email warning:', emailErr));
 
     return NextResponse.json({
       success: true,
