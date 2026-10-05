@@ -100,30 +100,30 @@ export default function ProfilePage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-[#f8faf9] flex items-center justify-center p-4">
+      <div className="min-h-screen flex items-center justify-center p-4">
         <div className="w-8 h-8 rounded-full border-2 border-emerald-600 border-t-transparent animate-spin" />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-[#f8faf9] flex flex-col font-sans">
+    <div className="min-h-screen flex flex-col font-sans">
       
       {/* Top Header */}
-      <header className="sticky top-0 z-30 bg-white/90 backdrop-blur-md border-b border-black/[0.06] shadow-xs">
+      <header className="sticky top-0 z-30 bg-black/20 backdrop-blur-xl border-b border-white/[0.07] transition-all">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <Link
               href="/"
-              className="flex items-center gap-2 p-1.5 rounded-xl hover:bg-gray-100 transition-colors text-gray-600 hover:text-gray-900"
+              className="flex items-center gap-2 p-1.5 rounded-xl hover:bg-white/[0.08] transition-colors text-white/50 hover:text-white"
               title="Return to Dashboard"
             >
               <ArrowLeft className="w-5 h-5" />
             </Link>
-            <div className="h-6 w-px bg-gray-200" />
+            <div className="h-6 w-px bg-white/[0.08]" />
             <div>
-              <h1 className="text-sm sm:text-base font-bold text-gray-950">Account Profile</h1>
-              <p className="text-[11px] text-gray-500 font-medium">FinLITE Identity & Security Credentials</p>
+              <h1 className="text-sm sm:text-base font-bold text-white">Account Profile</h1>
+              <p className="text-[11px] text-emerald-400/70 font-medium">FinLITE Identity &amp; Security Credentials</p>
             </div>
           </div>
 
@@ -131,18 +131,18 @@ export default function ProfilePage() {
             {isAdmin && (
               <Link
                 href="/admin"
-                className="h-9 px-3 text-xs font-semibold text-gray-900 bg-white hover:bg-gray-50 active:bg-gray-100 border border-black/[0.08] rounded-xl transition-all shadow-xs flex items-center gap-1.5 cursor-pointer whitespace-nowrap"
+                className="h-9 px-3 text-xs font-semibold text-white/70 bg-white/[0.06] hover:bg-white/[0.10] active:bg-white/[0.15] border border-white/[0.08] rounded-xl transition-all shadow-xs flex items-center gap-1.5 cursor-pointer whitespace-nowrap"
               >
-                <ShieldCheck className="w-3.5 h-3.5 text-amber-600" />
+                <ShieldCheck className="w-3.5 h-3.5 text-amber-400" />
                 <span className="hidden sm:inline">Admin Console</span>
               </Link>
             )}
 
             <button
               onClick={handleSignOut}
-              className="h-9 px-3 text-xs font-semibold text-rose-700 bg-white hover:bg-rose-50 active:bg-rose-100 border border-black/[0.08] rounded-xl transition-all shadow-xs flex items-center gap-1.5 cursor-pointer whitespace-nowrap"
+              className="h-9 px-3 text-xs font-semibold text-rose-400 bg-white/[0.06] hover:bg-rose-500/[0.08] active:bg-rose-500/[0.12] border border-white/[0.08] rounded-xl transition-all shadow-xs flex items-center gap-1.5 cursor-pointer whitespace-nowrap"
             >
-              <LogOut className="w-3.5 h-3.5 text-rose-600" />
+              <LogOut className="w-3.5 h-3.5 text-rose-400" />
               <span>Sign Out</span>
             </button>
           </div>
@@ -171,7 +171,7 @@ export default function ProfilePage() {
                   />
                 </div>
               ) : (
-                <div className="w-24 h-24 rounded-3xl bg-gray-100 border border-black/[0.08] flex items-center justify-center text-gray-800 text-3xl font-black shadow-xs">
+                <div className="w-24 h-24 rounded-3xl bg-emerald-100 border border-emerald-200 flex items-center justify-center text-emerald-800 text-3xl font-black shadow-xs">
                   {fullName[0]?.toUpperCase() || 'U'}
                 </div>
               )}
@@ -197,9 +197,9 @@ export default function ProfilePage() {
               </p>
 
               <div className="flex items-center justify-center sm:justify-start gap-2 mt-4 flex-wrap">
-                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold bg-gray-50 text-gray-800 border border-black/[0.08]">
+                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold bg-emerald-50 text-emerald-800 border border-emerald-200/80">
                   <CheckCircle2 className="w-3.5 h-3.5 text-emerald-700" />
-                  Account Approved & Active
+                  Account Approved &amp; Active
                 </span>
 
                 <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium bg-gray-100 text-gray-700 border border-black/[0.06]">
@@ -211,59 +211,59 @@ export default function ProfilePage() {
           </div>
         </div>
 
-        {/* Detailed Information Grid */}
+        {/* Detailed Information Grid — TRANSPARENT WHITE FROSTED GLASS */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           
           {/* Institutional Affiliation */}
-          <div className="bg-white rounded-2xl border border-black/[0.06] p-5 shadow-xs space-y-3">
-            <div className="flex items-center gap-2.5 text-emerald-800">
-              <div className="w-8 h-8 rounded-xl bg-emerald-50 flex items-center justify-center">
-                <Building className="w-4 h-4 text-emerald-700" />
+          <div className="rounded-2xl border border-white/30 bg-white/20 backdrop-blur-xl p-5 shadow-2xl space-y-3">
+            <div className="flex items-center gap-2.5 text-emerald-300">
+              <div className="w-8 h-8 rounded-xl bg-emerald-400/20 border border-emerald-400/30 flex items-center justify-center">
+                <Building className="w-4 h-4 text-emerald-300" />
               </div>
-              <h3 className="text-sm font-bold text-gray-950">Institutional Affiliation</h3>
+              <h3 className="text-sm font-bold text-white drop-shadow-xs">Institutional Affiliation</h3>
             </div>
             
             <div className="space-y-2 text-xs">
               <div>
-                <p className="text-gray-400 font-medium">Institution</p>
-                <p className="text-gray-900 font-semibold">Pambayang Dalubhasaan ng Marilao (PDM)</p>
+                <p className="text-white/60 font-medium">Institution</p>
+                <p className="text-white font-bold">Pambayang Dalubhasaan ng Marilao (PDM)</p>
               </div>
               <div>
-                <p className="text-gray-400 font-medium">College</p>
-                <p className="text-gray-900 font-semibold">College of Computer Studies (CCS)</p>
+                <p className="text-white/60 font-medium">College</p>
+                <p className="text-white font-bold">College of Computer Studies (CCS)</p>
               </div>
               <div>
-                <p className="text-gray-400 font-medium">Recognized Organization</p>
-                <p className="text-gray-900 font-semibold">League of Information Technology Enthusiasts (LITE)</p>
+                <p className="text-white/60 font-medium">Recognized Organization</p>
+                <p className="text-white font-bold">League of Information Technology Enthusiasts (LITE)</p>
               </div>
             </div>
           </div>
 
           {/* Contact & Verification */}
-          <div className="bg-white rounded-2xl border border-black/[0.06] p-5 shadow-xs space-y-3">
-            <div className="flex items-center gap-2.5 text-emerald-800">
-              <div className="w-8 h-8 rounded-xl bg-emerald-50 flex items-center justify-center">
-                <Shield className="w-4 h-4 text-emerald-700" />
+          <div className="rounded-2xl border border-white/30 bg-white/20 backdrop-blur-xl p-5 shadow-2xl space-y-3">
+            <div className="flex items-center gap-2.5 text-emerald-300">
+              <div className="w-8 h-8 rounded-xl bg-emerald-400/20 border border-emerald-400/30 flex items-center justify-center">
+                <Shield className="w-4 h-4 text-emerald-300" />
               </div>
-              <h3 className="text-sm font-bold text-gray-950">Contact & Access</h3>
+              <h3 className="text-sm font-bold text-white drop-shadow-xs">Contact &amp; Access</h3>
             </div>
 
             <div className="space-y-2 text-xs">
               <div>
-                <p className="text-gray-400 font-medium">Contact Number</p>
-                <p className="text-gray-900 font-semibold">
+                <p className="text-white/60 font-medium">Contact Number</p>
+                <p className="text-white font-bold">
                   {profile?.contact_number || 'Not provided'}
                 </p>
               </div>
               <div>
-                <p className="text-gray-400 font-medium">Financial Role Authority</p>
-                <p className="text-gray-900 font-semibold capitalize">
+                <p className="text-white/60 font-medium">Financial Role Authority</p>
+                <p className="text-white font-bold capitalize">
                   {role} {isAdmin ? '(Full System Authority)' : '(Restricted Segregation of Duties)'}
                 </p>
               </div>
               <div>
-                <p className="text-gray-400 font-medium">Account Status</p>
-                <p className="text-emerald-700 font-bold">Approved & Verified</p>
+                <p className="text-white/60 font-medium">Account Status</p>
+                <p className="text-emerald-300 font-bold">Approved &amp; Verified</p>
               </div>
             </div>
           </div>
@@ -271,32 +271,32 @@ export default function ProfilePage() {
         </div>
 
         {/* Quick Navigation Cards */}
-        <div className="bg-white rounded-2xl border border-black/[0.06] p-5 shadow-xs">
-          <h3 className="text-xs font-bold uppercase tracking-wider text-gray-500 mb-3">
+        <div className="rounded-2xl border border-white/30 bg-white/20 backdrop-blur-xl p-5 shadow-2xl">
+          <h3 className="text-xs font-bold uppercase tracking-wider text-white/70 mb-3">
             Available Operations
           </h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <Link
               href="/"
-              className="p-3.5 rounded-xl border border-gray-200/80 hover:border-emerald-300 hover:bg-emerald-50/40 transition-all flex items-center justify-between group"
+              className="p-3.5 rounded-xl border border-white/30 bg-white/15 hover:bg-white/25 transition-all flex items-center justify-between group shadow-xs backdrop-blur-md"
             >
               <div>
-                <p className="text-xs font-bold text-gray-900 group-hover:text-emerald-950">Main Ledger & Dashboard</p>
-                <p className="text-[11px] text-gray-500">Record transactions, cash box, liquidation preview</p>
+                <p className="text-xs font-bold text-white group-hover:text-emerald-300">Main Ledger &amp; Dashboard</p>
+                <p className="text-[11px] text-white/70">Record transactions, cash box, liquidation preview</p>
               </div>
-              <ExternalLink className="w-4 h-4 text-gray-400 group-hover:text-emerald-700 shrink-0" />
+              <ExternalLink className="w-4 h-4 text-white/60 group-hover:text-emerald-300 shrink-0" />
             </Link>
 
             {isAdmin && (
               <Link
                 href="/admin"
-                className="p-3.5 rounded-xl border border-amber-200/80 hover:border-amber-300 hover:bg-amber-50/40 transition-all flex items-center justify-between group"
+                className="p-3.5 rounded-xl border border-amber-400/30 bg-white/15 hover:bg-white/25 transition-all flex items-center justify-between group shadow-xs backdrop-blur-md"
               >
                 <div>
-                  <p className="text-xs font-bold text-gray-900 group-hover:text-amber-950">Access Control & Admin</p>
-                  <p className="text-[11px] text-gray-500">Review and approve new member registration requests</p>
+                  <p className="text-xs font-bold text-white group-hover:text-amber-300">Access Control &amp; Admin</p>
+                  <p className="text-[11px] text-white/70">Review and approve new member registration requests</p>
                 </div>
-                <ShieldCheck className="w-4 h-4 text-amber-700 shrink-0" />
+                <ShieldCheck className="w-4 h-4 text-amber-300 shrink-0" />
               </Link>
             )}
           </div>

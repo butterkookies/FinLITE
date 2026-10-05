@@ -374,7 +374,7 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#f8faf9]">
+    <div className="min-h-screen flex flex-col">
       
       {/* Top Navigation */}
       <ModuleErrorBoundary moduleName="Navigation Bar">

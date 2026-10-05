@@ -22,11 +22,18 @@ export const viewport = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body 
-        className="min-h-screen bg-[#f8faf9] text-gray-900 selection:bg-emerald-100 selection:text-emerald-900 select-none overscroll-none"
+      <body
+        className="min-h-screen text-gray-900 selection:bg-emerald-100 selection:text-emerald-900 select-none overscroll-none"
         suppressHydrationWarning
       >
-        {children}
+        {/* Forest Mist Aura Background */}
+        <div style={{ position: 'relative', minHeight: '100dvh', overflow: 'hidden' }}>
+          <div className="aura-layer-1" />
+          <div className="aura-layer-2" />
+          <div className="aura-content">
+            {children}
+          </div>
+        </div>
       </body>
     </html>
   );

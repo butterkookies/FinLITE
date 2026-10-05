@@ -216,37 +216,37 @@ export default function AdminPage() {
   });
 
   return (
-    <div className="min-h-screen bg-[#f8faf9] flex flex-col font-sans">
+    <div className="min-h-screen flex flex-col font-sans">
       
       {/* Top Header */}
-      <header className="sticky top-0 z-30 bg-white/90 backdrop-blur-md border-b border-black/[0.06] shadow-xs">
+      <header className="sticky top-0 z-30 bg-black/20 backdrop-blur-xl border-b border-white/[0.07] transition-all">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
           
           {/* Left: Branding & Portal Badge */}
           <div className="flex items-center gap-3">
             <Link 
               href="/" 
-              className="flex items-center gap-2 p-1.5 rounded-xl hover:bg-gray-100 transition-colors text-gray-600 hover:text-gray-900"
+              className="flex items-center gap-2 p-1.5 rounded-xl hover:bg-white/[0.08] transition-colors text-white/50 hover:text-white"
               title="Return to Main Dashboard"
             >
               <ArrowLeft className="w-5 h-5" />
             </Link>
 
-            <div className="h-6 w-px bg-gray-200" />
+            <div className="h-6 w-px bg-white/[0.08]" />
 
             <div className="flex items-center gap-2.5">
-              <div className="w-9 h-9 rounded-xl bg-emerald-800 flex items-center justify-center text-emerald-100 shadow-xs">
+              <div className="w-9 h-9 rounded-xl bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center text-emerald-300 shadow-xs">
                 <ShieldCheck className="w-5 h-5" />
               </div>
               <div>
                 <div className="flex items-center gap-2">
-                  <span className="text-base font-bold text-gray-950">FinLITE Admin Console</span>
-                  <span className="px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider bg-gray-100 text-gray-800 border border-black/[0.08] rounded-md">
+                  <span className="text-base font-bold text-white">FinLITE Admin Console</span>
+                  <span className="px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider bg-white/[0.08] text-white/60 border border-white/[0.08] rounded-md">
                     Access Control
                   </span>
                 </div>
-                <p className="text-xs text-gray-500 font-medium">
-                  User Registration Verification & Role Management
+                <p className="text-xs text-emerald-400/70 font-medium">
+                  User Registration Verification &amp; Role Management
                 </p>
               </div>
             </div>
@@ -254,27 +254,27 @@ export default function AdminPage() {
 
           {/* Right: Identity & Actions */}
           <div className="flex items-center gap-2.5">
-            <div className="hidden md:flex items-center gap-2 px-3 py-1.5 bg-gray-50 border border-black/[0.08] rounded-xl">
-              <ShieldCheck className="w-3.5 h-3.5 text-emerald-700 shrink-0" />
+            <div className="hidden md:flex items-center gap-2 px-3 py-1.5 bg-white/[0.06] border border-white/[0.08] rounded-xl">
+              <ShieldCheck className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
               <div className="text-right">
-                <p className="text-xs font-semibold text-gray-800">geronimoandreijohn.pdm@gmail.com</p>
-                <p className="text-[10px] text-gray-500 font-medium">Super Administrator</p>
+                <p className="text-xs font-semibold text-white/80">geronimoandreijohn.pdm@gmail.com</p>
+                <p className="text-[10px] text-white/40 font-medium">Super Administrator</p>
               </div>
             </div>
 
             <button
               onClick={() => fetchData(true)}
               disabled={isRefreshing}
-              className="h-9 px-3 text-xs font-semibold text-gray-800 bg-white hover:bg-gray-50 active:bg-gray-100 border border-black/[0.08] rounded-xl transition-all shadow-xs flex items-center gap-1.5 disabled:opacity-50 cursor-pointer"
+              className="h-9 px-3 text-xs font-semibold text-white/70 bg-white/[0.06] hover:bg-white/[0.10] active:bg-white/[0.15] border border-white/[0.08] rounded-xl transition-all shadow-xs flex items-center gap-1.5 disabled:opacity-50 cursor-pointer"
               title="Refresh Records"
             >
-              <RefreshCw className={`w-3.5 h-3.5 text-gray-600 ${isRefreshing ? 'animate-spin' : ''}`} />
+              <RefreshCw className={`w-3.5 h-3.5 text-white/50 ${isRefreshing ? 'animate-spin' : ''}`} />
               <span className="hidden sm:inline">Refresh</span>
             </button>
 
             <Link
               href="/"
-              className="px-3.5 py-2 text-xs font-semibold text-white bg-emerald-700 hover:bg-emerald-800 rounded-xl transition-all shadow-xs flex items-center gap-1.5"
+              className="px-3.5 py-2 text-xs font-semibold text-white bg-emerald-600 hover:bg-emerald-500 rounded-xl transition-all shadow-xs flex items-center gap-1.5"
             >
               <span>Main Ledger</span>
               <ExternalLink className="w-3.5 h-3.5" />
@@ -290,19 +290,19 @@ export default function AdminPage() {
         {/* Feedback Alert */}
         {feedback && (
           <div 
-            className={`mb-6 p-4 rounded-xl border flex items-center justify-between animate-in fade-in slide-in-from-top-2 duration-200 ${
+            className={`mb-6 p-4 rounded-xl border flex items-center justify-between animate-in fade-in slide-in-from-top-2 duration-200 shadow-sm ${
               feedback.type === 'success' 
-                ? 'bg-emerald-50 border-emerald-200 text-emerald-900' 
-                : 'bg-red-50 border-red-200 text-red-900'
+                ? 'bg-emerald-50 border-emerald-200 text-emerald-950' 
+                : 'bg-rose-50 border-rose-200 text-rose-950'
             }`}
           >
             <div className="flex items-center gap-2.5">
               {feedback.type === 'success' ? (
-                <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0" />
+                <CheckCircle2 className="w-5 h-5 text-emerald-700 shrink-0" />
               ) : (
-                <AlertTriangle className="w-5 h-5 text-red-600 shrink-0" />
+                <AlertTriangle className="w-5 h-5 text-rose-700 shrink-0" />
               )}
-              <span className="text-sm font-medium">{feedback.text}</span>
+              <span className="text-sm font-semibold">{feedback.text}</span>
             </div>
             <button 
               onClick={() => setFeedback(null)} 
@@ -313,7 +313,7 @@ export default function AdminPage() {
           </div>
         )}
 
-        {/* Overview Metric Cards */}
+        {/* Overview Metric Cards (Clean solid white style as in user screenshot) */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
           
           {/* Pending Approvals Card */}
@@ -321,7 +321,7 @@ export default function AdminPage() {
             onClick={() => setActiveTab('pending')}
             className={`p-5 rounded-2xl border transition-all cursor-pointer ${
               activeTab === 'pending'
-                ? 'bg-amber-50/70 border-amber-300 ring-2 ring-amber-400/30 shadow-sm'
+                ? 'bg-amber-50/90 border-amber-300 ring-2 ring-amber-400/30 shadow-sm'
                 : 'bg-white border-black/[0.06] hover:border-amber-200 hover:shadow-xs'
             }`}
           >
@@ -353,7 +353,7 @@ export default function AdminPage() {
             onClick={() => setActiveTab('users')}
             className={`p-5 rounded-2xl border transition-all cursor-pointer ${
               activeTab === 'users'
-                ? 'bg-emerald-50/70 border-emerald-300 ring-2 ring-emerald-400/30 shadow-sm'
+                ? 'bg-emerald-50/90 border-emerald-300 ring-2 ring-emerald-400/30 shadow-sm'
                 : 'bg-white border-black/[0.06] hover:border-emerald-200 hover:shadow-xs'
             }`}
           >
@@ -369,7 +369,7 @@ export default function AdminPage() {
               <span className="text-2xl sm:text-3xl font-black tracking-tight text-gray-950">
                 {users.length || stats.approved}
               </span>
-              <span className="text-xs font-medium text-emerald-700">Verified</span>
+              <span className="text-xs font-semibold text-emerald-700">Verified</span>
             </div>
             <p className="text-[11px] text-gray-500 mt-1 font-medium">
               Authorized organizational members
@@ -381,7 +381,7 @@ export default function AdminPage() {
             onClick={() => setActiveTab('rejected')}
             className={`p-5 rounded-2xl border transition-all cursor-pointer ${
               activeTab === 'rejected'
-                ? 'bg-rose-50/70 border-rose-300 ring-2 ring-rose-400/30 shadow-sm'
+                ? 'bg-rose-50/90 border-rose-300 ring-2 ring-rose-400/30 shadow-sm'
                 : 'bg-white border-black/[0.06] hover:border-rose-200 hover:shadow-xs'
             }`}
           >
@@ -409,7 +409,7 @@ export default function AdminPage() {
             onClick={() => setActiveTab('approved')}
             className={`p-5 rounded-2xl border transition-all cursor-pointer ${
               activeTab === 'approved'
-                ? 'bg-indigo-50/70 border-indigo-300 ring-2 ring-indigo-400/30 shadow-sm'
+                ? 'bg-indigo-50/90 border-indigo-300 ring-2 ring-indigo-400/30 shadow-sm'
                 : 'bg-white border-black/[0.06] hover:border-indigo-200 hover:shadow-xs'
             }`}
           >
@@ -434,18 +434,18 @@ export default function AdminPage() {
 
         </div>
 
-        {/* Tab Navigation & Search Bar */}
-        <div className="bg-white rounded-2xl border border-black/[0.06] p-4 mb-6 shadow-xs">
+        {/* Tab Navigation & Search Bar — TRANSPARENT WHITE FROSTED GLASS */}
+        <div className="rounded-2xl border border-white/30 bg-white/20 backdrop-blur-xl p-4 mb-6 shadow-2xl">
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
             
             {/* Tabs */}
-            <div className="flex items-center gap-1.5 p-1 bg-gray-100/80 rounded-xl overflow-x-auto">
+            <div className="flex items-center gap-1.5 p-1 bg-black/15 rounded-xl overflow-x-auto">
               <button
                 onClick={() => setActiveTab('pending')}
                 className={`px-3.5 py-1.5 text-xs font-semibold rounded-lg transition-all flex items-center gap-2 whitespace-nowrap cursor-pointer ${
                   activeTab === 'pending'
-                    ? 'bg-white text-gray-950 shadow-xs'
-                    : 'text-gray-600 hover:text-gray-900'
+                    ? 'bg-emerald-500 text-white font-bold shadow-md border border-emerald-300/40'
+                    : 'text-white/80 hover:text-white hover:bg-white/20'
                 }`}
               >
                 <span>Pending Approvals</span>
@@ -460,12 +460,12 @@ export default function AdminPage() {
                 onClick={() => setActiveTab('users')}
                 className={`px-3.5 py-1.5 text-xs font-semibold rounded-lg transition-all flex items-center gap-2 whitespace-nowrap cursor-pointer ${
                   activeTab === 'users'
-                    ? 'bg-white text-gray-950 shadow-xs'
-                    : 'text-gray-600 hover:text-gray-900'
+                    ? 'bg-emerald-500 text-white font-bold shadow-md border border-emerald-300/40'
+                    : 'text-white/80 hover:text-white hover:bg-white/20'
                 }`}
               >
                 <span>Active Officers</span>
-                <span className="px-1.5 py-0.2 rounded-full text-[10px] font-medium bg-gray-200 text-gray-700">
+                <span className="px-1.5 py-0.2 rounded-full text-[10px] font-semibold bg-white/20 text-white">
                   {users.length}
                 </span>
               </button>
@@ -474,12 +474,12 @@ export default function AdminPage() {
                 onClick={() => setActiveTab('approved')}
                 className={`px-3.5 py-1.5 text-xs font-semibold rounded-lg transition-all flex items-center gap-2 whitespace-nowrap cursor-pointer ${
                   activeTab === 'approved'
-                    ? 'bg-white text-gray-950 shadow-xs'
-                    : 'text-gray-600 hover:text-gray-900'
+                    ? 'bg-emerald-500 text-white font-bold shadow-md border border-emerald-300/40'
+                    : 'text-white/80 hover:text-white hover:bg-white/20'
                 }`}
               >
                 <span>Approved Requests</span>
-                <span className="px-1.5 py-0.2 rounded-full text-[10px] font-medium bg-gray-200 text-gray-700">
+                <span className="px-1.5 py-0.2 rounded-full text-[10px] font-semibold bg-white/20 text-white">
                   {stats.approved}
                 </span>
               </button>
@@ -488,12 +488,12 @@ export default function AdminPage() {
                 onClick={() => setActiveTab('rejected')}
                 className={`px-3.5 py-1.5 text-xs font-semibold rounded-lg transition-all flex items-center gap-2 whitespace-nowrap cursor-pointer ${
                   activeTab === 'rejected'
-                    ? 'bg-white text-gray-950 shadow-xs'
-                    : 'text-gray-600 hover:text-gray-900'
+                    ? 'bg-emerald-500 text-white font-bold shadow-md border border-emerald-300/40'
+                    : 'text-white/80 hover:text-white hover:bg-white/20'
                 }`}
               >
                 <span>Declined</span>
-                <span className="px-1.5 py-0.2 rounded-full text-[10px] font-medium bg-gray-200 text-gray-700">
+                <span className="px-1.5 py-0.2 rounded-full text-[10px] font-semibold bg-white/20 text-white">
                   {stats.rejected}
                 </span>
               </button>
@@ -501,34 +501,34 @@ export default function AdminPage() {
 
             {/* Search Input */}
             <div className="relative min-w-[240px]">
-              <Search className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+              <Search className="w-4 h-4 text-white/60 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
               <input
                 type="text"
                 placeholder="Search by name, email, phone..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full text-xs font-medium text-gray-800 bg-gray-50 border border-gray-200 rounded-xl pl-9 pr-3.5 py-2 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all placeholder:text-gray-400"
+                className="w-full text-xs font-medium text-white bg-white/20 focus:bg-white/30 border border-white/30 rounded-xl pl-9 pr-3.5 py-2 focus:outline-none focus:ring-2 focus:ring-white/40 transition-all placeholder:text-white/60 select-text shadow-xs"
               />
             </div>
 
           </div>
         </div>
 
-        {/* Tab 1: Pending Approvals View */}
+        {/* Tab 1: Pending Approvals View — TRANSPARENT WHITE FROSTED GLASS */}
         {activeTab === 'pending' && (
           <div className="space-y-3">
             {isLoading ? (
-              <div className="p-12 text-center bg-white rounded-2xl border border-black/[0.06]">
-                <RefreshCw className="w-6 h-6 text-emerald-600 animate-spin mx-auto mb-2" />
-                <p className="text-xs text-gray-500 font-medium">Loading pending registration requests...</p>
+              <div className="p-12 text-center rounded-2xl border border-white/30 bg-white/20 backdrop-blur-xl shadow-2xl">
+                <RefreshCw className="w-6 h-6 text-emerald-300 animate-spin mx-auto mb-2" />
+                <p className="text-xs text-white/80 font-medium">Loading pending registration requests...</p>
               </div>
             ) : filteredRequests.length === 0 ? (
-              <div className="p-16 text-center bg-white rounded-2xl border border-black/[0.06]">
-                <div className="w-12 h-12 rounded-2xl bg-emerald-50 border border-emerald-100 flex items-center justify-center text-emerald-600 mx-auto mb-3">
+              <div className="p-16 text-center rounded-2xl border border-white/30 bg-white/20 backdrop-blur-xl shadow-2xl">
+                <div className="w-12 h-12 rounded-2xl bg-emerald-400/20 border border-emerald-400/30 flex items-center justify-center text-emerald-300 mx-auto mb-3">
                   <CheckCircle2 className="w-6 h-6" />
                 </div>
-                <h3 className="text-base font-bold text-gray-900 mb-1">Queue is Clear!</h3>
-                <p className="text-xs text-gray-500 max-w-sm mx-auto">
+                <h3 className="text-base font-bold text-white mb-1 drop-shadow-xs">Queue is Clear!</h3>
+                <p className="text-xs text-white/80 max-w-sm mx-auto font-medium">
                   {searchQuery ? 'No pending requests matched your search query.' : 'There are currently no new registration requests awaiting approval.'}
                 </p>
               </div>
@@ -536,40 +536,40 @@ export default function AdminPage() {
               filteredRequests.map((req) => (
                 <div 
                   key={req.id}
-                  className="bg-white rounded-2xl border border-black/[0.06] p-5 hover:border-black/[0.12] transition-all shadow-xs flex flex-col lg:flex-row lg:items-center justify-between gap-4"
+                  className="rounded-2xl border border-white/30 bg-white/20 backdrop-blur-xl p-5 hover:bg-white/25 transition-all shadow-xl flex flex-col lg:flex-row lg:items-center justify-between gap-4"
                 >
                   {/* Left: Applicant Identity */}
                   <div className="flex items-start gap-4">
-                    <div className="w-11 h-11 rounded-2xl bg-emerald-100/80 border border-emerald-200/60 flex items-center justify-center text-emerald-800 font-bold text-base shrink-0">
+                    <div className="w-11 h-11 rounded-2xl bg-emerald-500/25 border border-emerald-400/40 flex items-center justify-center text-emerald-200 font-bold text-base shrink-0 shadow-xs">
                       {req.first_name?.[0]?.toUpperCase() || 'U'}
                       {req.last_name?.[0]?.toUpperCase() || ''}
                     </div>
 
                     <div>
                       <div className="flex items-center gap-2 flex-wrap">
-                        <h4 className="text-sm sm:text-base font-bold text-gray-950">
+                        <h4 className="text-sm sm:text-base font-bold text-white drop-shadow-xs">
                           {req.first_name} {req.last_name}
                         </h4>
-                        <span className="px-2 py-0.5 text-[10px] font-semibold bg-gray-100 text-gray-700 rounded-md">
+                        <span className="px-2 py-0.5 text-[10px] font-semibold bg-white/20 border border-white/30 text-white rounded-md">
                           {req.auth_provider === 'google' ? 'Google OAuth' : 'Email/Password'}
                         </span>
-                        <span className="px-2 py-0.5 text-[10px] font-bold bg-amber-100 text-amber-800 rounded-md uppercase tracking-wider">
+                        <span className="px-2 py-0.5 text-[10px] font-bold bg-amber-400/20 text-amber-200 border border-amber-400/30 rounded-md uppercase tracking-wider">
                           Pending Approval
                         </span>
                       </div>
 
-                      <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-1 text-xs text-gray-500 font-medium">
+                      <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-1 text-xs text-white/80 font-medium">
                         <div className="flex items-center gap-1.5">
-                          <Mail className="w-3.5 h-3.5 text-gray-400" />
-                          <span className="text-gray-800 font-semibold">{req.email}</span>
+                          <Mail className="w-3.5 h-3.5 text-white/60" />
+                          <span className="text-white font-semibold">{req.email}</span>
                         </div>
                         {req.contact_number && (
                           <div className="flex items-center gap-1.5">
-                            <Phone className="w-3.5 h-3.5 text-gray-400" />
+                            <Phone className="w-3.5 h-3.5 text-white/60" />
                             <span>{req.contact_number}</span>
                           </div>
                         )}
-                        <div className="flex items-center gap-1.5 text-gray-400">
+                        <div className="flex items-center gap-1.5 text-white/60">
                           <Calendar className="w-3.5 h-3.5" />
                           <span>Submitted: {new Date(req.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' })}</span>
                         </div>
@@ -578,20 +578,20 @@ export default function AdminPage() {
                   </div>
 
                   {/* Right: Role Assignment & Action Controls */}
-                  <div className="flex items-center gap-2.5 pt-3 lg:pt-0 border-t lg:border-t-0 border-gray-100 justify-end flex-wrap">
+                  <div className="flex items-center gap-2.5 pt-3 lg:pt-0 border-t lg:border-t-0 border-white/15 justify-end flex-wrap">
                     
                     {/* Role Dropdown */}
                     <div className="flex items-center gap-1.5">
-                      <span className="text-[11px] font-bold text-gray-500 uppercase tracking-wider hidden sm:inline">
+                      <span className="text-[11px] font-bold text-white/70 uppercase tracking-wider hidden sm:inline">
                         Assign Role:
                       </span>
                       <select
                         value={selectedRoles[req.id] || 'treasurer'}
                         onChange={(e) => setSelectedRoles((prev) => ({ ...prev, [req.id]: e.target.value }))}
-                        className="text-xs font-semibold text-gray-800 bg-gray-50 border border-gray-200 rounded-xl px-3 py-2 cursor-pointer focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
+                        className="text-xs font-semibold text-white bg-white/20 border border-white/30 rounded-xl px-3 py-2 cursor-pointer focus:outline-none focus:ring-2 focus:ring-white/40 shadow-xs"
                       >
                         {ROLE_OPTIONS.map((opt) => (
-                          <option key={opt.value} value={opt.value}>
+                          <option key={opt.value} value={opt.value} className="bg-[#0d2416] text-white">
                             {opt.label}
                           </option>
                         ))}
@@ -602,7 +602,7 @@ export default function AdminPage() {
                     <button
                       onClick={() => handleOpenReject(req)}
                       disabled={isSubmittingAction}
-                      className="px-3 py-2 text-xs font-semibold text-rose-700 bg-rose-50 hover:bg-rose-100 border border-rose-200/80 rounded-xl transition-all cursor-pointer disabled:opacity-50"
+                      className="px-3 py-2 text-xs font-semibold text-rose-200 bg-rose-500/20 hover:bg-rose-500/30 border border-rose-400/30 rounded-xl transition-all cursor-pointer disabled:opacity-50"
                     >
                       Decline
                     </button>
@@ -611,7 +611,7 @@ export default function AdminPage() {
                     <button
                       onClick={() => handleApprove(req.id)}
                       disabled={isSubmittingAction}
-                      className="px-4 py-2 text-xs font-bold text-white bg-emerald-700 hover:bg-emerald-800 rounded-xl transition-all shadow-xs flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
+                      className="px-4 py-2 text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-500 border border-emerald-400/30 rounded-xl transition-all shadow-md flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
                     >
                       <CheckCircle2 className="w-3.5 h-3.5" />
                       <span>Approve Access</span>
@@ -626,44 +626,44 @@ export default function AdminPage() {
 
         {/* Tab 2: Active Officers / Users View */}
         {activeTab === 'users' && (
-          <div className="bg-white rounded-2xl border border-black/[0.06] overflow-hidden shadow-xs">
-            <div className="p-4 border-b border-gray-100 bg-gray-50/50 flex items-center justify-between">
+          <div className="rounded-2xl border border-white/30 bg-white/20 backdrop-blur-xl overflow-hidden shadow-2xl">
+            <div className="p-4 border-b border-white/15 bg-black/15 flex items-center justify-between">
               <div>
-                <h3 className="text-sm font-bold text-gray-900">Active FinLITE Officers & Board Members</h3>
-                <p className="text-xs text-gray-500">Authorized accounts with access to financial operations</p>
+                <h3 className="text-sm font-bold text-white drop-shadow-xs">Active FinLITE Officers &amp; Board Members</h3>
+                <p className="text-xs text-white/80">Authorized accounts with access to financial operations</p>
               </div>
-              <span className="text-xs font-semibold text-emerald-800 bg-emerald-100 px-2.5 py-1 rounded-lg">
+              <span className="text-xs font-semibold text-emerald-200 bg-emerald-400/20 border border-emerald-400/30 px-2.5 py-1 rounded-lg">
                 {filteredUsers.length} Active Accounts
               </span>
             </div>
 
             {filteredUsers.length === 0 ? (
-              <div className="p-12 text-center text-xs text-gray-500">
+              <div className="p-12 text-center text-xs text-white/70 font-semibold">
                 No users found.
               </div>
             ) : (
-              <div className="divide-y divide-gray-100">
+              <div className="divide-y divide-white/10">
                 {filteredUsers.map((user) => (
-                  <div key={user.id} className="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:bg-gray-50/60 transition-colors">
+                  <div key={user.id} className="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:bg-white/15 transition-colors">
                     <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-xl bg-emerald-50 border border-emerald-100 flex items-center justify-center text-emerald-700 font-bold text-sm shrink-0">
+                      <div className="w-10 h-10 rounded-xl bg-emerald-500/25 border border-emerald-400/40 flex items-center justify-center text-emerald-200 font-bold text-sm shrink-0">
                         {user.first_name?.[0] || user.full_name?.[0] || 'U'}
                       </div>
                       <div>
                         <div className="flex items-center gap-2">
-                          <span className="text-sm font-bold text-gray-950">
+                          <span className="text-sm font-bold text-white drop-shadow-2xs">
                             {user.full_name || `${user.first_name || ''} ${user.last_name || ''}`.trim()}
                           </span>
-                          <span className="px-2 py-0.5 text-[10px] font-bold uppercase rounded-md bg-emerald-100 text-emerald-800">
+                          <span className="px-2 py-0.5 text-[10px] font-bold uppercase rounded-md bg-emerald-400/20 text-emerald-200 border border-emerald-400/30">
                             {user.role}
                           </span>
                           {user.email === 'geronimoandreijohn.pdm@gmail.com' && (
-                            <span className="px-2 py-0.5 text-[10px] font-bold uppercase rounded-md bg-purple-100 text-purple-800">
+                            <span className="px-2 py-0.5 text-[10px] font-bold uppercase rounded-md bg-purple-400/20 text-purple-200 border border-purple-400/30">
                               Primary Super Admin
                             </span>
                           )}
                         </div>
-                        <p className="text-xs text-gray-500 font-medium mt-0.5">
+                        <p className="text-xs text-white/70 font-medium mt-0.5">
                           {user.email} {user.contact_number ? `• ${user.contact_number}` : ''}
                         </p>
                       </div>
@@ -671,14 +671,14 @@ export default function AdminPage() {
 
                     {/* Change Role Selector */}
                     <div className="flex items-center gap-2 self-end sm:self-center">
-                      <span className="text-[11px] font-semibold text-gray-500">Change Role:</span>
+                      <span className="text-[11px] font-semibold text-white/70">Change Role:</span>
                       <select
                         value={user.role}
                         onChange={(e) => handleUpdateUserRole(user.id, e.target.value)}
-                        className="text-xs font-semibold text-gray-800 bg-gray-50 border border-gray-200 rounded-xl px-2.5 py-1.5 cursor-pointer focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
+                        className="text-xs font-semibold text-white bg-white/20 border border-white/30 rounded-xl px-2.5 py-1.5 cursor-pointer focus:outline-none focus:ring-2 focus:ring-white/40 shadow-xs"
                       >
                         {ROLE_OPTIONS.map((opt) => (
-                          <option key={opt.value} value={opt.value}>
+                          <option key={opt.value} value={opt.value} className="bg-[#0d2416] text-white">
                             {opt.label}
                           </option>
                         ))}
@@ -695,28 +695,28 @@ export default function AdminPage() {
         {activeTab === 'approved' && (
           <div className="space-y-3">
             {filteredRequests.length === 0 ? (
-              <div className="p-12 text-center bg-white rounded-2xl border border-black/[0.06] text-xs text-gray-500 font-medium">
+              <div className="p-12 text-center rounded-2xl border border-white/30 bg-white/20 backdrop-blur-xl text-xs text-white/70 font-semibold shadow-2xl">
                 No approved request records found.
               </div>
             ) : (
               filteredRequests.map((req) => (
-                <div key={req.id} className="bg-white rounded-2xl border border-black/[0.06] p-4 flex items-center justify-between gap-4">
+                <div key={req.id} className="rounded-2xl border border-white/30 bg-white/20 backdrop-blur-xl p-4 flex items-center justify-between gap-4 shadow-xl">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-700 flex items-center justify-center font-bold text-sm">
-                      <CheckCircle2 className="w-5 h-5 text-emerald-600" />
+                    <div className="w-10 h-10 rounded-xl bg-emerald-500/25 border border-emerald-400/40 text-emerald-300 flex items-center justify-center font-bold text-sm">
+                      <CheckCircle2 className="w-5 h-5 text-emerald-300" />
                     </div>
                     <div>
                       <div className="flex items-center gap-2">
-                        <span className="text-sm font-bold text-gray-900">{req.first_name} {req.last_name}</span>
-                        <span className="px-2 py-0.5 text-[10px] font-bold uppercase rounded-md bg-emerald-100 text-emerald-800">
+                        <span className="text-sm font-bold text-white">{req.first_name} {req.last_name}</span>
+                        <span className="px-2 py-0.5 text-[10px] font-bold uppercase rounded-md bg-emerald-400/20 text-emerald-200 border border-emerald-400/30">
                           {req.requested_role}
                         </span>
                       </div>
-                      <p className="text-xs text-gray-500 font-medium">{req.email}</p>
+                      <p className="text-xs text-white/70 font-medium">{req.email}</p>
                     </div>
                   </div>
 
-                  <span className="text-[11px] text-gray-400 font-medium">
+                  <span className="text-[11px] text-white/60 font-medium">
                     Approved: {req.reviewed_at ? new Date(req.reviewed_at).toLocaleDateString() : 'Active'}
                   </span>
                 </div>
@@ -729,28 +729,28 @@ export default function AdminPage() {
         {activeTab === 'rejected' && (
           <div className="space-y-3">
             {filteredRequests.length === 0 ? (
-              <div className="p-12 text-center bg-white rounded-2xl border border-black/[0.06] text-xs text-gray-500 font-medium">
+              <div className="p-12 text-center rounded-2xl border border-white/30 bg-white/20 backdrop-blur-xl text-xs text-white/70 font-semibold shadow-2xl">
                 No declined requests recorded.
               </div>
             ) : (
               filteredRequests.map((req) => (
-                <div key={req.id} className="bg-white rounded-2xl border border-rose-100 p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div key={req.id} className="rounded-2xl border border-rose-400/30 bg-white/20 backdrop-blur-xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xl">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-rose-50 text-rose-700 flex items-center justify-center font-bold text-sm shrink-0">
-                      <XCircle className="w-5 h-5 text-rose-600" />
+                    <div className="w-10 h-10 rounded-xl bg-rose-500/25 border border-rose-400/40 text-rose-300 flex items-center justify-center font-bold text-sm shrink-0">
+                      <XCircle className="w-5 h-5 text-rose-300" />
                     </div>
                     <div>
-                      <span className="text-sm font-bold text-gray-900">{req.first_name} {req.last_name}</span>
-                      <p className="text-xs text-gray-500 font-medium">{req.email}</p>
+                      <span className="text-sm font-bold text-white">{req.first_name} {req.last_name}</span>
+                      <p className="text-xs text-white/70 font-medium">{req.email}</p>
                       {req.rejection_reason && (
-                        <p className="text-xs text-rose-700 font-medium mt-1 bg-rose-50 px-2 py-0.5 rounded-md inline-block">
+                        <p className="text-xs text-rose-200 font-medium mt-1 bg-rose-950/40 border border-rose-400/30 px-2 py-0.5 rounded-md inline-block">
                           Reason: {req.rejection_reason}
                         </p>
                       )}
                     </div>
                   </div>
 
-                  <span className="text-[11px] text-gray-400 font-medium">
+                  <span className="text-[11px] text-white/60 font-medium">
                     Declined: {req.reviewed_at ? new Date(req.reviewed_at).toLocaleDateString() : 'N/A'}
                   </span>
                 </div>
@@ -784,7 +784,7 @@ export default function AdminPage() {
               value={rejectionReason}
               onChange={(e) => setRejectionReason(e.target.value)}
               placeholder="e.g. Not an active officer, invalid student number..."
-              className="w-full text-xs font-medium text-gray-800 bg-gray-50 border border-gray-200 rounded-xl p-3 focus:bg-white focus:outline-none focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500 mb-4"
+              className="w-full text-xs font-medium text-gray-800 bg-gray-50 border border-gray-200 rounded-xl p-3 focus:bg-white focus:outline-none focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500 mb-4 select-text"
             />
 
             <div className="flex items-center justify-end gap-2.5">

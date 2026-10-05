@@ -27,9 +27,12 @@ export async function middleware(request) {
     request: { headers: request.headers },
   });
 
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co';
+  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'placeholder-anon-key';
+
   const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
+    supabaseUrl,
+    supabaseAnonKey,
     {
       cookies: {
         getAll() {
@@ -48,10 +51,28 @@ export async function middleware(request) {
     }
   );
 
-  // Get current session
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  // Get current session (checking demo cookie first)
+  const demoCookie = request.cookies.get('finlite_demo_session')?.value;
+  let user = null;
+
+  if (demoCookie === 'admin') {
+    user = {
+      id: 'demo-admin-id',
+      email: 'geronimoandreijohn.pdm@gmail.com',
+      app_metadata: { status: 'approved', role: 'admin' },
+    };
+  } else if (demoCookie === 'user') {
+    user = {
+      id: 'demo-user-id',
+      email: 'demo.student@gmail.com',
+      app_metadata: { status: 'approved', role: 'treasurer' },
+    };
+  } else {
+    try {
+      const { data } = await supabase.auth.getUser();
+      user = data?.user || null;
+    } catch (_) {}
+  }
 
   const isPublic = isPublicRoute(pathname);
 

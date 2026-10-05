@@ -467,6 +467,12 @@ console.log('\n============================================================');
 console.log('6. RUNNING DOCX EXPORT ENGINE TESTS & STRESS LOAD');
 console.log('============================================================');
 
+let pythonCmd = 'python';
+try {
+  execFileSync('py', ['--version'], { stdio: 'ignore' });
+  pythonCmd = 'py';
+} catch {}
+
 function testDocxSingle() {
   const dummyPayload = {
     metadata: {
@@ -510,7 +516,7 @@ function testDocxSingle() {
   fs.writeFileSync(tempJson, JSON.stringify(dummyPayload, null, 2));
 
   const tStart = performance.now();
-  execFileSync('python', ['scripts/export_report_engine.py', tempJson, tempOutput]);
+  execFileSync(pythonCmd, ['scripts/export_report_engine.py', tempJson, tempOutput]);
   const tElapsed = performance.now() - tStart;
 
   assert(fs.existsSync(tempOutput), 'DOCX export file was created on disk');
@@ -564,7 +570,7 @@ for (let i = 0; i < 5; i++) {
   fs.writeFileSync(jsonFile, JSON.stringify(payload));
 
   const job = new Promise((resolve, reject) => {
-    const proc = spawn('python', ['scripts/export_report_engine.py', jsonFile, outFile]);
+    const proc = spawn(pythonCmd, ['scripts/export_report_engine.py', jsonFile, outFile]);
     proc.on('close', code => {
       if (code === 0 && fs.existsSync(outFile)) {
         resolve({ index: i, size: fs.statSync(outFile).size });

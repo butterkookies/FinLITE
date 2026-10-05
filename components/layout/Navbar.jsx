@@ -51,13 +51,13 @@ export default function Navbar({
   };
 
   return (
-    <header className="sticky top-0 z-30 bg-white/85 backdrop-blur-md border-b border-black/[0.06] transition-all">
+    <header className="sticky top-0 z-30 bg-black/20 backdrop-blur-xl border-b border-white/[0.07] transition-all">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
         
         {/* Left: Organization Branding & Semester Switcher */}
         <div className="flex items-center gap-2 sm:gap-3 min-w-0">
           <div className="flex items-center gap-2 min-w-0">
-            {/* Flat Transparent LITE Logo without squircle container */}
+            {/* Logo */}
             <div className="w-8 h-8 sm:w-9 sm:h-9 flex items-center justify-center shrink-0">
               <Image 
                 src="/assets/lite-logo.png" 
@@ -70,19 +70,19 @@ export default function Navbar({
             </div>
             <div className="min-w-0">
               <div className="flex items-center gap-1.5">
-                <span className="text-sm sm:text-base font-bold tracking-tight text-gray-950">FinLITE</span>
+                <span className="text-sm sm:text-base font-bold tracking-tight text-white">FinLITE</span>
               </div>
-              <p className="text-[10px] sm:text-[11px] text-gray-500 font-medium leading-none truncate">
-                <span className="md:hidden">LITE <span className="text-gray-300 mx-0.5">/</span> PDM</span>
-                <span className="hidden md:inline">LITE <span className="text-gray-300 mx-0.5">/</span> Pambayang Dalubhasaan ng Marilao</span>
+              <p className="text-[10px] sm:text-[11px] text-emerald-400/70 font-medium leading-none truncate">
+                <span className="md:hidden">LITE <span className="text-white/20 mx-0.5">/</span> PDM</span>
+                <span className="hidden md:inline">LITE <span className="text-white/20 mx-0.5">/</span> Pambayang Dalubhasaan ng Marilao</span>
               </p>
             </div>
           </div>
 
           {/* Interactive Semester Switcher */}
-          <div className="flex items-center pl-2 sm:pl-3 border-l border-black/[0.08]">
+          <div className="flex items-center pl-2 sm:pl-3 border-l border-white/[0.08]">
             <div className="relative flex items-center">
-              <Calendar className="w-3.5 h-3.5 text-emerald-700 absolute left-2.5 pointer-events-none" />
+              <Calendar className="w-3.5 h-3.5 text-emerald-400 absolute left-2.5 pointer-events-none" />
               <select
                 value={currentSemester?.id || ''}
                 onChange={(e) => {
@@ -92,16 +92,16 @@ export default function Navbar({
                     onSelectSemester(e.target.value);
                   }
                 }}
-                className="h-9 text-[11px] sm:text-xs font-semibold text-gray-700 bg-white hover:bg-gray-50 border border-black/[0.08] pl-7 pr-6 rounded-xl appearance-none cursor-pointer focus:outline-none focus:ring-2 focus:ring-emerald-500/20 max-w-[110px] xs:max-w-[140px] sm:max-w-none truncate transition-colors"
+                className="h-9 text-[11px] sm:text-xs font-semibold text-white/80 bg-white/[0.06] hover:bg-white/[0.10] border border-white/[0.08] pl-7 pr-6 rounded-xl appearance-none cursor-pointer focus:outline-none focus:ring-2 focus:ring-emerald-500/30 max-w-[110px] xs:max-w-[140px] sm:max-w-none truncate transition-colors"
                 title="Select Academic Year / Semester or Start New Term"
               >
                 {semesters.map((s) => (
-                  <option key={s.id} value={s.id}>
+                  <option key={s.id} value={s.id} className="bg-[#0d2416] text-white">
                     {s.label}
                   </option>
                 ))}
                 {isOfficer && (
-                  <option value="NEW" className="text-emerald-700 font-bold">
+                  <option value="NEW" className="bg-[#0d2416] text-emerald-400 font-bold">
                     + Start New Semester...
                   </option>
                 )}
@@ -117,10 +117,10 @@ export default function Navbar({
           {isOfficer && (
             <button
               onClick={onOpenDenominations}
-              className="h-9 flex items-center justify-center gap-1.5 px-2.5 sm:px-3 text-xs font-semibold text-gray-700 bg-white hover:bg-gray-50 active:bg-gray-100 border border-black/[0.08] rounded-xl transition-all shadow-xs cursor-pointer whitespace-nowrap"
+              className="h-9 flex items-center justify-center gap-1.5 px-2.5 sm:px-3 text-xs font-semibold text-white/80 bg-white/[0.06] hover:bg-white/[0.10] active:bg-white/[0.15] border border-white/[0.08] rounded-xl transition-all shadow-xs cursor-pointer whitespace-nowrap"
               title="Open Cash Box & Denomination Counter"
             >
-              <Wallet className="w-3.5 h-3.5 text-emerald-700 shrink-0" />
+              <Wallet className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
               <span className="hidden sm:inline">Cash Box</span>
             </button>
           )}
@@ -128,10 +128,10 @@ export default function Navbar({
           {/* AI Co-Pilot Button */}
           <button
             onClick={onOpenAI}
-            className="h-9 flex items-center justify-center gap-1.5 px-2.5 sm:px-3 text-xs font-semibold text-gray-900 bg-white hover:bg-gray-50 active:bg-gray-100 border border-black/[0.08] rounded-xl transition-all shadow-xs cursor-pointer whitespace-nowrap"
+            className="h-9 flex items-center justify-center gap-1.5 px-2.5 sm:px-3 text-xs font-semibold text-white/80 bg-white/[0.06] hover:bg-white/[0.10] active:bg-white/[0.15] border border-white/[0.08] rounded-xl transition-all shadow-xs cursor-pointer whitespace-nowrap"
             title="FinLITE Grounded AI Co-Pilot"
           >
-            <Sparkles className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+            <Sparkles className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
             <span className="hidden sm:inline">AI Co-Pilot</span>
             <span className="sm:hidden text-[11px]">AI</span>
           </button>
@@ -140,23 +140,23 @@ export default function Navbar({
           {isAdmin && (
             <Link
               href="/admin"
-              className="h-9 flex items-center justify-center gap-1.5 px-2.5 sm:px-3 text-xs font-semibold text-gray-900 bg-white hover:bg-gray-50 active:bg-gray-100 border border-black/[0.08] rounded-xl transition-all shadow-xs whitespace-nowrap"
+              className="h-9 flex items-center justify-center gap-1.5 px-2.5 sm:px-3 text-xs font-semibold text-white/80 bg-white/[0.06] hover:bg-white/[0.10] active:bg-white/[0.15] border border-white/[0.08] rounded-xl transition-all shadow-xs whitespace-nowrap"
               title="Open Admin Console & Approvals"
             >
-              <ShieldCheck className="w-3.5 h-3.5 text-amber-600 shrink-0" />
+              <ShieldCheck className="w-3.5 h-3.5 text-amber-400 shrink-0" />
               <span className="hidden sm:inline">Admin</span>
             </Link>
           )}
 
           {/* User Profile Section (Top Right Corner) */}
-          <div className="relative pl-1.5 sm:pl-2 border-l border-black/[0.08]" ref={profileMenuRef}>
+          <div className="relative pl-1.5 sm:pl-2 border-l border-white/[0.08]" ref={profileMenuRef}>
             <button
               onClick={() => setIsProfileOpen(!isProfileOpen)}
-              className="flex items-center gap-2 p-1 rounded-xl hover:bg-gray-100 transition-all cursor-pointer focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
+              className="flex items-center gap-2 p-1 rounded-xl hover:bg-white/[0.08] transition-all cursor-pointer focus:outline-none focus:ring-2 focus:ring-emerald-500/30"
               title="View Account Profile"
             >
               {avatarUrl ? (
-                <div className="w-8 h-8 rounded-xl overflow-hidden border border-black/[0.08] shadow-2xs relative">
+                <div className="w-8 h-8 rounded-xl overflow-hidden border border-white/[0.12] shadow-2xs relative">
                   <img
                     src={avatarUrl}
                     alt={fullName}
@@ -168,31 +168,31 @@ export default function Navbar({
                   />
                 </div>
               ) : (
-                <div className="w-8 h-8 rounded-xl bg-gray-100 border border-black/[0.08] flex items-center justify-center text-gray-800 text-xs font-bold shadow-2xs">
+                <div className="w-8 h-8 rounded-xl bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center text-emerald-300 text-xs font-bold shadow-2xs">
                   {initial}
                 </div>
               )}
 
               <div className="hidden md:flex flex-col text-left">
-                <span className="text-xs font-bold text-gray-900 leading-tight truncate max-w-[110px]">
+                <span className="text-xs font-bold text-white/90 leading-tight truncate max-w-[110px]">
                   {fullName.split(' ')[0]}
                 </span>
-                <span className="text-[10px] font-semibold text-emerald-700 capitalize leading-none">
+                <span className="text-[10px] font-semibold text-emerald-400 capitalize leading-none">
                   {isAdmin ? 'Admin' : currentRole}
                 </span>
               </div>
 
-              <ChevronDown className="w-3 h-3 text-gray-400 hidden sm:block" />
+              <ChevronDown className="w-3 h-3 text-white/30 hidden sm:block" />
             </button>
 
             {/* Profile Dropdown Menu */}
             {isProfileOpen && (
-              <div className="absolute right-0 mt-2 w-64 bg-white rounded-2xl border border-black/[0.08] shadow-lg py-2 z-50 animate-in fade-in zoom-in-95 duration-100">
+              <div className="absolute right-0 mt-2 w-64 bg-[#0d2416]/95 backdrop-blur-xl rounded-2xl border border-white/[0.08] shadow-2xl py-2 z-50 animate-in fade-in zoom-in-95 duration-100">
                 {/* User Header Info */}
-                <div className="px-4 py-3 border-b border-black/[0.06]">
+                <div className="px-4 py-3 border-b border-white/[0.06]">
                   <div className="flex items-center gap-3">
                     {avatarUrl ? (
-                      <div className="w-10 h-10 rounded-xl overflow-hidden border border-black/[0.08] relative shrink-0">
+                      <div className="w-10 h-10 rounded-xl overflow-hidden border border-white/[0.12] relative shrink-0">
                         <img
                           src={avatarUrl}
                           alt={fullName}
@@ -204,14 +204,14 @@ export default function Navbar({
                         />
                       </div>
                     ) : (
-                      <div className="w-10 h-10 rounded-xl bg-gray-100 border border-black/[0.08] flex items-center justify-center text-gray-800 font-bold text-sm shrink-0">
+                      <div className="w-10 h-10 rounded-xl bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center text-emerald-300 font-bold text-sm shrink-0">
                         {initial}
                       </div>
                     )}
                     <div className="min-w-0">
-                      <p className="text-xs font-bold text-gray-950 truncate">{fullName}</p>
-                      <p className="text-[11px] text-gray-500 truncate">{email}</p>
-                      <span className="inline-block mt-1 px-1.5 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider bg-gray-100 text-gray-700 border border-black/[0.06]">
+                      <p className="text-xs font-bold text-white/90 truncate">{fullName}</p>
+                      <p className="text-[11px] text-white/40 truncate">{email}</p>
+                      <span className="inline-block mt-1 px-1.5 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider bg-emerald-500/15 text-emerald-400 border border-emerald-500/20">
                         {isAdmin ? 'Super Admin' : currentRole}
                       </span>
                     </div>
@@ -223,9 +223,9 @@ export default function Navbar({
                   <Link
                     href="/profile"
                     onClick={() => setIsProfileOpen(false)}
-                    className="flex items-center gap-2.5 px-4 py-2 text-xs font-semibold text-gray-700 hover:bg-gray-50 transition-colors"
+                    className="flex items-center gap-2.5 px-4 py-2 text-xs font-semibold text-white/70 hover:bg-white/[0.06] hover:text-white transition-colors"
                   >
-                    <User className="w-4 h-4 text-emerald-700" />
+                    <User className="w-4 h-4 text-emerald-400" />
                     <span>My Profile</span>
                   </Link>
 
@@ -233,21 +233,21 @@ export default function Navbar({
                     <Link
                       href="/admin"
                       onClick={() => setIsProfileOpen(false)}
-                      className="flex items-center gap-2.5 px-4 py-2 text-xs font-semibold text-amber-900 hover:bg-amber-50/60 transition-colors"
+                      className="flex items-center gap-2.5 px-4 py-2 text-xs font-semibold text-amber-400/80 hover:bg-amber-500/[0.08] hover:text-amber-300 transition-colors"
                     >
-                      <ShieldCheck className="w-4 h-4 text-amber-700" />
+                      <ShieldCheck className="w-4 h-4 text-amber-400" />
                       <span>Admin Console</span>
                     </Link>
                   )}
                 </div>
 
                 {/* Sign Out */}
-                <div className="pt-1 border-t border-gray-100">
+                <div className="pt-1 border-t border-white/[0.06]">
                   <button
                     onClick={handleSignOut}
-                    className="w-full flex items-center gap-2.5 px-4 py-2 text-xs font-semibold text-rose-600 hover:bg-rose-50 transition-colors cursor-pointer text-left"
+                    className="w-full flex items-center gap-2.5 px-4 py-2 text-xs font-semibold text-rose-400/80 hover:bg-rose-500/[0.08] hover:text-rose-300 transition-colors cursor-pointer text-left"
                   >
-                    <LogOut className="w-4 h-4 text-rose-600" />
+                    <LogOut className="w-4 h-4 text-rose-400" />
                     <span>Sign Out</span>
                   </button>
                 </div>

@@ -2,7 +2,7 @@
 
 @layer base {
   :root {
-    --bg-canvas: #f8faf9;
+    --bg-canvas: #100e0b;
     --bg-surface: #ffffff;
     --bg-subtle: #f3f5f4;
     --bg-inset: #eef2f0;
@@ -25,7 +25,8 @@
   }
 
   body {
-    background-color: var(--bg-canvas);
+    background-color: #100e0b;
+    min-height: 100dvh;
     color: var(--text-main);
     font-family: -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Roboto, sans-serif;
     -webkit-font-smoothing: antialiased;
@@ -55,6 +56,39 @@
   }
 }
 
+/* =============================================
+   FOREST MIST AURA BACKGROUND
+   ============================================= */
+
+/* Layer 1 - base gradient */
+.aura-layer-1 {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(140deg, #022c22 0%, #064e3b 35%, #065f46 60%, #047857 100%);
+  mix-blend-mode: normal;
+  transform: translateZ(0);
+  will-change: transform;
+  pointer-events: none;
+}
+
+/* Layer 2 - screen glow blob */
+.aura-layer-2 {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 55% 45%, rgba(52, 211, 153, 0.25) 0%, transparent 50%);
+  mix-blend-mode: screen;
+  filter: blur(113px);
+  transform: translateZ(0);
+  will-change: transform;
+  pointer-events: none;
+}
+
+/* Content sits above the absolute layers */
+.aura-content {
+  position: relative;
+  z-index: 1;
+}
+
 /* Custom scrollbar for modern subtle aesthetics */
 ::-webkit-scrollbar {
   width: 6px;
@@ -64,9 +98,9 @@
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: rgba(0, 0, 0, 0.12);
+  background: rgba(255, 255, 255, 0.15);
   border-radius: 9999px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(0, 0, 0, 0.2);
+  background: rgba(255, 255, 255, 0.25);
 }

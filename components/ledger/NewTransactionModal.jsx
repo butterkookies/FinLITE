@@ -1,6 +1,6 @@
 'use client';
 import { useState, useRef, useEffect } from 'react';
-import { Camera, Check, ChevronDown, Upload, X } from 'lucide-react';
+import { Camera, Check, ChevronDown, Upload, X, AlertCircle } from 'lucide-react';
 import { compressReceiptImage } from '@/lib/utils/compression';
 
 export default function NewTransactionModal({ isOpen, onClose, onSave, categories = [] }) {
@@ -19,6 +19,12 @@ export default function NewTransactionModal({ isOpen, onClose, onSave, categorie
   const [previewUrl, setPreviewUrl] = useState('');
   const [compressing, setCompressing] = useState(false);
 
+  // Validation & Form Submission State
+  const [errors, setErrors] = useState({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState('');
+  const [hasSubmitted, setHasSubmitted] = useState(false);
+
   useEffect(() => {
     function handleClickOutside(event) {
       if (categoryRef.current && !categoryRef.current.contains(event.target)) {
@@ -28,6 +34,70 @@ export default function NewTransactionModal({ isOpen, onClose, onSave, categorie
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
+
+  // Instant inline validation helper
+  const validateField = (fieldName, value, currentType = type, currentReimb = isReimbursement, currentRecipient = recipient) => {
+    let err = '';
+    if (fieldName === 'amount') {
+      const num = parseFloat(value);
+      if (!value || isNaN(num) || num <= 0) {
+        err = 'Please enter a valid amount greater than ₱0.00';
+      }
+    } else if (fieldName === 'title') {
+      if (!value || !value.trim()) {
+        err = 'Item title is required.';
+      }
+    } else if (fieldName === 'recipient') {
+      if (currentType === 'OUTFLOW' && currentReimb && (!currentRecipient || !currentRecipient.trim())) {
+        err = 'Recipient name is required for advances.';
+      }
+    }
+    return err;
+  };
+
+  const validateAll = () => {
+    const newErrors = {};
+    const amountErr = validateField('amount', amount);
+    if (amountErr) newErrors.amount = amountErr;
+
+    const titleErr = validateField('title', title);
+    if (titleErr) newErrors.title = titleErr;
+
+    if (type === 'OUTFLOW' && isReimbursement) {
+      const recipientErr = validateField('recipient', recipient);
+      if (recipientErr) newErrors.recipient = recipientErr;
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const handleAmountChange = (e) => {
+    const val = e.target.value;
+    setAmount(val);
+    if (hasSubmitted) {
+      const err = validateField('amount', val);
+      setErrors((prev) => ({ ...prev, amount: err }));
+    }
+  };
+
+  const handleTitleChange = (e) => {
+    const val = e.target.value;
+    setTitle(val);
+    if (hasSubmitted) {
+      const err = validateField('title', val);
+      setErrors((prev) => ({ ...prev, title: err }));
+    }
+  };
+
+  const handleRecipientChange = (e) => {
+    const val = e.target.value;
+    setRecipient(val);
+    if (hasSubmitted) {
+      const err = validateField('recipient', val, type, isReimbursement, val);
+      setErrors((prev) => ({ ...prev, recipient: err }));
+    }
+  };
 
   const handleImageChange = async (e) => {
     const file = e.target.files?.[0];
@@ -47,26 +117,40 @@ export default function NewTransactionModal({ isOpen, onClose, onSave, categorie
     }
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!title || !amount || parseFloat(amount) <= 0) return;
+    setHasSubmitted(true);
+    setSubmitError('');
 
-    onSave({
-      title,
-      amount: parseFloat(amount),
-      type,
-      payment_method: paymentMethod,
-      category_name: categoryName,
-      event_name: eventName,
-      is_reimbursement: isReimbursement,
-      reimbursement_recipient: isReimbursement ? recipient : null,
-      receipt_url: previewUrl || null,
-      receiptFile: receiptImage || null,
-      transaction_date: new Date().toISOString().split('T')[0],
-      status: isReimbursement ? 'PENDING_REIMBURSEMENT' : 'COMPLETED',
-    });
+    if (!validateAll()) {
+      return;
+    }
 
-    onClose();
+    if (isSubmitting || compressing) return;
+
+    setIsSubmitting(true);
+    try {
+      await onSave({
+        title: title.trim(),
+        amount: parseFloat(amount),
+        type,
+        payment_method: paymentMethod,
+        category_name: categoryName,
+        event_name: eventName?.trim() || '',
+        is_reimbursement: isReimbursement,
+        reimbursement_recipient: isReimbursement ? recipient.trim() : null,
+        receipt_url: previewUrl || null,
+        receiptFile: receiptImage || null,
+        transaction_date: new Date().toISOString().split('T')[0],
+        status: isReimbursement ? 'PENDING_REIMBURSEMENT' : 'COMPLETED',
+      });
+      onClose();
+    } catch (err) {
+      console.error('Transaction save error:', err);
+      setSubmitError(err?.message || 'Failed to save transaction. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   // Safe early return after all hooks
@@ -86,20 +170,31 @@ export default function NewTransactionModal({ isOpen, onClose, onSave, categorie
             <p className="text-xs text-gray-500">Log an authorized inflow or disbursement</p>
           </div>
           <button 
+            type="button"
             onClick={onClose}
-            className="p-1.5 rounded-full text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
+            disabled={isSubmitting}
+            className="p-1.5 rounded-full text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors disabled:opacity-50"
           >
             <X className="w-4 h-4" />
           </button>
         </div>
 
+        {/* Submit Error Banner */}
+        {submitError && (
+          <div className="mx-5 sm:mx-6 mt-4 p-3 bg-red-50 border border-red-200 rounded-xl flex items-start gap-2 text-xs text-red-700">
+            <AlertCircle className="w-4 h-4 text-red-600 shrink-0 mt-0.5" />
+            <span>{submitError}</span>
+          </div>
+        )}
+
         {/* Form Body */}
-        <form onSubmit={handleSubmit} className="p-5 sm:p-6 space-y-4 text-xs overflow-y-auto">
+        <form onSubmit={handleSubmit} className="p-5 sm:p-6 space-y-4 text-xs overflow-y-auto" noValidate>
           
           {/* Type Toggle: Inflow vs Outflow */}
           <div className="grid grid-cols-2 gap-2 bg-gray-100/80 p-1 rounded-2xl">
             <button
               type="button"
+              disabled={isSubmitting}
               onClick={() => {
                 setType('INFLOW');
                 setCategoryName('Booth Sales');
@@ -114,6 +209,7 @@ export default function NewTransactionModal({ isOpen, onClose, onSave, categorie
             </button>
             <button
               type="button"
+              disabled={isSubmitting}
               onClick={() => {
                 setType('OUTFLOW');
                 setCategoryName('Supplies & Materials');
@@ -136,6 +232,7 @@ export default function NewTransactionModal({ isOpen, onClose, onSave, categorie
                 <button
                   key={m}
                   type="button"
+                  disabled={isSubmitting}
                   onClick={() => setPaymentMethod(m)}
                   className={`h-8 px-3 rounded-lg font-semibold transition-all cursor-pointer ${
                     paymentMethod === m 
@@ -162,13 +259,29 @@ export default function NewTransactionModal({ isOpen, onClose, onSave, categorie
                 type="number"
                 step="0.01"
                 min="0.01"
-                required
+                disabled={isSubmitting}
                 placeholder="0.00"
                 value={amount}
-                onChange={(e) => setAmount(e.target.value)}
-                className="w-full h-10 text-sm font-bold pl-7 pr-3 bg-white border border-black/[0.08] rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/20 tabular-nums select-text"
+                onChange={handleAmountChange}
+                onBlur={() => {
+                  if (hasSubmitted) {
+                    const err = validateField('amount', amount);
+                    setErrors((prev) => ({ ...prev, amount: err }));
+                  }
+                }}
+                className={`w-full h-10 text-sm font-bold pl-7 pr-3 bg-white rounded-xl focus:outline-none tabular-nums select-text transition-colors ${
+                  errors.amount
+                    ? 'border border-red-500 ring-2 ring-red-500/20 text-red-950'
+                    : 'border border-black/[0.08] focus:ring-2 focus:ring-emerald-500/20 text-gray-900'
+                }`}
               />
             </div>
+            {errors.amount && (
+              <p className="text-red-600 text-[11px] mt-1 font-medium flex items-center gap-1">
+                <AlertCircle className="w-3 h-3 text-red-500 shrink-0" />
+                <span>{errors.amount}</span>
+              </p>
+            )}
           </div>
 
           {/* Title / Description */}
@@ -178,12 +291,28 @@ export default function NewTransactionModal({ isOpen, onClose, onSave, categorie
             </label>
             <input
               type="text"
-              required
+              disabled={isSubmitting}
               placeholder="e.g. Tarpaulin for Booth, MLBB Team Registration"
               value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              className="w-full h-10 px-3 bg-white border border-black/[0.08] rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/20 text-gray-900 select-text"
+              onChange={handleTitleChange}
+              onBlur={() => {
+                if (hasSubmitted) {
+                  const err = validateField('title', title);
+                  setErrors((prev) => ({ ...prev, title: err }));
+                }
+              }}
+              className={`w-full h-10 px-3 bg-white rounded-xl focus:outline-none select-text transition-colors ${
+                errors.title
+                  ? 'border border-red-500 ring-2 ring-red-500/20 text-red-950'
+                  : 'border border-black/[0.08] focus:ring-2 focus:ring-emerald-500/20 text-gray-900'
+              }`}
             />
+            {errors.title && (
+              <p className="text-red-600 text-[11px] mt-1 font-medium flex items-center gap-1">
+                <AlertCircle className="w-3 h-3 text-red-500 shrink-0" />
+                <span>{errors.title}</span>
+              </p>
+            )}
           </div>
 
           {/* Category & Event in 2 Columns */}
@@ -192,6 +321,7 @@ export default function NewTransactionModal({ isOpen, onClose, onSave, categorie
               <label className="block text-gray-700 font-semibold mb-1">Category</label>
               <button
                 type="button"
+                disabled={isSubmitting}
                 onClick={() => setIsCategoryOpen(!isCategoryOpen)}
                 className="w-full h-10 px-3 bg-white hover:bg-gray-50 active:bg-gray-100 border border-black/[0.08] rounded-xl flex items-center justify-between text-gray-900 font-medium transition-colors cursor-pointer text-left"
               >
@@ -232,6 +362,7 @@ export default function NewTransactionModal({ isOpen, onClose, onSave, categorie
               <label className="block text-gray-700 font-semibold mb-1">Event Tag</label>
               <input
                 type="text"
+                disabled={isSubmitting}
                 placeholder="e.g. Club Week 2026"
                 value={eventName}
                 onChange={(e) => setEventName(e.target.value)}
@@ -246,8 +377,15 @@ export default function NewTransactionModal({ isOpen, onClose, onSave, categorie
               <label className="flex items-center gap-2 cursor-pointer">
                 <input
                   type="checkbox"
+                  disabled={isSubmitting}
                   checked={isReimbursement}
-                  onChange={(e) => setIsReimbursement(e.target.checked)}
+                  onChange={(e) => {
+                    const checked = e.target.checked;
+                    setIsReimbursement(checked);
+                    if (!checked) {
+                      setErrors((prev) => ({ ...prev, recipient: '' }));
+                    }
+                  }}
                   className="rounded text-emerald-700 focus:ring-emerald-500"
                 />
                 <span className="font-semibold text-gray-900">
@@ -258,19 +396,30 @@ export default function NewTransactionModal({ isOpen, onClose, onSave, categorie
               {isReimbursement && (
                 <div className="pt-1">
                   <label className="block text-gray-700 font-medium mb-1">
-                    Advance Paid By:
+                    Advance Paid By: <span className="text-red-500">*</span>
                   </label>
                   <input
                     type="text"
-                    required={isReimbursement}
+                    disabled={isSubmitting}
                     placeholder="e.g. Ms. Kimberly Dawn Jatulan"
                     value={recipient}
-                    onChange={(e) => setRecipient(e.target.value)}
-                    className="w-full h-9 px-3 bg-white border border-black/[0.08] rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/20 text-gray-900 select-text"
+                    onChange={handleRecipientChange}
+                    className={`w-full h-9 px-3 bg-white rounded-xl focus:outline-none select-text transition-colors ${
+                      errors.recipient
+                        ? 'border border-red-500 ring-2 ring-red-500/20 text-red-950'
+                        : 'border border-black/[0.08] focus:ring-2 focus:ring-emerald-500/20 text-gray-900'
+                    }`}
                   />
-                  <p className="text-[10px] text-gray-500 mt-1">
-                    Will be queued under Pending Reimbursements until cash is refunded.
-                  </p>
+                  {errors.recipient ? (
+                    <p className="text-red-600 text-[11px] mt-1 font-medium flex items-center gap-1">
+                      <AlertCircle className="w-3 h-3 text-red-500 shrink-0" />
+                      <span>{errors.recipient}</span>
+                    </p>
+                  ) : (
+                    <p className="text-[10px] text-gray-500 mt-1">
+                      Will be queued under Pending Reimbursements until cash is refunded.
+                    </p>
+                  )}
                 </div>
               )}
             </div>
@@ -290,6 +439,7 @@ export default function NewTransactionModal({ isOpen, onClose, onSave, categorie
                 <input
                   type="file"
                   accept="image/*"
+                  disabled={compressing || isSubmitting}
                   onChange={handleImageChange}
                   className="hidden"
                 />
@@ -311,15 +461,27 @@ export default function NewTransactionModal({ isOpen, onClose, onSave, categorie
             <button
               type="button"
               onClick={onClose}
-              className="h-10 px-4 text-gray-700 hover:bg-gray-100 active:bg-gray-200 rounded-xl font-semibold transition-colors cursor-pointer"
+              disabled={isSubmitting}
+              className="h-10 px-4 text-gray-700 hover:bg-gray-100 active:bg-gray-200 rounded-xl font-semibold transition-colors cursor-pointer disabled:opacity-50"
             >
               Cancel
             </button>
             <button
               type="submit"
-              className="h-10 px-5 bg-emerald-700 hover:bg-emerald-800 active:bg-emerald-900 text-white rounded-xl font-semibold shadow-xs transition-all cursor-pointer whitespace-nowrap"
+              disabled={isSubmitting || compressing}
+              className="h-10 px-5 bg-emerald-700 hover:bg-emerald-800 active:bg-emerald-900 text-white rounded-xl font-semibold shadow-xs transition-all cursor-pointer whitespace-nowrap flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Save Record
+              {isSubmitting ? (
+                <>
+                  <svg className="animate-spin w-4 h-4 text-white shrink-0" viewBox="0 0 24 24" fill="none">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                  </svg>
+                  <span>Saving...</span>
+                </>
+              ) : (
+                'Save Record'
+              )}
             </button>
           </div>
 

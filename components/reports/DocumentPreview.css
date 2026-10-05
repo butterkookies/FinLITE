@@ -5,12 +5,35 @@
   background-color: #262626; /* Dark slate canvas matching Word multi-page viewer */
 }
 
+/* Scrollable canvas viewport containing scalable document sheets */
+.document-canvas-wrapper {
+  width: 100%;
+  flex: 1;
+  overflow-x: auto;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 1.5rem 0.5rem 3rem 0.5rem;
+  box-sizing: border-box;
+}
+
+/* Scalable document container controlled by Zoom / Fit engine */
+.document-sheet-container {
+  width: 8.5in;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  transition: transform 0.12s ease-out;
+}
+
 /* Individual 8.5" x 11" Paper Sheet (Exact Word Margins: Top 1.0", Left 1.0", Right 1.0", Bottom 0.75") */
 .document-sheet {
   width: 8.5in;
   min-height: 11in;
   padding: 1.0in 1.0in 0.75in 1.0in;
-  margin: 1.5rem auto;
+  margin: 1rem auto 2rem auto;
   background-color: #ffffff;
   color: #000000;
   font-family: Calibri, 'Segoe UI', Arial, sans-serif !important;
@@ -20,6 +43,7 @@
   box-sizing: border-box;
   position: relative;
   page-break-after: always;
+  break-after: page;
 }
 
 /* Enforce Calibri on all child elements in document sheet */
@@ -144,6 +168,8 @@
   border: none !important;
   margin-top: 6pt;
   margin-bottom: 16pt;
+  page-break-inside: avoid;
+  break-inside: avoid;
 }
 
 .sig-table tr,
@@ -173,7 +199,7 @@
   height: 20pt;
 }
 
-/* Signatories 3-Column Grid (Retained for legacy backward compatibility) */
+/* Signatories Grids */
 .sig-row-3col {
   display: grid;
   grid-template-columns: 1fr 1fr 1fr;
@@ -182,7 +208,6 @@
   margin-bottom: 22pt;
 }
 
-/* Signatories 2-Column Grid (Retained for legacy backward compatibility) */
 .sig-row-2col {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -236,6 +261,8 @@
   border-collapse: collapse;
   border: none !important;
   font-size: 11pt !important;
+  page-break-inside: avoid;
+  break-inside: avoid;
 }
 
 .fin-table td,
@@ -277,97 +304,53 @@
   font-weight: bold;
 }
 
-/* Mobile & Tablet Responsive Overrides (< 860px) */
-@media screen and (max-width: 859px) {
-  .document-preview-overlay {
-    padding-left: 0.5rem;
-    padding-right: 0.5rem;
-  }
-
-  .document-sheet {
-    width: 100% !important;
-    max-width: 100% !important;
-    min-height: auto !important;
-    padding: 1.25rem 0.85rem !important;
-    margin: 0.75rem auto !important;
-    border-radius: 0.75rem;
-    font-size: 10pt !important;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
-  }
-
-  .document-sheet * {
-    font-size: 10pt !important;
-  }
-
-  .pdm-banner-container {
-    margin-bottom: 12pt;
-  }
-
-  .pdm-banner-frame {
-    padding: 3px 6px;
-  }
-
-  .pdm-banner-logo {
-    width: 36px;
-    height: 36px;
-  }
-
-  .pdm-banner-school {
-    font-size: 10pt !important;
-  }
-
-  .pdm-banner-club {
-    font-size: 8.5pt !important;
-  }
-
-  .pdm-banner-course {
-    font-size: 7.5pt !important;
-  }
-
-  .transmittal-date,
-  .transmittal-recipient,
-  .transmittal-salutation {
-    margin-bottom: 12pt;
-  }
-
-  .transmittal-body {
-    text-indent: 0.25in;
-    margin-bottom: 16pt;
-  }
-
-  .transmittal-closing {
-    margin-bottom: 16pt;
-  }
-
-  .sig-row-3col {
-    grid-template-columns: 1fr;
-    gap: 12px;
-    margin-top: 12pt;
-    margin-bottom: 14pt;
-  }
-
-  .sig-row-2col {
-    grid-template-columns: 1fr;
-    gap: 12px;
-    margin-top: 12pt;
-    margin-bottom: 14pt;
-  }
-
-  .fin-table td.amount {
-    width: auto;
-    min-width: 75px;
-  }
+/* Standard Print Page Dimensions & Rules */
+@page {
+  size: 8.5in 11in;
+  margin: 0;
 }
 
 /* Print Overrides */
 @media print {
+  *, *::before, *::after {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  html, body {
+    margin: 0 !important;
+    padding: 0 !important;
+    background: #ffffff !important;
+  }
+
   .no-print {
     display: none !important;
   }
 
   .document-preview-overlay {
-    background: transparent !important;
+    position: static !important;
+    background: #ffffff !important;
     padding: 0 !important;
+    margin: 0 !important;
+    overflow: visible !important;
+    height: auto !important;
+  }
+
+  .document-canvas-wrapper {
+    padding: 0 !important;
+    margin: 0 !important;
+    overflow: visible !important;
+    width: 8.5in !important;
+    display: block !important;
+  }
+
+  .document-sheet-container {
+    zoom: 1 !important;
+    transform: none !important;
+    width: 8.5in !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    display: block !important;
   }
 
   .document-sheet {
@@ -378,10 +361,19 @@
     min-height: 11in !important;
     font-size: 11pt !important;
     page-break-after: always !important;
+    break-after: page !important;
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+    background: #ffffff !important;
   }
 
   .document-sheet * {
     font-size: 11pt !important;
+  }
+
+  .sig-table, .fin-table {
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
   }
 
   .sig-row-3col {

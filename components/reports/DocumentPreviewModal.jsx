@@ -1,6 +1,6 @@
 'use client';
-import { useState, useEffect } from 'react';
-import { Download, Printer, X, FileText, Edit3 } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
+import { Download, Printer, X, FileText, Edit3, ZoomIn, ZoomOut, Maximize2 } from 'lucide-react';
 import './DocumentPreview.css';
 
 // Header Banner replicating PDM CCS & LITE official template banner
@@ -65,6 +65,106 @@ export default function DocumentPreviewModal({ isOpen, onClose, documentData }) 
   });
 
   const [isExporting, setIsExporting] = useState(false);
+
+  // Zoom & Scaling Engine State
+  const [zoom, setZoom] = useState(1);
+  const [isFitToScreen, setIsFitToScreen] = useState(false);
+  const [supportsCssZoom, setSupportsCssZoom] = useState(true);
+  const scrollCanvasRef = useRef(null);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined' && typeof CSS !== 'undefined' && CSS.supports) {
+      setSupportsCssZoom(CSS.supports('zoom', '1'));
+    }
+  }, []);
+
+  const calculateFitScale = () => {
+    if (!scrollCanvasRef.current) return 1;
+    const containerWidth = scrollCanvasRef.current.clientWidth;
+    // Standard US Letter 8.5in = 816px at 96 DPI with 32px viewport breathing room
+    const availableWidth = containerWidth - 32;
+    const fitScale = Math.min(1.2, Math.max(0.35, availableWidth / 816));
+    return Math.round(fitScale * 100) / 100;
+  };
+
+  // Auto fit on small screens when modal opens
+  useEffect(() => {
+    if (isOpen) {
+      if (typeof window !== 'undefined' && window.innerWidth < 900) {
+        setIsFitToScreen(true);
+        const timer = setTimeout(() => {
+          setZoom(calculateFitScale());
+        }, 60);
+        return () => clearTimeout(timer);
+      } else {
+        setZoom(1);
+        setIsFitToScreen(false);
+      }
+    }
+  }, [isOpen]);
+
+  // Dynamically adjust scale on window resize if in Fit to Screen mode
+  useEffect(() => {
+    const handleResize = () => {
+      if (isFitToScreen) {
+        setZoom(calculateFitScale());
+      }
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, [isFitToScreen]);
+
+  const handleZoomIn = () => {
+    setIsFitToScreen(false);
+    setZoom((prev) => Math.min(2.0, Math.round((prev + 0.1) * 10) / 10));
+  };
+
+  const handleZoomOut = () => {
+    setIsFitToScreen(false);
+    setZoom((prev) => Math.max(0.3, Math.round((prev - 0.1) * 10) / 10));
+  };
+
+  const handleResetZoom = () => {
+    setIsFitToScreen(false);
+    setZoom(1);
+  };
+
+  const handleToggleFitToScreen = () => {
+    if (!isFitToScreen) {
+      setIsFitToScreen(true);
+      setZoom(calculateFitScale());
+    } else {
+      setIsFitToScreen(false);
+      setZoom(1);
+    }
+  };
+
+  // Keyboard shortcuts: Esc, Ctrl +, Ctrl -, Ctrl 0
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const handleKeyDown = (e) => {
+      if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
+        if (!e.ctrlKey && !e.metaKey) return;
+      }
+
+      if (e.key === 'Escape') {
+        onClose();
+      } else if ((e.ctrlKey || e.metaKey) && (e.key === '=' || e.key === '+')) {
+        e.preventDefault();
+        handleZoomIn();
+      } else if ((e.ctrlKey || e.metaKey) && (e.key === '-' || e.key === '_')) {
+        e.preventDefault();
+        handleZoomOut();
+      } else if ((e.ctrlKey || e.metaKey) && e.key === '0') {
+        e.preventDefault();
+        handleResetZoom();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, isFitToScreen]);
 
   // Sync state strictly with incoming real documentData
   useEffect(() => {
@@ -301,85 +401,143 @@ export default function DocumentPreviewModal({ isOpen, onClose, documentData }) 
     <div className="fixed inset-0 z-50 flex flex-col document-preview-overlay overflow-y-auto">
       
       {/* Top Floating Action & Navigation Bar */}
-      <header className="sticky top-0 z-50 bg-[#1e232a]/95 backdrop-blur border-b border-gray-700 text-white px-3 sm:px-6 py-2.5 sm:py-3 flex flex-wrap items-center justify-between gap-2.5 sm:gap-3 no-print shadow-xl">
-        <div className="flex items-center gap-2 sm:gap-3 min-w-0">
-          <div className="w-8 h-8 rounded-lg bg-emerald-600 flex items-center justify-center font-bold text-white shadow-sm shrink-0">
-            <FileText className="w-4 h-4" />
-          </div>
-          <div className="min-w-0">
-            <div className="flex items-center gap-1.5 sm:gap-2">
-              <span className="text-xs sm:text-sm font-bold tracking-tight truncate">
-                {isProposal ? 'Activity Proposal Preview' : '1:1 Official PDM LITE Preview'}
-              </span>
-              <span className="hidden xs:inline-block px-1.5 py-0.5 rounded text-[9px] sm:text-[10px] font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 shrink-0">
-                Exact Replicant
-              </span>
+      <header className="sticky top-0 z-50 bg-[#1e232a]/95 backdrop-blur border-b border-gray-700 text-white px-3 sm:px-6 py-2 sm:py-2.5 flex flex-col gap-2 no-print shadow-xl">
+        <div className="flex items-center justify-between gap-2.5 w-full">
+          {/* Left: Branding & Subtitle */}
+          <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+            <div className="w-8 h-8 rounded-lg bg-emerald-600 flex items-center justify-center font-bold text-white shadow-sm shrink-0">
+              <FileText className="w-4 h-4" />
             </div>
-            <p className="text-[10px] sm:text-[11px] text-gray-400 flex items-center gap-1 truncate">
-              <Edit3 className="w-3 h-3 text-amber-400 shrink-0" />
-              <span className="truncate">In-place editing active: adjust values before export.</span>
-            </p>
+            <div className="min-w-0">
+              <div className="flex items-center gap-1.5 sm:gap-2">
+                <span className="text-xs sm:text-sm font-bold tracking-tight truncate">
+                  {isProposal ? 'Activity Proposal Preview' : '1:1 Official PDM LITE Preview'}
+                </span>
+                <span className="hidden xs:inline-block px-1.5 py-0.5 rounded text-[9px] sm:text-[10px] font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 shrink-0">
+                  Exact Replicant
+                </span>
+              </div>
+              <p className="text-[10px] sm:text-[11px] text-gray-400 flex items-center gap-1 truncate">
+                <Edit3 className="w-3 h-3 text-amber-400 shrink-0" />
+                <span className="truncate">In-place editing active: values auto-sync to export.</span>
+              </p>
+            </div>
+          </div>
+
+          {/* Right Actions: Zoom Controls + Print + Export + Close */}
+          <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
+            {/* Zoom Controls Toolbar */}
+            <div className="flex items-center bg-gray-800/90 border border-gray-700 rounded-lg p-0.5 text-xs text-gray-300 shadow-2xs">
+              <button
+                type="button"
+                onClick={handleZoomOut}
+                disabled={zoom <= 0.3}
+                className="p-1 sm:p-1.5 hover:text-white hover:bg-gray-700/70 rounded disabled:opacity-30 transition-colors cursor-pointer"
+                title="Zoom Out (Ctrl -)"
+                aria-label="Zoom Out"
+              >
+                <ZoomOut className="w-3.5 h-3.5" />
+              </button>
+
+              <button
+                type="button"
+                onClick={handleResetZoom}
+                className="px-1.5 sm:px-2 py-0.5 font-mono text-[11px] font-semibold text-gray-200 hover:text-white hover:bg-gray-700/70 rounded transition-colors cursor-pointer"
+                title="Reset to 100% 1:1 scale (Ctrl 0)"
+              >
+                {Math.round(zoom * 100)}%
+              </button>
+
+              <button
+                type="button"
+                onClick={handleZoomIn}
+                disabled={zoom >= 2.0}
+                className="p-1 sm:p-1.5 hover:text-white hover:bg-gray-700/70 rounded disabled:opacity-30 transition-colors cursor-pointer"
+                title="Zoom In (Ctrl +)"
+                aria-label="Zoom In"
+              >
+                <ZoomIn className="w-3.5 h-3.5" />
+              </button>
+
+              <div className="w-[1px] h-3.5 bg-gray-700 mx-0.5" />
+
+              <button
+                type="button"
+                onClick={handleToggleFitToScreen}
+                className={`flex items-center gap-1 px-1.5 sm:px-2 py-1 rounded text-[11px] font-medium transition-colors cursor-pointer ${
+                  isFitToScreen 
+                    ? 'bg-emerald-600 text-white font-semibold shadow-xs' 
+                    : 'hover:text-white hover:bg-gray-700/70 text-gray-300'
+                }`}
+                title="Fit document to screen width"
+              >
+                <Maximize2 className="w-3 h-3 shrink-0" />
+                <span className="hidden md:inline">Fit</span>
+              </button>
+            </div>
+
+            {/* Print / PDF Button */}
+            <button
+              onClick={() => window.print()}
+              className="hidden sm:flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 text-xs font-medium text-gray-300 bg-gray-800 hover:bg-gray-700 hover:text-white rounded-lg transition-colors border border-gray-700 cursor-pointer shadow-2xs"
+              title="Print or Save as PDF"
+            >
+              <Printer className="w-3.5 h-3.5" />
+              <span className="hidden md:inline">Print / PDF</span>
+            </button>
+
+            {/* Export .docx Button */}
+            <button
+              onClick={handleExportDocx}
+              disabled={isExporting}
+              className="flex items-center gap-1.5 px-2.5 sm:px-4 py-1.5 text-xs font-semibold text-white bg-emerald-600 hover:bg-emerald-500 rounded-lg shadow-xs transition-all disabled:opacity-50 cursor-pointer"
+            >
+              <Download className="w-3.5 h-3.5 shrink-0" />
+              <span>{isExporting ? 'Exporting...' : 'Export .docx'}</span>
+            </button>
+
+            {/* Close Button */}
+            <button
+              onClick={onClose}
+              className="w-8 h-8 rounded-lg flex items-center justify-center text-gray-400 hover:text-white hover:bg-gray-800 transition-colors ml-0.5 cursor-pointer"
+              title="Close preview (Esc)"
+              aria-label="Close Preview"
+            >
+              <X className="w-5 h-5" />
+            </button>
           </div>
         </div>
 
-        {/* Right Actions */}
-        <div className="flex items-center gap-1.5 sm:gap-2 ml-auto shrink-0">
-          <button
-            onClick={() => window.print()}
-            className="hidden xs:flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 text-xs font-medium text-gray-300 bg-gray-800 hover:bg-gray-700 hover:text-white rounded-lg transition-colors border border-gray-700"
-            title="Print or Save as PDF"
-          >
-            <Printer className="w-3.5 h-3.5" />
-            <span className="hidden sm:inline">Print / PDF</span>
-          </button>
-
-          <button
-            onClick={handleExportDocx}
-            disabled={isExporting}
-            className="flex items-center gap-1.5 px-3 sm:px-4 py-1.5 text-xs font-semibold text-white bg-emerald-600 hover:bg-emerald-500 rounded-lg shadow-sm transition-all disabled:opacity-50"
-          >
-            <Download className="w-3.5 h-3.5 shrink-0" />
-            <span>{isExporting ? 'Exporting...' : 'Export .docx'}</span>
-          </button>
-
-          <button
-            onClick={onClose}
-            className="w-8 h-8 rounded-lg flex items-center justify-center text-gray-400 hover:text-white hover:bg-gray-800 transition-colors ml-0.5 sm:ml-1"
-          >
-            <X className="w-5 h-5" />
-          </button>
-        </div>
-
-        {/* Page Selector Tabs (Row 2 on mobile, inline on desktop) */}
+        {/* Page Selector Tabs */}
         {!isProposal && (
-          <div className="w-full flex items-center gap-1 bg-gray-800/90 p-1 rounded-xl border border-gray-700 text-xs overflow-x-auto scrollbar-none order-last">
+          <div className="w-full flex items-center gap-1 bg-gray-800/90 p-1 rounded-xl border border-gray-700 text-xs overflow-x-auto scrollbar-none">
             <button
               onClick={() => setActivePage(0)}
-              className={`px-2.5 py-1 rounded-lg transition-all whitespace-nowrap ${activePage === 0 ? 'bg-emerald-700 text-white font-bold' : 'text-gray-300 hover:text-white'}`}
+              className={`px-2.5 py-1 rounded-lg transition-all whitespace-nowrap cursor-pointer ${activePage === 0 ? 'bg-emerald-700 text-white font-bold' : 'text-gray-300 hover:text-white'}`}
             >
               All 4 Pages
             </button>
             <button
               onClick={() => setActivePage(1)}
-              className={`px-2.5 py-1 rounded-lg transition-all whitespace-nowrap ${activePage === 1 ? 'bg-emerald-700 text-white font-bold' : 'text-gray-300 hover:text-white'}`}
+              className={`px-2.5 py-1 rounded-lg transition-all whitespace-nowrap cursor-pointer ${activePage === 1 ? 'bg-emerald-700 text-white font-bold' : 'text-gray-300 hover:text-white'}`}
             >
               Page 1: Transmittal
             </button>
             <button
               onClick={() => setActivePage(2)}
-              className={`px-2.5 py-1 rounded-lg transition-all whitespace-nowrap ${activePage === 2 ? 'bg-emerald-700 text-white font-bold' : 'text-gray-300 hover:text-white'}`}
+              className={`px-2.5 py-1 rounded-lg transition-all whitespace-nowrap cursor-pointer ${activePage === 2 ? 'bg-emerald-700 text-white font-bold' : 'text-gray-300 hover:text-white'}`}
             >
               Page 2: Income
             </button>
             <button
               onClick={() => setActivePage(3)}
-              className={`px-2.5 py-1 rounded-lg transition-all whitespace-nowrap ${activePage === 3 ? 'bg-emerald-700 text-white font-bold' : 'text-gray-300 hover:text-white'}`}
+              className={`px-2.5 py-1 rounded-lg transition-all whitespace-nowrap cursor-pointer ${activePage === 3 ? 'bg-emerald-700 text-white font-bold' : 'text-gray-300 hover:text-white'}`}
             >
               Page 3: Expenses
             </button>
             <button
               onClick={() => setActivePage(4)}
-              className={`px-2.5 py-1 rounded-lg transition-all whitespace-nowrap ${activePage === 4 ? 'bg-emerald-700 text-white font-bold' : 'text-gray-300 hover:text-white'}`}
+              className={`px-2.5 py-1 rounded-lg transition-all whitespace-nowrap cursor-pointer ${activePage === 4 ? 'bg-emerald-700 text-white font-bold' : 'text-gray-300 hover:text-white'}`}
             >
               Page 4: Reconciliation
             </button>
@@ -387,8 +545,23 @@ export default function DocumentPreviewModal({ isOpen, onClose, documentData }) 
         )}
       </header>
 
-      {/* Main Multi-Sheet Container */}
-      <main className="flex-1 p-2 sm:p-6 lg:p-8 flex flex-col items-center gap-4 sm:gap-8 w-full">
+      {/* Main Multi-Sheet Canvas with Zoom & Aspect-Ratio Preservation */}
+      <main
+        ref={scrollCanvasRef}
+        className="document-canvas-wrapper"
+      >
+        <div
+          className="document-sheet-container"
+          style={
+            supportsCssZoom
+              ? { zoom: zoom }
+              : {
+                  transform: `scale(${zoom})`,
+                  transformOrigin: 'top center',
+                  marginBottom: zoom < 1 ? `-${Math.round((1 - zoom) * 1100)}px` : '0px',
+                }
+          }
+        >
 
         {/* ========================================================================= */}
         {/* PROPOSAL VIEW                                                             */}
@@ -1209,7 +1382,7 @@ export default function DocumentPreviewModal({ isOpen, onClose, documentData }) 
         )}
           </>
         )}
-
+        </div>
       </main>
     </div>
   );
