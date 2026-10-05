@@ -30,7 +30,27 @@
 /* Official Header Banner */
 .pdm-banner-container {
   width: 100%;
-  margin-bottom: 24pt;
+  margin-bottom: 20pt;
+}
+
+.pdm-banner-image {
+  width: 100%;
+  height: auto;
+  display: block;
+  user-select: none;
+  pointer-events: none;
+}
+
+/* Page Number Footer (Bottom Right aligned) */
+.sheet-page-footer {
+  position: absolute;
+  bottom: 0.4in;
+  right: 1.0in;
+  font-size: 11pt !important;
+  color: #555555;
+  font-family: Calibri, 'Segoe UI', Arial, sans-serif !important;
+  user-select: none;
+  letter-spacing: 0.2px;
 }
 
 .pdm-banner-frame {

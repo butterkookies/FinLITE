@@ -84,6 +84,100 @@ def replace_placeholders(doc, config):
                         if tag in p.text:
                             replace_text_in_paragraph(p, tag, val)
 
+def setup_footer(section, style="page_x_of_y"):
+    """
+    Configure dynamic Word OpenXML footer fields.
+    Options:
+    - 'page_x_of_y': Page X of Y on all pages
+    - 'page_x_of_y_no_cover': Page X of Y on pages 2-4, suppressed on cover/Page 1
+    - 'simple': 1, 2, 3...
+    - 'none': footer cleared
+    """
+    if style == 'none':
+        for p in section.footer.paragraphs:
+            p.text = ''
+        return
+
+    def populate_p(p, is_simple=False):
+        p.alignment = docx.enum.text.WD_ALIGN_PARAGRAPH.RIGHT
+        pPr = p._p.get_or_add_pPr()
+        def make_run_xml(text):
+            return parse_xml(r'<w:r %s><w:rPr><w:rFonts w:ascii="Calibri" w:hAnsi="Calibri"/><w:sz w:val="22"/><w:color w:val="555555"/></w:rPr><w:t xml:space="preserve">%s</w:t></w:r>' % (nsdecls('w'), text))
+        def make_field_xml(field_type, sample_text):
+            return parse_xml(r'<w:fldSimple %s w:instr="%s"><w:r><w:rPr><w:rFonts w:ascii="Calibri" w:hAnsi="Calibri"/><w:sz w:val="22"/><w:color w:val="555555"/></w:rPr><w:t>%s</w:t></w:r></w:fldSimple>' % (nsdecls('w'), field_type, sample_text))
+        
+        p.text = ''
+        if is_simple:
+            p._p.append(make_field_xml("PAGE", "1"))
+        else:
+            p._p.append(make_run_xml("Page "))
+            p._p.append(make_field_xml("PAGE", "1"))
+            p._p.append(make_run_xml(" of "))
+            p._p.append(make_field_xml("NUMPAGES", "4"))
+
+    if style == 'page_x_of_y_no_cover':
+        section.different_first_page_header_footer = True
+        for child in list(section.header._element):
+            section.first_page_header._element.append(copy.deepcopy(child))
+        for p in section.first_page_footer.paragraphs:
+            p.text = ''
+        p_main = section.footer.paragraphs[0]
+        populate_p(p_main, is_simple=False)
+    elif style == 'simple':
+        section.different_first_page_header_footer = False
+        p_main = section.footer.paragraphs[0]
+        populate_p(p_main, is_simple=True)
+    else:  # 'page_x_of_y'
+        section.different_first_page_header_footer = False
+        p_main = section.footer.paragraphs[0]
+        populate_p(p_main, is_simple=False)
+
+def create_borderless_signatory_table(doc, signatories_list, num_cols):
+    """
+    Build structured multi-column borderless table for signatories.
+    Guarantees exact column widths, zero tab wrapping misalignment, and Calibri 11pt.
+    """
+    table = doc.add_table(rows=1, cols=num_cols)
+    ensure_invisible_table_borders(table)
+    col_width = Inches(6.5 / num_cols)
+    for col in table.columns:
+        col.width = col_width
+    row = table.rows[0]
+    for idx, sig in enumerate(signatories_list):
+        if idx >= num_cols:
+            break
+        cell = row.cells[idx]
+        cell.width = col_width
+        
+        tcPr = cell._element.get_or_add_tcPr()
+        tcMar = parse_xml(r'<w:tcMar %s><w:top w:w="0" w:type="dxa"/><w:bottom w:w="0" w:type="dxa"/><w:left w:w="0" w:type="dxa"/><w:right w:w="120" w:type="dxa"/></w:tcMar>' % nsdecls('w'))
+        tcPr.append(tcMar)
+        
+        p = cell.paragraphs[0]
+        p.paragraph_format.space_before = Pt(16)
+        p.paragraph_format.space_after = Pt(1)
+        p.paragraph_format.line_spacing = 1.0
+        
+        if sig.get('name'):
+            r_name = p.add_run(sig['name'])
+            r_name.font.name = 'Calibri'
+            r_name.font.size = Pt(11)
+            r_name.bold = True
+            
+        p_role = cell.add_paragraph()
+        p_role.paragraph_format.space_before = Pt(0)
+        p_role.paragraph_format.space_after = Pt(4)
+        p_role.paragraph_format.line_spacing = 1.0
+        
+        if sig.get('role'):
+            r_role = p_role.add_run(sig['role'])
+            r_role.font.name = 'Calibri'
+            r_role.font.size = Pt(11)
+            
+    tbl_elm = table._element
+    tbl_elm.getparent().remove(tbl_elm)
+    return tbl_elm
+
 def enforce_calibri_11(doc):
     """Strictly enforce Calibri size 11 across all runs in all paragraphs and table cells."""
     for style in doc.styles:
@@ -109,6 +203,7 @@ def enforce_calibri_11(doc):
         for p in s.header.paragraphs:
             for r in p.runs:
                 r.font.name = 'Calibri'
+                r.font.size = Pt(11)
 
 def populate_report(data, template_path=DEFAULT_TEMPLATE, output_path=DEFAULT_OUTPUT):
     if not os.path.exists(template_path):
@@ -122,14 +217,24 @@ def populate_report(data, template_path=DEFAULT_TEMPLATE, output_path=DEFAULT_OU
     core.last_modified_by = 'Andrei John Geronimo'
     core.revision = 3
 
-    # Section Margins & Page Size (Letter: 8.5 x 11 in; Margins: Top 1.0", Bottom 0.75", Left 1.0", Right 1.0")
+    # Section Margins & Page Size (Letter: 8.5 x 11 in)
+    # Calibrated Top Margin: 1.70" ensures body text clears the 0.98" header banner perfectly
     for s in doc.sections:
         s.page_width = Inches(8.5)
         s.page_height = Inches(11.0)
-        s.top_margin = Inches(1.0)
+        s.header_distance = Inches(0.5)
+        s.top_margin = Inches(1.70)
         s.bottom_margin = Inches(0.75)
         s.left_margin = Inches(1.0)
         s.right_margin = Inches(1.0)
+        s.footer_distance = Inches(0.4)
+
+    # Dynamic Bottom-Right Footer Page Numbers
+    page_number_style = data.get('page_number_style', 'page_x_of_y')
+    setup_footer(doc.sections[0], style=page_number_style)
+
+    include_cc = bool(data.get('include_cc', False))
+    cc_recipients = data.get('cc_recipients', ['cc: Co-Curricular', "cc: Dean's Office"])
 
     sig = data.get('signatories', {}) or {}
     summary = data.get('summary', {}) or {}
@@ -164,16 +269,13 @@ def populate_report(data, template_path=DEFAULT_TEMPLATE, output_path=DEFAULT_OU
     dean_name = get_val('dean_name', default=sig.get('deanName', 'DR. EMRAIDA MARIE M. MANUCOM')).upper()
     dean_role = get_val('dean_role', default=sig.get('deanRole', 'DEAN, COLLEGE OF COMPUTER STUDIES')).upper()
 
-    # If adviser2 is present, combine or format appropriately
     adv2 = sig.get('adviser2')
     if adv2 and adv2.strip() and adv2.upper() not in adv_name:
         adv_name = f"{adv_name} & {adv2.upper()}"
         adv_role = "LITE CLUB ADVISERS"
 
-    # Transactions & Totals from real database data
+    # Ledger Inflows & Outflows
     txs = data.get('transactions', []) or []
-    
-    # Inflow and Outflow items from DB
     income_items = data.get('income_items')
     if income_items is None:
         income_items = [
@@ -188,7 +290,6 @@ def populate_report(data, template_path=DEFAULT_TEMPLATE, output_path=DEFAULT_OU
             for t in txs if t.get('type') == 'OUTFLOW'
         ]
 
-    # Calculate or retrieve totals
     initial_budget = float(data.get('initial_budget', summary.get('initial_budget', 0.0)) or 0.0)
     total_income = sum(float(i.get('amount', 0)) for i in income_items)
     total_funds = initial_budget + total_income
@@ -205,20 +306,6 @@ def populate_report(data, template_path=DEFAULT_TEMPLATE, output_path=DEFAULT_OU
         '{{PERIOD_DESCRIPTION}}': period_desc,
         '{{FINAL_AS_OF_DATE}}': final_as_of,
         
-        # Signatories
-        '{{PRESIDENT_NAME}}': pres_name,
-        '{{PRESIDENT_ROLE}}': pres_role,
-        '{{TREASURER_NAME}}': tres_name,
-        '{{TREASURER_ROLE}}': tres_role,
-        '{{AUDITOR_NAME}}': aud_name,
-        '{{AUDITOR_ROLE}}': aud_role,
-        '{{ADVISER_NAME}}': adv_name,
-        '{{ADVISER_ROLE}}': adv_role,
-        '{{DIRECTOR_NAME}}': dir_name,
-        '{{DIRECTOR_ROLE}}': dir_role,
-        '{{DEAN_NAME}}': dean_name,
-        '{{DEAN_ROLE}}': dean_role,
-
         # Totals
         '{{INITIAL_BUDGET_AMOUNT}}': f"P{initial_budget:,.2f}",
         '{{TOTAL_INCOME_AMOUNT}}': f"P{total_income:,.2f}",
@@ -238,18 +325,17 @@ def populate_report(data, template_path=DEFAULT_TEMPLATE, output_path=DEFAULT_OU
     tbl0.rows[1].cells[4].text = f"P{initial_budget:,.2f}"
 
     # -------------------------------------------------------------
-    # 3. TABLE 1: INCOME SCHEDULE (STRICTLY FROM DATABASE, NO DUMMY DATA)
+    # 3. TABLE 1: INCOME SCHEDULE (STRICTLY FROM DATABASE)
     # -------------------------------------------------------------
     tbl1 = doc.tables[1]
     ensure_invisible_table_borders(tbl1)
     row_template = copy.deepcopy(tbl1.rows[1]._element)
     
-    # Remove all template dummy rows (Cosplay, Org-shirt, E-sports, etc.)
+    # Remove all template dummy rows
     while len(tbl1.rows) > 1:
         tr = tbl1.rows[-1]._element
         tr.getparent().remove(tr)
 
-    # Populate real database income items
     if not income_items:
         new_tr = copy.deepcopy(row_template)
         tbl1._element.append(new_tr)
@@ -291,18 +377,16 @@ def populate_report(data, template_path=DEFAULT_TEMPLATE, output_path=DEFAULT_OU
         tbl2._element.getparent().remove(tbl2._element)
 
     # -------------------------------------------------------------
-    # 5. TABLE 3 (NOW TABLE 2): MISCELLANEOUS EXPENSES (STRICTLY REAL DB DATA)
+    # 5. TABLE 3 (NOW TABLE 2): MISCELLANEOUS EXPENSES
     # -------------------------------------------------------------
     tbl_exp = doc.tables[2]
     ensure_invisible_table_borders(tbl_exp)
     exp_template = copy.deepcopy(tbl_exp.rows[2]._element)
 
-    # Remove all template dummy rows (Candle, Glue Stick, Dinner, etc.)
     while len(tbl_exp.rows) > 2:
         tr = tbl_exp.rows[-1]._element
         tr.getparent().remove(tr)
 
-    # Populate real database expense items
     if not expense_items:
         new_tr = copy.deepcopy(exp_template)
         tbl_exp._element.append(new_tr)
@@ -348,27 +432,83 @@ def populate_report(data, template_path=DEFAULT_TEMPLATE, output_path=DEFAULT_OU
     set_cell_border(tbl_summary.rows[3].cells[2], top={"val": "single", "sz": "4", "color": "000000"})
 
     # -------------------------------------------------------------
-    # 7. SECTION FLOW & EXACT PAGE ORDER (4 PAGES TOTAL)
+    # 7. STRUCTURED SIGNATORIES (PAGE 1 & PAGE 4)
     # -------------------------------------------------------------
-    # Purge consecutive empty spacer paragraphs that caused layout drift
+    officers = [
+        {'name': pres_name, 'role': pres_role},
+        {'name': tres_name, 'role': tres_role},
+        {'name': aud_name, 'role': aud_role}
+    ]
+    advisers = [
+        {'name': adv_name, 'role': adv_role},
+        {'name': '', 'role': ''}
+    ]
+    admins = [
+        {'name': dir_name, 'role': dir_role},
+        {'name': dean_name, 'role': dean_role}
+    ]
+
+    prep_nodes = [p for p in doc.paragraphs if p.text.strip() == 'Prepared by:']
+    for p in prep_nodes:
+        tbl = create_borderless_signatory_table(doc, officers, 3)
+        p._element.addnext(tbl)
+
+    appr_nodes = [p for p in doc.paragraphs if p.text.strip() == 'Approved by:']
+    for p in appr_nodes:
+        tbl = create_borderless_signatory_table(doc, advisers, 2)
+        p._element.addnext(tbl)
+
+    note_nodes = [p for p in doc.paragraphs if p.text.strip() == 'Noted by:']
+    last_p1_note_tbl = None
+    for idx, p in enumerate(note_nodes):
+        tbl = create_borderless_signatory_table(doc, admins, 2)
+        p._element.addnext(tbl)
+        if idx == 0:
+            last_p1_note_tbl = tbl
+
+    # Remove old template placeholder paragraphs for signatories
     body = doc._element.body
-    for child in list(body):
-        tag = child.tag.split('}')[-1]
-        if tag == 'p':
-            p = docx.text.paragraph.Paragraph(child, doc)
-            if not p.text.strip():
-                try:
-                    body.remove(child)
-                except Exception:
-                    pass
+    for p in list(doc.paragraphs):
+        if any(tag in p.text for tag in [
+            '{{PRESIDENT_NAME}}', '{{PRESIDENT_ROLE}}',
+            '{{TREASURER_NAME}}', '{{TREASURER_ROLE}}',
+            '{{AUDITOR_NAME}}', '{{AUDITOR_ROLE}}',
+            '{{ADVISER_NAME}}', '{{ADVISER_ROLE}}',
+            '{{DIRECTOR_NAME}}', '{{DIRECTOR_ROLE}}',
+            '{{DEAN_NAME}}', '{{DEAN_ROLE}}'
+        ]):
+            try:
+                body.remove(p._element)
+            except Exception:
+                pass
 
-    # Insert explicit page break after Transmittal Letter (after 'cc: Dean’s Office')
-    for p in doc.paragraphs:
-        if "cc: Dean" in p.text:
-            p_next = parse_xml(r'<w:p %s><w:r><w:br w:type="page"/></w:r></w:p>' % nsdecls('w'))
-            p._element.addnext(p_next)
-            break
+    # -------------------------------------------------------------
+    # 8. CC ROUTING BLOCK & PAGE BREAK AFTER TRANSMITTAL LETTER (PAGE 1)
+    # -------------------------------------------------------------
+    cc_paragraphs = [p for p in doc.paragraphs if 'cc:' in p.text.lower()]
+    for p in cc_paragraphs:
+        try:
+            body.remove(p._element)
+        except Exception:
+            pass
 
+    if not include_cc:
+        if last_p1_note_tbl is not None:
+            p_break = parse_xml(r'<w:p %s><w:r><w:br w:type="page"/></w:r></w:p>' % nsdecls('w'))
+            last_p1_note_tbl.addnext(p_break)
+    else:
+        anchor = last_p1_note_tbl
+        for rec in cc_recipients:
+            if rec.strip():
+                p_cc = parse_xml(r'<w:p %s><w:pPr><w:spacing w:before="60" w:after="20"/><w:rPr><w:rFonts w:ascii="Calibri"/><w:sz w:val="22"/><w:color w:val="000000"/></w:rPr></w:pPr><w:r><w:rPr><w:rFonts w:ascii="Calibri"/><w:sz w:val="22"/><w:color w:val="000000"/></w:rPr><w:t>%s</w:t></w:r></w:p>' % (nsdecls('w'), rec.strip()))
+                anchor.addnext(p_cc)
+                anchor = p_cc
+        p_break = parse_xml(r'<w:p %s><w:r><w:br w:type="page"/></w:r></w:p>' % nsdecls('w'))
+        anchor.addnext(p_break)
+
+    # -------------------------------------------------------------
+    # 9. SECTION FLOW & PAGE BREAKS (PAGE 2 -> PAGE 3 -> PAGE 4)
+    # -------------------------------------------------------------
     # Insert explicit page break before Expenses table
     tbl_exp_p = parse_xml(r'<w:p %s><w:r><w:br w:type="page"/></w:r></w:p>' % nsdecls('w'))
     tbl_exp._element.addprevious(tbl_exp_p)
@@ -381,7 +521,7 @@ def populate_report(data, template_path=DEFAULT_TEMPLATE, output_path=DEFAULT_OU
             break
 
     # -------------------------------------------------------------
-    # 8. STRICT CALIBRI 11PT ENFORCEMENT & BORDERLESS TABLE STYLING
+    # 10. STRICT CALIBRI 11PT ENFORCEMENT & BORDERLESS TABLE STYLING
     # -------------------------------------------------------------
     enforce_calibri_11(doc)
 
@@ -402,6 +542,8 @@ if __name__ == '__main__':
             'semester': '2nd SEMESTER',
             'academic_year': '2025–2026',
             'period_desc': 'Club week',
+            'include_cc': False,
+            'page_number_style': 'page_x_of_y',
             'income_items': [
                 {'title': 'ID Lace lanyard', 'amount': 8900.0}
             ],

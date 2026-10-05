@@ -7,8 +7,10 @@ import {
   AlignmentType,
   BorderStyle,
   Document,
+  Footer,
   HeightRule,
   Packer,
+  PageNumber,
   Paragraph,
   Table,
   TableCell,
@@ -687,6 +689,21 @@ export async function POST(req) {
       sections: [
         {
           properties: {},
+          footers: {
+            default: new Footer({
+              children: [
+                new Paragraph({
+                  alignment: AlignmentType.RIGHT,
+                  children: [
+                    new TextRun({ text: 'Page ', font: 'Calibri', size: 18, color: '555555' }),
+                    new TextRun({ children: [PageNumber.CURRENT], font: 'Calibri', size: 18, color: '555555' }),
+                    new TextRun({ text: ' of ', font: 'Calibri', size: 18, color: '555555' }),
+                    new TextRun({ children: [PageNumber.TOTAL_PAGES], font: 'Calibri', size: 18, color: '555555' }),
+                  ],
+                }),
+              ],
+            }),
+          },
           children: sectionChildren,
         },
       ],

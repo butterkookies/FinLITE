@@ -3,22 +3,15 @@ import { useState, useEffect } from 'react';
 import { Download, Printer, X, FileText, Edit3 } from 'lucide-react';
 import './DocumentPreview.css';
 
-// Header Banner replicating PDM CCS & LITE official template banner
+// Header Banner replicating PDM CCS & LITE official template banner with authentic graphic
 function OfficialHeaderBanner() {
   return (
     <div className="pdm-banner-container">
-      <div className="pdm-banner-frame">
-        <img src="/assets/pdm-logo.jpg" alt="PDM Seal" className="pdm-banner-logo" />
-        <div className="pdm-banner-center">
-          <div className="pdm-banner-school">Pambayang Dalubhasaan ng Marilao</div>
-          <div className="pdm-banner-green-bar">
-            <span className="pdm-banner-club">LEAGUE OF INFORMATION TECHNOLOGY ENTHUSIAST</span>
-            <span className="pdm-banner-course">Bachelor of Science in Information</span>
-          </div>
-        </div>
-        <img src="/assets/lite-logo.png" alt="LITE Logo" className="pdm-banner-logo" />
-      </div>
-      <hr className="pdm-banner-divider" />
+      <img
+        src="/images/pdm-lite-header-banner.png"
+        alt="PDM & LITE Institutional Header"
+        className="pdm-banner-image"
+      />
     </div>
   );
 }
@@ -42,6 +35,13 @@ export default function DocumentPreviewModal({ isOpen, onClose, documentData }) 
   const [finalAsOf, setFinalAsOf] = useState(
     `As of ${new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}`
   );
+
+  // CC Routing Configuration (Defaulted to false/excluded per user request)
+  const [includeCc, setIncludeCc] = useState(false);
+  const [ccRecipients, setCcRecipients] = useState(['cc: Co-Curricular', "cc: Dean's Office"]);
+
+  // Bottom-Right Page Numbering Configuration ('page_x_of_y' | 'page_x_of_y_no_cover' | 'simple' | 'none')
+  const [pageNumberStyle, setPageNumberStyle] = useState('page_x_of_y');
 
   // Dynamic Initial Budget & Transaction Rows (Zero Fake Data)
   const [initialBudget, setInitialBudget] = useState(0);
@@ -176,8 +176,28 @@ export default function DocumentPreviewModal({ isOpen, onClose, documentData }) 
     setExpenseRows(prev => [...prev, { id: `manual-out-${Date.now()}`, desc: 'New Expense Particulars', amount: 0, category: 'Operating Expense' }]);
   };
 
-  const handleRemoveExpense = (idx) => {
-    setExpenseRows(prev => prev.filter((_, i) => i !== idx));
+  const handleUpdateCcRecipient = (idx, val) => {
+    const next = [...ccRecipients];
+    next[idx] = val;
+    setCcRecipients(next);
+  };
+
+  const handleAddCcRecipient = () => {
+    setCcRecipients(prev => [...prev, 'cc: ']);
+  };
+
+  const handleRemoveCcRecipient = (idx) => {
+    setCcRecipients(prev => prev.filter((_, i) => i !== idx));
+  };
+
+  const getPageFooterText = (pageNum, totalPages = 4) => {
+    if (pageNumberStyle === 'none') return null;
+    if (pageNumberStyle === 'simple') return String(pageNum);
+    if (pageNumberStyle === 'page_x_of_y_no_cover') {
+      if (pageNum === 1) return null;
+      return `Page ${pageNum} of ${totalPages}`;
+    }
+    return `Page ${pageNum} of ${totalPages}`;
   };
 
   const handleExportDocx = async () => {
@@ -267,6 +287,9 @@ export default function DocumentPreviewModal({ isOpen, onClose, documentData }) 
         },
         items: documentData.items || [],
         transactions: allExportTransactions,
+        include_cc: includeCc,
+        cc_recipients: ccRecipients,
+        page_number_style: pageNumberStyle,
       };
 
       const res = await fetch('/api/reports/docx', {
@@ -322,8 +345,41 @@ export default function DocumentPreviewModal({ isOpen, onClose, documentData }) 
           </div>
         </div>
 
-        {/* Right Actions */}
-        <div className="flex items-center gap-1.5 sm:gap-2 ml-auto shrink-0">
+        {/* Right Actions & Document Tools */}
+        <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 ml-auto shrink-0">
+          {/* CC Routing Toggle */}
+          {!isProposal && (
+            <button
+              type="button"
+              onClick={() => setIncludeCc(!includeCc)}
+              className={`flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-semibold rounded-lg border transition-all ${
+                includeCc
+                  ? 'bg-emerald-600/30 text-emerald-300 border-emerald-500/50 shadow-sm'
+                  : 'bg-gray-800 text-gray-400 border-gray-700 hover:text-gray-200'
+              }`}
+              title="Toggle CC Routing block on Transmittal Letter"
+            >
+              <span className={`w-2 h-2 rounded-full ${includeCc ? 'bg-emerald-400' : 'bg-gray-500'}`} />
+              <span>CC: {includeCc ? 'Included' : 'Excluded'}</span>
+            </button>
+          )}
+
+          {/* Page Numbering Format Tool */}
+          <div className="flex items-center gap-1 bg-gray-800 border border-gray-700 rounded-lg px-2 py-1 text-xs text-gray-300 shadow-sm">
+            <span className="text-gray-400 font-medium hidden xs:inline">Footer:</span>
+            <select
+              value={pageNumberStyle}
+              onChange={(e) => setPageNumberStyle(e.target.value)}
+              className="bg-transparent text-white text-xs font-semibold border-none outline-none cursor-pointer pr-1"
+              title="Page numbering style in footer"
+            >
+              <option value="page_x_of_y" className="bg-gray-800 text-white">Page X of Y</option>
+              <option value="page_x_of_y_no_cover" className="bg-gray-800 text-white">Page X of Y (Start P2)</option>
+              <option value="simple" className="bg-gray-800 text-white">Simple (1, 2...)</option>
+              <option value="none" className="bg-gray-800 text-white">No Page Numbers</option>
+            </select>
+          </div>
+
           <button
             onClick={() => window.print()}
             className="hidden xs:flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 text-xs font-medium text-gray-300 bg-gray-800 hover:bg-gray-700 hover:text-white rounded-lg transition-colors border border-gray-700"
@@ -593,6 +649,9 @@ export default function DocumentPreviewModal({ isOpen, onClose, documentData }) 
                 </tr>
               </tbody>
             </table>
+            {getPageFooterText(1, 1) && (
+              <div className="sheet-page-footer">{getPageFooterText(1, 1)}</div>
+            )}
           </article>
         ) : (
           <>
@@ -813,11 +872,43 @@ export default function DocumentPreviewModal({ isOpen, onClose, documentData }) 
                 </tbody>
               </table>
 
-              <div className="text-xs text-gray-700 mt-6 space-y-0.5">
-                <div>cc: Co-Curricular</div>
-                <div>cc: Dean&rsquo;s Office</div>
-              </div>
+              {includeCc && (
+                <div className="text-gray-700 mt-6 space-y-1.5 border-t border-dashed border-gray-300 pt-3">
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="font-semibold text-gray-500 uppercase tracking-wider">Carbon Copy (CC) Routing</span>
+                    <button
+                      type="button"
+                      onClick={handleAddCcRecipient}
+                      className="text-emerald-600 hover:text-emerald-700 font-semibold no-print"
+                    >
+                      + Add Recipient
+                    </button>
+                  </div>
+                  {ccRecipients.map((rec, rIdx) => (
+                    <div key={rIdx} className="flex items-center gap-2">
+                      <input
+                        type="text"
+                        value={rec}
+                        onChange={(e) => handleUpdateCcRecipient(rIdx, e.target.value)}
+                        className="pdm-input w-64"
+                        placeholder="cc: Recipient Department"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveCcRecipient(rIdx)}
+                        className="text-gray-400 hover:text-red-500 px-1 no-print"
+                        title="Remove recipient"
+                      >
+                        ×
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
+            {getPageFooterText(1, 4) && (
+              <div className="sheet-page-footer">{getPageFooterText(1, 4)}</div>
+            )}
           </article>
         )}
 
@@ -830,10 +921,10 @@ export default function DocumentPreviewModal({ isOpen, onClose, documentData }) 
 
             {/* Document Title Block */}
             <div className="text-center mb-8">
-              <div className="font-bold text-base tracking-wide">LITE FINANCIAL REPORT</div>
-              <div className="font-bold text-sm tracking-wide">{semester}</div>
-              <div className="font-bold text-sm tracking-wide">ACADEMIC YEAR {academicYear}</div>
-              <div className="font-bold text-sm tracking-wide mt-4">
+              <div className="font-bold tracking-wide">LITE FINANCIAL REPORT</div>
+              <div className="font-bold tracking-wide">{semester}</div>
+              <div className="font-bold tracking-wide">ACADEMIC YEAR {academicYear}</div>
+              <div className="font-bold tracking-wide mt-4">
                 <input
                   type="text"
                   value={periodDesc}
@@ -845,7 +936,7 @@ export default function DocumentPreviewModal({ isOpen, onClose, documentData }) 
             </div>
 
             {/* Initial Budget */}
-            <div className="mb-2 font-bold text-xs uppercase text-gray-800">
+            <div className="mb-2 font-bold uppercase text-gray-800">
               INITIAL BUDGET / BEGINNING BALANCE (Carried over from prior semester)
             </div>
             <table className="fin-table mb-6">
@@ -867,7 +958,7 @@ export default function DocumentPreviewModal({ isOpen, onClose, documentData }) 
 
             {/* Inflow Section: Revenue & Collections */}
             <div className="flex justify-between items-center mb-1">
-              <span className="font-bold text-xs uppercase text-gray-800">Income & Collections:</span>
+              <span className="font-bold uppercase text-gray-800">Income & Collections:</span>
               <button
                 type="button"
                 onClick={handleAddInflow}
@@ -937,6 +1028,9 @@ export default function DocumentPreviewModal({ isOpen, onClose, documentData }) 
                 P{totalFunds.toLocaleString('en-PH', { minimumFractionDigits: 2 })}
               </span>
             </div>
+            {getPageFooterText(2, 4) && (
+              <div className="sheet-page-footer">{getPageFooterText(2, 4)}</div>
+            )}
           </article>
         )}
 
@@ -949,8 +1043,8 @@ export default function DocumentPreviewModal({ isOpen, onClose, documentData }) 
 
             <div className="flex justify-between items-center mb-1">
               <div>
-                <div className="font-bold text-xs uppercase text-gray-800">Expenses:</div>
-                <div className="font-bold text-xs mb-3 text-gray-700">Itemized Operating & Event Expenses</div>
+                <div className="font-bold uppercase text-gray-800">Expenses:</div>
+                <div className="font-bold mb-3 text-gray-700">Itemized Operating & Event Expenses</div>
               </div>
               <button
                 type="button"
@@ -1014,6 +1108,9 @@ export default function DocumentPreviewModal({ isOpen, onClose, documentData }) 
                 </tr>
               </tbody>
             </table>
+            {getPageFooterText(3, 4) && (
+              <div className="sheet-page-footer">{getPageFooterText(3, 4)}</div>
+            )}
           </article>
         )}
 
@@ -1025,7 +1122,7 @@ export default function DocumentPreviewModal({ isOpen, onClose, documentData }) 
             <OfficialHeaderBanner />
 
             {/* As of Date */}
-            <div className="text-center font-bold text-xs mb-6">
+            <div className="text-center font-bold mb-6">
               <input
                 type="text"
                 value={finalAsOf}
@@ -1205,6 +1302,9 @@ export default function DocumentPreviewModal({ isOpen, onClose, documentData }) 
                 </tbody>
               </table>
             </div>
+            {getPageFooterText(4, 4) && (
+              <div className="sheet-page-footer">{getPageFooterText(4, 4)}</div>
+            )}
           </article>
         )}
           </>
