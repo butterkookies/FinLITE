@@ -275,7 +275,7 @@ export default function TransactionTable({
                   {tx.type === 'INFLOW' ? 'Inflow Amount' : 'Disbursement Amount'}
                 </span>
                 <span
-                  className={`text-xl font-extrabold tracking-tight tabular-nums block ${
+                  className={`text-xl font-extrabold tracking-tight tabular-nums block whitespace-nowrap ${
                     tx.type === 'INFLOW' ? 'text-emerald-700' : 'text-gray-900'
                   }`}
                 >
@@ -368,17 +368,18 @@ export default function TransactionTable({
             {/* 1. Inflows Section */}
             {(mobileInflows.length > 0 || !searchQuery) && (
               <div className="space-y-3">
-                <div className="flex items-center justify-between px-1">
-                  <div className="flex items-center gap-2">
-                    <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 shadow-xs shadow-emerald-400/50" />
-                    <h3 className="text-xs font-bold uppercase tracking-wider text-white">
-                      Inflows &amp; Revenue
+                <div className="flex items-center justify-between gap-2 px-1">
+                  <div className="flex items-center gap-1.5 sm:gap-2 min-w-0">
+                    <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 shadow-xs shadow-emerald-400/50 shrink-0" />
+                    <h3 className="text-xs font-bold uppercase tracking-wider text-white truncate">
+                      <span className="sm:hidden">Inflows</span>
+                      <span className="hidden sm:inline">Inflows &amp; Revenue</span>
                     </h3>
-                    <span className="text-[10px] font-bold text-emerald-200 bg-emerald-950/60 border border-emerald-400/30 px-2 py-0.5 rounded-full">
+                    <span className="text-[10px] font-bold text-emerald-200 bg-emerald-950/60 border border-emerald-400/30 px-2 py-0.5 rounded-full shrink-0">
                       {mobileInflows.length}
                     </span>
                   </div>
-                  <span className="text-xs font-black text-emerald-300 tabular-nums">
+                  <span className="text-xs font-black text-emerald-300 tabular-nums whitespace-nowrap shrink-0 text-right">
                     +{formatPHP(totalInflowsSum)}
                   </span>
                 </div>
@@ -403,17 +404,18 @@ export default function TransactionTable({
             {/* 2. Outflows Section */}
             {(mobileOutflows.length > 0 || !searchQuery) && (
               <div className="space-y-3 pt-2">
-                <div className="flex items-center justify-between px-1">
-                  <div className="flex items-center gap-2">
-                    <span className="w-2.5 h-2.5 rounded-full bg-amber-400 shadow-xs shadow-amber-400/50" />
-                    <h3 className="text-xs font-bold uppercase tracking-wider text-white">
-                      Outflows &amp; Disbursements
+                <div className="flex items-center justify-between gap-2 px-1">
+                  <div className="flex items-center gap-1.5 sm:gap-2 min-w-0">
+                    <span className="w-2.5 h-2.5 rounded-full bg-amber-400 shadow-xs shadow-amber-400/50 shrink-0" />
+                    <h3 className="text-xs font-bold uppercase tracking-wider text-white truncate">
+                      <span className="sm:hidden">Outflows</span>
+                      <span className="hidden sm:inline">Outflows &amp; Disbursements</span>
                     </h3>
-                    <span className="text-[10px] font-bold text-amber-200 bg-amber-950/60 border border-amber-400/30 px-2 py-0.5 rounded-full">
+                    <span className="text-[10px] font-bold text-amber-200 bg-amber-950/60 border border-amber-400/30 px-2 py-0.5 rounded-full shrink-0">
                       {mobileOutflows.length}
                     </span>
                   </div>
-                  <span className="text-xs font-black text-white tabular-nums">
+                  <span className="text-xs font-black text-white tabular-nums whitespace-nowrap shrink-0 text-right">
                     -{formatPHP(totalOutflowsSum)}
                   </span>
                 </div>
@@ -438,17 +440,18 @@ export default function TransactionTable({
             {/* 3. Pending Abono / Reimbursements Section */}
             {(mobileReimbursements.length > 0 || !searchQuery) && (
               <div className="space-y-3 pt-2">
-                <div className="flex items-center justify-between px-1">
-                  <div className="flex items-center gap-2">
-                    <span className="w-2.5 h-2.5 rounded-full bg-orange-400 shadow-xs shadow-orange-400/50" />
-                    <h3 className="text-xs font-bold uppercase tracking-wider text-white">
-                      Pending Abono (Advances)
+                <div className="flex items-center justify-between gap-2 px-1">
+                  <div className="flex items-center gap-1.5 sm:gap-2 min-w-0">
+                    <span className="w-2.5 h-2.5 rounded-full bg-orange-400 shadow-xs shadow-orange-400/50 shrink-0" />
+                    <h3 className="text-xs font-bold uppercase tracking-wider text-white truncate">
+                      <span className="sm:hidden">Pending Abono</span>
+                      <span className="hidden sm:inline">Pending Abono (Advances)</span>
                     </h3>
-                    <span className="text-[10px] font-bold text-amber-200 bg-amber-950/60 border border-amber-400/30 px-2 py-0.5 rounded-full">
+                    <span className="text-[10px] font-bold text-amber-200 bg-amber-950/60 border border-amber-400/30 px-2 py-0.5 rounded-full shrink-0">
                       {mobileReimbursements.length}
                     </span>
                   </div>
-                  <span className="text-xs font-black text-amber-300 tabular-nums">
+                  <span className="text-xs font-black text-amber-300 tabular-nums whitespace-nowrap shrink-0 text-right">
                     {formatPHP(totalReimbursementsSum)}
                   </span>
                 </div>
