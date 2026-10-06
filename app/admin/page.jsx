@@ -440,19 +440,20 @@ export default function AdminPage() {
         <div className="rounded-2xl border border-white/30 bg-white/20 backdrop-blur-xl p-4 mb-6 shadow-2xl">
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
             
-            {/* Tabs */}
-            <div className="flex items-center gap-1.5 p-1 bg-black/15 rounded-xl overflow-x-auto">
+            {/* Tabs — 2x2 grid on mobile (no scroll), flex row on sm+ */}
+            <div className="grid grid-cols-2 sm:flex sm:items-center gap-1.5 p-1 bg-black/15 rounded-xl w-full sm:w-auto">
               <button
                 onClick={() => setActiveTab('pending')}
-                className={`px-3.5 py-1.5 text-xs font-semibold rounded-lg transition-all flex items-center gap-2 whitespace-nowrap cursor-pointer ${
+                className={`w-full sm:w-auto px-3 py-2 sm:py-1.5 text-xs font-semibold rounded-lg transition-all flex items-center justify-center gap-1.5 cursor-pointer text-center ${
                   activeTab === 'pending'
                     ? 'bg-emerald-500 text-white font-bold shadow-md border border-emerald-300/40'
                     : 'text-white/80 hover:text-white hover:bg-white/20'
                 }`}
               >
-                <span>Pending Approvals</span>
+                <span className="truncate">Pending</span>
+                <span className="hidden xs:inline">Approvals</span>
                 {stats.pending > 0 && (
-                  <span className="px-1.5 py-0.2 rounded-full text-[10px] font-bold bg-amber-500 text-white">
+                  <span className="px-1.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-500 text-white shrink-0">
                     {stats.pending}
                   </span>
                 )}
@@ -460,42 +461,43 @@ export default function AdminPage() {
 
               <button
                 onClick={() => setActiveTab('users')}
-                className={`px-3.5 py-1.5 text-xs font-semibold rounded-lg transition-all flex items-center gap-2 whitespace-nowrap cursor-pointer ${
+                className={`w-full sm:w-auto px-3 py-2 sm:py-1.5 text-xs font-semibold rounded-lg transition-all flex items-center justify-center gap-1.5 cursor-pointer text-center ${
                   activeTab === 'users'
                     ? 'bg-emerald-500 text-white font-bold shadow-md border border-emerald-300/40'
                     : 'text-white/80 hover:text-white hover:bg-white/20'
                 }`}
               >
-                <span>Active Officers</span>
-                <span className="px-1.5 py-0.2 rounded-full text-[10px] font-semibold bg-white/20 text-white">
+                <span className="truncate">Active Officers</span>
+                <span className="px-1.5 py-0.5 rounded-full text-[10px] font-semibold bg-white/20 text-white shrink-0">
                   {users.length}
                 </span>
               </button>
 
               <button
                 onClick={() => setActiveTab('approved')}
-                className={`px-3.5 py-1.5 text-xs font-semibold rounded-lg transition-all flex items-center gap-2 whitespace-nowrap cursor-pointer ${
+                className={`w-full sm:w-auto px-3 py-2 sm:py-1.5 text-xs font-semibold rounded-lg transition-all flex items-center justify-center gap-1.5 cursor-pointer text-center ${
                   activeTab === 'approved'
                     ? 'bg-emerald-500 text-white font-bold shadow-md border border-emerald-300/40'
                     : 'text-white/80 hover:text-white hover:bg-white/20'
                 }`}
               >
-                <span>Approved Requests</span>
-                <span className="px-1.5 py-0.2 rounded-full text-[10px] font-semibold bg-white/20 text-white">
+                <span className="truncate">Approved</span>
+                <span className="hidden xs:inline">Log</span>
+                <span className="px-1.5 py-0.5 rounded-full text-[10px] font-semibold bg-white/20 text-white shrink-0">
                   {stats.approved}
                 </span>
               </button>
 
               <button
                 onClick={() => setActiveTab('rejected')}
-                className={`px-3.5 py-1.5 text-xs font-semibold rounded-lg transition-all flex items-center gap-2 whitespace-nowrap cursor-pointer ${
+                className={`w-full sm:w-auto px-3 py-2 sm:py-1.5 text-xs font-semibold rounded-lg transition-all flex items-center justify-center gap-1.5 cursor-pointer text-center ${
                   activeTab === 'rejected'
                     ? 'bg-emerald-500 text-white font-bold shadow-md border border-emerald-300/40'
                     : 'text-white/80 hover:text-white hover:bg-white/20'
                 }`}
               >
-                <span>Declined</span>
-                <span className="px-1.5 py-0.2 rounded-full text-[10px] font-semibold bg-white/20 text-white">
+                <span className="truncate">Declined</span>
+                <span className="px-1.5 py-0.5 rounded-full text-[10px] font-semibold bg-white/20 text-white shrink-0">
                   {stats.rejected}
                 </span>
               </button>
