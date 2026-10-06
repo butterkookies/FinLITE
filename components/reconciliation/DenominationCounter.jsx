@@ -1,6 +1,6 @@
 'use client';
 import { useEffect, useState } from 'react';
-import { AlertCircle, CheckCircle2, Wallet, X, TrendingDown, TrendingUp, Minus } from 'lucide-react';
+import { AlertCircle, CheckCircle2, ShieldAlert, Wallet, X } from 'lucide-react';
 import { calculatePhysicalTotal, calculateVariance, formatPHP } from '@/lib/utils/currency';
 
 export default function DenominationCounter({ 
@@ -31,7 +31,6 @@ export default function DenominationCounter({
   // Animate in on open
   useEffect(() => {
     if (isOpen) {
-      // Small delay so CSS transition fires after mount
       const t = setTimeout(() => setVisible(true), 10);
       return () => clearTimeout(t);
     } else {
@@ -62,218 +61,223 @@ export default function DenominationCounter({
   // Safe early return after all hooks
   if (!isOpen) return null;
 
-  const bills = [
-    { key: 'bills_1000', label: '₱1,000', sublabel: 'Bill', color: 'emerald' },
-    { key: 'bills_500',  label: '₱500',   sublabel: 'Bill', color: 'teal' },
-    { key: 'bills_200',  label: '₱200',   sublabel: 'Bill', color: 'blue' },
-    { key: 'bills_100',  label: '₱100',   sublabel: 'Bill', color: 'violet' },
-    { key: 'bills_50',   label: '₱50',    sublabel: 'Bill', color: 'amber' },
-    { key: 'bills_20',   label: '₱20',    sublabel: 'Bill', color: 'orange' },
-  ];
-
-  const coins = [
-    { key: 'coins_20',    label: '₱20',   sublabel: 'Coin',  color: 'amber' },
-    { key: 'coins_10',    label: '₱10',   sublabel: 'Coin',  color: 'yellow' },
-    { key: 'coins_5',     label: '₱5',    sublabel: 'Coin',  color: 'orange' },
-    { key: 'coins_1',     label: '₱1',    sublabel: 'Coin',  color: 'gray' },
-    { key: 'coins_cents', label: '₱0.25', sublabel: 'Cents', color: 'gray' },
-  ];
-
-  const colorMap = {
-    emerald: { bg: 'bg-emerald-500/15', border: 'border-emerald-500/25', text: 'text-emerald-300', ring: 'focus:ring-emerald-500/40', dot: 'bg-emerald-400' },
-    teal:    { bg: 'bg-teal-500/15',    border: 'border-teal-500/25',    text: 'text-teal-300',    ring: 'focus:ring-teal-500/40',    dot: 'bg-teal-400' },
-    blue:    { bg: 'bg-blue-500/15',    border: 'border-blue-500/25',    text: 'text-blue-300',    ring: 'focus:ring-blue-500/40',    dot: 'bg-blue-400' },
-    violet:  { bg: 'bg-violet-500/15',  border: 'border-violet-500/25',  text: 'text-violet-300',  ring: 'focus:ring-violet-500/40',  dot: 'bg-violet-400' },
-    amber:   { bg: 'bg-amber-500/15',   border: 'border-amber-500/25',   text: 'text-amber-300',   ring: 'focus:ring-amber-500/40',   dot: 'bg-amber-400' },
-    orange:  { bg: 'bg-orange-500/15',  border: 'border-orange-500/25',  text: 'text-orange-300',  ring: 'focus:ring-orange-500/40',  dot: 'bg-orange-400' },
-    yellow:  { bg: 'bg-yellow-500/15',  border: 'border-yellow-500/25',  text: 'text-yellow-300',  ring: 'focus:ring-yellow-500/40',  dot: 'bg-yellow-400' },
-    gray:    { bg: 'bg-white/[0.06]',   border: 'border-white/[0.10]',   text: 'text-white/50',    ring: 'focus:ring-white/20',       dot: 'bg-white/30' },
-  };
-
-  const DenomCard = ({ den }) => {
-    const c = colorMap[den.color];
-    const subtotal = breakdown[den.key] || 0;
-    const qty = counts[den.key] || 0;
-    return (
-      <div className={`group relative p-3 rounded-2xl border ${c.border} ${c.bg} flex items-center justify-between gap-2 transition-all hover:border-opacity-60`}>
-        {/* Color dot */}
-        <span className={`absolute top-2 right-2 w-1.5 h-1.5 rounded-full ${c.dot} opacity-60`} />
-        <div className="min-w-0">
-          <div className="flex items-baseline gap-1">
-            <span className={`text-sm font-black ${c.text}`}>{den.label}</span>
-            <span className="text-[10px] text-white/30 font-medium">{den.sublabel}</span>
-          </div>
-          <span className="text-[10px] text-white/35 tabular-nums block">{formatPHP(subtotal)}</span>
-        </div>
-        <input
-          type="number"
-          min="0"
-          value={qty === 0 ? '' : qty}
-          placeholder="0"
-          onChange={(e) => handleQtyChange(den.key, e.target.value)}
-          className={`w-14 text-center text-sm font-black bg-black/20 border border-white/[0.10] text-white rounded-xl py-1.5 focus:outline-none focus:ring-2 ${c.ring} focus:border-transparent transition-all placeholder:text-white/20 select-text`}
-        />
-      </div>
-    );
-  };
-
   return (
     <div
       className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4"
-      style={{ transition: 'background 200ms ease', background: visible ? 'rgba(0,0,0,0.65)' : 'rgba(0,0,0,0)' }}
+      style={{
+        background: visible ? 'rgba(0,0,0,0.40)' : 'rgba(0,0,0,0)',
+        transition: 'background 200ms ease',
+      }}
     >
       {/* Backdrop blur layer */}
       <div
         className="absolute inset-0"
         style={{
-          backdropFilter: visible ? 'blur(8px)' : 'blur(0px)',
-          transition: 'backdrop-filter 250ms ease',
+          backdropFilter: visible ? 'blur(4px)' : 'blur(0px)',
+          transition: 'backdrop-filter 220ms ease',
         }}
         onClick={onClose}
       />
 
       {/* Modal panel */}
       <div
-        className="relative rounded-t-3xl sm:rounded-3xl max-w-xl w-full overflow-hidden max-h-[92vh] sm:max-h-[88vh] flex flex-col"
+        className="relative bg-white rounded-t-3xl sm:rounded-3xl max-w-xl w-full border border-black/10 shadow-2xl overflow-hidden max-h-[92vh] sm:max-h-[90vh] flex flex-col"
         style={{
-          background: 'rgba(10, 24, 16, 0.92)',
-          backdropFilter: 'blur(24px)',
-          border: '1px solid rgba(255,255,255,0.10)',
-          boxShadow: '0 32px 80px rgba(0,0,0,0.6), 0 0 0 1px rgba(16,185,129,0.08) inset',
           opacity: visible ? 1 : 0,
           transform: visible ? 'translateY(0) scale(1)' : 'translateY(24px) scale(0.97)',
           transition: 'opacity 220ms cubic-bezier(0.32,0.72,0,1), transform 280ms cubic-bezier(0.32,0.72,0,1)',
         }}
       >
         {/* Mobile Pull Handle */}
-        <div className="w-10 h-1 bg-white/20 rounded-full mx-auto mt-3 -mb-1 sm:hidden shrink-0" />
+        <div className="w-10 h-1 bg-gray-300 rounded-full mx-auto mt-2.5 -mb-1 sm:hidden shrink-0" />
 
-        {/* Header */}
-        <div className="px-5 sm:px-6 py-4 border-b border-white/[0.07] flex items-center justify-between shrink-0">
-          <div className="flex items-center gap-3 min-w-0">
-            <div className="w-9 h-9 rounded-xl bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center text-emerald-300 shrink-0">
+        {/* Modal Header */}
+        <div className="px-5 sm:px-6 py-3.5 sm:py-4 border-b border-black/[0.06] flex items-center justify-between shrink-0 bg-gray-50/50">
+          <div className="flex items-center gap-2 min-w-0">
+            <div className="w-8 h-8 rounded-xl bg-emerald-100 flex items-center justify-center text-emerald-800 shrink-0">
               <Wallet className="w-4 h-4" />
             </div>
             <div className="min-w-0">
-              <h3 className="text-sm sm:text-base font-bold text-white truncate">Cash Box Denomination Counter</h3>
-              <p className="text-[11px] text-white/40 font-medium truncate">Physical count audit vs. Book ledger balance</p>
+              <h3 className="text-sm sm:text-base font-bold text-gray-950 truncate">Cash Box Denomination Counter</h3>
+              <p className="text-[11px] sm:text-xs text-gray-500 font-medium truncate">
+                Physical count audit vs. Book ledger balance
+              </p>
             </div>
           </div>
-          <button
+          <button 
             onClick={onClose}
-            className="p-1.5 rounded-full text-white/30 hover:text-white hover:bg-white/[0.08] transition-colors shrink-0 ml-2"
+            className="p-1.5 rounded-full text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors shrink-0 ml-2"
           >
             <X className="w-4 h-4" />
           </button>
         </div>
 
-        {/* Scrollable Body */}
-        <div className="p-4 sm:p-5 overflow-y-auto space-y-4 flex-1">
-
-          {/* Summary Bar */}
-          <div className="grid grid-cols-3 gap-2 p-3.5 rounded-2xl" style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }}>
+        {/* Scrollable Content */}
+        <div className="p-4 sm:p-6 overflow-y-auto space-y-4 sm:space-y-5 text-xs">
+          
+          {/* Comparison Bar */}
+          <div className="grid grid-cols-3 gap-2 sm:gap-3 p-3 sm:p-4 bg-gray-50 rounded-2xl border border-black/[0.08]">
             <div>
-              <span className="text-[10px] text-white/35 font-medium block mb-0.5">Counted Cash</span>
-              <span className="text-sm sm:text-base font-black text-white block tabular-nums">{formatPHP(physicalTotal)}</span>
+              <span className="text-gray-500 font-medium text-[10px] sm:text-[11px] block truncate">Counted Cash</span>
+              <span className="text-sm sm:text-base font-bold text-gray-900 block mt-0.5 truncate tabular-nums">
+                {formatPHP(physicalTotal)}
+              </span>
             </div>
             <div>
-              <span className="text-[10px] text-white/35 font-medium block mb-0.5">Book Ledger</span>
-              <span className="text-sm sm:text-base font-black text-white block tabular-nums">{formatPHP(ledgerCashBalance)}</span>
+              <span className="text-gray-500 font-medium text-[10px] sm:text-[11px] block truncate">Book Ledger</span>
+              <span className="text-sm sm:text-base font-bold text-gray-900 block mt-0.5 truncate tabular-nums">
+                {formatPHP(ledgerCashBalance)}
+              </span>
             </div>
             <div>
-              <span className="text-[10px] text-white/35 font-medium block mb-0.5">Variance</span>
-              <span className={`text-sm sm:text-base font-black block tabular-nums ${
-                status === 'BALANCED' ? 'text-emerald-400' :
-                status === 'SHORTAGE' ? 'text-rose-400' : 'text-blue-400'
+              <span className="text-gray-500 font-medium text-[10px] sm:text-[11px] block truncate">Variance</span>
+              <span className={`text-sm sm:text-base font-bold block mt-0.5 truncate tabular-nums ${
+                status === 'BALANCED' ? 'text-emerald-700' :
+                status === 'SHORTAGE' ? 'text-rose-700' : 'text-blue-700'
               }`}>
                 {status === 'SHORTAGE' ? `-${formatPHP(variance)}` :
-                 status === 'OVERAGE'  ? `+${formatPHP(variance)}` : '₱0.00'}
+                 status === 'OVERAGE' ? `+${formatPHP(variance)}` : '₱0.00'}
               </span>
             </div>
           </div>
 
-          {/* Status Banner */}
-          {status === 'BALANCED' && (
-            <div className="flex items-center gap-2.5 p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-300 font-medium text-xs">
-              <CheckCircle2 className="w-4 h-4 shrink-0 text-emerald-400" />
-              Cash box perfectly reconciles with ledger records.
-            </div>
-          )}
-
+          {/* Variance Notice / Shortage Justification Box */}
           {status === 'SHORTAGE' && (
-            <div className="p-4 rounded-2xl border border-rose-500/20 space-y-3" style={{ background: 'rgba(239,68,68,0.06)' }}>
-              <div className="flex items-center gap-2 text-rose-300 font-bold text-xs">
-                <AlertCircle className="w-4 h-4 text-rose-400 shrink-0" />
-                Physical Shortage Detected (−{formatPHP(variance)})
+            <div className="p-4 bg-gray-50 border border-black/[0.08] rounded-2xl space-y-2.5">
+              <div className="flex items-center gap-2 text-rose-900 font-bold">
+                <AlertCircle className="w-4 h-4 text-rose-600 shrink-0" />
+                <span>Physical Shortage Detected (-{formatPHP(variance)})</span>
               </div>
-              <p className="text-[11px] text-white/45 leading-relaxed">
+              <p className="text-[11px] text-gray-600 leading-relaxed">
                 As per LITE AY 2025–2026 governance rules, physical variances from loose coin change or booth rush may be formally declared as a justified expense line item under Adviser approval.
               </p>
               <div>
-                <label className="block text-[11px] font-semibold text-white/60 mb-1.5">Adviser Shortage Justification Notes:</label>
+                <label className="block font-semibold text-gray-800 mb-1">
+                  Adviser Shortage Justification Notes:
+                </label>
                 <input
                   type="text"
-                  placeholder="e.g. Minor variance during Club Week booth rush (₱161.00 approved)"
+                  placeholder="e.g. Minor variance incurred during Club Week booth rush (₱161.00 approved)"
                   value={justificationNotes}
                   onChange={(e) => setJustificationNotes(e.target.value)}
-                  className="w-full h-9 px-3 bg-white/[0.06] border border-white/[0.08] rounded-xl focus:outline-none focus:ring-2 focus:ring-rose-500/30 text-xs text-white/80 placeholder:text-white/20 select-text"
+                  className="w-full h-9 px-3 bg-white border border-black/[0.08] rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/20 text-xs text-gray-900 select-text"
                 />
               </div>
               <button
                 type="button"
                 onClick={handleDeclareShortageClick}
-                className="h-9 px-4 bg-rose-600 hover:bg-rose-500 active:bg-rose-700 text-white font-semibold rounded-xl text-xs transition-colors shadow-xs cursor-pointer"
+                className="h-9 px-3.5 bg-rose-700 hover:bg-rose-800 active:bg-rose-900 text-white font-semibold rounded-xl text-xs transition-colors shadow-xs cursor-pointer"
               >
-                Log Approved Shortage Expense (−{formatPHP(variance)})
+                Log Approved Shortage Expense (-{formatPHP(variance)})
               </button>
             </div>
           )}
 
-          {/* Bills */}
-          <div>
-            <div className="flex items-center gap-2 mb-2.5">
-              <span className="text-[10px] font-bold uppercase tracking-widest text-white/30">Paper Banknotes</span>
-              <div className="flex-1 h-px bg-white/[0.06]" />
+          {status === 'BALANCED' && (
+            <div className="p-3 bg-gray-50 border border-black/[0.08] rounded-xl flex items-center gap-2 text-emerald-800 font-medium">
+              <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+              <span>Cash box perfectly reconciles with ledger records.</span>
             </div>
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-              {bills.map((den) => <DenomCard key={den.key} den={den} />)}
-            </div>
-          </div>
+          )}
 
-          {/* Coins */}
-          <div>
-            <div className="flex items-center gap-2 mb-2.5">
-              <span className="text-[10px] font-bold uppercase tracking-widest text-white/30">Coins &amp; Small Change</span>
-              <div className="flex-1 h-px bg-white/[0.06]" />
+          {/* Denominations Input Tables */}
+          <div className="space-y-4">
+            
+            {/* Paper Bills Section */}
+            <div>
+              <h4 className="font-bold text-gray-900 mb-2 uppercase tracking-wider text-[10px]">
+                Paper Banknotes
+              </h4>
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
+                {[
+                  { key: 'bills_1000', label: '₱1,000 Bill', value: 1000 },
+                  { key: 'bills_500', label: '₱500 Bill', value: 500 },
+                  { key: 'bills_200', label: '₱200 Bill', value: 200 },
+                  { key: 'bills_100', label: '₱100 Bill', value: 100 },
+                  { key: 'bills_50', label: '₱50 Bill', value: 50 },
+                  { key: 'bills_20', label: '₱20 Bill', value: 20 },
+                ].map((den) => (
+                  <div key={den.key} className="p-2.5 bg-gray-50 border border-black/[0.05] rounded-xl flex items-center justify-between">
+                    <div>
+                      <span className="font-bold text-gray-900 block">{den.label}</span>
+                      <span className="text-[10px] text-gray-400">
+                        {formatPHP(breakdown[den.key] || 0)}
+                      </span>
+                    </div>
+                    <input
+                      type="number"
+                      min="0"
+                      value={counts[den.key] || ''}
+                      placeholder="0"
+                      onChange={(e) => handleQtyChange(den.key, e.target.value)}
+                      className="w-14 text-center font-bold bg-white border border-black/[0.08] rounded-lg py-1 focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                    />
+                  </div>
+                ))}
+              </div>
             </div>
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-              {coins.map((den) => <DenomCard key={den.key} den={den} />)}
+
+            {/* Coins Section */}
+            <div>
+              <h4 className="font-bold text-gray-900 mb-2 uppercase tracking-wider text-[10px]">
+                Coins &amp; Small Change
+              </h4>
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
+                {[
+                  { key: 'coins_20', label: '₱20 Coin', value: 20 },
+                  { key: 'coins_10', label: '₱10 Coin', value: 10 },
+                  { key: 'coins_5', label: '₱5 Coin', value: 5 },
+                  { key: 'coins_1', label: '₱1 Coin', value: 1 },
+                  { key: 'coins_cents', label: '₱0.25 Cents', value: 0.25 },
+                ].map((den) => (
+                  <div key={den.key} className="p-2.5 bg-gray-50 border border-black/[0.05] rounded-xl flex items-center justify-between">
+                    <div>
+                      <span className="font-bold text-gray-900 block">{den.label}</span>
+                      <span className="text-[10px] text-gray-400">
+                        {formatPHP(breakdown[den.key] || 0)}
+                      </span>
+                    </div>
+                    <input
+                      type="number"
+                      min="0"
+                      value={counts[den.key] || ''}
+                      placeholder="0"
+                      onChange={(e) => handleQtyChange(den.key, e.target.value)}
+                      className="w-14 text-center font-bold bg-white border border-black/[0.08] rounded-lg py-1 focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                    />
+                  </div>
+                ))}
+              </div>
             </div>
+
           </div>
 
         </div>
 
-        {/* Footer */}
-        <div
-          className="px-5 sm:px-6 py-4 border-t border-white/[0.07] flex items-center justify-between shrink-0"
-          style={{ background: 'rgba(0,0,0,0.20)' }}
-        >
-          <div className="text-xs text-white/30">
-            Counted by: <span className="font-bold text-white/60">{currentRole.toUpperCase()}</span>
+        {/* Modal Footer */}
+        <div className="px-6 py-4 border-t border-black/[0.06] bg-gray-50/50 flex items-center justify-between shrink-0">
+          <div className="text-xs text-gray-500">
+            Counted by: <span className="font-semibold text-gray-800">{currentRole.toUpperCase()}</span>
           </div>
           <div className="flex items-center gap-2">
             <button
               onClick={onClose}
-              className="h-10 px-4 text-white/50 hover:text-white hover:bg-white/[0.08] active:bg-white/[0.12] rounded-xl text-xs font-semibold transition-colors cursor-pointer"
+              className="h-10 px-4 text-gray-700 hover:bg-gray-100 active:bg-gray-200 rounded-xl text-xs font-semibold transition-colors cursor-pointer"
             >
               Close
             </button>
             <button
               onClick={() => {
-                onSaveCount({ counts, physicalTotal, ledgerCashBalance, variance, status });
+                onSaveCount({
+                  counts,
+                  physicalTotal,
+                  ledgerCashBalance,
+                  variance,
+                  status,
+                });
                 onClose();
               }}
-              className="h-10 px-5 bg-emerald-600 hover:bg-emerald-500 active:bg-emerald-700 text-white rounded-xl text-xs font-bold shadow-xs transition-all cursor-pointer whitespace-nowrap"
+              className="h-10 px-5 bg-emerald-700 hover:bg-emerald-800 active:bg-emerald-900 text-white rounded-xl text-xs font-semibold shadow-xs transition-all cursor-pointer whitespace-nowrap"
             >
               Save Audit Count
             </button>
