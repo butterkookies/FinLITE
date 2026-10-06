@@ -52,12 +52,12 @@ export default function Navbar({
 
   return (
     <header className="sticky top-0 z-30 bg-black/20 backdrop-blur-xl border-b border-white/[0.07] transition-all">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-2">
         
         {/* Left: Organization Branding & Semester Switcher */}
         <div className="flex items-center gap-2 sm:gap-3 min-w-0">
-          <div className="flex items-center gap-2 min-w-0">
-            {/* Logo */}
+          {/* Logo & Brand Name (shrink-0 prevents crushing on mobile) */}
+          <div className="flex items-center gap-2 shrink-0">
             <div className="w-8 h-8 sm:w-9 sm:h-9 flex items-center justify-center shrink-0">
               <Image 
                 src="/assets/lite-logo.png" 
@@ -68,45 +68,47 @@ export default function Navbar({
                 onError={(e) => { e.currentTarget.style.display = 'none'; }}
               />
             </div>
-            <div className="min-w-0">
-              <div className="flex items-center gap-1.5">
-                <span className="text-sm sm:text-base font-bold tracking-tight text-white">FinLITE</span>
-              </div>
-              <p className="text-[10px] sm:text-[11px] text-emerald-400/70 font-medium leading-none truncate">
+            <div className="flex flex-col justify-center shrink-0">
+              <span className="text-sm sm:text-base font-bold tracking-tight text-white leading-tight">
+                FinLITE
+              </span>
+              <p className="text-[10px] sm:text-[11px] text-emerald-400/70 font-medium leading-none hidden sm:block">
                 <span className="md:hidden">LITE <span className="text-white/20 mx-0.5">/</span> PDM</span>
                 <span className="hidden md:inline">LITE <span className="text-white/20 mx-0.5">/</span> Pambayang Dalubhasaan ng Marilao</span>
               </p>
             </div>
           </div>
 
+          {/* Divider */}
+          <div className="h-5 w-px bg-white/[0.08] shrink-0" />
+
           {/* Interactive Semester Switcher */}
-          <div className="flex items-center pl-2 sm:pl-3 border-l border-white/[0.08]">
-            <div className="relative flex items-center">
-              <Calendar className="w-3.5 h-3.5 text-emerald-400 absolute left-2.5 pointer-events-none" />
-              <select
-                value={currentSemester?.id || ''}
-                onChange={(e) => {
-                  if (e.target.value === 'NEW') {
-                    onOpenNewSemester();
-                  } else {
-                    onSelectSemester(e.target.value);
-                  }
-                }}
-                className="h-9 text-[11px] sm:text-xs font-semibold text-white/80 bg-white/[0.06] hover:bg-white/[0.10] border border-white/[0.08] pl-7 pr-6 rounded-xl appearance-none cursor-pointer focus:outline-none focus:ring-2 focus:ring-emerald-500/30 max-w-[110px] xs:max-w-[140px] sm:max-w-none truncate transition-colors"
-                title="Select Academic Year / Semester or Start New Term"
-              >
-                {semesters.map((s) => (
-                  <option key={s.id} value={s.id} className="bg-[#0d2416] text-white">
-                    {s.label}
-                  </option>
-                ))}
-                {isOfficer && (
-                  <option value="NEW" className="bg-[#0d2416] text-emerald-400 font-bold">
-                    + Start New Semester...
-                  </option>
-                )}
-              </select>
-            </div>
+          <div className="relative flex items-center min-w-0 max-w-[110px] xs:max-w-[140px] sm:max-w-[220px]">
+            <Calendar className="w-3.5 h-3.5 text-emerald-400 absolute left-2.5 pointer-events-none shrink-0" />
+            <select
+              value={currentSemester?.id || ''}
+              onChange={(e) => {
+                if (e.target.value === 'NEW') {
+                  onOpenNewSemester();
+                } else {
+                  onSelectSemester(e.target.value);
+                }
+              }}
+              className="h-9 w-full text-[11px] sm:text-xs font-semibold text-white/80 bg-white/[0.06] hover:bg-white/[0.10] border border-white/[0.08] pl-7 pr-6 rounded-xl appearance-none cursor-pointer focus:outline-none focus:ring-2 focus:ring-emerald-500/30 truncate transition-colors"
+              title="Select Academic Year / Semester or Start New Term"
+            >
+              {semesters.map((s) => (
+                <option key={s.id} value={s.id} className="bg-[#0d2416] text-white">
+                  {s.label}
+                </option>
+              ))}
+              {isOfficer && (
+                <option value="NEW" className="bg-[#0d2416] text-emerald-400 font-bold">
+                  + Start New Semester...
+                </option>
+              )}
+            </select>
+            <ChevronDown className="w-3 h-3 text-white/40 absolute right-2 pointer-events-none" />
           </div>
         </div>
 
@@ -117,7 +119,7 @@ export default function Navbar({
           {isOfficer && (
             <button
               onClick={onOpenDenominations}
-              className="h-9 flex items-center justify-center gap-1.5 px-2.5 sm:px-3 text-xs font-semibold text-white/80 bg-white/[0.06] hover:bg-white/[0.10] active:bg-white/[0.15] border border-white/[0.08] rounded-xl transition-all shadow-xs cursor-pointer whitespace-nowrap"
+              className="h-9 w-9 sm:w-auto flex items-center justify-center sm:gap-1.5 sm:px-3 text-xs font-semibold text-white/80 bg-white/[0.06] hover:bg-white/[0.10] active:bg-white/[0.15] border border-white/[0.08] rounded-xl transition-all shadow-xs cursor-pointer shrink-0"
               title="Open Cash Box & Denomination Counter"
             >
               <Wallet className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
@@ -128,19 +130,19 @@ export default function Navbar({
           {/* AI Co-Pilot Button */}
           <button
             onClick={onOpenAI}
-            className="h-9 flex items-center justify-center gap-1.5 px-2.5 sm:px-3 text-xs font-semibold text-white/80 bg-white/[0.06] hover:bg-white/[0.10] active:bg-white/[0.15] border border-white/[0.08] rounded-xl transition-all shadow-xs cursor-pointer whitespace-nowrap"
+            className="h-9 flex items-center justify-center gap-1.5 px-2.5 sm:px-3 text-xs font-semibold text-white/80 bg-white/[0.06] hover:bg-white/[0.10] active:bg-white/[0.15] border border-white/[0.08] rounded-xl transition-all shadow-xs cursor-pointer shrink-0"
             title="FinLITE Grounded AI Co-Pilot"
           >
             <Sparkles className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
             <span className="hidden sm:inline">AI Co-Pilot</span>
-            <span className="sm:hidden text-[11px]">AI</span>
+            <span className="sm:hidden text-[11px] font-bold">AI</span>
           </button>
 
           {/* Admin Console Link Button — STRICTLY VISIBLE TO ADMIN ONLY */}
           {isAdmin && (
             <Link
               href="/admin"
-              className="h-9 flex items-center justify-center gap-1.5 px-2.5 sm:px-3 text-xs font-semibold text-white/80 bg-white/[0.06] hover:bg-white/[0.10] active:bg-white/[0.15] border border-white/[0.08] rounded-xl transition-all shadow-xs whitespace-nowrap"
+              className="h-9 w-9 sm:w-auto flex items-center justify-center sm:gap-1.5 sm:px-3 text-xs font-semibold text-white/80 bg-white/[0.06] hover:bg-white/[0.10] active:bg-white/[0.15] border border-white/[0.08] rounded-xl transition-all shadow-xs shrink-0"
               title="Open Admin Console & Approvals"
             >
               <ShieldCheck className="w-3.5 h-3.5 text-amber-400 shrink-0" />
