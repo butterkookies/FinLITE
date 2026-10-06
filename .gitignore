@@ -25,7 +25,10 @@ dist/
 
 # Environment Variables
 .env
+.env*
 .env.local
+.env.local.txt
+*.env*.txt
 .env.development.local
 .env.test.local
 .env.production.local

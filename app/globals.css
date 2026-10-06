@@ -104,3 +104,70 @@
 ::-webkit-scrollbar-thumb:hover {
   background: rgba(255, 255, 255, 0.25);
 }
+
+/* =============================================
+   AI CO-PILOT ENTRANCE & MICRO-ANIMATIONS
+   ============================================= */
+
+@keyframes aiBackdropFade {
+  0% {
+    opacity: 0;
+    backdrop-filter: blur(0px);
+  }
+  100% {
+    opacity: 1;
+    backdrop-filter: blur(8px);
+  }
+}
+
+@keyframes aiDrawerSlide {
+  0% {
+    opacity: 0;
+    transform: translateX(100%) scale(0.97);
+  }
+  60% {
+    opacity: 1;
+    transform: translateX(-0.8%) scale(1.002);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+}
+
+@keyframes aiMessageEntry {
+  0% {
+    opacity: 0;
+    transform: translateY(10px) scale(0.98);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes aiSparkleGlow {
+  0%, 100% {
+    box-shadow: 0 0 10px rgba(52, 211, 153, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 20px rgba(52, 211, 153, 0.7);
+  }
+}
+
+.animate-ai-backdrop {
+  animation: aiBackdropFade 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.animate-ai-drawer {
+  animation: aiDrawerSlide 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.animate-ai-message {
+  animation: aiMessageEntry 0.28s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.animate-ai-glow {
+  animation: aiSparkleGlow 2.5s infinite ease-in-out;
+}
+
