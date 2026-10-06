@@ -13,11 +13,11 @@ export default function StatCards({ summary, onOpenDenominations }) {
   } = summary;
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-2.5 sm:gap-3.5 mb-5 sm:mb-6">
+    <div className="grid grid-cols-2 lg:grid-cols-5 gap-2 sm:gap-3.5 mb-5 sm:mb-6">
 
       {/* 1. Physical Cash Box */}
       <BorderGlow
-        className="sm:col-span-2 lg:col-span-1"
+        className="lg:col-span-1"
         backgroundColor="#ffffff"
         borderRadius={16}
         glowRadius={36}
@@ -145,7 +145,7 @@ export default function StatCards({ summary, onOpenDenominations }) {
 
       {/* 5. Pending Reimbursements */}
       <BorderGlow
-        className="sm:col-span-2 lg:col-span-1"
+        className="lg:col-span-1"
         backgroundColor="#ffffff"
         borderRadius={16}
         glowRadius={36}
