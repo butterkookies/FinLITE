@@ -32,6 +32,17 @@ function LoginForm() {
     errorParam === 'server_error' ? 'A server error occurred. Please try again.' : ''
   );
 
+  // Interactive Wavy Gradient Panel Tracking
+  const [mousePos, setMousePos] = useState({ x: 50, y: 50 });
+  const [isHovered, setIsHovered] = useState(false);
+
+  const handlePanelMouseMove = (e) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = Math.round(((e.clientX - rect.left) / rect.width) * 100);
+    const y = Math.round(((e.clientY - rect.top) / rect.height) * 100);
+    setMousePos({ x, y });
+  };
+
   const handleLogin = async (e) => {
     e.preventDefault();
     setError('');
@@ -100,25 +111,71 @@ function LoginForm() {
       {/* Outer Card Container matching reference layout */}
       <div className="w-full max-w-5xl bg-white rounded-3xl shadow-[0_25px_70px_-15px_rgba(4,120,87,0.22),0_10px_30px_-10px_rgba(0,0,0,0.1)] border border-black/[0.08] overflow-hidden grid grid-cols-1 lg:grid-cols-12 p-3 sm:p-4 lg:p-4 gap-4">
         
-        {/* Left Side: Green Mesh Gradient Visual Panel */}
-        <div className="lg:col-span-6 relative rounded-2xl sm:rounded-3xl overflow-hidden bg-gradient-to-br from-emerald-950 via-emerald-800 to-teal-900 p-8 sm:p-10 flex flex-col justify-between min-h-[320px] lg:min-h-[580px] shadow-inner">
-          {/* Mesh Gradient Aura Blobs */}
-          <div className="absolute top-0 left-0 w-96 h-96 bg-emerald-400/20 rounded-full filter blur-3xl pointer-events-none -ml-20 -mt-20" />
-          <div className="absolute bottom-0 right-0 w-96 h-96 bg-teal-300/20 rounded-full filter blur-3xl pointer-events-none -mr-20 -mb-20" />
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-72 h-72 bg-emerald-300/15 rounded-full filter blur-2xl pointer-events-none" />
+        {/* Left Side: Green Mesh Gradient Visual Panel with Interactive Wavy Animation */}
+        <div 
+          onMouseMove={handlePanelMouseMove}
+          onMouseEnter={() => setIsHovered(true)}
+          onMouseLeave={() => { setIsHovered(false); setMousePos({ x: 50, y: 50 }); }}
+          className="lg:col-span-6 relative rounded-2xl sm:rounded-3xl overflow-hidden animate-wave-gradient bg-gradient-to-br from-emerald-950 via-[#064e3b] via-[#047857] to-[#0f766e] p-8 sm:p-10 flex flex-col justify-between min-h-[340px] lg:min-h-[580px] shadow-inner select-none transition-all duration-300 group cursor-default"
+        >
+          {/* Interactive Cursor Spotlight Glow Wave */}
+          <div 
+            className="absolute inset-0 pointer-events-none transition-all duration-500 ease-out z-[2]"
+            style={{
+              background: `radial-gradient(circle 380px at ${mousePos.x}% ${mousePos.y}%, rgba(52, 211, 153, ${isHovered ? '0.40' : '0.22'}), rgba(16, 185, 129, 0.15) 45%, transparent 75%)`,
+            }}
+          />
 
-          {/* Top Branding / Logo Mark */}
-          <div className="relative z-10 flex items-center gap-3">
-            <Image src="/assets/lite-logo.png" alt="LITE" width={48} height={48} className="w-12 h-12 object-contain shrink-0" priority />
+          {/* Morphing Wavy Fluid Blobs */}
+          <div className="absolute top-[-10%] left-[-15%] w-[420px] h-[420px] bg-emerald-400/25 blur-3xl rounded-full animate-wave-blob-1 pointer-events-none z-[1]" />
+          <div className="absolute bottom-[-15%] right-[-15%] w-[460px] h-[460px] bg-teal-300/20 blur-3xl rounded-full animate-wave-blob-2 pointer-events-none z-[1]" />
+          <div className="absolute top-[35%] left-[20%] w-[320px] h-[320px] bg-emerald-300/15 blur-2xl rounded-full animate-wave-blob-1 pointer-events-none z-[1]" />
+
+          {/* Flowing SVG Sine Wave Mesh Overlay */}
+          <div className="absolute inset-0 pointer-events-none overflow-hidden opacity-35 mix-blend-screen z-[1]">
+            <svg className="w-[180%] h-full animate-wave-svg" viewBox="0 0 1200 600" fill="none" preserveAspectRatio="none">
+              <path d="M0,320 C180,240 360,400 600,300 C840,200 1020,380 1200,310 L1200,600 L0,600 Z" fill="url(#wave-grad-1)" opacity="0.6"/>
+              <path d="M0,360 C220,440 420,270 620,370 C820,470 1020,290 1200,380 L1200,600 L0,600 Z" fill="url(#wave-grad-2)" opacity="0.45"/>
+              <defs>
+                <linearGradient id="wave-grad-1" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%" stopColor="#10b981" stopOpacity="0.15" />
+                  <stop offset="50%" stopColor="#34d399" stopOpacity="0.45" />
+                  <stop offset="100%" stopColor="#059669" stopOpacity="0.15" />
+                </linearGradient>
+                <linearGradient id="wave-grad-2" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%" stopColor="#047857" stopOpacity="0.15" />
+                  <stop offset="50%" stopColor="#6ee7b7" stopOpacity="0.35" />
+                  <stop offset="100%" stopColor="#0d9488" stopOpacity="0.15" />
+                </linearGradient>
+              </defs>
+            </svg>
+          </div>
+
+          {/* Top Branding / Logo Mark (Enlarged per request) */}
+          <div className="relative z-10 flex items-center gap-3.5 sm:gap-4">
+            <div className="w-13 h-13 sm:w-15 sm:h-15 flex items-center justify-center shrink-0 drop-shadow-md">
+              <Image 
+                src="/assets/lite-logo.png" 
+                alt="LITE" 
+                width={60} 
+                height={60} 
+                className="w-full h-full object-contain" 
+                priority 
+              />
+            </div>
             <div>
-              <span className="text-white font-bold text-base tracking-wide">FinLITE</span>
-              <p className="text-[11px] text-emerald-200/80 font-medium leading-none">League of Information Technology Enthusiasts</p>
+              <span className="text-white font-black text-xl sm:text-2xl lg:text-[1.65rem] tracking-tight leading-none block">
+                FinLITE
+              </span>
+              <p className="text-xs sm:text-sm text-emerald-200/90 font-medium leading-snug mt-1">
+                League of Information Technology Enthusiasts
+              </p>
             </div>
           </div>
 
-          {/* Bottom Banner Content matching reference card */}
+          {/* Bottom Banner Headline */}
           <div className="relative z-10 mt-auto pt-10">
-            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-white leading-tight tracking-tight">
+            <h2 className="text-2xl sm:text-3xl lg:text-[2.2rem] font-black text-white leading-[1.2] tracking-tight">
               Get access to your financial hub for clarity and accountability.
             </h2>
           </div>
