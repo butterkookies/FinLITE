@@ -441,30 +441,27 @@ export default function AdminPage() {
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
             
             {/* Tabs — 2x2 grid on mobile (no scroll), flex row on sm+ */}
-            <div className="grid grid-cols-2 sm:flex sm:items-center gap-1.5 p-1 bg-black/15 rounded-xl w-full sm:w-auto">
+            <div className="grid grid-cols-2 sm:flex sm:items-center gap-2 p-1.5 bg-black/20 rounded-2xl w-full sm:w-auto border border-white/[0.08]">
               <button
                 onClick={() => setActiveTab('pending')}
-                className={`w-full sm:w-auto px-3 py-2 sm:py-1.5 text-xs font-semibold rounded-lg transition-all flex items-center justify-center gap-1.5 cursor-pointer text-center ${
+                className={`w-full sm:w-auto px-3.5 py-2 sm:py-1.5 text-xs font-semibold rounded-xl transition-all flex items-center justify-center gap-2 cursor-pointer text-center border ${
                   activeTab === 'pending'
-                    ? 'bg-emerald-500 text-white font-bold shadow-md border border-emerald-300/40'
-                    : 'text-white/80 hover:text-white hover:bg-white/20'
+                    ? 'bg-emerald-500 text-white font-bold shadow-md border-emerald-300/50 ring-1 ring-emerald-400/30'
+                    : 'bg-white/[0.07] hover:bg-white/[0.12] border-white/[0.12] text-white/80 hover:text-white'
                 }`}
               >
                 <span className="truncate">Pending</span>
-                <span className="hidden xs:inline">Approvals</span>
-                {stats.pending > 0 && (
-                  <span className="px-1.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-500 text-white shrink-0">
-                    {stats.pending}
-                  </span>
-                )}
+                <span className="px-1.5 py-0.5 rounded-full text-[10px] font-bold shrink-0 bg-white/20 text-white">
+                  {stats.pending || 0}
+                </span>
               </button>
 
               <button
                 onClick={() => setActiveTab('users')}
-                className={`w-full sm:w-auto px-3 py-2 sm:py-1.5 text-xs font-semibold rounded-lg transition-all flex items-center justify-center gap-1.5 cursor-pointer text-center ${
+                className={`w-full sm:w-auto px-3.5 py-2 sm:py-1.5 text-xs font-semibold rounded-xl transition-all flex items-center justify-center gap-2 cursor-pointer text-center border ${
                   activeTab === 'users'
-                    ? 'bg-emerald-500 text-white font-bold shadow-md border border-emerald-300/40'
-                    : 'text-white/80 hover:text-white hover:bg-white/20'
+                    ? 'bg-emerald-500 text-white font-bold shadow-md border-emerald-300/50 ring-1 ring-emerald-400/30'
+                    : 'bg-white/[0.07] hover:bg-white/[0.12] border-white/[0.12] text-white/80 hover:text-white'
                 }`}
               >
                 <span className="truncate">Active Officers</span>
@@ -475,14 +472,13 @@ export default function AdminPage() {
 
               <button
                 onClick={() => setActiveTab('approved')}
-                className={`w-full sm:w-auto px-3 py-2 sm:py-1.5 text-xs font-semibold rounded-lg transition-all flex items-center justify-center gap-1.5 cursor-pointer text-center ${
+                className={`w-full sm:w-auto px-3.5 py-2 sm:py-1.5 text-xs font-semibold rounded-xl transition-all flex items-center justify-center gap-2 cursor-pointer text-center border ${
                   activeTab === 'approved'
-                    ? 'bg-emerald-500 text-white font-bold shadow-md border border-emerald-300/40'
-                    : 'text-white/80 hover:text-white hover:bg-white/20'
+                    ? 'bg-emerald-500 text-white font-bold shadow-md border-emerald-300/50 ring-1 ring-emerald-400/30'
+                    : 'bg-white/[0.07] hover:bg-white/[0.12] border-white/[0.12] text-white/80 hover:text-white'
                 }`}
               >
                 <span className="truncate">Approved</span>
-                <span className="hidden xs:inline">Log</span>
                 <span className="px-1.5 py-0.5 rounded-full text-[10px] font-semibold bg-white/20 text-white shrink-0">
                   {stats.approved}
                 </span>
@@ -490,10 +486,10 @@ export default function AdminPage() {
 
               <button
                 onClick={() => setActiveTab('rejected')}
-                className={`w-full sm:w-auto px-3 py-2 sm:py-1.5 text-xs font-semibold rounded-lg transition-all flex items-center justify-center gap-1.5 cursor-pointer text-center ${
+                className={`w-full sm:w-auto px-3.5 py-2 sm:py-1.5 text-xs font-semibold rounded-xl transition-all flex items-center justify-center gap-2 cursor-pointer text-center border ${
                   activeTab === 'rejected'
-                    ? 'bg-emerald-500 text-white font-bold shadow-md border border-emerald-300/40'
-                    : 'text-white/80 hover:text-white hover:bg-white/20'
+                    ? 'bg-emerald-500 text-white font-bold shadow-md border-emerald-300/50 ring-1 ring-emerald-400/30'
+                    : 'bg-white/[0.07] hover:bg-white/[0.12] border-white/[0.12] text-white/80 hover:text-white'
                 }`}
               >
                 <span className="truncate">Declined</span>
