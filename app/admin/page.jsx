@@ -235,17 +235,19 @@ export default function AdminPage() {
             <div className="h-6 w-px bg-white/[0.08]" />
 
             <div className="flex items-center gap-2.5">
-              <div className="w-9 h-9 rounded-xl bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center text-emerald-300 shadow-xs">
+              <div className="w-9 h-9 rounded-xl bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center text-emerald-300 shadow-xs shrink-0">
                 <ShieldCheck className="w-5 h-5" />
               </div>
-              <div>
+              <div className="min-w-0">
                 <div className="flex items-center gap-2">
-                  <span className="text-base font-bold text-white">FinLITE Admin Console</span>
-                  <span className="px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider bg-white/[0.08] text-white/60 border border-white/[0.08] rounded-md">
+                  <span className="text-base font-bold text-white">
+                    <span className="hidden sm:inline">FinLITE </span>Admin Console
+                  </span>
+                  <span className="hidden sm:inline px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider bg-white/[0.08] text-white/60 border border-white/[0.08] rounded-md shrink-0">
                     Access Control
                   </span>
                 </div>
-                <p className="text-xs text-emerald-400/70 font-medium">
+                <p className="hidden sm:block text-xs text-emerald-400/70 font-medium truncate">
                   User Registration Verification &amp; Role Management
                 </p>
               </div>
