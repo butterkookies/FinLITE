@@ -19,27 +19,69 @@ import {
 } from '../lib/utils/currency.js';
 import { validateGmail, validateUsername, validatePassword, validateContactNumber } from '../lib/utils/validation.js';
 import { isSuperAdminEmail, getSuperAdminEmails } from '../lib/config/admin.js';
-import { createClient } from '@supabase/supabase-js';
 import { execFileSync, spawn } from 'child_process';
 import fs from 'fs';
 import path from 'path';
 
-// Load .env.local
-const envContent = fs.readFileSync('.env.local', 'utf-8');
+// Optional dependency: only needed for the live Supabase check (section 7).
+let createClient = null;
+try {
+  ({ createClient } = await import('@supabase/supabase-js'));
+} catch {
+  /* dependencies not installed; section 7 will be skipped */
+}
+
+// Load .env.local (optional: sections that need it are skipped when it is absent)
 const env = {};
-for (const line of envContent.split('\n')) {
-  const trimmed = line.trim();
-  if (trimmed && !trimmed.startsWith('#')) {
-    const idx = trimmed.indexOf('=');
-    if (idx !== -1) {
-      env[trimmed.slice(0, idx).trim()] = trimmed.slice(idx + 1).trim();
+try {
+  const envContent = fs.readFileSync('.env.local', 'utf-8');
+  for (const line of envContent.split('\n')) {
+    const trimmed = line.trim();
+    if (trimmed && !trimmed.startsWith('#')) {
+      const idx = trimmed.indexOf('=');
+      if (idx !== -1) {
+        env[trimmed.slice(0, idx).trim()] = trimmed.slice(idx + 1).trim();
+      }
     }
   }
+} catch {
+  console.log('ℹ️  .env.local not found: Supabase-dependent checks will be skipped.');
 }
 
 const BASE_URL = 'http://localhost:3000';
 let passCount = 0;
 let failCount = 0;
+let skipCount = 0;
+const REQUIRE_ALL = process.argv.includes('--require-all'); // treat skips as failures (use for final runs)
+
+function skip(message) {
+  skipCount++;
+  console.log(`  ⏭️  SKIP: ${message}`);
+}
+
+async function isServerUp() {
+  try {
+    const ctrl = new AbortController();
+    const timer = setTimeout(() => ctrl.abort(), 2000);
+    await fetch(`${BASE_URL}/login`, { signal: ctrl.signal });
+    clearTimeout(timer);
+    return true;
+  } catch {
+    return false;
+  }
+}
+const serverUp = await isServerUp();
+console.log(serverUp
+  ? `ℹ️  Dev server detected at ${BASE_URL}: live route tests enabled.`
+  : `ℹ️  No server at ${BASE_URL} (run \`npm run dev\` to enable live route tests).`);
+
+function detectPython() {
+  for (const cmd of ['python3', 'python']) {
+    try { execFileSync(cmd, ['--version'], { stdio: 'ignore' }); return cmd; } catch {}
+  }
+  return null;
+}
+const PYTHON = detectPython();
 
 function assert(condition, message) {
   if (!condition) {
@@ -236,7 +278,7 @@ async function testRoutes() {
     assert(false, `/api/admin/approve test failed: ${e.message}`);
   }
 }
-await testRoutes();
+if (serverUp) await testRoutes(); else skip('Middleware route protection tests (server offline)');
 
 
 // ==============================================================================
@@ -261,6 +303,11 @@ async function testAuthValidation() {
   assert(validateGmail('example@gmail.co')?.includes("Did you mean"), "validateGmail('example@gmail.co') detects typo");
   assert(validateGmail('example@yahoo.com')?.includes("Only Gmail addresses"), "validateGmail('example@yahoo.com') rejects non-gmail");
   assert(validateGmail('valid.student@gmail.com') === null, "validateGmail('valid.student@gmail.com') returns null (valid)");
+
+  if (!serverUp) {
+    skip('Auth API validation tests against /api/auth/* (server offline)');
+    return;
+  }
 
   // API Test: Reject example.gmail without @ and without .com
   const resNoAt = await fetch(`${BASE_URL}/api/auth/register`, {
@@ -428,6 +475,10 @@ console.log('5. RUNNING AUTH API CONCURRENCY STRESS TEST (50 Parallel Requests)'
 console.log('============================================================');
 
 async function testAuthConcurrency() {
+  if (!serverUp) {
+    skip('50-request auth concurrency stress test (server offline)');
+    return;
+  }
   const CONCURRENT_REQUESTS = 50;
   console.log(`  🚀 Firing ${CONCURRENT_REQUESTS} parallel requests to /api/auth/register...`);
 
@@ -468,6 +519,10 @@ console.log('6. RUNNING DOCX EXPORT ENGINE TESTS & STRESS LOAD');
 console.log('============================================================');
 
 function testDocxSingle() {
+  if (!PYTHON) {
+    skip('DOCX export test (python/python3 not found)');
+    return;
+  }
   const dummyPayload = {
     metadata: {
       transmittalDate: 'SEPTEMBER 29, 2026',
@@ -510,7 +565,7 @@ function testDocxSingle() {
   fs.writeFileSync(tempJson, JSON.stringify(dummyPayload, null, 2));
 
   const tStart = performance.now();
-  execFileSync('python', ['scripts/export_report_engine.py', tempJson, tempOutput]);
+  execFileSync(PYTHON, ['scripts/export_report_engine.py', tempJson, tempOutput]);
   const tElapsed = performance.now() - tStart;
 
   assert(fs.existsSync(tempOutput), 'DOCX export file was created on disk');
@@ -525,7 +580,7 @@ console.log('  🚀 Stress Testing: Running 5 concurrent DOCX generation process
 const docxStart = performance.now();
 const docxJobs = [];
 
-for (let i = 0; i < 5; i++) {
+for (let i = 0; PYTHON && i < 5; i++) {
   const jsonFile = path.resolve(`exports/stress_input_${i}.json`);
   const outFile = path.resolve(`exports/stress_output_${i}.docx`);
   
@@ -564,7 +619,7 @@ for (let i = 0; i < 5; i++) {
   fs.writeFileSync(jsonFile, JSON.stringify(payload));
 
   const job = new Promise((resolve, reject) => {
-    const proc = spawn('python', ['scripts/export_report_engine.py', jsonFile, outFile]);
+    const proc = spawn(PYTHON, ['scripts/export_report_engine.py', jsonFile, outFile]);
     proc.on('close', code => {
       if (code === 0 && fs.existsSync(outFile)) {
         resolve({ index: i, size: fs.statSync(outFile).size });
@@ -576,12 +631,16 @@ for (let i = 0; i < 5; i++) {
   docxJobs.push(job);
 }
 
-const docxResults = await Promise.all(docxJobs);
+const docxResults = PYTHON ? await Promise.all(docxJobs) : [];
 const docxElapsed = performance.now() - docxStart;
 
-assert(docxResults.length === 5, 'All 5 concurrent DOCX files generated successfully');
-assert(docxResults.every(r => r.size > 20000), 'All 5 concurrent DOCX outputs are non-empty valid documents');
-console.log(`  ✅ 5 concurrent DOCX reports generated in ${docxElapsed.toFixed(2)}ms (avg ${(docxElapsed/5).toFixed(1)}ms per document)`);
+if (!PYTHON) {
+  skip('Concurrent DOCX stress test (python/python3 not found)');
+} else {
+  assert(docxResults.length === 5, 'All 5 concurrent DOCX files generated successfully');
+  assert(docxResults.every(r => r.size > 20000), 'All 5 concurrent DOCX outputs are non-empty valid documents');
+  console.log(`  ✅ 5 concurrent DOCX reports generated in ${docxElapsed.toFixed(2)}ms (avg ${(docxElapsed/5).toFixed(1)}ms per document)`);
+}
 
 // Clean up stress test temp files
 for (let i = 0; i < 5; i++) {
@@ -603,7 +662,14 @@ async function testDatabase() {
   const supabaseUrl = env.NEXT_PUBLIC_SUPABASE_URL;
   const anonKey = env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
-  assert(Boolean(supabaseUrl && anonKey), 'Supabase credentials loaded from .env.local');
+  if (!createClient) {
+    skip('Supabase checks (@supabase/supabase-js not installed; run npm install)');
+    return;
+  }
+  if (!supabaseUrl || !anonKey) {
+    skip('Supabase checks (credentials missing from .env.local)');
+    return;
+  }
 
   const supabase = createClient(supabaseUrl, anonKey);
 
@@ -640,6 +706,7 @@ console.log('============================================================');
 console.log(`  Total Checks: ${passCount + failCount}`);
 console.log(`  Passed:       ${passCount} ✅`);
 console.log(`  Failed:       ${failCount} ❌`);
+console.log(`  Skipped:      ${skipCount} ⏭️${skipCount && !REQUIRE_ALL ? '  (re-run with the server up and .env.local present, or use --require-all to fail on skips)' : ''}`);
 console.log('============================================================\n');
 
-process.exit(failCount === 0 ? 0 : 1);
+process.exit(failCount === 0 && !(REQUIRE_ALL && skipCount > 0) ? 0 : 1);

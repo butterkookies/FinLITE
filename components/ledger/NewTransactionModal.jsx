@@ -2,16 +2,30 @@
 import { useState, useRef, useEffect } from 'react';
 import { Camera, Check, ChevronDown, Upload, X } from 'lucide-react';
 import { compressReceiptImage } from '@/lib/utils/compression';
+import {
+  sanitizeAmountInput,
+  validateTransactionAmount,
+  validateOutflowBalance,
+} from '@/lib/utils/validation';
+import { formatPHP } from '@/lib/utils/currency';
 import { 
   OFFICIAL_INFLOW_CATEGORIES, 
   OFFICIAL_OUTFLOW_CATEGORIES 
 } from '@/lib/config/categories';
 
-export default function NewTransactionModal({ isOpen, onClose, onSave, categories = [] }) {
+export default function NewTransactionModal({
+  isOpen,
+  onClose,
+  onSave,
+  categories = [],
+  cashBalance = 0,
+  gcashBalance = 0,
+}) {
   const [type, setType] = useState('OUTFLOW');
   const [paymentMethod, setPaymentMethod] = useState('CASH');
   const [title, setTitle] = useState('');
   const [amount, setAmount] = useState('');
+  const [amountTouched, setAmountTouched] = useState(false);
   const [categoryName, setCategoryName] = useState('Supplies & Materials');
   const [isCategoryOpen, setIsCategoryOpen] = useState(false);
   const categoryRef = useRef(null);
@@ -23,11 +37,28 @@ export default function NewTransactionModal({ isOpen, onClose, onSave, categorie
   const [previewUrls, setPreviewUrls] = useState([]);
   const [compressing, setCompressing] = useState(false);
 
+  // Amount validation: format/limit first, then per-channel overdraft check
+  const amountError = validateTransactionAmount(amount);
+  const balanceError = amountError
+    ? null
+    : validateOutflowBalance({
+        type,
+        paymentMethod,
+        isReimbursement,
+        amount,
+        cashBalance,
+        gcashBalance,
+      });
+  const fieldError = (amountTouched && amountError) || balanceError;
+  const showOutflowBalance = type === 'OUTFLOW' && !isReimbursement;
+  const availableBalance = paymentMethod === 'GCASH' ? gcashBalance : cashBalance;
+
   // Reset fields when opening modal
   useEffect(() => {
     if (isOpen) {
       setTitle('');
       setAmount('');
+      setAmountTouched(false);
       setEventName('');
       setIsReimbursement(false);
       setRecipient('');
@@ -90,7 +121,8 @@ export default function NewTransactionModal({ isOpen, onClose, onSave, categorie
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (!title || !amount || parseFloat(amount) <= 0) return;
+    setAmountTouched(true);
+    if (!title || amountError || balanceError) return;
 
     onSave({
       title,
@@ -192,7 +224,7 @@ export default function NewTransactionModal({ isOpen, onClose, onSave, categorie
             </div>
           </div>
 
-          {/* Amount (₱) */}
+          {/* Amount (₱) — max ₱99,999.99, outflows cannot exceed the selected channel's balance */}
           <div>
             <label className="block text-gray-700 font-semibold mb-1">
               Amount (₱) <span className="text-red-500">*</span>
@@ -202,16 +234,32 @@ export default function NewTransactionModal({ isOpen, onClose, onSave, categorie
                 ₱
               </span>
               <input
-                type="number"
-                step="0.01"
-                min="0.01"
+                type="text"
+                inputMode="decimal"
+                maxLength={8}
                 required
                 placeholder="0.00"
                 value={amount}
-                onChange={(e) => setAmount(e.target.value)}
-                className="w-full h-10 text-sm font-bold pl-7 pr-3 bg-white border border-black/[0.08] rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/20 tabular-nums select-text"
+                onChange={(e) => setAmount(sanitizeAmountInput(e.target.value))}
+                onBlur={() => setAmountTouched(true)}
+                aria-invalid={Boolean(fieldError)}
+                className={`w-full h-10 text-sm font-bold pl-7 pr-3 bg-white border rounded-xl focus:outline-none focus:ring-2 tabular-nums select-text ${
+                  fieldError
+                    ? 'border-red-400 focus:ring-red-500/20'
+                    : 'border-black/[0.08] focus:ring-emerald-500/20'
+                }`}
               />
             </div>
+            {fieldError ? (
+              <p className="text-xs text-red-600 mt-1">{fieldError}</p>
+            ) : (
+              <p className="text-[11px] text-gray-400 mt-1">
+                Maximum ₱99,999.99
+                {showOutflowBalance && (
+                  <> · Available in {paymentMethod === 'GCASH' ? 'GCash Wallet' : 'Physical Cashbox'}: {formatPHP(availableBalance)}</>
+                )}
+              </p>
+            )}
           </div>
 
           {/* Title / Description */}
