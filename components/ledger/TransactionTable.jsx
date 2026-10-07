@@ -114,8 +114,8 @@ export default function TransactionTable({
           />
         </div>
 
-        {/* Filter Pills */}
-        <div className="flex items-center gap-1 overflow-x-auto pb-0.5 sm:pb-0 scrollbar-none flex-nowrap">
+        {/* Filter Pills — Desktop only; mobile renders categories straight downward */}
+        <div className="hidden md:flex items-center gap-1 overflow-x-auto pb-0.5 sm:pb-0 scrollbar-none flex-nowrap">
           {[
             { id: 'ALL', label: 'All Records' },
             { id: 'INFLOW', label: 'Inflows' },
@@ -241,83 +241,238 @@ export default function TransactionTable({
         </table>
       </div>
 
-      {/* Mobile Transactions Card Feed (< md) */}
-      <div className="md:hidden divide-y divide-white/10">
-        {filtered.length === 0 ? (
-          <div className="py-10 text-center text-white/70 font-semibold text-xs">
-            No matching transactions found.
-          </div>
-        ) : (
-          filtered.map((tx) => (
-            <div key={tx.id} className="p-3.5 space-y-2 hover:bg-white/10 transition-colors">
-              {/* Top Row: Title, Type icon & Amount */}
-              <div className="flex items-start justify-between gap-2">
-                <div className="flex items-center gap-1.5 min-w-0">
-                  {tx.type === 'INFLOW' ? (
-                    <ArrowDownRight className="w-4 h-4 text-emerald-300 shrink-0" />
-                  ) : (
-                    <ArrowUpRight className="w-4 h-4 text-amber-300 shrink-0" />
-                  )}
-                  <span className="font-bold text-white text-xs truncate">{tx.title}</span>
-                </div>
-                <span className={`font-black text-xs shrink-0 whitespace-nowrap tabular-nums ${
-                  tx.type === 'INFLOW' ? 'text-emerald-300' : 'text-white'
-                }`}>
+      {/* Mobile Transactions Sectioned Stack (< md) matching Reference UI */}
+      {(() => {
+        const filterBySearch = (txList) => {
+          if (!searchQuery.trim()) return txList;
+          const q = searchQuery.toLowerCase();
+          return txList.filter((tx) =>
+            tx.title?.toLowerCase().includes(q) ||
+            (tx.description && tx.description.toLowerCase().includes(q)) ||
+            (tx.event_name && tx.event_name.toLowerCase().includes(q)) ||
+            (tx.reimbursement_recipient && tx.reimbursement_recipient.toLowerCase().includes(q)) ||
+            (tx.category_name && tx.category_name.toLowerCase().includes(q))
+          );
+        };
+
+        const mobileInflows = filterBySearch(transactions.filter((tx) => tx.type === 'INFLOW'));
+        const mobileOutflows = filterBySearch(transactions.filter((tx) => tx.type === 'OUTFLOW' && !tx.is_reimbursement));
+        const mobileReimbursements = filterBySearch(transactions.filter((tx) => tx.is_reimbursement));
+
+        const totalInflowsSum = mobileInflows.reduce((acc, t) => acc + (Number(t.amount) || 0), 0);
+        const totalOutflowsSum = mobileOutflows.reduce((acc, t) => acc + (Number(t.amount) || 0), 0);
+        const totalReimbursementsSum = mobileReimbursements.reduce((acc, t) => acc + (Number(t.amount) || 0), 0);
+
+        const renderCard = (tx, badgeConfig) => (
+          <div
+            key={tx.id}
+            className="bg-white rounded-2xl shadow-xs border border-black/[0.08] p-4 space-y-3 transition-all"
+          >
+            {/* Top Row: Amount on left & Status pill badge on right */}
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <span className="text-[10px] font-bold uppercase tracking-wider text-gray-400 block mb-0.5">
+                  {tx.type === 'INFLOW' ? 'Inflow Amount' : 'Disbursement Amount'}
+                </span>
+                <span
+                  className={`text-xl font-extrabold tracking-tight tabular-nums block ${
+                    tx.type === 'INFLOW' ? 'text-emerald-700' : 'text-gray-900'
+                  }`}
+                >
                   {tx.type === 'INFLOW' ? '+' : '-'}{formatPHP(tx.amount)}
                 </span>
               </div>
 
-              {/* Middle Row: Date, Channel & Category */}
-              <div className="flex items-center gap-1.5 flex-wrap text-[11px]">
-                <span className="text-white/70 font-medium text-[10px] shrink-0">{tx.transaction_date}</span>
-                <span className="text-white/30 mx-0.5 shrink-0">/</span>
-                {tx.payment_method === 'CASH' ? (
-                  <span className="inline-flex items-center gap-1 font-medium text-emerald-200 bg-emerald-950/40 border border-emerald-400/30 px-1.5 py-0.5 rounded text-[10px] shrink-0">
-                    <Wallet className="w-3 h-3 text-emerald-300" />
-                    Cash
-                  </span>
-                ) : (
-                  <span className="inline-flex items-center gap-1 font-medium text-blue-200 bg-blue-950/40 border border-blue-400/30 px-1.5 py-0.5 rounded text-[10px] shrink-0">
-                    <Smartphone className="w-3 h-3 text-blue-300" />
-                    GCash
-                  </span>
-                )}
-                <span className="bg-white/15 border border-white/25 text-white px-1.5 py-0.5 rounded text-[10px] truncate max-w-[110px] sm:max-w-[160px]">
-                  {tx.category_name || (tx.type === 'INFLOW' ? 'Revenue' : 'Disbursement')}
+              {/* Status Badge Pill matching reference */}
+              <span className={`text-[11px] font-bold px-2.5 py-1 rounded-lg shrink-0 border ${badgeConfig.style}`}>
+                {badgeConfig.label}
+              </span>
+            </div>
+
+            {/* Middle Section: Key-Value Details */}
+            <div className="space-y-2 pt-2.5 border-t border-gray-100 text-xs">
+              <div className="flex items-start justify-between gap-3">
+                <span className="text-gray-500 font-medium shrink-0">Transaction</span>
+                <span className="text-gray-900 font-bold text-right truncate max-w-[200px]">{tx.title}</span>
+              </div>
+
+              {tx.event_name && (
+                <div className="flex items-center justify-between gap-3">
+                  <span className="text-gray-500 font-medium shrink-0">Event</span>
+                  <span className="text-gray-700 font-medium text-right truncate max-w-[200px]">{tx.event_name}</span>
+                </div>
+              )}
+
+              <div className="flex items-center justify-between gap-3">
+                <span className="text-gray-500 font-medium shrink-0">Date</span>
+                <span className="text-gray-700 font-semibold tabular-nums">{tx.transaction_date}</span>
+              </div>
+
+              <div className="flex items-center justify-between gap-3">
+                <span className="text-gray-500 font-medium shrink-0">Payment Channel</span>
+                <span className="inline-flex items-center gap-1 font-semibold text-gray-800">
+                  {tx.payment_method === 'CASH' ? (
+                    <>
+                      <Wallet className="w-3.5 h-3.5 text-emerald-600" />
+                      <span>Cash</span>
+                    </>
+                  ) : (
+                    <>
+                      <Smartphone className="w-3.5 h-3.5 text-blue-600" />
+                      <span>GCash</span>
+                    </>
+                  )}
                 </span>
               </div>
 
-              {/* Bottom Row: Event, Advance note & Receipt Action */}
-              {(tx.event_name || tx.is_reimbursement || tx.receipt_url) && (
-                <div className="flex items-center justify-between gap-2 pt-0.5">
-                  <div className="flex items-center gap-1.5 flex-wrap min-w-0">
-                    {tx.event_name && (
-                      <span className="text-[10px] text-white/70 font-medium truncate max-w-[140px] sm:max-w-[200px]">
-                        {tx.event_name}
-                      </span>
-                    )}
-                    {tx.is_reimbursement && (
-                      <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-amber-200 bg-amber-950/40 border border-amber-400/30 px-1.5 py-0.5 rounded-md">
-                        <Clock className="w-2.5 h-2.5 text-amber-300 shrink-0" />
-                        <span className="truncate max-w-[100px] sm:max-w-[160px]">Advance: {tx.reimbursement_recipient || 'Officer'}</span>
-                      </span>
-                    )}
-                  </div>
-                  {tx.receipt_url && (
-                    <button
-                      onClick={() => setSelectedReceipt(tx)}
-                      className="h-7 inline-flex items-center gap-1 text-[11px] text-white hover:text-white font-medium bg-white/20 hover:bg-white/30 border border-white/30 px-2.5 rounded-lg transition-colors shrink-0 ml-auto cursor-pointer"
-                    >
-                      <Receipt className="w-3 h-3 text-emerald-300" />
-                      Receipt
-                    </button>
-                  )}
+              <div className="flex items-center justify-between gap-3">
+                <span className="text-gray-500 font-medium shrink-0">Category</span>
+                <span className="text-gray-700 font-semibold">{tx.category_name || (tx.type === 'INFLOW' ? 'Revenue' : 'Disbursement')}</span>
+              </div>
+
+              {tx.is_reimbursement && tx.reimbursement_recipient && (
+                <div className="flex items-center justify-between gap-3">
+                  <span className="text-gray-500 font-medium shrink-0">Advance By</span>
+                  <span className="text-amber-800 font-bold">{tx.reimbursement_recipient}</span>
                 </div>
               )}
             </div>
-          ))
-        )}
-      </div>
+
+            {/* Bottom Full-Width Action Button matching Reference "View Offer Details" */}
+            {tx.receipt_url ? (
+              <button
+                onClick={() => setSelectedReceipt(tx)}
+                className="w-full mt-2 h-9 flex items-center justify-center gap-1.5 px-3 text-xs font-bold text-emerald-800 bg-emerald-50/80 hover:bg-emerald-100 active:bg-emerald-200 border border-emerald-200/80 rounded-xl transition-all cursor-pointer shadow-2xs"
+              >
+                <Receipt className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                <span>View Receipt Details</span>
+              </button>
+            ) : (
+              <div className="w-full mt-2 h-8 flex items-center justify-center text-[11px] font-medium text-gray-400 bg-gray-50 border border-gray-150 rounded-xl">
+                <span>No Receipt Attached</span>
+              </div>
+            )}
+          </div>
+        );
+
+        return (
+          <div className="md:hidden p-3.5 sm:p-4 space-y-6">
+
+            {/* Global Empty State */}
+            {mobileInflows.length === 0 && mobileOutflows.length === 0 && mobileReimbursements.length === 0 && (
+              <div className="py-10 text-center text-white/80 font-semibold text-xs bg-black/10 rounded-2xl border border-white/10 p-6">
+                No matching transactions found.
+              </div>
+            )}
+
+            {/* 1. Inflows Section */}
+            {(mobileInflows.length > 0 || !searchQuery) && (
+              <div className="space-y-3">
+                <div className="flex items-center justify-between px-1">
+                  <div className="flex items-center gap-2">
+                    <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 shadow-xs shadow-emerald-400/50" />
+                    <h3 className="text-xs font-bold uppercase tracking-wider text-white">
+                      Inflows &amp; Revenue
+                    </h3>
+                    <span className="text-[10px] font-bold text-emerald-200 bg-emerald-950/60 border border-emerald-400/30 px-2 py-0.5 rounded-full">
+                      {mobileInflows.length}
+                    </span>
+                  </div>
+                  <span className="text-xs font-black text-emerald-300 tabular-nums">
+                    +{formatPHP(totalInflowsSum)}
+                  </span>
+                </div>
+
+                {mobileInflows.length === 0 ? (
+                  <div className="p-4 text-center text-white/60 text-xs bg-black/10 rounded-xl border border-white/5">
+                    No inflow records found
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {mobileInflows.map((tx) =>
+                      renderCard(tx, {
+                        label: tx.category_name || 'Revenue',
+                        style: 'bg-emerald-50 text-emerald-800 border-emerald-200/80',
+                      })
+                    )}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* 2. Outflows Section */}
+            {(mobileOutflows.length > 0 || !searchQuery) && (
+              <div className="space-y-3 pt-2">
+                <div className="flex items-center justify-between px-1">
+                  <div className="flex items-center gap-2">
+                    <span className="w-2.5 h-2.5 rounded-full bg-amber-400 shadow-xs shadow-amber-400/50" />
+                    <h3 className="text-xs font-bold uppercase tracking-wider text-white">
+                      Outflows &amp; Disbursements
+                    </h3>
+                    <span className="text-[10px] font-bold text-amber-200 bg-amber-950/60 border border-amber-400/30 px-2 py-0.5 rounded-full">
+                      {mobileOutflows.length}
+                    </span>
+                  </div>
+                  <span className="text-xs font-black text-white tabular-nums">
+                    -{formatPHP(totalOutflowsSum)}
+                  </span>
+                </div>
+
+                {mobileOutflows.length === 0 ? (
+                  <div className="p-4 text-center text-white/60 text-xs bg-black/10 rounded-xl border border-white/5">
+                    No outflow records found
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {mobileOutflows.map((tx) =>
+                      renderCard(tx, {
+                        label: tx.category_name || 'Disbursement',
+                        style: 'bg-rose-50 text-rose-800 border-rose-200/80',
+                      })
+                    )}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* 3. Pending Abono / Reimbursements Section */}
+            {(mobileReimbursements.length > 0 || !searchQuery) && (
+              <div className="space-y-3 pt-2">
+                <div className="flex items-center justify-between px-1">
+                  <div className="flex items-center gap-2">
+                    <span className="w-2.5 h-2.5 rounded-full bg-orange-400 shadow-xs shadow-orange-400/50" />
+                    <h3 className="text-xs font-bold uppercase tracking-wider text-white">
+                      Pending Abono (Advances)
+                    </h3>
+                    <span className="text-[10px] font-bold text-amber-200 bg-amber-950/60 border border-amber-400/30 px-2 py-0.5 rounded-full">
+                      {mobileReimbursements.length}
+                    </span>
+                  </div>
+                  <span className="text-xs font-black text-amber-300 tabular-nums">
+                    {formatPHP(totalReimbursementsSum)}
+                  </span>
+                </div>
+
+                {mobileReimbursements.length === 0 ? (
+                  <div className="p-4 text-center text-white/60 text-xs bg-black/10 rounded-xl border border-white/5">
+                    No pending abono requests
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {mobileReimbursements.map((tx) =>
+                      renderCard(tx, {
+                        label: 'Pending Abono',
+                        style: 'bg-amber-50 text-amber-900 border-amber-300',
+                      })
+                    )}
+                  </div>
+                )}
+              </div>
+            )}
+
+          </div>
+        );
+      })()}
 
       {/* Receipt Modal Preview */}
       {selectedReceipt && (

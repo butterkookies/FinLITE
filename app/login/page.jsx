@@ -2,7 +2,7 @@
 import { useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
-import { Eye, EyeOff, LogIn, AlertCircle, Sparkles } from 'lucide-react';
+import { Eye, EyeOff, LogIn, AlertCircle } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
 
@@ -98,7 +98,7 @@ function LoginForm() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-[#f3f6f4] p-4 sm:p-6 lg:p-8">
       {/* Outer Card Container matching reference layout */}
-      <div className="w-full max-w-5xl bg-white rounded-3xl shadow-[0_20px_60px_-15px_rgba(4,120,87,0.15)] border border-black/[0.06] overflow-hidden grid grid-cols-1 lg:grid-cols-12 p-3 sm:p-4 lg:p-4 gap-4">
+      <div className="w-full max-w-5xl bg-white rounded-3xl shadow-[0_25px_70px_-15px_rgba(4,120,87,0.22),0_10px_30px_-10px_rgba(0,0,0,0.1)] border border-black/[0.08] overflow-hidden grid grid-cols-1 lg:grid-cols-12 p-3 sm:p-4 lg:p-4 gap-4">
         
         {/* Left Side: Green Mesh Gradient Visual Panel */}
         <div className="lg:col-span-6 relative rounded-2xl sm:rounded-3xl overflow-hidden bg-gradient-to-br from-emerald-950 via-emerald-800 to-teal-900 p-8 sm:p-10 flex flex-col justify-between min-h-[320px] lg:min-h-[580px] shadow-inner">
@@ -109,9 +109,7 @@ function LoginForm() {
 
           {/* Top Branding / Logo Mark */}
           <div className="relative z-10 flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center p-2 shadow-sm">
-              <Image src="/assets/lite-logo.png" alt="LITE" width={32} height={32} className="object-contain" priority />
-            </div>
+            <Image src="/assets/lite-logo.png" alt="LITE" width={48} height={48} className="w-12 h-12 object-contain shrink-0" priority />
             <div>
               <span className="text-white font-bold text-base tracking-wide">FinLITE</span>
               <p className="text-[11px] text-emerald-200/80 font-medium leading-none">League of Information Technology Enthusiasts</p>
@@ -120,27 +118,15 @@ function LoginForm() {
 
           {/* Bottom Banner Content matching reference card */}
           <div className="relative z-10 mt-auto pt-10">
-            <span className="text-xs font-semibold text-emerald-300 uppercase tracking-wider mb-2 flex items-center gap-1.5">
-              <Sparkles className="w-3.5 h-3.5" />
-              Automated Financial System
-            </span>
             <h2 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-white leading-tight tracking-tight">
-              Get access to your personal hub for clarity and accountability.
+              Get access to your financial hub for clarity and accountability.
             </h2>
-            <p className="text-xs sm:text-sm text-emerald-100/70 mt-3 font-medium max-w-sm">
-              Real-time ledger management, adviser reimbursements, and automated financial proposal generation.
-            </p>
           </div>
         </div>
 
         {/* Right Side: Form Panel matching reference layout */}
         <div className="lg:col-span-6 p-6 sm:p-8 lg:p-10 flex flex-col justify-between">
           <div className="max-w-md w-full mx-auto">
-            {/* Logo Mark for Form Side */}
-            <div className="w-9 h-9 rounded-xl bg-emerald-50 border border-emerald-200/60 flex items-center justify-center mb-6 text-emerald-600 shadow-2xs">
-              <Sparkles className="w-5 h-5 text-emerald-600" />
-            </div>
-
             <h1 className="text-2xl sm:text-3xl font-extrabold text-gray-900 tracking-tight">Welcome back</h1>
             <p className="text-xs text-gray-500 mt-1.5 mb-7 leading-relaxed">
               Access your tasks, ledgers, and financial records anytime — keeping everything flowing in one place.
