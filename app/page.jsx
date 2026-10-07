@@ -13,6 +13,7 @@ import ModuleErrorBoundary from '@/components/common/ModuleErrorBoundary';
 import { createClient } from '@/lib/supabase/client';
 import { isSuperAdminEmail } from '@/lib/config/admin';
 import { toCentavos, fromCentavos } from '@/lib/utils/currency';
+import { validateTransactionAmount, validateOutflowBalance } from '@/lib/utils/validation';
 
 const DEFAULT_SEMESTERS = [
   { id: 'sem-26-27-1', academicYear: '2026-2027', semester: '1st Sem', label: 'AY 2026–2027 • 1st Sem', isActive: true },
@@ -213,6 +214,22 @@ export default function Dashboard() {
   };
 
   const summary = calculateSummary(activeTransactions);
+
+  // Manual entry from the New Transaction form: enforce the ₱99,999.99 per-transaction cap.
+  // (System-generated entries such as semester rollover balances call handleSaveTransaction directly.)
+  const handleManualSaveTransaction = async (newTx) => {
+    if (validateTransactionAmount(newTx.amount)) return;
+    // Block outflows that would overdraw the selected channel (cash or GCash) in the active semester
+    if (validateOutflowBalance({
+      type: newTx.type,
+      paymentMethod: newTx.payment_method,
+      isReimbursement: newTx.is_reimbursement,
+      amount: newTx.amount,
+      cashBalance: summary.cash_on_hand,
+      gcashBalance: summary.gcash_balance,
+    })) return;
+    return handleSaveTransaction(newTx);
+  };
 
   const handleSaveTransaction = async (newTx) => {
     const tempId = `tx-${Date.now()}`;
@@ -696,7 +713,9 @@ export default function Dashboard() {
         <NewTransactionModal
           isOpen={isNewTxOpen}
           onClose={() => setIsNewTxOpen(false)}
-          onSave={handleSaveTransaction}
+          onSave={handleManualSaveTransaction}
+          cashBalance={summary.cash_on_hand}
+          gcashBalance={summary.gcash_balance}
         />
       </ModuleErrorBoundary>
 
