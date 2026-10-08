@@ -1,5 +1,5 @@
 'use client';
-import { Clock, Smartphone, Wallet, ArrowDownRight, ArrowUpRight } from 'lucide-react';
+import { Clock, Smartphone, Wallet, ArrowDownRight } from 'lucide-react';
 import { formatPHP } from '@/lib/utils/currency';
 
 export default function StatCards({ summary, onOpenDenominations }) {
@@ -24,12 +24,12 @@ export default function StatCards({ summary, onOpenDenominations }) {
     : '2.82x';
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-3.5 sm:gap-4 mb-5 sm:mb-6">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5 sm:gap-4 mb-5 sm:mb-6">
 
       {/* 1. Physical Cash Box */}
       <div
         onClick={onOpenDenominations}
-        className="col-span-1 md:col-span-1 lg:col-span-3 group relative p-4.5 sm:p-5 rounded-2xl cursor-pointer transition-all bg-[#0c1b14] hover:bg-[#0e2118] border border-[#163325] hover:border-emerald-500/40 shadow-xl flex flex-col justify-between"
+        className="group relative p-4.5 sm:p-5 rounded-2xl cursor-pointer transition-all bg-[#0c1b14] hover:bg-[#0e2118] border border-[#163325] hover:border-emerald-500/40 shadow-xl flex flex-col justify-between"
       >
         <div className="flex items-center justify-between mb-3 gap-2">
           <div className="flex items-center gap-2.5">
@@ -57,7 +57,7 @@ export default function StatCards({ summary, onOpenDenominations }) {
       </div>
 
       {/* 2. E-Money / GCash */}
-      <div className="col-span-1 md:col-span-1 lg:col-span-3 relative p-4.5 sm:p-5 rounded-2xl transition-all bg-[#0c1b14] hover:bg-[#0e2118] border border-[#163325] hover:border-emerald-500/40 shadow-xl flex flex-col justify-between">
+      <div className="relative p-4.5 sm:p-5 rounded-2xl transition-all bg-[#0c1b14] hover:bg-[#0e2118] border border-[#163325] hover:border-emerald-500/40 shadow-xl flex flex-col justify-between">
         <div className="flex items-center justify-between mb-3 gap-2">
           <div className="flex items-center gap-2.5">
             <div className="w-7 h-7 rounded-lg bg-emerald-500/15 border border-emerald-500/25 flex items-center justify-center shrink-0">
@@ -83,15 +83,15 @@ export default function StatCards({ summary, onOpenDenominations }) {
         </p>
       </div>
 
-      {/* 3. Monthly Net Cashflow (Double Column Card) */}
-      <div className="col-span-1 md:col-span-2 lg:col-span-4 relative p-4.5 sm:p-5 rounded-2xl transition-all bg-[#0c1b14] border border-[#163325] shadow-xl flex flex-col justify-between">
+      {/* 3. Monthly Net Cashflow */}
+      <div className="relative p-4.5 sm:p-5 rounded-2xl transition-all bg-[#0c1b14] border border-[#163325] shadow-xl flex flex-col justify-between">
         <div className="flex items-center justify-between mb-3 gap-2">
-          <div className="flex items-center gap-2.5">
+          <div className="flex items-center gap-2 min-w-0">
             <div className="w-7 h-7 rounded-lg bg-emerald-500/15 border border-emerald-500/25 flex items-center justify-center shrink-0">
               <ArrowDownRight className="w-3.5 h-3.5 text-emerald-400" />
             </div>
-            <span className="text-xs font-bold text-white/90">
-              Monthly Net Cashflow
+            <span className="text-xs font-bold text-white/90 truncate">
+              Net Cashflow
             </span>
           </div>
           <span className="text-[10px] font-bold text-emerald-300 bg-emerald-500/10 border border-emerald-500/30 px-2 py-0.5 rounded-md shrink-0 tabular-nums">
@@ -100,24 +100,24 @@ export default function StatCards({ summary, onOpenDenominations }) {
         </div>
 
         {/* Side-by-side Inflow and Outflow blocks */}
-        <div className="grid grid-cols-2 gap-2.5 my-1">
-          <div className="bg-[#07130e] p-2.5 sm:p-3 rounded-xl border border-[#142d21]">
-            <span className="text-[11px] font-semibold text-white/60 block">Inflow</span>
-            <p className="text-base sm:text-lg font-black text-white tabular-nums truncate mt-0.5">
+        <div className="grid grid-cols-2 gap-2 my-1">
+          <div className="bg-[#07130e] p-2.5 rounded-xl border border-[#142d21]">
+            <span className="text-[10px] font-semibold text-white/60 block">Inflow</span>
+            <p className="text-sm sm:text-base font-black text-white tabular-nums truncate mt-0.5">
               {formatPHP(total_inflows)}
             </p>
-            <span className="text-[10px] text-white/40 block truncate mt-0.5">
-              Sales, entries, dues
+            <span className="text-[9px] text-white/40 block truncate mt-0.5">
+              Sales, dues
             </span>
           </div>
 
-          <div className="bg-[#07130e] p-2.5 sm:p-3 rounded-xl border border-[#142d21]">
-            <span className="text-[11px] font-semibold text-white/60 block">Outflow</span>
-            <p className="text-base sm:text-lg font-black text-white tabular-nums truncate mt-0.5">
+          <div className="bg-[#07130e] p-2.5 rounded-xl border border-[#142d21]">
+            <span className="text-[10px] font-semibold text-white/60 block">Outflow</span>
+            <p className="text-sm sm:text-base font-black text-white tabular-nums truncate mt-0.5">
               {formatPHP(total_outflows)}
             </p>
-            <span className="text-[10px] text-white/40 block truncate mt-0.5">
-              Supplies, food, tokens
+            <span className="text-[9px] text-white/40 block truncate mt-0.5">
+              Supplies, tokens
             </span>
           </div>
         </div>
@@ -135,20 +135,20 @@ export default function StatCards({ summary, onOpenDenominations }) {
             />
           </div>
           <div className="flex items-center justify-between text-[10px] text-white/45 font-medium mt-1.5">
-            <span>{liquidityPct}% Liquidity Retained</span>
+            <span>{liquidityPct}% Liquidity</span>
             <span>Coverage {coverageRatio}</span>
           </div>
         </div>
       </div>
 
       {/* 4. ADVANCES / Abono */}
-      <div className="col-span-1 md:col-span-2 lg:col-span-2 relative p-4.5 sm:p-5 rounded-2xl transition-all bg-[#0c1b14] hover:bg-[#0e2118] border border-[#163325] hover:border-amber-500/40 shadow-xl flex flex-col justify-between">
+      <div className="relative p-4.5 sm:p-5 rounded-2xl transition-all bg-[#0c1b14] hover:bg-[#0e2118] border border-[#163325] hover:border-amber-500/40 shadow-xl flex flex-col justify-between">
         <div className="flex items-center justify-between mb-3 gap-2">
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2.5">
             <div className="w-7 h-7 rounded-lg bg-amber-500/15 border border-amber-500/25 flex items-center justify-center shrink-0">
               <Clock className="w-3.5 h-3.5 text-amber-400" />
             </div>
-            <span className="text-xs font-bold uppercase tracking-wider text-amber-200/90 truncate">
+            <span className="text-xs font-bold uppercase tracking-wider text-amber-200/90">
               ADVANCES
             </span>
           </div>
