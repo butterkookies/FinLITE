@@ -419,6 +419,13 @@ export default function Dashboard() {
 
       </main>
 
+      {/* Dashboard Footer matching reference mockup */}
+      <footer className="max-w-7xl w-full mx-auto px-4 py-6 text-center">
+        <p className="text-[11px] text-white/30 font-medium">
+          © 2026 FinLITE · Pambayang Dalubhasaan ng Marilao · All rights reserved.
+        </p>
+      </footer>
+
       {/* Modals & Slide-overs */}
       <ModuleErrorBoundary moduleName="Semester Management">
         <NewSemesterModal

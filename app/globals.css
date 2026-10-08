@@ -60,11 +60,15 @@
    FOREST MIST AURA BACKGROUND
    ============================================= */
 
-/* Layer 1 - base gradient */
+/* Layer 1 - base dark obsidian canvas with subtle dot grid */
 .aura-layer-1 {
   position: absolute;
   inset: 0;
-  background: linear-gradient(140deg, #022c22 0%, #064e3b 35%, #065f46 60%, #047857 100%);
+  background-color: #07130d;
+  background-image: 
+    radial-gradient(rgba(52, 211, 153, 0.13) 1.2px, transparent 1.2px),
+    radial-gradient(circle at 50% 0%, #082115 0%, #04120a 100%);
+  background-size: 22px 22px, 100% 100%;
   mix-blend-mode: normal;
   transform: translateZ(0);
   will-change: transform;
@@ -75,9 +79,9 @@
 .aura-layer-2 {
   position: absolute;
   inset: 0;
-  background: radial-gradient(circle at 55% 45%, rgba(52, 211, 153, 0.25) 0%, transparent 50%);
+  background: radial-gradient(circle at 50% 25%, rgba(16, 185, 129, 0.14) 0%, transparent 60%);
   mix-blend-mode: screen;
-  filter: blur(113px);
+  filter: blur(120px);
   transform: translateZ(0);
   will-change: transform;
   pointer-events: none;

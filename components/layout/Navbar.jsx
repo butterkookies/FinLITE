@@ -51,19 +51,19 @@ export default function Navbar({
   };
 
   return (
-    <header className="sticky top-0 z-30 bg-black/20 backdrop-blur-xl border-b border-white/[0.07] transition-all">
+    <header className="sticky top-0 z-30 bg-[#07130d]/90 backdrop-blur-xl border-b border-[#142e20] transition-all">
       <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 h-14 sm:h-16 flex items-center justify-between gap-2">
         
         {/* Left: Organization Branding & Desktop Semester Switcher */}
-        <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+        <div className="flex items-center gap-2.5 sm:gap-4 min-w-0">
           {/* Logo & Brand Name */}
-          <div className="flex items-center gap-2 shrink-0">
+          <div className="flex items-center gap-2.5 shrink-0">
             <div className="w-8 h-8 sm:w-9 sm:h-9 flex items-center justify-center shrink-0">
               <Image 
                 src="/assets/lite-logo.png" 
                 alt="LITE Logo" 
-                width={32} 
-                height={32} 
+                width={34} 
+                height={34} 
                 className="object-contain"
                 onError={(e) => { e.currentTarget.style.display = 'none'; }}
               />
@@ -72,7 +72,7 @@ export default function Navbar({
               <span className="text-sm sm:text-base font-bold tracking-tight text-white leading-tight">
                 FinLITE
               </span>
-              <p className="text-[10px] sm:text-[11px] text-emerald-400/70 font-medium leading-none hidden sm:block">
+              <p className="text-[10px] sm:text-[11px] text-white/50 font-medium leading-none hidden sm:block mt-0.5">
                 <span className="md:hidden">LITE <span className="text-white/20 mx-0.5">/</span> PDM</span>
                 <span className="hidden md:inline">LITE <span className="text-white/20 mx-0.5">/</span> Pambayang Dalubhasaan ng Marilao</span>
               </p>
@@ -80,9 +80,9 @@ export default function Navbar({
           </div>
 
           {/* Desktop Interactive Semester Switcher (Hidden on mobile, shown on sm+) */}
-          <div className="hidden sm:flex items-center pl-3 border-l border-white/[0.08]">
+          <div className="hidden sm:flex items-center">
             <div className="relative flex items-center">
-              <Calendar className="w-3.5 h-3.5 text-emerald-400 absolute left-2.5 pointer-events-none shrink-0" />
+              <Calendar className="w-3.5 h-3.5 text-emerald-400 absolute left-3 pointer-events-none shrink-0" />
               <select
                 value={currentSemester?.id || ''}
                 onChange={(e) => {
@@ -92,33 +92,33 @@ export default function Navbar({
                     onSelectSemester(e.target.value);
                   }
                 }}
-                className="h-9 text-xs font-semibold text-white/80 bg-white/[0.06] hover:bg-white/[0.10] border border-white/[0.08] pl-7 pr-7 rounded-xl appearance-none cursor-pointer focus:outline-none focus:ring-2 focus:ring-emerald-500/30 max-w-[220px] truncate transition-colors"
+                className="h-9 text-xs font-semibold text-emerald-100 bg-[#0c1e16] hover:bg-[#122b20] border border-[#1a382b] pl-8 pr-7 rounded-xl appearance-none cursor-pointer focus:outline-none focus:ring-2 focus:ring-emerald-500/30 max-w-[230px] truncate transition-colors shadow-2xs"
                 title="Select Academic Year / Semester or Start New Term"
               >
                 {semesters.map((s) => (
-                  <option key={s.id} value={s.id} className="bg-[#0d2416] text-white">
+                  <option key={s.id} value={s.id} className="bg-[#0c1e16] text-white">
                     {s.label}
                   </option>
                 ))}
                 {isOfficer && (
-                  <option value="NEW" className="bg-[#0d2416] text-emerald-400 font-bold">
+                  <option value="NEW" className="bg-[#0c1e16] text-emerald-400 font-bold">
                     + Start New Semester...
                   </option>
                 )}
               </select>
-              <ChevronDown className="w-3 h-3 text-white/40 absolute right-2 pointer-events-none" />
+              <ChevronDown className="w-3.5 h-3.5 text-emerald-400/60 absolute right-2.5 pointer-events-none" />
             </div>
           </div>
         </div>
 
         {/* Right: Actions, AI Co-Pilot & Google Profile */}
-        <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
+        <div className="flex items-center gap-1.5 sm:gap-2.5 shrink-0">
           
           {/* Quick Cash Reconciliation Button (Officer Gated) */}
           {isOfficer && (
             <button
               onClick={onOpenDenominations}
-              className="h-9 w-9 sm:w-auto flex items-center justify-center sm:gap-1.5 sm:px-3 text-xs font-semibold text-white/80 bg-white/[0.06] hover:bg-white/[0.10] active:bg-white/[0.15] border border-white/[0.08] rounded-xl transition-all shadow-xs cursor-pointer shrink-0"
+              className="h-9 w-9 sm:w-auto flex items-center justify-center sm:gap-1.5 sm:px-3 text-xs font-semibold text-emerald-100 bg-[#0c1e16] hover:bg-[#122b20] active:bg-[#163527] border border-[#1a382b] rounded-xl transition-all shadow-2xs cursor-pointer shrink-0"
               title="Open Cash Box & Denomination Counter"
             >
               <Wallet className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
@@ -129,7 +129,7 @@ export default function Navbar({
           {/* AI Co-Pilot Button */}
           <button
             onClick={onOpenAI}
-            className="h-9 flex items-center justify-center gap-1.5 px-2.5 sm:px-3 text-xs font-semibold text-white/80 bg-white/[0.06] hover:bg-white/[0.10] active:bg-white/[0.15] border border-white/[0.08] rounded-xl transition-all shadow-xs cursor-pointer shrink-0"
+            className="h-9 flex items-center justify-center gap-1.5 px-2.5 sm:px-3 text-xs font-semibold text-emerald-100 bg-[#0c1e16] hover:bg-[#122b20] active:bg-[#163527] border border-[#1a382b] rounded-xl transition-all shadow-2xs cursor-pointer shrink-0"
             title="FinLITE Grounded AI Co-Pilot"
           >
             <Sparkles className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
@@ -141,7 +141,7 @@ export default function Navbar({
           {isAdmin && (
             <Link
               href="/admin"
-              className="h-9 w-9 sm:w-auto flex items-center justify-center sm:gap-1.5 sm:px-3 text-xs font-semibold text-white/80 bg-white/[0.06] hover:bg-white/[0.10] active:bg-white/[0.15] border border-white/[0.08] rounded-xl transition-all shadow-xs shrink-0"
+              className="h-9 w-9 sm:w-auto flex items-center justify-center sm:gap-1.5 sm:px-3 text-xs font-semibold text-amber-200 bg-[#0c1e16] hover:bg-[#122b20] active:bg-[#163527] border border-[#1a382b] rounded-xl transition-all shadow-2xs shrink-0"
               title="Open Admin Console & Approvals"
             >
               <ShieldCheck className="w-3.5 h-3.5 text-amber-400 shrink-0" />
@@ -150,14 +150,14 @@ export default function Navbar({
           )}
 
           {/* User Profile Section (Top Right Corner) */}
-          <div className="relative pl-1.5 sm:pl-2 border-l border-white/[0.08]" ref={profileMenuRef}>
+          <div className="relative pl-1 sm:pl-1.5" ref={profileMenuRef}>
             <button
               onClick={() => setIsProfileOpen(!isProfileOpen)}
-              className="flex items-center gap-2 p-1 rounded-xl hover:bg-white/[0.08] transition-all cursor-pointer focus:outline-none focus:ring-2 focus:ring-emerald-500/30"
+              className="flex items-center gap-2 p-1 sm:px-2 sm:py-1 rounded-xl bg-[#0c1e16] hover:bg-[#122b20] border border-[#1a382b] transition-all cursor-pointer focus:outline-none focus:ring-2 focus:ring-emerald-500/30 shadow-2xs"
               title="View Account Profile"
             >
               {avatarUrl ? (
-                <div className="w-8 h-8 rounded-xl overflow-hidden border border-white/[0.12] shadow-2xs relative">
+                <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg overflow-hidden border border-emerald-500/30 relative shrink-0">
                   <img
                     src={avatarUrl}
                     alt={fullName}
@@ -169,21 +169,21 @@ export default function Navbar({
                   />
                 </div>
               ) : (
-                <div className="w-8 h-8 rounded-xl bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center text-emerald-300 text-xs font-bold shadow-2xs">
+                <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-[#064e3b] border border-emerald-500/40 flex items-center justify-center text-emerald-300 text-xs font-black shadow-2xs shrink-0">
                   {initial}
                 </div>
               )}
 
-              <div className="hidden md:flex flex-col text-left">
-                <span className="text-xs font-bold text-white/90 leading-tight truncate max-w-[110px]">
-                  {fullName.split(' ')[0]}
+              <div className="hidden md:flex flex-col text-left mr-0.5">
+                <span className="text-xs font-bold text-white leading-tight truncate max-w-[100px]">
+                  FinLITE
                 </span>
-                <span className="text-[10px] font-semibold text-emerald-400 capitalize leading-none">
+                <span className="text-[10px] font-medium text-emerald-400 capitalize leading-none mt-0.5">
                   {isAdmin ? 'Admin' : currentRole}
                 </span>
               </div>
 
-              <ChevronDown className="w-3 h-3 text-white/30 hidden sm:block" />
+              <ChevronDown className="w-3 h-3 text-white/40 hidden sm:block ml-0.5" />
             </button>
 
             {/* Profile Dropdown Menu */}
@@ -260,7 +260,7 @@ export default function Navbar({
       </div>
 
       {/* Mobile Dedicated Semester Switcher Bar (Clean, readable, zero overlap on mobile) */}
-      <div className="sm:hidden px-3 pb-2.5 pt-0.5 border-t border-white/[0.05]">
+      <div className="sm:hidden px-3 pb-2.5 pt-1 border-t border-[#142e20]/80">
         <div className="relative flex items-center w-full">
           <Calendar className="w-3.5 h-3.5 text-emerald-400 absolute left-3 pointer-events-none shrink-0" />
           <select
@@ -272,21 +272,21 @@ export default function Navbar({
                 onSelectSemester(e.target.value);
               }
             }}
-            className="h-8.5 w-full text-xs font-semibold text-white/90 bg-white/[0.06] hover:bg-white/[0.10] active:bg-white/[0.15] border border-white/[0.08] pl-8.5 pr-8 rounded-xl appearance-none cursor-pointer focus:outline-none focus:ring-2 focus:ring-emerald-500/30 truncate transition-colors shadow-2xs"
+            className="h-9 w-full text-xs font-semibold text-emerald-100 bg-[#0c1e16] hover:bg-[#122b20] active:bg-[#163527] border border-[#1a382b] pl-8.5 pr-8 rounded-xl appearance-none cursor-pointer focus:outline-none focus:ring-2 focus:ring-emerald-500/30 truncate transition-colors shadow-2xs"
             title="Select Academic Year / Semester or Start New Term"
           >
             {semesters.map((s) => (
-              <option key={s.id} value={s.id} className="bg-[#0d2416] text-white">
+              <option key={s.id} value={s.id} className="bg-[#0c1e16] text-white">
                 {s.label}
               </option>
             ))}
             {isOfficer && (
-              <option value="NEW" className="bg-[#0d2416] text-emerald-400 font-bold">
+              <option value="NEW" className="bg-[#0c1e16] text-emerald-400 font-bold">
                 + Start New Semester...
               </option>
             )}
           </select>
-          <ChevronDown className="w-3.5 h-3.5 text-white/40 absolute right-3 pointer-events-none" />
+          <ChevronDown className="w-3.5 h-3.5 text-emerald-400/60 absolute right-3 pointer-events-none" />
         </div>
       </div>
     </header>
