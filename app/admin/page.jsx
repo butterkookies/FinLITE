@@ -315,121 +315,131 @@ export default function AdminPage() {
           </div>
         )}
 
-        {/* Overview Metric Cards (Clean solid white style as in user screenshot) */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+        {/* Overview Metric Cards with Distinct Color Accents */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3.5 sm:gap-4 mb-8">
           
-          {/* Pending Approvals Card */}
+          {/* 1. Pending Approvals Card — ACCENT: WARM AMBER */}
           <div 
             onClick={() => setActiveTab('pending')}
-            className={`p-5 rounded-2xl border transition-all cursor-pointer ${
+            className={`p-5 rounded-2xl border transition-all cursor-pointer relative overflow-hidden flex flex-col justify-between ${
               activeTab === 'pending'
-                ? 'bg-amber-50/90 border-amber-300 ring-2 ring-amber-400/30 shadow-sm'
-                : 'bg-white border-black/[0.06] hover:border-amber-200 hover:shadow-xs'
+                ? 'bg-[#221c0b] border-amber-400/80 ring-2 ring-amber-400/30 shadow-xl shadow-amber-950/40'
+                : 'bg-[#181408] border-amber-500/25 hover:border-amber-400/60 hover:bg-[#1d180a] shadow-lg shadow-amber-950/20'
             }`}
           >
-            <div className="flex items-center justify-between mb-3">
-              <span className="text-xs font-bold uppercase tracking-wider text-amber-800">
+            <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-amber-500/0 via-amber-400/40 to-amber-500/0" />
+            <div className="flex items-center justify-between mb-3 gap-2">
+              <span className="text-xs font-bold uppercase tracking-wider text-amber-300">
                 Pending Approval
               </span>
-              <div className="w-8 h-8 rounded-xl bg-amber-100 flex items-center justify-center text-amber-700">
+              <div className="w-8 h-8 rounded-xl bg-amber-500/15 border border-amber-500/30 flex items-center justify-center text-amber-400 shrink-0">
                 <Clock className="w-4 h-4" />
               </div>
             </div>
-            <div className="flex items-baseline gap-2">
-              <span className="text-2xl sm:text-3xl font-black tracking-tight text-gray-950">
+            <div className="flex items-baseline gap-2 my-1">
+              <span className="text-2xl sm:text-3xl font-black tracking-tight text-white tabular-nums">
                 {stats.pending}
               </span>
               {stats.pending > 0 && (
-                <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 animate-pulse">
+                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30 animate-pulse">
                   Action required
                 </span>
               )}
             </div>
-            <p className="text-[11px] text-gray-500 mt-1 font-medium">
+            <p className="text-[11px] text-amber-200/50 mt-1 font-medium truncate">
               Applicants awaiting identity review
             </p>
           </div>
 
-          {/* Approved Users Card */}
+          {/* 2. Active Officers Card — ACCENT: VIBRANT EMERALD */}
           <div 
             onClick={() => setActiveTab('users')}
-            className={`p-5 rounded-2xl border transition-all cursor-pointer ${
+            className={`p-5 rounded-2xl border transition-all cursor-pointer relative overflow-hidden flex flex-col justify-between ${
               activeTab === 'users'
-                ? 'bg-emerald-50/90 border-emerald-300 ring-2 ring-emerald-400/30 shadow-sm'
-                : 'bg-white border-black/[0.06] hover:border-emerald-200 hover:shadow-xs'
+                ? 'bg-[#0e2418] border-emerald-400/80 ring-2 ring-emerald-400/30 shadow-xl shadow-emerald-950/40'
+                : 'bg-[#0a1b12] border-emerald-500/25 hover:border-emerald-400/60 hover:bg-[#0c2015] shadow-lg shadow-emerald-950/20'
             }`}
           >
-            <div className="flex items-center justify-between mb-3">
-              <span className="text-xs font-bold uppercase tracking-wider text-emerald-800">
+            <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-emerald-500/0 via-emerald-400/40 to-emerald-500/0" />
+            <div className="flex items-center justify-between mb-3 gap-2">
+              <span className="text-xs font-bold uppercase tracking-wider text-emerald-300">
                 Active Officers
               </span>
-              <div className="w-8 h-8 rounded-xl bg-emerald-100 flex items-center justify-center text-emerald-700">
+              <div className="w-8 h-8 rounded-xl bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center text-emerald-400 shrink-0">
                 <UserCheck className="w-4 h-4" />
               </div>
             </div>
-            <div className="flex items-baseline gap-2">
-              <span className="text-2xl sm:text-3xl font-black tracking-tight text-gray-950">
+            <div className="flex items-baseline gap-2 my-1">
+              <span className="text-2xl sm:text-3xl font-black tracking-tight text-white tabular-nums">
                 {users.length || stats.approved}
               </span>
-              <span className="text-xs font-semibold text-emerald-700">Verified</span>
+              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                Verified
+              </span>
             </div>
-            <p className="text-[11px] text-gray-500 mt-1 font-medium">
+            <p className="text-[11px] text-emerald-200/50 mt-1 font-medium truncate">
               Authorized organizational members
             </p>
           </div>
 
-          {/* Rejected Submissions Card */}
+          {/* 3. Declined Requests Card — ACCENT: VIBRANT ROSE */}
           <div 
             onClick={() => setActiveTab('rejected')}
-            className={`p-5 rounded-2xl border transition-all cursor-pointer ${
+            className={`p-5 rounded-2xl border transition-all cursor-pointer relative overflow-hidden flex flex-col justify-between ${
               activeTab === 'rejected'
-                ? 'bg-rose-50/90 border-rose-300 ring-2 ring-rose-400/30 shadow-sm'
-                : 'bg-white border-black/[0.06] hover:border-rose-200 hover:shadow-xs'
+                ? 'bg-[#240f16] border-rose-400/80 ring-2 ring-rose-400/30 shadow-xl shadow-rose-950/40'
+                : 'bg-[#1a0c10] border-rose-500/25 hover:border-rose-400/60 hover:bg-[#200e14] shadow-lg shadow-rose-950/20'
             }`}
           >
-            <div className="flex items-center justify-between mb-3">
-              <span className="text-xs font-bold uppercase tracking-wider text-rose-800">
+            <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-rose-500/0 via-rose-400/40 to-rose-500/0" />
+            <div className="flex items-center justify-between mb-3 gap-2">
+              <span className="text-xs font-bold uppercase tracking-wider text-rose-300">
                 Declined Requests
               </span>
-              <div className="w-8 h-8 rounded-xl bg-rose-100 flex items-center justify-center text-rose-700">
+              <div className="w-8 h-8 rounded-xl bg-rose-500/15 border border-rose-500/30 flex items-center justify-center text-rose-400 shrink-0">
                 <XCircle className="w-4 h-4" />
               </div>
             </div>
-            <div className="flex items-baseline gap-2">
-              <span className="text-2xl sm:text-3xl font-black tracking-tight text-gray-950">
+            <div className="flex items-baseline gap-2 my-1">
+              <span className="text-2xl sm:text-3xl font-black tracking-tight text-white tabular-nums">
                 {stats.rejected}
               </span>
-              <span className="text-xs font-medium text-gray-500">Submissions</span>
+              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-rose-500/20 text-rose-300 border border-rose-500/30">
+                Submissions
+              </span>
             </div>
-            <p className="text-[11px] text-gray-500 mt-1 font-medium">
+            <p className="text-[11px] text-rose-200/50 mt-1 font-medium truncate">
               Ineligible or rejected entries
             </p>
           </div>
 
-          {/* Total Submissions Card */}
+          {/* 4. Approved Log Card — ACCENT: ELECTRIC SKY BLUE */}
           <div 
             onClick={() => setActiveTab('approved')}
-            className={`p-5 rounded-2xl border transition-all cursor-pointer ${
+            className={`p-5 rounded-2xl border transition-all cursor-pointer relative overflow-hidden flex flex-col justify-between ${
               activeTab === 'approved'
-                ? 'bg-indigo-50/90 border-indigo-300 ring-2 ring-indigo-400/30 shadow-sm'
-                : 'bg-white border-black/[0.06] hover:border-indigo-200 hover:shadow-xs'
+                ? 'bg-[#0e1c33] border-sky-400/80 ring-2 ring-sky-400/30 shadow-xl shadow-sky-950/40'
+                : 'bg-[#0a1424] border-sky-500/25 hover:border-sky-400/60 hover:bg-[#0c182c] shadow-lg shadow-sky-950/20'
             }`}
           >
-            <div className="flex items-center justify-between mb-3">
-              <span className="text-xs font-bold uppercase tracking-wider text-indigo-800">
+            <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-sky-500/0 via-sky-400/40 to-sky-500/0" />
+            <div className="flex items-center justify-between mb-3 gap-2">
+              <span className="text-xs font-bold uppercase tracking-wider text-sky-300">
                 Approved Log
               </span>
-              <div className="w-8 h-8 rounded-xl bg-indigo-100 flex items-center justify-center text-indigo-700">
+              <div className="w-8 h-8 rounded-xl bg-sky-500/15 border border-sky-500/30 flex items-center justify-center text-sky-400 shrink-0">
                 <Users className="w-4 h-4" />
               </div>
             </div>
-            <div className="flex items-baseline gap-2">
-              <span className="text-2xl sm:text-3xl font-black tracking-tight text-gray-950">
+            <div className="flex items-baseline gap-2 my-1">
+              <span className="text-2xl sm:text-3xl font-black tracking-tight text-white tabular-nums">
                 {stats.approved}
               </span>
-              <span className="text-xs font-medium text-gray-500">Approved</span>
+              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-sky-500/20 text-sky-300 border border-sky-500/30">
+                Approved
+              </span>
             </div>
-            <p className="text-[11px] text-gray-500 mt-1 font-medium">
+            <p className="text-[11px] text-sky-200/50 mt-1 font-medium truncate">
               Historical approval record
             </p>
           </div>
