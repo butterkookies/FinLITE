@@ -219,20 +219,20 @@ export default function AdminPage() {
     <div className="min-h-screen flex flex-col font-sans">
       
       {/* Top Header */}
-      <header className="sticky top-0 z-30 bg-black/20 backdrop-blur-xl border-b border-white/[0.07] transition-all">
+      <header className="sticky top-0 z-30 bg-[#07130d]/90 backdrop-blur-xl border-b border-[#142e20] transition-all">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
           
           {/* Left: Branding & Portal Badge */}
           <div className="flex items-center gap-3">
             <Link 
               href="/" 
-              className="flex items-center gap-2 p-1.5 rounded-xl hover:bg-white/[0.08] transition-colors text-white/50 hover:text-white"
+              className="flex items-center gap-2 p-1.5 rounded-xl hover:bg-[#0c1e16] transition-colors text-white/50 hover:text-white"
               title="Return to Main Dashboard"
             >
               <ArrowLeft className="w-5 h-5" />
             </Link>
 
-            <div className="h-6 w-px bg-white/[0.08]" />
+            <div className="h-6 w-px bg-[#142e20]" />
 
             <div className="flex items-center gap-2.5">
               <div className="w-9 h-9 rounded-xl bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center text-emerald-300 shadow-xs shrink-0">
@@ -243,7 +243,7 @@ export default function AdminPage() {
                   <span className="text-base font-bold text-white">
                     <span className="hidden sm:inline">FinLITE </span>Admin Console
                   </span>
-                  <span className="hidden sm:inline px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider bg-white/[0.08] text-white/60 border border-white/[0.08] rounded-md shrink-0">
+                  <span className="hidden sm:inline px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider bg-[#0c1e16] text-emerald-300/80 border border-[#1a382b] rounded-md shrink-0">
                     Access Control
                   </span>
                 </div>
@@ -256,27 +256,27 @@ export default function AdminPage() {
 
           {/* Right: Identity & Actions */}
           <div className="flex items-center gap-2.5">
-            <div className="hidden md:flex items-center gap-2 px-3 py-1.5 bg-white/[0.06] border border-white/[0.08] rounded-xl">
+            <div className="hidden md:flex items-center gap-2 px-3 py-1.5 bg-[#0c1e16] border border-[#1a382b] rounded-xl">
               <ShieldCheck className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
               <div className="text-right">
-                <p className="text-xs font-semibold text-white/80">geronimoandreijohn.pdm@gmail.com</p>
-                <p className="text-[10px] text-white/40 font-medium">Super Administrator</p>
+                <p className="text-xs font-semibold text-white/90">geronimoandreijohn.pdm@gmail.com</p>
+                <p className="text-[10px] text-emerald-400/60 font-medium">Super Administrator</p>
               </div>
             </div>
 
             <button
               onClick={() => fetchData(true)}
               disabled={isRefreshing}
-              className="h-9 px-3 text-xs font-semibold text-white/70 bg-white/[0.06] hover:bg-white/[0.10] active:bg-white/[0.15] border border-white/[0.08] rounded-xl transition-all shadow-xs flex items-center gap-1.5 disabled:opacity-50 cursor-pointer"
+              className="h-9 px-3 text-xs font-semibold text-emerald-200 bg-[#0c1e16] hover:bg-[#122b20] active:bg-[#163527] border border-[#1a382b] rounded-xl transition-all shadow-2xs flex items-center gap-1.5 disabled:opacity-50 cursor-pointer"
               title="Refresh Records"
             >
-              <RefreshCw className={`w-3.5 h-3.5 text-white/50 ${isRefreshing ? 'animate-spin' : ''}`} />
+              <RefreshCw className={`w-3.5 h-3.5 text-emerald-400 ${isRefreshing ? 'animate-spin' : ''}`} />
               <span className="hidden sm:inline">Refresh</span>
             </button>
 
             <Link
               href="/"
-              className="px-3.5 py-2 text-xs font-semibold text-white bg-emerald-600 hover:bg-emerald-500 rounded-xl transition-all shadow-xs flex items-center gap-1.5"
+              className="px-3.5 py-2 text-xs font-black text-black bg-[#10b981] hover:bg-[#059669] rounded-xl transition-all shadow-md shadow-emerald-500/20 flex items-center gap-1.5"
             >
               <span>Main Ledger</span>
               <ExternalLink className="w-3.5 h-3.5" />
@@ -292,17 +292,17 @@ export default function AdminPage() {
         {/* Feedback Alert */}
         {feedback && (
           <div 
-            className={`mb-6 p-4 rounded-xl border flex items-center justify-between animate-in fade-in slide-in-from-top-2 duration-200 shadow-sm ${
+            className={`mb-6 p-4 rounded-xl border flex items-center justify-between animate-in fade-in slide-in-from-top-2 duration-200 shadow-xl ${
               feedback.type === 'success' 
-                ? 'bg-emerald-50 border-emerald-200 text-emerald-950' 
-                : 'bg-rose-50 border-rose-200 text-rose-950'
+                ? 'bg-emerald-500/15 border-emerald-500/30 text-emerald-300' 
+                : 'bg-rose-500/15 border-rose-500/30 text-rose-300'
             }`}
           >
             <div className="flex items-center gap-2.5">
               {feedback.type === 'success' ? (
-                <CheckCircle2 className="w-5 h-5 text-emerald-700 shrink-0" />
+                <CheckCircle2 className="w-5 h-5 text-emerald-400 shrink-0" />
               ) : (
-                <AlertTriangle className="w-5 h-5 text-rose-700 shrink-0" />
+                <AlertTriangle className="w-5 h-5 text-rose-400 shrink-0" />
               )}
               <span className="text-sm font-semibold">{feedback.text}</span>
             </div>
@@ -446,99 +446,115 @@ export default function AdminPage() {
 
         </div>
 
-        {/* Tab Navigation & Search Bar — TRANSPARENT WHITE FROSTED GLASS */}
-        <div className="rounded-2xl border border-white/30 bg-white/20 backdrop-blur-xl p-4 mb-6 shadow-2xl">
+        {/* Tab Navigation & Search Bar — OBSIDIAN THEME (SAME AS DASHBOARD) */}
+        <div className="rounded-2xl sm:rounded-3xl border border-[#142e20] bg-[#0a1811] p-3 sm:p-4 mb-6 shadow-2xl">
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
             
             {/* Tabs — 2x2 grid on mobile (no scroll), flex row on sm+ */}
-            <div className="grid grid-cols-2 sm:flex sm:items-center gap-2 p-1.5 bg-black/20 rounded-2xl w-full sm:w-auto border border-white/[0.08]">
+            <div className="grid grid-cols-2 sm:flex sm:items-center gap-1.5 p-1 bg-[#06120c] rounded-2xl border border-[#163325] w-full sm:w-auto">
               <button
                 onClick={() => setActiveTab('pending')}
-                className={`w-full sm:w-auto px-3.5 py-2 sm:py-1.5 text-xs font-semibold rounded-xl transition-all flex items-center justify-center gap-2 cursor-pointer text-center border ${
+                className={`w-full sm:w-auto px-3.5 py-2 sm:py-1.5 text-xs rounded-xl transition-all flex items-center justify-center gap-2 cursor-pointer text-center ${
                   activeTab === 'pending'
-                    ? 'bg-emerald-500 text-white font-bold shadow-md border-emerald-300/50 ring-1 ring-emerald-400/30'
-                    : 'bg-white/[0.07] hover:bg-white/[0.12] border-white/[0.12] text-white/80 hover:text-white'
+                    ? 'bg-[#10b981] text-black font-black shadow-md'
+                    : 'text-white/60 hover:text-white hover:bg-white/[0.04] font-semibold'
                 }`}
               >
                 <span className="truncate">Pending</span>
-                <span className="px-1.5 py-0.5 rounded-full text-[10px] font-bold shrink-0 bg-white/20 text-white">
+                <span className={`px-1.5 py-0.5 rounded-full text-[10px] font-bold shrink-0 ${
+                  activeTab === 'pending'
+                    ? 'bg-black/20 text-black'
+                    : 'bg-[#0c1e16] border border-[#1a382b] text-white/70'
+                }`}>
                   {stats.pending || 0}
                 </span>
               </button>
 
               <button
                 onClick={() => setActiveTab('users')}
-                className={`w-full sm:w-auto px-3.5 py-2 sm:py-1.5 text-xs font-semibold rounded-xl transition-all flex items-center justify-center gap-2 cursor-pointer text-center border ${
+                className={`w-full sm:w-auto px-3.5 py-2 sm:py-1.5 text-xs rounded-xl transition-all flex items-center justify-center gap-2 cursor-pointer text-center ${
                   activeTab === 'users'
-                    ? 'bg-emerald-500 text-white font-bold shadow-md border-emerald-300/50 ring-1 ring-emerald-400/30'
-                    : 'bg-white/[0.07] hover:bg-white/[0.12] border-white/[0.12] text-white/80 hover:text-white'
+                    ? 'bg-[#10b981] text-black font-black shadow-md'
+                    : 'text-white/60 hover:text-white hover:bg-white/[0.04] font-semibold'
                 }`}
               >
                 <span className="truncate">Active Officers</span>
-                <span className="px-1.5 py-0.5 rounded-full text-[10px] font-semibold bg-white/20 text-white shrink-0">
+                <span className={`px-1.5 py-0.5 rounded-full text-[10px] font-bold shrink-0 ${
+                  activeTab === 'users'
+                    ? 'bg-black/20 text-black'
+                    : 'bg-[#0c1e16] border border-[#1a382b] text-white/70'
+                }`}>
                   {users.length}
                 </span>
               </button>
 
               <button
                 onClick={() => setActiveTab('approved')}
-                className={`w-full sm:w-auto px-3.5 py-2 sm:py-1.5 text-xs font-semibold rounded-xl transition-all flex items-center justify-center gap-2 cursor-pointer text-center border ${
+                className={`w-full sm:w-auto px-3.5 py-2 sm:py-1.5 text-xs rounded-xl transition-all flex items-center justify-center gap-2 cursor-pointer text-center ${
                   activeTab === 'approved'
-                    ? 'bg-emerald-500 text-white font-bold shadow-md border-emerald-300/50 ring-1 ring-emerald-400/30'
-                    : 'bg-white/[0.07] hover:bg-white/[0.12] border-white/[0.12] text-white/80 hover:text-white'
+                    ? 'bg-[#10b981] text-black font-black shadow-md'
+                    : 'text-white/60 hover:text-white hover:bg-white/[0.04] font-semibold'
                 }`}
               >
                 <span className="truncate">Approved</span>
-                <span className="px-1.5 py-0.5 rounded-full text-[10px] font-semibold bg-white/20 text-white shrink-0">
+                <span className={`px-1.5 py-0.5 rounded-full text-[10px] font-bold shrink-0 ${
+                  activeTab === 'approved'
+                    ? 'bg-black/20 text-black'
+                    : 'bg-[#0c1e16] border border-[#1a382b] text-white/70'
+                }`}>
                   {stats.approved}
                 </span>
               </button>
 
               <button
                 onClick={() => setActiveTab('rejected')}
-                className={`w-full sm:w-auto px-3.5 py-2 sm:py-1.5 text-xs font-semibold rounded-xl transition-all flex items-center justify-center gap-2 cursor-pointer text-center border ${
+                className={`w-full sm:w-auto px-3.5 py-2 sm:py-1.5 text-xs rounded-xl transition-all flex items-center justify-center gap-2 cursor-pointer text-center ${
                   activeTab === 'rejected'
-                    ? 'bg-emerald-500 text-white font-bold shadow-md border-emerald-300/50 ring-1 ring-emerald-400/30'
-                    : 'bg-white/[0.07] hover:bg-white/[0.12] border-white/[0.12] text-white/80 hover:text-white'
+                    ? 'bg-[#10b981] text-black font-black shadow-md'
+                    : 'text-white/60 hover:text-white hover:bg-white/[0.04] font-semibold'
                 }`}
               >
                 <span className="truncate">Declined</span>
-                <span className="px-1.5 py-0.5 rounded-full text-[10px] font-semibold bg-white/20 text-white shrink-0">
+                <span className={`px-1.5 py-0.5 rounded-full text-[10px] font-bold shrink-0 ${
+                  activeTab === 'rejected'
+                    ? 'bg-black/20 text-black'
+                    : 'bg-[#0c1e16] border border-[#1a382b] text-white/70'
+                }`}>
                   {stats.rejected}
                 </span>
               </button>
             </div>
 
-            {/* Search Input */}
+            {/* Search Input — Obsidian Theme */}
             <div className="relative min-w-[240px]">
-              <Search className="w-4 h-4 text-white/60 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+              <Search className="w-4 h-4 text-emerald-400/60 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
               <input
                 type="text"
                 placeholder="Search by name, email, phone..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full text-xs font-medium text-white bg-white/20 focus:bg-white/30 border border-white/30 rounded-xl pl-9 pr-3.5 py-2 focus:outline-none focus:ring-2 focus:ring-white/40 transition-all placeholder:text-white/60 select-text shadow-xs"
+                className="w-full text-xs bg-[#06120c] focus:bg-[#091a11] border border-[#163325] focus:border-emerald-500/50 rounded-xl pl-9 pr-3.5 py-2 text-white placeholder:text-white/40 focus:outline-none focus:ring-1 focus:ring-emerald-500/30 transition-all select-text shadow-inner"
               />
             </div>
 
           </div>
         </div>
 
-        {/* Tab 1: Pending Approvals View — TRANSPARENT WHITE FROSTED GLASS */}
+        {/* Tab 1: Pending Approvals View — OBSIDIAN THEME (SAME AS DASHBOARD) */}
         {activeTab === 'pending' && (
           <div className="space-y-3">
             {isLoading ? (
-              <div className="p-12 text-center rounded-2xl border border-white/30 bg-white/20 backdrop-blur-xl shadow-2xl">
-                <RefreshCw className="w-6 h-6 text-emerald-300 animate-spin mx-auto mb-2" />
-                <p className="text-xs text-white/80 font-medium">Loading pending registration requests...</p>
+              <div className="p-12 text-center rounded-2xl border border-[#142e20] bg-[#07130e] shadow-xl">
+                <RefreshCw className="w-6 h-6 text-emerald-400 animate-spin mx-auto mb-2" />
+                <p className="text-xs text-white/60 font-medium">Loading pending registration requests...</p>
               </div>
             ) : filteredRequests.length === 0 ? (
-              <div className="p-16 text-center rounded-2xl border border-white/30 bg-white/20 backdrop-blur-xl shadow-2xl">
-                <div className="w-12 h-12 rounded-2xl bg-emerald-400/20 border border-emerald-400/30 flex items-center justify-center text-emerald-300 mx-auto mb-3">
+              <div className="p-12 sm:p-16 text-center rounded-2xl border border-[#142e20] bg-[#07130e] shadow-xl">
+                <div className="w-12 h-12 rounded-xl bg-[#064e3b]/30 border border-emerald-500/20 flex items-center justify-center text-emerald-400 mx-auto mb-3 shadow-inner">
                   <CheckCircle2 className="w-6 h-6" />
                 </div>
-                <h3 className="text-base font-bold text-white mb-1 drop-shadow-xs">Queue is Clear!</h3>
-                <p className="text-xs text-white/80 max-w-sm mx-auto font-medium">
+                <h3 className="text-base font-bold text-white mb-1">Queue is Clear!</h3>
+                <p className="text-xs text-white/45 max-w-sm mx-auto font-medium">
                   {searchQuery ? 'No pending requests matched your search query.' : 'There are currently no new registration requests awaiting approval.'}
                 </p>
               </div>
@@ -546,40 +562,40 @@ export default function AdminPage() {
               filteredRequests.map((req) => (
                 <div 
                   key={req.id}
-                  className="rounded-2xl border border-white/30 bg-white/20 backdrop-blur-xl p-5 hover:bg-white/25 transition-all shadow-xl flex flex-col lg:flex-row lg:items-center justify-between gap-4"
+                  className="rounded-2xl border border-[#163325] bg-[#0c1b14] p-5 hover:border-emerald-500/40 transition-all shadow-xl flex flex-col lg:flex-row lg:items-center justify-between gap-4"
                 >
                   {/* Left: Applicant Identity */}
                   <div className="flex items-start gap-4">
-                    <div className="w-11 h-11 rounded-2xl bg-emerald-500/25 border border-emerald-400/40 flex items-center justify-center text-emerald-200 font-bold text-base shrink-0 shadow-xs">
+                    <div className="w-11 h-11 rounded-2xl bg-[#064e3b]/40 border border-emerald-500/30 flex items-center justify-center text-emerald-300 font-bold text-base shrink-0 shadow-inner">
                       {req.first_name?.[0]?.toUpperCase() || 'U'}
                       {req.last_name?.[0]?.toUpperCase() || ''}
                     </div>
 
                     <div>
                       <div className="flex items-center gap-2 flex-wrap">
-                        <h4 className="text-sm sm:text-base font-bold text-white drop-shadow-xs">
+                        <h4 className="text-sm sm:text-base font-bold text-white">
                           {req.first_name} {req.last_name}
                         </h4>
-                        <span className="px-2 py-0.5 text-[10px] font-semibold bg-white/20 border border-white/30 text-white rounded-md">
+                        <span className="px-2 py-0.5 text-[10px] font-semibold bg-[#06120c] border border-[#163325] text-white/80 rounded-md">
                           {req.auth_provider === 'google' ? 'Google OAuth' : 'Email/Password'}
                         </span>
-                        <span className="px-2 py-0.5 text-[10px] font-bold bg-amber-400/20 text-amber-200 border border-amber-400/30 rounded-md uppercase tracking-wider">
+                        <span className="px-2 py-0.5 text-[10px] font-bold bg-amber-500/15 text-amber-300 border border-amber-500/30 rounded-md uppercase tracking-wider">
                           Pending Approval
                         </span>
                       </div>
 
-                      <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-1 text-xs text-white/80 font-medium">
+                      <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-1 text-xs text-white/70 font-medium">
                         <div className="flex items-center gap-1.5">
-                          <Mail className="w-3.5 h-3.5 text-white/60" />
+                          <Mail className="w-3.5 h-3.5 text-white/40" />
                           <span className="text-white font-semibold">{req.email}</span>
                         </div>
                         {req.contact_number && (
                           <div className="flex items-center gap-1.5">
-                            <Phone className="w-3.5 h-3.5 text-white/60" />
+                            <Phone className="w-3.5 h-3.5 text-white/40" />
                             <span>{req.contact_number}</span>
                           </div>
                         )}
-                        <div className="flex items-center gap-1.5 text-white/60">
+                        <div className="flex items-center gap-1.5 text-white/45">
                           <Calendar className="w-3.5 h-3.5" />
                           <span>Submitted: {new Date(req.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' })}</span>
                         </div>
@@ -588,20 +604,20 @@ export default function AdminPage() {
                   </div>
 
                   {/* Right: Role Assignment & Action Controls */}
-                  <div className="flex items-center gap-2.5 pt-3 lg:pt-0 border-t lg:border-t-0 border-white/15 justify-end flex-wrap">
+                  <div className="flex items-center gap-2.5 pt-3 lg:pt-0 border-t lg:border-t-0 border-[#163325] justify-end flex-wrap">
                     
                     {/* Role Dropdown */}
                     <div className="flex items-center gap-1.5">
-                      <span className="text-[11px] font-bold text-white/70 uppercase tracking-wider hidden sm:inline">
+                      <span className="text-[11px] font-bold text-white/60 uppercase tracking-wider hidden sm:inline">
                         Assign Role:
                       </span>
                       <select
                         value={selectedRoles[req.id] || 'treasurer'}
                         onChange={(e) => setSelectedRoles((prev) => ({ ...prev, [req.id]: e.target.value }))}
-                        className="text-xs font-semibold text-white bg-white/20 border border-white/30 rounded-xl px-3 py-2 cursor-pointer focus:outline-none focus:ring-2 focus:ring-white/40 shadow-xs"
+                        className="text-xs font-semibold text-white bg-[#06120c] border border-[#163325] rounded-xl px-3 py-2 cursor-pointer focus:outline-none focus:ring-1 focus:ring-emerald-500/30 shadow-inner"
                       >
                         {ROLE_OPTIONS.map((opt) => (
-                          <option key={opt.value} value={opt.value} className="bg-[#0d2416] text-white">
+                          <option key={opt.value} value={opt.value} className="bg-[#0c1e16] text-white">
                             {opt.label}
                           </option>
                         ))}
@@ -612,7 +628,7 @@ export default function AdminPage() {
                     <button
                       onClick={() => handleOpenReject(req)}
                       disabled={isSubmittingAction}
-                      className="px-3 py-2 text-xs font-semibold text-rose-200 bg-rose-500/20 hover:bg-rose-500/30 border border-rose-400/30 rounded-xl transition-all cursor-pointer disabled:opacity-50"
+                      className="px-3 py-2 text-xs font-semibold text-rose-300 bg-rose-500/15 hover:bg-rose-500/25 border border-rose-500/30 rounded-xl transition-all cursor-pointer disabled:opacity-50"
                     >
                       Decline
                     </button>
@@ -621,7 +637,7 @@ export default function AdminPage() {
                     <button
                       onClick={() => handleApprove(req.id)}
                       disabled={isSubmittingAction}
-                      className="px-4 py-2 text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-500 border border-emerald-400/30 rounded-xl transition-all shadow-md flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
+                      className="px-4 py-2 text-xs font-black text-black bg-[#10b981] hover:bg-[#059669] rounded-xl transition-all shadow-md shadow-emerald-500/20 flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
                     >
                       <CheckCircle2 className="w-3.5 h-3.5" />
                       <span>Approve Access</span>
@@ -634,46 +650,46 @@ export default function AdminPage() {
           </div>
         )}
 
-        {/* Tab 2: Active Officers / Users View */}
+        {/* Tab 2: Active Officers / Users View — OBSIDIAN THEME */}
         {activeTab === 'users' && (
-          <div className="rounded-2xl border border-white/30 bg-white/20 backdrop-blur-xl overflow-hidden shadow-2xl">
-            <div className="p-4 border-b border-white/15 bg-black/15 flex items-center justify-between">
+          <div className="rounded-2xl border border-[#142e20] bg-[#0a1811] overflow-hidden shadow-2xl">
+            <div className="p-4 border-b border-[#142e20] bg-[#07130e] flex items-center justify-between">
               <div>
-                <h3 className="text-sm font-bold text-white drop-shadow-xs">Active FinLITE Officers &amp; Board Members</h3>
-                <p className="text-xs text-white/80">Authorized accounts with access to financial operations</p>
+                <h3 className="text-sm font-bold text-white">Active FinLITE Officers &amp; Board Members</h3>
+                <p className="text-xs text-white/50">Authorized accounts with access to financial operations</p>
               </div>
-              <span className="text-xs font-semibold text-emerald-200 bg-emerald-400/20 border border-emerald-400/30 px-2.5 py-1 rounded-lg">
+              <span className="text-xs font-semibold text-emerald-300 bg-emerald-500/15 border border-emerald-500/30 px-2.5 py-1 rounded-lg">
                 {filteredUsers.length} Active Accounts
               </span>
             </div>
 
             {filteredUsers.length === 0 ? (
-              <div className="p-12 text-center text-xs text-white/70 font-semibold">
+              <div className="p-12 text-center text-xs text-white/40 font-semibold">
                 No users found.
               </div>
             ) : (
-              <div className="divide-y divide-white/10">
+              <div className="divide-y divide-[#142e20]">
                 {filteredUsers.map((user) => (
-                  <div key={user.id} className="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:bg-white/15 transition-colors">
+                  <div key={user.id} className="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:bg-white/[0.02] transition-colors">
                     <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-xl bg-emerald-500/25 border border-emerald-400/40 flex items-center justify-center text-emerald-200 font-bold text-sm shrink-0">
+                      <div className="w-10 h-10 rounded-xl bg-[#064e3b]/40 border border-emerald-500/30 flex items-center justify-center text-emerald-300 font-bold text-sm shrink-0 shadow-inner">
                         {user.first_name?.[0] || user.full_name?.[0] || 'U'}
                       </div>
                       <div>
                         <div className="flex items-center gap-2">
-                          <span className="text-sm font-bold text-white drop-shadow-2xs">
+                          <span className="text-sm font-bold text-white">
                             {user.full_name || `${user.first_name || ''} ${user.last_name || ''}`.trim()}
                           </span>
-                          <span className="px-2 py-0.5 text-[10px] font-bold uppercase rounded-md bg-emerald-400/20 text-emerald-200 border border-emerald-400/30">
+                          <span className="px-2 py-0.5 text-[10px] font-bold uppercase rounded-md bg-emerald-500/15 text-emerald-300 border border-emerald-500/30">
                             {user.role}
                           </span>
                           {user.email === 'geronimoandreijohn.pdm@gmail.com' && (
-                            <span className="px-2 py-0.5 text-[10px] font-bold uppercase rounded-md bg-purple-400/20 text-purple-200 border border-purple-400/30">
+                            <span className="px-2 py-0.5 text-[10px] font-bold uppercase rounded-md bg-purple-500/20 text-purple-200 border border-purple-500/30">
                               Primary Super Admin
                             </span>
                           )}
                         </div>
-                        <p className="text-xs text-white/70 font-medium mt-0.5">
+                        <p className="text-xs text-white/50 font-medium mt-0.5">
                           {user.email} {user.contact_number ? `• ${user.contact_number}` : ''}
                         </p>
                       </div>
@@ -681,14 +697,14 @@ export default function AdminPage() {
 
                     {/* Change Role Selector */}
                     <div className="flex items-center gap-2 self-end sm:self-center">
-                      <span className="text-[11px] font-semibold text-white/70">Change Role:</span>
+                      <span className="text-[11px] font-semibold text-white/60">Change Role:</span>
                       <select
                         value={user.role}
                         onChange={(e) => handleUpdateUserRole(user.id, e.target.value)}
-                        className="text-xs font-semibold text-white bg-white/20 border border-white/30 rounded-xl px-2.5 py-1.5 cursor-pointer focus:outline-none focus:ring-2 focus:ring-white/40 shadow-xs"
+                        className="text-xs font-semibold text-white bg-[#06120c] border border-[#163325] rounded-xl px-2.5 py-1.5 cursor-pointer focus:outline-none focus:ring-1 focus:ring-emerald-500/30 shadow-inner"
                       >
                         {ROLE_OPTIONS.map((opt) => (
-                          <option key={opt.value} value={opt.value} className="bg-[#0d2416] text-white">
+                          <option key={opt.value} value={opt.value} className="bg-[#0c1e16] text-white">
                             {opt.label}
                           </option>
                         ))}
@@ -701,32 +717,32 @@ export default function AdminPage() {
           </div>
         )}
 
-        {/* Tab 3: Approved Requests Log */}
+        {/* Tab 3: Approved Requests Log — OBSIDIAN THEME */}
         {activeTab === 'approved' && (
           <div className="space-y-3">
             {filteredRequests.length === 0 ? (
-              <div className="p-12 text-center rounded-2xl border border-white/30 bg-white/20 backdrop-blur-xl text-xs text-white/70 font-semibold shadow-2xl">
+              <div className="p-12 text-center rounded-2xl border border-[#142e20] bg-[#07130e] text-xs text-white/45 font-semibold shadow-xl">
                 No approved request records found.
               </div>
             ) : (
               filteredRequests.map((req) => (
-                <div key={req.id} className="rounded-2xl border border-white/30 bg-white/20 backdrop-blur-xl p-4 flex items-center justify-between gap-4 shadow-xl">
+                <div key={req.id} className="rounded-2xl border border-[#163325] bg-[#0c1b14] hover:border-emerald-500/30 p-4 flex items-center justify-between gap-4 shadow-xl transition-all">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-emerald-500/25 border border-emerald-400/40 text-emerald-300 flex items-center justify-center font-bold text-sm">
-                      <CheckCircle2 className="w-5 h-5 text-emerald-300" />
+                    <div className="w-10 h-10 rounded-xl bg-[#064e3b]/30 border border-emerald-500/20 text-emerald-400 flex items-center justify-center font-bold text-sm shadow-inner">
+                      <CheckCircle2 className="w-5 h-5 text-emerald-400" />
                     </div>
                     <div>
                       <div className="flex items-center gap-2">
                         <span className="text-sm font-bold text-white">{req.first_name} {req.last_name}</span>
-                        <span className="px-2 py-0.5 text-[10px] font-bold uppercase rounded-md bg-emerald-400/20 text-emerald-200 border border-emerald-400/30">
+                        <span className="px-2 py-0.5 text-[10px] font-bold uppercase rounded-md bg-emerald-500/15 text-emerald-300 border border-emerald-500/30">
                           {req.requested_role}
                         </span>
                       </div>
-                      <p className="text-xs text-white/70 font-medium">{req.email}</p>
+                      <p className="text-xs text-white/50 font-medium">{req.email}</p>
                     </div>
                   </div>
 
-                  <span className="text-[11px] text-white/60 font-medium">
+                  <span className="text-[11px] text-white/45 font-medium">
                     Approved: {req.reviewed_at ? new Date(req.reviewed_at).toLocaleDateString() : 'Active'}
                   </span>
                 </div>
@@ -735,32 +751,32 @@ export default function AdminPage() {
           </div>
         )}
 
-        {/* Tab 4: Declined Requests */}
+        {/* Tab 4: Declined Requests — OBSIDIAN THEME */}
         {activeTab === 'rejected' && (
           <div className="space-y-3">
             {filteredRequests.length === 0 ? (
-              <div className="p-12 text-center rounded-2xl border border-white/30 bg-white/20 backdrop-blur-xl text-xs text-white/70 font-semibold shadow-2xl">
+              <div className="p-12 text-center rounded-2xl border border-[#142e20] bg-[#07130e] text-xs text-white/45 font-semibold shadow-xl">
                 No declined requests recorded.
               </div>
             ) : (
               filteredRequests.map((req) => (
-                <div key={req.id} className="rounded-2xl border border-rose-400/30 bg-white/20 backdrop-blur-xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xl">
+                <div key={req.id} className="rounded-2xl border border-rose-950/60 bg-[#140a0e] hover:border-rose-900/60 p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xl transition-all">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-rose-500/25 border border-rose-400/40 text-rose-300 flex items-center justify-center font-bold text-sm shrink-0">
-                      <XCircle className="w-5 h-5 text-rose-300" />
+                    <div className="w-10 h-10 rounded-xl bg-rose-500/15 border border-rose-500/30 text-rose-400 flex items-center justify-center font-bold text-sm shrink-0 shadow-inner">
+                      <XCircle className="w-5 h-5 text-rose-400" />
                     </div>
                     <div>
                       <span className="text-sm font-bold text-white">{req.first_name} {req.last_name}</span>
-                      <p className="text-xs text-white/70 font-medium">{req.email}</p>
+                      <p className="text-xs text-white/50 font-medium">{req.email}</p>
                       {req.rejection_reason && (
-                        <p className="text-xs text-rose-200 font-medium mt-1 bg-rose-950/40 border border-rose-400/30 px-2 py-0.5 rounded-md inline-block">
+                        <p className="text-xs text-rose-300 font-medium mt-1 bg-rose-950/60 border border-rose-500/25 px-2.5 py-1 rounded-md inline-block">
                           Reason: {req.rejection_reason}
                         </p>
                       )}
                     </div>
                   </div>
 
-                  <span className="text-[11px] text-white/60 font-medium">
+                  <span className="text-[11px] text-white/45 font-medium">
                     Declined: {req.reviewed_at ? new Date(req.reviewed_at).toLocaleDateString() : 'N/A'}
                   </span>
                 </div>
@@ -771,21 +787,21 @@ export default function AdminPage() {
 
       </main>
 
-      {/* Rejection Reason Modal */}
+      {/* Rejection Reason Modal — OBSIDIAN THEME */}
       {rejectingRequest && (
-        <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-xl border border-black/[0.08] animate-in fade-in zoom-in-95 duration-150">
+        <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-[#0a1811] rounded-2xl max-w-md w-full p-6 shadow-2xl border border-[#163325] animate-in fade-in zoom-in-95 duration-150">
             <div className="flex items-center gap-3 mb-4">
-              <div className="w-10 h-10 rounded-xl bg-rose-100 flex items-center justify-center text-rose-700">
+              <div className="w-10 h-10 rounded-xl bg-rose-500/15 border border-rose-500/30 flex items-center justify-center text-rose-400 shrink-0 shadow-inner">
                 <XCircle className="w-5 h-5" />
               </div>
               <div>
-                <h3 className="text-base font-bold text-gray-950">Decline Registration</h3>
-                <p className="text-xs text-gray-500">{rejectingRequest.first_name} {rejectingRequest.last_name} ({rejectingRequest.email})</p>
+                <h3 className="text-base font-bold text-white">Decline Registration</h3>
+                <p className="text-xs text-white/50">{rejectingRequest.first_name} {rejectingRequest.last_name} ({rejectingRequest.email})</p>
               </div>
             </div>
 
-            <p className="text-xs text-gray-600 mb-3 font-medium">
+            <p className="text-xs text-white/60 mb-3 font-medium">
               Please specify the reason for declining this applicant. This reason is saved for institutional audit trails.
             </p>
 
@@ -794,14 +810,14 @@ export default function AdminPage() {
               value={rejectionReason}
               onChange={(e) => setRejectionReason(e.target.value)}
               placeholder="e.g. Not an active officer, invalid student number..."
-              className="w-full text-xs font-medium text-gray-800 bg-gray-50 border border-gray-200 rounded-xl p-3 focus:bg-white focus:outline-none focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500 mb-4 select-text"
+              className="w-full text-xs font-medium text-white bg-[#06120c] border border-[#163325] rounded-xl p-3 focus:bg-[#091a11] focus:outline-none focus:ring-1 focus:ring-rose-500/30 focus:border-rose-500/50 mb-4 placeholder:text-white/30 select-text shadow-inner"
             />
 
             <div className="flex items-center justify-end gap-2.5">
               <button
                 type="button"
                 onClick={() => setRejectingRequest(null)}
-                className="px-4 py-2 text-xs font-semibold text-gray-700 hover:bg-gray-100 rounded-xl transition-all cursor-pointer"
+                className="px-4 py-2 text-xs font-semibold text-white/60 hover:text-white hover:bg-white/[0.05] rounded-xl transition-all cursor-pointer"
               >
                 Cancel
               </button>
@@ -809,7 +825,7 @@ export default function AdminPage() {
                 type="button"
                 onClick={handleConfirmReject}
                 disabled={isSubmittingAction}
-                className="px-4 py-2 text-xs font-bold text-white bg-rose-600 hover:bg-rose-700 rounded-xl transition-all shadow-xs cursor-pointer disabled:opacity-50"
+                className="px-4 py-2 text-xs font-bold text-white bg-rose-600 hover:bg-rose-500 rounded-xl transition-all shadow-md cursor-pointer disabled:opacity-50"
               >
                 Confirm Decline
               </button>
