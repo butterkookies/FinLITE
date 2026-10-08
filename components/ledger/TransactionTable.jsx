@@ -115,8 +115,8 @@ export default function TransactionTable({
           />
         </div>
 
-        {/* Filter Pills */}
-        <div className="flex items-center gap-1 overflow-x-auto pb-0.5 sm:pb-0 scrollbar-none flex-nowrap">
+        {/* Filter Tabs — 2x2 grid on mobile (no scroll), flex row on sm+ */}
+        <div className="grid grid-cols-2 sm:flex sm:items-center gap-1.5 p-1 bg-[#06120c] rounded-2xl sm:rounded-full border border-[#163325] w-full sm:w-auto">
           {[
             { id: 'ALL', label: 'All Records' },
             { id: 'INFLOW', label: 'Inflows' },
@@ -126,10 +126,10 @@ export default function TransactionTable({
             <button
               key={tab.id}
               onClick={() => setFilterType(tab.id)}
-              className={`h-8 px-4 text-xs rounded-full transition-all whitespace-nowrap shrink-0 cursor-pointer ${
+              className={`h-8 px-3.5 sm:px-4 text-xs font-bold transition-all rounded-xl sm:rounded-full text-center flex items-center justify-center cursor-pointer ${
                 filterType === tab.id
-                  ? 'bg-[#10b981] text-black font-extrabold shadow-md'
-                  : 'text-white/60 hover:text-white font-semibold hover:bg-white/[0.05]'
+                  ? 'bg-[#10b981] text-black shadow-md'
+                  : 'text-white/60 hover:text-white hover:bg-white/[0.05]'
               }`}
             >
               {tab.label}
