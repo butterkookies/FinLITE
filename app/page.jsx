@@ -471,28 +471,19 @@ export default function Dashboard() {
                 </span>
               </button>
 
-              {/* Pod 2: User Greeting / Profile */}
-              <Link
-                href="/profile"
+              {/* Pod 2: Cash Box Audit */}
+              <button
+                type="button"
+                onClick={() => setIsDenomOpen(true)}
                 className="flex flex-col items-center gap-1.5 p-1 sm:px-2.5 group cursor-pointer"
-                title={`Account Profile: ${userProfile?.full_name || 'Officer'}`}
               >
-                <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-[#0c2e1f] border border-emerald-500/35 flex items-center justify-center text-emerald-400 group-hover:bg-[#10b981] group-hover:text-black group-hover:border-emerald-400 group-hover:scale-105 active:scale-95 transition-all shadow-md overflow-hidden">
-                  {userProfile?.avatar_url || currentUser?.user_metadata?.avatar_url || currentUser?.user_metadata?.picture ? (
-                    <img
-                      src={userProfile?.avatar_url || currentUser?.user_metadata?.avatar_url || currentUser?.user_metadata?.picture}
-                      alt={userProfile?.first_name || 'User'}
-                      className="w-full h-full object-cover"
-                      referrerPolicy="no-referrer"
-                    />
-                  ) : (
-                    <User className="w-5 h-5" />
-                  )}
+                <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-[#0c2e1f] border border-emerald-500/35 flex items-center justify-center text-emerald-400 group-hover:bg-[#10b981] group-hover:text-black group-hover:border-emerald-400 group-hover:scale-105 active:scale-95 transition-all shadow-md">
+                  <Wallet className="w-5 h-5" />
                 </div>
-                <span className="text-[10px] sm:text-[11px] font-bold text-white/75 group-hover:text-emerald-300 transition-colors truncate max-w-[58px]">
-                  Hi, {userProfile?.first_name || currentUser?.user_metadata?.full_name?.split(' ')[0] || 'User'}
+                <span className="text-[10px] sm:text-[11px] font-bold text-white/75 group-hover:text-emerald-300 transition-colors">
+                  Cash Box
                 </span>
-              </Link>
+              </button>
 
               {/* Pod 3: Proposal Creator */}
               <button
