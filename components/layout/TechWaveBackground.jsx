@@ -144,8 +144,9 @@ export default function TechWaveBackground() {
 
   return (
     <div
+      id="tech-wave-bg"
       aria-hidden="true"
-      className="fixed inset-0 pointer-events-none z-0 overflow-hidden select-none"
+      className="fixed inset-0 pointer-events-none z-0 overflow-hidden select-none no-print"
       style={{
         // Balanced rich dark-to-medium-light green gradient
         background: 'linear-gradient(140deg, #09281a 0%, #0d3824 25%, #124d32 55%, #186341 82%, #1d734c 100%)',

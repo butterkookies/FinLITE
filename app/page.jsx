@@ -393,25 +393,27 @@ export default function Dashboard() {
     <div className="min-h-screen flex flex-col">
       
       {/* Top Navigation */}
-      <ModuleErrorBoundary moduleName="Navigation Bar">
-        <Navbar
-          currentRole={currentRole}
-          userProfile={userProfile}
-          currentUser={currentUser}
-          onOpenAI={() => setIsAIOpen(true)}
-          onOpenDenominations={() => setIsDenomOpen(true)}
-          currentSemester={currentSemester}
-          semesters={semesters}
-          onSelectSemester={(semId) => {
-            const found = semesters.find((s) => s.id === semId);
-            if (found) setCurrentSemester(found);
-          }}
-          onOpenNewSemester={() => setIsNewSemesterOpen(true)}
-        />
-      </ModuleErrorBoundary>
+      <div className="no-print">
+        <ModuleErrorBoundary moduleName="Navigation Bar">
+          <Navbar
+            currentRole={currentRole}
+            userProfile={userProfile}
+            currentUser={currentUser}
+            onOpenAI={() => setIsAIOpen(true)}
+            onOpenDenominations={() => setIsDenomOpen(true)}
+            currentSemester={currentSemester}
+            semesters={semesters}
+            onSelectSemester={(semId) => {
+              const found = semesters.find((s) => s.id === semId);
+              if (found) setCurrentSemester(found);
+            }}
+            onOpenNewSemester={() => setIsNewSemesterOpen(true)}
+          />
+        </ModuleErrorBoundary>
+      </div>
 
       {/* Main Content Area */}
-      <main className="flex-1 max-w-7xl w-full mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-6 pb-24 sm:pb-8 space-y-5 sm:space-y-6">
+      <main className="flex-1 max-w-7xl w-full mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-6 pb-24 sm:pb-8 space-y-5 sm:space-y-6 no-print">
         
         {/* Modern Minimalist Hero Balance & Action Hub — CONCEPT DESIGN */}
         <section className="relative rounded-3xl bg-[#0a2419]/85 backdrop-blur-xl border border-emerald-500/20 p-5 sm:p-7 shadow-2xl overflow-hidden transition-all">
@@ -538,7 +540,7 @@ export default function Dashboard() {
       </main>
 
       {/* Mobile Floating Action Dock (Matching Mockup Navigation) */}
-      <div className="sm:hidden fixed bottom-3 left-3 right-3 z-40 bg-[#07130d]/95 backdrop-blur-xl border border-[#163325] rounded-full p-1.5 px-4 flex items-center justify-between shadow-2xl shadow-black/80">
+      <div className="sm:hidden fixed bottom-3 left-3 right-3 z-40 bg-[#07130d]/95 backdrop-blur-xl border border-[#163325] rounded-full p-1.5 px-4 flex items-center justify-between shadow-2xl shadow-black/80 no-print">
         <button
           type="button"
           onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
@@ -586,38 +588,40 @@ export default function Dashboard() {
       </div>
 
       {/* Dashboard Footer matching reference mockup */}
-      <footer className="max-w-7xl w-full mx-auto px-4 py-6 pb-24 sm:pb-6 text-center">
+      <footer className="max-w-7xl w-full mx-auto px-4 py-6 pb-24 sm:pb-6 text-center no-print">
         <p className="text-[11px] text-white/30 font-medium">
           © 2026 FinLITE · Pambayang Dalubhasaan ng Marilao · All rights reserved.
         </p>
       </footer>
 
       {/* Modals & Slide-overs */}
-      <ModuleErrorBoundary moduleName="Semester Management">
-        <NewSemesterModal
-          isOpen={isNewSemesterOpen}
-          onClose={() => setIsNewSemesterOpen(false)}
-          currentSemester={currentSemester}
-          currentSummary={summary}
-          onStartSemester={handleStartSemester}
-        />
-      </ModuleErrorBoundary>
+      <div className="no-print">
+        <ModuleErrorBoundary moduleName="Semester Management">
+          <NewSemesterModal
+            isOpen={isNewSemesterOpen}
+            onClose={() => setIsNewSemesterOpen(false)}
+            currentSemester={currentSemester}
+            currentSummary={summary}
+            onStartSemester={handleStartSemester}
+          />
+        </ModuleErrorBoundary>
 
-      <ModuleErrorBoundary moduleName="Transaction Entry">
-        <NewTransactionModal
-          isOpen={isNewTxOpen}
-          onClose={() => setIsNewTxOpen(false)}
-          onSave={handleSaveTransaction}
-        />
-      </ModuleErrorBoundary>
+        <ModuleErrorBoundary moduleName="Transaction Entry">
+          <NewTransactionModal
+            isOpen={isNewTxOpen}
+            onClose={() => setIsNewTxOpen(false)}
+            onSave={handleSaveTransaction}
+          />
+        </ModuleErrorBoundary>
 
-      <ModuleErrorBoundary moduleName="Proposal Generator">
-        <NewProposalModal
-          isOpen={isProposalOpen}
-          onClose={() => setIsProposalOpen(false)}
-          onOpenPreview={handleOpenProposalPreview}
-        />
-      </ModuleErrorBoundary>
+        <ModuleErrorBoundary moduleName="Proposal Generator">
+          <NewProposalModal
+            isOpen={isProposalOpen}
+            onClose={() => setIsProposalOpen(false)}
+            onOpenPreview={handleOpenProposalPreview}
+          />
+        </ModuleErrorBoundary>
+      </div>
 
       <ModuleErrorBoundary moduleName="Document Preview">
         {isPreviewOpen && previewData && (
@@ -629,25 +633,27 @@ export default function Dashboard() {
         )}
       </ModuleErrorBoundary>
 
-      <ModuleErrorBoundary moduleName="Cash Reconciliation">
-        <DenominationCounter
-          isOpen={isDenomOpen}
-          onClose={() => setIsDenomOpen(false)}
-          ledgerCashBalance={summary.cash_on_hand}
-          onDeclareShortage={handleDeclareShortage}
-          onSaveCount={handleSaveAuditCount}
-          currentRole={currentRole}
-        />
-      </ModuleErrorBoundary>
+      <div className="no-print">
+        <ModuleErrorBoundary moduleName="Cash Reconciliation">
+          <DenominationCounter
+            isOpen={isDenomOpen}
+            onClose={() => setIsDenomOpen(false)}
+            ledgerCashBalance={summary.cash_on_hand}
+            onDeclareShortage={handleDeclareShortage}
+            onSaveCount={handleSaveAuditCount}
+            currentRole={currentRole}
+          />
+        </ModuleErrorBoundary>
 
-      <ModuleErrorBoundary moduleName="AI Co-Pilot">
-        <AIChatDrawer
-          isOpen={isAIOpen}
-          onClose={() => setIsAIOpen(false)}
-          summary={summary}
-          transactions={activeTransactions}
-        />
-      </ModuleErrorBoundary>
+        <ModuleErrorBoundary moduleName="AI Co-Pilot">
+          <AIChatDrawer
+            isOpen={isAIOpen}
+            onClose={() => setIsAIOpen(false)}
+            summary={summary}
+            transactions={activeTransactions}
+          />
+        </ModuleErrorBoundary>
+      </div>
 
     </div>
   );

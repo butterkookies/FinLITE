@@ -304,6 +304,11 @@
   font-weight: bold;
 }
 
+/* Hide sheet on screen when navigating individual page tabs, but keep in DOM for print */
+.document-sheet.screen-hidden {
+  display: none !important;
+}
+
 /* Standard Print Page Dimensions & Rules */
 @page {
   size: 8.5in 11in;
@@ -321,6 +326,10 @@
     margin: 0 !important;
     padding: 0 !important;
     background: #ffffff !important;
+    color: #000000 !important;
+    width: 8.5in !important;
+    min-height: auto !important;
+    overflow: visible !important;
   }
 
   .no-print {
@@ -334,6 +343,9 @@
     margin: 0 !important;
     overflow: visible !important;
     height: auto !important;
+    min-height: auto !important;
+    inset: auto !important;
+    z-index: auto !important;
   }
 
   .document-canvas-wrapper {
@@ -353,7 +365,10 @@
     display: block !important;
   }
 
-  .document-sheet {
+  /* Force display of ALL document sheets during print regardless of active tab */
+  .document-sheet,
+  .document-sheet.screen-hidden {
+    display: block !important;
     box-shadow: none !important;
     margin: 0 !important;
     padding: 1.0in 1.0in 0.75in 1.0in !important;
@@ -365,6 +380,14 @@
     page-break-inside: avoid !important;
     break-inside: avoid !important;
     background: #ffffff !important;
+    box-sizing: border-box !important;
+  }
+
+  /* Prevent trailing blank page after sheet 4 */
+  .document-sheet:last-of-type,
+  .document-sheet:last-child {
+    page-break-after: auto !important;
+    break-after: auto !important;
   }
 
   .document-sheet * {
@@ -389,5 +412,9 @@
   .pdm-input {
     border: none !important;
     background: transparent !important;
+    outline: none !important;
+    box-shadow: none !important;
+    color: #000000 !important;
+    padding: 0 !important;
   }
 }

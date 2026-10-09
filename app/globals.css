@@ -246,3 +246,22 @@
   animation: waveFlowPath 9s ease-in-out infinite alternate;
 }
 
+/* =============================================
+   GLOBAL PRINT ENGINE OVERRIDES
+   ============================================= */
+@media print {
+  .no-print,
+  #tech-wave-bg,
+  nav,
+  aside,
+  footer,
+  canvas {
+    display: none !important;
+  }
+
+  html, body {
+    background: #ffffff !important;
+    color: #000000 !important;
+  }
+}
+

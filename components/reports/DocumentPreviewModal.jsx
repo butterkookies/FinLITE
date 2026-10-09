@@ -479,7 +479,7 @@ export default function DocumentPreviewModal({ isOpen, onClose, documentData }) 
             {/* Print / PDF Button */}
             <button
               onClick={() => window.print()}
-              className="hidden sm:flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 text-xs font-medium text-gray-300 bg-gray-800 hover:bg-gray-700 hover:text-white rounded-lg transition-colors border border-gray-700 cursor-pointer shadow-2xs"
+              className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 text-xs font-medium text-gray-300 bg-gray-800 hover:bg-gray-700 hover:text-white rounded-lg transition-colors border border-gray-700 cursor-pointer shadow-2xs"
               title="Print or Save as PDF"
             >
               <Printer className="w-3.5 h-3.5" />
@@ -772,9 +772,8 @@ export default function DocumentPreviewModal({ isOpen, onClose, documentData }) 
             {/* ========================================================================= */}
             {/* PAGE 1: TRANSMITTAL LETTER (Screenshot 1)                                 */}
             {/* ========================================================================= */}
-            {(activePage === 0 || activePage === 1) && (
-              <article className="document-sheet">
-                <OfficialHeaderBanner />
+            <article className={`document-sheet ${activePage !== 0 && activePage !== 1 ? 'screen-hidden' : ''}`}>
+              <OfficialHeaderBanner />
 
             {/* Date */}
             <div className="transmittal-date">
@@ -992,14 +991,12 @@ export default function DocumentPreviewModal({ isOpen, onClose, documentData }) 
               </div>
             </div>
           </article>
-        )}
 
         {/* ========================================================================= */}
         {/* PAGE 2: INCOME SCHEDULE (Screenshot 2)                                   */}
         {/* ========================================================================= */}
-        {(activePage === 0 || activePage === 2) && (
-          <article className="document-sheet">
-            <OfficialHeaderBanner />
+        <article className={`document-sheet ${activePage !== 0 && activePage !== 2 ? 'screen-hidden' : ''}`}>
+          <OfficialHeaderBanner />
 
             {/* Document Title Block */}
             <div className="text-center mb-8">
@@ -1111,14 +1108,12 @@ export default function DocumentPreviewModal({ isOpen, onClose, documentData }) 
               </span>
             </div>
           </article>
-        )}
 
         {/* ========================================================================= */}
         {/* PAGE 3: MISCELLANEOUS EXPENSES                                           */}
         {/* ========================================================================= */}
-        {(activePage === 0 || activePage === 3) && (
-          <article className="document-sheet">
-            <OfficialHeaderBanner />
+        <article className={`document-sheet ${activePage !== 0 && activePage !== 3 ? 'screen-hidden' : ''}`}>
+          <OfficialHeaderBanner />
 
             <div className="flex justify-between items-center mb-1">
               <div>
@@ -1188,14 +1183,12 @@ export default function DocumentPreviewModal({ isOpen, onClose, documentData }) 
               </tbody>
             </table>
           </article>
-        )}
 
         {/* ========================================================================= */}
         {/* PAGE 4: SUMMARY RECONCILIATION & SIGNATORIES (Screenshot 3 Right)        */}
         {/* ========================================================================= */}
-        {(activePage === 0 || activePage === 4) && (
-          <article className="document-sheet">
-            <OfficialHeaderBanner />
+        <article className={`document-sheet ${activePage !== 0 && activePage !== 4 ? 'screen-hidden' : ''}`}>
+          <OfficialHeaderBanner />
 
             {/* As of Date */}
             <div className="text-center font-bold text-xs mb-6">
@@ -1379,7 +1372,6 @@ export default function DocumentPreviewModal({ isOpen, onClose, documentData }) 
               </table>
             </div>
           </article>
-        )}
           </>
         )}
         </div>
