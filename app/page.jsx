@@ -1,7 +1,7 @@
 'use client';
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { Plus, Wallet, Calculator, Sparkles, ArrowUpRight, ShieldCheck, Home, User, FileText } from 'lucide-react';
+import { Plus, Wallet, Calculator, Sparkles, ShieldCheck, Home, User, FileText } from 'lucide-react';
 import Navbar from '@/components/layout/Navbar';
 import StatCards from '@/components/dashboard/StatCards';
 import TransactionTable from '@/components/ledger/TransactionTable';
@@ -435,20 +435,6 @@ export default function Dashboard() {
               <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black text-white tracking-tight drop-shadow-sm">
                 {greeting}, {userProfile?.first_name || userProfile?.full_name?.split(' ')[0] || currentUser?.user_metadata?.full_name?.split(' ')[0] || 'Officer'}
               </h1>
-
-              {/* Preview Report Pill Button */}
-              <div className="flex items-center gap-3 mt-3 flex-wrap">
-                <button
-                  type="button"
-                  onClick={handleOpenLiquidationPreview}
-                  className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-bold text-emerald-300 bg-[#0d2f20] hover:bg-[#13422d] active:bg-[#185037] border border-emerald-400/40 hover:border-emerald-300/60 shadow-md transition-all cursor-pointer group"
-                  title="Preview 1:1 PDM CCS Formal Word Liquidation Report & Live Edit"
-                >
-                  <FileText className="w-3.5 h-3.5 text-emerald-400 group-hover:scale-110 transition-transform" />
-                  <span>Preview Formal Report</span>
-                  <ArrowUpRight className="w-3.5 h-3.5 text-emerald-400/70 group-hover:text-emerald-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all" />
-                </button>
-              </div>
             </div>
 
             {/* Right: Quick Action Pods Dock (5 Circular Pods matching mockup) */}
