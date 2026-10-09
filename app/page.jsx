@@ -1,7 +1,7 @@
 'use client';
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { Eye, EyeOff, Plus, Wallet, Calculator, Sparkles, ArrowUpRight, TrendingUp, ShieldCheck, Home, User, FileText } from 'lucide-react';
+import { Plus, Wallet, Calculator, Sparkles, ArrowUpRight, ShieldCheck, Home, User, FileText } from 'lucide-react';
 import Navbar from '@/components/layout/Navbar';
 import StatCards from '@/components/dashboard/StatCards';
 import TransactionTable from '@/components/ledger/TransactionTable';
@@ -34,7 +34,6 @@ export default function Dashboard() {
   const [isProposalOpen, setIsProposalOpen] = useState(false);
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   const [previewData, setPreviewData] = useState(null);
-  const [isBalanceHidden, setIsBalanceHidden] = useState(false);
 
   // Multi-Semester State Management
   const [semesters, setSemesters] = useState(DEFAULT_SEMESTERS);
@@ -422,34 +421,23 @@ export default function Dashboard() {
 
           <div className="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-6">
             
-            {/* Left: Big Total Balance (Clean layout matching reference) */}
+            {/* Left: Dynamic Greetings Hero Header */}
             <div>
-              {/* Dynamic Time-of-Day Greeting & Eye Toggle */}
-              <div className="flex items-center gap-2 mb-1">
-                <span className="text-xs sm:text-sm font-bold tracking-wide uppercase text-emerald-300/90 flex items-center gap-1.5">
+              {/* Dynamic Time-of-Day Tag & Role */}
+              <div className="flex items-center gap-2 mb-2">
+                <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] sm:text-xs font-bold tracking-wider uppercase bg-emerald-500/15 text-emerald-300 border border-emerald-500/25">
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                  {greeting}, {userProfile?.first_name || currentUser?.user_metadata?.full_name?.split(' ')[0] || 'Officer'}
+                  {currentRole === 'admin' ? 'Administrator Portal' : currentRole === 'treasurer' ? 'LITE Treasury' : 'Officer Portal'}
                 </span>
-                <button
-                  type="button"
-                  onClick={() => setIsBalanceHidden(!isBalanceHidden)}
-                  className="p-1 rounded-md text-white/40 hover:text-white hover:bg-white/[0.06] transition-colors cursor-pointer"
-                  title={isBalanceHidden ? 'Show balance' : 'Hide balance'}
-                >
-                  {isBalanceHidden ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
-                </button>
               </div>
 
-              {/* Big Minimalist Balance Display */}
-              <div className="flex items-baseline gap-3 flex-wrap">
-                <h1 className="text-3xl sm:text-5xl font-black text-white tracking-tight tabular-nums drop-shadow-sm">
-                  {isBalanceHidden ? '••••••••' : formatPHP(summary.cash_on_hand + summary.gcash_balance)}
-                </h1>
-                <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-400/30">
-                  <TrendingUp className="w-3 h-3 text-emerald-400" />
-                  +{summary.total_inflows > 0 ? Math.max(0, Math.min(100, Math.round(((summary.total_inflows - summary.total_outflows) / summary.total_inflows) * 1000) / 10)) : 73.8}% Retention
+              {/* Big Minimalist Greetings (Replacing redundant balance line) */}
+              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black text-white tracking-tight drop-shadow-sm flex items-center gap-2.5 sm:gap-3 flex-wrap">
+                <span>
+                  {greeting}, {userProfile?.first_name || userProfile?.full_name?.split(' ')[0] || currentUser?.user_metadata?.full_name?.split(' ')[0] || 'Officer'}
                 </span>
-              </div>
+                <span className="inline-block hover:rotate-12 transition-transform cursor-default select-none">👋</span>
+              </h1>
 
               {/* Minimalist Subtitle & Preview Report Pill Button */}
               <div className="flex items-center gap-3 mt-3 flex-wrap">
