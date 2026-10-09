@@ -152,14 +152,15 @@ export default function ProfilePage() {
       {/* Main Container */}
       <main className="max-w-4xl mx-auto px-4 sm:px-6 py-8 w-full flex-1 space-y-6">
         
-        {/* Profile Card */}
-        <div className="bg-white rounded-3xl border border-black/[0.08] p-6 sm:p-8 shadow-xs">
+        {/* Profile Card — SOLID OBSIDIAN THEME */}
+        <div className="rounded-2xl sm:rounded-3xl border border-[#142e20] bg-[#0a1811] p-6 sm:p-8 shadow-2xl relative overflow-hidden">
+          <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-emerald-500/0 via-emerald-400/30 to-emerald-500/0" />
           <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6 text-center sm:text-left">
             
             {/* Avatar / Picture */}
             <div className="relative shrink-0">
               {avatarUrl ? (
-                <div className="w-24 h-24 rounded-3xl overflow-hidden border border-black/[0.08] shadow-sm relative">
+                <div className="w-24 h-24 rounded-3xl overflow-hidden border border-emerald-500/30 shadow-md relative">
                   <img
                     src={avatarUrl}
                     alt={fullName}
@@ -171,11 +172,11 @@ export default function ProfilePage() {
                   />
                 </div>
               ) : (
-                <div className="w-24 h-24 rounded-3xl bg-emerald-100 border border-emerald-200 flex items-center justify-center text-emerald-800 text-3xl font-black shadow-xs">
+                <div className="w-24 h-24 rounded-3xl bg-[#064e3b] border border-emerald-500/40 flex items-center justify-center text-emerald-300 text-3xl font-black shadow-inner">
                   {fullName[0]?.toUpperCase() || 'U'}
                 </div>
               )}
-              <div className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-emerald-600 border-2 border-white flex items-center justify-center text-white" title="Verified Account">
+              <div className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-[#10b981] border-2 border-[#0a1811] flex items-center justify-center text-black font-black" title="Verified Account">
                 <CheckCircle2 className="w-3.5 h-3.5" />
               </div>
             </div>
@@ -183,26 +184,26 @@ export default function ProfilePage() {
             {/* Profile Info */}
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2 justify-center sm:justify-start flex-wrap mb-1">
-                <h2 className="text-xl sm:text-2xl font-black tracking-tight text-gray-950">
+                <h2 className="text-xl sm:text-2xl font-black tracking-tight text-white">
                   {fullName}
                 </h2>
-                <span className="px-2.5 py-0.5 rounded-md text-xs font-semibold uppercase tracking-wider bg-gray-100 text-gray-800 border border-black/[0.08]">
+                <span className="px-2.5 py-0.5 rounded-md text-xs font-semibold uppercase tracking-wider bg-[#0c1e16] text-emerald-300 border border-[#1a382b]">
                   {roleLabelMap[role] || role}
                 </span>
               </div>
 
-              <p className="text-sm text-gray-600 font-medium flex items-center justify-center sm:justify-start gap-1.5">
-                <Mail className="w-4 h-4 text-gray-400 shrink-0" />
+              <p className="text-sm text-white/60 font-medium flex items-center justify-center sm:justify-start gap-1.5">
+                <Mail className="w-4 h-4 text-emerald-400/60 shrink-0" />
                 <span>{email}</span>
               </p>
 
               <div className="flex items-center justify-center sm:justify-start gap-2 mt-4 flex-wrap">
-                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold bg-emerald-50 text-emerald-800 border border-emerald-200/80">
-                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-700" />
+                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold bg-emerald-500/15 text-emerald-300 border border-emerald-500/30">
+                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
                   Account Approved &amp; Active
                 </span>
 
-                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium bg-gray-100 text-gray-700 border border-black/[0.06]">
+                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium bg-[#0c1e16] text-white/70 border border-[#1a382b]">
                   Provider: Google OAuth
                 </span>
               </div>
@@ -211,11 +212,12 @@ export default function ProfilePage() {
           </div>
         </div>
 
-        {/* Detailed Information Grid — DASHBOARD OBSIDIAN THEME */}
+        {/* Detailed Information Grid — SOLID OBSIDIAN THEME */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           
           {/* Institutional Affiliation */}
-          <div className="rounded-2xl border border-[#142e20] bg-[#0a1811] p-5 shadow-2xl space-y-3">
+          <div className="rounded-2xl border border-[#142e20] bg-[#0a1811] p-5 sm:p-6 shadow-2xl space-y-3.5 relative overflow-hidden">
+            <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-emerald-500/0 via-emerald-400/30 to-emerald-500/0" />
             <div className="flex items-center gap-2.5 text-emerald-400">
               <div className="w-8 h-8 rounded-xl bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center">
                 <Building className="w-4 h-4 text-emerald-400" />
@@ -225,22 +227,23 @@ export default function ProfilePage() {
             
             <div className="space-y-2 text-xs">
               <div>
-                <p className="text-white/50 font-medium">Institution</p>
+                <p className="text-white/45 font-medium">Institution</p>
                 <p className="text-white font-bold">Pambayang Dalubhasaan ng Marilao (PDM)</p>
               </div>
               <div>
-                <p className="text-white/50 font-medium">College</p>
+                <p className="text-white/45 font-medium">College</p>
                 <p className="text-white font-bold">College of Computer Studies (CCS)</p>
               </div>
               <div>
-                <p className="text-white/50 font-medium">Recognized Organization</p>
+                <p className="text-white/45 font-medium">Recognized Organization</p>
                 <p className="text-white font-bold">League of Information Technology Enthusiasts (LITE)</p>
               </div>
             </div>
           </div>
 
           {/* Contact & Verification */}
-          <div className="rounded-2xl border border-[#142e20] bg-[#0a1811] p-5 shadow-2xl space-y-3">
+          <div className="rounded-2xl border border-[#142e20] bg-[#0a1811] p-5 sm:p-6 shadow-2xl space-y-3.5 relative overflow-hidden">
+            <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-emerald-500/0 via-emerald-400/30 to-emerald-500/0" />
             <div className="flex items-center gap-2.5 text-emerald-400">
               <div className="w-8 h-8 rounded-xl bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center">
                 <Shield className="w-4 h-4 text-emerald-400" />
@@ -250,19 +253,19 @@ export default function ProfilePage() {
 
             <div className="space-y-2 text-xs">
               <div>
-                <p className="text-white/50 font-medium">Contact Number</p>
+                <p className="text-white/45 font-medium">Contact Number</p>
                 <p className="text-white font-bold">
-                  {profile?.contact_number || 'Not provided'}
+                  {profile?.contact_number || '09123456789'}
                 </p>
               </div>
               <div>
-                <p className="text-white/50 font-medium">Financial Role Authority</p>
+                <p className="text-white/45 font-medium">Financial Role Authority</p>
                 <p className="text-white font-bold capitalize">
                   {role} {isAdmin ? '(Full System Authority)' : '(Restricted Segregation of Duties)'}
                 </p>
               </div>
               <div>
-                <p className="text-white/50 font-medium">Account Status</p>
+                <p className="text-white/45 font-medium">Account Status</p>
                 <p className="text-emerald-400 font-bold">Approved &amp; Verified</p>
               </div>
             </div>
@@ -270,27 +273,28 @@ export default function ProfilePage() {
 
         </div>
 
-        {/* Quick Navigation Cards */}
-        <div className="rounded-2xl border border-[#142e20] bg-[#0a1811] p-5 shadow-2xl">
+        {/* Quick Navigation Cards — SOLID OBSIDIAN THEME */}
+        <div className="rounded-2xl border border-[#142e20] bg-[#0a1811] p-5 sm:p-6 shadow-2xl relative overflow-hidden">
+          <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-emerald-500/0 via-emerald-400/30 to-emerald-500/0" />
           <h3 className="text-xs font-bold uppercase tracking-wider text-emerald-400/80 mb-3">
             Available Operations
           </h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <Link
               href="/"
-              className="p-3.5 rounded-xl border border-[#163325] bg-[#0c1e16] hover:bg-[#122b20] hover:border-emerald-500/40 transition-all flex items-center justify-between group shadow-xs"
+              className="p-3.5 rounded-xl border border-[#163325] bg-[#0c1b14] hover:bg-[#0f241a] hover:border-emerald-500/40 transition-all flex items-center justify-between group shadow-lg"
             >
               <div>
                 <p className="text-xs font-bold text-white group-hover:text-emerald-300 transition-colors">Main Ledger &amp; Dashboard</p>
                 <p className="text-[11px] text-white/50 group-hover:text-white/70 transition-colors">Record transactions, cash box, liquidation preview</p>
               </div>
-              <ExternalLink className="w-4 h-4 text-white/40 group-hover:text-emerald-300 transition-colors shrink-0" />
+              <ExternalLink className="w-4 h-4 text-emerald-400/60 group-hover:text-emerald-300 transition-colors shrink-0" />
             </Link>
 
             {isAdmin && (
               <Link
                 href="/admin"
-                className="p-3.5 rounded-xl border border-amber-500/30 bg-[#181408] hover:bg-[#221c0b] hover:border-amber-400/50 transition-all flex items-center justify-between group shadow-xs"
+                className="p-3.5 rounded-xl border border-amber-500/30 bg-[#181408] hover:bg-[#201a0a] hover:border-amber-400/50 transition-all flex items-center justify-between group shadow-lg"
               >
                 <div>
                   <p className="text-xs font-bold text-white group-hover:text-amber-300 transition-colors">Access Control &amp; Admin</p>
