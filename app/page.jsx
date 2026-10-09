@@ -410,10 +410,11 @@ export default function Dashboard() {
             
             {/* Left: Big Total Balance (Clean layout matching reference) */}
             <div>
-              {/* Total Balance Label & Eye Toggle */}
+              {/* Greeting as Balance Header & Eye Toggle */}
               <div className="flex items-center gap-2 mb-1">
-                <span className="text-[11px] font-bold uppercase tracking-widest text-emerald-100/60">
-                  Total Organization Balance
+                <span className="text-xs sm:text-sm font-bold tracking-wide uppercase text-emerald-300/90 flex items-center gap-1.5">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                  Hi, {userProfile?.first_name || currentUser?.user_metadata?.full_name?.split(' ')[0] || 'Officer'}
                 </span>
                 <button
                   type="button"
