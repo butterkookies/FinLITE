@@ -401,10 +401,10 @@ export default function Dashboard() {
       <main className="flex-1 max-w-7xl w-full mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-6 pb-24 sm:pb-8 space-y-5 sm:space-y-6">
         
         {/* Modern Minimalist Hero Balance & Action Hub — CONCEPT DESIGN */}
-        <section className="relative rounded-3xl bg-[#08170f]/90 border border-[#142e20] p-5 sm:p-7 shadow-2xl overflow-hidden">
+        <section className="relative rounded-3xl bg-[#0a2419]/85 backdrop-blur-xl border border-emerald-500/20 p-5 sm:p-7 shadow-2xl overflow-hidden transition-all">
           {/* Subtle ambient corner light aura */}
-          <div className="absolute -top-24 -right-24 w-72 h-72 bg-emerald-500/15 rounded-full blur-3xl pointer-events-none" />
-          <div className="absolute -bottom-24 -left-24 w-72 h-72 bg-emerald-600/10 rounded-full blur-3xl pointer-events-none" />
+          <div className="absolute -top-24 -right-24 w-72 h-72 bg-emerald-400/20 rounded-full blur-3xl pointer-events-none" />
+          <div className="absolute -bottom-24 -left-24 w-72 h-72 bg-emerald-500/15 rounded-full blur-3xl pointer-events-none" />
 
           <div className="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-6">
             
@@ -424,7 +424,7 @@ export default function Dashboard() {
 
               {/* Total Balance Label & Eye Toggle */}
               <div className="flex items-center gap-2 mb-1">
-                <span className="text-[11px] font-bold uppercase tracking-widest text-white/45">
+                <span className="text-[11px] font-bold uppercase tracking-widest text-emerald-100/60">
                   Total Organization Balance
                 </span>
                 <button
@@ -439,10 +439,10 @@ export default function Dashboard() {
 
               {/* Big Minimalist Balance Display */}
               <div className="flex items-baseline gap-3 flex-wrap">
-                <h1 className="text-3xl sm:text-5xl font-black text-white tracking-tight tabular-nums">
+                <h1 className="text-3xl sm:text-5xl font-black text-white tracking-tight tabular-nums drop-shadow-sm">
                   {isBalanceHidden ? '••••••••' : formatPHP(summary.cash_on_hand + summary.gcash_balance)}
                 </h1>
-                <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-500/15 text-emerald-300 border border-emerald-500/30">
+                <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-400/30">
                   <TrendingUp className="w-3 h-3 text-emerald-400" />
                   +{summary.total_inflows > 0 ? Math.max(0, Math.min(100, Math.round(((summary.total_inflows - summary.total_outflows) / summary.total_inflows) * 1000) / 10)) : 73.8}% Retention
                 </span>
@@ -453,21 +453,21 @@ export default function Dashboard() {
                 <button
                   type="button"
                   onClick={handleOpenLiquidationPreview}
-                  className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-bold text-emerald-300 bg-[#0c2216] hover:bg-[#122e20] active:bg-[#163527] border border-emerald-500/30 hover:border-emerald-400/50 shadow-md transition-all cursor-pointer group"
+                  className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-bold text-emerald-300 bg-[#0d2f20] hover:bg-[#13422d] active:bg-[#185037] border border-emerald-400/40 hover:border-emerald-300/60 shadow-md transition-all cursor-pointer group"
                   title="Preview 1:1 PDM CCS Formal Word Liquidation Report & Live Edit"
                 >
                   <FileText className="w-3.5 h-3.5 text-emerald-400 group-hover:scale-110 transition-transform" />
                   <span>Preview Formal Report</span>
-                  <ArrowUpRight className="w-3.5 h-3.5 text-emerald-400/60 group-hover:text-emerald-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all" />
+                  <ArrowUpRight className="w-3.5 h-3.5 text-emerald-400/70 group-hover:text-emerald-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all" />
                 </button>
-                <span className="text-xs text-white/40 font-medium hidden sm:inline">
+                <span className="text-xs text-white/50 font-medium hidden sm:inline">
                   Combined Liquid Assets · Cash Box &amp; Electronic GCash
                 </span>
               </div>
             </div>
 
             {/* Right: Quick Action Pods Dock (5 Circular Pods matching mockup) */}
-            <div className="p-2 sm:p-2.5 rounded-2xl sm:rounded-full bg-[#05110a] border border-[#163325] shadow-inner flex items-center justify-around sm:justify-start sm:gap-4 shrink-0">
+            <div className="p-2 sm:p-2.5 rounded-2xl sm:rounded-full bg-[#071c13]/90 backdrop-blur-md border border-emerald-500/25 shadow-inner flex items-center justify-around sm:justify-start sm:gap-4 shrink-0">
               
               {/* Pod 1: Record Transaction */}
               <button
@@ -475,10 +475,10 @@ export default function Dashboard() {
                 onClick={() => setIsNewTxOpen(true)}
                 className="flex flex-col items-center gap-1.5 p-1 sm:px-2.5 group cursor-pointer"
               >
-                <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-[#0c2216] border border-emerald-500/30 flex items-center justify-center text-emerald-400 group-hover:bg-[#10b981] group-hover:text-black group-hover:border-emerald-400 group-hover:scale-105 active:scale-95 transition-all shadow-md">
+                <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-[#0c2e1f] border border-emerald-500/35 flex items-center justify-center text-emerald-400 group-hover:bg-[#10b981] group-hover:text-black group-hover:border-emerald-400 group-hover:scale-105 active:scale-95 transition-all shadow-md">
                   <Plus className="w-5 h-5 stroke-[2.5]" />
                 </div>
-                <span className="text-[10px] sm:text-[11px] font-bold text-white/70 group-hover:text-emerald-300 transition-colors">
+                <span className="text-[10px] sm:text-[11px] font-bold text-white/75 group-hover:text-emerald-300 transition-colors">
                   Record
                 </span>
               </button>
@@ -489,10 +489,10 @@ export default function Dashboard() {
                 onClick={() => setIsDenomOpen(true)}
                 className="flex flex-col items-center gap-1.5 p-1 sm:px-2.5 group cursor-pointer"
               >
-                <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-[#0c2216] border border-emerald-500/30 flex items-center justify-center text-emerald-400 group-hover:bg-[#10b981] group-hover:text-black group-hover:border-emerald-400 group-hover:scale-105 active:scale-95 transition-all shadow-md">
+                <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-[#0c2e1f] border border-emerald-500/35 flex items-center justify-center text-emerald-400 group-hover:bg-[#10b981] group-hover:text-black group-hover:border-emerald-400 group-hover:scale-105 active:scale-95 transition-all shadow-md">
                   <Wallet className="w-5 h-5" />
                 </div>
-                <span className="text-[10px] sm:text-[11px] font-bold text-white/70 group-hover:text-emerald-300 transition-colors">
+                <span className="text-[10px] sm:text-[11px] font-bold text-white/75 group-hover:text-emerald-300 transition-colors">
                   Cash Box
                 </span>
               </button>
@@ -503,10 +503,10 @@ export default function Dashboard() {
                 onClick={() => setIsProposalOpen(true)}
                 className="flex flex-col items-center gap-1.5 p-1 sm:px-2.5 group cursor-pointer"
               >
-                <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-[#0c2216] border border-emerald-500/30 flex items-center justify-center text-emerald-400 group-hover:bg-[#10b981] group-hover:text-black group-hover:border-emerald-400 group-hover:scale-105 active:scale-95 transition-all shadow-md">
+                <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-[#0c2e1f] border border-emerald-500/35 flex items-center justify-center text-emerald-400 group-hover:bg-[#10b981] group-hover:text-black group-hover:border-emerald-400 group-hover:scale-105 active:scale-95 transition-all shadow-md">
                   <Calculator className="w-5 h-5" />
                 </div>
-                <span className="text-[10px] sm:text-[11px] font-bold text-white/70 group-hover:text-emerald-300 transition-colors">
+                <span className="text-[10px] sm:text-[11px] font-bold text-white/75 group-hover:text-emerald-300 transition-colors">
                   Proposal
                 </span>
               </button>
@@ -517,10 +517,10 @@ export default function Dashboard() {
                 onClick={handleOpenLiquidationPreview}
                 className="flex flex-col items-center gap-1.5 p-1 sm:px-2.5 group cursor-pointer"
               >
-                <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-[#0c2216] border border-emerald-500/30 flex items-center justify-center text-emerald-400 group-hover:bg-[#10b981] group-hover:text-black group-hover:border-emerald-400 group-hover:scale-105 active:scale-95 transition-all shadow-md">
+                <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-[#0c2e1f] border border-emerald-500/35 flex items-center justify-center text-emerald-400 group-hover:bg-[#10b981] group-hover:text-black group-hover:border-emerald-400 group-hover:scale-105 active:scale-95 transition-all shadow-md">
                   <FileText className="w-5 h-5" />
                 </div>
-                <span className="text-[10px] sm:text-[11px] font-bold text-white/70 group-hover:text-emerald-300 transition-colors">
+                <span className="text-[10px] sm:text-[11px] font-bold text-white/75 group-hover:text-emerald-300 transition-colors">
                   Report
                 </span>
               </button>
@@ -531,10 +531,10 @@ export default function Dashboard() {
                 onClick={() => setIsAIOpen(true)}
                 className="flex flex-col items-center gap-1.5 p-1 sm:px-2.5 group cursor-pointer"
               >
-                <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-[#0c2216] border border-emerald-500/30 flex items-center justify-center text-emerald-400 group-hover:bg-[#10b981] group-hover:text-black group-hover:border-emerald-400 group-hover:scale-105 active:scale-95 transition-all shadow-md">
+                <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-[#0c2e1f] border border-emerald-500/35 flex items-center justify-center text-emerald-400 group-hover:bg-[#10b981] group-hover:text-black group-hover:border-emerald-400 group-hover:scale-105 active:scale-95 transition-all shadow-md">
                   <Sparkles className="w-5 h-5" />
                 </div>
-                <span className="text-[10px] sm:text-[11px] font-bold text-white/70 group-hover:text-emerald-300 transition-colors">
+                <span className="text-[10px] sm:text-[11px] font-bold text-white/75 group-hover:text-emerald-300 transition-colors">
                   AI Co-Pilot
                 </span>
               </button>

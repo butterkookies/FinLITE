@@ -45,11 +45,11 @@ export default function TransactionTable({
   });
 
   return (
-    <div className="rounded-3xl border border-[#142e20] bg-[#0a1811] shadow-2xl overflow-hidden transition-all relative">
-      <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-emerald-500/0 via-emerald-400/30 to-emerald-500/0 pointer-events-none" />
+    <div className="rounded-3xl border border-emerald-500/20 bg-[#082218]/85 backdrop-blur-xl shadow-2xl overflow-hidden transition-all relative">
+      <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-emerald-500/0 via-emerald-400/40 to-emerald-500/0 pointer-events-none" />
       
       {/* Table Header Controls */}
-      <div className="p-5 sm:p-6 border-b border-[#142e20] flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="p-5 sm:p-6 border-b border-emerald-500/15 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="min-w-0">
           <div className="flex items-center gap-2.5 flex-wrap">
             <h2 className="text-xl sm:text-2xl font-black text-white tracking-tight">

@@ -51,7 +51,7 @@ export default function Navbar({
   };
 
   return (
-    <header className="sticky top-0 z-30 bg-[#07130d]/90 backdrop-blur-xl border-b border-[#142e20] transition-all">
+    <header className="sticky top-0 z-30 bg-[#082217]/85 backdrop-blur-xl border-b border-emerald-500/15 transition-all">
       <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 h-14 sm:h-16 flex items-center justify-between gap-2">
         
         {/* Left: Organization Branding & Desktop Semester Switcher */}

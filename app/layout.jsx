@@ -1,4 +1,5 @@
 import './globals.css';
+import TechWaveBackground from '@/components/layout/TechWaveBackground';
 
 export const metadata = {
   title: 'FinLITE — Financial Management & Automated Document Generation System',
@@ -16,23 +17,22 @@ export const viewport = {
   maximumScale: 1,
   userScalable: false,
   viewportFit: 'cover',
-  themeColor: '#047857',
+  themeColor: '#0d3824',
 };
 
 export default function RootLayout({ children }) {
   return (
     <html lang="en" suppressHydrationWarning>
       <body
-        className="min-h-screen text-gray-900 selection:bg-emerald-100 selection:text-emerald-900 select-none overscroll-none"
+        className="min-h-screen text-white selection:bg-emerald-400 selection:text-black select-none overscroll-none"
         suppressHydrationWarning
       >
-        {/* Forest Mist Aura Background */}
-        <div style={{ position: 'relative', minHeight: '100dvh', overflow: 'hidden' }}>
-          <div className="aura-layer-1" />
-          <div className="aura-layer-2" />
-          <div className="aura-content">
-            {children}
-          </div>
+        {/* Modern Animated Wavy Technology Background */}
+        <TechWaveBackground />
+
+        {/* Content sits above the background layers */}
+        <div className="relative z-10 min-h-screen">
+          {children}
         </div>
       </body>
     </html>
