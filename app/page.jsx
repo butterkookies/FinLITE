@@ -41,6 +41,20 @@ export default function Dashboard() {
   const [currentSemester, setCurrentSemester] = useState(DEFAULT_SEMESTERS[0]);
   const [isNewSemesterOpen, setIsNewSemesterOpen] = useState(false);
 
+  // Dynamic Time-of-Day Greeting (Good morning / Good afternoon / Good evening)
+  const [greeting, setGreeting] = useState('Good day');
+
+  useEffect(() => {
+    const hour = new Date().getHours();
+    if (hour >= 5 && hour < 12) {
+      setGreeting('Good morning');
+    } else if (hour >= 12 && hour < 18) {
+      setGreeting('Good afternoon');
+    } else {
+      setGreeting('Good evening');
+    }
+  }, []);
+
   const supabase = createClient();
 
   // Load user profile & transactions from Supabase on mount
@@ -410,11 +424,11 @@ export default function Dashboard() {
             
             {/* Left: Big Total Balance (Clean layout matching reference) */}
             <div>
-              {/* Greeting as Balance Header & Eye Toggle */}
+              {/* Dynamic Time-of-Day Greeting & Eye Toggle */}
               <div className="flex items-center gap-2 mb-1">
                 <span className="text-xs sm:text-sm font-bold tracking-wide uppercase text-emerald-300/90 flex items-center gap-1.5">
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                  Hi, {userProfile?.first_name || currentUser?.user_metadata?.full_name?.split(' ')[0] || 'Officer'}
+                  {greeting}, {userProfile?.first_name || currentUser?.user_metadata?.full_name?.split(' ')[0] || 'Officer'}
                 </span>
                 <button
                   type="button"
