@@ -29,68 +29,18 @@ export default function TechWaveBackground() {
     handleResize();
     window.addEventListener('resize', handleResize);
 
-    // Drifting glass particles / light glints
-    const glintCount = 18;
-    const glints = Array.from({ length: glintCount }, () => ({
+    // Subtle drifting ambient particles
+    const particleCount = 20;
+    const particles = Array.from({ length: particleCount }, () => ({
       x: Math.random() * (window.innerWidth || 1000),
       y: Math.random() * (window.innerHeight || 800),
-      radius: Math.random() * 2.2 + 1.0,
+      radius: Math.random() * 1.8 + 0.8,
       speedX: (Math.random() - 0.5) * 0.35,
       speedY: (Math.random() - 0.5) * 0.25,
-      alpha: Math.random() * 0.5 + 0.2,
-      pulseSpeed: Math.random() * 0.02 + 0.015,
+      alpha: Math.random() * 0.45 + 0.15,
+      pulseSpeed: Math.random() * 0.02 + 0.01,
       phase: Math.random() * Math.PI * 2,
     }));
-
-    // Definition of layered curved glass wave ribbons
-    const glassWaves = [
-      {
-        yBaseRatio: 0.36,
-        amplitude: 52,
-        harmonicAmp: 24,
-        frequency: 0.0020,
-        harmonicFreq: 0.0048,
-        speed: 0.012,
-        rimColor: 'rgba(255, 255, 255, 0.75)',
-        rimGlow: 'rgba(167, 243, 208, 0.65)',
-        glowBlur: 16,
-        // Frosted glass gradient stops
-        glassTop: 'rgba(255, 255, 255, 0.14)',
-        glassMid: 'rgba(110, 231, 183, 0.08)',
-        glassBot: 'rgba(8, 40, 26, 0.0)',
-        specularPhase: 0,
-      },
-      {
-        yBaseRatio: 0.53,
-        amplitude: 62,
-        harmonicAmp: 30,
-        frequency: 0.0016,
-        harmonicFreq: 0.0041,
-        speed: -0.014,
-        rimColor: 'rgba(255, 255, 255, 0.70)',
-        rimGlow: 'rgba(52, 211, 153, 0.60)',
-        glowBlur: 18,
-        glassTop: 'rgba(255, 255, 255, 0.12)',
-        glassMid: 'rgba(45, 212, 191, 0.07)',
-        glassBot: 'rgba(8, 40, 26, 0.0)',
-        specularPhase: Math.PI * 0.5,
-      },
-      {
-        yBaseRatio: 0.70,
-        amplitude: 68,
-        harmonicAmp: 35,
-        frequency: 0.0013,
-        harmonicFreq: 0.0033,
-        speed: 0.009,
-        rimColor: 'rgba(255, 255, 255, 0.60)',
-        rimGlow: 'rgba(16, 185, 129, 0.50)',
-        glowBlur: 14,
-        glassTop: 'rgba(255, 255, 255, 0.10)',
-        glassMid: 'rgba(16, 185, 129, 0.06)',
-        glassBot: 'rgba(8, 40, 26, 0.0)',
-        specularPhase: Math.PI,
-      },
-    ];
 
     // Rendering loop
     const render = () => {
@@ -105,7 +55,7 @@ export default function TechWaveBackground() {
       ctx.save();
       
       // Batch 1: Primary glowing dots on wave peaks
-      ctx.fillStyle = 'rgba(167, 243, 208, 0.32)';
+      ctx.fillStyle = 'rgba(167, 243, 208, 0.35)';
       ctx.beginPath();
       for (let x = 15; x < width; x += dotSpacing) {
         for (let y = 15; y < height; y += dotSpacing) {
@@ -114,7 +64,7 @@ export default function TechWaveBackground() {
           const crossWave = Math.cos(x * 0.002 - y * 0.003 + time * 0.012);
           const totalWave = wave + crossWave; // -2 to +2
 
-          // Only draw crest dots in this high-light batch
+          // Highlighted crest dots
           if (totalWave > 0.4) {
             const offsetY = totalWave * 7;
             const radius = 1.3 + (totalWave - 0.4) * 0.5;
@@ -125,7 +75,7 @@ export default function TechWaveBackground() {
       }
       ctx.fill();
 
-      // Batch 2: Subtle background undulating dots
+      // Batch 2: Ambient background undulating dots
       ctx.fillStyle = 'rgba(110, 231, 183, 0.14)';
       ctx.beginPath();
       for (let x = 15; x < width; x += dotSpacing) {
@@ -146,109 +96,26 @@ export default function TechWaveBackground() {
       ctx.restore();
 
       // ========================================================
-      // 2. LAYERED FROSTED GLASS WAVES (Curved Acrylic / Glass)
+      // 2. DRIFTING AMBIENT PARTICLES
       // ========================================================
-      glassWaves.forEach((wave, idx) => {
-        const yBase = height * wave.yBaseRatio;
-        const wavePoints = [];
+      particles.forEach((p) => {
+        p.x += p.speedX;
+        p.y += p.speedY;
+        p.phase += p.pulseSpeed;
 
-        // Sample points across width for high-precision glass curvature
-        const step = 6;
-        for (let x = 0; x <= width + step; x += step) {
-          const y =
-            yBase +
-            Math.sin(x * wave.frequency + time * wave.speed) * wave.amplitude +
-            Math.cos(x * wave.harmonicFreq + time * wave.speed * 0.8) * wave.harmonicAmp +
-            Math.sin((x * 0.4 + time * 1.5) * 0.0015) * 10;
-          wavePoints.push({ x, y });
-        }
+        if (p.x < 0) p.x = width;
+        if (p.x > width) p.x = 0;
+        if (p.y < 0) p.y = height;
+        if (p.y > height) p.y = 0;
 
-        // --- Step A: Frosted Glass Body Translucency ---
-        ctx.save();
-        ctx.beginPath();
-        ctx.moveTo(wavePoints[0].x, wavePoints[0].y);
-        for (let i = 1; i < wavePoints.length; i++) {
-          ctx.lineTo(wavePoints[i].x, wavePoints[i].y);
-        }
-        ctx.lineTo(width, height);
-        ctx.lineTo(0, height);
-        ctx.closePath();
-
-        const glassGrad = ctx.createLinearGradient(0, yBase - 60, 0, height);
-        glassGrad.addColorStop(0, wave.glassTop);
-        glassGrad.addColorStop(0.25, wave.glassMid);
-        glassGrad.addColorStop(0.7, 'rgba(10, 42, 28, 0.04)');
-        glassGrad.addColorStop(1, wave.glassBot);
-
-        ctx.fillStyle = glassGrad;
-        ctx.fill();
-        ctx.restore();
-
-        // --- Step B: Internal Glass Refraction Edge (Double Stroke) ---
-        ctx.save();
-        ctx.beginPath();
-        // Slightly offset downward for 3D thickness reflection
-        ctx.moveTo(wavePoints[0].x, wavePoints[0].y + 4.5);
-        for (let i = 1; i < wavePoints.length; i++) {
-          ctx.lineTo(wavePoints[i].x, wavePoints[i].y + 4.5);
-        }
-        ctx.strokeStyle = 'rgba(255, 255, 255, 0.18)';
-        ctx.lineWidth = 1.2;
-        ctx.stroke();
-        ctx.restore();
-
-        // --- Step C: Specular Glass Crest Highlight (Glossy Top Rim) ---
-        ctx.save();
-        ctx.beginPath();
-        ctx.moveTo(wavePoints[0].x, wavePoints[0].y);
-        for (let i = 1; i < wavePoints.length; i++) {
-          ctx.lineTo(wavePoints[i].x, wavePoints[i].y);
-        }
-
-        ctx.shadowColor = wave.rimGlow;
-        ctx.shadowBlur = wave.glowBlur;
-
-        const rimGrad = ctx.createLinearGradient(0, 0, width, 0);
-        // Traveling specular glint across the glass edge
-        const glintPos = (Math.sin(time * 0.01 + wave.specularPhase) + 1) / 2; // 0 to 1
-        const gStart = Math.max(0, glintPos - 0.2);
-        const gCenter = glintPos;
-        const gEnd = Math.min(1, glintPos + 0.2);
-
-        rimGrad.addColorStop(0, 'rgba(255, 255, 255, 0.35)');
-        if (gStart > 0) rimGrad.addColorStop(gStart, 'rgba(167, 243, 208, 0.45)');
-        rimGrad.addColorStop(gCenter, '#ffffff'); // bright specular highlight glint
-        if (gEnd < 1) rimGrad.addColorStop(gEnd, 'rgba(167, 243, 208, 0.45)');
-        rimGrad.addColorStop(1, wave.rimColor);
-
-        ctx.strokeStyle = rimGrad;
-        ctx.lineWidth = 2.4;
-        ctx.lineCap = 'round';
-        ctx.stroke();
-        ctx.restore();
-      });
-
-      // ========================================================
-      // 3. FLOATING GLASS SPECULAR GLINTS & PARTICLES
-      // ========================================================
-      glints.forEach((g) => {
-        g.x += g.speedX;
-        g.y += g.speedY;
-        g.phase += g.pulseSpeed;
-
-        if (g.x < 0) g.x = width;
-        if (g.x > width) g.x = 0;
-        if (g.y < 0) g.y = height;
-        if (g.y > height) g.y = 0;
-
-        const currentAlpha = Math.max(0.12, g.alpha + Math.sin(g.phase) * 0.3);
+        const currentAlpha = Math.max(0.1, p.alpha + Math.sin(p.phase) * 0.25);
 
         ctx.save();
         ctx.beginPath();
-        ctx.arc(g.x, g.y, g.radius, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(255, 255, 255, ${currentAlpha})`;
-        ctx.shadowColor = 'rgba(167, 243, 208, 0.9)';
-        ctx.shadowBlur = 10;
+        ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(167, 243, 208, ${currentAlpha})`;
+        ctx.shadowColor = 'rgba(52, 211, 153, 0.7)';
+        ctx.shadowBlur = 8;
         ctx.fill();
         ctx.restore();
       });
@@ -256,7 +123,7 @@ export default function TechWaveBackground() {
       animationFrameId = requestAnimationFrame(render);
     };
 
-    // Tab visibility handling
+    // Tab visibility handling (auto-pause on hidden tab)
     const handleVisibilityChange = () => {
       if (document.hidden) {
         cancelAnimationFrame(animationFrameId);
@@ -305,16 +172,7 @@ export default function TechWaveBackground() {
         }}
       />
 
-      {/* Modern Frosted Glass Ribbon Ambient Layer (CSS Hardware Blur) */}
-      <div
-        className="absolute -top-10 left-[-10%] right-[-10%] h-[320px] pointer-events-none opacity-40 rounded-[100%] blur-[24px]"
-        style={{
-          background: 'linear-gradient(180deg, rgba(255, 255, 255, 0.12) 0%, rgba(110, 231, 183, 0.05) 50%, transparent 100%)',
-          borderTop: '1.5px solid rgba(255, 255, 255, 0.3)',
-        }}
-      />
-
-      {/* Canvas rendering: Wavy Dotted Grid + Specular Glass Waves */}
+      {/* Canvas rendering: Clean Animated Wavy Dotted Grid */}
       <canvas
         ref={canvasRef}
         className="absolute inset-0 w-full h-full pointer-events-none"
