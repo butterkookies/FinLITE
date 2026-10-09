@@ -153,11 +153,11 @@ export default function Navbar({
           <div className="relative pl-1 sm:pl-1.5" ref={profileMenuRef}>
             <button
               onClick={() => setIsProfileOpen(!isProfileOpen)}
-              className="flex items-center gap-2 p-1 sm:px-2 sm:py-1 rounded-xl bg-[#0c1e16] hover:bg-[#122b20] border border-[#1a382b] transition-all cursor-pointer focus:outline-none focus:ring-2 focus:ring-emerald-500/30 shadow-2xs"
+              className="flex items-center gap-2 p-1 sm:px-2.5 sm:py-1 rounded-full bg-[#0c1e16] hover:bg-[#122b20] border border-[#1a382b] transition-all cursor-pointer focus:outline-none focus:ring-2 focus:ring-emerald-500/30 shadow-2xs"
               title="View Account Profile"
             >
               {avatarUrl ? (
-                <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg overflow-hidden border border-emerald-500/30 relative shrink-0">
+                <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full overflow-hidden ring-2 ring-emerald-400/50 relative shrink-0">
                   <img
                     src={avatarUrl}
                     alt={fullName}
@@ -169,7 +169,7 @@ export default function Navbar({
                   />
                 </div>
               ) : (
-                <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-[#064e3b] border border-emerald-500/40 flex items-center justify-center text-emerald-300 text-xs font-black shadow-2xs shrink-0">
+                <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-[#064e3b] ring-2 ring-emerald-400/50 flex items-center justify-center text-emerald-300 text-xs font-black shadow-2xs shrink-0">
                   {initial}
                 </div>
               )}

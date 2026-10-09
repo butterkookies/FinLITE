@@ -45,7 +45,8 @@ export default function TransactionTable({
   });
 
   return (
-    <div className="rounded-2xl sm:rounded-3xl border border-[#142e20] bg-[#0a1811] shadow-2xl overflow-hidden transition-all">
+    <div className="rounded-3xl border border-[#142e20] bg-[#0a1811] shadow-2xl overflow-hidden transition-all relative">
+      <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-emerald-500/0 via-emerald-400/30 to-emerald-500/0 pointer-events-none" />
       
       {/* Table Header Controls */}
       <div className="p-5 sm:p-6 border-b border-[#142e20] flex flex-col sm:flex-row sm:items-center justify-between gap-4">
