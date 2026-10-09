@@ -432,14 +432,11 @@ export default function Dashboard() {
               </div>
 
               {/* Big Minimalist Greetings (Replacing redundant balance line) */}
-              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black text-white tracking-tight drop-shadow-sm flex items-center gap-2.5 sm:gap-3 flex-wrap">
-                <span>
-                  {greeting}, {userProfile?.first_name || userProfile?.full_name?.split(' ')[0] || currentUser?.user_metadata?.full_name?.split(' ')[0] || 'Officer'}
-                </span>
-                <span className="inline-block hover:rotate-12 transition-transform cursor-default select-none">👋</span>
+              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black text-white tracking-tight drop-shadow-sm">
+                {greeting}, {userProfile?.first_name || userProfile?.full_name?.split(' ')[0] || currentUser?.user_metadata?.full_name?.split(' ')[0] || 'Officer'}
               </h1>
 
-              {/* Minimalist Subtitle & Preview Report Pill Button */}
+              {/* Preview Report Pill Button */}
               <div className="flex items-center gap-3 mt-3 flex-wrap">
                 <button
                   type="button"
@@ -451,9 +448,6 @@ export default function Dashboard() {
                   <span>Preview Formal Report</span>
                   <ArrowUpRight className="w-3.5 h-3.5 text-emerald-400/70 group-hover:text-emerald-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all" />
                 </button>
-                <span className="text-xs text-white/50 font-medium hidden sm:inline">
-                  Combined Liquid Assets · Cash Box &amp; Electronic GCash
-                </span>
               </div>
             </div>
 
