@@ -110,17 +110,17 @@ export default function ProfilePage() {
     <div className="min-h-screen flex flex-col font-sans">
       
       {/* Top Header */}
-      <header className="sticky top-0 z-30 bg-black/20 backdrop-blur-xl border-b border-white/[0.07] transition-all">
+      <header className="sticky top-0 z-30 bg-[#07130d]/90 backdrop-blur-xl border-b border-[#142e20] transition-all">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <Link
               href="/"
-              className="flex items-center gap-2 p-1.5 rounded-xl hover:bg-white/[0.08] transition-colors text-white/50 hover:text-white"
+              className="flex items-center gap-2 p-1.5 rounded-xl hover:bg-[#0c1e16] transition-colors text-white/50 hover:text-white"
               title="Return to Dashboard"
             >
               <ArrowLeft className="w-5 h-5" />
             </Link>
-            <div className="h-6 w-px bg-white/[0.08]" />
+            <div className="h-6 w-px bg-[#142e20]" />
             <div>
               <h1 className="text-sm sm:text-base font-bold text-white">Account Profile</h1>
               <p className="text-[11px] text-emerald-400/70 font-medium">FinLITE Identity &amp; Security Credentials</p>
@@ -131,7 +131,7 @@ export default function ProfilePage() {
             {isAdmin && (
               <Link
                 href="/admin"
-                className="h-9 px-3 text-xs font-semibold text-white/70 bg-white/[0.06] hover:bg-white/[0.10] active:bg-white/[0.15] border border-white/[0.08] rounded-xl transition-all shadow-xs flex items-center gap-1.5 cursor-pointer whitespace-nowrap"
+                className="h-9 px-3 text-xs font-semibold text-amber-300 bg-[#181408] hover:bg-[#221c0b] active:bg-[#2a220e] border border-amber-500/30 rounded-xl transition-all shadow-xs flex items-center gap-1.5 cursor-pointer whitespace-nowrap"
               >
                 <ShieldCheck className="w-3.5 h-3.5 text-amber-400" />
                 <span className="hidden sm:inline">Admin Console</span>
@@ -140,7 +140,7 @@ export default function ProfilePage() {
 
             <button
               onClick={handleSignOut}
-              className="h-9 px-3 text-xs font-semibold text-rose-400 bg-white/[0.06] hover:bg-rose-500/[0.08] active:bg-rose-500/[0.12] border border-white/[0.08] rounded-xl transition-all shadow-xs flex items-center gap-1.5 cursor-pointer whitespace-nowrap"
+              className="h-9 px-3 text-xs font-semibold text-rose-400 bg-[#1a0c10] hover:bg-[#240f16] active:bg-[#2c121b] border border-rose-500/30 rounded-xl transition-all shadow-xs flex items-center gap-1.5 cursor-pointer whitespace-nowrap"
             >
               <LogOut className="w-3.5 h-3.5 text-rose-400" />
               <span>Sign Out</span>
@@ -211,59 +211,59 @@ export default function ProfilePage() {
           </div>
         </div>
 
-        {/* Detailed Information Grid — TRANSPARENT WHITE FROSTED GLASS */}
+        {/* Detailed Information Grid — DASHBOARD OBSIDIAN THEME */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           
           {/* Institutional Affiliation */}
-          <div className="rounded-2xl border border-white/30 bg-white/20 backdrop-blur-xl p-5 shadow-2xl space-y-3">
-            <div className="flex items-center gap-2.5 text-emerald-300">
-              <div className="w-8 h-8 rounded-xl bg-emerald-400/20 border border-emerald-400/30 flex items-center justify-center">
-                <Building className="w-4 h-4 text-emerald-300" />
+          <div className="rounded-2xl border border-[#142e20] bg-[#0a1811] p-5 shadow-2xl space-y-3">
+            <div className="flex items-center gap-2.5 text-emerald-400">
+              <div className="w-8 h-8 rounded-xl bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center">
+                <Building className="w-4 h-4 text-emerald-400" />
               </div>
-              <h3 className="text-sm font-bold text-white drop-shadow-xs">Institutional Affiliation</h3>
+              <h3 className="text-sm font-bold text-white">Institutional Affiliation</h3>
             </div>
             
             <div className="space-y-2 text-xs">
               <div>
-                <p className="text-white/60 font-medium">Institution</p>
+                <p className="text-white/50 font-medium">Institution</p>
                 <p className="text-white font-bold">Pambayang Dalubhasaan ng Marilao (PDM)</p>
               </div>
               <div>
-                <p className="text-white/60 font-medium">College</p>
+                <p className="text-white/50 font-medium">College</p>
                 <p className="text-white font-bold">College of Computer Studies (CCS)</p>
               </div>
               <div>
-                <p className="text-white/60 font-medium">Recognized Organization</p>
+                <p className="text-white/50 font-medium">Recognized Organization</p>
                 <p className="text-white font-bold">League of Information Technology Enthusiasts (LITE)</p>
               </div>
             </div>
           </div>
 
           {/* Contact & Verification */}
-          <div className="rounded-2xl border border-white/30 bg-white/20 backdrop-blur-xl p-5 shadow-2xl space-y-3">
-            <div className="flex items-center gap-2.5 text-emerald-300">
-              <div className="w-8 h-8 rounded-xl bg-emerald-400/20 border border-emerald-400/30 flex items-center justify-center">
-                <Shield className="w-4 h-4 text-emerald-300" />
+          <div className="rounded-2xl border border-[#142e20] bg-[#0a1811] p-5 shadow-2xl space-y-3">
+            <div className="flex items-center gap-2.5 text-emerald-400">
+              <div className="w-8 h-8 rounded-xl bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center">
+                <Shield className="w-4 h-4 text-emerald-400" />
               </div>
-              <h3 className="text-sm font-bold text-white drop-shadow-xs">Contact &amp; Access</h3>
+              <h3 className="text-sm font-bold text-white">Contact &amp; Access</h3>
             </div>
 
             <div className="space-y-2 text-xs">
               <div>
-                <p className="text-white/60 font-medium">Contact Number</p>
+                <p className="text-white/50 font-medium">Contact Number</p>
                 <p className="text-white font-bold">
                   {profile?.contact_number || 'Not provided'}
                 </p>
               </div>
               <div>
-                <p className="text-white/60 font-medium">Financial Role Authority</p>
+                <p className="text-white/50 font-medium">Financial Role Authority</p>
                 <p className="text-white font-bold capitalize">
                   {role} {isAdmin ? '(Full System Authority)' : '(Restricted Segregation of Duties)'}
                 </p>
               </div>
               <div>
-                <p className="text-white/60 font-medium">Account Status</p>
-                <p className="text-emerald-300 font-bold">Approved &amp; Verified</p>
+                <p className="text-white/50 font-medium">Account Status</p>
+                <p className="text-emerald-400 font-bold">Approved &amp; Verified</p>
               </div>
             </div>
           </div>
@@ -271,32 +271,32 @@ export default function ProfilePage() {
         </div>
 
         {/* Quick Navigation Cards */}
-        <div className="rounded-2xl border border-white/30 bg-white/20 backdrop-blur-xl p-5 shadow-2xl">
-          <h3 className="text-xs font-bold uppercase tracking-wider text-white/70 mb-3">
+        <div className="rounded-2xl border border-[#142e20] bg-[#0a1811] p-5 shadow-2xl">
+          <h3 className="text-xs font-bold uppercase tracking-wider text-emerald-400/80 mb-3">
             Available Operations
           </h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <Link
               href="/"
-              className="p-3.5 rounded-xl border border-white/30 bg-white/15 hover:bg-white/25 transition-all flex items-center justify-between group shadow-xs backdrop-blur-md"
+              className="p-3.5 rounded-xl border border-[#163325] bg-[#0c1e16] hover:bg-[#122b20] hover:border-emerald-500/40 transition-all flex items-center justify-between group shadow-xs"
             >
               <div>
-                <p className="text-xs font-bold text-white group-hover:text-emerald-300">Main Ledger &amp; Dashboard</p>
-                <p className="text-[11px] text-white/70">Record transactions, cash box, liquidation preview</p>
+                <p className="text-xs font-bold text-white group-hover:text-emerald-300 transition-colors">Main Ledger &amp; Dashboard</p>
+                <p className="text-[11px] text-white/50 group-hover:text-white/70 transition-colors">Record transactions, cash box, liquidation preview</p>
               </div>
-              <ExternalLink className="w-4 h-4 text-white/60 group-hover:text-emerald-300 shrink-0" />
+              <ExternalLink className="w-4 h-4 text-white/40 group-hover:text-emerald-300 transition-colors shrink-0" />
             </Link>
 
             {isAdmin && (
               <Link
                 href="/admin"
-                className="p-3.5 rounded-xl border border-amber-400/30 bg-white/15 hover:bg-white/25 transition-all flex items-center justify-between group shadow-xs backdrop-blur-md"
+                className="p-3.5 rounded-xl border border-amber-500/30 bg-[#181408] hover:bg-[#221c0b] hover:border-amber-400/50 transition-all flex items-center justify-between group shadow-xs"
               >
                 <div>
-                  <p className="text-xs font-bold text-white group-hover:text-amber-300">Access Control &amp; Admin</p>
-                  <p className="text-[11px] text-white/70">Review and approve new member registration requests</p>
+                  <p className="text-xs font-bold text-white group-hover:text-amber-300 transition-colors">Access Control &amp; Admin</p>
+                  <p className="text-[11px] text-amber-200/50 group-hover:text-amber-200/70 transition-colors">Review and approve new member registration requests</p>
                 </div>
-                <ShieldCheck className="w-4 h-4 text-amber-300 shrink-0" />
+                <ShieldCheck className="w-4 h-4 text-amber-400 shrink-0" />
               </Link>
             )}
           </div>
