@@ -10,7 +10,8 @@ import {
 import { formatPHP } from '@/lib/utils/currency';
 import { 
   OFFICIAL_INFLOW_CATEGORIES, 
-  OFFICIAL_OUTFLOW_CATEGORIES 
+  OFFICIAL_OUTFLOW_CATEGORIES,
+  CATEGORY_NAME_TO_ID
 } from '@/lib/config/categories';
 
 export default function NewTransactionModal({
@@ -130,6 +131,7 @@ export default function NewTransactionModal({
       type,
       payment_method: paymentMethod,
       category_name: categoryName,
+      category_id: CATEGORY_NAME_TO_ID[categoryName] || null,
       event_name: eventName,
       is_reimbursement: isReimbursement,
       reimbursement_recipient: isReimbursement ? recipient : null,
