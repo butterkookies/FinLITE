@@ -271,12 +271,31 @@ export default function TransactionTable({
                         {tx.event_name}
                       </span>
                     )}
-                    {tx.is_reimbursement && (
-                      <span className="inline-flex items-center gap-1 mt-1 text-[10px] font-semibold text-gray-700 bg-gray-50 border border-black/[0.06] px-1.5 py-0.5 rounded-md">
-                        <Clock className="w-2.5 h-2.5 text-amber-600" />
-                        Advance by: {tx.reimbursement_recipient || 'Officer'}
-                      </span>
-                    )}
+                    <div className="flex items-center gap-1.5 flex-wrap mt-1">
+                      {tx.is_reimbursement && (
+                        <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-gray-700 bg-gray-50 border border-black/[0.06] px-1.5 py-0.5 rounded-md">
+                          <Clock className="w-2.5 h-2.5 text-amber-600" />
+                          Advance by: {tx.reimbursement_recipient || 'Officer'}
+                        </span>
+                      )}
+                      {(() => {
+                        const loggerName = tx.logged_by_name || tx.logged_by_profile?.full_name || null;
+                        const loggerRole = tx.logged_by_role || tx.logged_by_profile?.role || null;
+                        if (!loggerName && !loggerRole) return null;
+                        return (
+                          <span 
+                            className="inline-flex items-center gap-1 text-[10px] text-gray-500 bg-gray-50 border border-black/[0.05] px-1.5 py-0.5 rounded-md"
+                            title={`Recorded into ledger by: ${loggerName || ''} (${loggerRole || ''})`}
+                          >
+                            <span className="text-gray-400">By:</span>
+                            <span className="font-medium text-gray-700">{loggerName || 'Officer'}</span>
+                            {loggerRole && (
+                              <span className="text-[9px] uppercase tracking-wider text-gray-400 font-medium">({loggerRole})</span>
+                            )}
+                          </span>
+                        );
+                      })()}
+                    </div>
                   </td>
 
                   {/* Date */}
@@ -421,6 +440,17 @@ export default function TransactionTable({
                         Advance: {tx.reimbursement_recipient || 'Officer'}
                       </span>
                     )}
+                    {(() => {
+                      const loggerName = tx.logged_by_name || tx.logged_by_profile?.full_name || null;
+                      const loggerRole = tx.logged_by_role || tx.logged_by_profile?.role || null;
+                      if (!loggerName && !loggerRole) return null;
+                      return (
+                        <span className="inline-flex items-center gap-1 text-[10px] text-gray-500 bg-gray-100/70 border border-black/[0.04] px-1.5 py-0.5 rounded-md">
+                          <span>By:</span>
+                          <span className="font-medium text-gray-700 truncate max-w-[100px]">{loggerName || 'Officer'}</span>
+                        </span>
+                      );
+                    })()}
                   </div>
                   {(() => {
                     const receipts = getTransactionReceipts(tx);
