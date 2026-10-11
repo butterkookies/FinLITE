@@ -2,17 +2,32 @@
 import { useState, useRef, useEffect } from 'react';
 import { Camera, Check, ChevronDown, Upload, X } from 'lucide-react';
 import { compressReceiptImage } from '@/lib/utils/compression';
+import {
+  sanitizeAmountInput,
+  validateTransactionAmount,
+  validateOutflowBalance,
+} from '@/lib/utils/validation';
+import { formatPHP } from '@/lib/utils/currency';
 import { 
   OFFICIAL_INFLOW_CATEGORIES, 
   OFFICIAL_OUTFLOW_CATEGORIES 
 } from '@/lib/config/categories';
 
-export default function NewTransactionModal({ isOpen, onClose, onSave, categories = [] }) {
+export default function NewTransactionModal({
+  isOpen,
+  onClose,
+  onSave,
+  categories = [],
+  cashBalance = 0,
+  gcashBalance = 0,
+}) {
   const [type, setType] = useState('OUTFLOW');
   const [paymentMethod, setPaymentMethod] = useState('CASH');
   const [title, setTitle] = useState('');
   const [amount, setAmount] = useState('');
+  const [amountTouched, setAmountTouched] = useState(false);
   const [categoryName, setCategoryName] = useState('Supplies & Materials');
+  const [categoryId, setCategoryId] = useState(null);
   const [isCategoryOpen, setIsCategoryOpen] = useState(false);
   const categoryRef = useRef(null);
 
@@ -23,11 +38,45 @@ export default function NewTransactionModal({ isOpen, onClose, onSave, categorie
   const [previewUrls, setPreviewUrls] = useState([]);
   const [compressing, setCompressing] = useState(false);
 
+  // Amount validation: format/limit first, then per-channel overdraft check
+  const amountError = validateTransactionAmount(amount);
+  const balanceError = amountError
+    ? null
+    : validateOutflowBalance({
+        type,
+        paymentMethod,
+        isReimbursement,
+        amount,
+        cashBalance,
+        gcashBalance,
+      });
+  const fieldError = (amountTouched && amountError) || balanceError;
+  const showOutflowBalance = type === 'OUTFLOW' && !isReimbursement;
+  const availableBalance = paymentMethod === 'GCASH' ? gcashBalance : cashBalance;
+
+  // Sync categoryId with categoryName / type whenever categories or type changes
+  useEffect(() => {
+    if (categories && categories.length > 0) {
+      const match = categories.find((c) => c.type === type && c.name.toLowerCase() === categoryName.toLowerCase());
+      if (match) {
+        setCategoryId(match.id);
+        setCategoryName(match.name);
+      } else {
+        const first = categories.find((c) => c.type === type);
+        if (first) {
+          setCategoryId(first.id);
+          setCategoryName(first.name);
+        }
+      }
+    }
+  }, [type, categories]);
+
   // Reset fields when opening modal
   useEffect(() => {
     if (isOpen) {
       setTitle('');
       setAmount('');
+      setAmountTouched(false);
       setEventName('');
       setIsReimbursement(false);
       setRecipient('');
@@ -90,13 +139,15 @@ export default function NewTransactionModal({ isOpen, onClose, onSave, categorie
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (!title || !amount || parseFloat(amount) <= 0) return;
+    setAmountTouched(true);
+    if (!title.trim() || amountError || balanceError) return;
 
     onSave({
       title,
       amount: parseFloat(amount),
       type,
       payment_method: paymentMethod,
+      category_id: categoryId,
       category_name: categoryName,
       event_name: eventName,
       is_reimbursement: isReimbursement,
@@ -192,7 +243,7 @@ export default function NewTransactionModal({ isOpen, onClose, onSave, categorie
             </div>
           </div>
 
-          {/* Amount (₱) */}
+          {/* Amount (₱) — max ₱99,999.99, outflows cannot exceed the selected channel's balance */}
           <div>
             <label className="block text-gray-700 font-semibold mb-1">
               Amount (₱) <span className="text-red-500">*</span>
@@ -202,16 +253,32 @@ export default function NewTransactionModal({ isOpen, onClose, onSave, categorie
                 ₱
               </span>
               <input
-                type="number"
-                step="0.01"
-                min="0.01"
+                type="text"
+                inputMode="decimal"
+                maxLength={8}
                 required
                 placeholder="0.00"
                 value={amount}
-                onChange={(e) => setAmount(e.target.value)}
-                className="w-full h-10 text-sm font-bold pl-7 pr-3 bg-white border border-black/[0.08] rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/20 tabular-nums select-text"
+                onChange={(e) => setAmount(sanitizeAmountInput(e.target.value))}
+                onBlur={() => setAmountTouched(true)}
+                aria-invalid={Boolean(fieldError)}
+                className={`w-full h-10 text-sm font-bold pl-7 pr-3 bg-white border rounded-xl focus:outline-none focus:ring-2 tabular-nums select-text ${
+                  fieldError
+                    ? 'border-red-400 focus:ring-red-500/20'
+                    : 'border-black/[0.08] focus:ring-emerald-500/20'
+                }`}
               />
             </div>
+            {fieldError ? (
+              <p className="text-xs text-red-600 mt-1">{fieldError}</p>
+            ) : (
+              <p className="text-[11px] text-gray-400 mt-1">
+                Maximum ₱99,999.99
+                {showOutflowBalance && (
+                  <> · Available in {paymentMethod === 'GCASH' ? 'GCash Wallet' : 'Physical Cashbox'}: {formatPHP(availableBalance)}</>
+                )}
+              </p>
+            )}
           </div>
 
           {/* Title / Description */}
@@ -244,29 +311,34 @@ export default function NewTransactionModal({ isOpen, onClose, onSave, categorie
 
               {isCategoryOpen && (
                 <div className="absolute left-0 right-0 mt-1 bg-white border border-black/[0.08] rounded-xl shadow-lg py-1 z-50 animate-in fade-in zoom-in-95 duration-100 max-h-48 overflow-y-auto">
-                  {(type === 'INFLOW' 
-                    ? OFFICIAL_INFLOW_CATEGORIES 
-                    : OFFICIAL_OUTFLOW_CATEGORIES
-                  ).map((cat) => (
-                    <button
-                      key={cat}
-                      type="button"
-                      onClick={() => {
-                        setCategoryName(cat);
-                        setIsCategoryOpen(false);
-                      }}
-                      className={`w-full h-9 flex items-center justify-between px-3 text-xs text-left cursor-pointer transition-colors ${
-                        categoryName === cat 
-                          ? 'bg-gray-50 font-semibold text-gray-950' 
-                          : 'text-gray-700 hover:bg-gray-50'
-                      }`}
-                    >
-                      <span className="truncate">{cat}</span>
-                      {categoryName === cat && (
-                        <Check className="w-3.5 h-3.5 text-emerald-700 shrink-0 ml-1" />
-                      )}
-                    </button>
-                  ))}
+                  {(categories && categories.length > 0
+                    ? categories.filter((c) => c.type === type)
+                    : (type === 'INFLOW' ? OFFICIAL_INFLOW_CATEGORIES : OFFICIAL_OUTFLOW_CATEGORIES).map((catName) => ({ id: null, name: catName }))
+                  ).map((cat) => {
+                    const cName = cat.name || cat;
+                    const cId = cat.id || null;
+                    return (
+                      <button
+                        key={cId || cName}
+                        type="button"
+                        onClick={() => {
+                          setCategoryId(cId);
+                          setCategoryName(cName);
+                          setIsCategoryOpen(false);
+                        }}
+                        className={`w-full h-9 flex items-center justify-between px-3 text-xs text-left cursor-pointer transition-colors ${
+                          categoryName === cName 
+                            ? 'bg-gray-50 font-semibold text-gray-950' 
+                            : 'text-gray-700 hover:bg-gray-50'
+                        }`}
+                      >
+                        <span className="truncate">{cName}</span>
+                        {categoryName === cName && (
+                          <Check className="w-3.5 h-3.5 text-emerald-700 shrink-0 ml-1" />
+                        )}
+                      </button>
+                    );
+                  })}
                 </div>
               )}
             </div>

@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FinLITE — New Transaction Wireframe</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body style="background: #e5e5ea;">
+
+  <!-- Wireframe Top Header Bar -->
+  <header class="apple-header" style="position: relative; z-index: 10;">
+    <div class="apple-header-inner">
+      <div style="display: flex; align-items: center; gap: 12px;">
+        <span class="sk-tag">Wireframe View</span>
+        <span style="font-size: 13px; font-weight: 600;">new-transaction.html (Transaction Entry Modal)</span>
+      </div>
+      <a href="index.html" class="apple-btn">← Back to Wireframe Deck</a>
+    </div>
+  </header>
+
+  <!-- Modal Backdrop Overlay -->
+  <div class="apple-modal-backdrop" style="position: static; min-height: calc(100vh - 60px); padding: 40px 20px;">
+    
+    <!-- Modal Card Container -->
+    <div class="apple-modal-card" style="max-width: 640px;">
+      
+      <!-- Modal Header -->
+      <div class="apple-modal-header">
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <div style="width: 28px; height: 28px; border-radius: 6px; background: #15803d; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 13px;">+</div>
+          <div>
+            <div style="font-size: 15px; font-weight: 700; letter-spacing: -0.01em;">Record Financial Transaction</div>
+            <div style="font-size: 11px; color: var(--apple-text-secondary); margin-top: 2px;">AY 2026–2027 • 1st Sem • Real-time Outflow Balance Validation</div>
+          </div>
+        </div>
+        <a href="dashboard.html" style="text-decoration: none; width: 28px; height: 28px; border-radius: var(--radius-pill); background: var(--apple-fill-subtle); display: flex; align-items: center; justify-content: center; color: var(--apple-text-secondary); font-size: 14px;">✕</a>
+      </div>
+
+      <!-- Modal Body -->
+      <div class="apple-modal-body">
+        
+        <!-- Segmented Type Selector (Inflow vs Outflow vs Reimbursement) -->
+        <div style="background: var(--apple-fill-subtle); padding: 4px; border-radius: var(--radius-md); display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; margin-bottom: 20px;">
+          <div style="padding: 7px 12px; text-align: center; font-size: 12px; font-weight: 500; color: var(--apple-text-secondary); cursor: pointer;">
+            Inflow (Revenue)
+          </div>
+          <div style="background: #15803d; color: #ffffff; border-radius: var(--radius-sm); padding: 7px 12px; text-align: center; font-size: 12px; font-weight: 600; cursor: pointer; box-shadow: var(--shadow-sm);">
+            Outflow (Expense)
+          </div>
+          <div style="padding: 7px 12px; text-align: center; font-size: 12px; font-weight: 500; color: var(--apple-text-secondary); cursor: pointer;">
+            Abono Advance
+          </div>
+        </div>
+
+        <!-- Payment Channel Segment (Physical Cashbox vs GCash E-Wallet) -->
+        <div class="form-group">
+          <label class="form-label">Payment Channel</label>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+            <!-- Cashbox (Selected) -->
+            <div style="border: 2px solid #15803d; border-radius: var(--radius-md); padding: 12px; display: flex; align-items: center; gap: 10px; background: #ffffff; cursor: pointer;">
+              <div style="width: 24px; height: 24px; border-radius: 6px; background: #f0fdf4; color: #166534; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700;">✓</div>
+              <div style="flex: 1;">
+                <div style="font-size: 13px; font-weight: 600; color: var(--apple-text-primary);">Cashbox (Physical)</div>
+                <div style="font-size: 11px; color: var(--apple-text-secondary); margin-top: 2px;">Available: <span class="tabular-nums" style="font-weight: 600;">₱14,850.00</span></div>
+              </div>
+            </div>
+            <!-- GCash -->
+            <div style="border: 1px solid var(--apple-hairline); border-radius: var(--radius-md); padding: 12px; display: flex; align-items: center; gap: 10px; background: #fafafa; cursor: pointer;">
+              <div style="width: 24px; height: 24px; border-radius: 6px; background: var(--apple-fill-secondary); display: flex; align-items: center; justify-content: center; font-size: 11px;">📱</div>
+              <div style="flex: 1;">
+                <div style="font-size: 13px; font-weight: 600; color: var(--apple-text-secondary);">GCash E-Wallet</div>
+                <div style="font-size: 11px; color: var(--apple-text-tertiary); margin-top: 2px;">Available: <span class="tabular-nums" style="font-weight: 600;">₱28,420.50</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Amount Input Group -->
+        <div class="form-group">
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;">
+            <label class="form-label" style="margin-bottom: 0;">Disbursement Amount</label>
+            <span style="font-size: 11px; color: #15803d; font-weight: 500;">✓ Sufficient cash in box</span>
+          </div>
+          <div style="display: flex; align-items: center; background: #ffffff; border: 1px solid var(--apple-hairline); border-radius: var(--radius-md); padding: 0 16px; height: 50px;">
+            <span style="font-size: 20px; font-weight: 700; color: var(--apple-text-secondary); margin-right: 8px;">₱</span>
+            <input type="text" value="3,500.00" class="tabular-nums" style="border: none; background: transparent; font-size: 20px; font-weight: 700; outline: none; width: 100%; color: var(--apple-text-primary); letter-spacing: -0.02em;">
+          </div>
+        </div>
+
+        <!-- Title & Category Row -->
+        <div class="grid-2">
+          <div class="form-group">
+            <label class="form-label">Particulars / Event Title</label>
+            <input type="text" value="AVR Sound System & Venue Extension" style="width: 100%; height: 42px; border-radius: var(--radius-md); border: 1px solid var(--apple-hairline); padding: 0 14px; font-size: 13px; outline: none; background: #ffffff; color: var(--apple-text-primary);">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Category</label>
+            <div style="width: 100%; height: 42px; border-radius: var(--radius-md); border: 1px solid var(--apple-hairline); padding: 0 14px; font-size: 13px; background: #ffffff; display: flex; align-items: center; justify-content: space-between; color: var(--apple-text-primary);">
+              <span>Logistics & Equipment</span>
+              <span style="font-size: 10px; color: var(--apple-text-tertiary);">▾</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Multi-Receipt Dropzone (Max 3 Receipts) -->
+        <div class="form-group" style="margin-bottom: 0;">
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;">
+            <label class="form-label" style="margin-bottom: 0;">Receipt Attachments (Max 3)</label>
+            <span class="sk-tag" style="background: #f0fdf4; color: #166534; border-color: #bbf7d0;">1 OF 3 UPLOADED</span>
+          </div>
+          <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;">
+            
+            <!-- Slot 1: Attached File -->
+            <div style="border: 1px solid var(--apple-hairline); border-radius: var(--radius-md); height: 90px; background: #ffffff; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; padding: 8px; position: relative; box-shadow: var(--shadow-sm);">
+              <span style="font-size: 20px;">📄</span>
+              <div style="font-size: 11px; font-weight: 600; color: var(--apple-text-primary); text-align: center; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">or_avr_1092.jpg</div>
+              <div style="font-size: 10px; color: var(--apple-text-tertiary);">284 KB</div>
+              <button style="position: absolute; top: 4px; right: 4px; width: 16px; height: 16px; border-radius: 9999px; background: var(--apple-fill-secondary); border: none; font-size: 10px; cursor: pointer;">✕</button>
+            </div>
+
+            <!-- Slot 2: Empty -->
+            <div style="border: 1px dashed var(--apple-hairline); border-radius: var(--radius-md); height: 90px; background: #fafafa; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; cursor: pointer;">
+              <span style="font-size: 16px; color: var(--apple-text-tertiary);">+</span>
+              <div style="font-size: 11px; font-weight: 500; color: var(--apple-text-secondary);">Add Receipt 2</div>
+            </div>
+
+            <!-- Slot 3: Empty -->
+            <div style="border: 1px dashed var(--apple-hairline); border-radius: var(--radius-md); height: 90px; background: #fafafa; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; cursor: pointer;">
+              <span style="font-size: 16px; color: var(--apple-text-tertiary);">+</span>
+              <div style="font-size: 11px; font-weight: 500; color: var(--apple-text-secondary);">Add Receipt 3</div>
+            </div>
+
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Modal Footer Action Bar -->
+      <div class="apple-modal-footer">
+        <a href="dashboard.html" class="apple-btn" style="font-size: 12px;">Cancel</a>
+        <a href="dashboard.html" class="apple-btn apple-btn-primary" style="font-size: 12px;">Record Outflow Transaction (₱3,500.00)</a>
+      </div>
+
+    </div>
+
+  </div>
+
+</body>
+</html>

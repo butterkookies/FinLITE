@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { createServerClient } from '@supabase/ssr';
 import { isSuperAdminEmail } from '@/lib/config/admin';
+import { checkRateLimit, applyRateLimitHeaders } from '@/lib/security/ratelimit';
 
 // Routes that are always public (no auth required)
 const PUBLIC_ROUTES = ['/login', '/register', '/pending-approval', '/forgot-password', '/reset-password', '/api/auth'];
@@ -12,14 +13,27 @@ function isPublicRoute(pathname) {
 export async function middleware(request) {
   const { pathname } = request.nextUrl;
 
-  // Always allow Next.js internals, static files, and auth API
+  // 1. Rate limiting for all API routes (executed before any DB queries or routing)
+  if (pathname.startsWith('/api/')) {
+    const rateLimitRes = checkRateLimit(request);
+    if (rateLimitRes) {
+      return rateLimitRes;
+    }
+  }
+
+  // 2. Always allow Next.js internals and static files
   if (
     pathname.startsWith('/_next') ||
-    pathname.startsWith('/api/auth') ||
     pathname.startsWith('/static') ||
     pathname.includes('.') // static files (images, icons, etc.)
   ) {
     return NextResponse.next();
+  }
+
+  // 3. Auth API routes bypass session checks (already rate-limited above)
+  if (pathname.startsWith('/api/auth')) {
+    const authRes = NextResponse.next();
+    return applyRateLimitHeaders(request, authRes);
   }
 
   // Build a response we can mutate cookies on
@@ -59,13 +73,13 @@ export async function middleware(request) {
   if (!user) {
     if (!isPublic) {
       if (pathname.startsWith('/api/')) {
-        return NextResponse.json({ error: 'Authentication required.' }, { status: 401 });
+        return applyRateLimitHeaders(request, NextResponse.json({ error: 'Authentication required.' }, { status: 401 }));
       }
       const loginUrl = request.nextUrl.clone();
       loginUrl.pathname = '/login';
       return NextResponse.redirect(loginUrl);
     }
-    return response;
+    return applyRateLimitHeaders(request, response);
   }
 
   const isSuperAdmin = isSuperAdminEmail(user.email);
@@ -79,7 +93,7 @@ export async function middleware(request) {
 
   // Super Admin: Full bypass on all routes (cannot be locked into pending-approval)
   if (isSuperAdmin) {
-    return response;
+    return applyRateLimitHeaders(request, response);
   }
 
   // Regular logged in user accessing a protected route — verify approval
@@ -104,7 +118,7 @@ export async function middleware(request) {
 
     if (status !== 'approved') {
       if (pathname.startsWith('/api/')) {
-        return NextResponse.json({ error: 'Your account is pending admin approval.' }, { status: 403 });
+        return applyRateLimitHeaders(request, NextResponse.json({ error: 'Your account is pending admin approval.' }, { status: 403 }));
       }
       const pendingUrl = request.nextUrl.clone();
       pendingUrl.pathname = '/pending-approval';
@@ -114,7 +128,7 @@ export async function middleware(request) {
     // If attempting to access /admin or /api/admin, restrict to users with role === 'admin'
     if (role !== 'admin') {
       if (pathname.startsWith('/api/admin')) {
-        return NextResponse.json({ error: 'Admin privileges required.' }, { status: 403 });
+        return applyRateLimitHeaders(request, NextResponse.json({ error: 'Admin privileges required.' }, { status: 403 }));
       }
       if (pathname.startsWith('/admin')) {
         const dashUrl = request.nextUrl.clone();
@@ -124,7 +138,7 @@ export async function middleware(request) {
     }
   }
 
-  return response;
+  return applyRateLimitHeaders(request, response);
 }
 
 export const config = {

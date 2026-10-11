@@ -8,6 +8,7 @@
  * 5. Auth API Concurrency Stress Test (100 parallel requests)
  * 6. DOCX Export Engine (Single & Concurrent Stress Generation)
  * 7. Supabase Database Schema & Connectivity Verification
+ * 8. Production-Grade Rate Limiting & Security Engine (Sliding Window, RFC Headers, Live 429)
  */
 
 import { 
@@ -15,31 +16,95 @@ import {
   toCentavos, 
   fromCentavos, 
   calculatePhysicalTotal, 
-  calculateVariance 
+  calculateVariance,
+  denomCodeToCountKey
 } from '../lib/utils/currency.js';
-import { validateGmail, validateUsername, validatePassword, validateContactNumber } from '../lib/utils/validation.js';
+import { 
+  validateGmail, 
+  validateUsername, 
+  validatePassword, 
+  validateContactNumber,
+  sanitizeAmountInput,
+  validateTransactionAmount,
+  validateOutflowBalance,
+  MAX_TRANSACTION_AMOUNT,
+} from '../lib/utils/validation.js';
 import { isSuperAdminEmail, getSuperAdminEmails } from '../lib/config/admin.js';
-import { createClient } from '@supabase/supabase-js';
+import {
+  rateLimiter,
+  SlidingWindowLimiter,
+  RATE_LIMIT_TIERS,
+  getClientIp,
+  getTierForPath,
+  checkRateLimit,
+  applyRateLimitHeaders,
+} from '../lib/security/ratelimit.js';
 import { execFileSync, spawn } from 'child_process';
 import fs from 'fs';
 import path from 'path';
 
-// Load .env.local
-const envContent = fs.readFileSync('.env.local', 'utf-8');
+// Optional dependency: only needed for the live Supabase check (section 7).
+let createClient = null;
+try {
+  ({ createClient } = await import('@supabase/supabase-js'));
+} catch {
+  /* dependencies not installed; section 7 will be skipped */
+}
+
+// Load .env.local (optional: sections that need it are skipped when it is absent)
 const env = {};
-for (const line of envContent.split('\n')) {
-  const trimmed = line.trim();
-  if (trimmed && !trimmed.startsWith('#')) {
-    const idx = trimmed.indexOf('=');
-    if (idx !== -1) {
-      env[trimmed.slice(0, idx).trim()] = trimmed.slice(idx + 1).trim();
+try {
+  const envContent = fs.readFileSync('.env.local', 'utf-8');
+  for (const line of envContent.split('\n')) {
+    const trimmed = line.trim();
+    if (trimmed && !trimmed.startsWith('#')) {
+      const idx = trimmed.indexOf('=');
+      if (idx !== -1) {
+        env[trimmed.slice(0, idx).trim()] = trimmed.slice(idx + 1).trim();
+      }
     }
   }
+} catch {
+  console.log('ℹ️  .env.local not found: Supabase-dependent checks will be skipped.');
 }
 
 const BASE_URL = 'http://localhost:3000';
 let passCount = 0;
 let failCount = 0;
+let skipCount = 0;
+const REQUIRE_ALL = process.argv.includes('--require-all');
+
+function skip(message) {
+  skipCount++;
+  console.log(`  ⏭️  SKIP: ${message}`);
+}
+
+async function isServerUp() {
+  try {
+    const ctrl = new AbortController();
+    const timer = setTimeout(() => ctrl.abort(), 2000);
+    await fetch(`${BASE_URL}/login`, { signal: ctrl.signal });
+    clearTimeout(timer);
+    return true;
+  } catch {
+    return false;
+  }
+}
+const serverUp = await isServerUp();
+console.log(serverUp
+  ? `ℹ️  Dev server detected at ${BASE_URL}: live route tests enabled.`
+  : `ℹ️  No server at ${BASE_URL} (run \`npm run dev\` to enable live route tests).`);
+
+function detectPython() {
+  for (const cmd of ['python', 'python3']) {
+    try {
+      execFileSync(cmd, ['-c', 'import docx'], { stdio: 'ignore' });
+      return cmd;
+    } catch {}
+  }
+  return null;
+}
+const PYTHON = detectPython();
 
 function assert(condition, message) {
   if (!condition) {
@@ -85,6 +150,12 @@ const normalCounts = {
 const { total: normalTotal } = calculatePhysicalTotal(normalCounts);
 assert(normalTotal === 8739, `Physical denomination count should equal 8739 (got ${normalTotal})`);
 
+// 3NF Denomination Code mapping tests
+assert(denomCodeToCountKey('BILL_1000') === 'bills_1000', "denomCodeToCountKey('BILL_1000') maps to 'bills_1000'");
+assert(denomCodeToCountKey('COIN_20') === 'coins_20', "denomCodeToCountKey('COIN_20') maps to 'coins_20'");
+assert(denomCodeToCountKey('COIN_CENT') === 'coins_cents', "denomCodeToCountKey('COIN_CENT') maps to 'coins_cents'");
+assert(denomCodeToCountKey('bills_1000') === 'bills_1000', "denomCodeToCountKey preserves already formatted 'bills_1000'");
+
 // Variance: Shortage detection
 const shortageVar = calculateVariance(8739, 8900.00);
 assert(shortageVar.status === 'SHORTAGE', 'Variance should be SHORTAGE');
@@ -123,6 +194,54 @@ testFractionalTxs.forEach((t) => {
 });
 assert(fromCentavos(testInflowsC) === 0.3, 'Summary inflows centavo precision: 0.1 + 0.2 === 0.3 exactly');
 assert(fromCentavos(testCashC) === 0.15, 'Summary cash on hand centavo precision: 0.3 - 0.15 === 0.15 exactly');
+
+// ==============================================================================
+// 1b. TRANSACTION AMOUNT & CHANNEL OVERDRAFT VALIDATION UNIT TESTS
+// ==============================================================================
+console.log('\n============================================================');
+console.log('1b. RUNNING TRANSACTION AMOUNT & OVERDRAFT VALIDATION TESTS');
+console.log('============================================================');
+
+// sanitizeAmountInput tests
+assert(sanitizeAmountInput('1250.50') === '1250.50', "sanitizeAmountInput('1250.50') returns '1250.50'");
+assert(sanitizeAmountInput('₱1,250.50') === '1250.50', "sanitizeAmountInput('₱1,250.50') strips symbols");
+assert(sanitizeAmountInput('12.34.56') === '12.34', "sanitizeAmountInput('12.34.56') keeps only first dot");
+assert(sanitizeAmountInput('123456.78') === '12345.78', "sanitizeAmountInput('123456.78') limits to 5 integer digits");
+assert(sanitizeAmountInput('9999999') === '99999', "sanitizeAmountInput('9999999') limits integer to 5 digits");
+assert(sanitizeAmountInput('123.456') === '123.45', "sanitizeAmountInput('123.456') limits decimal to 2 places");
+assert(sanitizeAmountInput('.50') === '.50', "sanitizeAmountInput('.50') preserves leading decimal point");
+assert(sanitizeAmountInput(null) === '', "sanitizeAmountInput(null) handles null gracefully");
+assert(sanitizeAmountInput('') === '', "sanitizeAmountInput('') returns empty string");
+
+// validateTransactionAmount tests
+assert(validateTransactionAmount('') === 'Amount is required.', "validateTransactionAmount('') reports required");
+assert(validateTransactionAmount(null) === 'Amount is required.', "validateTransactionAmount(null) reports required");
+assert(validateTransactionAmount('abc')?.includes('valid amount'), "validateTransactionAmount('abc') rejects non-number");
+assert(validateTransactionAmount('10.999')?.includes('valid amount'), "validateTransactionAmount('10.999') rejects > 2 decimal places");
+assert(validateTransactionAmount(0)?.includes('greater than ₱0.00'), "validateTransactionAmount(0) rejects zero");
+assert(validateTransactionAmount(-25)?.includes('valid amount'), "validateTransactionAmount(-25) rejects negative");
+assert(validateTransactionAmount(100000)?.includes('cannot exceed ₱99,999.99'), "validateTransactionAmount(100000) rejects > 5 digits (₱99,999.99)");
+assert(validateTransactionAmount('99999.99') === null, "validateTransactionAmount('99999.99') accepts max allowed amount");
+assert(validateTransactionAmount(0.01) === null, "validateTransactionAmount(0.01) accepts minimum positive centavo");
+assert(validateTransactionAmount(1500.50) === null, "validateTransactionAmount(1500.50) accepts typical transaction");
+
+// validateOutflowBalance tests
+assert(validateOutflowBalance({ type: 'INFLOW', paymentMethod: 'CASH', isReimbursement: false, amount: 5000, cashBalance: 100 }) === null,
+  "validateOutflowBalance skips INFLOW transactions");
+assert(validateOutflowBalance({ type: 'OUTFLOW', paymentMethod: 'CASH', isReimbursement: true, amount: 5000, cashBalance: 100 }) === null,
+  "validateOutflowBalance skips abono personal advance transactions");
+assert(validateOutflowBalance({ type: 'OUTFLOW', paymentMethod: 'CASH', isReimbursement: false, amount: 500, cashBalance: 1000, gcashBalance: 0 }) === null,
+  "validateOutflowBalance allows valid CASH outflow within cashbox balance");
+assert(validateOutflowBalance({ type: 'OUTFLOW', paymentMethod: 'CASH', isReimbursement: false, amount: 1500, cashBalance: 1000, gcashBalance: 5000 })?.includes('Insufficient Physical Cashbox balance') === true,
+  "validateOutflowBalance rejects CASH outflow exceeding cashbox even if GCash holds funds");
+assert(validateOutflowBalance({ type: 'OUTFLOW', paymentMethod: 'GCASH', isReimbursement: false, amount: 500, cashBalance: 0, gcashBalance: 1000 }) === null,
+  "validateOutflowBalance allows valid GCASH outflow within GCash balance");
+assert(validateOutflowBalance({ type: 'OUTFLOW', paymentMethod: 'GCASH', isReimbursement: false, amount: 1500, cashBalance: 5000, gcashBalance: 1000 })?.includes('Insufficient GCash Wallet balance') === true,
+  "validateOutflowBalance rejects GCASH outflow exceeding GCash balance even if cashbox holds funds");
+assert(validateOutflowBalance({ type: 'OUTFLOW', paymentMethod: 'CASH', isReimbursement: false, amount: 100.01, cashBalance: 100.00 }) !== null,
+  "validateOutflowBalance uses exact centavos to catch 1 centavo overdraft");
+assert(validateOutflowBalance({ type: 'OUTFLOW', paymentMethod: 'CASH', isReimbursement: false, amount: 100.00, cashBalance: 100.00 }) === null,
+  "validateOutflowBalance allows outflow exactly equal to channel balance");
 
 
 // ==============================================================================
@@ -236,7 +355,7 @@ async function testRoutes() {
     assert(false, `/api/admin/approve test failed: ${e.message}`);
   }
 }
-await testRoutes();
+if (serverUp) await testRoutes(); else skip('Middleware route protection tests (server offline)');
 
 
 // ==============================================================================
@@ -262,10 +381,21 @@ async function testAuthValidation() {
   assert(validateGmail('example@yahoo.com')?.includes("Only Gmail addresses"), "validateGmail('example@yahoo.com') rejects non-gmail");
   assert(validateGmail('valid.student@gmail.com') === null, "validateGmail('valid.student@gmail.com') returns null (valid)");
 
+  if (!serverUp) {
+    skip('Auth API validation tests against /api/auth/* (server offline)');
+    return;
+  }
+
+  let authReqIndex = 0;
+  const getAuthHeaders = () => ({
+    'Content-Type': 'application/json',
+    'x-forwarded-for': `198.51.100.${++authReqIndex}`,
+  });
+
   // API Test: Reject example.gmail without @ and without .com
   const resNoAt = await fetch(`${BASE_URL}/api/auth/register`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: getAuthHeaders(),
     body: JSON.stringify({
       firstName: 'Test',
       lastName: 'User',
@@ -281,7 +411,7 @@ async function testAuthValidation() {
   // API Test: Reject example@gmail without .com
   const resNoCom = await fetch(`${BASE_URL}/api/auth/register`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: getAuthHeaders(),
     body: JSON.stringify({
       firstName: 'Test',
       lastName: 'User',
@@ -305,7 +435,7 @@ async function testAuthValidation() {
   // API Test: Reject 10 digits in contactNumber on register
   const resShortPhone = await fetch(`${BASE_URL}/api/auth/register`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: getAuthHeaders(),
     body: JSON.stringify({
       firstName: 'Test',
       lastName: 'User',
@@ -322,7 +452,7 @@ async function testAuthValidation() {
   // API Test: Reject letters in contactNumber on email register
   const resLetterPhone = await fetch(`${BASE_URL}/api/auth/register`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: getAuthHeaders(),
     body: JSON.stringify({
       firstName: 'Test',
       lastName: 'User',
@@ -339,7 +469,7 @@ async function testAuthValidation() {
   // API Test: Reject letters in contactNumber on Google register
   const resGoogleLetterPhone = await fetch(`${BASE_URL}/api/auth/google-register`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: getAuthHeaders(),
     body: JSON.stringify({
       firstName: 'Test',
       lastName: 'User',
@@ -355,7 +485,7 @@ async function testAuthValidation() {
   // Negative Test 1: Reject non-Gmail
   const resNonGmail = await fetch(`${BASE_URL}/api/auth/register`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: getAuthHeaders(),
     body: JSON.stringify({
       firstName: 'Test',
       lastName: 'User',
@@ -371,7 +501,7 @@ async function testAuthValidation() {
   // Negative Test 2: Reject password < 8 chars
   const resShortPass = await fetch(`${BASE_URL}/api/auth/register`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: getAuthHeaders(),
     body: JSON.stringify({
       firstName: 'Test',
       lastName: 'User',
@@ -388,7 +518,7 @@ async function testAuthValidation() {
   // Negative Test 4: Missing required fields (First/Last name or Gmail)
   const resMissing = await fetch(`${BASE_URL}/api/auth/register`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: getAuthHeaders(),
     body: JSON.stringify({
       firstName: '',
       lastName: '',
@@ -401,7 +531,7 @@ async function testAuthValidation() {
   // Login Test 1: Missing email or password
   const resEmptyLogin = await fetch(`${BASE_URL}/api/auth/login`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: getAuthHeaders(),
     body: JSON.stringify({ email: '', password: '' }),
   });
   assert(resEmptyLogin.status === 400, `Empty login credentials rejected with 400 (got ${resEmptyLogin.status})`);
@@ -409,7 +539,7 @@ async function testAuthValidation() {
   // Login Test 2: Non-existent Gmail account
   const resBadEmail = await fetch(`${BASE_URL}/api/auth/login`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: getAuthHeaders(),
     body: JSON.stringify({
       email: 'nonexistent.user.9999@gmail.com',
       password: 'wrongpassword123',
@@ -428,6 +558,10 @@ console.log('5. RUNNING AUTH API CONCURRENCY STRESS TEST (50 Parallel Requests)'
 console.log('============================================================');
 
 async function testAuthConcurrency() {
+  if (!serverUp) {
+    skip('50-request auth concurrency stress test (server offline)');
+    return;
+  }
   const CONCURRENT_REQUESTS = 50;
   console.log(`  🚀 Firing ${CONCURRENT_REQUESTS} parallel requests to /api/auth/register...`);
 
@@ -437,7 +571,10 @@ async function testAuthConcurrency() {
   for (let i = 0; i < CONCURRENT_REQUESTS; i++) {
     const p = fetch(`${BASE_URL}/api/auth/register`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        'x-forwarded-for': `198.51.100.${i + 1}`,
+      },
       body: JSON.stringify({
         firstName: `StressFirst${i}`,
         lastName: `StressLast${i}`,
@@ -468,6 +605,10 @@ console.log('6. RUNNING DOCX EXPORT ENGINE TESTS & STRESS LOAD');
 console.log('============================================================');
 
 function testDocxSingle() {
+  if (!PYTHON) {
+    skip('DOCX export test (python/python3 not found)');
+    return;
+  }
   const dummyPayload = {
     metadata: {
       transmittalDate: 'SEPTEMBER 29, 2026',
@@ -510,7 +651,7 @@ function testDocxSingle() {
   fs.writeFileSync(tempJson, JSON.stringify(dummyPayload, null, 2));
 
   const tStart = performance.now();
-  execFileSync('python', ['scripts/export_report_engine.py', tempJson, tempOutput]);
+  execFileSync(PYTHON, ['scripts/export_report_engine.py', tempJson, tempOutput]);
   const tElapsed = performance.now() - tStart;
 
   assert(fs.existsSync(tempOutput), 'DOCX export file was created on disk');
@@ -525,7 +666,7 @@ console.log('  🚀 Stress Testing: Running 5 concurrent DOCX generation process
 const docxStart = performance.now();
 const docxJobs = [];
 
-for (let i = 0; i < 5; i++) {
+for (let i = 0; PYTHON && i < 5; i++) {
   const jsonFile = path.resolve(`exports/stress_input_${i}.json`);
   const outFile = path.resolve(`exports/stress_output_${i}.docx`);
   
@@ -564,7 +705,7 @@ for (let i = 0; i < 5; i++) {
   fs.writeFileSync(jsonFile, JSON.stringify(payload));
 
   const job = new Promise((resolve, reject) => {
-    const proc = spawn('python', ['scripts/export_report_engine.py', jsonFile, outFile]);
+    const proc = spawn(PYTHON, ['scripts/export_report_engine.py', jsonFile, outFile]);
     proc.on('close', code => {
       if (code === 0 && fs.existsSync(outFile)) {
         resolve({ index: i, size: fs.statSync(outFile).size });
@@ -576,12 +717,16 @@ for (let i = 0; i < 5; i++) {
   docxJobs.push(job);
 }
 
-const docxResults = await Promise.all(docxJobs);
+const docxResults = PYTHON ? await Promise.all(docxJobs) : [];
 const docxElapsed = performance.now() - docxStart;
 
-assert(docxResults.length === 5, 'All 5 concurrent DOCX files generated successfully');
-assert(docxResults.every(r => r.size > 20000), 'All 5 concurrent DOCX outputs are non-empty valid documents');
-console.log(`  ✅ 5 concurrent DOCX reports generated in ${docxElapsed.toFixed(2)}ms (avg ${(docxElapsed/5).toFixed(1)}ms per document)`);
+if (!PYTHON) {
+  skip('Concurrent DOCX stress test (python/python3 not found)');
+} else {
+  assert(docxResults.length === 5, 'All 5 concurrent DOCX files generated successfully');
+  assert(docxResults.every(r => r.size > 20000), 'All 5 concurrent DOCX outputs are non-empty valid documents');
+  console.log(`  ✅ 5 concurrent DOCX reports generated in ${docxElapsed.toFixed(2)}ms (avg ${(docxElapsed/5).toFixed(1)}ms per document)`);
+}
 
 // Clean up stress test temp files
 for (let i = 0; i < 5; i++) {
@@ -603,7 +748,14 @@ async function testDatabase() {
   const supabaseUrl = env.NEXT_PUBLIC_SUPABASE_URL;
   const anonKey = env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
-  assert(Boolean(supabaseUrl && anonKey), 'Supabase credentials loaded from .env.local');
+  if (!createClient) {
+    skip('Supabase checks (@supabase/supabase-js not installed; run npm install)');
+    return;
+  }
+  if (!supabaseUrl || !anonKey) {
+    skip('Supabase checks (credentials missing from .env.local)');
+    return;
+  }
 
   const supabase = createClient(supabaseUrl, anonKey);
 
@@ -627,8 +779,201 @@ async function testDatabase() {
   } else {
     assert(true, 'registration_requests table exists and is accessible');
   }
+
+  // Check 3NF normalized denominations reference table
+  const { data: denoms, error: denomErr } = await supabase.from('denominations').select('id, code, face_value').limit(20);
+  if (denomErr) {
+    console.log(`  ⚠️ Notice: denominations 3NF table: ${denomErr.message}`);
+    console.log('     (Ready for Phase 1 migration 012 deployment in Supabase SQL editor)');
+  } else {
+    assert(true, `denominations 3NF table query successful (retrieved ${denoms?.length || 0} denominations)`);
+  }
+
+  // Check 3NF normalized cash_reconciliation_items table
+  const { error: itemErr } = await supabase.from('cash_reconciliation_items').select('id').limit(1);
+  if (itemErr) {
+    console.log(`  ⚠️ Notice: cash_reconciliation_items 3NF table: ${itemErr.message}`);
+    console.log('     (Ready for Phase 1 migration 012 deployment in Supabase SQL editor)');
+  } else {
+    assert(true, 'cash_reconciliation_items 3NF table exists and is accessible');
+  }
+
+  // Check 3NF normalized transaction_receipts table
+  const { error: receiptErr } = await supabase.from('transaction_receipts').select('id').limit(1);
+  if (receiptErr) {
+    console.log(`  ⚠️ Notice: transaction_receipts 3NF table: ${receiptErr.message}`);
+    console.log('     (Ready for Phase 1 migration 012 deployment in Supabase SQL editor)');
+  } else {
+    assert(true, 'transaction_receipts 3NF table exists and is accessible');
+  }
 }
 await testDatabase();
+
+
+// ==============================================================================
+// 8. PRODUCTION-GRADE RATE LIMITING & SECURITY ENGINE TESTS
+// ==============================================================================
+console.log('\n============================================================');
+console.log('8. RUNNING RATE LIMITING & SECURITY ENGINE TESTS');
+console.log('============================================================');
+
+async function testRateLimiting() {
+  const limiter = new SlidingWindowLimiter();
+  const testWindowMs = 60000;
+  const testLimit = 5;
+
+  // 1. Requests within limit return { allowed: true } with decreasing remaining
+  const r1 = limiter.check('client-a', testLimit, testWindowMs);
+  assert(r1.allowed === true, '1st check within limit returns allowed: true');
+  assert(r1.remaining === 4, `1st check remaining decreases to 4 (got ${r1.remaining})`);
+  assert(r1.limit === testLimit, '1st check returns correct limit value');
+  assert(r1.retryAfter === 0, 'Allowed request has retryAfter === 0');
+
+  const r2 = limiter.check('client-a', testLimit, testWindowMs);
+  assert(r2.allowed === true, '2nd check within limit returns allowed: true');
+  assert(r2.remaining === 3, `2nd check remaining decreases to 3 (got ${r2.remaining})`);
+
+  const r3 = limiter.check('client-a', testLimit, testWindowMs);
+  const r4 = limiter.check('client-a', testLimit, testWindowMs);
+  const r5 = limiter.check('client-a', testLimit, testWindowMs);
+  assert(r5.allowed === true, '5th check reaches limit boundary with allowed: true');
+  assert(r5.remaining === 0, `5th check remaining reaches 0 (got ${r5.remaining})`);
+
+  // 2. Requests exceeding limit return { allowed: false } with remaining === 0 and positive retryAfter
+  const r6 = limiter.check('client-a', testLimit, testWindowMs);
+  assert(r6.allowed === false, '6th check exceeding limit returns allowed: false');
+  assert(r6.remaining === 0, `6th check remaining stays 0 (got ${r6.remaining})`);
+  assert(r6.retryAfter > 0 && r6.retryAfter <= 60, `Exceeded request has positive retryAfter (got ${r6.retryAfter}s)`);
+  assert(r6.reset > Math.floor(Date.now() / 1000), 'Exceeded request provides future Unix reset timestamp');
+
+  // 3. Different IP keys maintain isolated bucket counters
+  const rOtherIp = limiter.check('client-b', testLimit, testWindowMs);
+  assert(rOtherIp.allowed === true, 'Different IP client-b is not blocked by client-a exhaustion');
+  assert(rOtherIp.remaining === 4, `Different IP client-b has independent counter remaining === 4 (got ${rOtherIp.remaining})`);
+
+  // Different route prefixes maintain isolated bucket counters
+  const authKey = 'auth:192.168.1.1';
+  const chatKey = 'chat:192.168.1.1';
+  for (let i = 0; i < RATE_LIMIT_TIERS.AUTH.limit; i++) {
+    limiter.check(authKey, RATE_LIMIT_TIERS.AUTH.limit, RATE_LIMIT_TIERS.AUTH.windowMs);
+  }
+  const authBlocked = limiter.check(authKey, RATE_LIMIT_TIERS.AUTH.limit, RATE_LIMIT_TIERS.AUTH.windowMs);
+  assert(authBlocked.allowed === false, 'AUTH tier is rate limited after limit exhausted');
+
+  const chatCheck = limiter.check(chatKey, RATE_LIMIT_TIERS.AI_CHAT.limit, RATE_LIMIT_TIERS.AI_CHAT.windowMs);
+  assert(chatCheck.allowed === true, 'AI_CHAT tier on same IP remains isolated and allowed when AUTH tier exhausted');
+  assert(chatCheck.remaining === RATE_LIMIT_TIERS.AI_CHAT.limit - 1, 'AI_CHAT tier has isolated remaining counter');
+
+  // 4. Window reset behavior (simulated time progression & manual reset)
+  const simulatedStart = 1000000;
+  const resetLimiter = new SlidingWindowLimiter();
+  for (let i = 0; i < 3; i++) {
+    resetLimiter.check('sim-user', 3, 10000, simulatedStart + i * 100);
+  }
+  const simBlocked = resetLimiter.check('sim-user', 3, 10000, simulatedStart + 500);
+  assert(simBlocked.allowed === false, 'Simulated user blocked when limit reached');
+
+  // Advance time beyond the 10,000ms window
+  const simAfterWindow = resetLimiter.check('sim-user', 3, 10000, simulatedStart + 10500);
+  assert(simAfterWindow.allowed === true, 'Window reset: request allowed again after window duration elapses');
+  assert(simAfterWindow.remaining === 2, `Window reset: remaining counter reset properly (got ${simAfterWindow.remaining})`);
+
+  // Explicit reset
+  resetLimiter.reset('sim-user');
+  const simAfterReset = resetLimiter.check('sim-user', 3, 10000, simulatedStart + 10600);
+  assert(simAfterReset.allowed === true && simAfterReset.remaining === 2, 'Explicit reset clears key and reopens capacity');
+
+  // Eviction / memory cleanup test
+  const cleanupLimiter = new SlidingWindowLimiter();
+  cleanupLimiter.check('stale-key', 5, 5000, simulatedStart);
+  assert(cleanupLimiter.size() > 0, 'Limiter tracks active keys');
+  cleanupLimiter.cleanup(simulatedStart + 20000, 10000);
+  assert(cleanupLimiter.size() === 0, 'Automatic cleanup evicts expired keys preventing memory leak');
+
+  // 5. Client IP extraction tests
+  assert(getClientIp({ headers: { 'x-forwarded-for': '203.0.113.195, 70.41.3.18' } }) === '203.0.113.195',
+    'getClientIp extracts first IP from comma-separated x-forwarded-for');
+  assert(getClientIp({ headers: { 'x-real-ip': '198.51.100.4' } }) === '198.51.100.4',
+    'getClientIp extracts x-real-ip');
+  assert(getClientIp({ headers: { 'cf-connecting-ip': '104.16.1.1' } }) === '104.16.1.1',
+    'getClientIp extracts cf-connecting-ip');
+  assert(getClientIp({}) === '127.0.0.1',
+    'getClientIp falls back to 127.0.0.1 on empty request');
+
+  // 6. Tier classification tests
+  assert(getTierForPath('/api/auth/login')?.name === 'AUTH', 'getTierForPath identifies AUTH tier for /api/auth/login');
+  assert(getTierForPath('/api/reports/docx')?.name === 'REPORTS', 'getTierForPath identifies REPORTS tier');
+  assert(getTierForPath('/api/chat')?.name === 'AI_CHAT', 'getTierForPath identifies AI_CHAT tier');
+  assert(getTierForPath('/api/transactions')?.name === 'DEFAULT_API', 'getTierForPath identifies DEFAULT_API tier');
+  assert(getTierForPath('/dashboard') === null, 'getTierForPath returns null for non-API route');
+
+  // 7. checkRateLimit helper creates valid 429 response with proper JSON and RFC headers
+  const mockReq = {
+    nextUrl: { pathname: '/api/reports/docx' },
+    headers: { 'x-forwarded-for': '192.0.2.99' },
+  };
+
+  // Clear global rate limiter test key to ensure clean state
+  rateLimiter.reset('reports:192.0.2.99');
+
+  // First 5 requests within limit must return null (allowed)
+  for (let i = 0; i < 5; i++) {
+    const allowedRes = checkRateLimit(mockReq);
+    assert(allowedRes === null, `checkRateLimit call ${i + 1} returns null (allowed)`);
+  }
+  assert(Boolean(mockReq._rateLimitHeaders), 'Allowed request attaches _rateLimitHeaders to request');
+  assert(mockReq._rateLimitHeaders['X-RateLimit-Remaining'] === '0', '5th allowed request sets remaining header to 0');
+
+  // 6th request must return 429 response
+  const blockedRes = checkRateLimit(mockReq);
+  assert(blockedRes !== null, 'checkRateLimit returns response when rate limited');
+  assert(blockedRes.status === 429, `Rate-limited response has HTTP 429 status (got ${blockedRes.status})`);
+  
+  const limitHeader = blockedRes.headers.get('X-RateLimit-Limit');
+  const remainingHeader = blockedRes.headers.get('X-RateLimit-Remaining');
+  const resetHeader = blockedRes.headers.get('X-RateLimit-Reset');
+  const retryAfterHeader = blockedRes.headers.get('Retry-After');
+
+  assert(limitHeader === '5', `X-RateLimit-Limit header is '5' (got '${limitHeader}')`);
+  assert(remainingHeader === '0', `X-RateLimit-Remaining header is '0' (got '${remainingHeader}')`);
+  assert(Number(resetHeader) > Math.floor(Date.now() / 1000), `X-RateLimit-Reset is a valid future timestamp (got '${resetHeader}')`);
+  assert(Number(retryAfterHeader) > 0, `Retry-After header is positive seconds (got '${retryAfterHeader}')`);
+
+  const blockedBody = await blockedRes.json();
+  assert(blockedBody.error === 'Too many requests. Please try again later.',
+    `429 response JSON body has expected error message (got '${blockedBody.error}')`);
+
+  // 8. Live Route Rate Limiting Test (if serverUp)
+  if (serverUp) {
+    const liveIp = `198.51.100.${Math.floor(Math.random() * 800) + 100}`;
+    const liveLimit = RATE_LIMIT_TIERS.REPORTS.limit; // 5 requests
+    let got429 = false;
+
+    for (let i = 0; i < liveLimit + 2; i++) {
+      const res = await fetch(`${BASE_URL}/api/reports/docx`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-forwarded-for': liveIp,
+        },
+        body: JSON.stringify({}),
+      });
+
+      if (res.status === 429) {
+        got429 = true;
+        const resBody = await res.json();
+        assert(resBody.error?.includes('Too many requests'), 'Live 429 response contains error message');
+        assert(res.headers.get('x-ratelimit-limit') === String(liveLimit), `Live response contains x-ratelimit-limit: ${liveLimit}`);
+        assert(res.headers.get('retry-after') !== null, 'Live 429 response contains retry-after header');
+        break;
+      }
+    }
+    assert(got429, 'Live server enforced rate limit and returned 429 after limit exceeded');
+  } else {
+    skip('Live route rate limiting verification against dev server (server offline)');
+  }
+}
+await testRateLimiting();
 
 
 // ==============================================================================
@@ -640,6 +985,7 @@ console.log('============================================================');
 console.log(`  Total Checks: ${passCount + failCount}`);
 console.log(`  Passed:       ${passCount} ✅`);
 console.log(`  Failed:       ${failCount} ❌`);
+console.log(`  Skipped:      ${skipCount} ⏭️${skipCount && !REQUIRE_ALL ? '  (re-run with the server up and .env.local present, or use --require-all to fail on skips)' : ''}`);
 console.log('============================================================\n');
 
-process.exit(failCount === 0 ? 0 : 1);
+process.exit(failCount === 0 && !(REQUIRE_ALL && skipCount > 0) ? 0 : 1);

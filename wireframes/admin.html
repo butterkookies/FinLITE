@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FinLITE — Admin Governance Wireframe</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- Translucent Sticky Navigation Header -->
+  <header class="apple-header">
+    <div class="apple-header-inner">
+      <div style="display: flex; align-items: center; gap: 16px;">
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <div style="width: 32px; height: 32px; border-radius: 8px; background: #15803d; color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 14px;">L</div>
+          <div>
+            <div style="font-size: 14px; font-weight: 700; letter-spacing: -0.01em;">FinLITE Admin</div>
+            <div style="font-size: 11px; color: var(--apple-text-secondary); margin-top: -2px;">LITE Governance</div>
+          </div>
+        </div>
+        <span class="sk-tag" style="background: #f0fdf4; color: #166534; border-color: #bbf7d0;">GOVERNANCE</span>
+      </div>
+
+      <div style="display: flex; align-items: center; gap: 12px;">
+        <a href="dashboard.html" class="apple-btn">← Operational Dashboard</a>
+        <a href="index.html" class="apple-btn">Wireframe Deck</a>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+
+    <!-- Overview Banner -->
+    <div class="wireframe-banner">
+      <div>
+        <div class="wireframe-title">Wireframe: Super Admin Governance Portal (admin.html)</div>
+        <div class="wireframe-meta">Layout structure for pending account approval queue, role delegation, and user directory.</div>
+      </div>
+    </div>
+
+    <!-- Section 1: Pending Registration Approval Queue -->
+    <section class="apple-table-wrap" style="margin-bottom: 28px;">
+      
+      <div class="apple-table-header">
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <div style="width: 26px; height: 26px; border-radius: 6px; background: #15803d; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 12px;">⏳</div>
+          <div>
+            <div style="font-size: 14px; font-weight: 700;">Registration Approval Queue</div>
+            <div style="font-size: 11px; color: var(--apple-text-secondary); margin-top: 1px;">Applicants awaiting institutional verification</div>
+          </div>
+        </div>
+        <span class="sk-tag" style="background: #15803d; color: #ffffff;">2 PENDING</span>
+      </div>
+
+      <table class="apple-table">
+        <thead>
+          <tr>
+            <th>Applicant Name</th>
+            <th>Institutional Email</th>
+            <th style="width: 130px;">Student ID</th>
+            <th style="width: 140px;">Requested Role</th>
+            <th style="width: 130px;">Applied Date</th>
+            <th style="width: 170px; text-align: right;">Governance Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          
+          <!-- Request 1 -->
+          <tr>
+            <td>
+              <div style="font-size: 13px; font-weight: 600; color: var(--apple-text-primary);">Mark Kenneth Santos</div>
+              <div style="font-size: 11px; color: var(--apple-text-tertiary);">BSIT 3-A • General Auditor Candidate</div>
+            </td>
+            <td style="font-size: 12px; color: var(--apple-text-secondary);">santosmk.pdm@gmail.com</td>
+            <td style="font-size: 12px; font-weight: 600;" class="tabular-nums">2024-00142</td>
+            <td><span class="sk-tag" style="background: #eff6ff; color: #1d4ed8; border-color: #bfdbfe;">AUDITOR</span></td>
+            <td style="font-size: 12px; color: var(--apple-text-secondary);">Oct 11, 2026</td>
+            <td style="text-align: right;">
+              <div style="display: inline-flex; gap: 6px;">
+                <button class="apple-btn" style="padding: 4px 10px; font-size: 11px; color: #b91c1c;">Reject</button>
+                <button class="apple-btn apple-btn-primary" style="padding: 4px 12px; font-size: 11px;">Approve</button>
+              </div>
+            </td>
+          </tr>
+
+          <!-- Request 2 -->
+          <tr>
+            <td>
+              <div style="font-size: 13px; font-weight: 600; color: var(--apple-text-primary);">Alyssa Nicole Reyes</div>
+              <div style="font-size: 11px; color: var(--apple-text-tertiary);">BSIT 2-B • Cashier Custody Member</div>
+            </td>
+            <td style="font-size: 12px; color: var(--apple-text-secondary);">reyesan.pdm@gmail.com</td>
+            <td style="font-size: 12px; font-weight: 600;" class="tabular-nums">2024-00388</td>
+            <td><span class="sk-tag" style="background: #f0fdf4; color: #166534; border-color: #bbf7d0;">ASST. TREASURER</span></td>
+            <td style="font-size: 12px; color: var(--apple-text-secondary);">Oct 10, 2026</td>
+            <td style="text-align: right;">
+              <div style="display: inline-flex; gap: 6px;">
+                <button class="apple-btn" style="padding: 4px 10px; font-size: 11px; color: #b91c1c;">Reject</button>
+                <button class="apple-btn apple-btn-primary" style="padding: 4px 12px; font-size: 11px;">Approve</button>
+              </div>
+            </td>
+          </tr>
+
+        </tbody>
+      </table>
+
+    </section>
+
+    <!-- Section 2: Active Authorized Officers Directory -->
+    <section class="apple-table-wrap">
+      
+      <div class="apple-table-header">
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <div style="width: 26px; height: 26px; border-radius: 6px; background: #15803d; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 12px;">🛡️</div>
+          <div>
+            <div style="font-size: 14px; font-weight: 700;">Authorized Officers & Member Directory</div>
+            <div style="font-size: 11px; color: var(--apple-text-secondary); margin-top: 1px;">Current active role permissions and governance</div>
+          </div>
+        </div>
+        
+        <!-- Search bar -->
+        <div style="display: flex; align-items: center; gap: 6px; padding: 6px 12px; background: #fafafa; border: 1px solid var(--apple-hairline); border-radius: var(--radius-md); width: 220px;">
+          <span style="font-size: 12px; color: var(--apple-text-tertiary);">🔍</span>
+          <input type="text" placeholder="Filter active officers..." style="border: none; background: transparent; font-size: 12px; outline: none; width: 100%;">
+        </div>
+      </div>
+
+      <table class="apple-table">
+        <thead>
+          <tr>
+            <th>Member / Officer</th>
+            <th>Institutional Email</th>
+            <th style="width: 150px;">System Role</th>
+            <th style="width: 100px;">Status</th>
+            <th style="width: 140px; text-align: right;">Role Management</th>
+          </tr>
+        </thead>
+        <tbody>
+          
+          <!-- Officer Row 1 -->
+          <tr>
+            <td>
+              <div style="display: flex; align-items: center; gap: 10px;">
+                <div style="width: 28px; height: 28px; border-radius: 9999px; background: #15803d; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700;">AG</div>
+                <div>
+                  <div style="font-size: 13px; font-weight: 600; color: var(--apple-text-primary);">Andrei John Geronimo</div>
+                  <div style="font-size: 11px; color: var(--apple-text-tertiary);">BSIT 3-A • Lead Developer</div>
+                </div>
+              </div>
+            </td>
+            <td style="font-size: 12px; color: var(--apple-text-secondary);">geronimoandreijohn.pdm@gmail.com</td>
+            <td><span class="sk-tag" style="background: #15803d; color: #ffffff;">SUPER ADMIN</span></td>
+            <td><span class="sk-tag" style="background: #f0fdf4; color: #166534; border-color: #bbf7d0;">ACTIVE</span></td>
+            <td style="text-align: right;">
+              <span style="font-size: 11px; color: var(--apple-text-tertiary);">Permanent</span>
+            </td>
+          </tr>
+
+          <!-- Officer Row 2 -->
+          <tr>
+            <td>
+              <div style="display: flex; align-items: center; gap: 10px;">
+                <div style="width: 28px; height: 28px; border-radius: 9999px; background: var(--apple-fill-secondary); display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700;">CK</div>
+                <div>
+                  <div style="font-size: 13px; font-weight: 600; color: var(--apple-text-primary);">Christian Rey Kasilag</div>
+                  <div style="font-size: 11px; color: var(--apple-text-tertiary);">BSIT 3-A • LITE Auditor</div>
+                </div>
+              </div>
+            </td>
+            <td style="font-size: 12px; color: var(--apple-text-secondary);">kasilagcr.pdm@gmail.com</td>
+            <td><span class="sk-tag" style="background: #eff6ff; color: #1d4ed8; border-color: #bfdbfe;">AUDITOR</span></td>
+            <td><span class="sk-tag" style="background: #f0fdf4; color: #166534; border-color: #bbf7d0;">ACTIVE</span></td>
+            <td style="text-align: right;">
+              <button class="apple-btn" style="padding: 2px 8px; font-size: 11px;">Edit Role ▾</button>
+            </td>
+          </tr>
+
+          <!-- Officer Row 3 -->
+          <tr>
+            <td>
+              <div style="display: flex; align-items: center; gap: 10px;">
+                <div style="width: 28px; height: 28px; border-radius: 9999px; background: var(--apple-fill-secondary); display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700;">EM</div>
+                <div>
+                  <div style="font-size: 13px; font-weight: 600; color: var(--apple-text-primary);">Emanuel Malbarosa</div>
+                  <div style="font-size: 11px; color: var(--apple-text-tertiary);">BSIT 3-A • LITE President</div>
+                </div>
+              </div>
+            </td>
+            <td style="font-size: 12px; color: var(--apple-text-secondary);">malbarosae.pdm@gmail.com</td>
+            <td><span class="sk-tag" style="background: #ffffff; color: var(--apple-text-primary);">PRESIDENT</span></td>
+            <td><span class="sk-tag" style="background: #f0fdf4; color: #166534; border-color: #bbf7d0;">ACTIVE</span></td>
+            <td style="text-align: right;">
+              <button class="apple-btn" style="padding: 2px 8px; font-size: 11px;">Edit Role ▾</button>
+            </td>
+          </tr>
+
+        </tbody>
+      </table>
+
+    </section>
+
+  </main>
+
+</body>
+</html>

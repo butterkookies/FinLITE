@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FinLITE — Apple Design Wireframe Deck</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- Navigation Bar -->
+  <header class="apple-header">
+    <div class="apple-header-inner">
+      <div style="display: flex; align-items: center; gap: 12px;">
+        <div class="sk-block sk-circle" style="width: 28px; height: 28px; background: #15803d;"></div>
+        <div>
+          <h1 style="font-size: 15px; font-weight: 700; letter-spacing: -0.01em;">FinLITE Design System</h1>
+          <p style="font-size: 11px; color: var(--apple-text-secondary); margin-top: -2px;">Apple HIG Skeletal Wireframe Deck</p>
+        </div>
+      </div>
+      <div>
+        <span class="sk-tag">Standalone Offline Wireframes</span>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+    
+    <!-- Header Banner -->
+    <div class="wireframe-banner">
+      <div>
+        <div class="wireframe-title">Skeletal Wireframes & Component Architecture</div>
+        <div class="wireframe-meta">Pure HTML + CSS wireframes capturing layout geometry, spatial hierarchy, and proportions. Click any view below to inspect.</div>
+      </div>
+      <div style="display: flex; gap: 8px;">
+        <a href="color-system.html" class="apple-btn">Color System Specimen 🎨</a>
+        <a href="dashboard.html" class="apple-btn apple-btn-primary">View Core Dashboard →</a>
+      </div>
+    </div>
+
+    <!-- Section 1: Core Financial Dashboard & Operations -->
+    <div style="margin-bottom: 32px;">
+      <h2 style="font-size: 16px; font-weight: 700; margin-bottom: 14px; letter-spacing: -0.01em;">Operational Views & Modals</h2>
+      <div class="grid-3">
+        
+        <!-- Dashboard Card -->
+        <a href="dashboard.html" class="apple-card" style="text-decoration: none; color: inherit; display: block;">
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
+            <span class="sk-tag">Core Screen</span>
+            <span style="font-size: 12px; color: var(--apple-text-secondary);">dashboard.html</span>
+          </div>
+          <h3 style="font-size: 15px; font-weight: 600; margin-bottom: 6px;">Main Financial Dashboard</h3>
+          <p style="font-size: 12px; color: var(--apple-text-secondary); margin-bottom: 16px;">
+            Full operational view: top navigation with semester switcher, 5 KPI stat cards (Cashbox, GCash, Inflows, Outflows, Reimbursements), search/filters, and the transaction ledger table.
+          </p>
+          <div style="display: flex; gap: 6px; flex-wrap: wrap;">
+            <div class="sk-block sk-text-xs sk-w-30"></div>
+            <div class="sk-block sk-text-xs sk-w-40"></div>
+            <div class="sk-block sk-text-xs sk-w-20"></div>
+          </div>
+        </a>
+
+        <!-- Cash Reconciliation Modal -->
+        <a href="cash-reconciliation.html" class="apple-card" style="text-decoration: none; color: inherit; display: block;">
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
+            <span class="sk-tag">Audit Modal</span>
+            <span style="font-size: 12px; color: var(--apple-text-secondary);">cash-reconciliation.html</span>
+          </div>
+          <h3 style="font-size: 15px; font-weight: 600; margin-bottom: 6px;">Cash Reconciliation & Denominations</h3>
+          <p style="font-size: 12px; color: var(--apple-text-secondary); margin-bottom: 16px;">
+            Physical cashbox audit interface with denomination quantity steppers (₱1000 down to centavos), ledger balance comparison, and variance status indicators.
+          </p>
+          <div style="display: flex; gap: 6px; flex-wrap: wrap;">
+            <div class="sk-block sk-text-xs sk-w-40"></div>
+            <div class="sk-block sk-text-xs sk-w-30"></div>
+          </div>
+        </a>
+
+        <!-- New Transaction Modal -->
+        <a href="new-transaction.html" class="apple-card" style="text-decoration: none; color: inherit; display: block;">
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
+            <span class="sk-tag">Entry Modal</span>
+            <span style="font-size: 12px; color: var(--apple-text-secondary);">new-transaction.html</span>
+          </div>
+          <h3 style="font-size: 15px; font-weight: 600; margin-bottom: 6px;">New Transaction Entry</h3>
+          <p style="font-size: 12px; color: var(--apple-text-secondary); margin-bottom: 16px;">
+            Transaction logging modal featuring segmented Cash/GCash payment selector, category picker, amount input, multi-receipt image dropzone, and outflow balance guards.
+          </p>
+          <div style="display: flex; gap: 6px; flex-wrap: wrap;">
+            <div class="sk-block sk-text-xs sk-w-50"></div>
+            <div class="sk-block sk-text-xs sk-w-30"></div>
+          </div>
+        </a>
+
+        <!-- Document Preview Modal -->
+        <a href="report-preview.html" class="apple-card" style="text-decoration: none; color: inherit; display: block;">
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
+            <span class="sk-tag">Report Sheet</span>
+            <span style="font-size: 12px; color: var(--apple-text-secondary);">report-preview.html</span>
+          </div>
+          <h3 style="font-size: 15px; font-weight: 600; margin-bottom: 6px;">Institutional Liquidation Preview</h3>
+          <p style="font-size: 12px; color: var(--apple-text-secondary); margin-bottom: 16px;">
+            Full-fidelity letterhead report sheet preview with Calibri 11pt formatting, borderless signatory matrix, financial summary, and Word DOCX export actions.
+          </p>
+          <div style="display: flex; gap: 6px; flex-wrap: wrap;">
+            <div class="sk-block sk-text-xs sk-w-40"></div>
+            <div class="sk-block sk-text-xs sk-w-40"></div>
+          </div>
+        </a>
+
+      </div>
+    </div>
+
+    <!-- Section 2: Authentication & Administration -->
+    <div style="margin-bottom: 32px;">
+      <h2 style="font-size: 16px; font-weight: 700; margin-bottom: 14px; letter-spacing: -0.01em;">Authentication & Administration</h2>
+      <div class="grid-3">
+
+        <!-- Login Card -->
+        <a href="login.html" class="apple-card" style="text-decoration: none; color: inherit; display: block;">
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
+            <span class="sk-tag">Public Auth</span>
+            <span style="font-size: 12px; color: var(--apple-text-secondary);">login.html</span>
+          </div>
+          <h3 style="font-size: 15px; font-weight: 600; margin-bottom: 6px;">Sign In View</h3>
+          <p style="font-size: 12px; color: var(--apple-text-secondary); margin-bottom: 16px;">
+            Clean Apple-style authentication layout with floating centered card, student/officer identifier inputs, password field, and remember credentials toggle.
+          </p>
+          <div class="sk-block sk-text-xs sk-w-40"></div>
+        </a>
+
+        <!-- Register Card -->
+        <a href="register.html" class="apple-card" style="text-decoration: none; color: inherit; display: block;">
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
+            <span class="sk-tag">Public Auth</span>
+            <span style="font-size: 12px; color: var(--apple-text-secondary);">register.html</span>
+          </div>
+          <h3 style="font-size: 15px; font-weight: 600; margin-bottom: 6px;">Registration & Membership</h3>
+          <p style="font-size: 12px; color: var(--apple-text-secondary); margin-bottom: 16px;">
+            Officer and member onboarding form with institutional email verification, student ID format validation, role request selector, and adviser notification.
+          </p>
+          <div class="sk-block sk-text-xs sk-w-50"></div>
+        </a>
+
+        <!-- Admin Card -->
+        <a href="admin.html" class="apple-card" style="text-decoration: none; color: inherit; display: block;">
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
+            <span class="sk-tag">Admin Role</span>
+            <span style="font-size: 12px; color: var(--apple-text-secondary);">admin.html</span>
+          </div>
+          <h3 style="font-size: 15px; font-weight: 600; margin-bottom: 6px;">Admin Approval Portal</h3>
+          <p style="font-size: 12px; color: var(--apple-text-secondary); margin-bottom: 16px;">
+            Super-admin governance dashboard: pending registration approval queue, role delegation, security audit log, and user profile management.
+          </p>
+          <div class="sk-block sk-text-xs sk-w-60"></div>
+        </a>
+
+      </div>
+    </div>
+
+    <!-- Section 3: Design Tokens & Foundations -->
+    <div style="margin-bottom: 32px;">
+      <h2 style="font-size: 16px; font-weight: 700; margin-bottom: 14px; letter-spacing: -0.01em;">Design System & Color Tokens</h2>
+      <div class="grid-3">
+
+        <!-- Color System Specimen Card -->
+        <a href="color-system.html" class="apple-card" style="text-decoration: none; color: inherit; display: block;">
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
+            <span class="sk-tag" style="background: #f0fdf4; color: #166534; border-color: #bbf7d0;">Color Specimen</span>
+            <span style="font-size: 12px; color: var(--apple-text-secondary);">color-system.html</span>
+          </div>
+          <h3 style="font-size: 15px; font-weight: 600; margin-bottom: 6px;">Green Shade Palette Specimen</h3>
+          <p style="font-size: 12px; color: var(--apple-text-secondary); margin-bottom: 16px;">
+            Pure white canvas presentation (no card boxes). 8 curated green shade combinations, live component test bench, and copyable CSS tokens.
+          </p>
+          <div style="display: flex; gap: 6px; align-items: center;">
+            <span style="width: 14px; height: 14px; border-radius: 9999px; background: #15803d; display: inline-block;"></span>
+            <span style="width: 14px; height: 14px; border-radius: 9999px; background: #22c55e; display: inline-block;"></span>
+            <span style="width: 14px; height: 14px; border-radius: 9999px; background: #86efac; display: inline-block;"></span>
+            <span style="width: 14px; height: 14px; border-radius: 9999px; background: #bbf7d0; display: inline-block;"></span>
+            <span style="font-size: 11px; color: var(--apple-text-tertiary); margin-left: 4px;">8 Palettes Available</span>
+          </div>
+        </a>
+
+      </div>
+    </div>
+
+  </main>
+
+</body>
+</html>

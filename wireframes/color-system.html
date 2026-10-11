@@ -1,0 +1,2552 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FinLITE — Color Design System & Card Styles Studio</title>
+  <style>
+    /* ==========================================================================
+       FinLITE Color Design System & Card Styles Studio
+       Pure White Canvas Specification
+       ========================================================================== */
+
+    :root {
+      /* Active Palette Selection Variables (Default: 01 Institutional Emerald) */
+      --active-primary: #15803d;
+      --active-primary-hover: #166534;
+      --active-text: #14532d;
+      --active-mid: #22c55e;
+      --active-border: #86efac;
+      --active-tint: #f0fdf4;
+      --active-gradient: linear-gradient(180deg, #f0fdf4 0%, #dcfce7 48%, #bbf7d0 100%);
+      --active-palette-name: "01 — Institutional Emerald";
+
+      /* Customizer Live Gradient Variables */
+      --custom-gradient: linear-gradient(180deg, #f0fdf4 0%, #dcfce7 50%, #bbf7d0 100%);
+      --custom-text-color: #14532d;
+      --custom-border-color: #86efac;
+      --custom-tag-bg: #ffffff;
+      --custom-tag-color: #14532d;
+      --custom-tag-border: #86efac;
+
+      /* Foundational Neutrals */
+      --neutral-black: #111827;
+      --neutral-secondary: #4b5563;
+      --neutral-tertiary: #9ca3af;
+      --neutral-hairline: #f3f4f6;
+      --neutral-white: #ffffff;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background: #ffffff;
+      color: var(--neutral-black);
+      font-family: -apple-system, BlinkMacSystemFont, "Inter", "SF Pro Text", "Segoe UI", Roboto, sans-serif;
+      -webkit-font-smoothing: antialiased;
+      padding: 56px 32px 120px 32px;
+      line-height: 1.5;
+    }
+
+    .canvas {
+      max-width: 1120px;
+      margin: 0 auto;
+    }
+
+    /* Top Navigation Return */
+    .top-nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 48px;
+    }
+
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--neutral-secondary);
+      text-decoration: none;
+      transition: color 0.15s ease;
+    }
+
+    .back-link:hover {
+      color: var(--neutral-black);
+    }
+
+    .doc-badge {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--neutral-secondary);
+    }
+
+    /* Header Typography */
+    .hero-eyebrow {
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--active-primary);
+      margin-bottom: 12px;
+      transition: color 0.25s ease;
+    }
+
+    .hero-title {
+      font-size: 38px;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      line-height: 1.15;
+      margin-bottom: 14px;
+    }
+
+    .hero-desc {
+      font-size: 16px;
+      color: var(--neutral-secondary);
+      max-width: 760px;
+      line-height: 1.65;
+      margin-bottom: 36px;
+    }
+
+    /* Segmented Navigation Tabs (Floating on Pure White) */
+    .tabs-wrapper {
+      margin-bottom: 48px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--neutral-hairline);
+      padding-bottom: 16px;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+
+    .tabs-nav {
+      display: inline-flex;
+      background: #f3f4f6;
+      padding: 4px;
+      border-radius: 9999px;
+      gap: 4px;
+    }
+
+    .tab-btn {
+      background: transparent;
+      border: none;
+      padding: 8px 20px;
+      border-radius: 9999px;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--neutral-secondary);
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .tab-btn:hover {
+      color: var(--neutral-black);
+    }
+
+    .tab-btn.active {
+      background: #ffffff;
+      color: var(--neutral-black);
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+    }
+
+    .tab-meta-hint {
+      font-size: 12px;
+      color: var(--neutral-secondary);
+    }
+
+    /* Tab Panes */
+    .tab-pane {
+      display: none;
+      animation: fadeIn 0.2s ease-in-out;
+    }
+
+    .tab-pane.active {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Section Separation */
+    .specimen-section {
+      margin-top: 72px;
+      padding-top: 48px;
+      border-top: 1px solid var(--neutral-hairline);
+    }
+
+    .section-kicker {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--neutral-tertiary);
+      margin-bottom: 8px;
+    }
+
+    .section-heading {
+      font-size: 24px;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      margin-bottom: 8px;
+    }
+
+    .section-sub {
+      font-size: 14px;
+      color: var(--neutral-secondary);
+      max-width: 720px;
+      line-height: 1.6;
+      margin-bottom: 36px;
+    }
+
+    /* Active Specimen Test Bench (Open on White) */
+    .active-bench {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 36px;
+      align-items: center;
+      padding-bottom: 40px;
+      border-bottom: 1px solid var(--neutral-hairline);
+      margin-bottom: 56px;
+    }
+
+    @media (max-width: 860px) {
+      .active-bench {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .active-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--active-text);
+      background: var(--active-tint);
+      border: 1px solid var(--active-border);
+      padding: 4px 10px;
+      border-radius: 9999px;
+      margin-bottom: 12px;
+      transition: all 0.25s ease;
+    }
+
+    .active-palette-title {
+      font-size: 24px;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      margin-bottom: 6px;
+    }
+
+    .active-palette-desc {
+      font-size: 13px;
+      color: var(--neutral-secondary);
+    }
+
+    /* Live Mini Component Specimen Row */
+    .live-specimens {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+
+    .specimen-pill-card {
+      background: var(--active-gradient);
+      border: 1px solid var(--active-border);
+      border-radius: 14px;
+      padding: 14px 18px;
+      min-width: 170px;
+      transition: all 0.25s ease;
+    }
+
+    .specimen-pill-label {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--active-text);
+      margin-bottom: 2px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .specimen-pill-value {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--active-text);
+      font-variant-numeric: tabular-nums;
+      letter-spacing: -0.02em;
+    }
+
+    .specimen-btn-primary {
+      background: var(--active-primary);
+      color: #ffffff;
+      border: none;
+      padding: 10px 18px;
+      font-size: 13px;
+      font-weight: 600;
+      border-radius: 8px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s ease;
+    }
+
+    .specimen-btn-primary:hover {
+      background: var(--active-primary-hover);
+      transform: translateY(-1px);
+    }
+
+    .specimen-tag-pill {
+      background: var(--active-tint);
+      border: 1px solid var(--active-border);
+      color: var(--active-text);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      padding: 5px 10px;
+      border-radius: 6px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.25s ease;
+    }
+
+    /* Color Architecture Foundations (Role breakdown) */
+    .roles-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 28px;
+      margin-bottom: 64px;
+    }
+
+    @media (max-width: 900px) {
+      .roles-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (max-width: 520px) {
+      .roles-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .role-item-title {
+      font-size: 13px;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+
+    .role-item-spec {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--neutral-secondary);
+      margin-bottom: 6px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    }
+
+    .role-item-desc {
+      font-size: 12px;
+      color: var(--neutral-secondary);
+      line-height: 1.55;
+    }
+
+    /* Individual Palette Presentation (Open Layout on Blank White) */
+    .palette-entry {
+      margin-bottom: 72px;
+    }
+
+    .palette-header-row {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+    }
+
+    .palette-title-group {
+      display: flex;
+      align-items: baseline;
+      gap: 12px;
+    }
+
+    .palette-num {
+      font-size: 13px;
+      font-weight: 800;
+      letter-spacing: 0.04em;
+      color: var(--neutral-tertiary);
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    }
+
+    .palette-name {
+      font-size: 19px;
+      font-weight: 700;
+      letter-spacing: -0.015em;
+    }
+
+    .palette-personality {
+      font-size: 13px;
+      color: var(--neutral-secondary);
+      margin-bottom: 20px;
+      max-width: 720px;
+    }
+
+    .select-palette-btn {
+      background: transparent;
+      border: 1px solid var(--neutral-hairline);
+      color: var(--neutral-black);
+      padding: 6px 14px;
+      border-radius: 9999px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.15s ease;
+    }
+
+    .select-palette-btn:hover {
+      background: var(--neutral-black);
+      color: #ffffff;
+      border-color: var(--neutral-black);
+    }
+
+    .select-palette-btn.is-active {
+      background: #111827;
+      color: #ffffff;
+      border-color: #111827;
+    }
+
+    /* Swatches Strip (Open Row, No Boxes) */
+    .swatches-strip {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 18px;
+      margin-bottom: 20px;
+    }
+
+    @media (max-width: 860px) {
+      .swatches-strip {
+        grid-template-columns: repeat(3, 1fr);
+      }
+    }
+
+    @media (max-width: 520px) {
+      .swatches-strip {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    .swatch-col {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .swatch-circle {
+      width: 100%;
+      height: 48px;
+      border-radius: 10px;
+      border: 1px solid rgba(0, 0, 0, 0.06);
+      cursor: pointer;
+      position: relative;
+      transition: transform 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    .swatch-circle:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+    }
+
+    .swatch-hex {
+      font-size: 12px;
+      font-weight: 700;
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      color: var(--neutral-black);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      cursor: pointer;
+    }
+
+    .swatch-hex:hover {
+      text-decoration: underline;
+    }
+
+    .swatch-role {
+      font-size: 11px;
+      color: var(--neutral-secondary);
+      line-height: 1.3;
+    }
+
+    /* Gradient Specimen Strip */
+    .gradient-ribbon {
+      height: 28px;
+      border-radius: 7px;
+      width: 100%;
+      margin-bottom: 24px;
+      border: 1px solid rgba(0, 0, 0, 0.05);
+    }
+
+    /* Micro In-Situ Preview Row */
+    .in-situ-row {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+      padding-top: 12px;
+    }
+
+    /* ==========================================================================
+       TAB 2: CARD STYLES & GRADIENT CUSTOMIZER SPECIFICATION
+       ========================================================================== */
+
+    /* Card Styles Grid (Floating Open on White) */
+    .card-styles-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 32px;
+      margin-bottom: 64px;
+    }
+
+    @media (max-width: 980px) {
+      .card-styles-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (max-width: 620px) {
+      .card-styles-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .card-style-col {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .card-style-meta {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+    }
+
+    .card-style-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--neutral-black);
+    }
+
+    .card-style-tag {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--neutral-secondary);
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    }
+
+    .card-style-desc {
+      font-size: 12px;
+      color: var(--neutral-secondary);
+      line-height: 1.5;
+    }
+
+    /* Card Style Specimens (Real Card Previews) */
+    .demo-card {
+      border-radius: 18px;
+      padding: 20px;
+      position: relative;
+      cursor: pointer;
+      user-select: none;
+      transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s ease, border-color 0.2s ease;
+    }
+
+    .demo-card:hover {
+      transform: translateY(-2px);
+    }
+
+    /* Card Style 1: Flat Light Green Gradient */
+    .demo-card-1 {
+      background: linear-gradient(180deg, #f0fdf4 0%, #dcfce7 48%, #bbf7d0 100%);
+      border: 1px solid #86efac;
+      color: #14532d;
+      box-shadow: 0 1px 3px rgba(22, 101, 52, 0.08), 0 1px 2px rgba(22, 101, 52, 0.04);
+    }
+    .demo-card-1:hover {
+      border-color: #4ade80;
+      box-shadow: 0 6px 16px rgba(22, 101, 52, 0.12);
+    }
+
+    /* Card Style 2: Deep Matte Forest */
+    .demo-card-2 {
+      background: linear-gradient(180deg, #245239 0%, #173827 55%, #10281b 100%);
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      color: #ffffff;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
+    }
+    .demo-card-2:hover {
+      box-shadow: 0 8px 20px rgba(16, 40, 27, 0.25);
+    }
+
+    /* Card Style 3: Frosted Translucent Apple Material */
+    .demo-card-3 {
+      background: rgba(240, 253, 244, 0.72);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(134, 239, 172, 0.6);
+      color: #14532d;
+      box-shadow: 0 1px 4px rgba(22, 101, 52, 0.06);
+    }
+    .demo-card-3:hover {
+      background: rgba(240, 253, 244, 0.9);
+      border-color: #86efac;
+      box-shadow: 0 6px 18px rgba(22, 101, 52, 0.1);
+    }
+
+    /* Card Style 4: Minimal Left Accent Stripe */
+    .demo-card-4 {
+      background: #ffffff;
+      border: 1px solid #e5e7eb;
+      border-left: 5px solid #15803d;
+      color: #111827;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    }
+    .demo-card-4:hover {
+      border-color: #d1d5db;
+      border-left-color: #16a34a;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    }
+
+    /* Card Style 5: Soft Tactile Bevel Pillowed Emboss */
+    .demo-card-5 {
+      background: linear-gradient(180deg, #f0fdf4 0%, #dcfce7 60%, #c1ebd3 100%);
+      border: 1px solid rgba(255, 255, 255, 0.85);
+      color: #14532d;
+      box-shadow: 
+        0 2px 6px rgba(22, 101, 52, 0.08),
+        inset 0 1px 1px 0 rgba(255, 255, 255, 0.9),
+        inset 0 -1.5px 2px 0 rgba(22, 101, 52, 0.15);
+    }
+    .demo-card-5:hover {
+      box-shadow: 
+        0 6px 16px rgba(22, 101, 52, 0.14),
+        inset 0 1px 1px 0 #ffffff,
+        inset 0 -1.5px 2px 0 rgba(22, 101, 52, 0.18);
+    }
+
+    /* Card Style 6: Dual-Tone Segmented Header */
+    .demo-card-6 {
+      background: #ffffff;
+      border: 1px solid #bbf7d0;
+      color: #111827;
+      overflow: hidden;
+      padding: 0;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    }
+    .demo-card-6-header {
+      background: #f0fdf4;
+      border-bottom: 1px solid #bbf7d0;
+      padding: 12px 18px;
+    }
+    .demo-card-6-body {
+      padding: 16px 18px 18px 18px;
+    }
+
+    /* Card Interior Typography & Elements */
+    .demo-card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 8px;
+    }
+
+    .demo-card-title {
+      font-size: 12px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .demo-card-tag {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+
+    .demo-card-val {
+      font-size: 21px;
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      font-variant-numeric: tabular-nums;
+      margin-bottom: 4px;
+      line-height: 1.2;
+    }
+
+    .demo-card-sub {
+      font-size: 11px;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      opacity: 0.85;
+    }
+
+    .copy-card-code-btn {
+      background: transparent;
+      border: 1px solid var(--neutral-hairline);
+      color: var(--neutral-secondary);
+      font-size: 11px;
+      font-weight: 600;
+      padding: 5px 10px;
+      border-radius: 6px;
+      cursor: pointer;
+      align-self: flex-start;
+      transition: all 0.15s ease;
+    }
+
+    .copy-card-code-btn:hover {
+      background: var(--neutral-black);
+      color: #ffffff;
+      border-color: var(--neutral-black);
+    }
+
+    /* ==========================================================================
+       INTERACTIVE GRADIENT CUSTOMIZATION STUDIO
+       ========================================================================== */
+
+    .studio-layout {
+      display: grid;
+      grid-template-columns: 1fr 1.15fr;
+      gap: 48px;
+      align-items: start;
+      margin-top: 24px;
+    }
+
+    @media (max-width: 960px) {
+      .studio-layout {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* Presets Strip */
+    .presets-label {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--neutral-secondary);
+      margin-bottom: 12px;
+    }
+
+    .presets-strip {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 28px;
+    }
+
+    .preset-pill-btn {
+      background: #fafafa;
+      border: 1px solid var(--neutral-hairline);
+      padding: 6px 12px;
+      border-radius: 9999px;
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--neutral-black);
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.15s ease;
+    }
+
+    .preset-pill-btn:hover {
+      background: #f3f4f6;
+      border-color: #e5e7eb;
+    }
+
+    .preset-pill-btn.active {
+      background: #111827;
+      color: #ffffff;
+      border-color: #111827;
+    }
+
+    .preset-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 9999px;
+      border: 1px solid rgba(0, 0, 0, 0.1);
+    }
+
+    /* Controls Group (Open Layout on Blank White) */
+    .control-row {
+      margin-bottom: 24px;
+    }
+
+    .control-label {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--neutral-black);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 8px;
+    }
+
+    .control-val-badge {
+      font-size: 11px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      color: var(--neutral-secondary);
+    }
+
+    /* Direction Quick Buttons */
+    .direction-btn-group {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+
+    .direction-btn {
+      background: #ffffff;
+      border: 1px solid #e5e7eb;
+      padding: 6px 8px;
+      font-size: 11px;
+      font-weight: 600;
+      border-radius: 6px;
+      cursor: pointer;
+      color: var(--neutral-secondary);
+      text-align: center;
+      transition: all 0.15s ease;
+    }
+
+    .direction-btn:hover {
+      color: var(--neutral-black);
+      border-color: #d1d5db;
+    }
+
+    .direction-btn.active {
+      background: #111827;
+      color: #ffffff;
+      border-color: #111827;
+    }
+
+    /* Sliders */
+    .range-slider {
+      width: 100%;
+      height: 5px;
+      accent-color: #15803d;
+      background: #e5e7eb;
+      border-radius: 9999px;
+      outline: none;
+      cursor: pointer;
+    }
+
+    /* Color Stop Row */
+    .color-stops-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    .color-stop-col {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .color-stop-title {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--neutral-secondary);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .color-stop-picker-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: #ffffff;
+      border: 1px solid #e5e7eb;
+      border-radius: 8px;
+      padding: 4px 8px;
+    }
+
+    .color-input-native {
+      -webkit-appearance: none;
+      -moz-appearance: none;
+      appearance: none;
+      width: 24px;
+      height: 24px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      border-radius: 4px;
+    }
+    .color-input-native::-webkit-color-swatch {
+      border-radius: 4px;
+      border: 1px solid rgba(0, 0, 0, 0.15);
+    }
+
+    .color-hex-text {
+      font-size: 12px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-weight: 600;
+      border: none;
+      background: transparent;
+      outline: none;
+      width: 68px;
+      color: var(--neutral-black);
+    }
+
+    /* Quick Hue Swatches Lineup */
+    .quick-hues {
+      display: flex;
+      gap: 5px;
+      flex-wrap: wrap;
+      margin-top: 4px;
+    }
+
+    .quick-hue-dot {
+      width: 16px;
+      height: 16px;
+      border-radius: 4px;
+      cursor: pointer;
+      border: 1px solid rgba(0, 0, 0, 0.1);
+      transition: transform 0.1s ease;
+    }
+    .quick-hue-dot:hover {
+      transform: scale(1.15);
+    }
+
+    /* Contrast Theme Switcher */
+    .contrast-toggle-wrap {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 28px;
+    }
+
+    .contrast-pill-toggle {
+      display: inline-flex;
+      background: #f3f4f6;
+      padding: 3px;
+      border-radius: 9999px;
+      gap: 4px;
+    }
+
+    .contrast-btn {
+      background: transparent;
+      border: none;
+      padding: 5px 12px;
+      font-size: 11px;
+      font-weight: 600;
+      border-radius: 9999px;
+      color: var(--neutral-secondary);
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .contrast-btn.active {
+      background: #ffffff;
+      color: var(--neutral-black);
+      box-shadow: 0 1px 2px rgba(0,0,0,0.06);
+    }
+
+    /* Live Card Studio Canvas Display */
+    .studio-preview-col {
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    .live-preview-box {
+      border-radius: 20px;
+      padding: 24px 28px;
+      transition: all 0.15s ease;
+      cursor: default;
+    }
+
+    .live-preview-box-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 14px;
+    }
+
+    .live-preview-box-label {
+      font-size: 13px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .live-preview-box-tag {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      padding: 3px 8px;
+      border-radius: 6px;
+    }
+
+    .live-preview-box-val {
+      font-size: 26px;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      font-variant-numeric: tabular-nums;
+      margin-bottom: 8px;
+      line-height: 1.2;
+    }
+
+    .live-preview-box-sub {
+      font-size: 12px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-weight: 500;
+    }
+
+    /* CSS Output Pre */
+    .css-block-wrap {
+      margin-top: 16px;
+    }
+
+    .css-pre {
+      background: #fafafa;
+      border: 1px solid var(--neutral-hairline);
+      padding: 18px 20px;
+      border-radius: 12px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-size: 12px;
+      color: var(--neutral-black);
+      line-height: 1.7;
+      overflow-x: auto;
+      white-space: pre;
+    }
+
+    .copy-css-btn {
+      margin-top: 12px;
+      background: var(--neutral-black);
+      color: #ffffff;
+      border: none;
+      padding: 9px 18px;
+      font-size: 12px;
+      font-weight: 600;
+      border-radius: 7px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: opacity 0.15s ease;
+    }
+
+    .copy-css-btn:hover {
+      opacity: 0.85;
+    }
+
+    /* Floating Toast Feedback */
+    .copy-toast {
+      position: fixed;
+      bottom: 28px;
+      right: 28px;
+      background: #111827;
+      color: #ffffff;
+      padding: 10px 18px;
+      border-radius: 9999px;
+      font-size: 12px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      opacity: 0;
+      transform: translateY(12px);
+      pointer-events: none;
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+      z-index: 1000;
+    }
+
+    .copy-toast.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  </style>
+</head>
+<body>
+
+  <div class="canvas">
+
+    <!-- Top Navigation Return -->
+    <nav class="top-nav">
+      <a href="index.html" class="back-link">← Back to Wireframe Hub</a>
+      <span class="doc-badge">FinLITE Design Specimen • Pure White Canvas</span>
+    </nav>
+
+    <!-- Header Section -->
+    <header>
+      <div class="hero-eyebrow" id="activeEyebrow">Design System & Surface Specifications</div>
+      <h1 class="hero-title">Color System & Card Studio</h1>
+      <p class="hero-desc">
+        Laid out directly on pure white space with zero container boxes. Explore curated green shade palettes or switch tabs to test card surface treatments and custom gradient combinations in real time.
+      </p>
+    </header>
+
+    <!-- Segmented Navigation Tabs -->
+    <div class="tabs-wrapper">
+      <div class="tabs-nav">
+        <button class="tab-btn active" id="tab-btn-colors" onclick="switchTab('colors')">
+          <span>🎨</span>
+          <span>Color System & Green Palettes</span>
+        </button>
+        <button class="tab-btn" id="tab-btn-cards" onclick="switchTab('cards')">
+          <span>🃏</span>
+          <span>Card Styles & Gradient Customizer</span>
+        </button>
+      </div>
+      <div class="tab-meta-hint" id="tabHint">
+        Showing 8 Curated Green Palettes
+      </div>
+    </div>
+
+    <!-- ======================================================================
+         TAB 1 PANE: COLOR SYSTEM & 8 GREEN PALETTES
+         ====================================================================== -->
+    <div class="tab-pane active" id="tab-pane-colors">
+
+      <!-- Active Palette Live Test Bench -->
+      <section class="active-bench" id="testBench">
+        <div>
+          <div class="active-tag" id="benchBadge">
+            <span style="width: 7px; height: 7px; border-radius: 9999px; background: currentColor;"></span>
+            <span id="benchBadgeText">Active Selection: 01 — Institutional Emerald</span>
+          </div>
+          <h2 class="active-palette-title" id="benchTitle">01 — Institutional Emerald</h2>
+          <p class="active-palette-desc" id="benchDesc">
+            Official, authoritative, and stable university financial aesthetic.
+          </p>
+        </div>
+
+        <!-- Live Micro-Components in White Space -->
+        <div class="live-specimens">
+          
+          <!-- Cashbox Flat Light Specimen -->
+          <div class="specimen-pill-card" id="benchCard">
+            <div class="specimen-pill-label">
+              <span>Physical Cash</span>
+              <span style="font-size: 9px; opacity: 0.85;">CASHBOX</span>
+            </div>
+            <div class="specimen-pill-value">₱14,850.00</div>
+            <div style="font-size: 10px; color: var(--active-text); opacity: 0.85; margin-top: 3px; display: flex; align-items: center; gap: 5px;">
+              <span style="width: 5px; height: 5px; border-radius: 9999px; background: currentColor;"></span>
+              Audit Denominations
+            </div>
+          </div>
+
+          <!-- Primary Action Button -->
+          <button class="specimen-btn-primary" id="benchBtn" onclick="copyCurrentCSS()">
+            + Post Inflow
+          </button>
+
+          <!-- Status Tag -->
+          <div class="specimen-tag-pill" id="benchPill">
+            <span>●</span>
+            <span>Verified Ledger</span>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- Foundational Color Roles Breakdown -->
+      <section>
+        <div class="section-kicker">Part I • Design System Foundations</div>
+        <h2 class="section-heading">Functional Color Roles in FinLITE</h2>
+        <p class="section-sub">
+          Every color in a financial system serves a designated communicative duty. FinLITE separates identity, data readability, and spatial boundaries into 5 disciplined tiers:
+        </p>
+
+        <div class="roles-grid">
+          <div>
+            <div class="role-item-title">1. High-Contrast Text</div>
+            <div class="role-item-spec">--active-text</div>
+            <div class="role-item-desc">
+              Deep, desaturated green shades (600–900). Ensures minimum 7:1 WCAG AAA contrast ratio on pure white backgrounds and light tints for amounts and headers.
+            </div>
+          </div>
+          <div>
+            <div class="role-item-title">2. Primary Accent</div>
+            <div class="role-item-spec">--active-primary</div>
+            <div class="role-item-desc">
+              The distinctive brand signature. Powers primary buttons, squircle identity emblems, active segmented controls, and focal action triggers.
+            </div>
+          </div>
+          <div>
+            <div class="role-item-title">3. Mid Transition Shade</div>
+            <div class="role-item-spec">--active-mid</div>
+            <div class="role-item-desc">
+              Vibrant bridge tone used in directional gradients, active progress indicators, and trend badges (+12.4% net revenue).
+            </div>
+          </div>
+          <div>
+            <div class="role-item-title">4. Surface Tints & Borders</div>
+            <div class="role-item-spec">--active-tint / --border</div>
+            <div class="role-item-desc">
+              Light pastel green washes (50–200) for the flat Cashbox card, table row active states, pill backdrops, and delicate hairline separators.
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- The 8 Curated Green Shade Combinations -->
+      <section class="specimen-section">
+        <div class="section-kicker">Part II • Selection Gallery</div>
+        <h2 class="section-heading">Curated Green Shade Combinations</h2>
+        <p class="section-sub">
+          Choose the personality that best reflects the organization's identity. Click "Select Palette" on any option to apply it live to the specimen above and generate production code.
+        </p>
+
+        <!-- PALETTE 01: Institutional Emerald -->
+        <article class="palette-entry" id="palette-01">
+          <div class="palette-header-row">
+            <div class="palette-title-group">
+              <span class="palette-num">01</span>
+              <h3 class="palette-name">Institutional Emerald</h3>
+            </div>
+            <button class="select-palette-btn is-active" onclick="applyPalette('01')">✓ Currently Active</button>
+          </div>
+          <p class="palette-personality">
+            <strong>Aesthetic Persona:</strong> Official, authoritative, and stable university financial identity. Matches traditional academic governance, high-trust accounting, and PDM colors.
+          </p>
+
+          <div class="swatches-strip">
+            <div class="swatch-col">
+              <div class="swatch-circle" style="background: #14532d;" onclick="copyHex('#14532d')"></div>
+              <div class="swatch-hex" onclick="copyHex('#14532d')">#14532d <span>⎘</span></div>
+              <div class="swatch-role">Deep Text (AAA)</div>
+            </div>
+            <div class="swatch-col">
+              <div class="swatch-circle" style="background: #15803d;" onclick="copyHex('#15803d')"></div>
+              <div class="swatch-hex" onclick="copyHex('#15803d')">#15803d <span>⎘</span></div>
+              <div class="swatch-role">Primary Accent</div>
+            </div>
+            <div class="swatch-col">
+              <div class="swatch-circle" style="background: #22c55e;" onclick="copyHex('#22c55e')"></div>
+              <div class="swatch-hex" onclick="copyHex('#22c55e')">#22c55e <span>⎘</span></div>
+              <div class="swatch-role">Mid Shade / Pop</div>
+            </div>
+            <div class="swatch-col">
+              <div class="swatch-circle" style="background: #86efac;" onclick="copyHex('#86efac')"></div>
+              <div class="swatch-hex" onclick="copyHex('#86efac')">#86efac <span>⎘</span></div>
+              <div class="swatch-role">Hairline Border</div>
+            </div>
+            <div class="swatch-col">
+              <div class="swatch-circle" style="background: #f0fdf4;" onclick="copyHex('#f0fdf4')"></div>
+              <div class="swatch-hex" onclick="copyHex('#f0fdf4')">#f0fdf4 <span>⎘</span></div>
+              <div class="swatch-role">Surface Tint (50)</div>
+            </div>
+          </div>
+
+          <div class="gradient-ribbon" style="background: linear-gradient(90deg, #14532d 0%, #15803d 30%, #22c55e 65%, #86efac 85%, #f0fdf4 100%);"></div>
+
+          <div class="in-situ-row">
+            <div style="font-size: 16px; font-weight: 700; color: #14532d; font-variant-numeric: tabular-nums;">₱14,850.00</div>
+            <span style="font-size: 11px; font-weight: 600; color: #14532d; background: #f0fdf4; border: 1px solid #86efac; padding: 3px 8px; border-radius: 5px;">CASHBOX</span>
+            <span style="font-size: 11px; font-weight: 600; color: #15803d; background: #ffffff; border: 1px solid #86efac; padding: 3px 8px; border-radius: 5px;">+₱3,500.00 Inflow</span>
+            <span style="font-size: 11px; color: #15803d; font-weight: 500;">Audit Denominations →</span>
+          </div>
+        </article>
+
+        <!-- PALETTE 02: Nordic Sage & Alpine -->
+        <article class="palette-entry" id="palette-02">
+          <div class="palette-header-row">
+            <div class="palette-title-group">
+              <span class="palette-num">02</span>
+              <h3 class="palette-name">Nordic Sage & Alpine</h3>
+            </div>
+            <button class="select-palette-btn" onclick="applyPalette('02')">Select Palette</button>
+          </div>
+          <p class="palette-personality">
+            <strong>Aesthetic Persona:</strong> Understated, matte, architectural, and desaturated. Low eye-strain earth green with crisp contrast for high-volume ledger audits.
+          </p>
+
+          <div class="swatches-strip">
+            <div class="swatch-col">
+              <div class="swatch-circle" style="background: #183a29;" onclick="copyHex('#183a29')"></div>
+              <div class="swatch-hex" onclick="copyHex('#183a29')">#183a29 <span>⎘</span></div>
+              <div class="swatch-role">Deep Spruce Text</div>
+            </div>
+            <div class="swatch-col">
+              <div class="swatch-circle" style="background: #2e5842;" onclick="copyHex('#2e5842')"></div>
+              <div class="swatch-hex" onclick="copyHex('#2e5842')">#2e5842 <span>⎘</span></div>
+              <div class="swatch-role">Alpine Accent</div>
+            </div>
+            <div class="swatch-col">
+              <div class="swatch-circle" style="background: #527d65;" onclick="copyHex('#527d65')"></div>
+              <div class="swatch-hex" onclick="copyHex('#527d65')">#527d65 <span>⎘</span></div>
+              <div class="swatch-role">Muted Sage Mid</div>
+            </div>
+            <div class="swatch-col">
+              <div class="swatch-circle" style="background: #c8ded2;" onclick="copyHex('#c8ded2')"></div>
+              <div class="swatch-hex" onclick="copyHex('#c8ded2')">#c8ded2 <span>⎘</span></div>
+              <div class="swatch-role">Celadon Border</div>
+            </div>
+            <div class="swatch-col">
+              <div class="swatch-circle" style="background: #f2f7f4;" onclick="copyHex('#f2f7f4')"></div>
+              <div class="swatch-hex" onclick="copyHex('#f2f7f4')">#f2f7f4 <span>⎘</span></div>
+              <div class="swatch-role">Alpine Fog Tint</div>
+            </div>
+          </div>
+
+          <div class="gradient-ribbon" style="background: linear-gradient(90deg, #183a29 0%, #2e5842 32%, #527d65 65%, #c8ded2 85%, #f2f7f4 100%);"></div>
+
+          <div class="in-situ-row">
+            <div style="font-size: 16px; font-weight: 700; color: #183a29; font-variant-numeric: tabular-nums;">₱14,850.00</div>
+            <span style="font-size: 11px; font-weight: 600; color: #183a29; background: #f2f7f4; border: 1px solid #c8ded2; padding: 3px 8px; border-radius: 5px;">CASHBOX</span>
+            <span style="font-size: 11px; font-weight: 600; color: #2e5842; background: #ffffff; border: 1px solid #c8ded2; padding: 3px 8px; border-radius: 5px;">+₱3,500.00 Inflow</span>
+            <span style="font-size: 11px; color: #2e5842; font-weight: 500;">Audit Denominations →</span>
+          </div>
+        </article>
+
+        <!-- PALETTE 03: Modern Mint-Jade -->
+        <article class="palette-entry" id="palette-03">
+          <div class="palette-header-row">
+            <div class="palette-title-group">
+              <span class="palette-num">03</span>
+              <h3 class="palette-name">Modern Mint-Jade</h3>
+            </div>
+            <button class="select-palette-btn" onclick="applyPalette('03')">Select Palette</button>
+          </div>
+          <p class="palette-personality">
+            <strong>Aesthetic Persona:</strong> Modern fintech, digital-first, crisp and agile. Reminiscent of Stripe, Linear, and modern tech products with luminous clarity.
+          </p>
+
+          <div class="swatches-strip">
+            <div class="swatch-col">
+              <div class="swatch-circle" style="background: #064e3b;" onclick="copyHex('#064e3b')"></div>
+              <div class="swatch-hex" onclick="copyHex('#064e3b')">#064e3b <span>⎘</span></div>
+              <div class="swatch-role">Pine Text</div>
+            </div>
+            <div class="swatch-col">
+              <div class="swatch-circle" style="background: #059669;" onclick="copyHex('#059669')"></div>
+              <div class="swatch-hex" onclick="copyHex('#059669')">#059669 <span>⎘</span></div>
+              <div class="swatch-role">Pure Jade Accent</div>
+            </div>
+            <div class="swatch-col">
+              <div class="swatch-circle" style="background: #34d399;" onclick="copyHex('#34d399')"></div>
+              <div class="swatch-hex" onclick="copyHex('#34d399')">#34d399 <span>⎘</span></div>
+              <div class="swatch-role">Mint Mid Pop</div>
+            </div>
+            <div class="swatch-col">
+              <div class="swatch-circle" style="background: #a7f3d0;" onclick="copyHex('#a7f3d0')"></div>
+              <div class="swatch-hex" onclick="copyHex('#a7f3d0')">#a7f3d0 <span>⎘</span></div>
+              <div class="swatch-role">Mint Border</div>
+            </div>
+            <div class="swatch-col">
+              <div class="swatch-circle" style="background: #ecfdf5;" onclick="copyHex('#ecfdf5')"></div>
+              <div class="swatch-hex" onclick="copyHex('#ecfdf5')">#ecfdf5 <span>⎘</span></div>
+              <div class="swatch-role">Glow Mint Tint</div>
+            </div>
+          </div>
+
+          <div class="gradient-ribbon" style="background: linear-gradient(90deg, #064e3b 0%, #059669 35%, #34d399 68%, #a7f3d0 86%, #ecfdf5 100%);"></div>
+
+          <div class="in-situ-row">
+            <div style="font-size: 16px; font-weight: 700; color: #064e3b; font-variant-numeric: tabular-nums;">₱14,850.00</div>
+            <span style="font-size: 11px; font-weight: 600; color: #064e3b; background: #ecfdf5; border: 1px solid #a7f3d0; padding: 3px 8px; border-radius: 5px;">CASHBOX</span>
+            <span style="font-size: 11px; font-weight: 600; color: #059669; background: #ffffff; border: 1px solid #a7f3d0; padding: 3px 8px; border-radius: 5px;">+₱3,500.00 Inflow</span>
+            <span style="font-size: 11px; color: #059669; font-weight: 500;">Audit Denominations →</span>
+          </div>
+        </article>
+
+        <!-- PALETTE 04: British Racing Green -->
+        <article class="palette-entry" id="palette-04">
+          <div class="palette-header-row">
+            <div class="palette-title-group">
+              <span class="palette-num">04</span>
+              <h3 class="palette-name">British Racing Green & Heritage</h3>
+            </div>
+            <button class="select-palette-btn" onclick="applyPalette('04')">Select Palette</button>
+          </div>
+          <p class="palette-personality">
+            <strong>Aesthetic Persona:</strong> Luxury, private banking, treasury distinction. Deep, commanding green that exudes institutional permanence, fiduciary solemnity, and prestige.
+          </p>
+
+          <div class="swatches-strip">
+            <div class="swatch-col">
+              <div class="swatch-circle" style="background: #062817;" onclick="copyHex('#062817')"></div>
+              <div class="swatch-hex" onclick="copyHex('#062817')">#062817 <span>⎘</span></div>
+              <div class="swatch-role">Obsidian Green Text</div>
+            </div>
+            <div class="swatch-col">
+              <div class="swatch-circle" style="background: #0d522c;" onclick="copyHex('#0d522c')"></div>
+              <div class="swatch-hex" onclick="copyHex('#0d522c')">#0d522c <span>⎘</span></div>
+              <div class="swatch-role">Racing Green Accent</div>
+            </div>
+            <div class="swatch-col">
+              <div class="swatch-circle" style="background: #1b7a44;" onclick="copyHex('#1b7a44')"></div>
+              <div class="swatch-hex" onclick="copyHex('#1b7a44')">#1b7a44 <span>⎘</span></div>
+              <div class="swatch-role">Hunter Green Pop</div>
+            </div>
+            <div class="swatch-col">
+              <div class="swatch-circle" style="background: #c4ded0;" onclick="copyHex('#c4ded0')"></div>
+              <div class="swatch-hex" onclick="copyHex('#c4ded0')">#c4ded0 <span>⎘</span></div>
+              <div class="swatch-role">Silver Mint Border</div>
+            </div>
+            <div class="swatch-col">
+              <div class="swatch-circle" style="background: #f4f8f5;" onclick="copyHex('#f4f8f5')"></div>
+              <div class="swatch-hex" onclick="copyHex('#f4f8f5')">#f4f8f5 <span>⎘</span></div>
+              <div class="swatch-role">Linen Mint Tint</div>
+            </div>
+          </div>
+
+          <div class="gradient-ribbon" style="background: linear-gradient(90deg, #062817 0%, #0d522c 35%, #1b7a44 65%, #c4ded0 85%, #f4f8f5 100%);"></div>
+
+          <div class="in-situ-row">
+            <div style="font-size: 16px; font-weight: 700; color: #062817; font-variant-numeric: tabular-nums;">₱14,850.00</div>
+            <span style="font-size: 11px; font-weight: 600; color: #062817; background: #f4f8f5; border: 1px solid #c4ded0; padding: 3px 8px; border-radius: 5px;">CASHBOX</span>
+            <span style="font-size: 11px; font-weight: 600; color: #0d522c; background: #ffffff; border: 1px solid #c4ded0; padding: 3px 8px; border-radius: 5px;">+₱3,500.00 Inflow</span>
+            <span style="font-size: 11px; color: #0d522c; font-weight: 500;">Audit Denominations →</span>
+          </div>
+        </article>
+
+        <!-- PALETTE 05: Calming Eucalyptus & Seafoam -->
+        <article class="palette-entry" id="palette-05">
+          <div class="palette-header-row">
+            <div class="palette-title-group">
+              <span class="palette-num">05</span>
+              <h3 class="palette-name">Calming Eucalyptus & Seafoam</h3>
+            </div>
+            <button class="select-palette-btn" onclick="applyPalette('05')">Select Palette</button>
+          </div>
+          <p class="palette-personality">
+            <strong>Aesthetic Persona:</strong> Meditative, approachable, and serene. Cool blue-green notes reduce cognitive fatigue during intense financial ledger entries.
+          </p>
+
+          <div class="swatches-strip">
+            <div class="swatch-col">
+              <div class="swatch-circle" style="background: #16423c;" onclick="copyHex('#16423c')"></div>
+              <div class="swatch-hex" onclick="copyHex('#16423c')">#16423c <span>⎘</span></div>
+              <div class="swatch-role">Deep Sea Pine Text</div>
+            </div>
+            <div class="swatch-col">
+              <div class="swatch-circle" style="background: #2a6f62;" onclick="copyHex('#2a6f62')"></div>
+              <div class="swatch-hex" onclick="copyHex('#2a6f62')">#2a6f62 <span>⎘</span></div>
+              <div class="swatch-role">Eucalyptus Accent</div>
+            </div>
+            <div class="swatch-col">
+              <div class="swatch-circle" style="background: #52a394;" onclick="copyHex('#52a394')"></div>
+              <div class="swatch-hex" onclick="copyHex('#52a394')">#52a394 <span>⎘</span></div>
+              <div class="swatch-role">Soft Seafoam Mid</div>
+            </div>
+            <div class="swatch-col">
+              <div class="swatch-circle" style="background: #bde1d9;" onclick="copyHex('#bde1d9')"></div>
+              <div class="swatch-hex" onclick="copyHex('#bde1d9')">#bde1d9 <span>⎘</span></div>
+              <div class="swatch-role">Mist Border</div>
+            </div>
+            <div class="swatch-col">
+              <div class="swatch-circle" style="background: #f0f8f6;" onclick="copyHex('#f0f8f6')"></div>
+              <div class="swatch-hex" onclick="copyHex('#f0f8f6')">#f0f8f6 <span>⎘</span></div>
+              <div class="swatch-role">Sea Whisper Tint</div>
+            </div>
+          </div>
+
+          <div class="gradient-ribbon" style="background: linear-gradient(90deg, #16423c 0%, #2a6f62 35%, #52a394 65%, #bde1d9 85%, #f0f8f6 100%);"></div>
+
+          <div class="in-situ-row">
+            <div style="font-size: 16px; font-weight: 700; color: #16423c; font-variant-numeric: tabular-nums;">₱14,850.00</div>
+            <span style="font-size: 11px; font-weight: 600; color: #16423c; background: #f0f8f6; border: 1px solid #bde1d9; padding: 3px 8px; border-radius: 5px;">CASHBOX</span>
+            <span style="font-size: 11px; font-weight: 600; color: #2a6f62; background: #ffffff; border: 1px solid #bde1d9; padding: 3px 8px; border-radius: 5px;">+₱3,500.00 Inflow</span>
+            <span style="font-size: 11px; color: #2a6f62; font-weight: 500;">Audit Denominations →</span>
+          </div>
+        </article>
+
+        <!-- PALETTE 06: Scholastic Olive & Laurel -->
+        <article class="palette-entry" id="palette-06">
+          <div class="palette-header-row">
+            <div class="palette-title-group">
+              <span class="palette-num">06</span>
+              <h3 class="palette-name">Scholastic Olive & Laurel</h3>
+            </div>
+            <button class="select-palette-btn" onclick="applyPalette('06')">Select Palette</button>
+          </div>
+          <p class="palette-personality">
+            <strong>Aesthetic Persona:</strong> Academic heritage, collegiate, natural. Warm olive undertones connect with botanical wisdom, university seals, and classic institutional insignia.
+          </p>
+
+          <div class="swatches-strip">
+            <div class="swatch-col">
+              <div class="swatch-circle" style="background: #223b25;" onclick="copyHex('#223b25')"></div>
+              <div class="swatch-hex" onclick="copyHex('#223b25')">#223b25 <span>⎘</span></div>
+              <div class="swatch-role">Deep Olive Text</div>
+            </div>
+            <div class="swatch-col">
+              <div class="swatch-circle" style="background: #3d6642;" onclick="copyHex('#3d6642')"></div>
+              <div class="swatch-hex" onclick="copyHex('#3d6642')">#3d6642 <span>⎘</span></div>
+              <div class="swatch-role">Laurel Accent</div>
+            </div>
+            <div class="swatch-col">
+              <div class="swatch-circle" style="background: #5e8b64;" onclick="copyHex('#5e8b64')"></div>
+              <div class="swatch-hex" onclick="copyHex('#5e8b64')">#5e8b64 <span>⎘</span></div>
+              <div class="swatch-role">Warm Herb Mid</div>
+            </div>
+            <div class="swatch-col">
+              <div class="swatch-circle" style="background: #cde0cf;" onclick="copyHex('#cde0cf')"></div>
+              <div class="swatch-hex" onclick="copyHex('#cde0cf')">#cde0cf <span>⎘</span></div>
+              <div class="swatch-role">Antique Border</div>
+            </div>
+            <div class="swatch-col">
+              <div class="swatch-circle" style="background: #f5f8f5;" onclick="copyHex('#f5f8f5')"></div>
+              <div class="swatch-hex" onclick="copyHex('#f5f8f5')">#f5f8f5 <span>⎘</span></div>
+              <div class="swatch-role">Parchment Tint</div>
+            </div>
+          </div>
+
+          <div class="gradient-ribbon" style="background: linear-gradient(90deg, #223b25 0%, #3d6642 35%, #5e8b64 65%, #cde0cf 85%, #f5f8f5 100%);"></div>
+
+          <div class="in-situ-row">
+            <div style="font-size: 16px; font-weight: 700; color: #223b25; font-variant-numeric: tabular-nums;">₱14,850.00</div>
+            <span style="font-size: 11px; font-weight: 600; color: #223b25; background: #f5f8f5; border: 1px solid #cde0cf; padding: 3px 8px; border-radius: 5px;">CASHBOX</span>
+            <span style="font-size: 11px; font-weight: 600; color: #3d6642; background: #ffffff; border: 1px solid #cde0cf; padding: 3px 8px; border-radius: 5px;">+₱3,500.00 Inflow</span>
+            <span style="font-size: 11px; color: #3d6642; font-weight: 500;">Audit Denominations →</span>
+          </div>
+        </article>
+
+        <!-- PALETTE 07: Fresh Spring & Pistachio -->
+        <article class="palette-entry" id="palette-07">
+          <div class="palette-header-row">
+            <div class="palette-title-group">
+              <span class="palette-num">07</span>
+              <h3 class="palette-name">Fresh Spring & Pistachio</h3>
+            </div>
+            <button class="select-palette-btn" onclick="applyPalette('07')">Select Palette</button>
+          </div>
+          <p class="palette-personality">
+            <strong>Aesthetic Persona:</strong> High vitality, bright, energetic, and modern. Incorporates lime-spring warmth, ideal for an active student organization with a young, modern user base.
+          </p>
+
+          <div class="swatches-strip">
+            <div class="swatch-col">
+              <div class="swatch-circle" style="background: #14532d;" onclick="copyHex('#14532d')"></div>
+              <div class="swatch-hex" onclick="copyHex('#14532d')">#14532d <span>⎘</span></div>
+              <div class="swatch-role">Deep Anchor Text</div>
+            </div>
+            <div class="swatch-col">
+              <div class="swatch-circle" style="background: #16a34a;" onclick="copyHex('#16a34a')"></div>
+              <div class="swatch-hex" onclick="copyHex('#16a34a')">#16a34a <span>⎘</span></div>
+              <div class="swatch-role">Vibrant Spring Accent</div>
+            </div>
+            <div class="swatch-col">
+              <div class="swatch-circle" style="background: #65a30d;" onclick="copyHex('#65a30d')"></div>
+              <div class="swatch-hex" onclick="copyHex('#65a30d')">#65a30d <span>⎘</span></div>
+              <div class="swatch-role">Warm Lime Mid</div>
+            </div>
+            <div class="swatch-col">
+              <div class="swatch-circle" style="background: #bef264;" onclick="copyHex('#bef264')"></div>
+              <div class="swatch-hex" onclick="copyHex('#bef264')">#bef264 <span>⎘</span></div>
+              <div class="swatch-role">Lime Border</div>
+            </div>
+            <div class="swatch-col">
+              <div class="swatch-circle" style="background: #f7fee7;" onclick="copyHex('#f7fee7')"></div>
+              <div class="swatch-hex" onclick="copyHex('#f7fee7')">#f7fee7 <span>⎘</span></div>
+              <div class="swatch-role">Sunlit Pistachio Tint</div>
+            </div>
+          </div>
+
+          <div class="gradient-ribbon" style="background: linear-gradient(90deg, #14532d 0%, #16a34a 35%, #65a30d 65%, #bef264 85%, #f7fee7 100%);"></div>
+
+          <div class="in-situ-row">
+            <div style="font-size: 16px; font-weight: 700; color: #14532d; font-variant-numeric: tabular-nums;">₱14,850.00</div>
+            <span style="font-size: 11px; font-weight: 600; color: #14532d; background: #f7fee7; border: 1px solid #bef264; padding: 3px 8px; border-radius: 5px;">CASHBOX</span>
+            <span style="font-size: 11px; font-weight: 600; color: #16a34a; background: #ffffff; border: 1px solid #bef264; padding: 3px 8px; border-radius: 5px;">+₱3,500.00 Inflow</span>
+            <span style="font-size: 11px; color: #16a34a; font-weight: 500;">Audit Denominations →</span>
+          </div>
+        </article>
+
+        <!-- PALETTE 08: Cashbox Light Pastel Gradients -->
+        <article class="palette-entry" id="palette-08">
+          <div class="palette-header-row">
+            <div class="palette-title-group">
+              <span class="palette-num">08</span>
+              <h3 class="palette-name">Cashbox Light Pastel Gradient</h3>
+            </div>
+            <button class="select-palette-btn" onclick="applyPalette('08')">Select Palette</button>
+          </div>
+          <p class="palette-personality">
+            <strong>Aesthetic Persona:</strong> Minimalist, airy, luminous, and refined. Uses 3 cascading light green shades (#f0fdf4 → #dcfce7 → #bbf7d0) to create a gentle, pillowed surface without visual heaviness.
+          </p>
+
+          <div class="swatches-strip">
+            <div class="swatch-col">
+              <div class="swatch-circle" style="background: #14532d;" onclick="copyHex('#14532d')"></div>
+              <div class="swatch-hex" onclick="copyHex('#14532d')">#14532d <span>⎘</span></div>
+              <div class="swatch-role">High Contrast Text</div>
+            </div>
+            <div class="swatch-col">
+              <div class="swatch-circle" style="background: #15803d;" onclick="copyHex('#15803d')"></div>
+              <div class="swatch-hex" onclick="copyHex('#15803d')">#15803d <span>⎘</span></div>
+              <div class="swatch-role">Primary Action Accent</div>
+            </div>
+            <div class="swatch-col">
+              <div class="swatch-circle" style="background: #bbf7d0;" onclick="copyHex('#bbf7d0')"></div>
+              <div class="swatch-hex" onclick="copyHex('#bbf7d0')">#bbf7d0 <span>⎘</span></div>
+              <div class="swatch-role">Gradient Base (200)</div>
+            </div>
+            <div class="swatch-col">
+              <div class="swatch-circle" style="background: #dcfce7;" onclick="copyHex('#dcfce7')"></div>
+              <div class="swatch-hex" onclick="copyHex('#dcfce7')">#dcfce7 <span>⎘</span></div>
+              <div class="swatch-role">Gradient Mid (100)</div>
+            </div>
+            <div class="swatch-col">
+              <div class="swatch-circle" style="background: #f0fdf4;" onclick="copyHex('#f0fdf4')"></div>
+              <div class="swatch-hex" onclick="copyHex('#f0fdf4')">#f0fdf4 <span>⎘</span></div>
+              <div class="swatch-role">Gradient Top (50)</div>
+            </div>
+          </div>
+
+          <div class="gradient-ribbon" style="background: linear-gradient(90deg, #f0fdf4 0%, #dcfce7 50%, #bbf7d0 100%);"></div>
+
+          <div class="in-situ-row">
+            <div style="font-size: 16px; font-weight: 700; color: #14532d; font-variant-numeric: tabular-nums;">₱14,850.00</div>
+            <span style="font-size: 11px; font-weight: 700; color: #14532d; background: #ffffff; border: 1px solid #86efac; padding: 3px 8px; border-radius: 5px;">CASHBOX</span>
+            <span style="font-size: 11px; font-weight: 600; color: #15803d; background: #ffffff; border: 1px solid #86efac; padding: 3px 8px; border-radius: 5px;">+₱3,500.00 Inflow</span>
+            <span style="font-size: 11px; color: #15803d; font-weight: 500;">Audit Denominations →</span>
+          </div>
+        </article>
+
+      </section>
+
+      <!-- Live Code Generation for Selected Palette -->
+      <section class="specimen-section">
+        <div class="section-kicker">Part III • Developer Integration</div>
+        <h2 class="section-heading">Production CSS Custom Properties</h2>
+        <p class="section-sub">
+          CSS variable declarations for the currently selected palette. Copy and paste these into <code>wireframes/style.css</code> and <code>app/globals.css</code>:
+        </p>
+
+        <div class="css-block-wrap">
+          <pre class="css-pre" id="cssOutput">/* FinLITE Active Theme: 01 — Institutional Emerald */
+:root {
+  --apple-accent: #15803d;
+  --apple-accent-hover: #166534;
+  --apple-accent-text: #14532d;
+  --apple-accent-mid: #22c55e;
+  --apple-accent-border: #86efac;
+  --apple-accent-subtle: #f0fdf4;
+  --apple-cashbox-gradient: linear-gradient(180deg, #f0fdf4 0%, #dcfce7 48%, #bbf7d0 100%);
+}</pre>
+          <button class="copy-css-btn" onclick="copyCurrentCSS()">
+            ⎘ Copy Palette CSS Variables
+          </button>
+        </div>
+      </section>
+
+    </div>
+
+    <!-- ======================================================================
+         TAB 2 PANE: CARD STYLES GALLERY & GRADIENT CUSTOMIZER
+         ====================================================================== -->
+    <div class="tab-pane" id="tab-pane-cards">
+
+      <!-- SECTION A: CARD SURFACE STYLES GALLERY -->
+      <section>
+        <div class="section-kicker">Part I • Surface Treatments</div>
+        <h2 class="section-heading">Card Styles Gallery for FinLITE</h2>
+        <p class="section-sub">
+          Comparison of 6 distinct architectural card surface treatments for financial metrics. Each style is rendered below directly in whitespace without outer card wrappers.
+        </p>
+
+        <div class="card-styles-grid">
+
+          <!-- Style 1: Flat Light Green Gradient (Active Standard) -->
+          <div class="card-style-col">
+            <div class="card-style-meta">
+              <span class="card-style-title">1. Flat Light Pastel Gradient</span>
+              <span class="card-style-tag">Active Model</span>
+            </div>
+            
+            <div class="demo-card demo-card-1" onclick="applyPreset('light-pastel')">
+              <div class="demo-card-header">
+                <div class="demo-card-title">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"/><path d="M3 5v14a2 2 0 0 0 2 2h16v-5"/><path d="M18 12a2 2 0 0 0 0 4h4v-4z"/></svg>
+                  <span>Physical Cash</span>
+                </div>
+                <span class="demo-card-tag" style="background: #ffffff; border: 1px solid #86efac; color: #14532d;">CASHBOX</span>
+              </div>
+              <div class="demo-card-val">₱14,850.00</div>
+              <div class="demo-card-sub">
+                <span style="width: 5px; height: 5px; border-radius: 9999px; background: currentColor;"></span>
+                <span>Click to count denominations</span>
+              </div>
+            </div>
+
+            <div class="card-style-desc">
+              Soft 3-stop light green wash (#f0fdf4 to #bbf7d0) with high-contrast emerald text. Delicate #86efac hairline border.
+            </div>
+            <button class="copy-card-code-btn" onclick="copyCardSnippet('style-1')">⎘ Copy Style CSS</button>
+          </div>
+
+          <!-- Style 2: Deep Matte Forest -->
+          <div class="card-style-col">
+            <div class="card-style-meta">
+              <span class="card-style-title">2. Deep Matte Forest</span>
+              <span class="card-style-tag">Executive Dark</span>
+            </div>
+
+            <div class="demo-card demo-card-2" onclick="applyPreset('deep-forest')">
+              <div class="demo-card-header">
+                <div class="demo-card-title">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"/><path d="M3 5v14a2 2 0 0 0 2 2h16v-5"/><path d="M18 12a2 2 0 0 0 0 4h4v-4z"/></svg>
+                  <span>Physical Cash</span>
+                </div>
+                <span class="demo-card-tag" style="background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.22); color: #ffffff;">CASHBOX</span>
+              </div>
+              <div class="demo-card-val">₱14,850.00</div>
+              <div class="demo-card-sub" style="color: rgba(255,255,255,0.75);">
+                <span style="width: 5px; height: 5px; border-radius: 9999px; background: #4ade80;"></span>
+                <span>Click to count denominations</span>
+              </div>
+            </div>
+
+            <div class="card-style-desc">
+              Muted evergreen desaturated tones (#245239 to #10281b) with crisp pure white typography and translucent pill badge.
+            </div>
+            <button class="copy-card-code-btn" onclick="copyCardSnippet('style-2')">⎘ Copy Style CSS</button>
+          </div>
+
+          <!-- Style 3: Frosted Translucent Material -->
+          <div class="card-style-col">
+            <div class="card-style-meta">
+              <span class="card-style-title">3. Frosted Apple Material</span>
+              <span class="card-style-tag">Glass Blur</span>
+            </div>
+
+            <div class="demo-card demo-card-3">
+              <div class="demo-card-header">
+                <div class="demo-card-title">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"/><path d="M3 5v14a2 2 0 0 0 2 2h16v-5"/><path d="M18 12a2 2 0 0 0 0 4h4v-4z"/></svg>
+                  <span>Physical Cash</span>
+                </div>
+                <span class="demo-card-tag" style="background: rgba(255,255,255,0.8); border: 1px solid rgba(134,239,172,0.8); color: #14532d;">CASHBOX</span>
+              </div>
+              <div class="demo-card-val">₱14,850.00</div>
+              <div class="demo-card-sub">
+                <span style="width: 5px; height: 5px; border-radius: 9999px; background: currentColor;"></span>
+                <span>Click to count denominations</span>
+              </div>
+            </div>
+
+            <div class="card-style-desc">
+              Translucent mint wash with 16px backdrop-filter blur. Mimics native macOS / iOS liquid glass widget surfaces.
+            </div>
+            <button class="copy-card-code-btn" onclick="copyCardSnippet('style-3')">⎘ Copy Style CSS</button>
+          </div>
+
+          <!-- Style 4: Minimal Left Accent Stripe -->
+          <div class="card-style-col">
+            <div class="card-style-meta">
+              <span class="card-style-title">4. Left Indicator Stripe</span>
+              <span class="card-style-tag">Clean Border</span>
+            </div>
+
+            <div class="demo-card demo-card-4">
+              <div class="demo-card-header">
+                <div class="demo-card-title" style="color: var(--neutral-secondary);">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#15803d" stroke-width="2"><path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"/><path d="M3 5v14a2 2 0 0 0 2 2h16v-5"/><path d="M18 12a2 2 0 0 0 0 4h4v-4z"/></svg>
+                  <span>Physical Cash</span>
+                </div>
+                <span class="demo-card-tag" style="background: #f0fdf4; border: 1px solid #bbf7d0; color: #166534;">CASHBOX</span>
+              </div>
+              <div class="demo-card-val" style="color: var(--neutral-black);">₱14,850.00</div>
+              <div class="demo-card-sub" style="color: var(--neutral-secondary);">
+                <span style="width: 5px; height: 5px; border-radius: 9999px; background: #15803d;"></span>
+                <span>Click to count denominations</span>
+              </div>
+            </div>
+
+            <div class="card-style-desc">
+              Pure white card background with a 5px solid emerald indicator band along the left spine. Ultra-clean and restrained.
+            </div>
+            <button class="copy-card-code-btn" onclick="copyCardSnippet('style-4')">⎘ Copy Style CSS</button>
+          </div>
+
+          <!-- Style 5: Soft Tactile Pillowed Emboss -->
+          <div class="card-style-col">
+            <div class="card-style-meta">
+              <span class="card-style-title">5. Soft Tactile Emboss</span>
+              <span class="card-style-tag">Pillowed Edge</span>
+            </div>
+
+            <div class="demo-card demo-card-5">
+              <div class="demo-card-header">
+                <div class="demo-card-title">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"/><path d="M3 5v14a2 2 0 0 0 2 2h16v-5"/><path d="M18 12a2 2 0 0 0 0 4h4v-4z"/></svg>
+                  <span>Physical Cash</span>
+                </div>
+                <span class="demo-card-tag" style="background: #ffffff; border: 1px solid #86efac; color: #14532d; box-shadow: 0 1px 2px rgba(0,0,0,0.05);">CASHBOX</span>
+              </div>
+              <div class="demo-card-val">₱14,850.00</div>
+              <div class="demo-card-sub">
+                <span style="width: 5px; height: 5px; border-radius: 9999px; background: currentColor;"></span>
+                <span>Click to count denominations</span>
+              </div>
+            </div>
+
+            <div class="card-style-desc">
+              Subtle top inner bevel light (inset 0 1px) with bottom cavity shadow. Creates tactile depth without heavy 3D skeuomorphism.
+            </div>
+            <button class="copy-card-code-btn" onclick="copyCardSnippet('style-5')">⎘ Copy Style CSS</button>
+          </div>
+
+          <!-- Style 6: Dual-Tone Segmented Header -->
+          <div class="card-style-col">
+            <div class="card-style-meta">
+              <span class="card-style-title">6. Dual-Tone Header Split</span>
+              <span class="card-style-tag">Structured</span>
+            </div>
+
+            <div class="demo-card demo-card-6">
+              <div class="demo-card-6-header">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                  <div style="font-size: 11px; font-weight: 600; color: #166534; display: flex; align-items: center; gap: 6px;">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"/><path d="M3 5v14a2 2 0 0 0 2 2h16v-5"/><path d="M18 12a2 2 0 0 0 0 4h4v-4z"/></svg>
+                    Physical Cash
+                  </div>
+                  <span class="demo-card-tag" style="background: #ffffff; border: 1px solid #bbf7d0; color: #166534;">CASHBOX</span>
+                </div>
+              </div>
+              <div class="demo-card-6-body">
+                <div class="demo-card-val" style="color: var(--neutral-black); margin-bottom: 2px;">₱14,850.00</div>
+                <div class="demo-card-sub" style="color: var(--neutral-secondary);">
+                  <span style="width: 5px; height: 5px; border-radius: 9999px; background: #15803d;"></span>
+                  <span>Click to count denominations</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="card-style-desc">
+              Structured architectural layout: light tinted header bar over a crisp white metric body with a hairline separator.
+            </div>
+            <button class="copy-card-code-btn" onclick="copyCardSnippet('style-6')">⎘ Copy Style CSS</button>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- SECTION B: INTERACTIVE GRADIENT CUSTOMIZER STUDIO -->
+      <section class="specimen-section">
+        <div class="section-kicker">Part II • Live Interactive Studio</div>
+        <h2 class="section-heading">Gradient Customization Studio</h2>
+        <p class="section-sub">
+          Customize your own gradient stops, angle, and contrast balance. The specimen card on the right updates instantly in real time with copyable CSS code.
+        </p>
+
+        <!-- Presets Quick Bar -->
+        <div>
+          <div class="presets-label">Quick Preset Combinations:</div>
+          <div class="presets-strip">
+            <button class="preset-pill-btn active" onclick="applyPreset('light-pastel')">
+              <span class="preset-dot" style="background: linear-gradient(90deg, #f0fdf4, #bbf7d0);"></span>
+              <span>Airy Mint to Pistachio</span>
+            </button>
+            <button class="preset-pill-btn" onclick="applyPreset('spring-lime')">
+              <span class="preset-dot" style="background: linear-gradient(90deg, #f7fee7, #bef264);"></span>
+              <span>Spring Lime Meadow</span>
+            </button>
+            <button class="preset-pill-btn" onclick="applyPreset('nordic-mist')">
+              <span class="preset-dot" style="background: linear-gradient(90deg, #f2f7f4, #c8ded2);"></span>
+              <span>Nordic Sage Mist</span>
+            </button>
+            <button class="preset-pill-btn" onclick="applyPreset('deep-forest')">
+              <span class="preset-dot" style="background: linear-gradient(90deg, #245239, #10281b);"></span>
+              <span>Executive Deep Forest</span>
+            </button>
+            <button class="preset-pill-btn" onclick="applyPreset('luminous-jade')">
+              <span class="preset-dot" style="background: linear-gradient(90deg, #ecfdf5, #a7f3d0);"></span>
+              <span>Luminous Mint-Jade</span>
+            </button>
+            <button class="preset-pill-btn" onclick="applyPreset('seafoam-whisper')">
+              <span class="preset-dot" style="background: linear-gradient(90deg, #f0f8f6, #bde1d9);"></span>
+              <span>Calming Seafoam</span>
+            </button>
+            <button class="preset-pill-btn" onclick="applyPreset('white-pale-mint')">
+              <span class="preset-dot" style="background: linear-gradient(90deg, #ffffff, #dcfce7);"></span>
+              <span>Pure White to Mint Fade</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="studio-layout">
+
+          <!-- Left Column: Controls (Open on White) -->
+          <div>
+            
+            <!-- Direction Quick Buttons -->
+            <div class="control-row">
+              <div class="control-label">
+                <span>Gradient Direction / Flow</span>
+                <span class="control-val-badge" id="angleDisplay">180° (Top to Bottom)</span>
+              </div>
+              <div class="direction-btn-group">
+                <button class="direction-btn active" id="dir-180" onclick="setAngle(180, 'Top to Bottom')">↓ 180° Top</button>
+                <button class="direction-btn" id="dir-0" onclick="setAngle(0, 'Bottom to Top')">↑ 0° Bottom</button>
+                <button class="direction-btn" id="dir-135" onclick="setAngle(135, 'Diagonal')">↘ 135° Diag</button>
+                <button class="direction-btn" id="dir-90" onclick="setAngle(90, 'Left to Right')">→ 90° Right</button>
+              </div>
+              <input type="range" class="range-slider" min="0" max="360" value="180" id="angleSlider" oninput="updateCustomFromControls()">
+            </div>
+
+            <!-- Color Stops -->
+            <div class="control-label">
+              <span>Color Stops Specification</span>
+              <span class="control-val-badge">3-Stop Ramp</span>
+            </div>
+
+            <div class="color-stops-grid">
+              
+              <!-- Stop 1 (Start) -->
+              <div class="color-stop-col">
+                <div class="color-stop-title">Stop 1 (Start 0%)</div>
+                <div class="color-stop-picker-row">
+                  <input type="color" class="color-input-native" id="stop1Picker" value="#f0fdf4" oninput="updateCustomFromControls()">
+                  <input type="text" class="color-hex-text" id="stop1Hex" value="#f0fdf4" onchange="syncPickerFromText(1)">
+                </div>
+                <div class="quick-hues">
+                  <span class="quick-hue-dot" style="background: #ffffff;" onclick="setStop(1, '#ffffff')"></span>
+                  <span class="quick-hue-dot" style="background: #f0fdf4;" onclick="setStop(1, '#f0fdf4')"></span>
+                  <span class="quick-hue-dot" style="background: #ecfdf5;" onclick="setStop(1, '#ecfdf5')"></span>
+                  <span class="quick-hue-dot" style="background: #f7fee7;" onclick="setStop(1, '#f7fee7')"></span>
+                  <span class="quick-hue-dot" style="background: #245239;" onclick="setStop(1, '#245239')"></span>
+                </div>
+              </div>
+
+              <!-- Stop 2 (Mid) -->
+              <div class="color-stop-col">
+                <div class="color-stop-title">
+                  <span>Stop 2 (Mid)</span>
+                  <input type="checkbox" id="enableMidStop" checked onchange="updateCustomFromControls()">
+                </div>
+                <div class="color-stop-picker-row">
+                  <input type="color" class="color-input-native" id="stop2Picker" value="#dcfce7" oninput="updateCustomFromControls()">
+                  <input type="text" class="color-hex-text" id="stop2Hex" value="#dcfce7" onchange="syncPickerFromText(2)">
+                </div>
+                <div class="quick-hues">
+                  <span class="quick-hue-dot" style="background: #dcfce7;" onclick="setStop(2, '#dcfce7')"></span>
+                  <span class="quick-hue-dot" style="background: #a7f3d0;" onclick="setStop(2, '#a7f3d0')"></span>
+                  <span class="quick-hue-dot" style="background: #ecfccb;" onclick="setStop(2, '#ecfccb')"></span>
+                  <span class="quick-hue-dot" style="background: #22c55e;" onclick="setStop(2, '#22c55e')"></span>
+                  <span class="quick-hue-dot" style="background: #173827;" onclick="setStop(2, '#173827')"></span>
+                </div>
+              </div>
+
+              <!-- Stop 3 (End) -->
+              <div class="color-stop-col">
+                <div class="color-stop-title">Stop 3 (End 100%)</div>
+                <div class="color-stop-picker-row">
+                  <input type="color" class="color-input-native" id="stop3Picker" value="#bbf7d0" oninput="updateCustomFromControls()">
+                  <input type="text" class="color-hex-text" id="stop3Hex" value="#bbf7d0" onchange="syncPickerFromText(3)">
+                </div>
+                <div class="quick-hues">
+                  <span class="quick-hue-dot" style="background: #bbf7d0;" onclick="setStop(3, '#bbf7d0')"></span>
+                  <span class="quick-hue-dot" style="background: #86efac;" onclick="setStop(3, '#86efac')"></span>
+                  <span class="quick-hue-dot" style="background: #bef264;" onclick="setStop(3, '#bef264')"></span>
+                  <span class="quick-hue-dot" style="background: #15803d;" onclick="setStop(3, '#15803d')"></span>
+                  <span class="quick-hue-dot" style="background: #10281b;" onclick="setStop(3, '#10281b')"></span>
+                </div>
+              </div>
+
+            </div>
+
+            <!-- Typography & Contrast Theme -->
+            <div class="contrast-toggle-wrap">
+              <span style="font-size: 12px; font-weight: 600;">Text Contrast Mode:</span>
+              <div class="contrast-pill-toggle">
+                <button class="contrast-btn active" id="contrast-dark" onclick="setContrastMode('dark')">
+                  Dark Green Text
+                </button>
+                <button class="contrast-btn" id="contrast-white" onclick="setContrastMode('white')">
+                  Pure White Text
+                </button>
+              </div>
+            </div>
+
+            <!-- Hairline Border Tint -->
+            <div class="control-row">
+              <div class="control-label">
+                <span>Hairline Border Tone</span>
+                <span class="control-val-badge" id="borderHexBadge">#86efac</span>
+              </div>
+              <div style="display: flex; gap: 8px; align-items: center;">
+                <input type="color" class="color-input-native" id="borderPicker" value="#86efac" oninput="updateCustomFromControls()">
+                <div class="quick-hues">
+                  <span class="quick-hue-dot" style="background: #86efac;" onclick="setBorderColor('#86efac')"></span>
+                  <span class="quick-hue-dot" style="background: #bbf7d0;" onclick="setBorderColor('#bbf7d0')"></span>
+                  <span class="quick-hue-dot" style="background: #a7f3d0;" onclick="setBorderColor('#a7f3d0')"></span>
+                  <span class="quick-hue-dot" style="background: #4ade80;" onclick="setBorderColor('#4ade80')"></span>
+                  <span class="quick-hue-dot" style="background: rgba(255,255,255,0.2);" onclick="setBorderColor('rgba(255,255,255,0.25)')"></span>
+                  <span class="quick-hue-dot" style="background: #e5e7eb;" onclick="setBorderColor('#e5e7eb')"></span>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Right Column: Live Card Canvas Preview & Code -->
+          <div class="studio-preview-col">
+
+            <!-- Live Card Preview Surface -->
+            <div>
+              <div style="font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--neutral-secondary); margin-bottom: 10px;">
+                Live Customized Card Preview:
+              </div>
+
+              <div class="live-preview-box" id="liveCustomCard">
+                <div class="live-preview-box-header">
+                  <div class="live-preview-box-label" id="liveCardLabel">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"/><path d="M3 5v14a2 2 0 0 0 2 2h16v-5"/><path d="M18 12a2 2 0 0 0 0 4h4v-4z"/></svg>
+                    <span>Physical Cash</span>
+                  </div>
+                  <span class="live-preview-box-tag" id="liveCardTag">CASHBOX</span>
+                </div>
+                <div class="live-preview-box-val" id="liveCardVal">₱14,850.00</div>
+                <div class="live-preview-box-sub" id="liveCardSub">
+                  <span style="width: 6px; height: 6px; border-radius: 9999px; background: currentColor;"></span>
+                  <span>Click to audit denominations</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Export CSS Snippet -->
+            <div class="css-block-wrap">
+              <div style="font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--neutral-secondary); margin-bottom: 8px;">
+                Generated Production CSS:
+              </div>
+              <pre class="css-pre" id="customCssOutput">.apple-card-cashbox {
+  background: linear-gradient(180deg, #f0fdf4 0%, #dcfce7 50%, #bbf7d0 100%);
+  border: 1px solid #86efac;
+  color: #14532d;
+  border-radius: 18px;
+  padding: 20px;
+}</pre>
+              <button class="copy-css-btn" onclick="copyCustomCSS()">
+                ⎘ Copy Custom Gradient CSS
+              </button>
+            </div>
+
+          </div>
+
+        </div>
+      </section>
+
+    </div>
+
+  </div>
+
+  <!-- Toast Notification -->
+  <div class="copy-toast" id="copyToast">
+    <span>✓</span>
+    <span id="toastMessage">Copied to clipboard!</span>
+  </div>
+
+  <!-- Interactive Engine Script -->
+  <script>
+    // ==========================================
+    // TAB NAVIGATION
+    // ==========================================
+    function switchTab(tabId) {
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+
+      const btn = document.getElementById(`tab-btn-${tabId}`);
+      const pane = document.getElementById(`tab-pane-${tabId}`);
+      const hint = document.getElementById('tabHint');
+
+      if (btn && pane) {
+        btn.classList.add('active');
+        pane.classList.add('active');
+      }
+
+      if (tabId === 'colors') {
+        hint.textContent = 'Showing 8 Curated Green Palettes';
+      } else {
+        hint.textContent = '6 Card Styles • Interactive Gradient Studio';
+      }
+    }
+
+    // ==========================================
+    // PALETTES DATA (TAB 1)
+    // ==========================================
+    const PALETTES = {
+      '01': {
+        name: '01 — Institutional Emerald',
+        desc: 'Official, authoritative, and stable university financial aesthetic. Matches PDM traditional colors.',
+        primary: '#15803d',
+        primaryHover: '#166534',
+        text: '#14532d',
+        mid: '#22c55e',
+        border: '#86efac',
+        tint: '#f0fdf4',
+        gradient: 'linear-gradient(180deg, #f0fdf4 0%, #dcfce7 48%, #bbf7d0 100%)'
+      },
+      '02': {
+        name: '02 — Nordic Sage & Alpine',
+        desc: 'Understated, matte, architectural, and desaturated. Low eye strain with high contrast.',
+        primary: '#2e5842',
+        primaryHover: '#1f4330',
+        text: '#183a29',
+        mid: '#527d65',
+        border: '#c8ded2',
+        tint: '#f2f7f4',
+        gradient: 'linear-gradient(180deg, #f2f7f4 0%, #e2ece6 48%, #c8ded2 100%)'
+      },
+      '03': {
+        name: '03 — Modern Mint-Jade',
+        desc: 'Modern fintech, digital-first, crisp and agile. Reminiscent of Stripe and Linear.',
+        primary: '#059669',
+        primaryHover: '#047857',
+        text: '#064e3b',
+        mid: '#34d399',
+        border: '#a7f3d0',
+        tint: '#ecfdf5',
+        gradient: 'linear-gradient(180deg, #ecfdf5 0%, #d1fae5 48%, #a7f3d0 100%)'
+      },
+      '04': {
+        name: '04 — British Racing Green & Heritage',
+        desc: 'Luxury, private banking, treasury distinction. Deep, commanding, and timeless.',
+        primary: '#0d522c',
+        primaryHover: '#083d20',
+        text: '#062817',
+        mid: '#1b7a44',
+        border: '#c4ded0',
+        tint: '#f4f8f5',
+        gradient: 'linear-gradient(180deg, #f4f8f5 0%, #e3ece6 48%, #c4ded0 100%)'
+      },
+      '05': {
+        name: '05 — Calming Eucalyptus & Seafoam',
+        desc: 'Meditative, approachable, and serene. Incorporates cool blue-green eucalyptus notes.',
+        primary: '#2a6f62',
+        primaryHover: '#1d5449',
+        text: '#16423c',
+        mid: '#52a394',
+        border: '#bde1d9',
+        tint: '#f0f8f6',
+        gradient: 'linear-gradient(180deg, #f0f8f6 0%, #def0ec 48%, #bde1d9 100%)'
+      },
+      '06': {
+        name: '06 — Scholastic Olive & Laurel',
+        desc: 'Academic heritage, collegiate, natural. Warm olive undertones connect with botanical wisdom.',
+        primary: '#3d6642',
+        primaryHover: '#2a4b2e',
+        text: '#223b25',
+        mid: '#5e8b64',
+        border: '#cde0cf',
+        tint: '#f5f8f5',
+        gradient: 'linear-gradient(180deg, #f5f8f5 0%, #e6efe7 48%, #cde0cf 100%)'
+      },
+      '07': {
+        name: '07 — Fresh Spring & Pistachio',
+        desc: 'High vitality, bright, energetic, and modern. Incorporates lime-spring warmth.',
+        primary: '#16a34a',
+        primaryHover: '#15803d',
+        text: '#14532d',
+        mid: '#65a30d',
+        border: '#bef264',
+        tint: '#f7fee7',
+        gradient: 'linear-gradient(180deg, #f7fee7 0%, #ecfccb 48%, #d9f99d 100%)'
+      },
+      '08': {
+        name: '08 — Cashbox Light Pastel Gradient',
+        desc: 'Minimalist, airy, luminous, and refined. Cascading light green shades for minimal visual weight.',
+        primary: '#15803d',
+        primaryHover: '#166534',
+        text: '#14532d',
+        mid: '#22c55e',
+        border: '#86efac',
+        tint: '#f0fdf4',
+        gradient: 'linear-gradient(180deg, #f0fdf4 0%, #dcfce7 48%, #bbf7d0 100%)'
+      }
+    };
+
+    let activeKey = '01';
+
+    function applyPalette(key) {
+      const p = PALETTES[key];
+      if (!p) return;
+      activeKey = key;
+
+      const root = document.documentElement;
+      root.style.setProperty('--active-primary', p.primary);
+      root.style.setProperty('--active-primary-hover', p.primaryHover);
+      root.style.setProperty('--active-text', p.text);
+      root.style.setProperty('--active-mid', p.mid);
+      root.style.setProperty('--active-border', p.border);
+      root.style.setProperty('--active-tint', p.tint);
+      root.style.setProperty('--active-gradient', p.gradient);
+      root.style.setProperty('--active-palette-name', `"${p.name}"`);
+
+      document.getElementById('benchBadgeText').textContent = `Active Selection: ${p.name}`;
+      document.getElementById('benchTitle').textContent = p.name;
+      document.getElementById('benchDesc').textContent = p.desc;
+      document.getElementById('activeEyebrow').textContent = `Active: ${p.name}`;
+
+      const cssString = `/* FinLITE Active Theme: ${p.name} */
+:root {
+  --apple-accent: ${p.primary};
+  --apple-accent-hover: ${p.primaryHover};
+  --apple-accent-text: ${p.text};
+  --apple-accent-mid: ${p.mid};
+  --apple-accent-border: ${p.border};
+  --apple-accent-subtle: ${p.tint};
+  --apple-cashbox-gradient: ${p.gradient};
+}`;
+      document.getElementById('cssOutput').textContent = cssString;
+
+      document.querySelectorAll('.select-palette-btn').forEach(btn => {
+        btn.classList.remove('is-active');
+        btn.textContent = 'Select Palette';
+      });
+
+      const activeBtn = document.querySelector(`#palette-${key} .select-palette-btn`);
+      if (activeBtn) {
+        activeBtn.classList.add('is-active');
+        activeBtn.textContent = '✓ Currently Active';
+      }
+
+      showToast(`Selected ${p.name}`);
+    }
+
+    // ==========================================
+    // GRADIENT CUSTOMIZER ENGINE (TAB 2)
+    // ==========================================
+    let currentAngle = 180;
+    let currentAngleLabel = 'Top to Bottom';
+    let contrastMode = 'dark'; // 'dark' | 'white'
+
+    const PRESETS = {
+      'light-pastel': {
+        angle: 180,
+        stop1: '#f0fdf4',
+        stop2: '#dcfce7',
+        stop3: '#bbf7d0',
+        hasMid: true,
+        border: '#86efac',
+        contrast: 'dark'
+      },
+      'spring-lime': {
+        angle: 180,
+        stop1: '#f7fee7',
+        stop2: '#ecfccb',
+        stop3: '#bef264',
+        hasMid: true,
+        border: '#bef264',
+        contrast: 'dark'
+      },
+      'nordic-mist': {
+        angle: 180,
+        stop1: '#f2f7f4',
+        stop2: '#e2ece6',
+        stop3: '#c8ded2',
+        hasMid: true,
+        border: '#c8ded2',
+        contrast: 'dark'
+      },
+      'deep-forest': {
+        angle: 180,
+        stop1: '#245239',
+        stop2: '#173827',
+        stop3: '#10281b',
+        hasMid: true,
+        border: 'rgba(255, 255, 255, 0.18)',
+        contrast: 'white'
+      },
+      'luminous-jade': {
+        angle: 135,
+        stop1: '#ecfdf5',
+        stop2: '#d1fae5',
+        stop3: '#a7f3d0',
+        hasMid: true,
+        border: '#a7f3d0',
+        contrast: 'dark'
+      },
+      'seafoam-whisper': {
+        angle: 180,
+        stop1: '#f0f8f6',
+        stop2: '#def0ec',
+        stop3: '#bde1d9',
+        hasMid: true,
+        border: '#bde1d9',
+        contrast: 'dark'
+      },
+      'white-pale-mint': {
+        angle: 180,
+        stop1: '#ffffff',
+        stop2: '#f5fbf7',
+        stop3: '#e1f7ea',
+        hasMid: true,
+        border: '#bbf7d0',
+        contrast: 'dark'
+      }
+    };
+
+    function setAngle(deg, label) {
+      currentAngle = deg;
+      currentAngleLabel = label;
+      document.getElementById('angleSlider').value = deg;
+      document.getElementById('angleDisplay').textContent = `${deg}° (${label})`;
+
+      document.querySelectorAll('.direction-btn').forEach(b => b.classList.remove('active'));
+      const activeBtn = document.getElementById(`dir-${deg}`);
+      if (activeBtn) activeBtn.classList.add('active');
+
+      renderCustomCard();
+    }
+
+    function setStop(index, hex) {
+      document.getElementById(`stop${index}Picker`).value = hex;
+      document.getElementById(`stop${index}Hex`).value = hex;
+      renderCustomCard();
+    }
+
+    function syncPickerFromText(index) {
+      const val = document.getElementById(`stop${index}Hex`).value;
+      if (/^#[0-9A-F]{6}$/i.test(val)) {
+        document.getElementById(`stop${index}Picker`).value = val;
+        renderCustomCard();
+      }
+    }
+
+    function setBorderColor(hex) {
+      document.getElementById('borderPicker').value = hex.startsWith('#') ? hex : '#86efac';
+      document.getElementById('borderHexBadge').textContent = hex;
+      renderCustomCard();
+    }
+
+    function setContrastMode(mode) {
+      contrastMode = mode;
+      document.querySelectorAll('.contrast-btn').forEach(b => b.classList.remove('active'));
+      document.getElementById(`contrast-${mode}`).classList.add('active');
+      renderCustomCard();
+    }
+
+    function updateCustomFromControls() {
+      currentAngle = parseInt(document.getElementById('angleSlider').value, 10);
+      document.getElementById('angleDisplay').textContent = `${currentAngle}°`;
+
+      document.getElementById('stop1Hex').value = document.getElementById('stop1Picker').value;
+      document.getElementById('stop2Hex').value = document.getElementById('stop2Picker').value;
+      document.getElementById('stop3Hex').value = document.getElementById('stop3Picker').value;
+      document.getElementById('borderHexBadge').textContent = document.getElementById('borderPicker').value;
+
+      document.querySelectorAll('.direction-btn').forEach(b => b.classList.remove('active'));
+      const dirMatch = document.getElementById(`dir-${currentAngle}`);
+      if (dirMatch) dirMatch.classList.add('active');
+
+      renderCustomCard();
+    }
+
+    function applyPreset(key) {
+      const p = PRESETS[key];
+      if (!p) return;
+
+      document.querySelectorAll('.preset-pill-btn').forEach(b => b.classList.remove('active'));
+      if (event && event.currentTarget) {
+        event.currentTarget.classList.add('active');
+      }
+
+      setAngle(p.angle, `${p.angle}°`);
+      setStop(1, p.stop1);
+      setStop(2, p.stop2);
+      setStop(3, p.stop3);
+      document.getElementById('enableMidStop').checked = p.hasMid;
+      setBorderColor(p.border);
+      setContrastMode(p.contrast);
+
+      showToast(`Loaded ${key.replace('-', ' ')} preset!`);
+    }
+
+    function renderCustomCard() {
+      const stop1 = document.getElementById('stop1Picker').value;
+      const stop2 = document.getElementById('stop2Picker').value;
+      const stop3 = document.getElementById('stop3Picker').value;
+      const hasMid = document.getElementById('enableMidStop').checked;
+      const border = document.getElementById('borderPicker').value;
+
+      let gradCSS = '';
+      if (hasMid) {
+        gradCSS = `linear-gradient(${currentAngle}deg, ${stop1} 0%, ${stop2} 50%, ${stop3} 100%)`;
+      } else {
+        gradCSS = `linear-gradient(${currentAngle}deg, ${stop1} 0%, ${stop3} 100%)`;
+      }
+
+      const card = document.getElementById('liveCustomCard');
+      const cardLabel = document.getElementById('liveCardLabel');
+      const cardTag = document.getElementById('liveCardTag');
+      const cardVal = document.getElementById('liveCardVal');
+      const cardSub = document.getElementById('liveCardSub');
+
+      card.style.background = gradCSS;
+      card.style.borderColor = border;
+
+      if (contrastMode === 'dark') {
+        const darkTextColor = '#14532d';
+        card.style.color = darkTextColor;
+        cardLabel.style.color = darkTextColor;
+        cardVal.style.color = darkTextColor;
+        cardSub.style.color = '#15803d';
+
+        cardTag.style.background = '#ffffff';
+        cardTag.style.borderColor = border;
+        cardTag.style.color = darkTextColor;
+      } else {
+        const whiteTextColor = '#ffffff';
+        card.style.color = whiteTextColor;
+        cardLabel.style.color = whiteTextColor;
+        cardVal.style.color = whiteTextColor;
+        cardSub.style.color = 'rgba(255, 255, 255, 0.8)';
+
+        cardTag.style.background = 'rgba(255, 255, 255, 0.16)';
+        cardTag.style.borderColor = 'rgba(255, 255, 255, 0.28)';
+        cardTag.style.color = '#ffffff';
+      }
+
+      // Generate CSS Code Snippet
+      const cssSnippet = `.apple-card-cashbox {
+  background: ${gradCSS};
+  border: 1px solid ${border};
+  color: ${contrastMode === 'dark' ? '#14532d' : '#ffffff'};
+  border-radius: 18px;
+  padding: 20px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+}`;
+      document.getElementById('customCssOutput').textContent = cssSnippet;
+    }
+
+    // ==========================================
+    // UTILITIES & CLIPBOARD
+    // ==========================================
+    function copyHex(hex) {
+      navigator.clipboard.writeText(hex).then(() => {
+        showToast(`Copied ${hex} to clipboard!`);
+      }).catch(() => {
+        showToast(`Color: ${hex}`);
+      });
+    }
+
+    function copyCurrentCSS() {
+      const text = document.getElementById('cssOutput').textContent;
+      navigator.clipboard.writeText(text).then(() => {
+        showToast(`Copied CSS custom properties for ${PALETTES[activeKey].name}!`);
+      });
+    }
+
+    function copyCustomCSS() {
+      const text = document.getElementById('customCssOutput').textContent;
+      navigator.clipboard.writeText(text).then(() => {
+        showToast(`Copied Custom Gradient Card CSS!`);
+      });
+    }
+
+    function copyCardSnippet(styleId) {
+      const snippets = {
+        'style-1': `/* Style 1: Flat Light Green Gradient */
+.apple-card-cashbox {
+  background: linear-gradient(180deg, #f0fdf4 0%, #dcfce7 48%, #bbf7d0 100%);
+  border: 1px solid #86efac;
+  color: #14532d;
+  border-radius: 18px;
+  padding: 20px;
+  box-shadow: 0 1px 3px rgba(22, 101, 52, 0.08);
+}`,
+        'style-2': `/* Style 2: Deep Matte Forest */
+.apple-card-cashbox {
+  background: linear-gradient(180deg, #245239 0%, #173827 55%, #10281b 100%);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  color: #ffffff;
+  border-radius: 18px;
+  padding: 20px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
+}`,
+        'style-3': `/* Style 3: Frosted Apple Material */
+.apple-card-cashbox {
+  background: rgba(240, 253, 244, 0.72);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(134, 239, 172, 0.6);
+  color: #14532d;
+  border-radius: 18px;
+  padding: 20px;
+}`,
+        'style-4': `/* Style 4: Minimal Left Accent Stripe */
+.apple-card-cashbox {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-left: 5px solid #15803d;
+  color: #111827;
+  border-radius: 18px;
+  padding: 20px;
+}`,
+        'style-5': `/* Style 5: Soft Tactile Pillowed Emboss */
+.apple-card-cashbox {
+  background: linear-gradient(180deg, #f0fdf4 0%, #dcfce7 60%, #c1ebd3 100%);
+  border: 1px solid rgba(255, 255, 255, 0.85);
+  color: #14532d;
+  border-radius: 18px;
+  padding: 20px;
+  box-shadow: 0 2px 6px rgba(22, 101, 52, 0.08), inset 0 1px 1px #ffffff, inset 0 -1.5px 2px rgba(22, 101, 52, 0.15);
+}`,
+        'style-6': `/* Style 6: Dual-Tone Segmented Header */
+.apple-card-cashbox {
+  background: #ffffff;
+  border: 1px solid #bbf7d0;
+  border-radius: 18px;
+  overflow: hidden;
+}`
+      };
+
+      const snippet = snippets[styleId] || '';
+      navigator.clipboard.writeText(snippet).then(() => {
+        showToast(`Copied ${styleId.replace('-', ' ').toUpperCase()} CSS!`);
+      });
+    }
+
+    function showToast(msg) {
+      const toast = document.getElementById('copyToast');
+      document.getElementById('toastMessage').textContent = msg;
+      toast.classList.add('show');
+      clearTimeout(window.__toastTimer);
+      window.__toastTimer = setTimeout(() => {
+        toast.classList.remove('show');
+      }, 2400);
+    }
+
+    // Initialize custom card on load
+    window.addEventListener('DOMContentLoaded', () => {
+      renderCustomCard();
+    });
+  </script>
+
+</body>
+</html>

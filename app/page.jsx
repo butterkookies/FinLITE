@@ -12,7 +12,8 @@ import NewSemesterModal from '@/components/semesters/NewSemesterModal';
 import ModuleErrorBoundary from '@/components/common/ModuleErrorBoundary';
 import { createClient } from '@/lib/supabase/client';
 import { isSuperAdminEmail } from '@/lib/config/admin';
-import { toCentavos, fromCentavos } from '@/lib/utils/currency';
+import { toCentavos, fromCentavos, denomCodeToCountKey } from '@/lib/utils/currency';
+import { validateTransactionAmount, validateOutflowBalance } from '@/lib/utils/validation';
 
 const DEFAULT_SEMESTERS = [
   { id: 'sem-26-27-1', academicYear: '2026-2027', semester: '1st Sem', label: 'AY 2026–2027 • 1st Sem', isActive: true },
@@ -39,9 +40,13 @@ export default function Dashboard() {
   const [currentSemester, setCurrentSemester] = useState(DEFAULT_SEMESTERS[0]);
   const [isNewSemesterOpen, setIsNewSemesterOpen] = useState(false);
 
+  // 3NF Master Catalog States
+  const [categories, setCategories] = useState([]);
+  const [denominations, setDenominations] = useState([]);
+
   const supabase = createClient();
 
-  // Load user profile, semesters & transactions from Supabase on mount
+  // Load user profile, semesters, categories, denominations & transactions from Supabase on mount
   useEffect(() => {
     async function loadData() {
       if (!supabase) {
@@ -89,7 +94,33 @@ export default function Dashboard() {
           }
         }
 
-        // 2. Load Semesters from Supabase
+        // 2. Load Categories Reference Table
+        try {
+          const { data: catData, error: catError } = await supabase
+            .from('categories')
+            .select('*')
+            .order('name');
+          if (!catError && catData) {
+            setCategories(catData);
+          }
+        } catch (catErr) {
+          console.warn('Categories reference load notice:', catErr);
+        }
+
+        // 3. Load Denominations Reference Table
+        try {
+          const { data: denomData, error: denomError } = await supabase
+            .from('denominations')
+            .select('*')
+            .order('display_order');
+          if (!denomError && denomData) {
+            setDenominations(denomData);
+          }
+        } catch (denomErr) {
+          console.warn('Denominations reference load notice:', denomErr);
+        }
+
+        // 4. Load Semesters from Supabase
         let activeSemestersList = DEFAULT_SEMESTERS;
         try {
           const { data: semData, error: semError } = await supabase
@@ -121,38 +152,103 @@ export default function Dashboard() {
           setCurrentSemester(matchedSemester);
         }
 
-        // 3. Load Transactions
-        const { data, error } = await supabase
-          .from('transactions')
-          .select('*')
-          .order('transaction_date', { ascending: false });
+        // 5. Load Transactions with 3NF Normalized Joins (with seamless fallback)
+        try {
+          const { data, error } = await supabase
+            .from('transactions')
+            .select(`
+              *,
+              categories (id, name, type),
+              semesters (id, academic_year, semester, label),
+              transaction_receipts (id, public_url, sort_order)
+            `)
+            .order('transaction_date', { ascending: false });
 
-        if (error) {
-          console.warn('Supabase fetch failed:', error.message);
+          if (error) {
+            console.warn('3NF relational select fallback to base select:', error.message);
+            const { data: flatData, error: flatError } = await supabase
+              .from('transactions')
+              .select('*')
+              .order('transaction_date', { ascending: false });
+
+            if (flatError) {
+              console.warn('Supabase transactions fetch failed:', flatError.message);
+              setTransactions([]);
+            } else {
+              setIsDbConnected(true);
+              setTransactions(flatData || []);
+            }
+          } else if (data) {
+            setIsDbConnected(true);
+            const normalized = data.map((t) => ({
+              ...t,
+              category_name: t.categories?.name || t.category_name,
+              category_id: t.category_id || t.categories?.id,
+              academic_year: t.semesters?.academic_year || t.academic_year,
+              semester: t.semesters?.semester || t.semester,
+              receipt_urls: (Array.isArray(t.transaction_receipts) && t.transaction_receipts.length > 0)
+                ? t.transaction_receipts.sort((a, b) => a.sort_order - b.sort_order).map((r) => r.public_url)
+                : (Array.isArray(t.receipt_urls) && t.receipt_urls.length > 0 ? t.receipt_urls : (t.receipt_url ? [t.receipt_url] : [])),
+              receipt_url: (Array.isArray(t.transaction_receipts) && t.transaction_receipts.length > 0)
+                ? (t.transaction_receipts.find((r) => r.sort_order === 0)?.public_url || t.transaction_receipts[0]?.public_url)
+                : (t.receipt_url || (Array.isArray(t.receipt_urls) && t.receipt_urls[0]) || null),
+            }));
+            setTransactions(normalized);
+          }
+        } catch (txFetchErr) {
+          console.warn('Transaction fetch exception:', txFetchErr);
           setTransactions([]);
-        } else {
-          setIsDbConnected(true);
-          setTransactions(data || []);
         }
 
-        // 4. Load Latest Cash Reconciliation from Supabase
+        // 6. Load Latest Cash Reconciliation from Supabase (with 3NF items join)
         try {
           const { data: reconData, error: reconError } = await supabase
             .from('cash_reconciliations')
-            .select('*')
+            .select(`
+              *,
+              cash_reconciliation_items (
+                id,
+                denomination_id,
+                quantity,
+                subtotal,
+                denominations (id, code, label, face_value)
+              )
+            `)
             .order('created_at', { ascending: false })
             .limit(1)
             .maybeSingle();
 
           if (!reconError && reconData) {
+            // Map child items to denomination keys for backwards compatible UI counters
+            if (Array.isArray(reconData.cash_reconciliation_items) && reconData.cash_reconciliation_items.length > 0) {
+              reconData.cash_reconciliation_items.forEach((item) => {
+                const code = item.denominations?.code;
+                if (code) {
+                  const countKey = denomCodeToCountKey(code);
+                  reconData[countKey] = item.quantity;
+                  reconData[code.toLowerCase()] = item.quantity;
+                }
+              });
+            }
             setLatestReconciliation(reconData);
             if (typeof window !== 'undefined') {
               try { localStorage.setItem('finlite_latest_reconciliation', JSON.stringify(reconData)); } catch (_) {}
             }
           } else {
-            const cached = typeof window !== 'undefined' ? localStorage.getItem('finlite_latest_reconciliation') : null;
-            if (cached) {
-              try { setLatestReconciliation(JSON.parse(cached)); } catch (_) {}
+            const { data: flatRecon } = await supabase
+              .from('cash_reconciliations')
+              .select('*')
+              .order('created_at', { ascending: false })
+              .limit(1)
+              .maybeSingle();
+
+            if (flatRecon) {
+              setLatestReconciliation(flatRecon);
+            } else {
+              const cached = typeof window !== 'undefined' ? localStorage.getItem('finlite_latest_reconciliation') : null;
+              if (cached) {
+                try { setLatestReconciliation(JSON.parse(cached)); } catch (_) {}
+              }
             }
           }
         } catch (reconErr) {
@@ -213,6 +309,20 @@ export default function Dashboard() {
   };
 
   const summary = calculateSummary(activeTransactions);
+
+  // Manual entry from the New Transaction form: enforce ₱99,999.99 cap and channel balance check.
+  const handleManualSaveTransaction = async (newTx) => {
+    if (validateTransactionAmount(newTx.amount)) return;
+    if (validateOutflowBalance({
+      type: newTx.type,
+      paymentMethod: newTx.payment_method,
+      isReimbursement: newTx.is_reimbursement,
+      amount: newTx.amount,
+      cashBalance: summary.cash_on_hand,
+      gcashBalance: summary.gcash_balance,
+    })) return;
+    return handleSaveTransaction(newTx);
+  };
 
   const handleSaveTransaction = async (newTx) => {
     const tempId = `tx-${Date.now()}`;
@@ -287,13 +397,31 @@ export default function Dashboard() {
           uploadedReceiptUrls.push(newTx.receipt_url);
         }
 
+        // Resolve 3NF foreign keys
+        let resolvedCategoryId = newTx.category_id || null;
+        if (!resolvedCategoryId && categories && categories.length > 0) {
+          const matchedCategory = categories.find((c) =>
+            c.name.toLowerCase() === (newTx.category_name || '').toLowerCase()
+          );
+          if (matchedCategory) resolvedCategoryId = matchedCategory.id;
+        }
+
+        let resolvedSemesterId = currentSemester?.id;
+        if (resolvedSemesterId && resolvedSemesterId.startsWith('sem-')) {
+          const matchedDbSem = semesters.find((s) => s.id && !s.id.startsWith('sem-') && s.academicYear === currentSemester.academicYear && s.semester === currentSemester.semester);
+          resolvedSemesterId = matchedDbSem ? matchedDbSem.id : null;
+        }
+
         const payload = {
           title: newTx.title,
           description: newTx.description || null,
           amount: parseFloat(newTx.amount),
           type: newTx.type,
           payment_method: newTx.payment_method,
+          category_id: resolvedCategoryId,
           category_name: newTx.category_name || null,
+          semester_id: resolvedSemesterId,
+          logged_by: userProfile?.id || null,
           transaction_date: newTx.transaction_date || new Date().toISOString().split('T')[0],
           is_reimbursement: Boolean(newTx.is_reimbursement),
           reimbursement_recipient: newTx.is_reimbursement ? newTx.reimbursement_recipient : null,
@@ -305,19 +433,53 @@ export default function Dashboard() {
           semester: optimisticTx.semester,
         };
 
-        const { data, error } = await supabase
+        let insertRes = await supabase
           .from('transactions')
           .insert([payload])
           .select()
           .single();
 
+        // Graceful fallback if semester_id column is missing in remote DB
+        if (insertRes.error && (insertRes.error.message?.includes('semester_id') || insertRes.error.code === 'PGRST204')) {
+          const fallbackPayload = { ...payload };
+          delete fallbackPayload.semester_id;
+          insertRes = await supabase
+            .from('transactions')
+            .insert([fallbackPayload])
+            .select()
+            .single();
+        }
+
+        const data = insertRes.data;
+        const error = insertRes.error;
+
         if (error) {
           console.error('Supabase transaction insert failed:', error);
         } else if (data) {
+          // If receipts were uploaded, insert normalized child records in transaction_receipts
+          if (uploadedReceiptUrls.length > 0) {
+            const receiptItems = uploadedReceiptUrls.map((url, idx) => ({
+              transaction_id: data.id,
+              public_url: url,
+              file_url: url,
+              sort_order: idx,
+              uploaded_by: userProfile?.id || null,
+            }));
+            try {
+              await supabase.from('transaction_receipts').insert(receiptItems);
+            } catch (rErr) {
+              console.warn('transaction_receipts insert notice:', rErr?.message);
+            }
+          }
+
           setTransactions((prev) =>
             prev.map((t) => (t.id === tempId ? {
               ...data,
+              logged_by_name: userProfile?.full_name || null,
+              logged_by_role: currentRole || userProfile?.role || null,
+              category_id: data.category_id || resolvedCategoryId,
               category_name: data.category_name || newTx.category_name,
+              semester_id: data.semester_id || resolvedSemesterId,
               receipt_url: data.receipt_url || uploadedReceiptUrls[0] || null,
               receipt_urls: (Array.isArray(data.receipt_urls) && data.receipt_urls.length > 0) ? data.receipt_urls : uploadedReceiptUrls,
               academic_year: optimisticTx.academic_year,
@@ -384,9 +546,23 @@ export default function Dashboard() {
 
     const combinedUrls = [...existingUrls, ...uploadedUrls].slice(0, 3);
 
-    // Update DB if Supabase is connected
+    // Update DB if Supabase is connected (Normalized transaction_receipts + legacy columns)
     if (supabase && typeof transactionId === 'string' && !transactionId.startsWith('tx-')) {
       try {
+        if (uploadedUrls.length > 0) {
+          const receiptRecords = uploadedUrls.map((url, idx) => ({
+            transaction_id: transactionId,
+            public_url: url,
+            sort_order: existingUrls.length + idx,
+            uploaded_by: userProfile?.id || null,
+          }));
+          try {
+            await supabase.from('transaction_receipts').insert(receiptRecords);
+          } catch (childErr) {
+            console.warn('transaction_receipts child insert notice:', childErr?.message);
+          }
+        }
+
         const { error: updateError } = await supabase
           .from('transactions')
           .update({
@@ -484,16 +660,30 @@ export default function Dashboard() {
   };
 
   const handleDeclareShortage = async ({ amount, notes }) => {
+    let shortageCatId = null;
+    if (categories && categories.length > 0) {
+      const match = categories.find((c) => c.name.toLowerCase().includes('shortage'));
+      if (match) shortageCatId = match.id;
+    }
+    let resolvedSemesterId = currentSemester?.id;
+    if (resolvedSemesterId && resolvedSemesterId.startsWith('sem-')) {
+      const matchedDbSem = semesters.find((s) => s.id && !s.id.startsWith('sem-') && s.academicYear === currentSemester.academicYear && s.semester === currentSemester.semester);
+      resolvedSemesterId = matchedDbSem ? matchedDbSem.id : null;
+    }
+
     const shortageTx = {
       title: 'Declared Cash Shortage (Adviser Approved)',
       description: notes || 'Discrepancy identified during physical cash count audit',
       amount: parseFloat(amount),
       type: 'OUTFLOW',
       payment_method: 'CASH',
+      category_id: shortageCatId,
       category_name: 'Cash Shortage Discrepancy',
       transaction_date: new Date().toISOString().split('T')[0],
       academic_year: currentSemester.academicYear,
       semester: currentSemester.semester,
+      semester_id: resolvedSemesterId,
+      logged_by: userProfile?.id || null,
       is_reimbursement: false,
       event_name: 'Cash Count Audit',
       status: 'COMPLETED',
@@ -504,7 +694,7 @@ export default function Dashboard() {
 
     if (supabase) {
       try {
-        const { data, error } = await supabase
+        let insertRes = await supabase
           .from('transactions')
           .insert([{
             title: shortageTx.title,
@@ -512,6 +702,10 @@ export default function Dashboard() {
             amount: shortageTx.amount,
             type: shortageTx.type,
             payment_method: shortageTx.payment_method,
+            category_id: shortageTx.category_id,
+            category_name: shortageTx.category_name,
+            semester_id: shortageTx.semester_id,
+            logged_by: shortageTx.logged_by,
             transaction_date: shortageTx.transaction_date,
             academic_year: shortageTx.academic_year,
             semester: shortageTx.semester,
@@ -522,8 +716,41 @@ export default function Dashboard() {
           .select()
           .single();
 
+        if (insertRes.error && (insertRes.error.message?.includes('semester_id') || insertRes.error.code === 'PGRST204')) {
+          insertRes = await supabase
+            .from('transactions')
+            .insert([{
+              title: shortageTx.title,
+              description: shortageTx.description,
+              amount: shortageTx.amount,
+              type: shortageTx.type,
+              payment_method: shortageTx.payment_method,
+              category_id: shortageTx.category_id,
+              category_name: shortageTx.category_name,
+              logged_by: shortageTx.logged_by,
+              transaction_date: shortageTx.transaction_date,
+              academic_year: shortageTx.academic_year,
+              semester: shortageTx.semester,
+              is_reimbursement: false,
+              status: 'COMPLETED',
+              event_name: shortageTx.event_name,
+            }])
+            .select()
+            .single();
+        }
+
+        const data = insertRes.data;
+        const error = insertRes.error;
+
         if (!error && data) {
-          setTransactions((prev) => prev.map((t) => (t.id === tempId ? data : t)));
+          setTransactions((prev) => prev.map((t) => (t.id === tempId ? {
+            ...data,
+            logged_by_name: userProfile?.full_name || null,
+            logged_by_role: currentRole || userProfile?.role || null,
+            category_id: data.category_id || shortageCatId,
+            category_name: data.category_name || shortageTx.category_name,
+            semester_id: data.semester_id || resolvedSemesterId,
+          } : t)));
         }
       } catch (err) {
         console.error('Failed to log shortage to database:', err);
@@ -532,6 +759,12 @@ export default function Dashboard() {
   };
 
   const handleSaveAuditCount = async (audit) => {
+    let resolvedSemesterId = currentSemester?.id;
+    if (resolvedSemesterId && resolvedSemesterId.startsWith('sem-')) {
+      const matchedDbSem = semesters.find((s) => s.id && !s.id.startsWith('sem-') && s.academicYear === currentSemester.academicYear && s.semester === currentSemester.semester);
+      resolvedSemesterId = matchedDbSem ? matchedDbSem.id : null;
+    }
+
     const payload = {
       bills_1000: audit.counts.bills_1000 || 0,
       bills_500: audit.counts.bills_500 || 0,
@@ -551,6 +784,7 @@ export default function Dashboard() {
       notes: audit.notes || null,
       academic_year: currentSemester?.academicYear || '2025-2026',
       semester: currentSemester?.semester || '1st',
+      semester_id: resolvedSemesterId || null,
       counted_by: userProfile?.id || currentUser?.id || null,
       created_at: new Date().toISOString(),
     };
@@ -577,6 +811,27 @@ export default function Dashboard() {
       if (error) {
         console.error('Failed to save audit count to Supabase:', error.message);
       } else if (data) {
+        // 4. Upsert normalized cash_reconciliation_items
+        if (denominations && denominations.length > 0) {
+          const reconItems = denominations.map((d) => {
+            const countKey = denomCodeToCountKey(d.code);
+            const qty = audit.counts[countKey] ?? audit.counts[d.code.toLowerCase()] ?? 0;
+            return {
+              reconciliation_id: data.id,
+              denomination_id: d.id,
+              quantity: qty,
+              subtotal: qty * parseFloat(d.face_value),
+            };
+          });
+          try {
+            await supabase
+              .from('cash_reconciliation_items')
+              .upsert(reconItems, { onConflict: 'reconciliation_id,denomination_id' });
+          } catch (itemErr) {
+            console.warn('cash_reconciliation_items upsert note:', itemErr?.message);
+          }
+        }
+
         setLatestReconciliation(data);
         if (typeof window !== 'undefined') {
           try {
@@ -696,7 +951,10 @@ export default function Dashboard() {
         <NewTransactionModal
           isOpen={isNewTxOpen}
           onClose={() => setIsNewTxOpen(false)}
-          onSave={handleSaveTransaction}
+          onSave={handleManualSaveTransaction}
+          categories={categories}
+          cashBalance={summary.cash_on_hand}
+          gcashBalance={summary.gcash_balance}
         />
       </ModuleErrorBoundary>
 
@@ -727,6 +985,7 @@ export default function Dashboard() {
           onSaveCount={handleSaveAuditCount}
           currentRole={currentRole}
           latestReconciliation={latestReconciliation}
+          denominations={denominations}
         />
       </ModuleErrorBoundary>
 

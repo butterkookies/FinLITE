@@ -1,7 +1,7 @@
 'use client';
 import { useState, useEffect } from 'react';
 import { AlertCircle, CheckCircle2, ShieldAlert, Wallet, X, RotateCcw } from 'lucide-react';
-import { calculatePhysicalTotal, calculateVariance, formatPHP } from '@/lib/utils/currency';
+import { calculatePhysicalTotal, calculateVariance, formatPHP, denomCodeToCountKey } from '@/lib/utils/currency';
 
 export default function DenominationCounter({ 
   isOpen, 
@@ -11,6 +11,7 @@ export default function DenominationCounter({
   onSaveCount,
   currentRole,
   latestReconciliation = null,
+  denominations = [],
 }) {
   const [counts, setCounts] = useState({
     bills_1000: 0,
@@ -33,7 +34,7 @@ export default function DenominationCounter({
   // Sync state whenever latestReconciliation loads or when modal opens
   useEffect(() => {
     if (latestReconciliation) {
-      setCounts({
+      const initialCounts = {
         bills_1000: Number(latestReconciliation.bills_1000) || 0,
         bills_500: Number(latestReconciliation.bills_500) || 0,
         bills_200: Number(latestReconciliation.bills_200) || 0,
@@ -45,12 +46,26 @@ export default function DenominationCounter({
         coins_5: Number(latestReconciliation.coins_5) || 0,
         coins_1: Number(latestReconciliation.coins_1) || 0,
         coins_cents: Number(latestReconciliation.coins_cents) || 0,
-      });
+      };
+
+      // If normalized child items are present, override with relational counts
+      if (Array.isArray(latestReconciliation.cash_reconciliation_items) && latestReconciliation.cash_reconciliation_items.length > 0) {
+        latestReconciliation.cash_reconciliation_items.forEach((item) => {
+          const code = item.denominations?.code || denominations.find((d) => d.id === item.denomination_id)?.code;
+          if (code) {
+            const countKey = denomCodeToCountKey(code);
+            initialCounts[countKey] = Number(item.quantity) || 0;
+            initialCounts[code.toLowerCase()] = Number(item.quantity) || 0;
+          }
+        });
+      }
+
+      setCounts(initialCounts);
       if (latestReconciliation.notes) {
         setJustificationNotes(latestReconciliation.notes);
       }
     }
-  }, [isOpen, latestReconciliation]);
+  }, [isOpen, latestReconciliation, denominations]);
 
   const handleResetCounts = () => {
     setCounts({

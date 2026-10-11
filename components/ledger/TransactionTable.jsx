@@ -140,7 +140,7 @@ export default function TransactionTable({
       tx.type === filterType;
 
     const matchesSearch = 
-      tx.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (tx.title || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
       (tx.description && tx.description.toLowerCase().includes(searchQuery.toLowerCase())) ||
       (tx.event_name && tx.event_name.toLowerCase().includes(searchQuery.toLowerCase())) ||
       (tx.reimbursement_recipient && tx.reimbursement_recipient.toLowerCase().includes(searchQuery.toLowerCase()));
@@ -271,12 +271,31 @@ export default function TransactionTable({
                         {tx.event_name}
                       </span>
                     )}
-                    {tx.is_reimbursement && (
-                      <span className="inline-flex items-center gap-1 mt-1 text-[10px] font-semibold text-gray-700 bg-gray-50 border border-black/[0.06] px-1.5 py-0.5 rounded-md">
-                        <Clock className="w-2.5 h-2.5 text-amber-600" />
-                        Advance by: {tx.reimbursement_recipient || 'Officer'}
-                      </span>
-                    )}
+                    <div className="flex items-center gap-1.5 flex-wrap mt-1">
+                      {tx.is_reimbursement && (
+                        <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-gray-700 bg-gray-50 border border-black/[0.06] px-1.5 py-0.5 rounded-md">
+                          <Clock className="w-2.5 h-2.5 text-amber-600" />
+                          Advance by: {tx.reimbursement_recipient || 'Officer'}
+                        </span>
+                      )}
+                      {(() => {
+                        const loggerName = tx.logged_by_name || tx.logged_by_profile?.full_name;
+                        const loggerRole = tx.logged_by_role || tx.logged_by_profile?.role;
+                        if (!loggerName && !loggerRole) return null;
+                        return (
+                          <span 
+                            className="inline-flex items-center gap-1 text-[10px] text-gray-500 bg-gray-50 border border-black/[0.05] px-1.5 py-0.5 rounded-md"
+                            title={`Recorded by: ${loggerName || ''} (${loggerRole || ''})`}
+                          >
+                            <span className="text-gray-400">By:</span>
+                            <span className="font-medium text-gray-700">{loggerName || 'Officer'}</span>
+                            {loggerRole && (
+                              <span className="text-[9px] uppercase tracking-wider text-gray-400 font-medium">({loggerRole})</span>
+                            )}
+                          </span>
+                        );
+                      })()}
+                    </div>
                   </td>
 
                   {/* Date */}
@@ -406,8 +425,8 @@ export default function TransactionTable({
                 </span>
               </div>
 
-              {/* Bottom Row: Event, Advance note & Receipt Action */}
-              {(tx.event_name || tx.is_reimbursement || tx.receipt_url || (Array.isArray(tx.receipt_urls) && tx.receipt_urls.length > 0) || isAuthorized) && (
+              {/* Bottom Row: Event, Advance note, Creator attribution & Receipt Action */}
+              {(tx.event_name || tx.is_reimbursement || tx.receipt_url || (Array.isArray(tx.receipt_urls) && tx.receipt_urls.length > 0) || isAuthorized || tx.logged_by_name || tx.logged_by_profile?.full_name || tx.logged_by_role || tx.logged_by_profile?.role) && (
                 <div className="flex items-center justify-between gap-2 pt-0.5">
                   <div className="flex items-center gap-1.5 flex-wrap min-w-0">
                     {tx.event_name && (
@@ -421,6 +440,20 @@ export default function TransactionTable({
                         Advance: {tx.reimbursement_recipient || 'Officer'}
                       </span>
                     )}
+                    {(() => {
+                      const loggerName = tx.logged_by_name || tx.logged_by_profile?.full_name;
+                      const loggerRole = tx.logged_by_role || tx.logged_by_profile?.role;
+                      if (!loggerName && !loggerRole) return null;
+                      return (
+                        <span className="inline-flex items-center gap-1 text-[10px] text-gray-500 bg-gray-50 border border-black/[0.05] px-1.5 py-0.5 rounded-md">
+                          <span className="text-gray-400">By:</span>
+                          <span className="font-medium text-gray-700 truncate max-w-[100px]">{loggerName || 'Officer'}</span>
+                          {loggerRole && (
+                            <span className="text-[9px] uppercase tracking-wider text-gray-400 font-medium">({loggerRole})</span>
+                          )}
+                        </span>
+                      );
+                    })()}
                   </div>
                   {(() => {
                     const receipts = getTransactionReceipts(tx);

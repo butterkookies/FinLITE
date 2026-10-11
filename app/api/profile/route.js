@@ -129,12 +129,25 @@ export async function PATCH(req) {
     let savedProfile = null;
 
     if (existingProfile) {
-      const { data, error: updateError } = await adminClient
+      let { data, error: updateError } = await adminClient
         .from('profiles')
         .update(updatePayload)
         .eq('id', existingProfile.id)
         .select()
         .single();
+
+      if (updateError && (updateError.message?.includes('generated column') || updateError.code === '42601')) {
+        const sanitizedUpdate = { ...updatePayload };
+        delete sanitizedUpdate.full_name;
+        const retry = await adminClient
+          .from('profiles')
+          .update(sanitizedUpdate)
+          .eq('id', existingProfile.id)
+          .select()
+          .single();
+        data = retry.data;
+        updateError = retry.error;
+      }
 
       if (updateError) {
         console.error('Update profile error:', updateError);
@@ -158,11 +171,23 @@ export async function PATCH(req) {
         ...updatePayload,
       };
 
-      const { data, error: insertError } = await adminClient
+      let { data, error: insertError } = await adminClient
         .from('profiles')
         .insert([insertPayload])
         .select()
         .single();
+
+      if (insertError && (insertError.message?.includes('generated column') || insertError.code === '42601')) {
+        const sanitizedInsert = { ...insertPayload };
+        delete sanitizedInsert.full_name;
+        const retry = await adminClient
+          .from('profiles')
+          .insert([sanitizedInsert])
+          .select()
+          .single();
+        data = retry.data;
+        insertError = retry.error;
+      }
 
       if (insertError) {
         console.error('Insert profile error:', insertError);

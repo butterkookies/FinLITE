@@ -77,12 +77,39 @@ export async function POST(req) {
       profileData.avatar_url = request.avatar_url;
     }
 
-    const { error: profileErr } = await supabase
+    let savedProfileId = null;
+    let { data: upsertedProfile, error: profileErr } = await supabase
       .from('profiles')
-      .upsert(profileData, { onConflict: 'email' });
+      .upsert(profileData, { onConflict: 'email' })
+      .select('id')
+      .maybeSingle();
+
+    // If error was caused by full_name being a GENERATED ALWAYS column in PostgreSQL Phase 3
+    if (profileErr && (profileErr.message?.includes('generated column') || profileErr.code === '42601')) {
+      const sanitizedProfileData = { ...profileData };
+      delete sanitizedProfileData.full_name;
+      const retry = await supabase
+        .from('profiles')
+        .upsert(sanitizedProfileData, { onConflict: 'email' })
+        .select('id')
+        .maybeSingle();
+      upsertedProfile = retry.data;
+      profileErr = retry.error;
+    }
 
     if (profileErr) {
       console.warn('Profile upsert note (may need migration 006 run):', profileErr.message);
+    } else if (upsertedProfile?.id) {
+      savedProfileId = upsertedProfile.id;
+      // 3.1 Link approved_profile_id back to registration_requests for 3NF relational traceability
+      try {
+        await supabase
+          .from('registration_requests')
+          .update({ approved_profile_id: savedProfileId })
+          .eq('id', requestId);
+      } catch (linkErr) {
+        console.warn('Traceability link note:', linkErr?.message);
+      }
     }
 
     // 4. Update Supabase Auth app_metadata if admin client available

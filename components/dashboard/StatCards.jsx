@@ -14,24 +14,25 @@ export default function StatCards({ summary, onOpenDenominations }) {
   return (
     <div className="grid grid-cols-2 lg:grid-cols-5 gap-2.5 sm:gap-3.5 mb-5 sm:mb-6">
       
-      {/* 1. Physical Cash Box (spans full width on mobile for rapid cashier access) */}
+      {/* 1. Physical Cash Box (Flat Light Green Shade Gradient) */}
       <div 
         onClick={onOpenDenominations}
-        className="col-span-2 sm:col-span-1 group relative bg-white p-3.5 sm:p-4 rounded-2xl border border-black/[0.08] shadow-xs hover:border-black/[0.16] hover:shadow-sm cursor-pointer transition-all"
+        className="col-span-2 sm:col-span-1 group relative p-3.5 sm:p-4 rounded-2xl cursor-pointer transition-all duration-150 select-none border border-emerald-300/80 bg-gradient-to-t from-emerald-200/90 via-emerald-100 to-emerald-50/90 shadow-xs hover:border-emerald-400 hover:shadow-sm hover:-translate-y-px active:scale-[0.985]"
       >
-        <div className="flex items-center justify-between text-xs text-gray-500 font-medium mb-1">
-          <span className="flex items-center gap-1.5 font-semibold text-gray-700 whitespace-nowrap">
+        <div className="flex items-center justify-between text-xs font-medium mb-1">
+          <span className="flex items-center gap-1.5 font-semibold text-emerald-900 whitespace-nowrap">
             <Wallet className="w-3.5 h-3.5 text-emerald-700 shrink-0" />
             Physical Cash
           </span>
-          <span className="text-[10px] font-semibold uppercase tracking-wider text-gray-600 bg-gray-50 border border-black/[0.06] px-1.5 py-0.5 rounded-md shrink-0">
+          <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-900 bg-white/90 border border-emerald-300 px-1.5 py-0.5 rounded-md shrink-0 shadow-xs">
             Cashbox
           </span>
         </div>
-        <p className="text-xl sm:text-xl font-bold text-gray-950 tracking-tight tabular-nums whitespace-nowrap">
+        <p className="text-xl sm:text-xl font-bold text-emerald-950 tracking-tight tabular-nums whitespace-nowrap">
           {formatPHP(cash_on_hand)}
         </p>
-        <p className="text-[10px] sm:text-[11px] text-gray-400 mt-0.5 sm:mt-1 flex items-center gap-1 group-hover:text-emerald-700 transition-colors whitespace-nowrap">
+        <p className="text-[10px] sm:text-[11px] text-emerald-800 mt-0.5 sm:mt-1 flex items-center gap-1.5 font-medium whitespace-nowrap group-hover:text-emerald-950 transition-colors">
+          <span className="inline-block w-1.5 h-1.5 rounded-full bg-emerald-600" />
           Click to count denominations
         </p>
       </div>

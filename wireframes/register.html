@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FinLITE — Registration Wireframe</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body style="display: flex; flex-direction: column; min-height: 100vh;">
+
+  <!-- Wireframe Top Header Bar -->
+  <header class="apple-header">
+    <div class="apple-header-inner">
+      <div style="display: flex; align-items: center; gap: 12px;">
+        <span class="sk-tag">Wireframe View</span>
+        <span style="font-size: 13px; font-weight: 600;">register.html (Account Registration)</span>
+      </div>
+      <a href="index.html" class="apple-btn">← Back to Wireframe Deck</a>
+    </div>
+  </header>
+
+  <!-- Centered Registration Card -->
+  <main style="flex: 1; display: flex; align-items: center; justify-content: center; padding: 40px 20px;">
+    
+    <div class="apple-card" style="width: 100%; max-width: 560px; padding: 36px 32px; box-shadow: var(--shadow-modal);">
+      
+      <!-- Organization Logo & Header -->
+      <div style="text-align: center; margin-bottom: 24px;">
+        <div style="width: 48px; height: 48px; border-radius: 12px; background: #15803d; color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 20px; margin: 0 auto 12px auto;">
+          L
+        </div>
+        <h2 style="font-size: 19px; font-weight: 700; letter-spacing: -0.02em; color: var(--apple-text-primary); margin-bottom: 4px;">Officer Account Application</h2>
+        <p style="font-size: 12px; color: var(--apple-text-secondary);">Request access to the FinLITE Financial Operations & Ledger System</p>
+      </div>
+
+      <!-- Institutional Notice Banner -->
+      <div style="background: var(--apple-fill-subtle); border: 1px solid var(--apple-hairline); border-radius: var(--radius-md); padding: 12px 14px; margin-bottom: 20px; display: flex; gap: 10px; align-items: flex-start;">
+        <span style="font-size: 16px;">🛡️</span>
+        <div style="font-size: 11px; color: var(--apple-text-secondary); line-height: 1.4;">
+          <strong style="color: var(--apple-text-primary);">Institutional Verification Required:</strong> Applications require endorsement by the LITE Faculty Advisers (Ms. Kimberly Dawn Jatulan / Ms. Krizia Mae Genovia) before ledger permissions are granted.
+        </div>
+      </div>
+
+      <!-- Form Grid -->
+      <div>
+        
+        <!-- Full Name -->
+        <div class="form-group">
+          <label class="form-label">Full Name</label>
+          <div style="background: #ffffff; border: 1px solid var(--apple-hairline); border-radius: var(--radius-md); padding: 0 14px; height: 42px; display: flex; align-items: center;">
+            <input type="text" value="Mark Kenneth Santos" style="border: none; background: transparent; font-size: 13px; outline: none; width: 100%; color: var(--apple-text-primary);">
+          </div>
+        </div>
+
+        <!-- Student ID & Institutional Email -->
+        <div class="grid-2">
+          <div class="form-group">
+            <label class="form-label">Student ID Number</label>
+            <div style="background: #ffffff; border: 1px solid var(--apple-hairline); border-radius: var(--radius-md); padding: 0 14px; height: 42px; display: flex; align-items: center;">
+              <input type="text" value="2024-00142" class="tabular-nums" style="border: none; background: transparent; font-size: 13px; outline: none; width: 100%; color: var(--apple-text-primary);">
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Institutional Email</label>
+            <div style="background: #ffffff; border: 1px solid var(--apple-hairline); border-radius: var(--radius-md); padding: 0 14px; height: 42px; display: flex; align-items: center;">
+              <input type="text" value="santosmk.pdm@gmail.com" style="border: none; background: transparent; font-size: 13px; outline: none; width: 100%; color: var(--apple-text-primary);">
+            </div>
+          </div>
+        </div>
+
+        <!-- Role Requested -->
+        <div class="form-group">
+          <label class="form-label">Requested Organizational Role</label>
+          <div style="background: #ffffff; border: 1px solid var(--apple-hairline); border-radius: var(--radius-md); padding: 0 14px; height: 42px; display: flex; align-items: center; justify-content: space-between; font-size: 13px; color: var(--apple-text-primary);">
+            <span>Auditor (Financial Audit & Denomination Witness)</span>
+            <span style="font-size: 10px; color: var(--apple-text-tertiary);">▾</span>
+          </div>
+        </div>
+
+        <!-- Password & Confirm Password -->
+        <div class="grid-2">
+          <div class="form-group">
+            <label class="form-label">Password</label>
+            <div style="background: #ffffff; border: 1px solid var(--apple-hairline); border-radius: var(--radius-md); padding: 0 14px; height: 42px; display: flex; align-items: center;">
+              <input type="password" value="••••••••••••" style="border: none; background: transparent; font-size: 14px; outline: none; width: 100%; color: var(--apple-text-primary);">
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Confirm Password</label>
+            <div style="background: #ffffff; border: 1px solid var(--apple-hairline); border-radius: var(--radius-md); padding: 0 14px; height: 42px; display: flex; align-items: center;">
+              <input type="password" value="••••••••••••" style="border: none; background: transparent; font-size: 14px; outline: none; width: 100%; color: var(--apple-text-primary);">
+            </div>
+          </div>
+        </div>
+
+        <!-- Submit Button -->
+        <div style="margin-top: 10px; margin-bottom: 20px;">
+          <a href="login.html" class="apple-btn apple-btn-primary" style="width: 100%; height: 44px; font-size: 13px; font-weight: 600; text-align: center; text-decoration: none; border-radius: var(--radius-md);">
+            Submit Officer Application
+          </a>
+        </div>
+
+        <!-- Back to Login Link -->
+        <div style="text-align: center;">
+          <span style="font-size: 12px; color: var(--apple-text-secondary);">Already have an approved account? </span>
+          <a href="login.html" style="font-size: 12px; font-weight: 600; color: var(--apple-accent); text-decoration: none;">Sign In →</a>
+        </div>
+
+      </div>
+
+    </div>
+
+  </main>
+
+  <!-- Institutional Footer -->
+  <footer style="padding: 20px; text-align: center; border-top: 1px solid var(--apple-hairline); background: var(--apple-surface);">
+    <p style="font-size: 11px; color: var(--apple-text-tertiary);">
+      Pambayang Dalubhasaan ng Marilao • College of Computer Studies • AY 2026–2027
+    </p>
+  </footer>
+
+</body>
+</html>
