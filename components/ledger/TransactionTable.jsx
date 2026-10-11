@@ -242,13 +242,14 @@ export default function TransactionTable({
               <th className="py-2.5 px-3">Channel</th>
               <th className="py-2.5 px-3">Category</th>
               <th className="py-2.5 px-3 text-right">Amount</th>
+              <th className="py-2.5 px-3.5">Recorded By</th>
               <th className="py-2.5 px-4 text-center">Receipt</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-black/[0.03] text-xs">
             {filtered.length === 0 ? (
               <tr>
-                <td colSpan="6" className="py-8 text-center text-gray-400 font-medium">
+                <td colSpan="7" className="py-8 text-center text-gray-400 font-medium">
                   No matching transactions found.
                 </td>
               </tr>
@@ -311,6 +312,61 @@ export default function TransactionTable({
                     tx.type === 'INFLOW' ? 'text-emerald-700' : 'text-gray-900'
                   }`}>
                     {tx.type === 'INFLOW' ? '+' : '-'}{formatPHP(tx.amount)}
+                  </td>
+
+                  {/* Recorded By */}
+                  <td className="py-3 px-3.5 whitespace-nowrap">
+                    {(() => {
+                      const loggerName = tx.logged_by_name || tx.logged_by_profile?.full_name;
+                      const loggerRole = tx.logged_by_role || tx.logged_by_profile?.role;
+                      const loggerEmail = tx.logged_by_email || tx.logged_by_profile?.email;
+                      const loggerAvatar = tx.logged_by_avatar_url || tx.logged_by_profile?.avatar_url;
+
+                      if (!loggerName && !loggerRole && !tx.logged_by) {
+                        return (
+                          <span className="text-[11px] text-gray-400 font-medium italic">
+                            System
+                          </span>
+                        );
+                      }
+
+                      const roleBadgeClasses = {
+                        admin: 'bg-rose-50 text-rose-700 border-rose-200/80',
+                        treasurer: 'bg-emerald-50 text-emerald-700 border-emerald-200/80',
+                        auditor: 'bg-amber-50 text-amber-700 border-amber-200/80',
+                        president: 'bg-blue-50 text-blue-700 border-blue-200/80',
+                        adviser: 'bg-purple-50 text-purple-700 border-purple-200/80',
+                      }[loggerRole?.toLowerCase()] || 'bg-gray-100 text-gray-700 border-gray-200';
+
+                      return (
+                        <div 
+                          className="flex items-center gap-2" 
+                          title={loggerEmail ? `${loggerName || 'Officer'} (${loggerEmail})` : (loggerName || 'Officer')}
+                        >
+                          {loggerAvatar ? (
+                            <img 
+                              src={loggerAvatar} 
+                              alt={loggerName || 'Officer'} 
+                              className="w-6 h-6 rounded-full object-cover shrink-0 border border-black/10 shadow-2xs" 
+                            />
+                          ) : (
+                            <div className="w-6 h-6 rounded-full bg-emerald-100/90 text-emerald-800 flex items-center justify-center text-[10px] font-bold shrink-0 border border-emerald-200/60 shadow-2xs">
+                              {(loggerName || 'O').charAt(0).toUpperCase()}
+                            </div>
+                          )}
+                          <div className="min-w-0">
+                            <div className="text-xs font-semibold text-gray-900 truncate max-w-[130px]">
+                              {loggerName || 'Officer'}
+                            </div>
+                            {loggerRole && (
+                              <span className={`inline-block text-[9px] font-semibold uppercase tracking-wider px-1.5 py-0.5 rounded border leading-none mt-0.5 ${roleBadgeClasses}`}>
+                                {loggerRole}
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })()}
                   </td>
 
                   {/* Receipt Preview & Action */}
@@ -421,6 +477,28 @@ export default function TransactionTable({
                         Advance: {tx.reimbursement_recipient || 'Officer'}
                       </span>
                     )}
+                    {(() => {
+                      const loggerName = tx.logged_by_name || tx.logged_by_profile?.full_name;
+                      const loggerRole = tx.logged_by_role || tx.logged_by_profile?.role;
+                      const loggerAvatar = tx.logged_by_avatar_url || tx.logged_by_profile?.avatar_url;
+                      if (!loggerName && !loggerRole && !tx.logged_by) return null;
+                      return (
+                        <span className="inline-flex items-center gap-1.5 text-[10px] text-gray-700 bg-gray-50 border border-black/[0.06] px-1.5 py-0.5 rounded-md">
+                          {loggerAvatar ? (
+                            <img src={loggerAvatar} alt="" className="w-3.5 h-3.5 rounded-full object-cover shrink-0" />
+                          ) : (
+                            <span className="w-3.5 h-3.5 rounded-full bg-emerald-100 text-emerald-800 flex items-center justify-center text-[8px] font-bold shrink-0">
+                              {(loggerName || 'O').charAt(0).toUpperCase()}
+                            </span>
+                          )}
+                          <span className="text-gray-400 font-medium">By:</span>
+                          <span className="font-semibold text-gray-800 truncate max-w-[100px]">{loggerName || 'Officer'}</span>
+                          {loggerRole && (
+                            <span className="text-[8px] uppercase tracking-wider font-semibold text-emerald-700">({loggerRole})</span>
+                          )}
+                        </span>
+                      );
+                    })()}
                   </div>
                   {(() => {
                     const receipts = getTransactionReceipts(tx);
@@ -509,6 +587,30 @@ export default function TransactionTable({
                       <span className="ml-2 text-gray-400">· via {selectedReceipt.payment_method}</span>
                     )}
                   </p>
+                  {(() => {
+                    const loggerName = selectedReceipt.logged_by_name || selectedReceipt.logged_by_profile?.full_name;
+                    const loggerRole = selectedReceipt.logged_by_role || selectedReceipt.logged_by_profile?.role;
+                    const loggerAvatar = selectedReceipt.logged_by_avatar_url || selectedReceipt.logged_by_profile?.avatar_url;
+                    if (!loggerName && !loggerRole && !selectedReceipt.logged_by) return null;
+                    return (
+                      <div className="flex items-center gap-1.5 text-[11px] text-gray-600 mt-1.5 pt-1.5 border-t border-black/[0.05]">
+                        {loggerAvatar ? (
+                          <img src={loggerAvatar} alt="" className="w-4 h-4 rounded-full object-cover shrink-0" />
+                        ) : (
+                          <span className="w-4 h-4 rounded-full bg-emerald-100 text-emerald-800 flex items-center justify-center text-[9px] font-bold shrink-0">
+                            {(loggerName || 'O').charAt(0).toUpperCase()}
+                          </span>
+                        )}
+                        <span className="text-gray-400 font-medium">Recorded by:</span>
+                        <span className="font-semibold text-gray-900">{loggerName || 'Officer'}</span>
+                        {loggerRole && (
+                          <span className="text-[9px] uppercase tracking-wider font-semibold px-1.5 py-0.2 rounded bg-gray-100 text-gray-700 border border-black/[0.05]">
+                            {loggerRole}
+                          </span>
+                        )}
+                      </div>
+                    );
+                  })()}
                 </div>
 
                 <button
