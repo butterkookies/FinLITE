@@ -16,6 +16,7 @@ import {
   Folder
 } from 'lucide-react';
 import { formatPHP } from '@/lib/utils/currency';
+import { useTheme } from '@/components/theme/ThemeProvider';
 
 export default function TransactionTable({ 
   transactions = [], 
@@ -25,6 +26,7 @@ export default function TransactionTable({
   currentRole,
   isDbConnected = false
 }) {
+  const { isLight } = useTheme();
   const [filterType, setFilterType] = useState('ALL');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedReceipt, setSelectedReceipt] = useState(null);
@@ -45,23 +47,37 @@ export default function TransactionTable({
   });
 
   return (
-    <div className="rounded-3xl border border-emerald-500/20 bg-[#082218]/85 backdrop-blur-xl shadow-2xl overflow-hidden transition-all relative">
+    <div className={`rounded-3xl border transition-all relative overflow-hidden shadow-xl ${
+      isLight
+        ? 'border-emerald-600/15 bg-gradient-to-br from-[#f8fbf9]/95 via-[#f2f7f4]/90 to-[#e6f1ea]/85 backdrop-blur-xl shadow-emerald-950/5'
+        : 'border-emerald-500/20 bg-[#082218]/85 backdrop-blur-xl shadow-2xl shadow-black/30'
+    }`}>
       <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-emerald-500/0 via-emerald-400/40 to-emerald-500/0 pointer-events-none" />
       
       {/* Table Header Controls */}
-      <div className="p-5 sm:p-6 border-b border-emerald-500/15 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className={`p-5 sm:p-6 border-b flex flex-col sm:flex-row sm:items-center justify-between gap-4 ${
+        isLight ? 'border-emerald-900/10 bg-emerald-50/20' : 'border-emerald-500/15'
+      }`}>
         <div className="min-w-0">
           <div className="flex items-center gap-2.5 flex-wrap">
-            <h2 className="text-xl sm:text-2xl font-black text-white tracking-tight">
+            <h2 className={`text-xl sm:text-2xl font-black tracking-tight ${
+              isLight ? 'text-gray-900' : 'text-white'
+            }`}>
               Financial Ledger &amp; Transactions
             </h2>
             {isDbConnected && (
-              <span className="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 shrink-0">
+              <span className={`inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider shrink-0 border ${
+                isLight
+                  ? 'bg-emerald-100 text-emerald-800 border-emerald-300'
+                  : 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30'
+              }`}>
                 Live
               </span>
             )}
           </div>
-          <p className="text-xs text-white/50 font-medium mt-1 truncate">
+          <p className={`text-xs font-medium mt-1 truncate ${
+            isLight ? 'text-emerald-900/60' : 'text-white/50'
+          }`}>
             Real-time auditable record of organization inflows and disbursements
           </p>
         </div>
@@ -71,20 +87,28 @@ export default function TransactionTable({
           {/* Create Business Proposal Button */}
           <button
             onClick={onNewProposal}
-            className="h-10 flex items-center justify-center gap-2 px-4 text-xs font-semibold text-emerald-200 bg-[#0d1e16] hover:bg-[#122b20] active:bg-[#163527] border border-[#1a382b] hover:border-emerald-500/40 rounded-xl transition-all shadow-xs whitespace-nowrap cursor-pointer"
+            className={`h-10 flex items-center justify-center gap-2 px-4 text-xs font-semibold rounded-xl transition-all shadow-xs whitespace-nowrap cursor-pointer border ${
+              isLight
+                ? 'text-emerald-900 bg-emerald-50/80 hover:bg-emerald-100 border-emerald-200 hover:border-emerald-300'
+                : 'text-emerald-200 bg-[#0d1e16] hover:bg-[#122b20] active:bg-[#163527] border-[#1a382b] hover:border-emerald-500/40'
+            }`}
             title="Create Pre-Activity Business Proposal & Booth Budget"
           >
-            <Calculator className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+            <Calculator className={`w-3.5 h-3.5 shrink-0 ${isLight ? 'text-emerald-600' : 'text-emerald-400'}`} />
             <span>Create Proposal</span>
           </button>
 
           {/* Review & Export Report Button */}
           <button
             onClick={onExportReport}
-            className="h-10 flex items-center justify-center gap-2 px-4 text-xs font-semibold text-emerald-200 bg-[#0d1e16] hover:bg-[#122b20] active:bg-[#163527] border border-[#1a382b] hover:border-emerald-500/40 rounded-xl transition-all shadow-xs whitespace-nowrap cursor-pointer"
+            className={`h-10 flex items-center justify-center gap-2 px-4 text-xs font-semibold rounded-xl transition-all shadow-xs whitespace-nowrap cursor-pointer border ${
+              isLight
+                ? 'text-emerald-900 bg-emerald-50/80 hover:bg-emerald-100 border-emerald-200 hover:border-emerald-300'
+                : 'text-emerald-200 bg-[#0d1e16] hover:bg-[#122b20] active:bg-[#163527] border-[#1a382b] hover:border-emerald-500/40'
+            }`}
             title="Preview 1:1 PDM CCS Formal Word Liquidation Report & Live Edit"
           >
-            <FileText className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+            <FileText className={`w-3.5 h-3.5 shrink-0 ${isLight ? 'text-emerald-600' : 'text-emerald-400'}`} />
             <span>Preview Report</span>
           </button>
 
@@ -92,7 +116,11 @@ export default function TransactionTable({
           {(currentRole === 'admin' || currentRole === 'treasurer' || currentRole === 'auditor') && (
             <button
               onClick={onNewTransaction}
-              className="col-span-2 sm:col-span-1 h-10 flex items-center justify-center gap-2 px-4.5 text-xs font-black text-black bg-[#10b981] hover:bg-[#059669] active:bg-[#047857] rounded-xl transition-all shadow-lg shadow-emerald-500/20 whitespace-nowrap cursor-pointer"
+              className={`col-span-2 sm:col-span-1 h-10 flex items-center justify-center gap-2 px-4.5 text-xs font-black rounded-xl transition-all shadow-lg whitespace-nowrap cursor-pointer ${
+                isLight
+                  ? 'text-white bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 shadow-emerald-600/20'
+                  : 'text-black bg-[#10b981] hover:bg-[#059669] active:bg-[#047857] shadow-emerald-500/20'
+              }`}
             >
               <Plus className="w-4 h-4 shrink-0 stroke-[3]" />
               <span>Record Transaction</span>
@@ -102,22 +130,32 @@ export default function TransactionTable({
       </div>
 
       {/* Filter & Search Bar */}
-      <div className="px-5 sm:px-6 py-3.5 border-b border-[#142e20] flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+      <div className={`px-5 sm:px-6 py-3.5 border-b flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 ${
+        isLight ? 'border-emerald-900/10 bg-gradient-to-r from-emerald-50/50 via-teal-50/40 to-emerald-50/50' : 'border-[#142e20] bg-transparent'
+      }`}>
         
         {/* Search Input */}
         <div className="relative w-full sm:w-80 shrink-0">
-          <Search className="w-3.5 h-3.5 text-white/40 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+          <Search className={`w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none ${
+            isLight ? 'text-emerald-800/40' : 'text-white/40'
+          }`} />
           <input
             type="text"
             placeholder="Search items, events, recipients..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full h-9 text-xs bg-[#06120c] focus:bg-[#091a11] border border-[#163325] focus:border-emerald-500/50 rounded-xl pl-8.5 pr-3 text-white placeholder:text-white/40 focus:outline-none focus:ring-1 focus:ring-emerald-500/30 transition-all select-text shadow-inner"
+            className={`w-full h-9 text-xs rounded-xl pl-8.5 pr-3 transition-all select-text shadow-inner focus:outline-none focus:ring-1 ${
+              isLight
+                ? 'bg-white/95 focus:bg-white border border-emerald-300/80 text-emerald-950 placeholder:text-gray-400 focus:border-emerald-600 focus:ring-emerald-500/20'
+                : 'bg-[#06120c] focus:bg-[#091a11] border border-[#163325] focus:border-emerald-500/50 text-white placeholder:text-white/40 focus:ring-emerald-500/30'
+            }`}
           />
         </div>
 
-        {/* Filter Tabs — 2x2 grid on mobile (no scroll), flex row on sm+ */}
-        <div className="grid grid-cols-2 sm:flex sm:items-center gap-1.5 p-1 bg-[#06120c] rounded-2xl sm:rounded-full border border-[#163325] w-full sm:w-auto">
+        {/* Filter Tabs */}
+        <div className={`grid grid-cols-2 sm:flex sm:items-center gap-1.5 p-1 rounded-2xl sm:rounded-full border w-full sm:w-auto ${
+          isLight ? 'bg-emerald-100/50 border-emerald-200/80' : 'bg-[#06120c] border-[#163325]'
+        }`}>
           {[
             { id: 'ALL', label: 'All Records' },
             { id: 'INFLOW', label: 'Inflows' },
@@ -129,8 +167,12 @@ export default function TransactionTable({
               onClick={() => setFilterType(tab.id)}
               className={`h-8 px-3.5 sm:px-4 text-xs font-bold transition-all rounded-xl sm:rounded-full text-center flex items-center justify-center cursor-pointer ${
                 filterType === tab.id
-                  ? 'bg-[#10b981] text-black shadow-md'
-                  : 'text-white/60 hover:text-white hover:bg-white/[0.05]'
+                  ? isLight
+                    ? 'bg-emerald-600 text-white shadow-sm'
+                    : 'bg-[#10b981] text-black shadow-md'
+                  : isLight
+                    ? 'text-emerald-900/75 hover:text-emerald-950 hover:bg-white/80'
+                    : 'text-white/60 hover:text-white hover:bg-white/[0.05]'
               }`}
             >
               {tab.label}
@@ -144,7 +186,11 @@ export default function TransactionTable({
       <div className="hidden md:block overflow-x-auto">
         <table className="w-full min-w-[640px] text-left border-collapse">
           <thead>
-            <tr className="border-b border-[#142e20] text-[10px] sm:text-[11px] font-bold text-white/40 uppercase tracking-wider">
+            <tr className={`border-b text-[10px] sm:text-[11px] font-bold uppercase tracking-wider ${
+              isLight
+                ? 'border-emerald-900/10 text-emerald-900/70 bg-gradient-to-r from-emerald-100/40 via-teal-50/40 to-emerald-100/40'
+                : 'border-[#142e20] text-white/40 bg-transparent'
+            }`}>
               <th className="py-3 px-5 sm:px-6">Transaction &amp; Event</th>
               <th className="py-3 px-3 whitespace-nowrap">Date</th>
               <th className="py-3 px-3 whitespace-nowrap">Channel</th>
@@ -153,73 +199,107 @@ export default function TransactionTable({
               <th className="py-3 px-5 text-center whitespace-nowrap">Receipt</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-[#142e20]/60 text-xs">
+          <tbody className={`divide-y text-xs ${
+            isLight ? 'divide-emerald-900/10' : 'divide-[#142e20]/60'
+          }`}>
             {filtered.length === 0 ? (
               <tr>
                 <td colSpan="6" className="py-16 text-center">
-                  <div className="w-12 h-12 rounded-xl bg-[#064e3b]/30 border border-emerald-500/20 flex items-center justify-center text-emerald-400 mx-auto mb-3 shadow-inner">
+                  <div className={`w-12 h-12 rounded-xl flex items-center justify-center mx-auto mb-3 shadow-inner border ${
+                    isLight
+                      ? 'bg-emerald-100 text-emerald-700 border-emerald-200'
+                      : 'bg-[#064e3b]/30 text-emerald-400 border-emerald-500/20'
+                  }`}>
                     <Folder className="w-6 h-6" />
                   </div>
-                  <p className="text-xs text-white/50 font-medium">No matching transactions found.</p>
+                  <p className={`text-xs font-medium ${isLight ? 'text-gray-500' : 'text-white/50'}`}>
+                    No matching transactions found.
+                  </p>
                 </td>
               </tr>
             ) : (
               filtered.map((tx) => (
-                <tr key={tx.id} className="hover:bg-white/[0.02] transition-colors">
+                <tr key={tx.id} className={`transition-colors ${
+                  isLight ? 'hover:bg-emerald-50/50' : 'hover:bg-white/[0.02]'
+                }`}>
                   
                   {/* Title & Event */}
                   <td className="py-3.5 px-5 sm:px-6 max-w-[260px]">
-                    <div className="font-bold text-white flex items-center gap-1.5">
+                    <div className={`font-bold flex items-center gap-1.5 ${
+                      isLight ? 'text-gray-900' : 'text-white'
+                    }`}>
                       {tx.type === 'INFLOW' ? (
-                        <ArrowDownRight className="w-4 h-4 text-emerald-400 shrink-0" />
+                        <ArrowDownRight className={`w-4 h-4 shrink-0 ${isLight ? 'text-emerald-600' : 'text-emerald-400'}`} />
                       ) : (
-                        <ArrowUpRight className="w-4 h-4 text-amber-400 shrink-0" />
+                        <ArrowUpRight className={`w-4 h-4 shrink-0 ${isLight ? 'text-amber-600' : 'text-amber-400'}`} />
                       )}
                       <span className="truncate">{tx.title}</span>
                     </div>
                     {tx.event_name && (
-                      <span className="text-[10px] font-medium text-white/50 block mt-0.5 truncate">
+                      <span className={`text-[10px] font-medium block mt-0.5 truncate ${
+                        isLight ? 'text-gray-500' : 'text-white/50'
+                      }`}>
                         {tx.event_name}
                       </span>
                     )}
                     {tx.is_reimbursement && (
-                      <span className="inline-flex items-center gap-1 mt-1 text-[10px] font-semibold text-amber-300 bg-amber-500/10 border border-amber-500/20 px-1.5 py-0.5 rounded-md">
-                        <Clock className="w-2.5 h-2.5 text-amber-400 shrink-0" />
+                      <span className={`inline-flex items-center gap-1 mt-1 text-[10px] font-semibold px-1.5 py-0.5 rounded-md border ${
+                        isLight
+                          ? 'text-amber-800 bg-amber-100/80 border-amber-300'
+                          : 'text-amber-300 bg-amber-500/10 border-amber-500/20'
+                      }`}>
+                        <Clock className={`w-2.5 h-2.5 shrink-0 ${isLight ? 'text-amber-700' : 'text-amber-400'}`} />
                         <span className="truncate max-w-[160px]">Advance by: {tx.reimbursement_recipient || 'Officer'}</span>
                       </span>
                     )}
                   </td>
 
                   {/* Date */}
-                  <td className="py-3.5 px-3 text-white/70 font-medium whitespace-nowrap">
+                  <td className={`py-3.5 px-3 font-medium whitespace-nowrap ${
+                    isLight ? 'text-gray-700' : 'text-white/70'
+                  }`}>
                     {tx.transaction_date}
                   </td>
 
                   {/* Payment Channel */}
                   <td className="py-3.5 px-3 whitespace-nowrap">
                     {tx.payment_method === 'CASH' ? (
-                      <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-300 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-md">
-                        <Wallet className="w-3 h-3 text-emerald-400" />
+                      <span className={`inline-flex items-center gap-1 text-[11px] font-semibold px-2 py-0.5 rounded-md border ${
+                        isLight
+                          ? 'text-emerald-800 bg-emerald-100/90 border-emerald-300'
+                          : 'text-emerald-300 bg-emerald-500/10 border-emerald-500/20'
+                      }`}>
+                        <Wallet className={`w-3 h-3 ${isLight ? 'text-emerald-700' : 'text-emerald-400'}`} />
                         Cash
                       </span>
                     ) : (
-                      <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-blue-300 bg-blue-500/10 border border-blue-500/20 px-2 py-0.5 rounded-md">
-                        <Smartphone className="w-3 h-3 text-blue-400" />
+                      <span className={`inline-flex items-center gap-1 text-[11px] font-semibold px-2 py-0.5 rounded-md border ${
+                        isLight
+                          ? 'text-sky-800 bg-sky-100/90 border-sky-300'
+                          : 'text-blue-300 bg-blue-500/10 border-blue-500/20'
+                      }`}>
+                        <Smartphone className={`w-3 h-3 ${isLight ? 'text-sky-700' : 'text-blue-400'}`} />
                         GCash
                       </span>
                     )}
                   </td>
 
                   {/* Category */}
-                  <td className="py-3.5 px-3 text-white/80 font-medium whitespace-nowrap">
-                    <span className="bg-[#0c1e16] border border-[#1a382b] text-white/90 text-[11px] px-2 py-0.5 rounded-md font-semibold">
+                  <td className="py-3.5 px-3 whitespace-nowrap">
+                    <span className={`text-[11px] px-2 py-0.5 rounded-md font-semibold border ${
+                      isLight
+                        ? 'bg-gray-100 border-gray-200 text-gray-800'
+                        : 'bg-[#0c1e16] border-[#1a382b] text-white/90'
+                    }`}>
                       {tx.category_name || (tx.type === 'INFLOW' ? 'Revenue' : 'Disbursement')}
                     </span>
                   </td>
 
                   {/* Amount */}
                   <td className={`py-3.5 px-3 text-right font-black whitespace-nowrap tabular-nums text-sm ${
-                    tx.type === 'INFLOW' ? 'text-emerald-400' : 'text-white'
+                    tx.type === 'INFLOW' 
+                      ? isLight ? 'text-emerald-600' : 'text-emerald-400' 
+                      : isLight ? 'text-gray-900' : 'text-white'
                   }`}>
                     {tx.type === 'INFLOW' ? '+' : '-'}{formatPHP(tx.amount)}
                   </td>
@@ -229,13 +309,17 @@ export default function TransactionTable({
                     {tx.receipt_url ? (
                       <button
                         onClick={() => setSelectedReceipt(tx)}
-                        className="h-7 inline-flex items-center gap-1 text-[11px] text-emerald-300 hover:text-emerald-200 font-semibold bg-[#0c1e16] hover:bg-[#122b20] border border-[#1a382b] px-2.5 rounded-lg transition-colors cursor-pointer"
+                        className={`h-7 inline-flex items-center gap-1 text-[11px] font-semibold px-2.5 rounded-lg transition-colors cursor-pointer border ${
+                          isLight
+                            ? 'text-emerald-800 hover:text-emerald-950 bg-emerald-50 hover:bg-emerald-100 border-emerald-200'
+                            : 'text-emerald-300 hover:text-emerald-200 bg-[#0c1e16] hover:bg-[#122b20] border-[#1a382b]'
+                        }`}
                       >
-                        <Receipt className="w-3 h-3 text-emerald-400" />
+                        <Receipt className={`w-3 h-3 ${isLight ? 'text-emerald-600' : 'text-emerald-400'}`} />
                         View
                       </button>
                     ) : (
-                      <span className="text-[11px] text-white/40 italic">None</span>
+                      <span className={`text-[11px] italic ${isLight ? 'text-gray-400' : 'text-white/40'}`}>None</span>
                     )}
                   </td>
 
@@ -271,17 +355,25 @@ export default function TransactionTable({
         const renderCard = (tx, badgeConfig) => (
           <div
             key={tx.id}
-            className="bg-[#0c1b14] rounded-2xl border border-[#163325] p-4.5 space-y-3 transition-all"
+            className={`rounded-2xl border p-4.5 space-y-3 transition-all ${
+              isLight
+                ? 'bg-gradient-to-br from-white/95 to-[#f3faf6]/90 border-emerald-600/15 shadow-xs'
+                : 'bg-[#0c1b14] border-[#163325]'
+            }`}
           >
             {/* Top Row: Amount on left & Status pill badge on right */}
             <div className="flex items-start justify-between gap-3">
               <div>
-                <span className="text-[10px] font-bold uppercase tracking-wider text-white/40 block mb-0.5">
+                <span className={`text-[10px] font-bold uppercase tracking-wider block mb-0.5 ${
+                  isLight ? 'text-gray-500' : 'text-white/40'
+                }`}>
                   {tx.type === 'INFLOW' ? 'Inflow Amount' : 'Disbursement Amount'}
                 </span>
                 <span
                   className={`text-xl font-black tracking-tight tabular-nums block whitespace-nowrap ${
-                    tx.type === 'INFLOW' ? 'text-emerald-400' : 'text-white'
+                    tx.type === 'INFLOW' 
+                      ? isLight ? 'text-emerald-600' : 'text-emerald-400' 
+                      : isLight ? 'text-gray-900' : 'text-white'
                   }`}
                 >
                   {tx.type === 'INFLOW' ? '+' : '-'}{formatPHP(tx.amount)}
@@ -295,35 +387,37 @@ export default function TransactionTable({
             </div>
 
             {/* Middle Section: Key-Value Details */}
-            <div className="space-y-2 pt-2.5 border-t border-[#142e20] text-xs">
+            <div className={`space-y-2 pt-2.5 border-t text-xs ${
+              isLight ? 'border-gray-100' : 'border-[#142e20]'
+            }`}>
               <div className="flex items-start justify-between gap-3">
-                <span className="text-white/50 font-medium shrink-0">Transaction</span>
-                <span className="text-white font-bold text-right truncate max-w-[200px]">{tx.title}</span>
+                <span className={`font-medium shrink-0 ${isLight ? 'text-gray-500' : 'text-white/50'}`}>Transaction</span>
+                <span className={`font-bold text-right truncate max-w-[200px] ${isLight ? 'text-gray-900' : 'text-white'}`}>{tx.title}</span>
               </div>
 
               {tx.event_name && (
                 <div className="flex items-center justify-between gap-3">
-                  <span className="text-white/50 font-medium shrink-0">Event</span>
-                  <span className="text-white/80 font-medium text-right truncate max-w-[200px]">{tx.event_name}</span>
+                  <span className={`font-medium shrink-0 ${isLight ? 'text-gray-500' : 'text-white/50'}`}>Event</span>
+                  <span className={`font-medium text-right truncate max-w-[200px] ${isLight ? 'text-gray-700' : 'text-white/80'}`}>{tx.event_name}</span>
                 </div>
               )}
 
               <div className="flex items-center justify-between gap-3">
-                <span className="text-white/50 font-medium shrink-0">Date</span>
-                <span className="text-white/80 font-semibold tabular-nums">{tx.transaction_date}</span>
+                <span className={`font-medium shrink-0 ${isLight ? 'text-gray-500' : 'text-white/50'}`}>Date</span>
+                <span className={`font-semibold tabular-nums ${isLight ? 'text-gray-700' : 'text-white/80'}`}>{tx.transaction_date}</span>
               </div>
 
               <div className="flex items-center justify-between gap-3">
-                <span className="text-white/50 font-medium shrink-0">Payment Channel</span>
-                <span className="inline-flex items-center gap-1 font-semibold text-white/90">
+                <span className={`font-medium shrink-0 ${isLight ? 'text-gray-500' : 'text-white/50'}`}>Payment Channel</span>
+                <span className={`inline-flex items-center gap-1 font-semibold ${isLight ? 'text-gray-900' : 'text-white/90'}`}>
                   {tx.payment_method === 'CASH' ? (
                     <>
-                      <Wallet className="w-3.5 h-3.5 text-emerald-400" />
+                      <Wallet className={`w-3.5 h-3.5 ${isLight ? 'text-emerald-600' : 'text-emerald-400'}`} />
                       <span>Cash</span>
                     </>
                   ) : (
                     <>
-                      <Smartphone className="w-3.5 h-3.5 text-blue-400" />
+                      <Smartphone className={`w-3.5 h-3.5 ${isLight ? 'text-sky-600' : 'text-blue-400'}`} />
                       <span>GCash</span>
                     </>
                   )}
@@ -331,14 +425,14 @@ export default function TransactionTable({
               </div>
 
               <div className="flex items-center justify-between gap-3">
-                <span className="text-white/50 font-medium shrink-0">Category</span>
-                <span className="text-white/80 font-semibold">{tx.category_name || (tx.type === 'INFLOW' ? 'Revenue' : 'Disbursement')}</span>
+                <span className={`font-medium shrink-0 ${isLight ? 'text-gray-500' : 'text-white/50'}`}>Category</span>
+                <span className={`font-semibold ${isLight ? 'text-gray-700' : 'text-white/80'}`}>{tx.category_name || (tx.type === 'INFLOW' ? 'Revenue' : 'Disbursement')}</span>
               </div>
 
               {tx.is_reimbursement && tx.reimbursement_recipient && (
                 <div className="flex items-center justify-between gap-3">
-                  <span className="text-white/50 font-medium shrink-0">Advance By</span>
-                  <span className="text-amber-300 font-bold">{tx.reimbursement_recipient}</span>
+                  <span className={`font-medium shrink-0 ${isLight ? 'text-gray-500' : 'text-white/50'}`}>Advance By</span>
+                  <span className={`font-bold ${isLight ? 'text-amber-800' : 'text-amber-300'}`}>{tx.reimbursement_recipient}</span>
                 </div>
               )}
             </div>
@@ -347,13 +441,21 @@ export default function TransactionTable({
             {tx.receipt_url ? (
               <button
                 onClick={() => setSelectedReceipt(tx)}
-                className="w-full mt-2 h-9 flex items-center justify-center gap-1.5 px-3 text-xs font-bold text-emerald-300 bg-[#0d1e16] hover:bg-[#122b20] active:bg-[#163527] border border-[#1a382b] rounded-xl transition-all cursor-pointer shadow-2xs"
+                className={`w-full mt-2 h-9 flex items-center justify-center gap-1.5 px-3 text-xs font-bold rounded-xl transition-all cursor-pointer shadow-2xs border ${
+                  isLight
+                    ? 'text-emerald-900 bg-emerald-50 hover:bg-emerald-100 border-emerald-200'
+                    : 'text-emerald-300 bg-[#0d1e16] hover:bg-[#122b20] active:bg-[#163527] border-[#1a382b]'
+                }`}
               >
-                <Receipt className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+                <Receipt className={`w-3.5 h-3.5 shrink-0 ${isLight ? 'text-emerald-600' : 'text-emerald-400'}`} />
                 <span>View Receipt Details</span>
               </button>
             ) : (
-              <div className="w-full mt-2 h-8 flex items-center justify-center text-[11px] font-medium text-white/30 bg-[#07130e] border border-[#142e20] rounded-xl">
+              <div className={`w-full mt-2 h-8 flex items-center justify-center text-[11px] font-medium rounded-xl border ${
+                isLight
+                  ? 'text-gray-400 bg-gray-50 border-gray-200'
+                  : 'text-white/30 bg-[#07130e] border-[#142e20]'
+              }`}>
                 <span>No Receipt Attached</span>
               </div>
             )}
@@ -365,8 +467,16 @@ export default function TransactionTable({
 
             {/* Global Empty State */}
             {mobileInflows.length === 0 && mobileOutflows.length === 0 && mobileReimbursements.length === 0 && (
-              <div className="py-12 text-center text-white/50 font-semibold text-xs bg-[#07130e] rounded-2xl border border-[#142e20] p-6">
-                <div className="w-12 h-12 rounded-xl bg-[#064e3b]/30 border border-emerald-500/20 flex items-center justify-center text-emerald-400 mx-auto mb-3 shadow-inner">
+              <div className={`py-12 text-center font-semibold text-xs rounded-2xl border p-6 ${
+                isLight
+                  ? 'text-gray-500 bg-white border-emerald-900/10'
+                  : 'text-white/50 bg-[#07130e] border-[#142e20]'
+              }`}>
+                <div className={`w-12 h-12 rounded-xl flex items-center justify-center mx-auto mb-3 shadow-inner border ${
+                  isLight
+                    ? 'bg-emerald-100 text-emerald-700 border-emerald-200'
+                    : 'bg-[#064e3b]/30 text-emerald-400 border-emerald-500/20'
+                }`}>
                   <Folder className="w-6 h-6" />
                 </div>
                 No matching transactions found.
@@ -378,22 +488,32 @@ export default function TransactionTable({
               <div className="space-y-3">
                 <div className="flex items-center justify-between gap-2 px-1">
                   <div className="flex items-center gap-1.5 sm:gap-2 min-w-0">
-                    <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 shadow-xs shadow-emerald-400/50 shrink-0" />
-                    <h3 className="text-xs font-bold uppercase tracking-wider text-white truncate">
+                    <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 shrink-0" />
+                    <h3 className={`text-xs font-bold uppercase tracking-wider truncate ${
+                      isLight ? 'text-gray-900' : 'text-white'
+                    }`}>
                       <span className="sm:hidden">Inflows</span>
                       <span className="hidden sm:inline">Inflows &amp; Revenue</span>
                     </h3>
-                    <span className="text-[10px] font-bold text-emerald-300 bg-emerald-500/15 border border-emerald-500/30 px-2 py-0.5 rounded-full shrink-0">
+                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full shrink-0 border ${
+                      isLight
+                        ? 'text-emerald-800 bg-emerald-100 border-emerald-200'
+                        : 'text-emerald-300 bg-emerald-500/15 border-emerald-500/30'
+                    }`}>
                       {mobileInflows.length}
                     </span>
                   </div>
-                  <span className="text-xs font-black text-emerald-400 tabular-nums whitespace-nowrap shrink-0 text-right">
+                  <span className={`text-xs font-black tabular-nums whitespace-nowrap shrink-0 text-right ${
+                    isLight ? 'text-emerald-700' : 'text-emerald-400'
+                  }`}>
                     +{formatPHP(totalInflowsSum)}
                   </span>
                 </div>
 
                 {mobileInflows.length === 0 ? (
-                  <div className="p-4 text-center text-white/40 text-xs bg-[#07130e] rounded-xl border border-[#142e20]">
+                  <div className={`p-4 text-center text-xs rounded-xl border ${
+                    isLight ? 'text-gray-400 bg-white border-gray-100' : 'text-white/40 bg-[#07130e] border-[#142e20]'
+                  }`}>
                     No inflow records found
                   </div>
                 ) : (
@@ -401,7 +521,9 @@ export default function TransactionTable({
                     {mobileInflows.map((tx) =>
                       renderCard(tx, {
                         label: tx.category_name || 'Revenue',
-                        style: 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30',
+                        style: isLight
+                          ? 'bg-emerald-100 text-emerald-800 border-emerald-200'
+                          : 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30',
                       })
                     )}
                   </div>
@@ -414,22 +536,32 @@ export default function TransactionTable({
               <div className="space-y-3 pt-2">
                 <div className="flex items-center justify-between gap-2 px-1">
                   <div className="flex items-center gap-1.5 sm:gap-2 min-w-0">
-                    <span className="w-2.5 h-2.5 rounded-full bg-amber-400 shadow-xs shadow-amber-400/50 shrink-0" />
-                    <h3 className="text-xs font-bold uppercase tracking-wider text-white truncate">
+                    <span className="w-2.5 h-2.5 rounded-full bg-amber-500 shrink-0" />
+                    <h3 className={`text-xs font-bold uppercase tracking-wider truncate ${
+                      isLight ? 'text-gray-900' : 'text-white'
+                    }`}>
                       <span className="sm:hidden">Outflows</span>
                       <span className="hidden sm:inline">Outflows &amp; Disbursements</span>
                     </h3>
-                    <span className="text-[10px] font-bold text-amber-300 bg-amber-500/15 border border-amber-500/30 px-2 py-0.5 rounded-full shrink-0">
+                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full shrink-0 border ${
+                      isLight
+                        ? 'text-amber-800 bg-amber-100 border-amber-200'
+                        : 'text-amber-300 bg-amber-500/15 border-amber-500/30'
+                    }`}>
                       {mobileOutflows.length}
                     </span>
                   </div>
-                  <span className="text-xs font-black text-white tabular-nums whitespace-nowrap shrink-0 text-right">
+                  <span className={`text-xs font-black tabular-nums whitespace-nowrap shrink-0 text-right ${
+                    isLight ? 'text-gray-900' : 'text-white'
+                  }`}>
                     -{formatPHP(totalOutflowsSum)}
                   </span>
                 </div>
 
                 {mobileOutflows.length === 0 ? (
-                  <div className="p-4 text-center text-white/40 text-xs bg-[#07130e] rounded-xl border border-[#142e20]">
+                  <div className={`p-4 text-center text-xs rounded-xl border ${
+                    isLight ? 'text-gray-400 bg-white border-gray-100' : 'text-white/40 bg-[#07130e] border-[#142e20]'
+                  }`}>
                     No outflow records found
                   </div>
                 ) : (
@@ -437,7 +569,9 @@ export default function TransactionTable({
                     {mobileOutflows.map((tx) =>
                       renderCard(tx, {
                         label: tx.category_name || 'Disbursement',
-                        style: 'bg-rose-500/15 text-rose-300 border-rose-500/30',
+                        style: isLight
+                          ? 'bg-rose-100 text-rose-800 border-rose-200'
+                          : 'bg-rose-500/15 text-rose-300 border-rose-500/30',
                       })
                     )}
                   </div>
@@ -450,22 +584,32 @@ export default function TransactionTable({
               <div className="space-y-3 pt-2">
                 <div className="flex items-center justify-between gap-2 px-1">
                   <div className="flex items-center gap-1.5 sm:gap-2 min-w-0">
-                    <span className="w-2.5 h-2.5 rounded-full bg-orange-400 shadow-xs shadow-orange-400/50 shrink-0" />
-                    <h3 className="text-xs font-bold uppercase tracking-wider text-white truncate">
+                    <span className="w-2.5 h-2.5 rounded-full bg-amber-500 shrink-0" />
+                    <h3 className={`text-xs font-bold uppercase tracking-wider truncate ${
+                      isLight ? 'text-gray-900' : 'text-white'
+                    }`}>
                       <span className="sm:hidden">Pending Abono</span>
                       <span className="hidden sm:inline">Pending Abono (Advances)</span>
                     </h3>
-                    <span className="text-[10px] font-bold text-amber-300 bg-amber-500/15 border border-amber-500/30 px-2 py-0.5 rounded-full shrink-0">
+                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full shrink-0 border ${
+                      isLight
+                        ? 'text-amber-800 bg-amber-100 border-amber-200'
+                        : 'text-amber-300 bg-amber-500/15 border-amber-500/30'
+                    }`}>
                       {mobileReimbursements.length}
                     </span>
                   </div>
-                  <span className="text-xs font-black text-amber-300 tabular-nums whitespace-nowrap shrink-0 text-right">
+                  <span className={`text-xs font-black tabular-nums whitespace-nowrap shrink-0 text-right ${
+                    isLight ? 'text-amber-800' : 'text-amber-300'
+                  }`}>
                     {formatPHP(totalReimbursementsSum)}
                   </span>
                 </div>
 
                 {mobileReimbursements.length === 0 ? (
-                  <div className="p-4 text-center text-white/40 text-xs bg-[#07130e] rounded-xl border border-[#142e20]">
+                  <div className={`p-4 text-center text-xs rounded-xl border ${
+                    isLight ? 'text-gray-400 bg-white border-gray-100' : 'text-white/40 bg-[#07130e] border-[#142e20]'
+                  }`}>
                     No pending abono requests
                   </div>
                 ) : (
@@ -473,7 +617,9 @@ export default function TransactionTable({
                     {mobileReimbursements.map((tx) =>
                       renderCard(tx, {
                         label: 'Pending Abono',
-                        style: 'bg-amber-500/15 text-amber-300 border-amber-500/30',
+                        style: isLight
+                          ? 'bg-amber-100 text-amber-800 border-amber-200'
+                          : 'bg-amber-500/15 text-amber-300 border-amber-500/30',
                       })
                     )}
                   </div>
@@ -488,17 +634,27 @@ export default function TransactionTable({
       {/* Receipt Modal Preview */}
       {selectedReceipt && (
         <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4">
-          <div className="bg-[#0a1811] rounded-t-2xl sm:rounded-2xl max-w-sm w-full p-5 border border-[#163325] shadow-2xl animate-in fade-in slide-in-from-bottom-4 sm:zoom-in-95 duration-150">
+          <div className={`rounded-t-2xl sm:rounded-2xl max-w-sm w-full p-5 border shadow-2xl animate-in fade-in slide-in-from-bottom-4 sm:zoom-in-95 duration-150 ${
+            isLight
+              ? 'bg-white border-emerald-900/10'
+              : 'bg-[#0a1811] border-[#163325]'
+          }`}>
             <div className="w-10 h-1 bg-white/20 rounded-full mx-auto mb-3 sm:hidden" />
-            <h3 className="text-sm font-bold text-white mb-1">
+            <h3 className={`text-sm font-bold mb-1 ${isLight ? 'text-gray-900' : 'text-white'}`}>
               Receipt / Disbursement Proof
             </h3>
-            <div className="flex items-center gap-1 text-xs text-white/50 mb-3 min-w-0">
+            <div className={`flex items-center gap-1 text-xs mb-3 min-w-0 ${
+              isLight ? 'text-gray-600' : 'text-white/50'
+            }`}>
               <span className="truncate">{selectedReceipt.title}</span>
-              <span className="text-white/20 mx-1 shrink-0">/</span>
-              <span className="tabular-nums font-semibold text-emerald-400 shrink-0 whitespace-nowrap">{formatPHP(selectedReceipt.amount)}</span>
+              <span className="opacity-30 mx-1 shrink-0">/</span>
+              <span className={`tabular-nums font-semibold shrink-0 whitespace-nowrap ${
+                isLight ? 'text-emerald-700' : 'text-emerald-400'
+              }`}>{formatPHP(selectedReceipt.amount)}</span>
             </div>
-            <div className="rounded-xl overflow-hidden bg-[#07130e] border border-[#163325] aspect-4/3 flex items-center justify-center mb-4">
+            <div className={`rounded-xl overflow-hidden aspect-4/3 flex items-center justify-center mb-4 border ${
+              isLight ? 'bg-gray-100 border-gray-200' : 'bg-[#07130e] border-[#163325]'
+            }`}>
               <img 
                 src={selectedReceipt.receipt_url} 
                 alt="Receipt" 
@@ -507,7 +663,11 @@ export default function TransactionTable({
             </div>
             <button
               onClick={() => setSelectedReceipt(null)}
-              className="w-full h-9 bg-[#0c1e16] hover:bg-[#122b20] text-emerald-200 border border-[#1a382b] rounded-xl text-xs font-semibold transition-colors cursor-pointer"
+              className={`w-full h-9 rounded-xl text-xs font-semibold transition-colors cursor-pointer border ${
+                isLight
+                  ? 'bg-emerald-50 hover:bg-emerald-100 text-emerald-900 border-emerald-200'
+                  : 'bg-[#0c1e16] hover:bg-[#122b20] text-emerald-200 border-[#1a382b]'
+              }`}
             >
               Close Preview
             </button>

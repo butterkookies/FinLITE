@@ -24,13 +24,38 @@
     --shadow-sheet: 0 24px 48px -12px rgba(0, 0, 0, 0.4);
   }
 
+  html.light,
+  html[data-theme="light"] {
+    --bg-canvas: #eaf4ed;
+    --bg-surface: #f4f8f5;
+    --bg-subtle: #e3ede6;
+    --bg-inset: #dce7e0;
+
+    --primary: #059669;
+    --primary-hover: #047857;
+    --primary-tint: #ecfdf5;
+    --primary-light: #d1fae5;
+
+    --text-main: #062416;
+    --text-secondary: #335343;
+    --text-muted: #5c7568;
+
+    --hairline: rgba(5, 150, 105, 0.12);
+    --hairline-light: rgba(5, 150, 105, 0.06);
+
+    --shadow-card: 0 4px 14px -3px rgba(12, 46, 27, 0.06), 0 1px 3px 0 rgba(0, 0, 0, 0.03);
+    --shadow-float: 0 14px 34px -4px rgba(12, 46, 27, 0.09), 0 4px 12px -2px rgba(0, 0, 0, 0.04);
+    --shadow-sheet: 0 24px 48px -12px rgba(12, 46, 27, 0.12);
+  }
+
   body {
-    background-color: #09281a;
+    background-color: var(--bg-canvas);
     min-height: 100dvh;
     color: var(--text-main);
     font-family: -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Roboto, sans-serif;
     -webkit-font-smoothing: antialiased;
     -webkit-tap-highlight-color: transparent;
+    transition: background-color 0.3s ease, color 0.3s ease;
   }
 
   /* Prevent 300ms mobile tap delay and accidental double-tap zoom */
@@ -107,6 +132,15 @@
 }
 ::-webkit-scrollbar-thumb:hover {
   background: rgba(255, 255, 255, 0.25);
+}
+
+html.light ::-webkit-scrollbar-thumb,
+html[data-theme="light"] ::-webkit-scrollbar-thumb {
+  background: rgba(5, 150, 105, 0.2);
+}
+html.light ::-webkit-scrollbar-thumb:hover,
+html[data-theme="light"] ::-webkit-scrollbar-thumb:hover {
+  background: rgba(5, 150, 105, 0.35);
 }
 
 /* =============================================
