@@ -145,9 +145,43 @@ export default function Dashboard() {
         if (txError) {
           console.warn('Supabase fetch failed:', txError.message);
           setTransactions([]);
-        } else {
+        } else if (txData) {
           setIsDbConnected(true);
-          setTransactions(txData || []);
+
+          // Enrich transactions with creator profile details if not already joined by the view
+          try {
+            const missingProfileIds = [...new Set(
+              txData
+                .filter((t) => t.logged_by && !t.logged_by_name)
+                .map((t) => t.logged_by)
+            )];
+
+            if (missingProfileIds.length > 0) {
+              const { data: profilesData } = await supabase
+                .from('profiles')
+                .select('id, full_name, email, role, avatar_url')
+                .in('id', missingProfileIds);
+
+              if (profilesData && profilesData.length > 0) {
+                const profileMap = new Map(profilesData.map((p) => [p.id, p]));
+                txData = txData.map((t) => {
+                  const p = t.logged_by ? profileMap.get(t.logged_by) : null;
+                  if (!p) return t;
+                  return {
+                    ...t,
+                    logged_by_name: t.logged_by_name || p.full_name,
+                    logged_by_role: t.logged_by_role || p.role,
+                    logged_by_email: t.logged_by_email || p.email,
+                    logged_by_avatar_url: t.logged_by_avatar_url || p.avatar_url,
+                  };
+                });
+              }
+            }
+          } catch (profileEnrichErr) {
+            console.warn('Profile enrichment notice:', profileEnrichErr?.message);
+          }
+
+          setTransactions(txData);
         }
 
         // 4. Load Latest Cash Reconciliation from Supabase
