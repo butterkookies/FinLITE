@@ -194,12 +194,12 @@ export default function Navbar({
 
             {/* Profile Dropdown Menu */}
             {isProfileOpen && (
-              <div className="absolute right-0 mt-2 w-64 backdrop-blur-xl rounded-2xl shadow-2xl py-2 z-50 animate-in fade-in zoom-in-95 duration-100 bg-[#0d2416]/95 border border-white/[0.08] text-white">
+              <div className="absolute right-0 mt-2 w-64 backdrop-blur-2xl rounded-2xl shadow-2xl py-2 z-50 animate-in fade-in zoom-in-95 duration-100 bg-[#0d2416]/98 border border-emerald-500/30 text-white">
                 {/* User Header Info */}
-                <div className={`px-4 py-3 border-b ${isLight ? 'border-emerald-900/10' : 'border-white/[0.06]'}`}>
+                <div className="px-4 py-3 border-b border-white/[0.08]">
                   <div className="flex items-center gap-3">
                     {avatarUrl ? (
-                      <div className={`w-10 h-10 rounded-xl overflow-hidden border relative shrink-0 ${isLight ? 'border-emerald-900/15' : 'border-white/[0.12]'}`}>
+                      <div className="w-10 h-10 rounded-xl overflow-hidden border border-emerald-500/30 relative shrink-0">
                         <img
                           src={avatarUrl}
                           alt={fullName}
@@ -211,22 +211,14 @@ export default function Navbar({
                         />
                       </div>
                     ) : (
-                      <div className={`w-10 h-10 rounded-xl flex items-center justify-center font-bold text-sm shrink-0 ${
-                        isLight
-                          ? 'bg-emerald-100 border border-emerald-300 text-emerald-800'
-                          : 'bg-emerald-500/20 border border-emerald-500/30 text-emerald-300'
-                      }`}>
+                      <div className="w-10 h-10 rounded-xl flex items-center justify-center font-bold text-sm shrink-0 bg-emerald-500/20 border border-emerald-500/30 text-emerald-300">
                         {initial}
                       </div>
                     )}
                     <div className="min-w-0">
-                      <p className={`text-xs font-bold truncate ${isLight ? 'text-emerald-950' : 'text-white/90'}`}>{fullName}</p>
-                      <p className={`text-[11px] truncate ${isLight ? 'text-emerald-800/60' : 'text-white/40'}`}>{email}</p>
-                      <span className={`inline-block mt-1 px-1.5 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider ${
-                        isLight
-                          ? 'bg-emerald-100 text-emerald-800 border border-emerald-300'
-                          : 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/20'
-                      }`}>
+                      <p className="text-xs font-bold truncate text-white">{fullName}</p>
+                      <p className="text-[11px] truncate text-white/60">{email}</p>
+                      <span className="inline-block mt-1 px-1.5 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
                         {isAdmin ? 'Super Admin' : currentRole}
                       </span>
                     </div>
@@ -234,25 +226,17 @@ export default function Navbar({
                 </div>
 
                 {/* Appearance Theme Switcher Row */}
-                <div className={`py-1 border-b ${isLight ? 'border-emerald-900/10' : 'border-white/[0.06]'}`}>
+                <div className="py-1 border-b border-white/[0.08]">
                   <button
                     type="button"
                     onClick={toggleTheme}
-                    className={`w-full flex items-center justify-between px-4 py-2 text-xs font-semibold transition-colors cursor-pointer text-left ${
-                      isLight
-                        ? 'text-emerald-900 hover:bg-emerald-50'
-                        : 'text-white/70 hover:bg-white/[0.06] hover:text-white'
-                    }`}
+                    className="w-full flex items-center justify-between px-4 py-2.5 text-xs font-semibold transition-colors cursor-pointer text-left text-white/85 hover:bg-white/[0.08] hover:text-white"
                   >
                     <span className="flex items-center gap-2.5">
-                      {isLight ? <Sun className="w-4 h-4 text-amber-500" /> : <Moon className="w-4 h-4 text-emerald-400" />}
+                      {isLight ? <Sun className="w-4 h-4 text-amber-400" /> : <Moon className="w-4 h-4 text-emerald-400" />}
                       <span>Appearance</span>
                     </span>
-                    <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded capitalize ${
-                      isLight
-                        ? 'bg-emerald-100 text-emerald-800 border border-emerald-300'
-                        : 'bg-emerald-500/15 text-emerald-300 border border-emerald-500/25'
-                    }`}>
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded capitalize bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
                       {theme} mode
                     </span>
                   </button>
@@ -263,13 +247,9 @@ export default function Navbar({
                   <Link
                     href="/profile"
                     onClick={() => setIsProfileOpen(false)}
-                    className={`flex items-center gap-2.5 px-4 py-2 text-xs font-semibold transition-colors ${
-                      isLight
-                        ? 'text-emerald-900 hover:bg-emerald-50'
-                        : 'text-white/70 hover:bg-white/[0.06] hover:text-white'
-                    }`}
+                    className="flex items-center gap-2.5 px-4 py-2 text-xs font-semibold transition-colors text-white/85 hover:bg-white/[0.08] hover:text-white"
                   >
-                    <User className="w-4 h-4 text-emerald-500" />
+                    <User className="w-4 h-4 text-emerald-400" />
                     <span>My Profile</span>
                   </Link>
 
@@ -277,29 +257,21 @@ export default function Navbar({
                     <Link
                       href="/admin"
                       onClick={() => setIsProfileOpen(false)}
-                      className={`flex items-center gap-2.5 px-4 py-2 text-xs font-semibold transition-colors ${
-                        isLight
-                          ? 'text-amber-800 hover:bg-amber-50'
-                          : 'text-amber-400/80 hover:bg-amber-500/[0.08] hover:text-amber-300'
-                      }`}
+                      className="flex items-center gap-2.5 px-4 py-2 text-xs font-semibold transition-colors text-amber-300/90 hover:bg-amber-500/10 hover:text-amber-300"
                     >
-                      <ShieldCheck className="w-4 h-4 text-amber-500" />
+                      <ShieldCheck className="w-4 h-4 text-amber-400" />
                       <span>Admin Console</span>
                     </Link>
                   )}
                 </div>
 
                 {/* Sign Out */}
-                <div className={`pt-1 border-t ${isLight ? 'border-emerald-900/10' : 'border-white/[0.06]'}`}>
+                <div className="pt-1 border-t border-white/[0.08]">
                   <button
                     onClick={handleSignOut}
-                    className={`w-full flex items-center gap-2.5 px-4 py-2 text-xs font-semibold transition-colors cursor-pointer text-left ${
-                      isLight
-                        ? 'text-rose-600 hover:bg-rose-50'
-                        : 'text-rose-400/80 hover:bg-rose-500/[0.08] hover:text-rose-300'
-                    }`}
+                    className="w-full flex items-center gap-2.5 px-4 py-2 text-xs font-semibold transition-colors cursor-pointer text-left text-rose-400 hover:bg-rose-500/10 hover:text-rose-300"
                   >
-                    <LogOut className="w-4 h-4 text-rose-500" />
+                    <LogOut className="w-4 h-4 text-rose-400" />
                     <span>Sign Out</span>
                   </button>
                 </div>
