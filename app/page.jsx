@@ -336,14 +336,28 @@ export default function Dashboard() {
           academic_year: optimisticTx.academic_year,
           semester: optimisticTx.semester,
           semester_id: currentSemester?.id && !String(currentSemester.id).startsWith('sem-') ? currentSemester.id : null,
-          logged_by: userProfile?.id || currentUser?.id || null,
+          logged_by: userProfile?.id || null,
         };
 
-        const { data, error } = await supabase
+        let insertRes = await supabase
           .from('transactions')
           .insert([payload])
           .select()
           .single();
+
+        // Graceful fallback if 013 migration hasn't been run yet on remote DB
+        if (insertRes.error && (insertRes.error.message?.includes('semester_id') || insertRes.error.code === 'PGRST204')) {
+          const fallbackPayload = { ...payload };
+          delete fallbackPayload.semester_id;
+          insertRes = await supabase
+            .from('transactions')
+            .insert([fallbackPayload])
+            .select()
+            .single();
+        }
+
+        const data = insertRes.data;
+        const error = insertRes.error;
 
         if (error) {
           console.error('Supabase transaction insert failed:', error);
@@ -573,7 +587,7 @@ export default function Dashboard() {
 
     if (supabase) {
       try {
-        const { data, error } = await supabase
+        let insertRes = await supabase
           .from('transactions')
           .insert([{
             title: shortageTx.title,
@@ -592,6 +606,30 @@ export default function Dashboard() {
           }])
           .select()
           .single();
+
+        if (insertRes.error && (insertRes.error.message?.includes('semester_id') || insertRes.error.code === 'PGRST204')) {
+          insertRes = await supabase
+            .from('transactions')
+            .insert([{
+              title: shortageTx.title,
+              description: shortageTx.description,
+              amount: shortageTx.amount,
+              type: shortageTx.type,
+              payment_method: shortageTx.payment_method,
+              transaction_date: shortageTx.transaction_date,
+              academic_year: shortageTx.academic_year,
+              semester: shortageTx.semester,
+              logged_by: userProfile?.id || null,
+              is_reimbursement: false,
+              status: 'COMPLETED',
+              event_name: shortageTx.event_name,
+            }])
+            .select()
+            .single();
+        }
+
+        const data = insertRes.data;
+        const error = insertRes.error;
 
         if (!error && data) {
           setTransactions((prev) => prev.map((t) => (t.id === tempId ? {
