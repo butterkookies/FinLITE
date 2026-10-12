@@ -1,7 +1,6 @@
 'use client';
+
 import { useState, useEffect } from 'react';
-import Link from 'next/link';
-import { Plus, Wallet, Calculator, Sparkles, ShieldCheck, Home, User, FileText } from 'lucide-react';
 import Navbar from '@/components/layout/Navbar';
 import StatCards from '@/components/dashboard/StatCards';
 import TransactionTable from '@/components/ledger/TransactionTable';
@@ -14,8 +13,7 @@ import NewSemesterModal from '@/components/semesters/NewSemesterModal';
 import ModuleErrorBoundary from '@/components/common/ModuleErrorBoundary';
 import { createClient } from '@/lib/supabase/client';
 import { isSuperAdminEmail } from '@/lib/config/admin';
-import { toCentavos, fromCentavos, formatPHP } from '@/lib/utils/currency';
-import { useTheme } from '@/components/theme/ThemeProvider';
+import { toCentavos, fromCentavos } from '@/lib/utils/currency';
 
 const DEFAULT_SEMESTERS = [
   { id: 'sem-25-26-2', academicYear: '2025-2026', semester: '2nd Sem', label: 'AY 2025–2026 • 2nd Sem' },
@@ -23,7 +21,6 @@ const DEFAULT_SEMESTERS = [
 ];
 
 export default function Dashboard() {
-  const { isLight } = useTheme();
   const [currentUser, setCurrentUser] = useState(null);
   const [userProfile, setUserProfile] = useState(null);
   const [currentRole, setCurrentRole] = useState('treasurer');
@@ -41,20 +38,6 @@ export default function Dashboard() {
   const [semesters, setSemesters] = useState(DEFAULT_SEMESTERS);
   const [currentSemester, setCurrentSemester] = useState(DEFAULT_SEMESTERS[0]);
   const [isNewSemesterOpen, setIsNewSemesterOpen] = useState(false);
-
-  // Dynamic Time-of-Day Greeting (Good morning / Good afternoon / Good evening)
-  const [greeting, setGreeting] = useState('Good day');
-
-  useEffect(() => {
-    const hour = new Date().getHours();
-    if (hour >= 5 && hour < 12) {
-      setGreeting('Good morning');
-    } else if (hour >= 12 && hour < 18) {
-      setGreeting('Good afternoon');
-    } else {
-      setGreeting('Good evening');
-    }
-  }, []);
 
   const supabase = createClient();
 
@@ -79,39 +62,50 @@ export default function Dashboard() {
           const { data: profile } = await supabase
             .from('profiles')
             .select('*')
-            .eq('auth_user_id', user.id)
-            .maybeSingle();
+            .eq('id', user.id)
+            .single();
 
           if (profile) {
             setUserProfile(profile);
             setCurrentRole(isSuperAdmin ? 'admin' : (profile.role || 'member'));
           } else if (isSuperAdmin) {
-            setUserProfile({
-              email,
-              full_name: user.user_metadata?.full_name || 'Andrei John Geronimo',
-              role: 'admin',
-              status: 'approved',
-              avatar_url: user.user_metadata?.avatar_url || user.user_metadata?.picture || null,
-            });
             setCurrentRole('admin');
           }
         }
 
-        // 2. Load Transactions
-        const { data, error } = await supabase
+        // 2. Load Academic Semesters
+        const { data: semData, error: semError } = await supabase
+          .from('semesters')
+          .select('*')
+          .order('created_at', { ascending: false });
+
+        if (!semError && semData && semData.length > 0) {
+          const mappedSemesters = semData.map((s) => ({
+            id: s.id,
+            academicYear: s.academic_year,
+            semester: s.semester_type,
+            label: s.label || `AY ${s.academic_year} • ${s.semester_type}`,
+            isCurrent: s.is_current,
+          }));
+          setSemesters(mappedSemesters);
+          const active = mappedSemesters.find((s) => s.isCurrent) || mappedSemesters[0];
+          setCurrentSemester(active);
+        }
+
+        // 3. Load Transactions
+        const { data: txData, error: txError } = await supabase
           .from('transactions')
           .select('*')
           .order('transaction_date', { ascending: false });
 
-        if (error) {
-          console.warn('Supabase fetch failed:', error.message);
-          setTransactions([]);
-        } else {
+        if (!txError && txData) {
+          setTransactions(txData);
           setIsDbConnected(true);
-          setTransactions(data || []);
+        } else {
+          setTransactions([]);
         }
       } catch (err) {
-        console.error('Database connection error:', err);
+        console.error('Failed to load Supabase ledger:', err);
         setTransactions([]);
       } finally {
         setIsLoading(false);
@@ -123,7 +117,6 @@ export default function Dashboard() {
 
   // Filter transactions strictly for the active semester
   const activeTransactions = transactions.filter((tx) => {
-    // If transaction has academic_year / semester, match it
     if (tx.academic_year && tx.academic_year !== currentSemester.academicYear) return false;
     if (tx.semester && tx.semester !== currentSemester.semester) return false;
     return true;
@@ -145,7 +138,6 @@ export default function Dashboard() {
         if (tx.payment_method === 'CASH') cash_c += amt_c;
         if (tx.payment_method === 'GCASH') gcash_c += amt_c;
       } else if (tx.type === 'OUTFLOW') {
-        // Pending reimbursements do not deduct cash yet until disbursed
         if (tx.is_reimbursement && tx.status === 'PENDING_REIMBURSEMENT') {
           pending_reimbursements_c += amt_c;
         } else {
@@ -181,7 +173,6 @@ export default function Dashboard() {
       try {
         let uploadedReceiptUrl = newTx.receipt_url;
 
-        // Try upload receipt file to Supabase storage bucket if available
         if (newTx.receiptFile) {
           try {
             const fileExt = newTx.receiptFile.name ? newTx.receiptFile.name.split('.').pop() : 'jpg';
@@ -201,30 +192,32 @@ export default function Dashboard() {
           }
         }
 
-        const payload = {
+        const txPayload = {
           title: newTx.title,
           description: newTx.description || null,
-          amount: parseFloat(newTx.amount),
+          amount: newTx.amount,
           type: newTx.type,
           payment_method: newTx.payment_method,
-          transaction_date: newTx.transaction_date || new Date().toISOString().split('T')[0],
-          is_reimbursement: Boolean(newTx.is_reimbursement),
-          reimbursement_recipient: newTx.is_reimbursement ? newTx.reimbursement_recipient : null,
+          category_name: newTx.category_name,
+          transaction_date: newTx.transaction_date,
+          academic_year: optimisticTx.academic_year,
+          semester: optimisticTx.semester,
+          is_reimbursement: newTx.is_reimbursement || false,
+          disbursed_to: newTx.disbursed_to || null,
+          status: newTx.is_reimbursement ? 'PENDING_REIMBURSEMENT' : 'COMPLETED',
           receipt_url: uploadedReceiptUrl || null,
-          status: newTx.status || 'COMPLETED',
-          event_name: newTx.event_name || null,
+          created_by: currentUser?.id || null,
+          event_name: newTx.event_name || 'Regular Operations',
         };
 
         const { data, error } = await supabase
           .from('transactions')
-          .insert([payload])
+          .insert([txPayload])
           .select()
           .single();
 
-        if (error) {
-          console.error('Supabase transaction insert failed:', error);
-        } else if (data) {
-          setTransactions((prev) => prev.map((t) => (t.id === tempId ? { ...data, academic_year: optimisticTx.academic_year, semester: optimisticTx.semester } : t)));
+        if (!error && data) {
+          setTransactions((prev) => prev.map((t) => (t.id === tempId ? data : t)));
         }
       } catch (err) {
         console.error('Failed to save transaction to database:', err);
@@ -232,23 +225,39 @@ export default function Dashboard() {
     }
   };
 
-  // Handler for starting a new semester with carry-over rollover balance
-  const handleStartSemester = async ({ academicYear, semester, label, rolloverCash, rolloverGcash, previousTermLabel }) => {
-    const newSemObj = {
-      id: `sem-${academicYear.replace(/[^0-9]/g, '')}-${semester.toLowerCase().replace(/[^a-z0-9]/g, '')}`,
+  const handleStartSemester = async ({ academicYear, semester, rolloverCash, rolloverGcash, previousTermLabel }) => {
+    const newSem = {
+      id: `sem-${academicYear.replace(/[^0-9]/g, '')}-${semester.startsWith('1') ? '1' : '2'}`,
       academicYear,
       semester,
-      label,
+      label: `AY ${academicYear} • ${semester}`,
     };
 
-    setSemesters((prev) => [...prev.filter((s) => s.id !== newSemObj.id), newSemObj]);
-    setCurrentSemester(newSemObj);
+    setSemesters((prev) => [newSem, ...prev]);
+    setCurrentSemester(newSem);
 
-    // If rollover cash is requested, record an official Beginning Balance Inflow
+    if (supabase) {
+      try {
+        await supabase
+          .from('semesters')
+          .update({ is_current: false })
+          .neq('id', 'placeholder');
+
+        await supabase.from('semesters').insert([{
+          academic_year: academicYear,
+          semester_type: semester,
+          label: newSem.label,
+          is_current: true,
+        }]);
+      } catch (err) {
+        console.error('Failed to create semester in database:', err);
+      }
+    }
+
     if (rolloverCash > 0) {
       await handleSaveTransaction({
-        title: `Beginning Cash on Hand (Rolled over from ${previousTermLabel})`,
-        description: `Official starting balance forwarded from the verified ending cashbox of ${previousTermLabel}`,
+        title: `Beginning Physical Cash (Forwarded from ${previousTermLabel})`,
+        description: `Starting cash box float forwarded from ${previousTermLabel}`,
         amount: rolloverCash,
         type: 'INFLOW',
         payment_method: 'CASH',
@@ -392,7 +401,7 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col bg-[#f8faf9]">
       
       {/* Top Navigation */}
       <div className="no-print">
@@ -415,154 +424,8 @@ export default function Dashboard() {
       </div>
 
       {/* Main Content Area */}
-      <main className="flex-1 max-w-7xl w-full mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-6 pb-24 sm:pb-8 space-y-5 sm:space-y-6 no-print">
+      <main className="flex-1 max-w-7xl w-full mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-6 space-y-5 sm:space-y-6 no-print">
         
-        {/* Modern Minimalist Hero Balance & Action Hub — CONCEPT DESIGN */}
-        <section className={`relative rounded-3xl backdrop-blur-xl p-5 sm:p-7 shadow-xl overflow-hidden transition-all duration-300 ${
-          isLight
-            ? 'bg-gradient-to-br from-[#f8fbf9]/95 via-[#f0f7f3]/90 to-[#e4f1e9]/85 border border-emerald-600/15 shadow-emerald-950/5'
-            : 'bg-[#0a2419]/85 border border-emerald-500/20 shadow-2xl'
-        }`}>
-          {/* Subtle ambient corner light aura */}
-          <div className={`absolute -top-24 -right-24 w-72 h-72 rounded-full blur-3xl pointer-events-none transition-opacity duration-300 ${isLight ? 'bg-emerald-400/15' : 'bg-emerald-400/20'}`} />
-          <div className={`absolute -bottom-24 -left-24 w-72 h-72 rounded-full blur-3xl pointer-events-none transition-opacity duration-300 ${isLight ? 'bg-teal-400/15' : 'bg-emerald-500/15'}`} />
-
-          <div className="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-6">
-            
-            {/* Left: Dynamic Greetings Hero Header */}
-            <div>
-              {/* Dynamic Time-of-Day Tag & Role */}
-              <div className="flex items-center gap-2 mb-2">
-                <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] sm:text-xs font-bold tracking-wider uppercase transition-colors ${
-                  isLight
-                    ? 'bg-emerald-100 text-emerald-800 border border-emerald-300'
-                    : 'bg-emerald-500/15 text-emerald-300 border border-emerald-500/25'
-                }`}>
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                  {currentRole === 'admin' ? 'Administrator Portal' : currentRole === 'treasurer' ? 'LITE Treasury' : 'Officer Portal'}
-                </span>
-              </div>
-
-              {/* Big Minimalist Greetings (Replacing redundant balance line) */}
-              <h1 className={`text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight drop-shadow-sm transition-colors ${
-                isLight ? 'text-emerald-950' : 'text-white'
-              }`}>
-                {greeting}, {userProfile?.first_name || userProfile?.full_name?.split(' ')[0] || currentUser?.user_metadata?.full_name?.split(' ')[0] || 'Officer'}
-              </h1>
-            </div>
-
-            {/* Right: Quick Action Pods Dock (5 Circular Pods matching mockup) */}
-            <div className={`p-2 sm:p-2.5 rounded-2xl sm:rounded-full backdrop-blur-md flex items-center justify-around sm:justify-start sm:gap-4 shrink-0 transition-all ${
-              isLight
-                ? 'bg-gradient-to-r from-emerald-100/60 via-white/80 to-teal-100/60 border border-emerald-300/60 shadow-xs'
-                : 'bg-[#071c13]/90 border border-emerald-500/25 shadow-inner'
-            }`}>
-              
-              {/* Pod 1: Record Transaction */}
-              <button
-                type="button"
-                onClick={() => setIsNewTxOpen(true)}
-                className="flex flex-col items-center gap-1.5 p-1 sm:px-2.5 group cursor-pointer"
-              >
-                <div className={`w-11 h-11 sm:w-12 sm:h-12 rounded-full flex items-center justify-center transition-all shadow-md ${
-                  isLight
-                    ? 'bg-white/95 border border-emerald-300/70 text-emerald-800 group-hover:bg-emerald-600 group-hover:text-white group-hover:border-emerald-600 group-hover:scale-105 active:scale-95'
-                    : 'bg-[#0c2e1f] border border-emerald-500/35 text-emerald-400 group-hover:bg-[#10b981] group-hover:text-black group-hover:border-emerald-400 group-hover:scale-105 active:scale-95'
-                }`}>
-                  <Plus className="w-5 h-5 stroke-[2.5]" />
-                </div>
-                <span className={`text-[10px] sm:text-[11px] font-bold transition-colors ${
-                  isLight ? 'text-emerald-950/80 group-hover:text-emerald-700' : 'text-white/75 group-hover:text-emerald-300'
-                }`}>
-                  Record
-                </span>
-              </button>
-
-              {/* Pod 2: Cash Box Audit */}
-              <button
-                type="button"
-                onClick={() => setIsDenomOpen(true)}
-                className="flex flex-col items-center gap-1.5 p-1 sm:px-2.5 group cursor-pointer"
-              >
-                <div className={`w-11 h-11 sm:w-12 sm:h-12 rounded-full flex items-center justify-center transition-all shadow-md ${
-                  isLight
-                    ? 'bg-white/95 border border-emerald-300/70 text-emerald-800 group-hover:bg-emerald-600 group-hover:text-white group-hover:border-emerald-600 group-hover:scale-105 active:scale-95'
-                    : 'bg-[#0c2e1f] border border-emerald-500/35 text-emerald-400 group-hover:bg-[#10b981] group-hover:text-black group-hover:border-emerald-400 group-hover:scale-105 active:scale-95'
-                }`}>
-                  <Wallet className="w-5 h-5" />
-                </div>
-                <span className={`text-[10px] sm:text-[11px] font-bold transition-colors ${
-                  isLight ? 'text-emerald-950/80 group-hover:text-emerald-700' : 'text-white/75 group-hover:text-emerald-300'
-                }`}>
-                  Cash Box
-                </span>
-              </button>
-
-              {/* Pod 3: Proposal Creator */}
-              <button
-                type="button"
-                onClick={() => setIsProposalOpen(true)}
-                className="flex flex-col items-center gap-1.5 p-1 sm:px-2.5 group cursor-pointer"
-              >
-                <div className={`w-11 h-11 sm:w-12 sm:h-12 rounded-full flex items-center justify-center transition-all shadow-md ${
-                  isLight
-                    ? 'bg-white/95 border border-emerald-300/70 text-emerald-800 group-hover:bg-emerald-600 group-hover:text-white group-hover:border-emerald-600 group-hover:scale-105 active:scale-95'
-                    : 'bg-[#0c2e1f] border border-emerald-500/35 text-emerald-400 group-hover:bg-[#10b981] group-hover:text-black group-hover:border-emerald-400 group-hover:scale-105 active:scale-95'
-                }`}>
-                  <Calculator className="w-5 h-5" />
-                </div>
-                <span className={`text-[10px] sm:text-[11px] font-bold transition-colors ${
-                  isLight ? 'text-emerald-950/80 group-hover:text-emerald-700' : 'text-white/75 group-hover:text-emerald-300'
-                }`}>
-                  Proposal
-                </span>
-              </button>
-
-              {/* Pod 4: Preview Report */}
-              <button
-                type="button"
-                onClick={handleOpenLiquidationPreview}
-                className="flex flex-col items-center gap-1.5 p-1 sm:px-2.5 group cursor-pointer"
-              >
-                <div className={`w-11 h-11 sm:w-12 sm:h-12 rounded-full flex items-center justify-center transition-all shadow-md ${
-                  isLight
-                    ? 'bg-white/95 border border-emerald-300/70 text-emerald-800 group-hover:bg-emerald-600 group-hover:text-white group-hover:border-emerald-600 group-hover:scale-105 active:scale-95'
-                    : 'bg-[#0c2e1f] border border-emerald-500/35 text-emerald-400 group-hover:bg-[#10b981] group-hover:text-black group-hover:border-emerald-400 group-hover:scale-105 active:scale-95'
-                }`}>
-                  <FileText className="w-5 h-5" />
-                </div>
-                <span className={`text-[10px] sm:text-[11px] font-bold transition-colors ${
-                  isLight ? 'text-emerald-950/80 group-hover:text-emerald-700' : 'text-white/75 group-hover:text-emerald-300'
-                }`}>
-                  Report
-                </span>
-              </button>
-
-              {/* Pod 5: AI Co-Pilot */}
-              <button
-                type="button"
-                onClick={() => setIsAIOpen(true)}
-                className="flex flex-col items-center gap-1.5 p-1 sm:px-2.5 group cursor-pointer"
-              >
-                <div className={`w-11 h-11 sm:w-12 sm:h-12 rounded-full flex items-center justify-center transition-all shadow-md ${
-                  isLight
-                    ? 'bg-white/95 border border-emerald-300/70 text-emerald-800 group-hover:bg-emerald-600 group-hover:text-white group-hover:border-emerald-600 group-hover:scale-105 active:scale-95'
-                    : 'bg-[#0c2e1f] border border-emerald-500/35 text-emerald-400 group-hover:bg-[#10b981] group-hover:text-black group-hover:border-emerald-400 group-hover:scale-105 active:scale-95'
-                }`}>
-                  <Sparkles className="w-5 h-5" />
-                </div>
-                <span className={`text-[10px] sm:text-[11px] font-bold transition-colors ${
-                  isLight ? 'text-emerald-950/80 group-hover:text-emerald-700' : 'text-white/75 group-hover:text-emerald-300'
-                }`}>
-                  AI Co-Pilot
-                </span>
-              </button>
-
-            </div>
-
-          </div>
-        </section>
-
         {/* KPI Metric Cards */}
         <ModuleErrorBoundary moduleName="Financial Overview">
           <StatCards
@@ -584,77 +447,6 @@ export default function Dashboard() {
         </ModuleErrorBoundary>
 
       </main>
-
-      {/* Mobile Floating Action Dock (Matching Mockup Navigation) */}
-      <div className={`sm:hidden fixed bottom-3 left-3 right-3 z-40 backdrop-blur-xl rounded-full p-1.5 px-4 flex items-center justify-between shadow-2xl no-print transition-all duration-200 ${
-        isLight
-          ? 'bg-white/95 border border-emerald-200/80 shadow-emerald-950/10'
-          : 'bg-[#07130d]/95 border border-[#163325] shadow-black/80'
-      }`}>
-        <button
-          type="button"
-          onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-          className="flex flex-col items-center gap-0.5 p-1 text-emerald-500 cursor-pointer"
-        >
-          <Home className="w-4 h-4" />
-          <span className="text-[9px] font-bold">Home</span>
-        </button>
-
-        <button
-          type="button"
-          onClick={() => setIsDenomOpen(true)}
-          className={`flex flex-col items-center gap-0.5 p-1 transition-colors cursor-pointer ${
-            isLight ? 'text-emerald-950/60 hover:text-emerald-950' : 'text-white/50 hover:text-white'
-          }`}
-        >
-          <Wallet className="w-4 h-4" />
-          <span className="text-[9px] font-bold">Cash Box</span>
-        </button>
-
-        {/* Center Floating Action Button (Glowing Emerald Pod) */}
-        <button
-          type="button"
-          onClick={() => setIsNewTxOpen(true)}
-          className={`-mt-5 w-12 h-12 rounded-full flex items-center justify-center shadow-lg hover:scale-105 active:scale-95 transition-all cursor-pointer ${
-            isLight
-              ? 'bg-emerald-500 text-white shadow-emerald-500/30 border-2 border-white'
-              : 'bg-[#10b981] text-black shadow-emerald-500/40 border-2 border-[#07130d]'
-          }`}
-          title="Record New Transaction"
-        >
-          <Plus className="w-6 h-6 stroke-[3]" />
-        </button>
-
-        <button
-          type="button"
-          onClick={() => setIsAIOpen(true)}
-          className={`flex flex-col items-center gap-0.5 p-1 transition-colors cursor-pointer ${
-            isLight ? 'text-emerald-950/60 hover:text-emerald-950' : 'text-white/50 hover:text-white'
-          }`}
-        >
-          <Sparkles className="w-4 h-4" />
-          <span className="text-[9px] font-bold">AI Co-Pilot</span>
-        </button>
-
-        <Link
-          href="/profile"
-          className={`flex flex-col items-center gap-0.5 p-1 transition-colors cursor-pointer ${
-            isLight ? 'text-emerald-950/60 hover:text-emerald-950' : 'text-white/50 hover:text-white'
-          }`}
-        >
-          <User className="w-4 h-4" />
-          <span className="text-[9px] font-bold">Profile</span>
-        </Link>
-      </div>
-
-      {/* Dashboard Footer matching reference mockup */}
-      <footer className="max-w-7xl w-full mx-auto px-4 py-6 pb-24 sm:pb-6 text-center no-print">
-        <p className={`text-[11px] font-medium transition-colors ${
-          isLight ? 'text-emerald-950/40' : 'text-white/30'
-        }`}>
-          © 2026 FinLITE · Pambayang Dalubhasaan ng Marilao · All rights reserved.
-        </p>
-      </footer>
 
       {/* Modals & Slide-overs */}
       <div className="no-print">

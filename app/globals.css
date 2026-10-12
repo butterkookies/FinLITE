@@ -2,7 +2,7 @@
 
 @layer base {
   :root {
-    --bg-canvas: #09281a;
+    --bg-canvas: #f8faf9;
     --bg-surface: #ffffff;
     --bg-subtle: #f3f5f4;
     --bg-inset: #eef2f0;
@@ -12,50 +12,24 @@
     --primary-tint: #ecfdf5;
     --primary-light: #d1fae5;
 
-    --text-main: #ffffff;
-    --text-secondary: #94a3b8;
-    --text-muted: #64748b;
+    --text-main: #111827;
+    --text-secondary: #4b5563;
+    --text-muted: #9ca3af;
 
-    --hairline: rgba(255, 255, 255, 0.08);
-    --hairline-light: rgba(255, 255, 255, 0.04);
+    --hairline: rgba(0, 0, 0, 0.06);
+    --hairline-light: rgba(0, 0, 0, 0.03);
 
-    --shadow-card: 0 2px 8px -1px rgba(0, 0, 0, 0.2), 0 1px 3px 0 rgba(0, 0, 0, 0.1);
-    --shadow-float: 0 12px 32px -4px rgba(0, 0, 0, 0.28), 0 4px 12px -2px rgba(0, 0, 0, 0.16);
-    --shadow-sheet: 0 24px 48px -12px rgba(0, 0, 0, 0.4);
-  }
-
-  html.light,
-  html[data-theme="light"] {
-    --bg-canvas: #eaf4ed;
-    --bg-surface: #f4f8f5;
-    --bg-subtle: #e3ede6;
-    --bg-inset: #dce7e0;
-
-    --primary: #059669;
-    --primary-hover: #047857;
-    --primary-tint: #ecfdf5;
-    --primary-light: #d1fae5;
-
-    --text-main: #062416;
-    --text-secondary: #335343;
-    --text-muted: #5c7568;
-
-    --hairline: rgba(5, 150, 105, 0.12);
-    --hairline-light: rgba(5, 150, 105, 0.06);
-
-    --shadow-card: 0 4px 14px -3px rgba(12, 46, 27, 0.06), 0 1px 3px 0 rgba(0, 0, 0, 0.03);
-    --shadow-float: 0 14px 34px -4px rgba(12, 46, 27, 0.09), 0 4px 12px -2px rgba(0, 0, 0, 0.04);
-    --shadow-sheet: 0 24px 48px -12px rgba(12, 46, 27, 0.12);
+    --shadow-card: 0 2px 8px -1px rgba(0, 0, 0, 0.04), 0 1px 3px 0 rgba(0, 0, 0, 0.02);
+    --shadow-float: 0 12px 32px -4px rgba(0, 0, 0, 0.08), 0 4px 12px -2px rgba(0, 0, 0, 0.03);
+    --shadow-sheet: 0 24px 48px -12px rgba(0, 0, 0, 0.16);
   }
 
   body {
     background-color: var(--bg-canvas);
-    min-height: 100dvh;
     color: var(--text-main);
     font-family: -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Roboto, sans-serif;
     -webkit-font-smoothing: antialiased;
     -webkit-tap-highlight-color: transparent;
-    transition: background-color 0.3s ease, color 0.3s ease;
   }
 
   /* Prevent 300ms mobile tap delay and accidental double-tap zoom */
@@ -81,43 +55,6 @@
   }
 }
 
-/* =============================================
-   FOREST MIST AURA BACKGROUND
-   ============================================= */
-
-/* Layer 1 - base dark obsidian canvas with subtle dot grid */
-.aura-layer-1 {
-  position: absolute;
-  inset: 0;
-  background-color: #07130d;
-  background-image: 
-    radial-gradient(rgba(52, 211, 153, 0.13) 1.2px, transparent 1.2px),
-    radial-gradient(circle at 50% 0%, #082115 0%, #04120a 100%);
-  background-size: 22px 22px, 100% 100%;
-  mix-blend-mode: normal;
-  transform: translateZ(0);
-  will-change: transform;
-  pointer-events: none;
-}
-
-/* Layer 2 - screen glow blob */
-.aura-layer-2 {
-  position: absolute;
-  inset: 0;
-  background: radial-gradient(circle at 50% 25%, rgba(16, 185, 129, 0.14) 0%, transparent 60%);
-  mix-blend-mode: screen;
-  filter: blur(120px);
-  transform: translateZ(0);
-  will-change: transform;
-  pointer-events: none;
-}
-
-/* Content sits above the absolute layers */
-.aura-content {
-  position: relative;
-  z-index: 1;
-}
-
 /* Custom scrollbar for modern subtle aesthetics */
 ::-webkit-scrollbar {
   width: 6px;
@@ -127,20 +64,11 @@
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.15);
+  background: rgba(0, 0, 0, 0.12);
   border-radius: 9999px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.25);
-}
-
-html.light ::-webkit-scrollbar-thumb,
-html[data-theme="light"] ::-webkit-scrollbar-thumb {
-  background: rgba(5, 150, 105, 0.2);
-}
-html.light ::-webkit-scrollbar-thumb:hover,
-html[data-theme="light"] ::-webkit-scrollbar-thumb:hover {
-  background: rgba(5, 150, 105, 0.35);
+  background: rgba(0, 0, 0, 0.2);
 }
 
 /* =============================================
@@ -210,82 +138,10 @@ html[data-theme="light"] ::-webkit-scrollbar-thumb:hover {
 }
 
 /* =============================================
-   LOGIN WAVY GRADIENT & LIQUID MESH ANIMATIONS
-   ============================================= */
-
-@keyframes waveGradientFlow {
-  0% {
-    background-position: 0% 50%;
-  }
-  50% {
-    background-position: 100% 50%;
-  }
-  100% {
-    background-position: 0% 50%;
-  }
-}
-
-@keyframes waveMorph1 {
-  0%, 100% {
-    border-radius: 42% 58% 70% 30% / 45% 45% 55% 55%;
-    transform: translate(0, 0) rotate(0deg) scale(1);
-  }
-  33% {
-    border-radius: 70% 30% 46% 54% / 30% 29% 71% 70%;
-    transform: translate(30px, -20px) rotate(120deg) scale(1.1);
-  }
-  66% {
-    border-radius: 100% 60% 60% 100% / 100% 100% 60% 60%;
-    transform: translate(-25px, 25px) rotate(240deg) scale(0.94);
-  }
-}
-
-@keyframes waveMorph2 {
-  0%, 100% {
-    border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%;
-    transform: translate(0, 0) rotate(360deg) scale(1);
-  }
-  50% {
-    border-radius: 30% 60% 70% 40% / 50% 60% 30% 60%;
-    transform: translate(-35px, -30px) rotate(180deg) scale(1.15);
-  }
-}
-
-@keyframes waveFlowPath {
-  0% {
-    transform: translateX(0) scaleY(1);
-  }
-  50% {
-    transform: translateX(-15%) scaleY(1.15);
-  }
-  100% {
-    transform: translateX(0) scaleY(1);
-  }
-}
-
-.animate-wave-gradient {
-  background-size: 220% 220%;
-  animation: waveGradientFlow 12s ease infinite;
-}
-
-.animate-wave-blob-1 {
-  animation: waveMorph1 15s ease-in-out infinite;
-}
-
-.animate-wave-blob-2 {
-  animation: waveMorph2 19s ease-in-out infinite;
-}
-
-.animate-wave-svg {
-  animation: waveFlowPath 9s ease-in-out infinite alternate;
-}
-
-/* =============================================
    GLOBAL PRINT ENGINE OVERRIDES
    ============================================= */
 @media print {
   .no-print,
-  #tech-wave-bg,
   nav,
   aside,
   footer,
@@ -298,4 +154,3 @@ html[data-theme="light"] ::-webkit-scrollbar-thumb:hover {
     color: #000000 !important;
   }
 }
-
