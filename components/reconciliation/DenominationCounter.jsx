@@ -253,7 +253,7 @@ export default function DenominationCounter({
                       value={counts[den.key] || ''}
                       placeholder="0"
                       onChange={(e) => handleQtyChange(den.key, e.target.value)}
-                      className="w-14 text-center font-bold bg-white border border-black/[0.08] rounded-lg py-1 focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                      className="w-14 text-center font-bold bg-white text-black border border-black/[0.08] rounded-lg py-1 focus:outline-none focus:ring-1 focus:ring-emerald-500"
                     />
                   </div>
                 ))}
@@ -286,7 +286,7 @@ export default function DenominationCounter({
                       value={counts[den.key] || ''}
                       placeholder="0"
                       onChange={(e) => handleQtyChange(den.key, e.target.value)}
-                      className="w-14 text-center font-bold bg-white border border-black/[0.08] rounded-lg py-1 focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                      className="w-14 text-center font-bold bg-white text-black border border-black/[0.08] rounded-lg py-1 focus:outline-none focus:ring-1 focus:ring-emerald-500"
                     />
                   </div>
                 ))}

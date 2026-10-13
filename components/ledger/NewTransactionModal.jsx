@@ -279,7 +279,7 @@ export default function NewTransactionModal({
               Amount (₱) <span className="text-red-500">*</span>
             </label>
             <div className="relative">
-              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 font-bold text-sm pointer-events-none">
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-600 font-bold text-sm pointer-events-none">
                 ₱
               </span>
               <input
@@ -292,7 +292,7 @@ export default function NewTransactionModal({
                 onChange={(e) => setAmount(sanitizeAmountInput(e.target.value))}
                 onBlur={() => setAmountTouched(true)}
                 aria-invalid={Boolean(fieldError)}
-                className={`w-full h-10 text-sm font-bold pl-7 pr-3 bg-white border rounded-xl focus:outline-none focus:ring-2 tabular-nums select-text ${
+                className={`w-full h-10 text-sm font-bold pl-7 pr-3 bg-white text-black placeholder:text-gray-400 border rounded-xl focus:outline-none focus:ring-2 tabular-nums select-text ${
                   fieldError
                     ? 'border-red-400 focus:ring-red-500/20'
                     : 'border-black/[0.08] focus:ring-emerald-500/20'

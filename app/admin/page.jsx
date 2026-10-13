@@ -326,23 +326,22 @@ export default function AdminPage() {
           {/* 1. Pending Approvals Card — ACCENT: WARM AMBER */}
           <div 
             onClick={() => setActiveTab('pending')}
-            className={`p-5 rounded-2xl border-2 transition-all cursor-pointer relative overflow-hidden flex flex-col justify-between shadow-lg ${
+            className={`p-5 rounded-2xl transition-all cursor-pointer relative overflow-hidden flex flex-col justify-between shadow-lg ${
               isLight
                 ? activeTab === 'pending'
-                  ? 'bg-gradient-to-br from-[#fff7d6] via-[#feecaa] to-[#fde078] border-amber-500 ring-2 ring-amber-400/40 shadow-amber-900/15'
-                  : 'bg-gradient-to-br from-[#fffdf5] via-[#fef7df] to-[#fdedbe] border-amber-400/40 hover:border-amber-500 hover:shadow-md'
+                  ? 'bg-gradient-to-br from-[#fff7d6] via-[#feecaa] to-[#fde078] ring-2 ring-amber-400/40 shadow-amber-900/15'
+                  : 'bg-gradient-to-br from-[#fffdf5] via-[#fef7df] to-[#fdedbe] hover:shadow-md'
                 : activeTab === 'pending'
-                  ? 'bg-[#221c0b] border-amber-400/80 ring-2 ring-amber-400/30 shadow-xl shadow-amber-950/40'
-                  : 'bg-[#181408] border-amber-500/25 hover:border-amber-400/60 hover:bg-[#1d180a] shadow-lg shadow-amber-950/20'
+                  ? 'bg-[#221c0b] ring-2 ring-amber-400/30 shadow-xl shadow-amber-950/40'
+                  : 'bg-[#181408] hover:bg-[#1d180a] shadow-lg shadow-amber-950/20'
             }`}
           >
-            <div className={`absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-amber-500/0 via-amber-400/60 to-amber-500/0 ${isLight ? 'opacity-80' : ''}`} />
             <div className="flex items-center justify-between mb-3 gap-2">
               <span className={`text-xs font-black uppercase tracking-wider ${isLight ? 'text-amber-950' : 'text-amber-300'}`}>
                 Pending Approval
               </span>
-              <div className={`w-8 h-8 rounded-xl border flex items-center justify-center shrink-0 shadow-xs ${
-                isLight ? 'bg-amber-300/80 border-amber-500/60 text-amber-950' : 'bg-amber-500/15 border-amber-500/30 text-amber-400'
+              <div className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 shadow-xs ${
+                isLight ? 'bg-amber-300/80 text-amber-950' : 'bg-amber-500/15 text-amber-400'
               }`}>
                 <Clock className="w-4 h-4 stroke-[2.5]" />
               </div>
@@ -352,10 +351,10 @@ export default function AdminPage() {
                 {stats.pending}
               </span>
               {stats.pending > 0 && (
-                <span className={`text-[10px] font-black px-2 py-0.5 rounded-full border animate-pulse ${
+                <span className={`text-[10px] font-black px-2 py-0.5 rounded-full animate-pulse ${
                   isLight
-                    ? 'bg-amber-300/90 text-amber-950 border-amber-500/70'
-                    : 'bg-amber-500/20 text-amber-300 border-amber-500/30'
+                    ? 'bg-amber-300/90 text-amber-950'
+                    : 'bg-amber-500/20 text-amber-300'
                 }`}>
                   Action required
                 </span>
@@ -369,23 +368,22 @@ export default function AdminPage() {
           {/* 2. Active Officers Card — ACCENT: VIBRANT EMERALD */}
           <div 
             onClick={() => setActiveTab('users')}
-            className={`p-5 rounded-2xl border-2 transition-all cursor-pointer relative overflow-hidden flex flex-col justify-between shadow-lg ${
+            className={`p-5 rounded-2xl transition-all cursor-pointer relative overflow-hidden flex flex-col justify-between shadow-lg ${
               isLight
                 ? activeTab === 'users'
-                  ? 'bg-gradient-to-br from-[#d9f9e6] via-[#bbf2d2] to-[#99e8b9] border-emerald-500 ring-2 ring-emerald-400/40 shadow-emerald-900/15'
-                  : 'bg-gradient-to-br from-[#f2fdf6] via-[#e1faec] to-[#c6f4d8] border-emerald-400/40 hover:border-emerald-500 hover:shadow-md'
+                  ? 'bg-gradient-to-br from-[#d9f9e6] via-[#bbf2d2] to-[#99e8b9] ring-2 ring-emerald-400/40 shadow-emerald-900/15'
+                  : 'bg-gradient-to-br from-[#f2fdf6] via-[#e1faec] to-[#c6f4d8] hover:shadow-md'
                 : activeTab === 'users'
-                  ? 'bg-[#0e2418] border-emerald-400/80 ring-2 ring-emerald-400/30 shadow-xl shadow-emerald-950/40'
-                  : 'bg-[#0a1b12] border-emerald-500/25 hover:border-emerald-400/60 hover:bg-[#0c2015] shadow-lg shadow-emerald-950/20'
+                  ? 'bg-[#0e2418] ring-2 ring-emerald-400/30 shadow-xl shadow-emerald-950/40'
+                  : 'bg-[#0a1b12] hover:bg-[#0c2015] shadow-lg shadow-emerald-950/20'
             }`}
           >
-            <div className={`absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-emerald-500/0 via-emerald-400/60 to-emerald-500/0 ${isLight ? 'opacity-80' : ''}`} />
             <div className="flex items-center justify-between mb-3 gap-2">
               <span className={`text-xs font-black uppercase tracking-wider ${isLight ? 'text-emerald-950' : 'text-emerald-300'}`}>
                 Active Officers
               </span>
-              <div className={`w-8 h-8 rounded-xl border flex items-center justify-center shrink-0 shadow-xs ${
-                isLight ? 'bg-emerald-300/80 border-emerald-500/60 text-emerald-950' : 'bg-emerald-500/15 border-emerald-500/30 text-emerald-400'
+              <div className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 shadow-xs ${
+                isLight ? 'bg-emerald-300/80 text-emerald-950' : 'bg-emerald-500/15 text-emerald-400'
               }`}>
                 <UserCheck className="w-4 h-4 stroke-[2.5]" />
               </div>
@@ -394,10 +392,10 @@ export default function AdminPage() {
               <span className={`text-2xl sm:text-3xl font-black tracking-tight tabular-nums ${isLight ? 'text-emerald-950' : 'text-white'}`}>
                 {users.length || stats.approved}
               </span>
-              <span className={`text-[10px] font-black px-2 py-0.5 rounded-full border ${
+              <span className={`text-[10px] font-black px-2 py-0.5 rounded-full ${
                 isLight
-                  ? 'bg-emerald-300/90 text-emerald-950 border-emerald-500/70'
-                  : 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30'
+                  ? 'bg-emerald-300/90 text-emerald-950'
+                  : 'bg-emerald-500/20 text-emerald-300'
               }`}>
                 Verified
               </span>
@@ -410,23 +408,22 @@ export default function AdminPage() {
           {/* 3. Declined Requests Card — ACCENT: VIBRANT ROSE */}
           <div 
             onClick={() => setActiveTab('rejected')}
-            className={`p-5 rounded-2xl border-2 transition-all cursor-pointer relative overflow-hidden flex flex-col justify-between shadow-lg ${
+            className={`p-5 rounded-2xl transition-all cursor-pointer relative overflow-hidden flex flex-col justify-between shadow-lg ${
               isLight
                 ? activeTab === 'rejected'
-                  ? 'bg-gradient-to-br from-[#ffe4e6] via-[#fecdd3] to-[#fda4af] border-rose-500 ring-2 ring-rose-400/40 shadow-rose-900/15'
-                  : 'bg-gradient-to-br from-[#fff1f2] via-[#ffe4e6] to-[#fec5cc] border-rose-400/40 hover:border-rose-500 hover:shadow-md'
+                  ? 'bg-gradient-to-br from-[#ffe4e6] via-[#fecdd3] to-[#fda4af] ring-2 ring-rose-400/40 shadow-rose-900/15'
+                  : 'bg-gradient-to-br from-[#fff1f2] via-[#ffe4e6] to-[#fec5cc] hover:shadow-md'
                 : activeTab === 'rejected'
-                  ? 'bg-[#240f16] border-rose-400/80 ring-2 ring-rose-400/30 shadow-xl shadow-rose-950/40'
-                  : 'bg-[#1a0c10] border-rose-500/25 hover:border-rose-400/60 hover:bg-[#200e14] shadow-lg shadow-rose-950/20'
+                  ? 'bg-[#240f16] ring-2 ring-rose-400/30 shadow-xl shadow-rose-950/40'
+                  : 'bg-[#1a0c10] hover:bg-[#200e14] shadow-lg shadow-rose-950/20'
             }`}
           >
-            <div className={`absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-rose-500/0 via-rose-400/60 to-rose-500/0 ${isLight ? 'opacity-80' : ''}`} />
             <div className="flex items-center justify-between mb-3 gap-2">
               <span className={`text-xs font-black uppercase tracking-wider ${isLight ? 'text-rose-950' : 'text-rose-300'}`}>
                 Declined Requests
               </span>
-              <div className={`w-8 h-8 rounded-xl border flex items-center justify-center shrink-0 shadow-xs ${
-                isLight ? 'bg-rose-300/80 border-rose-500/60 text-rose-950' : 'bg-rose-500/15 border-rose-500/30 text-rose-400'
+              <div className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 shadow-xs ${
+                isLight ? 'bg-rose-300/80 text-rose-950' : 'bg-rose-500/15 text-rose-400'
               }`}>
                 <XCircle className="w-4 h-4 stroke-[2.5]" />
               </div>
@@ -435,10 +432,10 @@ export default function AdminPage() {
               <span className={`text-2xl sm:text-3xl font-black tracking-tight tabular-nums ${isLight ? 'text-rose-950' : 'text-white'}`}>
                 {stats.rejected}
               </span>
-              <span className={`text-[10px] font-black px-2 py-0.5 rounded-full border ${
+              <span className={`text-[10px] font-black px-2 py-0.5 rounded-full ${
                 isLight
-                  ? 'bg-rose-300/90 text-rose-950 border-rose-500/70'
-                  : 'bg-rose-500/20 text-rose-300 border-rose-500/30'
+                  ? 'bg-rose-300/90 text-rose-950'
+                  : 'bg-rose-500/20 text-rose-300'
               }`}>
                 Submissions
               </span>
@@ -451,23 +448,22 @@ export default function AdminPage() {
           {/* 4. Approved Log Card — ACCENT: ELECTRIC SKY BLUE */}
           <div 
             onClick={() => setActiveTab('approved')}
-            className={`p-5 rounded-2xl border-2 transition-all cursor-pointer relative overflow-hidden flex flex-col justify-between shadow-lg ${
+            className={`p-5 rounded-2xl transition-all cursor-pointer relative overflow-hidden flex flex-col justify-between shadow-lg ${
               isLight
                 ? activeTab === 'approved'
-                  ? 'bg-gradient-to-br from-[#e0f2fe] via-[#bae6fd] to-[#7dd3fc] border-sky-500 ring-2 ring-sky-400/40 shadow-sky-900/15'
-                  : 'bg-gradient-to-br from-[#f0f9ff] via-[#e0f2fe] to-[#b9e6fe] border-sky-400/40 hover:border-sky-500 hover:shadow-md'
+                  ? 'bg-gradient-to-br from-[#e0f2fe] via-[#bae6fd] to-[#7dd3fc] ring-2 ring-sky-400/40 shadow-sky-900/15'
+                  : 'bg-gradient-to-br from-[#f0f9ff] via-[#e0f2fe] to-[#b9e6fe] hover:shadow-md'
                 : activeTab === 'approved'
-                  ? 'bg-[#0e1c33] border-sky-400/80 ring-2 ring-sky-400/30 shadow-xl shadow-sky-950/40'
-                  : 'bg-[#0a1424] border-sky-500/25 hover:border-sky-400/60 hover:bg-[#0c182c] shadow-lg shadow-sky-950/20'
+                  ? 'bg-[#0e1c33] ring-2 ring-sky-400/30 shadow-xl shadow-sky-950/40'
+                  : 'bg-[#0a1424] hover:bg-[#0c182c] shadow-lg shadow-sky-950/20'
             }`}
           >
-            <div className={`absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-sky-500/0 via-sky-400/60 to-sky-500/0 ${isLight ? 'opacity-80' : ''}`} />
             <div className="flex items-center justify-between mb-3 gap-2">
               <span className={`text-xs font-black uppercase tracking-wider ${isLight ? 'text-sky-950' : 'text-sky-300'}`}>
                 Approved Log
               </span>
-              <div className={`w-8 h-8 rounded-xl border flex items-center justify-center shrink-0 shadow-xs ${
-                isLight ? 'bg-sky-300/80 border-sky-500/60 text-sky-950' : 'bg-sky-500/15 border-sky-500/30 text-sky-400'
+              <div className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 shadow-xs ${
+                isLight ? 'bg-sky-300/80 text-sky-950' : 'bg-sky-500/15 text-sky-400'
               }`}>
                 <Users className="w-4 h-4 stroke-[2.5]" />
               </div>
@@ -476,10 +472,10 @@ export default function AdminPage() {
               <span className={`text-2xl sm:text-3xl font-black tracking-tight tabular-nums ${isLight ? 'text-sky-950' : 'text-white'}`}>
                 {stats.approved}
               </span>
-              <span className={`text-[10px] font-black px-2 py-0.5 rounded-full border ${
+              <span className={`text-[10px] font-black px-2 py-0.5 rounded-full ${
                 isLight
-                  ? 'bg-sky-300/90 text-sky-950 border-sky-500/70'
-                  : 'bg-sky-500/20 text-sky-300 border-sky-500/30'
+                  ? 'bg-sky-300/90 text-sky-950'
+                  : 'bg-sky-500/20 text-sky-300'
               }`}>
                 Approved
               </span>
@@ -492,16 +488,16 @@ export default function AdminPage() {
         </div>
 
         {/* Tab Navigation & Search Bar */}
-        <div className={`rounded-2xl sm:rounded-3xl border p-3 sm:p-4 mb-6 shadow-xl transition-all ${
+        <div className={`rounded-2xl sm:rounded-3xl p-3 sm:p-4 mb-6 shadow-xl transition-all ${
           isLight
-            ? 'border-emerald-600/15 bg-gradient-to-br from-[#f8fbf9]/95 via-[#f2f7f4]/90 to-[#e6f1ea]/85 shadow-emerald-950/5'
-            : 'border-[#142e20] bg-[#0a1811] shadow-2xl'
+            ? 'bg-gradient-to-br from-[#f8fbf9]/95 via-[#f2f7f4]/90 to-[#e6f1ea]/85 shadow-emerald-950/5'
+            : 'bg-[#0a1811] shadow-2xl'
         }`}>
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
             
             {/* Tabs */}
-            <div className={`grid grid-cols-2 sm:flex sm:items-center gap-1.5 p-1 rounded-2xl border w-full sm:w-auto ${
-              isLight ? 'bg-emerald-100/50 border-emerald-200/80' : 'bg-[#06120c] border-[#163325]'
+            <div className={`grid grid-cols-2 sm:flex sm:items-center gap-1.5 p-1 rounded-2xl w-full sm:w-auto ${
+              isLight ? 'bg-emerald-100/50' : 'bg-[#06120c]'
             }`}>
               <button
                 onClick={() => setActiveTab('pending')}
@@ -519,7 +515,7 @@ export default function AdminPage() {
                 <span className={`px-1.5 py-0.5 rounded-full text-[10px] font-bold shrink-0 ${
                   activeTab === 'pending'
                     ? isLight ? 'bg-white/30 text-white' : 'bg-black/20 text-black'
-                    : isLight ? 'bg-white border border-emerald-300 text-emerald-950' : 'bg-[#0c1e16] border border-[#1a382b] text-white/70'
+                    : isLight ? 'bg-white text-emerald-950' : 'bg-[#0c1e16] text-white/70'
                 }`}>
                   {stats.pending || 0}
                 </span>
@@ -541,7 +537,7 @@ export default function AdminPage() {
                 <span className={`px-1.5 py-0.5 rounded-full text-[10px] font-bold shrink-0 ${
                   activeTab === 'users'
                     ? isLight ? 'bg-white/30 text-white' : 'bg-black/20 text-black'
-                    : isLight ? 'bg-white border border-emerald-300 text-emerald-950' : 'bg-[#0c1e16] border border-[#1a382b] text-white/70'
+                    : isLight ? 'bg-white text-emerald-950' : 'bg-[#0c1e16] text-white/70'
                 }`}>
                   {users.length}
                 </span>
@@ -563,7 +559,7 @@ export default function AdminPage() {
                 <span className={`px-1.5 py-0.5 rounded-full text-[10px] font-bold shrink-0 ${
                   activeTab === 'approved'
                     ? isLight ? 'bg-white/30 text-white' : 'bg-black/20 text-black'
-                    : isLight ? 'bg-white border border-emerald-300 text-emerald-950' : 'bg-[#0c1e16] border border-[#1a382b] text-white/70'
+                    : isLight ? 'bg-white text-emerald-950' : 'bg-[#0c1e16] text-white/70'
                 }`}>
                   {stats.approved}
                 </span>
@@ -585,7 +581,7 @@ export default function AdminPage() {
                 <span className={`px-1.5 py-0.5 rounded-full text-[10px] font-bold shrink-0 ${
                   activeTab === 'rejected'
                     ? isLight ? 'bg-white/30 text-white' : 'bg-black/20 text-black'
-                    : isLight ? 'bg-white border border-emerald-300 text-emerald-950' : 'bg-[#0c1e16] border border-[#1a382b] text-white/70'
+                    : isLight ? 'bg-white text-emerald-950' : 'bg-[#0c1e16] text-white/70'
                 }`}>
                   {stats.rejected}
                 </span>
@@ -617,20 +613,20 @@ export default function AdminPage() {
         {activeTab === 'pending' && (
           <div className="space-y-3">
             {isLoading ? (
-              <div className={`p-12 text-center rounded-2xl border shadow-xl ${
-                isLight ? 'border-emerald-600/15 bg-white/90' : 'border-[#142e20] bg-[#07130e]'
+              <div className={`p-12 text-center rounded-2xl shadow-xl ${
+                isLight ? 'bg-white/90' : 'bg-[#07130e]'
               }`}>
                 <RefreshCw className="w-6 h-6 text-emerald-500 animate-spin mx-auto mb-2" />
                 <p className={`text-xs font-medium ${isLight ? 'text-gray-600' : 'text-white/60'}`}>Loading pending registration requests...</p>
               </div>
             ) : filteredRequests.length === 0 ? (
-              <div className={`p-12 sm:p-16 text-center rounded-2xl border shadow-xl ${
-                isLight ? 'border-emerald-600/15 bg-white/90' : 'border-[#142e20] bg-[#07130e]'
+              <div className={`p-12 sm:p-16 text-center rounded-2xl shadow-xl ${
+                isLight ? 'bg-white/90' : 'bg-[#07130e]'
               }`}>
-                <div className={`w-12 h-12 rounded-xl flex items-center justify-center mx-auto mb-3 shadow-inner border ${
+                <div className={`w-12 h-12 rounded-xl flex items-center justify-center mx-auto mb-3 shadow-inner ${
                   isLight
-                    ? 'bg-emerald-100 text-emerald-700 border-emerald-200'
-                    : 'bg-[#064e3b]/30 text-emerald-400 border-emerald-500/20'
+                    ? 'bg-emerald-100 text-emerald-700'
+                    : 'bg-[#064e3b]/30 text-emerald-400'
                 }`}>
                   <CheckCircle2 className="w-6 h-6" />
                 </div>
@@ -643,18 +639,18 @@ export default function AdminPage() {
               filteredRequests.map((req) => (
                 <div 
                   key={req.id}
-                  className={`rounded-2xl border p-5 transition-all shadow-xl flex flex-col lg:flex-row lg:items-center justify-between gap-4 ${
+                  className={`rounded-2xl p-5 transition-all shadow-xl flex flex-col lg:flex-row lg:items-center justify-between gap-4 ${
                     isLight
-                      ? 'border-emerald-600/15 bg-white/95 hover:border-emerald-500'
-                      : 'border-[#163325] bg-[#0c1b14] hover:border-emerald-500/40'
+                      ? 'bg-white/95'
+                      : 'bg-[#0c1b14]'
                   }`}
                 >
                   {/* Left: Applicant Identity */}
                   <div className="flex items-start gap-4">
-                    <div className={`w-11 h-11 rounded-2xl flex items-center justify-center font-bold text-base shrink-0 shadow-inner border ${
+                    <div className={`w-11 h-11 rounded-2xl flex items-center justify-center font-bold text-base shrink-0 shadow-inner ${
                       isLight
-                        ? 'bg-emerald-100 border-emerald-200 text-emerald-800'
-                        : 'bg-[#064e3b]/40 border-emerald-500/30 text-emerald-300'
+                        ? 'bg-emerald-100 text-emerald-800'
+                        : 'bg-[#064e3b]/40 text-emerald-300'
                     }`}>
                       {req.first_name?.[0]?.toUpperCase() || 'U'}
                       {req.last_name?.[0]?.toUpperCase() || ''}
@@ -665,17 +661,17 @@ export default function AdminPage() {
                         <h4 className={`text-sm sm:text-base font-bold ${isLight ? 'text-gray-900' : 'text-white'}`}>
                           {req.first_name} {req.last_name}
                         </h4>
-                        <span className={`px-2 py-0.5 text-[10px] font-semibold rounded-md border ${
+                        <span className={`px-2 py-0.5 text-[10px] font-semibold rounded-md ${
                           isLight
-                            ? 'bg-gray-100 border-gray-200 text-gray-700'
-                            : 'bg-[#06120c] border-[#163325] text-white/80'
+                            ? 'bg-gray-100 text-gray-700'
+                            : 'bg-[#06120c] text-white/80'
                         }`}>
                           {req.auth_provider === 'google' ? 'Google OAuth' : 'Email/Password'}
                         </span>
-                        <span className={`px-2 py-0.5 text-[10px] font-bold rounded-md uppercase tracking-wider border ${
+                        <span className={`px-2 py-0.5 text-[10px] font-bold rounded-md uppercase tracking-wider ${
                           isLight
-                            ? 'bg-amber-100 text-amber-900 border-amber-300'
-                            : 'bg-amber-500/15 text-amber-300 border-amber-500/30'
+                            ? 'bg-amber-100 text-amber-900'
+                            : 'bg-amber-500/15 text-amber-300'
                         }`}>
                           Pending Approval
                         </span>
@@ -735,10 +731,10 @@ export default function AdminPage() {
                     <button
                       onClick={() => handleOpenReject(req)}
                       disabled={isSubmittingAction}
-                      className={`px-3 py-2 text-xs font-semibold rounded-xl transition-all cursor-pointer disabled:opacity-50 border ${
+                      className={`px-3 py-2 text-xs font-semibold rounded-xl transition-all cursor-pointer disabled:opacity-50 ${
                         isLight
-                          ? 'text-rose-700 bg-rose-50 hover:bg-rose-100 border-rose-200'
-                          : 'text-rose-300 bg-rose-500/15 hover:bg-rose-500/25 border-rose-500/30'
+                          ? 'text-rose-700 bg-rose-50 hover:bg-rose-100'
+                          : 'text-rose-300 bg-rose-500/15 hover:bg-rose-500/25'
                       }`}
                     >
                       Decline
@@ -763,10 +759,10 @@ export default function AdminPage() {
 
         {/* Tab 2: Active Officers / Users View */}
         {activeTab === 'users' && (
-          <div className={`rounded-2xl border overflow-hidden shadow-2xl ${
+          <div className={`rounded-2xl overflow-hidden shadow-2xl ${
             isLight
-              ? 'border-emerald-600/15 bg-white/95'
-              : 'border-[#142e20] bg-[#0a1811]'
+              ? 'bg-white/95'
+              : 'bg-[#0a1811]'
           }`}>
             <div className={`p-4 border-b flex items-center justify-between ${
               isLight ? 'border-gray-100 bg-emerald-50/40' : 'border-[#142e20] bg-[#07130e]'
@@ -775,10 +771,10 @@ export default function AdminPage() {
                 <h3 className={`text-sm font-bold ${isLight ? 'text-gray-900' : 'text-white'}`}>Active FinLITE Officers &amp; Board Members</h3>
                 <p className={`text-xs ${isLight ? 'text-gray-500' : 'text-white/50'}`}>Authorized accounts with access to financial operations</p>
               </div>
-              <span className={`text-xs font-semibold px-2.5 py-1 rounded-lg border ${
+              <span className={`text-xs font-semibold px-2.5 py-1 rounded-lg ${
                 isLight
-                  ? 'text-emerald-900 bg-emerald-100 border-emerald-300'
-                  : 'text-emerald-300 bg-emerald-500/15 border-emerald-500/30'
+                  ? 'text-emerald-900 bg-emerald-100'
+                  : 'text-emerald-300 bg-emerald-500/15'
               }`}>
                 {filteredUsers.length} Active Accounts
               </span>
@@ -795,10 +791,10 @@ export default function AdminPage() {
                     isLight ? 'hover:bg-emerald-50/40' : 'hover:bg-white/[0.02]'
                   }`}>
                     <div className="flex items-center gap-3">
-                      <div className={`w-10 h-10 rounded-xl flex items-center justify-center font-bold text-sm shrink-0 shadow-inner border ${
+                      <div className={`w-10 h-10 rounded-xl flex items-center justify-center font-bold text-sm shrink-0 shadow-inner ${
                         isLight
-                          ? 'bg-emerald-100 border-emerald-200 text-emerald-800'
-                          : 'bg-[#064e3b]/40 border-emerald-500/30 text-emerald-300'
+                          ? 'bg-emerald-100 text-emerald-800'
+                          : 'bg-[#064e3b]/40 text-emerald-300'
                       }`}>
                         {user.first_name?.[0] || user.full_name?.[0] || 'U'}
                       </div>
@@ -807,18 +803,18 @@ export default function AdminPage() {
                           <span className={`text-sm font-bold ${isLight ? 'text-gray-900' : 'text-white'}`}>
                             {user.full_name || `${user.first_name || ''} ${user.last_name || ''}`.trim()}
                           </span>
-                          <span className={`px-2 py-0.5 text-[10px] font-bold uppercase rounded-md border ${
+                          <span className={`px-2 py-0.5 text-[10px] font-bold uppercase rounded-md ${
                             isLight
-                              ? 'bg-emerald-100 text-emerald-800 border-emerald-300'
-                              : 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30'
+                              ? 'bg-emerald-100 text-emerald-800'
+                              : 'bg-emerald-500/15 text-emerald-300'
                           }`}>
                             {user.role}
                           </span>
                           {user.email === 'geronimoandreijohn.pdm@gmail.com' && (
-                            <span className={`px-2 py-0.5 text-[10px] font-bold uppercase rounded-md border ${
+                            <span className={`px-2 py-0.5 text-[10px] font-bold uppercase rounded-md ${
                               isLight
-                                ? 'bg-purple-100 text-purple-900 border-purple-300'
-                                : 'bg-purple-500/20 text-purple-200 border-purple-500/30'
+                                ? 'bg-purple-100 text-purple-900'
+                                : 'bg-purple-500/20 text-purple-200'
                             }`}>
                               Primary Super Admin
                             </span>
@@ -860,33 +856,33 @@ export default function AdminPage() {
         {activeTab === 'approved' && (
           <div className="space-y-3">
             {filteredRequests.length === 0 ? (
-              <div className={`p-12 text-center rounded-2xl border text-xs font-semibold shadow-xl ${
-                isLight ? 'border-emerald-600/15 bg-white/90 text-gray-400' : 'border-[#142e20] bg-[#07130e] text-white/45'
+              <div className={`p-12 text-center rounded-2xl text-xs font-semibold shadow-xl ${
+                isLight ? 'bg-white/90 text-gray-400' : 'bg-[#07130e] text-white/45'
               }`}>
                 No approved request records found.
               </div>
             ) : (
               filteredRequests.map((req) => (
-                <div key={req.id} className={`rounded-2xl border p-4 flex items-center justify-between gap-4 shadow-xl transition-all ${
+                <div key={req.id} className={`rounded-2xl p-4 flex items-center justify-between gap-4 shadow-xl transition-all ${
                   isLight
-                    ? 'border-emerald-600/15 bg-white/95 hover:border-emerald-500'
-                    : 'border-[#163325] bg-[#0c1b14] hover:border-emerald-500/30'
+                    ? 'bg-white/95'
+                    : 'bg-[#0c1b14]'
                 }`}>
                   <div className="flex items-center gap-3">
-                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center font-bold text-sm shadow-inner border ${
+                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center font-bold text-sm shadow-inner ${
                       isLight
-                        ? 'bg-emerald-100 border-emerald-200 text-emerald-700'
-                        : 'bg-[#064e3b]/30 border-emerald-500/20 text-emerald-400'
+                        ? 'bg-emerald-100 text-emerald-700'
+                        : 'bg-[#064e3b]/30 text-emerald-400'
                     }`}>
                       <CheckCircle2 className="w-5 h-5" />
                     </div>
                     <div>
                       <div className="flex items-center gap-2">
                         <span className={`text-sm font-bold ${isLight ? 'text-gray-900' : 'text-white'}`}>{req.first_name} {req.last_name}</span>
-                        <span className={`px-2 py-0.5 text-[10px] font-bold uppercase rounded-md border ${
+                        <span className={`px-2 py-0.5 text-[10px] font-bold uppercase rounded-md ${
                           isLight
-                            ? 'bg-emerald-100 text-emerald-800 border-emerald-300'
-                            : 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30'
+                            ? 'bg-emerald-100 text-emerald-800'
+                            : 'bg-emerald-500/15 text-emerald-300'
                         }`}>
                           {req.requested_role}
                         </span>
@@ -908,23 +904,23 @@ export default function AdminPage() {
         {activeTab === 'rejected' && (
           <div className="space-y-3">
             {filteredRequests.length === 0 ? (
-              <div className={`p-12 text-center rounded-2xl border text-xs font-semibold shadow-xl ${
-                isLight ? 'border-emerald-600/15 bg-white/90 text-gray-400' : 'border-[#142e20] bg-[#07130e] text-white/45'
+              <div className={`p-12 text-center rounded-2xl text-xs font-semibold shadow-xl ${
+                isLight ? 'bg-white/90 text-gray-400' : 'bg-[#07130e] text-white/45'
               }`}>
                 No declined requests recorded.
               </div>
             ) : (
               filteredRequests.map((req) => (
-                <div key={req.id} className={`rounded-2xl border p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xl transition-all ${
+                <div key={req.id} className={`rounded-2xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xl transition-all ${
                   isLight
-                    ? 'border-rose-200 bg-rose-50/50 hover:border-rose-300'
-                    : 'border-rose-950/60 bg-[#140a0e] hover:border-rose-900/60'
+                    ? 'bg-rose-50/50'
+                    : 'bg-[#140a0e]'
                 }`}>
                   <div className="flex items-center gap-3">
-                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center font-bold text-sm shrink-0 shadow-inner border ${
+                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center font-bold text-sm shrink-0 shadow-inner ${
                       isLight
-                        ? 'bg-rose-100 border-rose-200 text-rose-700'
-                        : 'bg-rose-500/15 border-rose-500/30 text-rose-400'
+                        ? 'bg-rose-100 text-rose-700'
+                        : 'bg-rose-500/15 text-rose-400'
                     }`}>
                       <XCircle className="w-5 h-5" />
                     </div>
@@ -932,10 +928,10 @@ export default function AdminPage() {
                       <span className={`text-sm font-bold ${isLight ? 'text-gray-900' : 'text-white'}`}>{req.first_name} {req.last_name}</span>
                       <p className={`text-xs font-medium ${isLight ? 'text-gray-500' : 'text-white/50'}`}>{req.email}</p>
                       {req.rejection_reason && (
-                        <p className={`text-xs font-medium mt-1 px-2.5 py-1 rounded-md inline-block border ${
+                        <p className={`text-xs font-medium mt-1 px-2.5 py-1 rounded-md inline-block ${
                           isLight
-                            ? 'bg-rose-100 text-rose-900 border-rose-200'
-                            : 'bg-rose-950/60 text-rose-300 border-rose-500/25'
+                            ? 'bg-rose-100 text-rose-900'
+                            : 'bg-rose-950/60 text-rose-300'
                         }`}>
                           Reason: {req.rejection_reason}
                         </p>

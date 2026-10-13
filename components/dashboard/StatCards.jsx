@@ -33,8 +33,8 @@ export default function StatCards({ summary, onOpenDenominations }) {
         onClick={onOpenDenominations}
         className={`group relative p-4.5 sm:p-5 rounded-3xl cursor-pointer transition-all flex flex-col justify-between overflow-hidden shadow-lg ${
           isLight
-            ? 'bg-gradient-to-br from-[#ebfae5] via-[#d7f5cc] to-[#bbf0aa] hover:from-[#e3f8dc] hover:to-[#aee999] border-2 border-lime-500/40 hover:border-lime-500/70 shadow-lime-900/10'
-            : 'bg-gradient-to-br from-[#0d2e1b]/90 via-[#092314]/85 to-[#061a0f]/90 backdrop-blur-xl hover:from-[#103620]/95 hover:to-[#082013]/95 border border-lime-500/20 hover:border-lime-400/40 shadow-black/10'
+            ? 'bg-gradient-to-br from-[#ebfae5] via-[#d7f5cc] to-[#bbf0aa] hover:from-[#e3f8dc] hover:to-[#aee999] shadow-lime-900/10'
+            : 'bg-gradient-to-br from-[#0d2e1b]/90 via-[#092314]/85 to-[#061a0f]/90 backdrop-blur-xl hover:from-[#103620]/95 hover:to-[#082013]/95 shadow-black/10'
         }`}
       >
         <div className={`absolute -top-12 -right-12 w-36 h-36 rounded-full blur-2xl pointer-events-none ${
@@ -43,8 +43,8 @@ export default function StatCards({ summary, onOpenDenominations }) {
 
         <div className="flex items-center justify-between mb-3 gap-2 relative z-10">
           <div className="flex items-center gap-2.5">
-            <div className={`w-8 h-8 rounded-xl border flex items-center justify-center shrink-0 shadow-xs ${
-              isLight ? 'bg-lime-300/80 border-lime-500/60 text-lime-950' : 'bg-lime-500/15 border-lime-500/25 text-lime-400'
+            <div className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 shadow-xs ${
+              isLight ? 'bg-lime-300/80 text-lime-950' : 'bg-lime-500/15 text-lime-400'
             }`}>
               <Wallet className="w-4 h-4 stroke-[2.5]" />
             </div>
@@ -55,10 +55,10 @@ export default function StatCards({ summary, onOpenDenominations }) {
             </span>
           </div>
           <div className="flex items-center gap-1.5">
-            <span className={`text-[10px] font-black px-2 py-0.5 rounded-md shrink-0 border ${
+            <span className={`text-[10px] font-black px-2 py-0.5 rounded-md shrink-0 ${
               isLight
-                ? 'text-lime-950 bg-lime-300/90 border-lime-500/70 shadow-2xs'
-                : 'text-lime-300 bg-lime-500/15 border-lime-500/30'
+                ? 'text-lime-950 bg-lime-300/90 shadow-2xs'
+                : 'text-lime-300 bg-lime-500/15'
             }`}>
               Audit
             </span>
@@ -86,8 +86,8 @@ export default function StatCards({ summary, onOpenDenominations }) {
       {/* 2. E-Money / GCash — ACCENT: LIGHT SKY BLUE */}
       <div className={`group relative p-4.5 sm:p-5 rounded-3xl transition-all flex flex-col justify-between overflow-hidden shadow-lg ${
         isLight
-          ? 'bg-gradient-to-br from-[#e0f3fe] via-[#bae6fd] to-[#90d6fc] hover:from-[#d5edfd] hover:to-[#7dcffc] border-2 border-sky-500/40 hover:border-sky-500/70 shadow-sky-900/10'
-          : 'bg-gradient-to-br from-[#082a3a]/90 via-[#06212e]/85 to-[#041722]/90 backdrop-blur-xl hover:from-[#0a3245]/95 hover:to-[#051c2a]/95 border border-sky-500/20 hover:border-sky-400/40 shadow-black/10'
+          ? 'bg-gradient-to-br from-[#e0f3fe] via-[#bae6fd] to-[#90d6fc] hover:from-[#d5edfd] hover:to-[#7dcffc] shadow-sky-900/10'
+          : 'bg-gradient-to-br from-[#082a3a]/90 via-[#06212e]/85 to-[#041722]/90 backdrop-blur-xl hover:from-[#0a3245]/95 hover:to-[#051c2a]/95 shadow-black/10'
       }`}>
         <div className={`absolute -top-12 -right-12 w-36 h-36 rounded-full blur-2xl pointer-events-none ${
           isLight ? 'bg-sky-400/30' : 'bg-sky-400/10'
@@ -95,8 +95,8 @@ export default function StatCards({ summary, onOpenDenominations }) {
 
         <div className="flex items-center justify-between mb-3 gap-2 relative z-10">
           <div className="flex items-center gap-2.5">
-            <div className={`w-8 h-8 rounded-xl border flex items-center justify-center shrink-0 shadow-xs ${
-              isLight ? 'bg-sky-300/80 border-sky-500/60 text-sky-950' : 'bg-sky-500/15 border-sky-500/25 text-sky-400'
+            <div className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 shadow-xs ${
+              isLight ? 'bg-sky-300/80 text-sky-950' : 'bg-sky-500/15 text-sky-400'
             }`}>
               <Smartphone className="w-4 h-4 stroke-[2.5]" />
             </div>
@@ -107,10 +107,10 @@ export default function StatCards({ summary, onOpenDenominations }) {
             </span>
           </div>
           <div className="flex items-center gap-1.5">
-            <span className={`text-[10px] font-black px-2 py-0.5 rounded-md shrink-0 border ${
+            <span className={`text-[10px] font-black px-2 py-0.5 rounded-md shrink-0 ${
               isLight
-                ? 'text-sky-950 bg-sky-300/90 border-sky-500/70 shadow-2xs'
-                : 'text-sky-300 bg-sky-500/15 border-sky-500/30'
+                ? 'text-sky-950 bg-sky-300/90 shadow-2xs'
+                : 'text-sky-300 bg-sky-500/15'
             }`}>
               GCash
             </span>
@@ -138,8 +138,8 @@ export default function StatCards({ summary, onOpenDenominations }) {
       {/* 3. Monthly Net Cashflow — ACCENT: EMERALD INFLOW & ORANGE OUTFLOW */}
       <div className={`group relative p-4.5 sm:p-5 rounded-3xl transition-all flex flex-col justify-between overflow-hidden shadow-lg ${
         isLight
-          ? 'bg-gradient-to-br from-[#d9f9e6] via-[#bbf2d2] to-[#99e8b9] hover:from-[#cdf6dd] hover:to-[#86e2ab] border-2 border-emerald-500/40 hover:border-emerald-500/70 shadow-emerald-900/10'
-          : 'bg-gradient-to-br from-[#0a2e1d]/90 via-[#072417]/85 to-[#051b11]/90 backdrop-blur-xl hover:from-[#0d3623]/95 hover:to-[#072115]/95 border border-emerald-500/20 hover:border-emerald-400/40 shadow-black/10'
+          ? 'bg-gradient-to-br from-[#d9f9e6] via-[#bbf2d2] to-[#99e8b9] hover:from-[#cdf6dd] hover:to-[#86e2ab] shadow-emerald-900/10'
+          : 'bg-gradient-to-br from-[#0a2e1d]/90 via-[#072417]/85 to-[#051b11]/90 backdrop-blur-xl hover:from-[#0d3623]/95 hover:to-[#072115]/95 shadow-black/10'
       }`}>
         <div className={`absolute -top-12 -right-12 w-36 h-36 rounded-full blur-2xl pointer-events-none ${
           isLight ? 'bg-emerald-400/30' : 'bg-emerald-400/10'
@@ -147,8 +147,8 @@ export default function StatCards({ summary, onOpenDenominations }) {
 
         <div className="flex items-center justify-between mb-3 gap-2 relative z-10">
           <div className="flex items-center gap-2 min-w-0">
-            <div className={`w-8 h-8 rounded-xl border flex items-center justify-center shrink-0 shadow-xs ${
-              isLight ? 'bg-emerald-300/80 border-emerald-500/60 text-emerald-950' : 'bg-emerald-500/15 border-emerald-500/25 text-emerald-400'
+            <div className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 shadow-xs ${
+              isLight ? 'bg-emerald-300/80 text-emerald-950' : 'bg-emerald-500/15 text-emerald-400'
             }`}>
               <ArrowDownRight className="w-4 h-4 stroke-[2.5]" />
             </div>
@@ -159,10 +159,10 @@ export default function StatCards({ summary, onOpenDenominations }) {
             </span>
           </div>
           <div className="flex items-center gap-1.5">
-            <span className={`text-[10px] font-black px-2 py-0.5 rounded-md shrink-0 border tabular-nums ${
+            <span className={`text-[10px] font-black px-2 py-0.5 rounded-md shrink-0 tabular-nums ${
               isLight
-                ? 'text-emerald-950 bg-emerald-300/90 border-emerald-500/70 shadow-2xs'
-                : 'text-emerald-300 bg-emerald-500/15 border-emerald-500/30'
+                ? 'text-emerald-950 bg-emerald-300/90 shadow-2xs'
+                : 'text-emerald-300 bg-emerald-500/15'
             }`}>
               {netSign}{formatPHP(Math.abs(netCashflow))}
             </span>
@@ -175,10 +175,10 @@ export default function StatCards({ summary, onOpenDenominations }) {
         {/* Side-by-side: Inflow (Emerald) vs Outflow (ORANGE ACCENT) */}
         <div className="grid grid-cols-2 gap-2 my-1 relative z-10">
           {/* Inflow Sub-Card */}
-          <div className={`p-2.5 rounded-xl border transition-colors shadow-2xs ${
+          <div className={`p-2.5 rounded-xl transition-colors shadow-2xs ${
             isLight
-              ? 'bg-gradient-to-br from-white/95 to-[#c9f6d7] border-emerald-500/50'
-              : 'bg-gradient-to-br from-[#072215] to-[#04160e] border-emerald-500/20'
+              ? 'bg-gradient-to-br from-white/95 to-[#c9f6d7]'
+              : 'bg-gradient-to-br from-[#072215] to-[#04160e]'
           }`}>
             <div className="flex items-center gap-1 mb-0.5">
               <span className={`w-1.5 h-1.5 rounded-full ${isLight ? 'bg-emerald-700' : 'bg-emerald-400'}`} />
@@ -199,10 +199,10 @@ export default function StatCards({ summary, onOpenDenominations }) {
           </div>
 
           {/* Outflow Sub-Card (ORANGE) */}
-          <div className={`p-2.5 rounded-xl border transition-colors shadow-2xs ${
+          <div className={`p-2.5 rounded-xl transition-colors shadow-2xs ${
             isLight
-              ? 'bg-gradient-to-br from-white/95 to-[#fed8b8] border-orange-400/60'
-              : 'bg-gradient-to-br from-[#221308] to-[#150a04] border-orange-500/25 hover:border-orange-400/40'
+              ? 'bg-gradient-to-br from-white/95 to-[#fed8b8]'
+              : 'bg-gradient-to-br from-[#221308] to-[#150a04]'
           }`}>
             <div className="flex items-center gap-1 mb-0.5">
               <span className={`w-1.5 h-1.5 rounded-full ${isLight ? 'bg-orange-600' : 'bg-orange-400'}`} />
@@ -247,8 +247,8 @@ export default function StatCards({ summary, onOpenDenominations }) {
       {/* 4. ADVANCES / Abono — ACCENT: WARM YELLOW */}
       <div className={`group relative p-4.5 sm:p-5 rounded-3xl transition-all flex flex-col justify-between overflow-hidden shadow-lg ${
         isLight
-          ? 'bg-gradient-to-br from-[#fff7d6] via-[#feecaa] to-[#fde078] hover:from-[#fef3c7] hover:to-[#fcd34d] border-2 border-amber-500/40 hover:border-amber-500/70 shadow-amber-900/10'
-          : 'bg-gradient-to-br from-[#2a240a]/90 via-[#211c07]/85 to-[#161304]/90 backdrop-blur-xl hover:from-[#332b0c]/95 hover:to-[#1b1705]/95 border border-yellow-500/20 hover:border-yellow-400/40 shadow-black/10'
+          ? 'bg-gradient-to-br from-[#fff7d6] via-[#feecaa] to-[#fde078] hover:from-[#fef3c7] hover:to-[#fcd34d] shadow-amber-900/10'
+          : 'bg-gradient-to-br from-[#2a240a]/90 via-[#211c07]/85 to-[#161304]/90 backdrop-blur-xl hover:from-[#332b0c]/95 hover:to-[#1b1705]/95 shadow-black/10'
       }`}>
         <div className={`absolute -top-12 -right-12 w-36 h-36 rounded-full blur-2xl pointer-events-none ${
           isLight ? 'bg-amber-400/30' : 'bg-yellow-400/10'
@@ -256,8 +256,8 @@ export default function StatCards({ summary, onOpenDenominations }) {
 
         <div className="flex items-center justify-between mb-3 gap-2 relative z-10">
           <div className="flex items-center gap-2.5">
-            <div className={`w-8 h-8 rounded-xl border flex items-center justify-center shrink-0 shadow-xs ${
-              isLight ? 'bg-amber-300/80 border-amber-500/60 text-amber-950' : 'bg-yellow-500/15 border-yellow-500/25 text-yellow-400'
+            <div className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 shadow-xs ${
+              isLight ? 'bg-amber-300/80 text-amber-950' : 'bg-yellow-500/15 text-yellow-400'
             }`}>
               <Clock className="w-4 h-4 stroke-[2.5]" />
             </div>
@@ -268,10 +268,10 @@ export default function StatCards({ summary, onOpenDenominations }) {
             </span>
           </div>
           <div className="flex items-center gap-1.5">
-            <span className={`text-[10px] font-black px-2 py-0.5 rounded-md shrink-0 border ${
+            <span className={`text-[10px] font-black px-2 py-0.5 rounded-md shrink-0 ${
               isLight
-                ? 'text-amber-950 bg-amber-300/90 border-amber-500/70 shadow-2xs'
-                : 'text-yellow-300 bg-yellow-500/15 border-yellow-500/30'
+                ? 'text-amber-950 bg-amber-300/90 shadow-2xs'
+                : 'text-yellow-300 bg-yellow-500/15'
             }`}>
               Pending
             </span>

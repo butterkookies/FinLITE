@@ -215,7 +215,7 @@ export default function Dashboard() {
           setCurrentSemester(matchedSemester);
         }
 
-        // 5. Load Transactions with 3NF Normalized Joins (with seamless fallback)
+        // 5. Load Transactions with 3NF Normalized Joins (with creator profile details)
         try {
           const { data, error } = await supabase
             .from('transactions')
@@ -223,10 +223,12 @@ export default function Dashboard() {
               *,
               categories (id, name, type),
               semesters (id, academic_year, semester, label),
-              transaction_receipts (id, public_url, sort_order)
+              transaction_receipts (id, public_url, sort_order),
+              profiles (id, full_name, role, email, avatar_url)
             `)
             .order('transaction_date', { ascending: false });
 
+          let rawData = null;
           if (error) {
             console.warn('3NF relational select fallback to base select:', error.message);
             const { data: flatData, error: flatError } = await supabase
@@ -239,16 +241,24 @@ export default function Dashboard() {
               setTransactions([]);
             } else {
               setIsDbConnected(true);
-              setTransactions(flatData || []);
+              rawData = flatData || [];
             }
           } else if (data) {
             setIsDbConnected(true);
-            const normalized = data.map((t) => ({
+            rawData = data;
+          }
+
+          if (rawData) {
+            let normalized = rawData.map((t) => ({
               ...t,
               category_name: t.categories?.name || t.category_name,
               category_id: t.category_id || t.categories?.id,
               academic_year: t.semesters?.academic_year || t.academic_year,
               semester: t.semesters?.semester || t.semester,
+              logged_by_name: t.profiles?.full_name || t.logged_by_name || null,
+              logged_by_role: t.profiles?.role || t.logged_by_role || null,
+              logged_by_email: t.profiles?.email || t.logged_by_email || null,
+              logged_by_avatar_url: t.profiles?.avatar_url || t.logged_by_avatar_url || null,
               receipt_urls: (Array.isArray(t.transaction_receipts) && t.transaction_receipts.length > 0)
                 ? t.transaction_receipts.sort((a, b) => a.sort_order - b.sort_order).map((r) => r.public_url)
                 : (Array.isArray(t.receipt_urls) && t.receipt_urls.length > 0 ? t.receipt_urls : (t.receipt_url ? [t.receipt_url] : [])),
@@ -256,6 +266,45 @@ export default function Dashboard() {
                 ? (t.transaction_receipts.find((r) => r.sort_order === 0)?.public_url || t.transaction_receipts[0]?.public_url)
                 : (t.receipt_url || (Array.isArray(t.receipt_urls) && t.receipt_urls[0]) || null),
             }));
+
+            // Secondary enrichment: Resolve names for any transactions with missing profile joins
+            const missingProfileIds = [...new Set(
+              normalized
+                .filter((t) => t.logged_by && !t.logged_by_name)
+                .map((t) => t.logged_by)
+            )];
+
+            if (missingProfileIds.length > 0) {
+              try {
+                const { data: profs } = await supabase
+                  .from('profiles')
+                  .select('id, full_name, email, role, avatar_url, auth_user_id')
+                  .or(`id.in.(${missingProfileIds.join(',')}),auth_user_id.in.(${missingProfileIds.join(',')})`);
+
+                if (profs && profs.length > 0) {
+                  const idMap = new Map();
+                  profs.forEach((p) => {
+                    if (p.id) idMap.set(p.id, p);
+                    if (p.auth_user_id) idMap.set(p.auth_user_id, p);
+                  });
+
+                  normalized = normalized.map((t) => {
+                    const matchedProfile = t.logged_by ? idMap.get(t.logged_by) : null;
+                    if (!matchedProfile) return t;
+                    return {
+                      ...t,
+                      logged_by_name: t.logged_by_name || matchedProfile.full_name,
+                      logged_by_role: t.logged_by_role || matchedProfile.role,
+                      logged_by_email: t.logged_by_email || matchedProfile.email,
+                      logged_by_avatar_url: t.logged_by_avatar_url || matchedProfile.avatar_url,
+                    };
+                  });
+                }
+              } catch (enrichErr) {
+                console.warn('Profile creator enrichment notice:', enrichErr?.message);
+              }
+            }
+
             setTransactions(normalized);
           }
         } catch (txFetchErr) {
@@ -468,6 +517,10 @@ export default function Dashboard() {
       receipt_url: optimisticReceiptUrls[0] || null,
       academic_year: newTx.academic_year || currentSemester.academicYear,
       semester: newTx.semester || currentSemester.semester,
+      logged_by: userProfile?.id || currentUser?.id || null,
+      logged_by_name: userProfile?.full_name || currentUser?.user_metadata?.full_name || 'Officer',
+      logged_by_role: currentRole || userProfile?.role || 'treasurer',
+      logged_by_avatar_url: userProfile?.avatar_url || currentUser?.user_metadata?.avatar_url || null,
     };
     setTransactions((prev) => [optimisticTx, ...prev]);
 
@@ -608,6 +661,7 @@ export default function Dashboard() {
               ...data,
               logged_by_name: userProfile?.full_name || null,
               logged_by_role: currentRole || userProfile?.role || null,
+              logged_by_avatar_url: userProfile?.avatar_url || null,
               category_id: data.category_id || resolvedCategoryId,
               category_name: data.category_name || newTx.category_name,
               semester_id: data.semester_id || resolvedSemesterId,
@@ -724,6 +778,83 @@ export default function Dashboard() {
     return { success: true, urls: combinedUrls };
   };
 
+  // Handler for settling an out-of-pocket advance (abono)
+  const handleSettleReimbursement = async (transactionId, { paymentMethod = 'CASH' } = {}) => {
+    const isAuthorized = currentRole === 'admin' || currentRole === 'treasurer' || currentRole === 'president' || currentRole === 'adviser';
+    if (!isAuthorized) {
+      return { success: false, error: 'Unauthorized. Only club officers and advisers can settle abono advances.' };
+    }
+
+    const targetTx = transactions.find((t) => t.id === transactionId);
+    if (!targetTx) {
+      return { success: false, error: 'Transaction not found.' };
+    }
+
+    // Validate channel balance: ensure disbursing vault has sufficient liquid balance
+    const balanceError = validateOutflowBalance({
+      type: 'OUTFLOW',
+      paymentMethod,
+      isReimbursement: false,
+      amount: targetTx.amount,
+      cashBalance: summary.cash_on_hand,
+      gcashBalance: summary.gcash_balance,
+    });
+
+    if (balanceError) {
+      return { success: false, error: balanceError };
+    }
+
+    // Update in Supabase if connected
+    if (supabase && typeof transactionId === 'string' && !transactionId.startsWith('tx-')) {
+      try {
+        const { error: updateError } = await supabase
+          .from('transactions')
+          .update({
+            status: 'REIMBURSED',
+            payment_method: paymentMethod,
+            updated_at: new Date().toISOString(),
+          })
+          .eq('id', transactionId);
+
+        if (updateError) {
+          console.error('Failed to update abono reimbursement status in Supabase:', updateError);
+          return { success: false, error: updateError.message };
+        }
+
+        // Best-effort immutable audit log entry
+        try {
+          await supabase.from('audit_logs').insert([{
+            user_id: userProfile?.id || currentUser?.id || null,
+            action: 'SETTLE_ABONO_REIMBURSEMENT',
+            entity_type: 'transactions',
+            entity_id: String(transactionId),
+            details: {
+              title: targetTx.title,
+              amount: targetTx.amount,
+              recipient: targetTx.reimbursement_recipient,
+              payment_method: paymentMethod,
+              settled_by: userProfile?.full_name || currentUser?.email || 'Officer',
+            },
+          }]);
+        } catch (_) {}
+      } catch (err) {
+        console.error('Settle reimbursement exception:', err);
+        return { success: false, error: err.message };
+      }
+    }
+
+    // Optimistically update local transactions state
+    setTransactions((prev) =>
+      prev.map((t) => (t.id === transactionId ? {
+        ...t,
+        status: 'REIMBURSED',
+        payment_method: paymentMethod,
+      } : t))
+    );
+
+    return { success: true };
+  };
+
   // Handler for starting a new semester with carry-over rollover balance
   const handleStartSemester = async ({ academicYear, semester, label, rolloverCash, rolloverGcash, previousTermLabel }) => {
     const newSemObj = {
@@ -815,6 +946,9 @@ export default function Dashboard() {
       semester: currentSemester.semester,
       semester_id: resolvedSemesterId,
       logged_by: userProfile?.id || null,
+      logged_by_name: userProfile?.full_name || 'Officer',
+      logged_by_role: currentRole || userProfile?.role || 'treasurer',
+      logged_by_avatar_url: userProfile?.avatar_url || null,
       is_reimbursement: false,
       event_name: 'Cash Count Audit',
       status: 'COMPLETED',
@@ -878,6 +1012,7 @@ export default function Dashboard() {
             ...data,
             logged_by_name: userProfile?.full_name || null,
             logged_by_role: currentRole || userProfile?.role || null,
+            logged_by_avatar_url: userProfile?.avatar_url || null,
             category_id: data.category_id || shortageCatId,
             category_name: data.category_name || shortageTx.category_name,
             semester_id: data.semester_id || resolvedSemesterId,
@@ -1035,8 +1170,8 @@ export default function Dashboard() {
         {/* Modern Minimalist Hero Balance & Action Hub — CONCEPT DESIGN */}
         <section className={`relative rounded-3xl backdrop-blur-xl p-5 sm:p-7 shadow-xl overflow-hidden transition-all duration-300 ${
           isLight
-            ? 'bg-gradient-to-br from-[#f8fbf9]/95 via-[#f0f7f3]/90 to-[#e4f1e9]/85 border border-emerald-600/15 shadow-emerald-950/5'
-            : 'bg-[#0a2419]/85 border border-emerald-500/20 shadow-2xl'
+            ? 'bg-gradient-to-br from-[#f8fbf9]/95 via-[#f0f7f3]/90 to-[#e4f1e9]/85 shadow-emerald-950/5'
+            : 'bg-[#0a2419]/85 shadow-2xl'
         }`}>
           {/* Subtle ambient corner light aura */}
           <div className={`absolute -top-24 -right-24 w-72 h-72 rounded-full blur-3xl pointer-events-none transition-opacity duration-300 ${isLight ? 'bg-emerald-400/15' : 'bg-emerald-400/20'}`} />
@@ -1050,8 +1185,8 @@ export default function Dashboard() {
               <div className="flex items-center gap-2 mb-2">
                 <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] sm:text-xs font-bold tracking-wider uppercase transition-colors ${
                   isLight
-                    ? 'bg-emerald-100 text-emerald-800 border border-emerald-300'
-                    : 'bg-emerald-500/15 text-emerald-300 border border-emerald-500/25'
+                    ? 'bg-emerald-100 text-emerald-800'
+                    : 'bg-emerald-500/15 text-emerald-300'
                 }`}>
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
                   {currentRole === 'admin' ? 'Administrator Portal' : currentRole === 'treasurer' ? 'LITE Treasury' : 'Officer Portal'}
@@ -1069,8 +1204,8 @@ export default function Dashboard() {
             {/* Right: Quick Action Pods Dock (5 Circular Pods matching mockup) */}
             <div className={`p-2 sm:p-2.5 rounded-2xl sm:rounded-full backdrop-blur-md flex items-center justify-around sm:justify-start sm:gap-4 shrink-0 transition-all ${
               isLight
-                ? 'bg-gradient-to-r from-emerald-100/60 via-white/80 to-teal-100/60 border border-emerald-300/60 shadow-xs'
-                : 'bg-[#071c13]/90 border border-emerald-500/25 shadow-inner'
+                ? 'bg-gradient-to-r from-emerald-100/60 via-white/80 to-teal-100/60 shadow-xs'
+                : 'bg-[#071c13]/90 shadow-inner'
             }`}>
               
               {/* Pod 1: Record Transaction */}
@@ -1081,8 +1216,8 @@ export default function Dashboard() {
               >
                 <div className={`w-11 h-11 sm:w-12 sm:h-12 rounded-full flex items-center justify-center transition-all shadow-md ${
                   isLight
-                    ? 'bg-white/95 border border-emerald-300/70 text-emerald-800 group-hover:bg-emerald-600 group-hover:text-white group-hover:border-emerald-600 group-hover:scale-105 active:scale-95'
-                    : 'bg-[#0c2e1f] border border-emerald-500/35 text-emerald-400 group-hover:bg-[#10b981] group-hover:text-black group-hover:border-emerald-400 group-hover:scale-105 active:scale-95'
+                    ? 'bg-white/95 text-emerald-800 group-hover:bg-emerald-600 group-hover:text-white group-hover:scale-105 active:scale-95'
+                    : 'bg-[#0c2e1f] text-emerald-400 group-hover:bg-[#10b981] group-hover:text-black group-hover:scale-105 active:scale-95'
                 }`}>
                   <Plus className="w-5 h-5 stroke-[2.5]" />
                 </div>
@@ -1101,8 +1236,8 @@ export default function Dashboard() {
               >
                 <div className={`w-11 h-11 sm:w-12 sm:h-12 rounded-full flex items-center justify-center transition-all shadow-md ${
                   isLight
-                    ? 'bg-white/95 border border-emerald-300/70 text-emerald-800 group-hover:bg-emerald-600 group-hover:text-white group-hover:border-emerald-600 group-hover:scale-105 active:scale-95'
-                    : 'bg-[#0c2e1f] border border-emerald-500/35 text-emerald-400 group-hover:bg-[#10b981] group-hover:text-black group-hover:border-emerald-400 group-hover:scale-105 active:scale-95'
+                    ? 'bg-white/95 text-emerald-800 group-hover:bg-emerald-600 group-hover:text-white group-hover:scale-105 active:scale-95'
+                    : 'bg-[#0c2e1f] text-emerald-400 group-hover:bg-[#10b981] group-hover:text-black group-hover:scale-105 active:scale-95'
                 }`}>
                   <Wallet className="w-5 h-5" />
                 </div>
@@ -1121,8 +1256,8 @@ export default function Dashboard() {
               >
                 <div className={`w-11 h-11 sm:w-12 sm:h-12 rounded-full flex items-center justify-center transition-all shadow-md ${
                   isLight
-                    ? 'bg-white/95 border border-emerald-300/70 text-emerald-800 group-hover:bg-emerald-600 group-hover:text-white group-hover:border-emerald-600 group-hover:scale-105 active:scale-95'
-                    : 'bg-[#0c2e1f] border border-emerald-500/35 text-emerald-400 group-hover:bg-[#10b981] group-hover:text-black group-hover:border-emerald-400 group-hover:scale-105 active:scale-95'
+                    ? 'bg-white/95 text-emerald-800 group-hover:bg-emerald-600 group-hover:text-white group-hover:scale-105 active:scale-95'
+                    : 'bg-[#0c2e1f] text-emerald-400 group-hover:bg-[#10b981] group-hover:text-black group-hover:scale-105 active:scale-95'
                 }`}>
                   <Calculator className="w-5 h-5" />
                 </div>
@@ -1141,8 +1276,8 @@ export default function Dashboard() {
               >
                 <div className={`w-11 h-11 sm:w-12 sm:h-12 rounded-full flex items-center justify-center transition-all shadow-md ${
                   isLight
-                    ? 'bg-white/95 border border-emerald-300/70 text-emerald-800 group-hover:bg-emerald-600 group-hover:text-white group-hover:border-emerald-600 group-hover:scale-105 active:scale-95'
-                    : 'bg-[#0c2e1f] border border-emerald-500/35 text-emerald-400 group-hover:bg-[#10b981] group-hover:text-black group-hover:border-emerald-400 group-hover:scale-105 active:scale-95'
+                    ? 'bg-white/95 text-emerald-800 group-hover:bg-emerald-600 group-hover:text-white group-hover:scale-105 active:scale-95'
+                    : 'bg-[#0c2e1f] text-emerald-400 group-hover:bg-[#10b981] group-hover:text-black group-hover:scale-105 active:scale-95'
                 }`}>
                   <FileText className="w-5 h-5" />
                 </div>
@@ -1161,8 +1296,8 @@ export default function Dashboard() {
               >
                 <div className={`w-11 h-11 sm:w-12 sm:h-12 rounded-full flex items-center justify-center transition-all shadow-md ${
                   isLight
-                    ? 'bg-white/95 border border-emerald-300/70 text-emerald-800 group-hover:bg-emerald-600 group-hover:text-white group-hover:border-emerald-600 group-hover:scale-105 active:scale-95'
-                    : 'bg-[#0c2e1f] border border-emerald-500/35 text-emerald-400 group-hover:bg-[#10b981] group-hover:text-black group-hover:border-emerald-400 group-hover:scale-105 active:scale-95'
+                    ? 'bg-white/95 text-emerald-800 group-hover:bg-emerald-600 group-hover:text-white group-hover:scale-105 active:scale-95'
+                    : 'bg-[#0c2e1f] text-emerald-400 group-hover:bg-[#10b981] group-hover:text-black group-hover:scale-105 active:scale-95'
                 }`}>
                   <Sparkles className="w-5 h-5" />
                 </div>
@@ -1194,6 +1329,9 @@ export default function Dashboard() {
             onExportReport={handleOpenLiquidationPreview}
             onNewProposal={() => setIsProposalOpen(true)}
             onAttachReceipt={handleAttachReceipt}
+            onSettleReimbursement={handleSettleReimbursement}
+            cashBalance={summary.cash_on_hand}
+            gcashBalance={summary.gcash_balance}
             currentRole={currentRole}
             isDbConnected={isDbConnected}
           />
@@ -1204,8 +1342,8 @@ export default function Dashboard() {
       {/* Mobile Floating Action Dock (Matching Mockup Navigation) */}
       <div className={`sm:hidden fixed bottom-3 left-3 right-3 z-40 backdrop-blur-xl rounded-full p-1.5 px-4 flex items-center justify-between shadow-2xl no-print transition-all duration-200 ${
         isLight
-          ? 'bg-white/95 border border-emerald-200/80 shadow-emerald-950/10'
-          : 'bg-[#07130d]/95 border border-[#163325] shadow-black/80'
+          ? 'bg-white/95 shadow-emerald-950/10'
+          : 'bg-[#07130d]/95 shadow-black/80'
       }`}>
         <button
           type="button"

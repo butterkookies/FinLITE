@@ -174,7 +174,7 @@ export default function ProfilePage() {
       <main className="max-w-4xl mx-auto px-4 sm:px-6 py-8 w-full flex-1 space-y-6">
         
         {/* Profile Card — Gradient matching Dashboard Hero */}
-        <div className="rounded-3xl border border-emerald-500/20 bg-gradient-to-br from-[#0a2e1d]/90 via-[#072417]/85 to-[#051b11]/90 backdrop-blur-xl p-6 sm:p-8 shadow-xl relative overflow-hidden transition-all">
+        <div className="rounded-3xl bg-gradient-to-br from-[#0a2e1d]/90 via-[#072417]/85 to-[#051b11]/90 backdrop-blur-xl p-6 sm:p-8 shadow-xl relative overflow-hidden transition-all">
           {/* Ambient corner auras matching Dashboard Hero */}
           <div className="absolute -top-20 -right-20 w-60 h-60 bg-emerald-400/15 rounded-full blur-3xl pointer-events-none" />
           <div className="absolute -bottom-20 -left-20 w-60 h-60 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
@@ -184,7 +184,7 @@ export default function ProfilePage() {
             {/* Avatar / Picture */}
             <div className="relative shrink-0 group">
               {avatarUrl ? (
-                <div className="w-24 h-24 rounded-3xl overflow-hidden border border-emerald-400/30 shadow-md relative">
+                <div className="w-24 h-24 rounded-3xl overflow-hidden shadow-md relative">
                   <img
                     src={avatarUrl}
                     alt={fullName}
@@ -196,14 +196,14 @@ export default function ProfilePage() {
                   />
                 </div>
               ) : (
-                <div className="w-24 h-24 rounded-3xl bg-gradient-to-br from-[#0c3924] to-[#062014] border border-emerald-400/35 flex items-center justify-center text-emerald-300 text-3xl font-black shadow-inner">
+                <div className="w-24 h-24 rounded-3xl bg-gradient-to-br from-[#0c3924] to-[#062014] flex items-center justify-center text-emerald-300 text-3xl font-black shadow-inner">
                   {fullName[0]?.toUpperCase() || 'U'}
                 </div>
               )}
               <button
                 type="button"
                 onClick={() => setIsEditOpen(true)}
-                className="absolute -top-1.5 -right-1.5 w-7 h-7 rounded-full bg-[#0c3924] hover:bg-[#124d32] border border-emerald-400/40 shadow-md flex items-center justify-center text-emerald-300 hover:text-white transition-colors cursor-pointer"
+                className="absolute -top-1.5 -right-1.5 w-7 h-7 rounded-full bg-[#0c3924] hover:bg-[#124d32] shadow-md flex items-center justify-center text-emerald-300 hover:text-white transition-colors cursor-pointer"
                 title="Change Profile Photo"
               >
                 <Camera className="w-3.5 h-3.5" />
@@ -220,17 +220,17 @@ export default function ProfilePage() {
                   {fullName}
                 </h2>
                 {profile?.username && (
-                  <span className="text-xs font-bold text-emerald-300 bg-emerald-500/15 border border-emerald-500/30 px-2 py-0.5 rounded-full">
+                  <span className="text-xs font-bold text-emerald-300 bg-emerald-500/15 px-2 py-0.5 rounded-full">
                     @{profile.username}
                   </span>
                 )}
-                <span className="px-2.5 py-0.5 rounded-full text-xs font-bold uppercase tracking-wider bg-[#0d3322] text-emerald-300 border border-emerald-500/30">
+                <span className="px-2.5 py-0.5 rounded-full text-xs font-bold uppercase tracking-wider bg-[#0d3322] text-emerald-300">
                   {roleLabelMap[role] || role}
                 </span>
                 <button
                   type="button"
                   onClick={() => setIsEditOpen(true)}
-                  className="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-300 hover:text-white hover:bg-emerald-500/20 px-2 py-0.5 rounded-full transition-colors cursor-pointer border border-emerald-500/30"
+                  className="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-300 hover:text-white hover:bg-emerald-500/20 px-2 py-0.5 rounded-full transition-colors cursor-pointer"
                   title="Edit Profile"
                 >
                   <Pencil className="w-2.5 h-2.5" />
@@ -244,12 +244,12 @@ export default function ProfilePage() {
               </p>
 
               <div className="flex items-center justify-center sm:justify-start gap-2 mt-4 flex-wrap">
-                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-emerald-500/15 text-emerald-300 border border-emerald-400/30">
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-emerald-500/15 text-emerald-300">
                   <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
                   Account Approved &amp; Active
                 </span>
 
-                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-[#0d3020] text-emerald-100/75 border border-emerald-500/25">
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-[#0d3020] text-emerald-100/75">
                   Provider: Google OAuth
                 </span>
               </div>
@@ -262,11 +262,11 @@ export default function ProfilePage() {
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           
           {/* Institutional Affiliation */}
-          <div className="rounded-3xl border border-emerald-500/20 bg-gradient-to-br from-[#0a2e1d]/90 via-[#072417]/85 to-[#051b11]/90 backdrop-blur-xl p-5 sm:p-6 shadow-xl space-y-3.5 relative overflow-hidden transition-all">
+          <div className="rounded-3xl bg-gradient-to-br from-[#0a2e1d]/90 via-[#072417]/85 to-[#051b11]/90 backdrop-blur-xl p-5 sm:p-6 shadow-xl space-y-3.5 relative overflow-hidden transition-all">
             <div className="absolute -top-12 -right-12 w-32 h-32 bg-emerald-400/10 rounded-full blur-2xl pointer-events-none" />
             
             <div className="flex items-center gap-2.5 text-emerald-400 relative z-10">
-              <div className="w-8 h-8 rounded-xl bg-emerald-500/15 border border-emerald-500/25 flex items-center justify-center">
+              <div className="w-8 h-8 rounded-xl bg-emerald-500/15 flex items-center justify-center">
                 <Building className="w-4 h-4 text-emerald-400" />
               </div>
               <h3 className="text-sm font-bold text-white">Institutional Affiliation</h3>
@@ -289,11 +289,11 @@ export default function ProfilePage() {
           </div>
 
           {/* Contact & Access */}
-          <div className="rounded-3xl border border-emerald-500/20 bg-gradient-to-br from-[#0a2e1d]/90 via-[#072417]/85 to-[#051b11]/90 backdrop-blur-xl p-5 sm:p-6 shadow-xl space-y-3.5 relative overflow-hidden transition-all">
+          <div className="rounded-3xl bg-gradient-to-br from-[#0a2e1d]/90 via-[#072417]/85 to-[#051b11]/90 backdrop-blur-xl p-5 sm:p-6 shadow-xl space-y-3.5 relative overflow-hidden transition-all">
             <div className="absolute -top-12 -right-12 w-32 h-32 bg-emerald-400/10 rounded-full blur-2xl pointer-events-none" />
 
             <div className="flex items-center gap-2.5 text-emerald-400 relative z-10">
-              <div className="w-8 h-8 rounded-xl bg-emerald-500/15 border border-emerald-500/25 flex items-center justify-center">
+              <div className="w-8 h-8 rounded-xl bg-emerald-500/15 flex items-center justify-center">
                 <Shield className="w-4 h-4 text-emerald-400" />
               </div>
               <h3 className="text-sm font-bold text-white">Contact &amp; Access</h3>
@@ -344,7 +344,7 @@ export default function ProfilePage() {
         </div>
 
         {/* Quick Navigation Cards — Gradient Matching Dashboard */}
-        <div className="rounded-3xl border border-emerald-500/20 bg-gradient-to-br from-[#09291a]/90 via-[#072115]/85 to-[#05180f]/90 backdrop-blur-xl p-5 sm:p-6 shadow-xl relative overflow-hidden transition-all">
+        <div className="rounded-3xl bg-gradient-to-br from-[#09291a]/90 via-[#072115]/85 to-[#05180f]/90 backdrop-blur-xl p-5 sm:p-6 shadow-xl relative overflow-hidden transition-all">
           <div className="absolute -top-16 -right-16 w-40 h-40 bg-emerald-400/10 rounded-full blur-2xl pointer-events-none" />
 
           <h3 className="text-xs font-bold uppercase tracking-wider text-emerald-300/80 mb-3 relative z-10">
@@ -353,7 +353,7 @@ export default function ProfilePage() {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 relative z-10">
             <Link
               href="/"
-              className="p-4 rounded-2xl border border-emerald-500/20 bg-gradient-to-br from-[#0b2f1e]/90 to-[#061d12]/90 hover:from-[#0e3b26] hover:to-[#092617] hover:border-emerald-400/40 transition-all flex items-center justify-between group shadow-md"
+              className="p-4 rounded-2xl bg-gradient-to-br from-[#0b2f1e]/90 to-[#061d12]/90 hover:from-[#0e3b26] hover:to-[#092617] transition-all flex items-center justify-between group shadow-md"
             >
               <div>
                 <p className="text-xs font-bold text-white group-hover:text-emerald-300 transition-colors">Main Ledger &amp; Dashboard</p>
@@ -365,7 +365,7 @@ export default function ProfilePage() {
             {isAdmin && (
               <Link
                 href="/admin"
-                className="p-4 rounded-2xl border border-amber-500/25 bg-gradient-to-br from-[#28200a]/90 to-[#181305]/90 hover:from-[#33290d] hover:to-[#201906] hover:border-amber-400/40 transition-all flex items-center justify-between group shadow-md"
+                className="p-4 rounded-2xl bg-gradient-to-br from-[#28200a]/90 to-[#181305]/90 hover:from-[#33290d] hover:to-[#201906] transition-all flex items-center justify-between group shadow-md"
               >
                 <div>
                   <p className="text-xs font-bold text-white group-hover:text-amber-300 transition-colors">Access Control &amp; Admin</p>

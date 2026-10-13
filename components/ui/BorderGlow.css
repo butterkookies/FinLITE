@@ -12,7 +12,7 @@
   isolation: isolate;
   transform: translate3d(0, 0, 0.01px);
   display: grid;
-  border: 1px solid rgb(255 255 255 / 15%);
+  border: none;
   background: var(--card-bg, #120F17);
   overflow: visible;
   box-shadow:
@@ -25,7 +25,6 @@
 }
 
 .border-glow-card--light {
-  border-color: rgb(24 24 27 / 12%);
   box-shadow:
     rgb(24 24 27 / 4%) 0 1px 2px,
     rgb(24 24 27 / 5%) 0 8px 24px;
