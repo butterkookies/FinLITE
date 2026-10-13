@@ -13,7 +13,8 @@ import {
   Wallet,
   Calculator,
   FileText,
-  Folder
+  Folder,
+  X
 } from 'lucide-react';
 import { formatPHP } from '@/lib/utils/currency';
 import { useTheme } from '@/components/theme/ThemeProvider';
@@ -631,46 +632,90 @@ export default function TransactionTable({
         );
       })()}
 
-      {/* Receipt Modal Preview */}
+      {/* Receipt Modal Preview — Clean White Card with High-Contrast Readable Text */}
       {selectedReceipt && (
-        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4">
-          <div className={`rounded-t-2xl sm:rounded-2xl max-w-sm w-full p-5 border shadow-2xl animate-in fade-in slide-in-from-bottom-4 sm:zoom-in-95 duration-150 ${
-            isLight
-              ? 'bg-white border-emerald-900/10'
-              : 'bg-[#0a1811] border-[#163325]'
-          }`}>
-            <div className="w-10 h-1 bg-white/20 rounded-full mx-auto mb-3 sm:hidden" />
-            <h3 className={`text-sm font-bold mb-1 ${isLight ? 'text-gray-900' : 'text-white'}`}>
-              Receipt / Disbursement Proof
-            </h3>
-            <div className={`flex items-center gap-1 text-xs mb-3 min-w-0 ${
-              isLight ? 'text-gray-600' : 'text-white/50'
-            }`}>
-              <span className="truncate">{selectedReceipt.title}</span>
-              <span className="opacity-30 mx-1 shrink-0">/</span>
-              <span className={`tabular-nums font-semibold shrink-0 whitespace-nowrap ${
-                isLight ? 'text-emerald-700' : 'text-emerald-400'
-              }`}>{formatPHP(selectedReceipt.amount)}</span>
+        <div 
+          className="fixed inset-0 z-50 bg-black/65 backdrop-blur-md flex items-end sm:items-center justify-center p-3 sm:p-4 animate-in fade-in duration-150"
+          onClick={() => setSelectedReceipt(null)}
+        >
+          <div 
+            className="rounded-3xl max-w-sm sm:max-w-md w-full p-5 sm:p-6 border border-gray-200/90 shadow-2xl bg-white text-gray-900 animate-in zoom-in-95 duration-150 relative"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Mobile handle indicator */}
+            <div className="w-10 h-1 bg-gray-300 rounded-full mx-auto mb-3.5 sm:hidden" />
+
+            {/* Header: Title and Close button */}
+            <div className="flex items-center justify-between gap-2 mb-2">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-xl bg-emerald-100 text-emerald-800 flex items-center justify-center shrink-0">
+                  <Receipt className="w-4 h-4 stroke-[2.2]" />
+                </div>
+                <div>
+                  <h3 className="text-sm sm:text-base font-bold text-gray-950 tracking-tight leading-tight">
+                    Receipt / Disbursement Proof
+                  </h3>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setSelectedReceipt(null)}
+                className="p-1.5 rounded-full text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors cursor-pointer"
+                title="Close Preview"
+              >
+                <X className="w-4 h-4 stroke-[2.2]" />
+              </button>
             </div>
-            <div className={`rounded-xl overflow-hidden aspect-4/3 flex items-center justify-center mb-4 border ${
-              isLight ? 'bg-gray-100 border-gray-200' : 'bg-[#07130e] border-[#163325]'
-            }`}>
+
+            {/* Subtitle Info Badge */}
+            <div className="flex items-center justify-between gap-2 text-xs mb-3.5 bg-gray-50 border border-gray-200/80 rounded-xl px-3 py-2">
+              <div className="flex items-center gap-1.5 min-w-0">
+                <span className="font-semibold text-gray-800 truncate" title={selectedReceipt.title}>
+                  {selectedReceipt.title}
+                </span>
+                {selectedReceipt.category_name && (
+                  <span className="text-[10px] text-gray-500 hidden sm:inline">
+                    • {selectedReceipt.category_name}
+                  </span>
+                )}
+              </div>
+              <span className="tabular-nums font-bold text-emerald-800 bg-emerald-100/90 px-2.5 py-0.5 rounded-md border border-emerald-300/60 whitespace-nowrap text-xs shrink-0">
+                {formatPHP(selectedReceipt.amount)}
+              </span>
+            </div>
+
+            {/* Receipt Image Display Box */}
+            <div className="rounded-2xl overflow-hidden aspect-4/3 flex items-center justify-center mb-4 bg-gray-100/90 border border-gray-200 shadow-inner relative">
               <img 
                 src={selectedReceipt.receipt_url} 
-                alt="Receipt" 
-                className="w-full h-full object-contain" 
+                alt="Receipt Document" 
+                className="w-full h-full object-contain p-1" 
               />
             </div>
-            <button
-              onClick={() => setSelectedReceipt(null)}
-              className={`w-full h-9 rounded-xl text-xs font-semibold transition-colors cursor-pointer border ${
-                isLight
-                  ? 'bg-emerald-50 hover:bg-emerald-100 text-emerald-900 border-emerald-200'
-                  : 'bg-[#0c1e16] hover:bg-[#122b20] text-emerald-200 border-[#1a382b]'
-              }`}
-            >
-              Close Preview
-            </button>
+
+            {/* Bottom Actions */}
+            <div className="flex items-center gap-2">
+              {selectedReceipt.receipt_url && (
+                <a
+                  href={selectedReceipt.receipt_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="h-10 px-3.5 rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 bg-gray-100 hover:bg-gray-200 text-gray-700 transition-colors border border-gray-200 shrink-0"
+                  title="Open full size image in new tab"
+                >
+                  <Download className="w-3.5 h-3.5" />
+                  <span className="hidden sm:inline">Full Image</span>
+                </a>
+              )}
+              <button
+                type="button"
+                onClick={() => setSelectedReceipt(null)}
+                className="flex-1 h-10 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer bg-emerald-600 hover:bg-emerald-700 active:scale-98 text-white shadow-sm flex items-center justify-center"
+              >
+                Close Preview
+              </button>
+            </div>
+
           </div>
         </div>
       )}

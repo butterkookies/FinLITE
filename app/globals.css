@@ -201,6 +201,36 @@ html[data-theme="light"] ::-webkit-scrollbar-thumb:hover {
   animation: aiDrawerSlide 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
+@keyframes aiModalPop {
+  0% {
+    opacity: 0;
+    transform: scale(0.95) translateY(8px);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@keyframes orbPulse {
+  0%, 100% {
+    transform: translateY(0px) scale(1);
+    filter: drop-shadow(0 0 16px rgba(16, 185, 129, 0.45));
+  }
+  50% {
+    transform: translateY(-4px) scale(1.02);
+    filter: drop-shadow(0 0 26px rgba(52, 211, 153, 0.7));
+  }
+}
+
+.animate-ai-modal {
+  animation: aiModalPop 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.animate-orb-pulse {
+  animation: orbPulse 3.5s infinite ease-in-out;
+}
+
 .animate-ai-message {
   animation: aiMessageEntry 0.28s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
