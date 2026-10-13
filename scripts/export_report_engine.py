@@ -136,7 +136,11 @@ def create_borderless_signatory_table(doc, signatories_list, num_cols):
     """
     Build structured multi-column borderless table for signatories.
     Guarantees exact column widths, zero tab wrapping misalignment, and Calibri 11pt.
+    Guards against division by zero if num_cols <= 0.
     """
+    if num_cols <= 0 or not signatories_list:
+        return None
+
     table = doc.add_table(rows=1, cols=num_cols)
     ensure_invisible_table_borders(table)
     col_width = Inches(6.5 / num_cols)
@@ -153,13 +157,27 @@ def create_borderless_signatory_table(doc, signatories_list, num_cols):
         tcMar = parse_xml(r'<w:tcMar %s><w:top w:w="0" w:type="dxa"/><w:bottom w:w="0" w:type="dxa"/><w:left w:w="0" w:type="dxa"/><w:right w:w="120" w:type="dxa"/></w:tcMar>' % nsdecls('w'))
         tcPr.append(tcMar)
         
-        p = cell.paragraphs[0]
-        p.paragraph_format.space_before = Pt(16)
-        p.paragraph_format.space_after = Pt(1)
-        p.paragraph_format.line_spacing = 1.0
-        
+        if sig.get('heading'):
+            p_head = cell.paragraphs[0]
+            p_head.paragraph_format.space_before = Pt(8)
+            p_head.paragraph_format.space_after = Pt(24)
+            p_head.paragraph_format.line_spacing = 1.0
+            r_head = p_head.add_run(sig['heading'])
+            r_head.font.name = 'Calibri'
+            r_head.font.size = Pt(11)
+
+            p_name = cell.add_paragraph()
+            p_name.paragraph_format.space_before = Pt(0)
+            p_name.paragraph_format.space_after = Pt(1)
+            p_name.paragraph_format.line_spacing = 1.0
+        else:
+            p_name = cell.paragraphs[0]
+            p_name.paragraph_format.space_before = Pt(16)
+            p_name.paragraph_format.space_after = Pt(1)
+            p_name.paragraph_format.line_spacing = 1.0
+
         if sig.get('name'):
-            r_name = p.add_run(sig['name'])
+            r_name = p_name.add_run(sig['name'])
             r_name.font.name = 'Calibri'
             r_name.font.size = Pt(11)
             r_name.bold = True
@@ -173,10 +191,139 @@ def create_borderless_signatory_table(doc, signatories_list, num_cols):
             r_role = p_role.add_run(sig['role'])
             r_role.font.name = 'Calibri'
             r_role.font.size = Pt(11)
+
+    # Fill remaining columns with empty cells to keep left-alignment without stretching
+    for empty_idx in range(len(signatories_list), num_cols):
+        empty_cell = row.cells[empty_idx]
+        empty_cell.width = col_width
             
     tbl_elm = table._element
     tbl_elm.getparent().remove(tbl_elm)
     return tbl_elm
+
+def add_receipt_sheets_table(doc, receipts, academic_year, semester):
+    """
+    Renders 2-column Word table holding up to 4 receipts per page (2 rows x 2 cols).
+    Scales pictures proportionally into max 3.1" x 3.0" bounding box.
+    """
+    if not receipts:
+        return
+
+    from PIL import Image
+
+    chunks = [receipts[i:i + 4] for i in range(0, len(receipts), 4)]
+    total_sheets = len(chunks)
+
+    for sheet_idx, chunk in enumerate(chunks):
+        if sheet_idx > 0 or len(doc.paragraphs) > 0:
+            p_break = parse_xml(r'<w:p %s><w:r><w:br w:type="page"/></w:r></w:p>' % nsdecls('w'))
+            doc._element.body.append(p_break)
+
+        p_title = doc.add_paragraph()
+        p_title.alignment = docx.enum.text.WD_ALIGN_PARAGRAPH.CENTER
+        p_title.paragraph_format.space_before = Pt(4)
+        p_title.paragraph_format.space_after = Pt(4)
+
+        r1 = p_title.add_run("PAMBAYANG DALUBHASAAN NG MARILAO\n")
+        r1.font.name = 'Calibri'
+        r1.font.size = Pt(9.5)
+        r1.bold = True
+
+        r2 = p_title.add_run("RECEIPTS & PROOFS OF DISBURSEMENT\n")
+        r2.font.name = 'Calibri'
+        r2.font.size = Pt(11)
+        r2.bold = True
+
+        r3 = p_title.add_run(f"{semester} • ACADEMIC YEAR {academic_year}\n")
+        r3.font.name = 'Calibri'
+        r3.font.size = Pt(9.5)
+        r3.font.color.rgb = docx.shared.RGBColor(80, 80, 80)
+
+        r4 = p_title.add_run(f"Receipts Attachment Sheet {sheet_idx + 1} of {total_sheets}")
+        r4.font.name = 'Calibri'
+        r4.font.size = Pt(8.5)
+        r4.font.color.rgb = docx.shared.RGBColor(120, 120, 120)
+
+        table = doc.add_table(rows=2, cols=2)
+        tblPr = table._element.tblPr
+        tblBorders = parse_xml(r'<w:tblBorders %s>'
+                               r'<w:top w:val="none"/>'
+                               r'<w:left w:val="none"/>'
+                               r'<w:bottom w:val="none"/>'
+                               r'<w:right w:val="none"/>'
+                               r'<w:insideH w:val="none"/>'
+                               r'<w:insideV w:val="none"/>'
+                               r'</w:tblBorders>' % nsdecls('w'))
+        tblPr.append(tblBorders)
+
+        for col in table.columns:
+            col.width = Inches(3.2)
+
+        for idx, rc in enumerate(chunk):
+            r_idx = idx // 2
+            c_idx = idx % 2
+            cell = table.rows[r_idx].cells[c_idx]
+            cell.width = Inches(3.2)
+
+            tcPr = cell._element.get_or_add_tcPr()
+            tcMar = parse_xml(r'<w:tcMar %s><w:top w:w="80" w:type="dxa"/><w:bottom w:w="80" w:type="dxa"/><w:left w:w="80" w:type="dxa"/><w:right w:w="80" w:type="dxa"/></w:tcMar>' % nsdecls('w'))
+            tcPr.append(tcMar)
+
+            set_cell_border(cell,
+                top={"val": "single", "sz": "4", "color": "D1D5DB"},
+                bottom={"val": "single", "sz": "4", "color": "D1D5DB"},
+                left={"val": "single", "sz": "4", "color": "D1D5DB"},
+                right={"val": "single", "sz": "4", "color": "D1D5DB"}
+            )
+
+            p_img = cell.paragraphs[0]
+            p_img.alignment = docx.enum.text.WD_ALIGN_PARAGRAPH.CENTER
+            p_img.paragraph_format.space_before = Pt(2)
+            p_img.paragraph_format.space_after = Pt(2)
+
+            img_path = rc.get('local_path')
+            if img_path and os.path.exists(img_path):
+                try:
+                    with Image.open(img_path) as im:
+                        im_w, im_h = im.size
+                    if im_w > 0 and im_h > 0:
+                        aspect = im_w / im_h
+                        # Max box: 3.1" wide by 3.0" tall
+                        if aspect > (3.1 / 3.0):
+                            w = Inches(3.1)
+                            h = Inches(3.1 / aspect)
+                        else:
+                            h = Inches(3.0)
+                            w = Inches(3.0 * aspect)
+                        p_img.add_run().add_picture(img_path, width=w, height=h)
+                except Exception as img_err:
+                    p_img.add_run(f"[Receipt Image: {rc.get('title', 'Voucher')}]")
+            else:
+                p_img.add_run(f"[Receipt: {rc.get('title', 'Voucher')}]")
+
+            p_cap = cell.add_paragraph()
+            p_cap.paragraph_format.space_before = Pt(2)
+            p_cap.paragraph_format.space_after = Pt(2)
+            p_cap.paragraph_format.line_spacing = 1.0
+
+            r_d = p_cap.add_run(f"{rc.get('date', '')}  •  ")
+            r_d.font.name = 'Calibri'
+            r_d.font.size = Pt(9.5)
+
+            r_a = p_cap.add_run(f"P{float(rc.get('amount', 0)):,.2f}\n")
+            r_a.font.name = 'Calibri'
+            r_a.font.size = Pt(9.5)
+            r_a.bold = True
+
+            r_t = p_cap.add_run(f"{rc.get('title', 'Disbursement Particulars')}\n")
+            r_t.font.name = 'Calibri'
+            r_t.font.size = Pt(9.5)
+            r_t.bold = True
+
+            r_c = p_cap.add_run(f"{rc.get('category', 'Disbursement')}")
+            r_c.font.name = 'Calibri'
+            r_c.font.size = Pt(8.5)
+            r_c.font.color.rgb = docx.shared.RGBColor(100, 100, 100)
 
 def enforce_calibri_11(doc):
     """Strictly enforce Calibri size 11 across all runs in all paragraphs and table cells."""
@@ -218,16 +365,16 @@ def populate_report(data, template_path=DEFAULT_TEMPLATE, output_path=DEFAULT_OU
     core.revision = 3
 
     # Section Margins & Page Size (Letter: 8.5 x 11 in)
-    # Calibrated Top Margin: 1.70" ensures body text clears the 0.98" header banner perfectly
+    # Calibrated Minimal Header Space & Top Margin to eliminate vertical misalignment
     for s in doc.sections:
         s.page_width = Inches(8.5)
         s.page_height = Inches(11.0)
-        s.header_distance = Inches(0.5)
-        s.top_margin = Inches(1.70)
+        s.header_distance = Inches(0.20)
+        s.top_margin = Inches(1.10)
         s.bottom_margin = Inches(0.75)
         s.left_margin = Inches(1.0)
         s.right_margin = Inches(1.0)
-        s.footer_distance = Inches(0.4)
+        s.footer_distance = Inches(0.35)
 
     # Dynamic Bottom-Right Footer Page Numbers
     page_number_style = data.get('page_number_style', 'page_x_of_y')
@@ -255,24 +402,47 @@ def populate_report(data, template_path=DEFAULT_TEMPLATE, output_path=DEFAULT_OU
     period_desc = get_val('period_desc', 'periodDesc', 'eventName', 'activityTitle', default='Financial Operations')
     final_as_of = get_val('final_as_of', 'finalAsOf', default=f"As of {transmittal_date}")
 
-    # Signatories
-    pres_name = get_val('president_name', default=sig.get('presidentName', sig.get('notedBy', 'EMANUEL MALBAROSA'))).upper()
+    # Signatories Extraction (AY 2026-2027 & AY 2025-2026 Compatible)
+    pres_name = get_val('president_name', default=sig.get('presidentName', sig.get('notedBy', 'GERONIMO, ANDREI JOHN P.'))).upper()
     pres_role = get_val('president_role', default=sig.get('presidentRole', sig.get('notedRole', 'LITE PRESIDENT'))).upper()
-    tres_name = get_val('treasurer_name', default=sig.get('treasurerName', sig.get('preparedBy', 'ANDREI JOHN P. GERONIMO'))).upper()
+    vp_name = get_val('vice_president_name', 'vp_name', default=sig.get('vicePresidentName', sig.get('vpName', 'BAJAMUNDE, JHELLIAM T.'))).upper()
+    vp_role = get_val('vice_president_role', 'vp_role', default=sig.get('vicePresidentRole', sig.get('vpRole', 'LITE VICE PRESIDENT'))).upper()
+    tres_name = get_val('treasurer_name', default=sig.get('treasurerName', sig.get('preparedBy', 'CABANAG, ROSE MARIELLE P.'))).upper()
     tres_role = get_val('treasurer_role', default=sig.get('treasurerRole', sig.get('preparedRole', 'LITE TREASURER'))).upper()
-    aud_name = get_val('auditor_name', default=sig.get('auditorName', sig.get('reviewedBy', 'CHRISTIAN REY C. KASILAG'))).upper()
+    aud_name = get_val('auditor_name', default=sig.get('auditorName', sig.get('reviewedBy', 'SARA, RISHAME P.'))).upper()
     aud_role = get_val('auditor_role', default=sig.get('auditorRole', sig.get('reviewedRole', 'LITE AUDITOR'))).upper()
-    adv_name = get_val('adviser_name', default=sig.get('adviserName', sig.get('adviser1', 'MS. KIMBERLY DAWN JATULAN'))).upper()
-    adv_role = get_val('adviser_role', default=sig.get('adviserRole', 'LITE CLUB ADVISER')).upper()
-    dir_name = get_val('director_name', default=sig.get('directorName', 'JOVYLYN ORTIZ-CESAR, MBA, MSIT')).upper()
+    
+    adv1_name = get_val('adviser1_name', 'adviser1', 'adviser_name', default=sig.get('adviser1Name', sig.get('adviser1', sig.get('adviserName', 'MS. KIMBERLY DAWN JATULAN')))).upper()
+    adv1_role = get_val('adviser1_role', default=sig.get('adviser1Role', sig.get('adviserRole', 'LITE CLUB ADVISER'))).upper()
+    adv2_name = get_val('adviser2_name', 'adviser2', default=sig.get('adviser2Name', sig.get('adviser2', 'MS. KRIZIA MAE GENOVIA'))).upper()
+    adv2_role = get_val('adviser2_role', default=sig.get('adviser2Role', 'LITE CLUB ADVISER')).upper()
+
+    dir_name = get_val('director_name', default=sig.get('directorName', '')).upper()
     dir_role = get_val('director_role', default=sig.get('directorRole', 'PROGRAM DIRECTOR, BSIT')).upper()
-    dean_name = get_val('dean_name', default=sig.get('deanName', 'DR. EMRAIDA MARIE M. MANUCOM')).upper()
+    dean_name = get_val('dean_name', default=sig.get('deanName', '')).upper()
     dean_role = get_val('dean_role', default=sig.get('deanRole', 'DEAN, COLLEGE OF COMPUTER STUDIES')).upper()
 
-    adv2 = sig.get('adviser2')
-    if adv2 and adv2.strip() and adv2.upper() not in adv_name:
-        adv_name = f"{adv_name} & {adv2.upper()}"
-        adv_role = "LITE CLUB ADVISERS"
+    # Clean redundant empty paragraphs at the top of the body before transmittal date
+    while len(doc.paragraphs) > 0 and not doc.paragraphs[0].text.strip():
+        p_elm = doc.paragraphs[0]._element
+        p_elm.getparent().remove(p_elm)
+
+    receipts_mode = data.get('receipts_mode') or data.get('receiptsMode') or 'NONE'
+    receipts = data.get('receipts') or []
+
+    if receipts_mode == 'STANDALONE':
+        for tbl in list(doc.tables):
+            t_elm = tbl._element
+            t_elm.getparent().remove(t_elm)
+        for p in list(doc.paragraphs):
+            p_elm = p._element
+            p_elm.getparent().remove(p_elm)
+
+        add_receipt_sheets_table(doc, receipts, academic_year, semester)
+        setup_footer(doc.sections[0], style=page_number_style)
+        doc.save(output_path)
+        print(f"Successfully generated standalone receipts report: {output_path}")
+        return output_path
 
     # Ledger Inflows & Outflows
     txs = data.get('transactions', []) or []
@@ -434,37 +604,60 @@ def populate_report(data, template_path=DEFAULT_TEMPLATE, output_path=DEFAULT_OU
     # -------------------------------------------------------------
     # 7. STRUCTURED SIGNATORIES (PAGE 1 & PAGE 4)
     # -------------------------------------------------------------
-    officers = [
-        {'name': pres_name, 'role': pres_role},
-        {'name': tres_name, 'role': tres_role},
-        {'name': aud_name, 'role': aud_role}
-    ]
-    advisers = [
-        {'name': adv_name, 'role': adv_role},
-        {'name': '', 'role': ''}
-    ]
-    admins = [
-        {'name': dir_name, 'role': dir_role},
-        {'name': dean_name, 'role': dean_role}
-    ]
+    inc = data.get('included_signatories') or data.get('includedSignatories') or {}
+    officers = []
+    if inc.get('treasurer', True) and tres_name:
+        officers.append({'heading': 'Prepared by:', 'name': tres_name, 'role': tres_role})
+    if inc.get('auditor', True) and aud_name:
+        officers.append({'heading': 'Audited by:', 'name': aud_name, 'role': aud_role})
+    if inc.get('vice_president', inc.get('vicePresident', bool(vp_name))) and vp_name:
+        officers.append({'heading': 'Noted by:', 'name': vp_name, 'role': vp_role})
+    if inc.get('president', True) and pres_name:
+        officers.append({'heading': 'Noted by:', 'name': pres_name, 'role': pres_role})
+
+    advisers = []
+    if inc.get('adviser1', inc.get('adviser', True)) and adv1_name:
+        advisers.append({'heading': 'Approved by:', 'name': adv1_name, 'role': adv1_role})
+    if inc.get('adviser2', True) and adv2_name and adv2_name != adv1_name:
+        advisers.append({'heading': 'Approved by:', 'name': adv2_name, 'role': adv2_role})
+
+    admins = []
+    if inc.get('director', True) and dir_name:
+        admins.append({'heading': 'Noted by:', 'name': dir_name, 'role': dir_role})
+    if inc.get('dean', True) and dean_name:
+        admins.append({'heading': 'Approved by:', 'name': dean_name, 'role': dean_role})
+
+    last_p1_note_tbl = None
 
     prep_nodes = [p for p in doc.paragraphs if p.text.strip() == 'Prepared by:']
-    for p in prep_nodes:
-        tbl = create_borderless_signatory_table(doc, officers, 3)
-        p._element.addnext(tbl)
+    for idx, p in enumerate(prep_nodes):
+        if len(officers) > 0:
+            tbl = create_borderless_signatory_table(doc, officers, min(max(len(officers), 3), 4))
+            if tbl is not None:
+                p._element.addnext(tbl)
+                if idx == 0 and last_p1_note_tbl is None:
+                    last_p1_note_tbl = tbl
+        p._element.getparent().remove(p._element)
 
     appr_nodes = [p for p in doc.paragraphs if p.text.strip() == 'Approved by:']
-    for p in appr_nodes:
-        tbl = create_borderless_signatory_table(doc, advisers, 2)
-        p._element.addnext(tbl)
+    for idx, p in enumerate(appr_nodes):
+        if len(advisers) > 0:
+            tbl = create_borderless_signatory_table(doc, advisers, 2)
+            if tbl is not None:
+                p._element.addnext(tbl)
+                if idx == 0 and last_p1_note_tbl is None:
+                    last_p1_note_tbl = tbl
+        p._element.getparent().remove(p._element)
 
     note_nodes = [p for p in doc.paragraphs if p.text.strip() == 'Noted by:']
-    last_p1_note_tbl = None
     for idx, p in enumerate(note_nodes):
-        tbl = create_borderless_signatory_table(doc, admins, 2)
-        p._element.addnext(tbl)
-        if idx == 0:
-            last_p1_note_tbl = tbl
+        if len(admins) > 0:
+            tbl = create_borderless_signatory_table(doc, admins, 2)
+            if tbl is not None:
+                p._element.addnext(tbl)
+                if idx == 0:
+                    last_p1_note_tbl = tbl
+        p._element.getparent().remove(p._element)
 
     # Remove old template placeholder paragraphs for signatories
     body = doc._element.body
@@ -524,6 +717,12 @@ def populate_report(data, template_path=DEFAULT_TEMPLATE, output_path=DEFAULT_OU
     # 10. STRICT CALIBRI 11PT ENFORCEMENT & BORDERLESS TABLE STYLING
     # -------------------------------------------------------------
     enforce_calibri_11(doc)
+
+    # -------------------------------------------------------------
+    # 11. ATTACHED RECEIPT SHEETS (PAGE 5+)
+    # -------------------------------------------------------------
+    if receipts_mode == 'APPEND' and receipts:
+        add_receipt_sheets_table(doc, receipts, academic_year, semester)
 
     doc.save(output_path)
     print(f"Successfully generated institutional financial report: {output_path}")

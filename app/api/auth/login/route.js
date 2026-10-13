@@ -57,6 +57,11 @@ export async function POST(req) {
     });
 
     if (error) {
+      if (error.message?.toLowerCase().includes('email not confirmed')) {
+        return NextResponse.json({
+          error: 'Email address not yet confirmed. Please verify your email or have the admin confirm your account in Supabase.',
+        }, { status: 403 });
+      }
       return NextResponse.json({ error: 'Incorrect username or password.' }, { status: 401 });
     }
 

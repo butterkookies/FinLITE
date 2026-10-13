@@ -1,7 +1,8 @@
 'use client';
 import { useState, useRef, useEffect } from 'react';
-import { Camera, Check, ChevronDown, Upload, X } from 'lucide-react';
+import { Camera, Check, ChevronDown, Crop, Upload, X } from 'lucide-react';
 import { compressReceiptImage } from '@/lib/utils/compression';
+import ReceiptCropModal from '@/components/common/ReceiptCropModal';
 import {
   sanitizeAmountInput,
   validateTransactionAmount,
@@ -37,6 +38,7 @@ export default function NewTransactionModal({
   const [receiptFiles, setReceiptFiles] = useState([]);
   const [previewUrls, setPreviewUrls] = useState([]);
   const [compressing, setCompressing] = useState(false);
+  const [croppingIndex, setCroppingIndex] = useState(null);
 
   // Amount validation: format/limit first, then per-channel overdraft check
   const amountError = validateTransactionAmount(amount);
@@ -82,6 +84,7 @@ export default function NewTransactionModal({
       setRecipient('');
       setReceiptFiles([]);
       setPreviewUrls([]);
+      setCroppingIndex(null);
     }
   }, [isOpen]);
 
@@ -135,6 +138,33 @@ export default function NewTransactionModal({
       try { URL.revokeObjectURL(prev[index]); } catch (_) {}
       return prev.filter((_, i) => i !== index);
     });
+  };
+
+  const handleConfirmCrop = async (croppedFile) => {
+    if (croppingIndex === null || croppingIndex >= receiptFiles.length) return;
+    setCompressing(true);
+    try {
+      const compressed = await compressReceiptImage(croppedFile);
+      const newUrl = URL.createObjectURL(compressed);
+
+      setReceiptFiles((prev) => {
+        const next = [...prev];
+        next[croppingIndex] = compressed;
+        return next;
+      });
+
+      setPreviewUrls((prev) => {
+        const next = [...prev];
+        try { URL.revokeObjectURL(next[croppingIndex]); } catch (_) {}
+        next[croppingIndex] = newUrl;
+        return next;
+      });
+    } catch (err) {
+      console.error('Error compressing cropped receipt:', err);
+    } finally {
+      setCompressing(false);
+      setCroppingIndex(null);
+    }
   };
 
   const handleSubmit = (e) => {
@@ -410,6 +440,14 @@ export default function NewTransactionModal({
                     <img src={url} alt={`Receipt ${idx + 1}`} className="w-full h-full object-cover" />
                     <button
                       type="button"
+                      onClick={() => setCroppingIndex(idx)}
+                      className="absolute top-1 left-1 w-5 h-5 rounded-full bg-black/70 hover:bg-emerald-600 text-white flex items-center justify-center transition-colors cursor-pointer"
+                      title="Rotate & Crop photo"
+                    >
+                      <Crop className="w-2.5 h-2.5" />
+                    </button>
+                    <button
+                      type="button"
                       onClick={() => handleRemoveReceipt(idx)}
                       className="absolute top-1 right-1 w-5 h-5 rounded-full bg-black/70 hover:bg-black text-white flex items-center justify-center transition-colors cursor-pointer"
                       title="Remove image"
@@ -467,6 +505,16 @@ export default function NewTransactionModal({
         </form>
 
       </div>
+
+      {/* Interactive Crop & Rotation Modal */}
+      {croppingIndex !== null && receiptFiles[croppingIndex] && (
+        <ReceiptCropModal
+          isOpen={croppingIndex !== null}
+          imageFile={receiptFiles[croppingIndex]}
+          onClose={() => setCroppingIndex(null)}
+          onConfirm={handleConfirmCrop}
+        />
+      )}
     </div>
   );
 }

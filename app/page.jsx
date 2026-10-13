@@ -20,6 +20,50 @@ const DEFAULT_SEMESTERS = [
   { id: 'sem-25-26-2', academicYear: '2025-2026', semester: '2nd Sem', label: 'AY 2025–2026 • 2nd Sem', isActive: false },
 ];
 
+const DEFAULT_LITE_SIGNATORIES_26_27 = {
+  presidentName: 'GERONIMO, ANDREI JOHN P.',
+  presidentRole: 'LITE President',
+  vicePresidentName: 'BAJAMUNDE, JHELLIAM T.',
+  vicePresidentRole: 'LITE Vice President',
+  treasurerName: 'CABANAG, ROSE MARIELLE P.',
+  treasurerRole: 'LITE Treasurer',
+  auditorName: 'SARA, RISHAME P.',
+  auditorRole: 'LITE Auditor',
+  preparedBy: 'CABANAG, ROSE MARIELLE P.',
+  preparedRole: 'LITE Treasurer',
+  reviewedBy: 'SARA, RISHAME P.',
+  reviewedRole: 'LITE Auditor',
+  notedBy: 'GERONIMO, ANDREI JOHN P.',
+  notedRole: 'LITE President',
+  adviser1: 'MS. KIMBERLY DAWN JATULAN',
+  adviser2: 'MS. KRIZIA MAE GENOVIA',
+  adviserName: 'MS. KIMBERLY DAWN JATULAN',
+  adviserRole: 'LITE Club Advisers',
+};
+
+const DEFAULT_LITE_SIGNATORIES_25_26 = {
+  presidentName: 'MALBAROSA, EMANUEL',
+  presidentRole: 'LITE President',
+  vicePresidentName: '',
+  vicePresidentRole: '',
+  treasurerName: 'GERONIMO, ANDREI JOHN P.',
+  treasurerRole: 'LITE Treasurer',
+  auditorName: 'CABANAG, ROSE MARIELLE P.',
+  auditorRole: 'LITE Auditor',
+  preparedBy: 'GERONIMO, ANDREI JOHN P.',
+  preparedRole: 'LITE Treasurer',
+  reviewedBy: 'CABANAG, ROSE MARIELLE P.',
+  reviewedRole: 'LITE Auditor',
+  notedBy: 'MALBAROSA, EMANUEL',
+  notedRole: 'LITE President',
+  adviser1: 'MS. KIMBERLY DAWN JATULAN',
+  adviser2: 'MR. FLORANTE PANGILINAN',
+  adviserName: 'MS. KIMBERLY DAWN JATULAN',
+  adviserRole: 'LITE Club Advisers',
+};
+
+const DEFAULT_LITE_SIGNATORIES = DEFAULT_LITE_SIGNATORIES_26_27;
+
 export default function Dashboard() {
   const [currentUser, setCurrentUser] = useState(null);
   const [userProfile, setUserProfile] = useState(null);
@@ -34,6 +78,7 @@ export default function Dashboard() {
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   const [previewData, setPreviewData] = useState(null);
   const [latestReconciliation, setLatestReconciliation] = useState(null);
+  const [semesterSignatories, setSemesterSignatories] = useState(DEFAULT_LITE_SIGNATORIES);
 
   // Multi-Semester State Management
   const [semesters, setSemesters] = useState(DEFAULT_SEMESTERS);
@@ -264,6 +309,74 @@ export default function Dashboard() {
 
     loadData();
   }, []);
+
+  // Load official semester signatories from Supabase whenever active semester changes
+  useEffect(() => {
+    async function loadSignatories() {
+      if (!supabase || !currentSemester?.academicYear || !currentSemester?.semester) return;
+      try {
+        const { data, error } = await supabase
+          .from('semester_signatories')
+          .select('*')
+          .eq('academic_year', currentSemester.academicYear)
+          .eq('semester', currentSemester.semester)
+          .eq('is_active', true)
+          .order('sort_order', { ascending: true });
+
+        const termDefault = currentSemester.academicYear === '2025-2026' 
+          ? DEFAULT_LITE_SIGNATORIES_25_26 
+          : DEFAULT_LITE_SIGNATORIES_26_27;
+
+        if (!error && data && data.length > 0) {
+          const sigMap = { ...termDefault };
+          data.forEach((row) => {
+            if (row.role_key === 'president') {
+              sigMap.notedBy = row.name;
+              sigMap.notedRole = row.position_title;
+              sigMap.presidentName = row.name;
+              sigMap.presidentRole = row.position_title;
+            } else if (row.role_key === 'vice_president' || row.role_key === 'vp') {
+              sigMap.vicePresidentName = row.name;
+              sigMap.vicePresidentRole = row.position_title;
+            } else if (row.role_key === 'treasurer') {
+              sigMap.preparedBy = row.name;
+              sigMap.preparedRole = row.position_title;
+              sigMap.treasurerName = row.name;
+              sigMap.treasurerRole = row.position_title;
+            } else if (row.role_key === 'auditor') {
+              sigMap.reviewedBy = row.name;
+              sigMap.reviewedRole = row.position_title;
+              sigMap.auditorName = row.name;
+              sigMap.auditorRole = row.position_title;
+            } else if (row.role_key === 'adviser1' || row.role_key === 'adviser') {
+              sigMap.adviser1 = row.name;
+              sigMap.adviserName = row.name;
+              sigMap.adviserRole = row.position_title;
+            } else if (row.role_key === 'adviser2') {
+              sigMap.adviser2 = row.name;
+            } else if (row.role_key === 'director') {
+              sigMap.directorName = row.name;
+              sigMap.directorRole = row.position_title;
+            } else if (row.role_key === 'dean') {
+              sigMap.deanName = row.name;
+              sigMap.deanRole = row.position_title;
+            }
+          });
+          setSemesterSignatories(sigMap);
+        } else {
+          setSemesterSignatories(termDefault);
+        }
+      } catch (err) {
+        console.warn('semester_signatories query notice:', err);
+        const termDefault = currentSemester?.academicYear === '2025-2026' 
+          ? DEFAULT_LITE_SIGNATORIES_25_26 
+          : DEFAULT_LITE_SIGNATORIES_26_27;
+        setSemesterSignatories(termDefault);
+      }
+    }
+
+    loadSignatories();
+  }, [currentSemester?.academicYear, currentSemester?.semester, supabase]);
 
   // Filter transactions strictly for the active semester
   const activeTransactions = transactions.filter((tx) => {
@@ -860,21 +973,7 @@ export default function Dashboard() {
       summary,
       transactions: activeTransactions,
       remarks: 'All transactions recorded conform with the 7-day receipt submission policy and dual club adviser audit verification.',
-      signatories: {
-        preparedBy: 'ANDREI JOHN P. GERONIMO',
-        preparedRole: 'LITE Treasurer',
-        reviewedBy: 'CHRISTIAN REY C. KASILAG',
-        reviewedRole: 'LITE Auditor',
-        notedBy: 'EMANUEL MALBAROSA',
-        notedRole: 'LITE President',
-        adviser1: 'MS. KIMBERLY DAWN JATULAN',
-        adviser2: 'MS. KRIZIA MAE GENOVIA',
-        adviserRole: 'LITE Club Advisers',
-        directorName: 'JOVYLYN ORTIZ-CESAR, MBA, MSIT',
-        directorRole: 'Program Director, BSIT',
-        deanName: 'DR. EMRAIDA MARIE M. MANUCOM',
-        deanRole: 'Dean, College of Computer Studies',
-      },
+      signatories: semesterSignatories,
     });
     setIsPreviewOpen(true);
   };

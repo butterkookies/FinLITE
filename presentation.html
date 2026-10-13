@@ -1,0 +1,868 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>FinLITE - System Progress Report</title>
+  <!-- Google Fonts: Inter & JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+
+  <style>
+    /* ==========================================================================
+       FINLITE MINIMAL PRESENTATION SYSTEM
+       100% Minimalist, Zero Fluff, High Contrast, Direct to the Point
+       ========================================================================== */
+    :root {
+      --bg: #0b0f19;
+      --card-bg: rgba(255, 255, 255, 0.03);
+      --card-border: rgba(255, 255, 255, 0.08);
+      --card-hover: rgba(255, 255, 255, 0.06);
+      
+      --accent: #10b981;
+      --accent-subtle: rgba(16, 185, 129, 0.12);
+      
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+      --text-dim: #64748b;
+      
+      --radius: 12px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      overflow: hidden;
+      width: 100vw;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    /* Top Progress Bar */
+    .progress-bar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      height: 3px;
+      width: 0%;
+      background: var(--accent);
+      transition: width 0.3s ease;
+      z-index: 100;
+    }
+
+    /* Minimal Header */
+    .top-nav {
+      height: 60px;
+      padding: 0 48px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--card-border);
+    }
+
+    .brand {
+      font-size: 15px;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .brand-dot {
+      width: 8px;
+      height: 8px;
+      background: var(--accent);
+      border-radius: 50%;
+    }
+
+    .target-tag {
+      font-size: 12px;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+
+    /* Slide Deck */
+    .deck-container {
+      position: relative;
+      flex: 1;
+      width: 100%;
+      max-width: 1100px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px 48px;
+    }
+
+    .slide {
+      position: absolute;
+      width: 100%;
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(10px);
+      transition: opacity 0.25s ease, transform 0.25s ease, visibility 0.25s;
+    }
+
+    .slide.active {
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(0);
+    }
+
+    /* Typography */
+    .slide-label {
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--accent);
+      margin-bottom: 8px;
+    }
+
+    .slide-title {
+      font-size: clamp(28px, 3.5vw, 44px);
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      color: #ffffff;
+      line-height: 1.15;
+      margin-bottom: 12px;
+    }
+
+    .slide-subtitle {
+      font-size: 16px;
+      color: var(--text-muted);
+      line-height: 1.5;
+      margin-bottom: 28px;
+      max-width: 800px;
+    }
+
+    /* Minimal Cards */
+    .grid-2 {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px;
+    }
+
+    .grid-3 {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+    }
+
+    .grid-4 {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 14px;
+    }
+
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: var(--radius);
+      padding: 20px 22px;
+      transition: border-color 0.2s, background 0.2s;
+    }
+
+    .card:hover {
+      background: var(--card-hover);
+      border-color: rgba(255, 255, 255, 0.16);
+    }
+
+    .card-title {
+      font-size: 16px;
+      font-weight: 700;
+      color: #ffffff;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .card-text {
+      font-size: 14px;
+      color: var(--text-muted);
+      line-height: 1.5;
+    }
+
+    .card-text strong {
+      color: #ffffff;
+    }
+
+    /* Step Flow */
+    .flow-step {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: var(--radius);
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .step-num {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--accent);
+      background: var(--accent-subtle);
+      padding: 2px 8px;
+      border-radius: 4px;
+      align-self: flex-start;
+    }
+
+    .step-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: #ffffff;
+    }
+
+    .step-desc {
+      font-size: 13px;
+      color: var(--text-muted);
+      line-height: 1.45;
+    }
+
+    /* Bottom Controls */
+    .bottom-nav {
+      height: 64px;
+      padding: 0 48px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-top: 1px solid var(--card-border);
+    }
+
+    .nav-btn-group {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .btn {
+      height: 36px;
+      padding: 0 16px;
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--card-border);
+      color: #ffffff;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: background 0.2s;
+    }
+
+    .btn:hover {
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    .btn-primary {
+      background: #059669;
+      border-color: var(--accent);
+    }
+
+    .btn-primary:hover {
+      background: #10b981;
+    }
+
+    .slide-counter {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13px;
+      color: var(--text-muted);
+      min-width: 60px;
+      text-align: center;
+    }
+
+    .shortcuts-hint {
+      font-size: 12px;
+      color: var(--text-dim);
+      display: flex;
+      gap: 12px;
+    }
+
+    /* Jump Modal */
+    .jump-modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(11, 15, 25, 0.95);
+      backdrop-filter: blur(12px);
+      z-index: 200;
+      display: none;
+      flex-direction: column;
+      padding: 48px;
+      overflow-y: auto;
+    }
+
+    .jump-modal.open {
+      display: flex;
+    }
+
+    .jump-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 14px;
+      margin-top: 24px;
+    }
+
+    .jump-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: var(--radius);
+      padding: 16px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .jump-card:hover {
+      border-color: var(--accent);
+      transform: translateY(-2px);
+    }
+
+    .jump-card.active {
+      border-color: var(--accent);
+      background: var(--accent-subtle);
+    }
+
+    @media (max-width: 768px) {
+      .top-nav, .bottom-nav { padding: 0 20px; }
+      .deck-container { padding: 20px; }
+      .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; }
+      .shortcuts-hint { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Progress Bar -->
+  <div class="progress-bar" id="progressBar"></div>
+
+  <!-- Header -->
+  <header class="top-nav">
+    <div class="brand">
+      <div class="brand-dot"></div>
+      <span>FinLITE</span>
+    </div>
+    <div class="target-tag">
+      Case Study for: <strong>League of Information Technology Enthusiasts (LITE) · PDM</strong>
+    </div>
+  </header>
+
+  <!-- Slide Deck -->
+  <main class="deck-container">
+
+    <!-- ====================================================================
+         SLIDE 1: TITLE & GROUP MEMBERS
+         ==================================================================== -->
+    <section class="slide active" data-index="1">
+      <div class="slide-label">SYSTEM ANALYSIS AND DEVELOPMENT (ITE-SAD) · BSIT-31A</div>
+      <h1 class="slide-title" style="font-size: clamp(32px, 4vw, 50px);">
+        FinLITE: A Web-Based Financial Tracker and Automatic Report Generation System with A.I. Chatbot
+      </h1>
+      <p class="slide-subtitle">
+        A Tailored Financial Co-Pilot for the <strong>League of Information Technology Enthusiasts (LITE)</strong> at <strong>Pambayang Dalubhasaan ng Marilao (PDM)</strong>.
+      </p>
+
+      <div class="card" style="margin-top: 8px;">
+        <div class="card-title" style="color: var(--accent); font-size: 14px; text-transform: uppercase; letter-spacing: 0.05em;">
+          PROJECT PROPONENTS (GROUP MEMBERS)
+        </div>
+        <div class="grid-4" style="margin-top: 14px;">
+          <div style="background: rgba(255,255,255,0.02); padding: 12px 14px; border-radius: 8px; border: 1px solid var(--card-border);">
+            <div style="font-size: 14px; font-weight: 700; color: #fff;">Andrei John P. Geronimo</div>
+            <div style="font-size: 12px; color: var(--text-dim); margin-top: 2px;">BSIT-31A</div>
+          </div>
+          <div style="background: rgba(255,255,255,0.02); padding: 12px 14px; border-radius: 8px; border: 1px solid var(--card-border);">
+            <div style="font-size: 14px; font-weight: 700; color: #fff;">Christian Rey C. Kasilag</div>
+            <div style="font-size: 12px; color: var(--text-dim); margin-top: 2px;">BSIT-31A</div>
+          </div>
+          <div style="background: rgba(255,255,255,0.02); padding: 12px 14px; border-radius: 8px; border: 1px solid var(--card-border);">
+            <div style="font-size: 14px; font-weight: 700; color: #fff;">Emanuel P. Malbarosa</div>
+            <div style="font-size: 12px; color: var(--text-dim); margin-top: 2px;">BSIT-31A</div>
+          </div>
+          <div style="background: rgba(255,255,255,0.02); padding: 12px 14px; border-radius: 8px; border: 1px solid var(--card-border);">
+            <div style="font-size: 14px; font-weight: 700; color: #fff;">Ervin James C. Ramos</div>
+            <div style="font-size: 12px; color: var(--text-dim); margin-top: 2px;">BSIT-31A</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ====================================================================
+         SLIDE 2: PURPOSE OF THE SYSTEM
+         ==================================================================== -->
+    <section class="slide" data-index="2">
+      <div class="slide-label">SYSTEM PURPOSE</div>
+      <h2 class="slide-title">What is FinLITE Built For?</h2>
+      <p class="slide-subtitle">
+        FinLITE bridges the gap between high-friction corporate accounting software and unstructured manual record-keeping for LITE.
+      </p>
+
+      <div class="grid-3">
+        <div class="card">
+          <div class="card-title">1. Digitize Transactions</div>
+          <div class="card-text">
+            Replaces loose paper receipts and chat messages with a <strong>centralized, secure digital ledger</strong> that tracks cash collections, GCash payments, and personal advances.
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">2. Automate Liquidation</div>
+          <div class="card-text">
+            Compiles verified ledger records into <strong>audit-ready Word (.docx) reports</strong> matching institutional college standards in 1 click, eliminating arithmetic and formatting errors.
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">3. Intelligent Co-Pilot</div>
+          <div class="card-text">
+            Provides an embedded <strong>zero-hallucination AI Chatbot</strong> that instantly answers budget, expense, and reimbursement questions directly from live ledger records.
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ====================================================================
+         SLIDE 3: MAIN PROBLEMS OF LITE
+         ==================================================================== -->
+    <section class="slide" data-index="3">
+      <div class="slide-label">PROBLEM STATEMENT</div>
+      <h2 class="slide-title">Main Financial Problems of LITE</h2>
+      <p class="slide-subtitle">
+        Field interviews across successive administrations revealed four critical bottlenecks in current manual workflows:
+      </p>
+
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-title" style="color: #f87171;">1. Personal Advance Vulnerability (Abono)</div>
+          <div class="card-text">
+            Officers front personal money for event materials. Thermal paper receipts fade, crumple, or get lost, causing <strong>unliquidated personal losses</strong>.
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title" style="color: #f87171;">2. GCash Commingling & Unlogged Fees</div>
+          <div class="card-text">
+            Digital tournament payments mix with officers' personal mobile wallets. Unrecorded <strong>₱15–₱20 withdrawal fees</strong> create persistent cash shortages.
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title" style="color: #f87171;">3. Cash Count Discrepancies & Freezes</div>
+          <div class="card-text">
+            Physical banknote and coin counts are performed months late. When math discrepancies occur, <strong>all club spending and activities immediately freeze</strong>.
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title" style="color: #f87171;">4. 6-Stage Signatory Paper Gridlock</div>
+          <div class="card-text">
+            Manual Word reports rejected at later stages (Director/Dean) require <strong>re-editing, re-printing, and restarting</strong> the entire physical wet-ink signature chain from scratch.
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ====================================================================
+         SLIDE 4: SYSTEM FEATURES - FUND TRACKING & DUAL VAULTS
+         ==================================================================== -->
+    <section class="slide" data-index="4">
+      <div class="slide-label">SYSTEM FEATURES · PART 1</div>
+      <h2 class="slide-title">Dual-Vault Tracker & Advance Management</h2>
+      <p class="slide-subtitle">
+        Eliminates commingled personal funds and protects officers who front personal capital.
+      </p>
+
+      <div class="grid-3">
+        <div class="card">
+          <div class="card-title" style="color: var(--accent);">Dual-Vault Separation</div>
+          <div class="card-text">
+            Strictly separates liquid assets into a <strong>Physical Cashbox Vault</strong> (Program Director's room) and a <strong>Digital GCash In-Transit Vault</strong>.
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title" style="color: var(--accent);">Cash-Out Fee Logger</div>
+          <div class="card-text">
+            Automatically logs <strong>₱15–₱20 third-party withdrawal fees</strong> as legitimate operational expenses so officers never pay out-of-pocket.
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title" style="color: var(--accent);">Abono Dual Tracking</div>
+          <div class="card-text">
+            Tracks both the <strong>original payer</strong> and the <strong>claimant</strong>, paired with photo receipt staging and a 7-day countdown badge.
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ====================================================================
+         SLIDE 5: SYSTEM FEATURES - DENOMINATION COUNTER
+         ==================================================================== -->
+    <section class="slide" data-index="5">
+      <div class="slide-label">SYSTEM FEATURES · PART 2</div>
+      <h2 class="slide-title">Interactive Cash Denomination Counter</h2>
+      <p class="slide-subtitle">
+        Solves math errors by auditing physical bills and coins against the theoretical ledger in real-time.
+      </p>
+
+      <div class="grid-3">
+        <div class="card">
+          <div class="card-title">Digital Keypad</div>
+          <div class="card-text">
+            Dedicated inputs for all Philippine banknotes (<strong>₱1,000 to ₱20</strong>) and coins (<strong>₱20 to ₱1</strong> plus centavos).
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">Real-Time Variance Engine</div>
+          <div class="card-text">
+            Automatically calculates: <em>Counted Cash - Theoretical Ledger Balance</em>. Instantly flags <strong>Balanced</strong>, <strong>Overage</strong>, or <strong>Shortage</strong>.
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">Shortage Justification</div>
+          <div class="card-text">
+            Generates a formal <strong>Cash Shortage Justification Report</strong> for dual-adviser sign-off (modeled after the ₱161 precedent) to prevent spending freezes.
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ====================================================================
+         SLIDE 6: SYSTEM FEATURES - 1-CLICK REPORTS & AI CHATBOT
+         ==================================================================== -->
+    <section class="slide" data-index="6">
+      <div class="slide-label">SYSTEM FEATURES · PART 3</div>
+      <h2 class="slide-title">1-Click Institutional DOCX & AI Co-Pilot</h2>
+      <p class="slide-subtitle">
+        Automates formal college report compliance and provides natural-language budget intelligence.
+      </p>
+
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">1-Click Institutional DOCX Export</div>
+          </div>
+          <div class="card-text">
+            <ul style="list-style: none; display: flex; flex-direction: column; gap: 8px;">
+              <li>• <strong>Format Compliance:</strong> Calibri 11pt, 1.0-inch margins, and borderless financial tables.</li>
+              <li>• <strong>6-Stage Signatory Chain:</strong> Programmatically formats signature blocks for Treasurer, Auditor, President, Dual Advisers, Director, and Dean.</li>
+              <li>• <strong>In-App Preview:</strong> Live interactive preview with dynamic Carbon Copy (CC) toggle before downloading.</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">Zero-Hallucination AI Chatbot</div>
+          </div>
+          <div class="card-text">
+            <ul style="list-style: none; display: flex; flex-direction: column; gap: 8px;">
+              <li>• <strong>Grounded in Live Data:</strong> Answers questions strictly using current Supabase transaction records.</li>
+              <li>• <strong>Instant Answers:</strong> Officers and advisers query remaining budgets, pending abono, and category totals in plain language.</li>
+              <li>• <strong>Streaming Responses:</strong> Fast, conversational interface integrated into the side drawer.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ====================================================================
+         SLIDE 7: TECH STACK - FRONTEND & DATABASE
+         ==================================================================== -->
+    <section class="slide" data-index="7">
+      <div class="slide-label">TECH STACK & SELECTION RATIONALE · PART 1</div>
+      <h2 class="slide-title">Frontend & Database Architecture</h2>
+      <p class="slide-subtitle">
+        Selected for performance, modern development velocity, and strict data security.
+      </p>
+
+      <div class="grid-3">
+        <div class="card">
+          <div class="card-title">Next.js 15 & React 19</div>
+          <div class="card-text">
+            <strong>Why selected:</strong> Provides high-speed server rendering, robust route handlers, and modern component architecture for a responsive single-page experience.
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">Tailwind CSS v4</div>
+          <div class="card-text">
+            <strong>Why selected:</strong> Enables strict design tokens, clean hairline borders, and rapid UI styling without bloated CSS stylesheets.
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">Supabase (PostgreSQL)</div>
+          <div class="card-text">
+            <strong>Why selected:</strong> Delivers enterprise-grade relational integrity, cloud photo storage for receipts, and verified <strong>Row-Level Security (RLS)</strong> to block unauthorized access.
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ====================================================================
+         SLIDE 8: TECH STACK - MATH, DOCS & AI
+         ==================================================================== -->
+    <section class="slide" data-index="8">
+      <div class="slide-label">TECH STACK & SELECTION RATIONALE · PART 2</div>
+      <h2 class="slide-title">Math Engine, Document Generation & AI</h2>
+      <p class="slide-subtitle">
+        Selected to eliminate math drift, guarantee institutional formatting, and deliver intelligent assistance.
+      </p>
+
+      <div class="grid-3">
+        <div class="card">
+          <div class="card-title">Centavo Integer Math</div>
+          <div class="card-text">
+            <strong>Why selected:</strong> Completely eliminates JavaScript IEEE-754 floating-point rounding errors by calculating all balances in whole integer centavos.
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">Python DOCX Engine</div>
+          <div class="card-text">
+            <strong>Why selected:</strong> Allows programmatic manipulation of Word XML to guarantee exact 1-inch margins, borderless tables, and signatory blocks required by the college.
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">Google Gemini API</div>
+          <div class="card-text">
+            <strong>Why selected:</strong> Provides fast, reliable natural language understanding with zero hallucination by injecting live ledger summaries into the system prompt.
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ====================================================================
+         SLIDE 9: BASIC FLOW OF THE SYSTEM
+         ==================================================================== -->
+    <section class="slide" data-index="9">
+      <div class="slide-label">SYSTEM WORKFLOW</div>
+      <h2 class="slide-title">Basic Flow of the FinLITE System</h2>
+      <p class="slide-subtitle">
+        A streamlined 4-step pipeline from transaction entry to final wet-ink sign-off:
+      </p>
+
+      <div class="grid-4">
+        <div class="flow-step">
+          <span class="step-num">STEP 1</span>
+          <div class="step-title">Entry & Receipts</div>
+          <div class="step-desc">
+            Officer logs cash/GCash collection or records an abono advance with uploaded receipt photos.
+          </div>
+        </div>
+
+        <div class="flow-step">
+          <span class="step-num">STEP 2</span>
+          <div class="step-title">Ledger & Vaults</div>
+          <div class="step-desc">
+            System automatically routes funds into Cashbox or GCash In-Transit vaults with centavo precision.
+          </div>
+        </div>
+
+        <div class="flow-step">
+          <span class="step-num">STEP 3</span>
+          <div class="step-title">Physical Audit</div>
+          <div class="step-desc">
+            Officers input banknote and coin counts into the digital counter to verify zero discrepancy.
+          </div>
+        </div>
+
+        <div class="flow-step">
+          <span class="step-num">STEP 4</span>
+          <div class="step-title">1-Click Sign-Off</div>
+          <div class="step-desc">
+            System compiles the audit-ready Word liquidation report ready for the 6-stage wet-ink signature chain.
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ====================================================================
+         SLIDE 10: CURRENT SYSTEM STATUS
+         ==================================================================== -->
+    <section class="slide" data-index="10">
+      <div class="slide-label">PROJECT READINESS</div>
+      <h2 class="slide-title">Current State of FinLITE</h2>
+      <p class="slide-subtitle">
+        All core architectural modules are developed, verified, and operational.
+      </p>
+
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-title" style="color: var(--accent);">Operational Modules</div>
+          <div class="card-text">
+            <ul style="list-style: none; display: flex; flex-direction: column; gap: 8px;">
+              <li>✓ <strong>Dual-Vault Financial Ledger:</strong> Active with centavo math.</li>
+              <li>✓ <strong>Multi-Receipt Storage & Abono:</strong> Functional with Supabase buckets.</li>
+              <li>✓ <strong>Interactive Cash Denomination Counter:</strong> Auditing down to ₱1.00.</li>
+              <li>✓ <strong>1-Click Institutional DOCX Engine:</strong> Fully calibrated to CCS standards.</li>
+              <li>✓ <strong>Google Gemini AI Co-Pilot:</strong> Streaming live financial queries.</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title" style="color: #60a5fa;">Next Project Steps</div>
+          <div class="card-text">
+            <ul style="list-style: none; display: flex; flex-direction: column; gap: 8px;">
+              <li>1. <strong>User Acceptance Testing (UAT):</strong> Formal evaluation with LITE Executive Board.</li>
+              <li>2. <strong>Institutional Club Week Pilot:</strong> Live field trial capturing event booth transactions.</li>
+              <li>3. <strong>Academic Defense:</strong> Final manuscript submission and panel presentation.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Bottom Navigation -->
+  <footer class="bottom-nav">
+    <div class="nav-btn-group">
+      <button class="btn" id="btnPrev" onclick="prevSlide()">← Prev</button>
+      <span class="slide-counter"><span id="currSlide">1</span> / <span id="totalSlides">10</span></span>
+      <button class="btn btn-primary" id="btnNext" onclick="nextSlide()">Next →</button>
+    </div>
+
+    <div class="shortcuts-hint">
+      <span>[← / →] Navigate</span>
+      <span>[Space] Next</span>
+      <span>[G] Jump</span>
+      <span>[F] Fullscreen</span>
+    </div>
+
+    <div class="nav-btn-group">
+      <button class="btn" onclick="toggleJumpModal()">Jump to Slide</button>
+      <button class="btn" onclick="toggleFullscreen()">Fullscreen</button>
+    </div>
+  </footer>
+
+  <!-- Slide Jump Modal -->
+  <div class="jump-modal" id="jumpModal">
+    <div style="display: flex; justify-content: space-between; align-items: center;">
+      <div>
+        <h3 style="font-size: 20px; font-weight: 700; color: #fff;">Slide Index</h3>
+        <p style="font-size: 13px; color: var(--text-muted);">Select a slide to jump directly</p>
+      </div>
+      <button class="btn" onclick="toggleJumpModal()">Close</button>
+    </div>
+
+    <div class="jump-grid" id="jumpGrid"></div>
+  </div>
+
+  <script>
+    let current = 1;
+    const slides = Array.from(document.querySelectorAll('.slide'));
+    const total = slides.length;
+    document.getElementById('totalSlides').textContent = total;
+
+    const titles = [
+      "1. Title & Group Members",
+      "2. Purpose of FinLITE",
+      "3. Main Problems of LITE",
+      "4. Dual Vaults & Abono Tracking",
+      "5. Cash Denomination Counter",
+      "6. 1-Click DOCX & AI Chatbot",
+      "7. Tech Stack: Frontend & Database",
+      "8. Tech Stack: Math, DOCX & AI",
+      "9. Basic System Flow",
+      "10. Current System State"
+    ];
+
+    function showSlide(n) {
+      if (n < 1) n = 1;
+      if (n > total) n = total;
+      current = n;
+
+      slides.forEach((s, idx) => {
+        s.classList.toggle('active', idx === n - 1);
+      });
+
+      document.getElementById('currSlide').textContent = current;
+      document.getElementById('progressBar').style.width = (current / total * 100) + '%';
+
+      document.getElementById('btnPrev').disabled = (current === 1);
+      document.getElementById('btnNext').disabled = (current === total);
+      document.getElementById('btnPrev').style.opacity = (current === 1) ? '0.4' : '1';
+      document.getElementById('btnNext').style.opacity = (current === total) ? '0.4' : '1';
+
+      updateJumpHighlights();
+    }
+
+    function nextSlide() { if (current < total) showSlide(current + 1); }
+    function prevSlide() { if (current > 1) showSlide(current - 1); }
+
+    document.addEventListener('keydown', (e) => {
+      if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+      if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); nextSlide(); }
+      if (e.key === 'ArrowLeft') { e.preventDefault(); prevSlide(); }
+      if (e.key === 'Home') { e.preventDefault(); showSlide(1); }
+      if (e.key === 'End') { e.preventDefault(); showSlide(total); }
+      if (e.key.toLowerCase() === 'f') { e.preventDefault(); toggleFullscreen(); }
+      if (e.key.toLowerCase() === 'g') { e.preventDefault(); toggleJumpModal(); }
+      if (e.key === 'Escape') {
+        const m = document.getElementById('jumpModal');
+        if (m.classList.contains('open')) toggleJumpModal();
+      }
+    });
+
+    function toggleFullscreen() {
+      if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen().catch(() => {});
+      } else {
+        if (document.exitFullscreen) document.exitFullscreen().catch(() => {});
+      }
+    }
+
+    function toggleJumpModal() {
+      const m = document.getElementById('jumpModal');
+      const open = m.classList.toggle('open');
+      if (open) buildJumpGrid();
+    }
+
+    function buildJumpGrid() {
+      const g = document.getElementById('jumpGrid');
+      g.innerHTML = '';
+      titles.forEach((t, i) => {
+        const num = i + 1;
+        const card = document.createElement('div');
+        card.className = `jump-card ${num === current ? 'active' : ''}`;
+        card.onclick = () => { showSlide(num); toggleJumpModal(); };
+        card.innerHTML = `
+          <div style="font-size: 11px; font-weight: 700; color: var(--accent); margin-bottom: 4px;">SLIDE ${num}</div>
+          <div style="font-size: 14px; font-weight: 600; color: #fff;">${t}</div>
+        `;
+        g.appendChild(card);
+      });
+    }
+
+    function updateJumpHighlights() {
+      const cards = document.querySelectorAll('.jump-card');
+      cards.forEach((c, i) => c.classList.toggle('active', i + 1 === current));
+    }
+
+    showSlide(1);
+  </script>
+</body>
+</html>

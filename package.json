@@ -7,7 +7,9 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "test": "node scripts/run_all_tests.mjs"
+    "test": "node scripts/run_all_tests.mjs",
+    "video": "remotion preview src/motion/Root.tsx",
+    "video:render": "remotion render src/motion/Root.tsx FinLiteReveal out/finlite-reveal.mp4"
   },
   "dependencies": {
     "@google/generative-ai": "^0.24.1",
@@ -17,16 +19,19 @@
     "clsx": "^2.1.1",
     "date-fns": "^4.1.0",
     "docx": "^9.2.0",
-    "lucide-react": "^0.475.0",
     "next": "^15.2.0",
-    "nodemailer": "^10.0.13",
-    "react": "^19.0.0",
-    "react-dom": "^19.0.0",
+    "nodemailer": "^10.1.0",
     "tailwind-merge": "^3.0.2"
   },
   "devDependencies": {
+    "@remotion/cli": "^4.0.535",
+    "@remotion/player": "^4.0.535",
     "@tailwindcss/postcss": "^4.0.9",
+    "lucide-react": "^1.55.0",
     "postcss": "^8.5.3",
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0",
+    "remotion": "^4.0.535",
     "tailwindcss": "^4.0.9"
   }
 }

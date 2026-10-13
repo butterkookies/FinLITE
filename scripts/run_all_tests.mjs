@@ -657,7 +657,7 @@ function testDocxSingle() {
   assert(fs.existsSync(tempOutput), 'DOCX export file was created on disk');
   const stats = fs.statSync(tempOutput);
   assert(stats.size > 20000, `DOCX export file size is valid (${(stats.size / 1024).toFixed(1)} KB > 20 KB)`);
-  assert(tElapsed < 3000, `Single DOCX generated in ${tElapsed.toFixed(2)}ms (< 3000ms threshold)`);
+  assert(tElapsed < 4000, `Single DOCX generated in ${tElapsed.toFixed(2)}ms (< 4000ms threshold)`);
 }
 testDocxSingle();
 

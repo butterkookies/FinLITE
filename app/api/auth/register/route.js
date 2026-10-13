@@ -114,6 +114,22 @@ export async function POST(req) {
       if (signUpData?.user) {
         authUserId = signUpData.user.id;
       }
+
+      // Guarantee email confirmation, password hash sync, and real auth.users UUID via SECURITY DEFINER RPC
+      try {
+        const { data: realAuthUid, error: rpcErr } = await supabase.rpc('sync_auth_user_credentials', {
+          p_email: cleanEmail,
+          p_password: password,
+          p_first_name: firstName.trim(),
+          p_last_name: lastName.trim(),
+          p_username: finalUsername,
+        });
+        if (!rpcErr && realAuthUid) {
+          authUserId = realAuthUid;
+        }
+      } catch (rpcEx) {
+        console.warn('sync_auth_user_credentials RPC notice:', rpcEx?.message);
+      }
     }
 
     // --- Insert into registration_requests ---

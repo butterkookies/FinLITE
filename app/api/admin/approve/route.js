@@ -112,11 +112,12 @@ export async function POST(req) {
       }
     }
 
-    // 4. Update Supabase Auth app_metadata if admin client available
+    // 4. Update Supabase Auth app_metadata & confirm email
     const adminClient = createAdminClient();
     if (adminClient && request.google_id) {
       try {
         await adminClient.auth.admin.updateUserById(request.google_id, {
+          email_confirm: true,
           app_metadata: {
             role: normalizedRole,
             status: 'approved',
@@ -124,6 +125,12 @@ export async function POST(req) {
         });
       } catch (metaErr) {
         console.warn('Could not update user app_metadata in auth:', metaErr?.message);
+      }
+    } else if (request.email) {
+      try {
+        await supabase.rpc('confirm_user_on_approval', { p_email: request.email });
+      } catch (rpcErr) {
+        console.warn('confirm_user_on_approval RPC note:', rpcErr?.message);
       }
     }
 

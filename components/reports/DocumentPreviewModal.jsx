@@ -50,19 +50,45 @@ export default function DocumentPreviewModal({ isOpen, onClose, documentData }) 
 
   // Active Signatories
   const [signatories, setSignatories] = useState({
-    presidentName: 'EMANUEL MALBAROSA',
+    presidentName: 'GERONIMO, ANDREI JOHN P.',
     presidentRole: 'LITE PRESIDENT',
-    treasurerName: 'ANDREI JOHN P. GERONIMO',
+    vicePresidentName: 'BAJAMUNDE, JHELLIAM T.',
+    vicePresidentRole: 'LITE VICE PRESIDENT',
+    treasurerName: 'CABANAG, ROSE MARIELLE P.',
     treasurerRole: 'LITE TREASURER',
-    auditorName: 'CHRISTIAN REY C. KASILAG',
+    auditorName: 'SARA, RISHAME P.',
     auditorRole: 'LITE AUDITOR',
-    adviserName: 'MS. KIMBERLY DAWN JATULAN',
-    adviserRole: 'LITE CLUB ADVISER',
+    adviser1Name: 'MS. KIMBERLY DAWN JATULAN',
+    adviser1Role: 'LITE CLUB ADVISER',
+    adviser2Name: 'MS. KRIZIA MAE GENOVIA',
+    adviser2Role: 'LITE CLUB ADVISER',
     directorName: 'JOVYLYN ORTIZ-CESAR, MBA, MSIT',
     directorRole: 'PROGRAM DIRECTOR, BSIT',
     deanName: 'DR. EMRAIDA MARIE M. MANUCOM',
     deanRole: 'DEAN, COLLEGE OF COMPUTER STUDIES',
   });
+
+  // Signatory Inclusion / Exclusion state (true = included in signature block)
+  const [includedSignatories, setIncludedSignatories] = useState({
+    treasurer: true,
+    auditor: true,
+    vicePresident: true,
+    president: true,
+    adviser1: true,
+    adviser2: true,
+    director: false,
+    dean: false,
+  });
+
+  const toggleSignatory = (key) => {
+    setIncludedSignatories((prev) => ({
+      ...prev,
+      [key]: !prev[key],
+    }));
+  };
+
+  // Export & Attachment Scope: 'APPEND' (Report + Receipts), 'NONE' (Report Only), 'STANDALONE' (Receipts Only)
+  const [receiptsMode, setReceiptsMode] = useState('APPEND');
 
   const [isExporting, setIsExporting] = useState(false);
 
@@ -86,20 +112,53 @@ export default function DocumentPreviewModal({ isOpen, onClose, documentData }) 
       
       // Sync real signatories if provided
       if (documentData.signatories) {
+        const sigs = documentData.signatories;
+        const pName = (sigs.notedBy || sigs.presidentName || '').toUpperCase();
+        const pRole = (sigs.notedRole || sigs.presidentRole || 'LITE PRESIDENT').toUpperCase();
+        const vpName = (sigs.vicePresidentName || sigs.vice_president || '').toUpperCase();
+        const vpRole = (sigs.vicePresidentRole || 'LITE VICE PRESIDENT').toUpperCase();
+        const tName = (sigs.preparedBy || sigs.treasurerName || '').toUpperCase();
+        const tRole = (sigs.preparedRole || sigs.treasurerRole || 'LITE TREASURER').toUpperCase();
+        const aName = (sigs.reviewedBy || sigs.auditorName || '').toUpperCase();
+        const aRole = (sigs.reviewedRole || sigs.auditorRole || 'LITE AUDITOR').toUpperCase();
+        const adv1 = (sigs.adviser1 || sigs.adviser1Name || sigs.adviserName || '').toUpperCase();
+        const adv1R = (sigs.adviser1Role || sigs.adviserRole || 'LITE CLUB ADVISER').toUpperCase();
+        const adv2 = (sigs.adviser2 || sigs.adviser2Name || '').toUpperCase();
+        const adv2R = (sigs.adviser2Role || sigs.adviserRole || 'LITE CLUB ADVISER').toUpperCase();
+        const dir = (sigs.directorName || '').toUpperCase();
+        const dirR = (sigs.directorRole || 'PROGRAM DIRECTOR, BSIT').toUpperCase();
+        const dean = (sigs.deanName || '').toUpperCase();
+        const deanR = (sigs.deanRole || 'DEAN, COLLEGE OF COMPUTER STUDIES').toUpperCase();
+
         setSignatories(prev => ({
+          presidentName: pName || prev.presidentName,
+          presidentRole: pRole || prev.presidentRole,
+          vicePresidentName: vpName !== undefined ? vpName : prev.vicePresidentName,
+          vicePresidentRole: vpRole || prev.vicePresidentRole,
+          treasurerName: tName || prev.treasurerName,
+          treasurerRole: tRole || prev.treasurerRole,
+          auditorName: aName || prev.auditorName,
+          auditorRole: aRole || prev.auditorRole,
+          adviser1Name: adv1 || prev.adviser1Name,
+          adviser1Role: adv1R || prev.adviser1Role,
+          adviser2Name: adv2 !== undefined ? adv2 : prev.adviser2Name,
+          adviser2Role: adv2R || prev.adviser2Role,
+          directorName: dir || prev.directorName,
+          directorRole: dirR || prev.directorRole,
+          deanName: dean || prev.deanName,
+          deanRole: deanR || prev.deanRole,
+        }));
+
+        setIncludedSignatories(prev => ({
           ...prev,
-          presidentName: (documentData.signatories.notedBy || documentData.signatories.presidentName || prev.presidentName).toUpperCase(),
-          presidentRole: (documentData.signatories.notedRole || documentData.signatories.presidentRole || prev.presidentRole).toUpperCase(),
-          treasurerName: (documentData.signatories.preparedBy || documentData.signatories.treasurerName || prev.treasurerName).toUpperCase(),
-          treasurerRole: (documentData.signatories.preparedRole || documentData.signatories.treasurerRole || prev.treasurerRole).toUpperCase(),
-          auditorName: (documentData.signatories.reviewedBy || documentData.signatories.auditorName || prev.auditorName).toUpperCase(),
-          auditorRole: (documentData.signatories.reviewedRole || documentData.signatories.auditorRole || prev.auditorRole).toUpperCase(),
-          adviserName: (documentData.signatories.adviser1 || documentData.signatories.adviserName || prev.adviserName).toUpperCase(),
-          adviserRole: (documentData.signatories.adviserRole || prev.adviserRole).toUpperCase(),
-          directorName: (documentData.signatories.directorName || prev.directorName).toUpperCase(),
-          directorRole: (documentData.signatories.directorRole || prev.directorRole).toUpperCase(),
-          deanName: (documentData.signatories.deanName || prev.deanName).toUpperCase(),
-          deanRole: (documentData.signatories.deanRole || prev.deanRole).toUpperCase(),
+          treasurer: Boolean(tName || prev.treasurerName),
+          auditor: Boolean(aName || prev.auditorName),
+          vicePresident: Boolean(vpName),
+          president: Boolean(pName || prev.presidentName),
+          adviser1: Boolean(adv1 || prev.adviser1Name),
+          adviser2: Boolean(adv2),
+          director: Boolean(dir),
+          dean: Boolean(dean),
         }));
       }
 
@@ -190,15 +249,70 @@ export default function DocumentPreviewModal({ isOpen, onClose, documentData }) 
     setCcRecipients(prev => prev.filter((_, i) => i !== idx));
   };
 
-  const getPageFooterText = (pageNum, totalPages = 4) => {
+  // Flatten receipt vouchers from active transactions
+  const receiptItems = [];
+  (documentData?.transactions || []).forEach((tx) => {
+    const urls = Array.isArray(tx.receipt_urls) && tx.receipt_urls.length > 0
+      ? tx.receipt_urls
+      : (tx.receipt_url ? [tx.receipt_url] : []);
+    urls.forEach((url, uIdx) => {
+      receiptItems.push({
+        id: `${tx.id}-${uIdx}`,
+        transactionId: tx.id,
+        url,
+        title: tx.title || 'Disbursement Particulars',
+        amount: Number(tx.amount) || 0,
+        category: tx.category_name || tx.category || 'Operating Expense',
+        date: tx.transaction_date || transmittalDate,
+        voucherIndex: uIdx + 1,
+        totalVouchers: urls.length,
+      });
+    });
+  });
+
+  // Group receipts into 4-up pages (2 columns x 2 rows)
+  const receiptPages = [];
+  for (let i = 0; i < receiptItems.length; i += 4) {
+    receiptPages.push(receiptItems.slice(i, i + 4));
+  }
+
+  const totalReportPages = receiptsMode === 'STANDALONE'
+    ? Math.max(1, receiptPages.length)
+    : receiptsMode === 'APPEND'
+      ? 4 + receiptPages.length
+      : 4;
+
+  const getPageFooterText = (pageNum, customTotal = null) => {
+    const total = customTotal ?? totalReportPages;
     if (pageNumberStyle === 'none') return null;
     if (pageNumberStyle === 'simple') return String(pageNum);
     if (pageNumberStyle === 'page_x_of_y_no_cover') {
       if (pageNum === 1) return null;
-      return `Page ${pageNum} of ${totalPages}`;
+      return `Page ${pageNum} of ${total}`;
     }
-    return `Page ${pageNum} of ${totalPages}`;
+    return `Page ${pageNum} of ${total}`;
   };
+
+  // Signatory matrix metadata
+  const studentOfficers = [
+    { key: 'treasurer', label: 'Treasurer', nameKey: 'treasurerName', roleKey: 'treasurerRole', heading: 'Prepared by:' },
+    { key: 'auditor', label: 'Auditor', nameKey: 'auditorName', roleKey: 'auditorRole', heading: 'Audited by:' },
+    { key: 'vicePresident', label: 'Vice President', nameKey: 'vicePresidentName', roleKey: 'vicePresidentRole', heading: 'Noted by:' },
+    { key: 'president', label: 'President', nameKey: 'presidentName', roleKey: 'presidentRole', heading: 'Noted by:' },
+  ];
+  const adviserOfficers = [
+    { key: 'adviser1', label: 'Club Adviser 1', nameKey: 'adviser1Name', roleKey: 'adviser1Role', heading: 'Approved by:' },
+    { key: 'adviser2', label: 'Club Adviser 2', nameKey: 'adviser2Name', roleKey: 'adviser2Role', heading: 'Approved by:' },
+  ];
+  const adminOfficers = [
+    { key: 'director', label: 'Program Director', nameKey: 'directorName', roleKey: 'directorRole', heading: 'Noted by:' },
+    { key: 'dean', label: 'Dean', nameKey: 'deanName', roleKey: 'deanRole', heading: 'Approved by:' },
+  ];
+  const allSignatoryDefs = [...studentOfficers, ...adviserOfficers, ...adminOfficers];
+
+  const activeOfficers = studentOfficers.filter((o) => includedSignatories[o.key]);
+  const activeAdvisers = adviserOfficers.filter((a) => includedSignatories[a.key]);
+  const activeAdmins = adminOfficers.filter((adm) => includedSignatories[adm.key]);
 
   const handleExportDocx = async () => {
     try {
@@ -242,12 +356,20 @@ export default function DocumentPreviewModal({ isOpen, onClose, documentData }) 
         signatories: {
           presidentName: signatories.presidentName,
           presidentRole: signatories.presidentRole,
+          vicePresidentName: signatories.vicePresidentName,
+          vicePresidentRole: signatories.vicePresidentRole,
           treasurerName: signatories.treasurerName,
           treasurerRole: signatories.treasurerRole,
           auditorName: signatories.auditorName,
           auditorRole: signatories.auditorRole,
-          adviserName: signatories.adviserName,
-          adviserRole: signatories.adviserRole,
+          adviser1Name: signatories.adviser1Name,
+          adviser1Role: signatories.adviser1Role,
+          adviser2Name: signatories.adviser2Name,
+          adviser2Role: signatories.adviser2Role,
+          adviser1: signatories.adviser1Name,
+          adviser2: signatories.adviser2Name,
+          adviserName: signatories.adviser1Name,
+          adviserRole: signatories.adviser1Role,
           directorName: signatories.directorName,
           directorRole: signatories.directorRole,
           deanName: signatories.deanName,
@@ -258,16 +380,21 @@ export default function DocumentPreviewModal({ isOpen, onClose, documentData }) 
           reviewedRole: signatories.auditorRole,
           notedBy: signatories.presidentName,
           notedRole: signatories.presidentRole,
-          adviser1: signatories.adviserName,
         },
         president_name: signatories.presidentName,
         president_role: signatories.presidentRole,
+        vice_president_name: signatories.vicePresidentName,
+        vice_president_role: signatories.vicePresidentRole,
         treasurer_name: signatories.treasurerName,
         treasurer_role: signatories.treasurerRole,
         auditor_name: signatories.auditorName,
         auditor_role: signatories.auditorRole,
-        adviser_name: signatories.adviserName,
-        adviser_role: signatories.adviserRole,
+        adviser1_name: signatories.adviser1Name,
+        adviser1_role: signatories.adviser1Role,
+        adviser2_name: signatories.adviser2Name,
+        adviser2_role: signatories.adviser2Role,
+        adviser_name: signatories.adviser1Name,
+        adviser_role: signatories.adviser1Role,
         director_name: signatories.directorName,
         director_role: signatories.directorRole,
         dean_name: signatories.deanName,
@@ -290,6 +417,10 @@ export default function DocumentPreviewModal({ isOpen, onClose, documentData }) 
         include_cc: includeCc,
         cc_recipients: ccRecipients,
         page_number_style: pageNumberStyle,
+        receiptsMode: receiptsMode,
+        includedSignatories: includedSignatories,
+        active_signatories: Object.keys(includedSignatories).filter((k) => includedSignatories[k]),
+        receipts: receiptItems,
       };
 
       const res = await fetch('/api/reports/docx', {
@@ -304,7 +435,10 @@ export default function DocumentPreviewModal({ isOpen, onClose, documentData }) 
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `LITE-Financial-Report-AY-${academicYear.replace(/[^a-zA-Z0-9]/g, '-')}.docx`;
+      const cleanAy = academicYear.replace(/[^a-zA-Z0-9]/g, '-');
+      a.download = receiptsMode === 'STANDALONE'
+        ? `LITE-Receipts-Proof-AY-${cleanAy}.docx`
+        : `LITE-Financial-Report-AY-${cleanAy}.docx`;
       document.body.appendChild(a);
       a.click();
       window.URL.revokeObjectURL(url);
@@ -347,6 +481,46 @@ export default function DocumentPreviewModal({ isOpen, onClose, documentData }) 
 
         {/* Right Actions & Document Tools */}
         <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 ml-auto shrink-0">
+          {/* Export Scope Radio Buttons */}
+          {!isProposal && (
+            <div className="flex items-center gap-2 bg-gray-800 border border-gray-700 rounded-lg px-2.5 py-1 text-xs text-gray-300 shadow-sm">
+              <span className="text-gray-400 font-medium hidden md:inline">Scope:</span>
+              <label className="flex items-center gap-1 cursor-pointer hover:text-white" title="Financial Report Only">
+                <input
+                  type="radio"
+                  name="receiptsMode"
+                  value="NONE"
+                  checked={receiptsMode === 'NONE'}
+                  onChange={() => setReceiptsMode('NONE')}
+                  className="text-emerald-500 focus:ring-emerald-500 h-3 w-3"
+                />
+                <span className="text-[11px]">Financial Only</span>
+              </label>
+              <label className="flex items-center gap-1 cursor-pointer hover:text-white" title="Financial Report + Attached Receipts">
+                <input
+                  type="radio"
+                  name="receiptsMode"
+                  value="APPEND"
+                  checked={receiptsMode === 'APPEND'}
+                  onChange={() => setReceiptsMode('APPEND')}
+                  className="text-emerald-500 focus:ring-emerald-500 h-3 w-3"
+                />
+                <span className="text-[11px]">+ Receipts</span>
+              </label>
+              <label className="flex items-center gap-1 cursor-pointer hover:text-white" title="Receipts Attachment Only">
+                <input
+                  type="radio"
+                  name="receiptsMode"
+                  value="STANDALONE"
+                  checked={receiptsMode === 'STANDALONE'}
+                  onChange={() => setReceiptsMode('STANDALONE')}
+                  className="text-emerald-500 focus:ring-emerald-500 h-3 w-3"
+                />
+                <span className="text-[11px]">Receipts Only</span>
+              </label>
+            </div>
+          )}
+
           {/* CC Routing Toggle */}
           {!isProposal && (
             <button
@@ -406,14 +580,36 @@ export default function DocumentPreviewModal({ isOpen, onClose, documentData }) 
           </button>
         </div>
 
-        {/* Page Selector Tabs (Row 2 on mobile, inline on desktop) */}
+        {/* Signatory Inclusion Matrix Strip */}
+        {!isProposal && (
+          <div className="w-full flex flex-wrap items-center justify-between gap-2 px-3 py-1.5 bg-gray-900/90 rounded-xl border border-gray-800 text-[11px] text-gray-300 order-last">
+            <span className="font-semibold text-gray-400 shrink-0">Signatories:</span>
+            <div className="flex flex-wrap items-center gap-3">
+              {allSignatoryDefs.map((sig) => (
+                <label key={sig.key} className="flex items-center gap-1.5 cursor-pointer text-gray-300 hover:text-white select-none">
+                  <input
+                    type="checkbox"
+                    checked={includedSignatories[sig.key]}
+                    onChange={() => toggleSignatory(sig.key)}
+                    className="rounded text-emerald-500 focus:ring-emerald-500 w-3.5 h-3.5 cursor-pointer"
+                  />
+                  <span className={includedSignatories[sig.key] ? 'font-medium text-emerald-300' : 'text-gray-500 line-through'}>
+                    {sig.label}
+                  </span>
+                </label>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Page Selector Tabs */}
         {!isProposal && (
           <div className="w-full flex items-center gap-1 bg-gray-800/90 p-1 rounded-xl border border-gray-700 text-xs overflow-x-auto scrollbar-none order-last">
             <button
               onClick={() => setActivePage(0)}
               className={`px-2.5 py-1 rounded-lg transition-all whitespace-nowrap ${activePage === 0 ? 'bg-emerald-700 text-white font-bold' : 'text-gray-300 hover:text-white'}`}
             >
-              All 4 Pages
+              All Pages ({receiptPages.length > 0 && receiptsMode !== 'NONE' ? 4 + receiptPages.length : 4})
             </button>
             <button
               onClick={() => setActivePage(1)}
@@ -439,6 +635,14 @@ export default function DocumentPreviewModal({ isOpen, onClose, documentData }) 
             >
               Page 4: Reconciliation
             </button>
+            {receiptPages.length > 0 && (
+              <button
+                onClick={() => setActivePage(5)}
+                className={`px-2.5 py-1 rounded-lg transition-all whitespace-nowrap ${activePage === 5 ? 'bg-emerald-700 text-white font-bold' : 'text-gray-300 hover:text-white'}`}
+              >
+                Receipts &amp; Proofs ({receiptPages.length} {receiptPages.length === 1 ? 'Sheet' : 'Sheets'})
+              </button>
+            )}
           </div>
         )}
       </header>
@@ -539,114 +743,104 @@ export default function DocumentPreviewModal({ isOpen, onClose, documentData }) 
               III. INSTITUTIONAL APPROVAL ROUTING
             </div>
 
-            {/* Table 1: Prepared & Endorsed by (Student Officers - 3 Columns) */}
-            <table className="sig-table">
+            {/* Table 1: Prepared & Endorsed by (Student Officers - Dynamic Columns) */}
+            <table className="sig-table mb-4">
               <thead>
                 <tr>
-                  <th colSpan="3" className="sig-section-header">Prepared &amp; Endorsed by:</th>
+                  <th colSpan={Math.max(activeOfficers.length, 1)} className="sig-section-header">Prepared &amp; Endorsed by:</th>
                 </tr>
               </thead>
               <tbody>
-                <tr>
-                  <td style={{ width: '33.33%' }}>
-                    <div className="sig-cell">
-                      <div className="sig-space" />
-                      <input
-                        type="text"
-                        value={signatories.treasurerName}
-                        onChange={(e) => handleUpdateSignatory('treasurerName', e.target.value)}
-                        className="pdm-input sig-name"
-                      />
-                      <input
-                        type="text"
-                        value={signatories.treasurerRole}
-                        onChange={(e) => handleUpdateSignatory('treasurerRole', e.target.value)}
-                        className="pdm-input sig-role"
-                      />
-                    </div>
-                  </td>
-                  <td style={{ width: '33.33%' }}>
-                    <div className="sig-cell">
-                      <div className="sig-space" />
-                      <input
-                        type="text"
-                        value={signatories.auditorName}
-                        onChange={(e) => handleUpdateSignatory('auditorName', e.target.value)}
-                        className="pdm-input sig-name"
-                      />
-                      <input
-                        type="text"
-                        value={signatories.auditorRole}
-                        onChange={(e) => handleUpdateSignatory('auditorRole', e.target.value)}
-                        className="pdm-input sig-role"
-                      />
-                    </div>
-                  </td>
-                  <td style={{ width: '33.33%' }}>
-                    <div className="sig-cell">
-                      <div className="sig-space" />
-                      <input
-                        type="text"
-                        value={signatories.presidentName}
-                        onChange={(e) => handleUpdateSignatory('presidentName', e.target.value)}
-                        className="pdm-input sig-name"
-                      />
-                      <input
-                        type="text"
-                        value={signatories.presidentRole}
-                        onChange={(e) => handleUpdateSignatory('presidentRole', e.target.value)}
-                        className="pdm-input sig-role"
-                      />
-                    </div>
-                  </td>
-                </tr>
+                {activeOfficers.length === 0 ? (
+                  <tr>
+                    <td colSpan={1} className="text-gray-400 italic text-[11px] py-2">
+                      (No officers selected in signature block)
+                    </td>
+                  </tr>
+                ) : (
+                  <tr>
+                    {activeOfficers.map((off) => (
+                      <td key={off.key} style={{ width: `${100 / Math.max(activeOfficers.length, 1)}%`, maxWidth: '2.5in' }}>
+                        <div className="sig-cell">
+                          <label className="flex items-center gap-1.5 mb-1 cursor-pointer no-print text-[10px] text-gray-500 font-medium select-none">
+                            <input
+                              type="checkbox"
+                              checked={includedSignatories[off.key]}
+                              onChange={() => toggleSignatory(off.key)}
+                              className="rounded text-emerald-600 focus:ring-emerald-500 w-3 h-3 cursor-pointer"
+                            />
+                            <span>Include</span>
+                          </label>
+                          <div className="sig-space" />
+                          <input
+                            type="text"
+                            value={signatories[off.nameKey]}
+                            onChange={(e) => handleUpdateSignatory(off.nameKey, e.target.value)}
+                            className="pdm-input sig-name"
+                          />
+                          <input
+                            type="text"
+                            value={signatories[off.roleKey]}
+                            onChange={(e) => handleUpdateSignatory(off.roleKey, e.target.value)}
+                            className="pdm-input sig-role"
+                          />
+                        </div>
+                      </td>
+                    ))}
+                  </tr>
+                )}
               </tbody>
             </table>
 
             {/* Table 2: Recommending & Final Approval (Administrators - 2 Columns) */}
-            <table className="sig-table">
+            <table className="sig-table mb-4">
               <thead>
                 <tr>
                   <th colSpan="2" className="sig-section-header">Recommending Approval:</th>
                 </tr>
               </thead>
               <tbody>
-                <tr>
-                  <td style={{ width: '50%' }}>
-                    <div className="sig-cell">
-                      <div className="sig-space" />
-                      <input
-                        type="text"
-                        value={signatories.directorName}
-                        onChange={(e) => handleUpdateSignatory('directorName', e.target.value)}
-                        className="pdm-input sig-name"
-                      />
-                      <input
-                        type="text"
-                        value={signatories.directorRole}
-                        onChange={(e) => handleUpdateSignatory('directorRole', e.target.value)}
-                        className="pdm-input sig-role"
-                      />
-                    </div>
-                  </td>
-                  <td style={{ width: '50%' }}>
-                    <div className="sig-cell">
-                      <div className="sig-space" />
-                      <input
-                        type="text"
-                        value={signatories.deanName}
-                        onChange={(e) => handleUpdateSignatory('deanName', e.target.value)}
-                        className="pdm-input sig-name"
-                      />
-                      <input
-                        type="text"
-                        value={signatories.deanRole}
-                        onChange={(e) => handleUpdateSignatory('deanRole', e.target.value)}
-                        className="pdm-input sig-role"
-                      />
-                    </div>
-                  </td>
-                </tr>
+                {activeAdmins.length === 0 ? (
+                  <tr>
+                    <td colSpan="2" className="text-gray-400 italic text-[11px] py-2">
+                      (No administrators selected in signature block)
+                    </td>
+                  </tr>
+                ) : (
+                  <tr>
+                    {activeAdmins.map((adm) => (
+                      <td key={adm.key} style={{ width: '50%', maxWidth: '3.25in' }}>
+                        <div className="sig-cell">
+                          <label className="flex items-center gap-1.5 mb-1 cursor-pointer no-print text-[10px] text-gray-500 font-medium select-none">
+                            <input
+                              type="checkbox"
+                              checked={includedSignatories[adm.key]}
+                              onChange={() => toggleSignatory(adm.key)}
+                              className="rounded text-emerald-600 focus:ring-emerald-500 w-3 h-3 cursor-pointer"
+                            />
+                            <span>Include</span>
+                          </label>
+                          <div className="sig-space" />
+                          <input
+                            type="text"
+                            value={signatories[adm.nameKey]}
+                            onChange={(e) => handleUpdateSignatory(adm.nameKey, e.target.value)}
+                            className="pdm-input sig-name"
+                          />
+                          <input
+                            type="text"
+                            value={signatories[adm.roleKey]}
+                            onChange={(e) => handleUpdateSignatory(adm.roleKey, e.target.value)}
+                            className="pdm-input sig-role"
+                          />
+                        </div>
+                      </td>
+                    ))}
+                    {activeAdmins.length < 2 && (
+                      <td style={{ width: `${(2 - activeAdmins.length) * 50}%` }} />
+                    )}
+                  </tr>
+                )}
               </tbody>
             </table>
             {getPageFooterText(1, 1) && (
@@ -658,7 +852,7 @@ export default function DocumentPreviewModal({ isOpen, onClose, documentData }) 
             {/* ========================================================================= */}
             {/* PAGE 1: TRANSMITTAL LETTER (Screenshot 1)                                 */}
             {/* ========================================================================= */}
-            {(activePage === 0 || activePage === 1) && (
+            {(activePage === 0 || activePage === 1) && receiptsMode !== 'STANDALONE' && (
               <article className="document-sheet">
                 <OfficialHeaderBanner />
 
@@ -729,103 +923,108 @@ export default function DocumentPreviewModal({ isOpen, onClose, documentData }) 
 
             {/* Signatories Block (Table-Based) */}
             <div className="mt-8">
-              {/* Table 1: Prepared by (Student Officers - 3 Columns) */}
-              <table className="sig-table">
+              {/* Table 1: Prepared by (Student Officers - Dynamic Columns) */}
+              <table className="sig-table mb-4">
                 <thead>
                   <tr>
-                    <th colSpan="3" className="sig-section-header">Prepared by:</th>
+                    <th colSpan={Math.max(activeOfficers.length, 1)} className="sig-section-header">Prepared by:</th>
                   </tr>
                 </thead>
                 <tbody>
-                  <tr>
-                    <td style={{ width: '33.33%' }}>
-                      <div className="sig-cell">
-                        <div className="sig-space" />
-                        <input
-                          type="text"
-                          value={signatories.presidentName}
-                          onChange={(e) => handleUpdateSignatory('presidentName', e.target.value)}
-                          className="pdm-input sig-name"
-                        />
-                        <input
-                          type="text"
-                          value={signatories.presidentRole}
-                          onChange={(e) => handleUpdateSignatory('presidentRole', e.target.value)}
-                          className="pdm-input sig-role"
-                        />
-                      </div>
-                    </td>
-                    <td style={{ width: '33.33%' }}>
-                      <div className="sig-cell">
-                        <div className="sig-space" />
-                        <input
-                          type="text"
-                          value={signatories.treasurerName}
-                          onChange={(e) => handleUpdateSignatory('treasurerName', e.target.value)}
-                          className="pdm-input sig-name"
-                        />
-                        <input
-                          type="text"
-                          value={signatories.treasurerRole}
-                          onChange={(e) => handleUpdateSignatory('treasurerRole', e.target.value)}
-                          className="pdm-input sig-role"
-                        />
-                      </div>
-                    </td>
-                    <td style={{ width: '33.33%' }}>
-                      <div className="sig-cell">
-                        <div className="sig-space" />
-                        <input
-                          type="text"
-                          value={signatories.auditorName}
-                          onChange={(e) => handleUpdateSignatory('auditorName', e.target.value)}
-                          className="pdm-input sig-name"
-                        />
-                        <input
-                          type="text"
-                          value={signatories.auditorRole}
-                          onChange={(e) => handleUpdateSignatory('auditorRole', e.target.value)}
-                          className="pdm-input sig-role"
-                        />
-                      </div>
-                    </td>
-                  </tr>
+                  {activeOfficers.length === 0 ? (
+                    <tr>
+                      <td colSpan={1} className="text-gray-400 italic text-[11px] py-2">
+                        (No officers selected in signature block)
+                      </td>
+                    </tr>
+                  ) : (
+                    <tr>
+                      {activeOfficers.map((off) => (
+                        <td key={off.key} style={{ width: `${100 / Math.max(activeOfficers.length, 1)}%`, maxWidth: '2.5in' }}>
+                          <div className="sig-cell">
+                            <label className="flex items-center gap-1.5 mb-1 cursor-pointer no-print text-[10px] text-gray-500 font-medium select-none">
+                              <input
+                                type="checkbox"
+                                checked={includedSignatories[off.key]}
+                                onChange={() => toggleSignatory(off.key)}
+                                className="rounded text-emerald-600 focus:ring-emerald-500 w-3 h-3 cursor-pointer"
+                              />
+                              <span>Include</span>
+                            </label>
+                            <div className="sig-space" />
+                            <input
+                              type="text"
+                              value={signatories[off.nameKey]}
+                              onChange={(e) => handleUpdateSignatory(off.nameKey, e.target.value)}
+                              className="pdm-input sig-name"
+                            />
+                            <input
+                              type="text"
+                              value={signatories[off.roleKey]}
+                              onChange={(e) => handleUpdateSignatory(off.roleKey, e.target.value)}
+                              className="pdm-input sig-role"
+                            />
+                          </div>
+                        </td>
+                      ))}
+                    </tr>
+                  )}
                 </tbody>
               </table>
 
               {/* Table 2: Approved by (Advisers - 2 Columns) */}
-              <table className="sig-table">
+              <table className="sig-table mb-4">
                 <thead>
                   <tr>
-                    <th className="sig-section-header" style={{ width: '50%' }}>Approved by:</th>
-                    <th style={{ width: '50%' }}></th>
+                    <th colSpan={2} className="sig-section-header">Approved by:</th>
                   </tr>
                 </thead>
                 <tbody>
-                  <tr>
-                    <td style={{ width: '50%' }}>
-                      <div className="sig-cell">
-                        <div className="sig-space" />
-                        <input
-                          type="text"
-                          value={signatories.adviserName}
-                          onChange={(e) => handleUpdateSignatory('adviserName', e.target.value)}
-                          className="pdm-input sig-name w-72"
-                        />
-                        <input
-                          type="text"
-                          value={signatories.adviserRole}
-                          onChange={(e) => handleUpdateSignatory('adviserRole', e.target.value)}
-                          className="pdm-input sig-role w-72"
-                        />
-                      </div>
-                    </td>
-                    <td style={{ width: '50%' }}></td>
-                  </tr>
+                  {activeAdvisers.length === 0 ? (
+                    <tr>
+                      <td colSpan="2" className="text-gray-400 italic text-[11px] py-2">
+                        (No advisers selected in signature block)
+                      </td>
+                    </tr>
+                  ) : (
+                    <tr>
+                      {activeAdvisers.map((adv) => (
+                        <td key={adv.key} style={{ width: '50%', maxWidth: '3.25in' }}>
+                          <div className="sig-cell">
+                            <label className="flex items-center gap-1.5 mb-1 cursor-pointer no-print text-[10px] text-gray-500 font-medium select-none">
+                              <input
+                                type="checkbox"
+                                checked={includedSignatories[adv.key]}
+                                onChange={() => toggleSignatory(adv.key)}
+                                className="rounded text-emerald-600 focus:ring-emerald-500 w-3 h-3 cursor-pointer"
+                              />
+                              <span>Include</span>
+                            </label>
+                            <div className="sig-space" />
+                            <input
+                              type="text"
+                              value={signatories[adv.nameKey]}
+                              onChange={(e) => handleUpdateSignatory(adv.nameKey, e.target.value)}
+                              className="pdm-input sig-name w-72"
+                            />
+                            <input
+                              type="text"
+                              value={signatories[adv.roleKey]}
+                              onChange={(e) => handleUpdateSignatory(adv.roleKey, e.target.value)}
+                              className="pdm-input sig-role w-72"
+                            />
+                          </div>
+                        </td>
+                      ))}
+                      {activeAdvisers.length < 2 && (
+                        <td style={{ width: `${(2 - activeAdvisers.length) * 50}%` }} />
+                      )}
+                    </tr>
+                  )}
                 </tbody>
               </table>
 
-              {/* Table 3: Noted by (Administrators - 2 Columns) */}
+              {/* Table 3: Noted by (Administrators - 2 Max Columns) */}
               <table className="sig-table">
                 <thead>
                   <tr>
@@ -833,42 +1032,47 @@ export default function DocumentPreviewModal({ isOpen, onClose, documentData }) 
                   </tr>
                 </thead>
                 <tbody>
-                  <tr>
-                    <td style={{ width: '50%' }}>
-                      <div className="sig-cell">
-                        <div className="sig-space" />
-                        <input
-                          type="text"
-                          value={signatories.directorName}
-                          onChange={(e) => handleUpdateSignatory('directorName', e.target.value)}
-                          className="pdm-input sig-name"
-                        />
-                        <input
-                          type="text"
-                          value={signatories.directorRole}
-                          onChange={(e) => handleUpdateSignatory('directorRole', e.target.value)}
-                          className="pdm-input sig-role"
-                        />
-                      </div>
-                    </td>
-                    <td style={{ width: '50%' }}>
-                      <div className="sig-cell">
-                        <div className="sig-space" />
-                        <input
-                          type="text"
-                          value={signatories.deanName}
-                          onChange={(e) => handleUpdateSignatory('deanName', e.target.value)}
-                          className="pdm-input sig-name"
-                        />
-                        <input
-                          type="text"
-                          value={signatories.deanRole}
-                          onChange={(e) => handleUpdateSignatory('deanRole', e.target.value)}
-                          className="pdm-input sig-role"
-                        />
-                      </div>
-                    </td>
-                  </tr>
+                  {activeAdmins.length === 0 ? (
+                    <tr>
+                      <td colSpan="2" className="text-gray-400 italic text-[11px] py-2">
+                        (No administrators selected in signature block)
+                      </td>
+                    </tr>
+                  ) : (
+                    <tr>
+                      {activeAdmins.map((adm) => (
+                        <td key={adm.key} style={{ width: '50%', maxWidth: '3.25in' }}>
+                          <div className="sig-cell">
+                            <label className="flex items-center gap-1.5 mb-1 cursor-pointer no-print text-[10px] text-gray-500 font-medium select-none">
+                              <input
+                                type="checkbox"
+                                checked={includedSignatories[adm.key]}
+                                onChange={() => toggleSignatory(adm.key)}
+                                className="rounded text-emerald-600 focus:ring-emerald-500 w-3 h-3 cursor-pointer"
+                              />
+                              <span>Include</span>
+                            </label>
+                            <div className="sig-space" />
+                            <input
+                              type="text"
+                              value={signatories[adm.nameKey]}
+                              onChange={(e) => handleUpdateSignatory(adm.nameKey, e.target.value)}
+                              className="pdm-input sig-name"
+                            />
+                            <input
+                              type="text"
+                              value={signatories[adm.roleKey]}
+                              onChange={(e) => handleUpdateSignatory(adm.roleKey, e.target.value)}
+                              className="pdm-input sig-role"
+                            />
+                          </div>
+                        </td>
+                      ))}
+                      {activeAdmins.length < 2 && (
+                        <td style={{ width: `${(2 - activeAdmins.length) * 50}%` }} />
+                      )}
+                    </tr>
+                  )}
                 </tbody>
               </table>
 
@@ -906,8 +1110,8 @@ export default function DocumentPreviewModal({ isOpen, onClose, documentData }) 
                 </div>
               )}
             </div>
-            {getPageFooterText(1, 4) && (
-              <div className="sheet-page-footer">{getPageFooterText(1, 4)}</div>
+            {getPageFooterText(1) && (
+              <div className="sheet-page-footer">{getPageFooterText(1)}</div>
             )}
           </article>
         )}
@@ -915,7 +1119,7 @@ export default function DocumentPreviewModal({ isOpen, onClose, documentData }) 
         {/* ========================================================================= */}
         {/* PAGE 2: INCOME SCHEDULE (Screenshot 2)                                   */}
         {/* ========================================================================= */}
-        {(activePage === 0 || activePage === 2) && (
+        {(activePage === 0 || activePage === 2) && receiptsMode !== 'STANDALONE' && (
           <article className="document-sheet">
             <OfficialHeaderBanner />
 
@@ -1028,8 +1232,8 @@ export default function DocumentPreviewModal({ isOpen, onClose, documentData }) 
                 P{totalFunds.toLocaleString('en-PH', { minimumFractionDigits: 2 })}
               </span>
             </div>
-            {getPageFooterText(2, 4) && (
-              <div className="sheet-page-footer">{getPageFooterText(2, 4)}</div>
+            {getPageFooterText(2) && (
+              <div className="sheet-page-footer">{getPageFooterText(2)}</div>
             )}
           </article>
         )}
@@ -1037,7 +1241,7 @@ export default function DocumentPreviewModal({ isOpen, onClose, documentData }) 
         {/* ========================================================================= */}
         {/* PAGE 3: MISCELLANEOUS EXPENSES                                           */}
         {/* ========================================================================= */}
-        {(activePage === 0 || activePage === 3) && (
+        {(activePage === 0 || activePage === 3) && receiptsMode !== 'STANDALONE' && (
           <article className="document-sheet">
             <OfficialHeaderBanner />
 
@@ -1108,8 +1312,8 @@ export default function DocumentPreviewModal({ isOpen, onClose, documentData }) 
                 </tr>
               </tbody>
             </table>
-            {getPageFooterText(3, 4) && (
-              <div className="sheet-page-footer">{getPageFooterText(3, 4)}</div>
+            {getPageFooterText(3) && (
+              <div className="sheet-page-footer">{getPageFooterText(3)}</div>
             )}
           </article>
         )}
@@ -1117,7 +1321,7 @@ export default function DocumentPreviewModal({ isOpen, onClose, documentData }) 
         {/* ========================================================================= */}
         {/* PAGE 4: SUMMARY RECONCILIATION & SIGNATORIES (Screenshot 3 Right)        */}
         {/* ========================================================================= */}
-        {(activePage === 0 || activePage === 4) && (
+        {(activePage === 0 || activePage === 4) && receiptsMode !== 'STANDALONE' && (
           <article className="document-sheet">
             <OfficialHeaderBanner />
 
@@ -1157,105 +1361,110 @@ export default function DocumentPreviewModal({ isOpen, onClose, documentData }) 
               </tbody>
             </table>
 
-            {/* Signatories Block (Table-Based) */}
+            {/* Signatories Block (Dynamic Left-Aligned Table Columns) */}
             <div className="mt-12">
-              {/* Table 1: Prepared by (Student Officers - 3 Columns) */}
-              <table className="sig-table">
+              {/* Table 1: Prepared by (Student Officers - Dynamic Columns) */}
+              <table className="sig-table mb-4">
                 <thead>
                   <tr>
-                    <th colSpan="3" className="sig-section-header">Prepared by:</th>
+                    <th colSpan={Math.max(activeOfficers.length, 1)} className="sig-section-header">Prepared by:</th>
                   </tr>
                 </thead>
                 <tbody>
-                  <tr>
-                    <td style={{ width: '33.33%' }}>
-                      <div className="sig-cell">
-                        <div className="sig-space" />
-                        <input
-                          type="text"
-                          value={signatories.presidentName}
-                          onChange={(e) => handleUpdateSignatory('presidentName', e.target.value)}
-                          className="pdm-input sig-name"
-                        />
-                        <input
-                          type="text"
-                          value={signatories.presidentRole}
-                          onChange={(e) => handleUpdateSignatory('presidentRole', e.target.value)}
-                          className="pdm-input sig-role"
-                        />
-                      </div>
-                    </td>
-                    <td style={{ width: '33.33%' }}>
-                      <div className="sig-cell">
-                        <div className="sig-space" />
-                        <input
-                          type="text"
-                          value={signatories.treasurerName}
-                          onChange={(e) => handleUpdateSignatory('treasurerName', e.target.value)}
-                          className="pdm-input sig-name"
-                        />
-                        <input
-                          type="text"
-                          value={signatories.treasurerRole}
-                          onChange={(e) => handleUpdateSignatory('treasurerRole', e.target.value)}
-                          className="pdm-input sig-role"
-                        />
-                      </div>
-                    </td>
-                    <td style={{ width: '33.33%' }}>
-                      <div className="sig-cell">
-                        <div className="sig-space" />
-                        <input
-                          type="text"
-                          value={signatories.auditorName}
-                          onChange={(e) => handleUpdateSignatory('auditorName', e.target.value)}
-                          className="pdm-input sig-name"
-                        />
-                        <input
-                          type="text"
-                          value={signatories.auditorRole}
-                          onChange={(e) => handleUpdateSignatory('auditorRole', e.target.value)}
-                          className="pdm-input sig-role"
-                        />
-                      </div>
-                    </td>
-                  </tr>
+                  {activeOfficers.length === 0 ? (
+                    <tr>
+                      <td colSpan={1} className="text-gray-400 italic text-[11px] py-2">
+                        (No officers selected in signature block)
+                      </td>
+                    </tr>
+                  ) : (
+                    <tr>
+                      {activeOfficers.map((off) => (
+                        <td key={off.key} style={{ width: `${100 / Math.max(activeOfficers.length, 1)}%`, maxWidth: '2.5in' }}>
+                          <div className="sig-cell">
+                            <label className="flex items-center gap-1.5 mb-1 cursor-pointer no-print text-[10px] text-gray-500 font-medium select-none">
+                              <input
+                                type="checkbox"
+                                checked={includedSignatories[off.key]}
+                                onChange={() => toggleSignatory(off.key)}
+                                className="rounded text-emerald-600 focus:ring-emerald-500 w-3 h-3 cursor-pointer"
+                              />
+                              <span>Include</span>
+                            </label>
+                            <div className="sig-space" />
+                            <input
+                              type="text"
+                              value={signatories[off.nameKey]}
+                              onChange={(e) => handleUpdateSignatory(off.nameKey, e.target.value)}
+                              className="pdm-input sig-name"
+                            />
+                            <input
+                              type="text"
+                              value={signatories[off.roleKey]}
+                              onChange={(e) => handleUpdateSignatory(off.roleKey, e.target.value)}
+                              className="pdm-input sig-role"
+                            />
+                          </div>
+                        </td>
+                      ))}
+                    </tr>
+                  )}
                 </tbody>
               </table>
 
               {/* Table 2: Approved by (Advisers - 2 Columns) */}
-              <table className="sig-table">
+              <table className="sig-table mb-4">
                 <thead>
                   <tr>
-                    <th className="sig-section-header" style={{ width: '50%' }}>Approved by:</th>
-                    <th style={{ width: '50%' }}></th>
+                    <th colSpan={2} className="sig-section-header">Approved by:</th>
                   </tr>
                 </thead>
                 <tbody>
-                  <tr>
-                    <td style={{ width: '50%' }}>
-                      <div className="sig-cell">
-                        <div className="sig-space" />
-                        <input
-                          type="text"
-                          value={signatories.adviserName}
-                          onChange={(e) => handleUpdateSignatory('adviserName', e.target.value)}
-                          className="pdm-input sig-name w-72"
-                        />
-                        <input
-                          type="text"
-                          value={signatories.adviserRole}
-                          onChange={(e) => handleUpdateSignatory('adviserRole', e.target.value)}
-                          className="pdm-input sig-role w-72"
-                        />
-                      </div>
-                    </td>
-                    <td style={{ width: '50%' }}></td>
-                  </tr>
+                  {activeAdvisers.length === 0 ? (
+                    <tr>
+                      <td colSpan="2" className="text-gray-400 italic text-[11px] py-2">
+                        (No advisers selected in signature block)
+                      </td>
+                    </tr>
+                  ) : (
+                    <tr>
+                      {activeAdvisers.map((adv) => (
+                        <td key={adv.key} style={{ width: '50%', maxWidth: '3.25in' }}>
+                          <div className="sig-cell">
+                            <label className="flex items-center gap-1.5 mb-1 cursor-pointer no-print text-[10px] text-gray-500 font-medium select-none">
+                              <input
+                                type="checkbox"
+                                checked={includedSignatories[adv.key]}
+                                onChange={() => toggleSignatory(adv.key)}
+                                className="rounded text-emerald-600 focus:ring-emerald-500 w-3 h-3 cursor-pointer"
+                              />
+                              <span>Include</span>
+                            </label>
+                            <div className="sig-space" />
+                            <input
+                              type="text"
+                              value={signatories[adv.nameKey]}
+                              onChange={(e) => handleUpdateSignatory(adv.nameKey, e.target.value)}
+                              className="pdm-input sig-name w-72"
+                            />
+                            <input
+                              type="text"
+                              value={signatories[adv.roleKey]}
+                              onChange={(e) => handleUpdateSignatory(adv.roleKey, e.target.value)}
+                              className="pdm-input sig-role w-72"
+                            />
+                          </div>
+                        </td>
+                      ))}
+                      {activeAdvisers.length < 2 && (
+                        <td style={{ width: `${(2 - activeAdvisers.length) * 50}%` }} />
+                      )}
+                    </tr>
+                  )}
                 </tbody>
               </table>
 
-              {/* Table 3: Noted by (Administrators - 2 Columns) */}
+              {/* Table 3: Noted by (Administrators - 2 Max Columns) */}
               <table className="sig-table">
                 <thead>
                   <tr>
@@ -1263,49 +1472,155 @@ export default function DocumentPreviewModal({ isOpen, onClose, documentData }) 
                   </tr>
                 </thead>
                 <tbody>
-                  <tr>
-                    <td style={{ width: '50%' }}>
-                      <div className="sig-cell">
-                        <div className="sig-space" />
-                        <input
-                          type="text"
-                          value={signatories.directorName}
-                          onChange={(e) => handleUpdateSignatory('directorName', e.target.value)}
-                          className="pdm-input sig-name"
-                        />
-                        <input
-                          type="text"
-                          value={signatories.directorRole}
-                          onChange={(e) => handleUpdateSignatory('directorRole', e.target.value)}
-                          className="pdm-input sig-role"
-                        />
-                      </div>
-                    </td>
-                    <td style={{ width: '50%' }}>
-                      <div className="sig-cell">
-                        <div className="sig-space" />
-                        <input
-                          type="text"
-                          value={signatories.deanName}
-                          onChange={(e) => handleUpdateSignatory('deanName', e.target.value)}
-                          className="pdm-input sig-name"
-                        />
-                        <input
-                          type="text"
-                          value={signatories.deanRole}
-                          onChange={(e) => handleUpdateSignatory('deanRole', e.target.value)}
-                          className="pdm-input sig-role"
-                        />
-                      </div>
-                    </td>
-                  </tr>
+                  {activeAdmins.length === 0 ? (
+                    <tr>
+                      <td colSpan="2" className="text-gray-400 italic text-[11px] py-2">
+                        (No administrators selected in signature block)
+                      </td>
+                    </tr>
+                  ) : (
+                    <tr>
+                      {activeAdmins.map((adm) => (
+                        <td key={adm.key} style={{ width: '50%', maxWidth: '3.25in' }}>
+                          <div className="sig-cell">
+                            <label className="flex items-center gap-1.5 mb-1 cursor-pointer no-print text-[10px] text-gray-500 font-medium select-none">
+                              <input
+                                type="checkbox"
+                                checked={includedSignatories[adm.key]}
+                                onChange={() => toggleSignatory(adm.key)}
+                                className="rounded text-emerald-600 focus:ring-emerald-500 w-3 h-3 cursor-pointer"
+                              />
+                              <span>Include</span>
+                            </label>
+                            <div className="sig-space" />
+                            <input
+                              type="text"
+                              value={signatories[adm.nameKey]}
+                              onChange={(e) => handleUpdateSignatory(adm.nameKey, e.target.value)}
+                              className="pdm-input sig-name"
+                            />
+                            <input
+                              type="text"
+                              value={signatories[adm.roleKey]}
+                              onChange={(e) => handleUpdateSignatory(adm.roleKey, e.target.value)}
+                              className="pdm-input sig-role"
+                            />
+                          </div>
+                        </td>
+                      ))}
+                      {activeAdmins.length < 2 && (
+                        <td style={{ width: `${(2 - activeAdmins.length) * 50}%` }} />
+                      )}
+                    </tr>
+                  )}
                 </tbody>
               </table>
             </div>
-            {getPageFooterText(4, 4) && (
-              <div className="sheet-page-footer">{getPageFooterText(4, 4)}</div>
+            {getPageFooterText(4) && (
+              <div className="sheet-page-footer">{getPageFooterText(4)}</div>
             )}
           </article>
+        )}
+
+        {/* ========================================================================= */}
+        {/* RECEIPTS & PROOFS OF DISBURSEMENT (PAGES 5+)                              */}
+        {/* Rendered when All Pages is selected, or Receipts Tab (5), or STANDALONE  */}
+        {/* ========================================================================= */}
+        {!isProposal && (activePage === 0 || activePage === 5 || receiptsMode === 'STANDALONE') && (receiptsMode !== 'NONE') && (
+          receiptPages.length > 0 ? (
+            receiptPages.map((pageReceipts, pageIdx) => {
+              const currentSheetNum = pageIdx + 1;
+              const totalReceiptSheets = receiptPages.length;
+              const currentDocPage = receiptsMode === 'STANDALONE' ? currentSheetNum : 4 + currentSheetNum;
+              const displayTotalPages = totalReportPages;
+
+              return (
+                <article key={`receipt-sheet-${pageIdx}`} className="document-sheet">
+                  <OfficialHeaderBanner />
+
+                  {/* Sheet Institutional Header */}
+                  <div className="text-center mb-6">
+                    <div className="font-bold tracking-wide text-xs uppercase text-gray-700">
+                      PAMBAYANG DALUBHASAAN NG MARILAO
+                    </div>
+                    <div className="font-black tracking-wide text-sm uppercase text-gray-900 mt-0.5">
+                      RECEIPTS &amp; PROOFS OF DISBURSEMENT
+                    </div>
+                    <div className="font-semibold text-xs text-gray-600 uppercase mt-0.5">
+                      {semester} &bull; ACADEMIC YEAR {academicYear}
+                    </div>
+                    <div className="text-[10px] text-gray-500 mt-1 uppercase tracking-wider font-semibold">
+                      Receipts Attachment Sheet {currentSheetNum} of {totalReceiptSheets}
+                    </div>
+                  </div>
+
+                  {/* 2-Column Grid (Up to 4 receipts per page: 2 rows of 2) */}
+                  <div className="grid grid-cols-2 gap-4">
+                    {pageReceipts.map((rc) => (
+                      <div
+                        key={rc.id}
+                        className="border border-gray-300 rounded-xl p-2.5 bg-white flex flex-col justify-between shadow-2xs"
+                        style={{ height: '3.45in', boxSizing: 'border-box' }}
+                      >
+                        {/* Image Frame with Aspect Containment */}
+                        <div className="w-full flex-1 bg-gray-50 rounded-lg flex items-center justify-center overflow-hidden border border-gray-200 mb-2 p-1 min-h-[2.1in]">
+                          <img
+                            src={rc.url}
+                            alt={rc.title}
+                            className="max-h-[2.3in] max-w-full object-contain"
+                            loading="lazy"
+                          />
+                        </div>
+
+                        {/* Metadata Footer */}
+                        <div className="shrink-0 pt-1 border-t border-gray-100">
+                          <div className="flex items-center justify-between text-[11px] font-bold text-gray-900 mb-0.5">
+                            <span className="text-gray-700">{rc.date}</span>
+                            <span className="text-emerald-800 font-black bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200">
+                              ₱{rc.amount.toLocaleString('en-PH', { minimumFractionDigits: 2 })}
+                            </span>
+                          </div>
+                          <div className="text-[11px] font-bold text-gray-900 truncate" title={rc.title}>
+                            {rc.title}
+                          </div>
+                          <div className="flex items-center justify-between text-[10px] text-gray-500 mt-0.5">
+                            <span className="truncate">{rc.category}</span>
+                            {rc.totalVouchers > 1 && (
+                              <span className="text-[9px] bg-gray-100 px-1.5 py-0.2 rounded text-gray-600 font-semibold shrink-0">
+                                Voucher {rc.voucherIndex} of {rc.totalVouchers}
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  {getPageFooterText(currentDocPage, displayTotalPages) && (
+                    <div className="sheet-page-footer">
+                      {getPageFooterText(currentDocPage, displayTotalPages)}
+                    </div>
+                  )}
+                </article>
+              );
+            })
+          ) : (activePage === 5 ? (
+            <article className="document-sheet flex flex-col justify-between">
+              <OfficialHeaderBanner />
+              <div className="text-center py-24 my-auto">
+                <div className="w-12 h-12 rounded-2xl bg-gray-100 text-gray-400 flex items-center justify-center mx-auto mb-3">
+                  <FileText className="w-6 h-6" />
+                </div>
+                <h4 className="text-sm font-bold text-gray-800">No Receipt Attachments</h4>
+                <p className="text-xs text-gray-500 mt-1 max-w-sm mx-auto">
+                  No disbursement records with attached vouchers were found for {semester} {academicYear}.
+                </p>
+              </div>
+              {getPageFooterText(1, 1) && (
+                <div className="sheet-page-footer">{getPageFooterText(1, 1)}</div>
+              )}
+            </article>
+          ) : null)
         )}
           </>
         )}
