@@ -379,15 +379,33 @@
   }
 }
 
+/* Standard Print Page Dimensions & Rules */
+@page {
+  size: 8.5in 11in;
+  margin: 0;
+}
+
 /* Print Overrides */
 @media print {
+  *, *::before, *::after {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
   .no-print {
     display: none !important;
   }
 
   .document-preview-overlay {
+    position: static !important;
     background: transparent !important;
     padding: 0 !important;
+    margin: 0 !important;
+    overflow: visible !important;
+    height: auto !important;
+    min-height: auto !important;
+    inset: auto !important;
+    z-index: auto !important;
   }
 
   .document-sheet {
@@ -398,10 +416,26 @@
     min-height: 11in !important;
     font-size: 11pt !important;
     page-break-after: always !important;
+    break-after: page !important;
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+    background: #ffffff !important;
+    box-sizing: border-box !important;
+  }
+
+  .document-sheet:last-of-type,
+  .document-sheet:last-child {
+    page-break-after: auto !important;
+    break-after: auto !important;
   }
 
   .document-sheet * {
     font-size: 11pt !important;
+  }
+
+  .sig-table, .fin-table {
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
   }
 
   .sig-row-3col {
@@ -417,5 +451,9 @@
   .pdm-input {
     border: none !important;
     background: transparent !important;
+    outline: none !important;
+    box-shadow: none !important;
+    color: #000000 !important;
+    padding: 0 !important;
   }
 }

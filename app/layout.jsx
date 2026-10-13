@@ -1,11 +1,6 @@
-import { Inter } from 'next/font/google';
 import './globals.css';
-
-const inter = Inter({
-  subsets: ['latin'],
-  display: 'swap',
-  variable: '--font-inter',
-});
+import TechWaveBackground from '@/components/layout/TechWaveBackground';
+import { ThemeProvider } from '@/components/theme/ThemeProvider';
 
 export const metadata = {
   title: 'FinLITE — Financial Management & Automated Document Generation System',
@@ -23,17 +18,47 @@ export const viewport = {
   maximumScale: 1,
   userScalable: false,
   viewportFit: 'cover',
-  themeColor: '#047857',
+  themeColor: '#0d3824',
 };
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en" className={inter.variable} suppressHydrationWarning>
-      <body 
-        className={`${inter.className} min-h-screen bg-[#f8faf9] text-gray-900 selection:bg-emerald-100 selection:text-emerald-900 select-none overscroll-none`}
+    <html lang="en" suppressHydrationWarning>
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function() {
+                try {
+                  // Session-based theme: defaults to dark mode whenever system is opened
+                  var t = sessionStorage.getItem('finlite-theme') || 'dark';
+                  document.documentElement.setAttribute('data-theme', t);
+                  if (t === 'light') {
+                    document.documentElement.classList.add('light');
+                    document.documentElement.classList.remove('dark');
+                  } else {
+                    document.documentElement.classList.add('dark');
+                    document.documentElement.classList.remove('light');
+                  }
+                } catch (e) {}
+              })();
+            `,
+          }}
+        />
+      </head>
+      <body
+        className="min-h-screen text-[var(--text-main)] selection:bg-emerald-400 selection:text-black select-none overscroll-none transition-colors duration-200"
         suppressHydrationWarning
       >
-        {children}
+        <ThemeProvider>
+          {/* Modern Animated Wavy Technology Background */}
+          <TechWaveBackground />
+
+          {/* Content sits above the background layers */}
+          <div className="relative z-10 min-h-screen">
+            {children}
+          </div>
+        </ThemeProvider>
       </body>
     </html>
   );

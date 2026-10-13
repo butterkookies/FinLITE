@@ -98,7 +98,7 @@ export default function ProfilePage() {
 
   const email = user?.email || profile?.email || '';
   const fullName = profile?.full_name || user?.user_metadata?.full_name || user?.user_metadata?.name || 'FinLITE Member';
-  const avatarUrl = user?.user_metadata?.avatar_url || user?.user_metadata?.picture || profile?.avatar_url || null;
+  const avatarUrl = profile?.avatar_url || user?.user_metadata?.avatar_url || user?.user_metadata?.picture || null;
   const role = profile?.role || (email === 'geronimoandreijohn.pdm@gmail.com' ? 'admin' : 'member');
   const isAdmin = role === 'admin' || email === 'geronimoandreijohn.pdm@gmail.com';
 
@@ -113,57 +113,57 @@ export default function ProfilePage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-[#f8faf9] flex items-center justify-center p-4">
-        <div className="w-8 h-8 rounded-full border-2 border-emerald-600 border-t-transparent animate-spin" />
+      <div className="min-h-screen flex items-center justify-center p-4">
+        <div className="w-8 h-8 rounded-full border-2 border-emerald-400 border-t-transparent animate-spin" />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-[#f8faf9] flex flex-col font-sans">
+    <div className="min-h-screen flex flex-col font-sans">
       
-      {/* Top Header */}
-      <header className="sticky top-0 z-30 bg-white/90 backdrop-blur-md border-b border-black/[0.06] shadow-xs">
+      {/* Top Header — Frosted Emerald Header matching Navbar */}
+      <header className="sticky top-0 z-30 bg-[#082217]/85 backdrop-blur-xl border-b border-emerald-500/15 transition-all">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <Link
               href="/"
-              className="flex items-center gap-2 p-1.5 rounded-xl hover:bg-gray-100 transition-colors text-gray-600 hover:text-gray-900"
+              className="flex items-center gap-2 p-1.5 rounded-xl hover:bg-emerald-500/15 transition-colors text-white/60 hover:text-white"
               title="Return to Dashboard"
             >
               <ArrowLeft className="w-5 h-5" />
             </Link>
-            <div className="h-6 w-px bg-gray-200" />
+            <div className="h-6 w-px bg-emerald-500/20" />
             <div>
-              <h1 className="text-sm sm:text-base font-bold text-gray-950">Account Profile</h1>
-              <p className="text-[11px] text-gray-500 font-medium">FinLITE Identity & Security Credentials</p>
+              <h1 className="text-sm sm:text-base font-bold text-white">Account Profile</h1>
+              <p className="text-[11px] text-emerald-400 font-medium">FinLITE Identity &amp; Security Credentials</p>
             </div>
           </div>
 
           <div className="flex items-center gap-2">
             <button
               onClick={() => setIsEditOpen(true)}
-              className="h-9 px-3 text-xs font-semibold text-emerald-800 bg-emerald-50 hover:bg-emerald-100 active:bg-emerald-200 border border-emerald-200 rounded-xl transition-all shadow-2xs flex items-center gap-1.5 cursor-pointer whitespace-nowrap"
+              className="h-9 px-3 text-xs font-semibold text-emerald-200 bg-[#0c1e16] hover:bg-[#122b20] active:bg-[#163527] border border-[#1a382b] rounded-xl transition-all shadow-sm flex items-center gap-1.5 cursor-pointer whitespace-nowrap"
             >
-              <Pencil className="w-3.5 h-3.5 text-emerald-700" />
+              <Pencil className="w-3.5 h-3.5 text-emerald-400" />
               <span>Edit Profile</span>
             </button>
 
             {isAdmin && (
               <Link
                 href="/admin"
-                className="h-9 px-3 text-xs font-semibold text-gray-900 bg-white hover:bg-gray-50 active:bg-gray-100 border border-black/[0.08] rounded-xl transition-all shadow-xs flex items-center gap-1.5 cursor-pointer whitespace-nowrap"
+                className="h-9 px-3 text-xs font-semibold text-amber-300 bg-gradient-to-br from-[#271f09] to-[#181204] hover:from-[#33290b] hover:to-[#201805] active:scale-98 border border-amber-500/30 rounded-xl transition-all shadow-sm flex items-center gap-1.5 cursor-pointer whitespace-nowrap"
               >
-                <ShieldCheck className="w-3.5 h-3.5 text-amber-600" />
+                <ShieldCheck className="w-3.5 h-3.5 text-amber-400" />
                 <span className="hidden sm:inline">Admin Console</span>
               </Link>
             )}
 
             <button
               onClick={handleSignOut}
-              className="h-9 px-3 text-xs font-semibold text-rose-700 bg-white hover:bg-rose-50 active:bg-rose-100 border border-black/[0.08] rounded-xl transition-all shadow-xs flex items-center gap-1.5 cursor-pointer whitespace-nowrap"
+              className="h-9 px-3 text-xs font-semibold text-rose-300 bg-gradient-to-br from-[#280c13] to-[#19060b] hover:from-[#361019] hover:to-[#22080f] active:scale-98 border border-rose-500/30 rounded-xl transition-all shadow-sm flex items-center gap-1.5 cursor-pointer whitespace-nowrap"
             >
-              <LogOut className="w-3.5 h-3.5 text-rose-600" />
+              <LogOut className="w-3.5 h-3.5 text-rose-400" />
               <span>Sign Out</span>
             </button>
           </div>
@@ -173,14 +173,18 @@ export default function ProfilePage() {
       {/* Main Container */}
       <main className="max-w-4xl mx-auto px-4 sm:px-6 py-8 w-full flex-1 space-y-6">
         
-        {/* Profile Card */}
-        <div className="bg-white rounded-3xl border border-black/[0.08] p-6 sm:p-8 shadow-xs">
-          <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6 text-center sm:text-left">
+        {/* Profile Card — Gradient matching Dashboard Hero */}
+        <div className="rounded-3xl border border-emerald-500/20 bg-gradient-to-br from-[#0a2e1d]/90 via-[#072417]/85 to-[#051b11]/90 backdrop-blur-xl p-6 sm:p-8 shadow-xl relative overflow-hidden transition-all">
+          {/* Ambient corner auras matching Dashboard Hero */}
+          <div className="absolute -top-20 -right-20 w-60 h-60 bg-emerald-400/15 rounded-full blur-3xl pointer-events-none" />
+          <div className="absolute -bottom-20 -left-20 w-60 h-60 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
+
+          <div className="relative z-10 flex flex-col sm:flex-row items-center sm:items-start gap-6 text-center sm:text-left">
             
             {/* Avatar / Picture */}
             <div className="relative shrink-0 group">
               {avatarUrl ? (
-                <div className="w-24 h-24 rounded-3xl overflow-hidden border border-black/[0.08] shadow-sm relative">
+                <div className="w-24 h-24 rounded-3xl overflow-hidden border border-emerald-400/30 shadow-md relative">
                   <img
                     src={avatarUrl}
                     alt={fullName}
@@ -192,19 +196,19 @@ export default function ProfilePage() {
                   />
                 </div>
               ) : (
-                <div className="w-24 h-24 rounded-3xl bg-gray-100 border border-black/[0.08] flex items-center justify-center text-gray-800 text-3xl font-black shadow-xs">
+                <div className="w-24 h-24 rounded-3xl bg-gradient-to-br from-[#0c3924] to-[#062014] border border-emerald-400/35 flex items-center justify-center text-emerald-300 text-3xl font-black shadow-inner">
                   {fullName[0]?.toUpperCase() || 'U'}
                 </div>
               )}
               <button
                 type="button"
                 onClick={() => setIsEditOpen(true)}
-                className="absolute -top-1.5 -right-1.5 w-7 h-7 rounded-full bg-white hover:bg-gray-50 active:bg-gray-100 border border-black/[0.08] shadow-md flex items-center justify-center text-gray-700 hover:text-emerald-700 transition-colors cursor-pointer"
+                className="absolute -top-1.5 -right-1.5 w-7 h-7 rounded-full bg-[#0c3924] hover:bg-[#124d32] border border-emerald-400/40 shadow-md flex items-center justify-center text-emerald-300 hover:text-white transition-colors cursor-pointer"
                 title="Change Profile Photo"
               >
                 <Camera className="w-3.5 h-3.5" />
               </button>
-              <div className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-emerald-600 border-2 border-white flex items-center justify-center text-white" title="Verified Account">
+              <div className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-[#10b981] border-2 border-[#072417] flex items-center justify-center text-black font-black" title="Verified Account">
                 <CheckCircle2 className="w-3.5 h-3.5" />
               </div>
             </div>
@@ -212,21 +216,21 @@ export default function ProfilePage() {
             {/* Profile Info */}
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2 justify-center sm:justify-start flex-wrap mb-1">
-                <h2 className="text-xl sm:text-2xl font-black tracking-tight text-gray-950">
+                <h2 className="text-xl sm:text-2xl font-black tracking-tight text-white drop-shadow-sm">
                   {fullName}
                 </h2>
                 {profile?.username && (
-                  <span className="text-xs font-semibold text-emerald-800 bg-emerald-50 border border-emerald-200/80 px-2 py-0.5 rounded-md">
+                  <span className="text-xs font-bold text-emerald-300 bg-emerald-500/15 border border-emerald-500/30 px-2 py-0.5 rounded-full">
                     @{profile.username}
                   </span>
                 )}
-                <span className="px-2.5 py-0.5 rounded-md text-xs font-semibold uppercase tracking-wider bg-gray-100 text-gray-800 border border-black/[0.08]">
+                <span className="px-2.5 py-0.5 rounded-full text-xs font-bold uppercase tracking-wider bg-[#0d3322] text-emerald-300 border border-emerald-500/30">
                   {roleLabelMap[role] || role}
                 </span>
                 <button
                   type="button"
                   onClick={() => setIsEditOpen(true)}
-                  className="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-700 hover:text-emerald-900 hover:bg-emerald-50 px-2 py-0.5 rounded-md transition-colors cursor-pointer border border-emerald-200/60"
+                  className="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-300 hover:text-white hover:bg-emerald-500/20 px-2 py-0.5 rounded-full transition-colors cursor-pointer border border-emerald-500/30"
                   title="Edit Profile"
                 >
                   <Pencil className="w-2.5 h-2.5" />
@@ -234,18 +238,18 @@ export default function ProfilePage() {
                 </button>
               </div>
 
-              <p className="text-sm text-gray-600 font-medium flex items-center justify-center sm:justify-start gap-1.5">
-                <Mail className="w-4 h-4 text-gray-400 shrink-0" />
+              <p className="text-sm text-white/70 font-medium flex items-center justify-center sm:justify-start gap-1.5 mt-1">
+                <Mail className="w-4 h-4 text-emerald-400 shrink-0" />
                 <span>{email}</span>
               </p>
 
               <div className="flex items-center justify-center sm:justify-start gap-2 mt-4 flex-wrap">
-                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold bg-gray-50 text-gray-800 border border-black/[0.08]">
-                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-700" />
-                  Account Approved & Active
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-emerald-500/15 text-emerald-300 border border-emerald-400/30">
+                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+                  Account Approved &amp; Active
                 </span>
 
-                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium bg-gray-100 text-gray-700 border border-black/[0.06]">
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-[#0d3020] text-emerald-100/75 border border-emerald-500/25">
                   Provider: Google OAuth
                 </span>
               </div>
@@ -254,114 +258,120 @@ export default function ProfilePage() {
           </div>
         </div>
 
-        {/* Detailed Information Grid */}
+        {/* Detailed Information Grid — Gradient Matching Dashboard StatCards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           
           {/* Institutional Affiliation */}
-          <div className="bg-white rounded-2xl border border-black/[0.06] p-5 shadow-xs space-y-3">
-            <div className="flex items-center gap-2.5 text-emerald-800">
-              <div className="w-8 h-8 rounded-xl bg-emerald-50 flex items-center justify-center">
-                <Building className="w-4 h-4 text-emerald-700" />
+          <div className="rounded-3xl border border-emerald-500/20 bg-gradient-to-br from-[#0a2e1d]/90 via-[#072417]/85 to-[#051b11]/90 backdrop-blur-xl p-5 sm:p-6 shadow-xl space-y-3.5 relative overflow-hidden transition-all">
+            <div className="absolute -top-12 -right-12 w-32 h-32 bg-emerald-400/10 rounded-full blur-2xl pointer-events-none" />
+            
+            <div className="flex items-center gap-2.5 text-emerald-400 relative z-10">
+              <div className="w-8 h-8 rounded-xl bg-emerald-500/15 border border-emerald-500/25 flex items-center justify-center">
+                <Building className="w-4 h-4 text-emerald-400" />
               </div>
-              <h3 className="text-sm font-bold text-gray-950">Institutional Affiliation</h3>
+              <h3 className="text-sm font-bold text-white">Institutional Affiliation</h3>
             </div>
             
-            <div className="space-y-2 text-xs">
+            <div className="space-y-2.5 text-xs relative z-10">
               <div>
-                <p className="text-gray-400 font-medium">Institution</p>
-                <p className="text-gray-900 font-semibold">Pambayang Dalubhasaan ng Marilao (PDM)</p>
+                <p className="text-emerald-100/50 font-medium">Institution</p>
+                <p className="text-white font-bold mt-0.5">Pambayang Dalubhasaan ng Marilao (PDM)</p>
               </div>
               <div>
-                <p className="text-gray-400 font-medium">College</p>
-                <p className="text-gray-900 font-semibold">College of Computer Studies (CCS)</p>
+                <p className="text-emerald-100/50 font-medium">College</p>
+                <p className="text-white font-bold mt-0.5">College of Computer Studies (CCS)</p>
               </div>
               <div>
-                <p className="text-gray-400 font-medium">Recognized Organization</p>
-                <p className="text-gray-900 font-semibold">League of Information Technology Enthusiasts (LITE)</p>
+                <p className="text-emerald-100/50 font-medium">Recognized Organization</p>
+                <p className="text-white font-bold mt-0.5">League of Information Technology Enthusiasts (LITE)</p>
               </div>
             </div>
           </div>
 
-          {/* Contact & Verification */}
-          <div className="bg-white rounded-2xl border border-black/[0.06] p-5 shadow-xs space-y-3">
-            <div className="flex items-center gap-2.5 text-emerald-800">
-              <div className="w-8 h-8 rounded-xl bg-emerald-50 flex items-center justify-center">
-                <Shield className="w-4 h-4 text-emerald-700" />
+          {/* Contact & Access */}
+          <div className="rounded-3xl border border-emerald-500/20 bg-gradient-to-br from-[#0a2e1d]/90 via-[#072417]/85 to-[#051b11]/90 backdrop-blur-xl p-5 sm:p-6 shadow-xl space-y-3.5 relative overflow-hidden transition-all">
+            <div className="absolute -top-12 -right-12 w-32 h-32 bg-emerald-400/10 rounded-full blur-2xl pointer-events-none" />
+
+            <div className="flex items-center gap-2.5 text-emerald-400 relative z-10">
+              <div className="w-8 h-8 rounded-xl bg-emerald-500/15 border border-emerald-500/25 flex items-center justify-center">
+                <Shield className="w-4 h-4 text-emerald-400" />
               </div>
-              <h3 className="text-sm font-bold text-gray-950">Contact & Access</h3>
+              <h3 className="text-sm font-bold text-white">Contact &amp; Access</h3>
             </div>
 
-            <div className="space-y-2.5 text-xs">
+            <div className="space-y-2.5 text-xs relative z-10">
               <div>
-                <p className="text-gray-400 font-medium">Username</p>
+                <p className="text-emerald-100/50 font-medium">Username</p>
                 <div className="flex items-center gap-1.5 mt-0.5">
-                  <p className="text-gray-900 font-semibold">
-                    {profile?.username ? `@${profile.username}` : <span className="text-gray-400 italic font-normal">Not set</span>}
+                  <p className="text-white font-bold">
+                    {profile?.username ? `@${profile.username}` : <span className="text-white/40 italic font-normal">Not set</span>}
                   </p>
                   <button
                     onClick={() => setIsEditOpen(true)}
-                    className="text-[11px] text-emerald-700 hover:underline font-semibold cursor-pointer"
+                    className="text-[11px] text-emerald-400 hover:underline font-semibold cursor-pointer"
                   >
                     {profile?.username ? 'Change' : '+ Add'}
                   </button>
                 </div>
               </div>
               <div>
-                <p className="text-gray-400 font-medium">Contact Number</p>
+                <p className="text-emerald-100/50 font-medium">Contact Number</p>
                 <div className="flex items-center gap-1.5 mt-0.5">
-                  <p className="text-gray-900 font-semibold tabular-nums">
-                    {profile?.contact_number || <span className="text-gray-400 italic font-normal">Not provided</span>}
+                  <p className="text-white font-bold tabular-nums">
+                    {profile?.contact_number || <span className="text-white/40 italic font-normal">Not provided</span>}
                   </p>
                   <button
                     onClick={() => setIsEditOpen(true)}
-                    className="text-[11px] text-emerald-700 hover:underline font-semibold cursor-pointer"
+                    className="text-[11px] text-emerald-400 hover:underline font-semibold cursor-pointer"
                   >
                     {profile?.contact_number ? 'Change' : '+ Add number'}
                   </button>
                 </div>
               </div>
               <div>
-                <p className="text-gray-400 font-medium">Financial Role Authority</p>
-                <p className="text-gray-900 font-semibold capitalize">
+                <p className="text-emerald-100/50 font-medium">Financial Role Authority</p>
+                <p className="text-white font-bold capitalize mt-0.5">
                   {role} {isAdmin ? '(Full System Authority)' : '(Restricted Segregation of Duties)'}
                 </p>
               </div>
               <div>
-                <p className="text-gray-400 font-medium">Account Status</p>
-                <p className="text-emerald-700 font-bold">Approved & Verified</p>
+                <p className="text-emerald-100/50 font-medium">Account Status</p>
+                <p className="text-emerald-400 font-bold mt-0.5">Approved &amp; Verified</p>
               </div>
             </div>
           </div>
 
         </div>
 
-        {/* Quick Navigation Cards */}
-        <div className="bg-white rounded-2xl border border-black/[0.06] p-5 shadow-xs">
-          <h3 className="text-xs font-bold uppercase tracking-wider text-gray-500 mb-3">
+        {/* Quick Navigation Cards — Gradient Matching Dashboard */}
+        <div className="rounded-3xl border border-emerald-500/20 bg-gradient-to-br from-[#09291a]/90 via-[#072115]/85 to-[#05180f]/90 backdrop-blur-xl p-5 sm:p-6 shadow-xl relative overflow-hidden transition-all">
+          <div className="absolute -top-16 -right-16 w-40 h-40 bg-emerald-400/10 rounded-full blur-2xl pointer-events-none" />
+
+          <h3 className="text-xs font-bold uppercase tracking-wider text-emerald-300/80 mb-3 relative z-10">
             Available Operations
           </h3>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 relative z-10">
             <Link
               href="/"
-              className="p-3.5 rounded-xl border border-gray-200/80 hover:border-emerald-300 hover:bg-emerald-50/40 transition-all flex items-center justify-between group"
+              className="p-4 rounded-2xl border border-emerald-500/20 bg-gradient-to-br from-[#0b2f1e]/90 to-[#061d12]/90 hover:from-[#0e3b26] hover:to-[#092617] hover:border-emerald-400/40 transition-all flex items-center justify-between group shadow-md"
             >
               <div>
-                <p className="text-xs font-bold text-gray-900 group-hover:text-emerald-950">Main Ledger & Dashboard</p>
-                <p className="text-[11px] text-gray-500">Record transactions, cash box, liquidation preview</p>
+                <p className="text-xs font-bold text-white group-hover:text-emerald-300 transition-colors">Main Ledger &amp; Dashboard</p>
+                <p className="text-[11px] text-white/50 group-hover:text-white/70 transition-colors mt-0.5">Record transactions, cash box, liquidation preview</p>
               </div>
-              <ExternalLink className="w-4 h-4 text-gray-400 group-hover:text-emerald-700 shrink-0" />
+              <ExternalLink className="w-4 h-4 text-emerald-400/60 group-hover:text-emerald-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all shrink-0" />
             </Link>
 
             {isAdmin && (
               <Link
                 href="/admin"
-                className="p-3.5 rounded-xl border border-amber-200/80 hover:border-amber-300 hover:bg-amber-50/40 transition-all flex items-center justify-between group"
+                className="p-4 rounded-2xl border border-amber-500/25 bg-gradient-to-br from-[#28200a]/90 to-[#181305]/90 hover:from-[#33290d] hover:to-[#201906] hover:border-amber-400/40 transition-all flex items-center justify-between group shadow-md"
               >
                 <div>
-                  <p className="text-xs font-bold text-gray-900 group-hover:text-amber-950">Access Control & Admin</p>
-                  <p className="text-[11px] text-gray-500">Review and approve new member registration requests</p>
+                  <p className="text-xs font-bold text-white group-hover:text-amber-300 transition-colors">Access Control &amp; Admin</p>
+                  <p className="text-[11px] text-amber-200/50 group-hover:text-amber-200/70 transition-colors mt-0.5">Review and approve new member registration requests</p>
                 </div>
-                <ShieldCheck className="w-4 h-4 text-amber-700 shrink-0" />
+                <ShieldCheck className="w-4 h-4 text-amber-400 group-hover:scale-110 transition-transform shrink-0" />
               </Link>
             )}
           </div>

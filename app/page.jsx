@@ -1,5 +1,7 @@
 'use client';
 import { useState, useEffect } from 'react';
+import Link from 'next/link';
+import { Plus, Wallet, Calculator, Sparkles, ShieldCheck, Home, User, FileText } from 'lucide-react';
 import Navbar from '@/components/layout/Navbar';
 import StatCards from '@/components/dashboard/StatCards';
 import TransactionTable from '@/components/ledger/TransactionTable';
@@ -14,6 +16,7 @@ import { createClient } from '@/lib/supabase/client';
 import { isSuperAdminEmail } from '@/lib/config/admin';
 import { toCentavos, fromCentavos, denomCodeToCountKey } from '@/lib/utils/currency';
 import { validateTransactionAmount, validateOutflowBalance } from '@/lib/utils/validation';
+import { useTheme } from '@/components/theme/ThemeProvider';
 
 const DEFAULT_SEMESTERS = [
   { id: 'sem-26-27-1', academicYear: '2026-2027', semester: '1st Sem', label: 'AY 2026–2027 • 1st Sem', isActive: true },
@@ -65,6 +68,7 @@ const DEFAULT_LITE_SIGNATORIES_25_26 = {
 const DEFAULT_LITE_SIGNATORIES = DEFAULT_LITE_SIGNATORIES_26_27;
 
 export default function Dashboard() {
+  const { isLight } = useTheme();
   const [currentUser, setCurrentUser] = useState(null);
   const [userProfile, setUserProfile] = useState(null);
   const [currentRole, setCurrentRole] = useState('treasurer');
@@ -88,6 +92,20 @@ export default function Dashboard() {
   // 3NF Master Catalog States
   const [categories, setCategories] = useState([]);
   const [denominations, setDenominations] = useState([]);
+
+  // Dynamic Time-of-Day Greeting (Good morning / Good afternoon / Good evening)
+  const [greeting, setGreeting] = useState('Good day');
+
+  useEffect(() => {
+    const hour = new Date().getHours();
+    if (hour >= 5 && hour < 12) {
+      setGreeting('Good morning');
+    } else if (hour >= 12 && hour < 18) {
+      setGreeting('Good afternoon');
+    } else {
+      setGreeting('Good evening');
+    }
+  }, []);
 
   const supabase = createClient();
 
@@ -984,34 +1002,182 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#f8faf9]">
+    <div className="min-h-screen flex flex-col">
       
       {/* Top Navigation */}
-      <ModuleErrorBoundary moduleName="Navigation Bar">
-        <Navbar
-          currentRole={currentRole}
-          userProfile={userProfile}
-          currentUser={currentUser}
-          onOpenAI={() => setIsAIOpen(true)}
-          onOpenDenominations={() => setIsDenomOpen(true)}
-          currentSemester={currentSemester}
-          semesters={semesters}
-          onSelectSemester={(semId) => {
-            const found = semesters.find((s) => s.id === semId || `${s.academicYear}-${s.semester}` === semId);
-            if (found) {
-              setCurrentSemester(found);
-              if (typeof window !== 'undefined') {
-                localStorage.setItem('finlite_active_semester_id', found.id);
+      <div className="no-print">
+        <ModuleErrorBoundary moduleName="Navigation Bar">
+          <Navbar
+            currentRole={currentRole}
+            userProfile={userProfile}
+            currentUser={currentUser}
+            onOpenAI={() => setIsAIOpen(true)}
+            onOpenDenominations={() => setIsDenomOpen(true)}
+            currentSemester={currentSemester}
+            semesters={semesters}
+            onSelectSemester={(semId) => {
+              const found = semesters.find((s) => s.id === semId || `${s.academicYear}-${s.semester}` === semId);
+              if (found) {
+                setCurrentSemester(found);
+                if (typeof window !== 'undefined') {
+                  localStorage.setItem('finlite_active_semester_id', found.id);
+                }
               }
-            }
-          }}
-          onOpenNewSemester={() => setIsNewSemesterOpen(true)}
-        />
-      </ModuleErrorBoundary>
+            }}
+            onOpenNewSemester={() => setIsNewSemesterOpen(true)}
+          />
+        </ModuleErrorBoundary>
+      </div>
 
       {/* Main Content Area */}
-      <main className="flex-1 max-w-7xl w-full mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-6">
+      <main className="flex-1 max-w-7xl w-full mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-6 pb-24 sm:pb-8 space-y-5 sm:space-y-6 no-print">
         
+        {/* Modern Minimalist Hero Balance & Action Hub — CONCEPT DESIGN */}
+        <section className={`relative rounded-3xl backdrop-blur-xl p-5 sm:p-7 shadow-xl overflow-hidden transition-all duration-300 ${
+          isLight
+            ? 'bg-gradient-to-br from-[#f8fbf9]/95 via-[#f0f7f3]/90 to-[#e4f1e9]/85 border border-emerald-600/15 shadow-emerald-950/5'
+            : 'bg-[#0a2419]/85 border border-emerald-500/20 shadow-2xl'
+        }`}>
+          {/* Subtle ambient corner light aura */}
+          <div className={`absolute -top-24 -right-24 w-72 h-72 rounded-full blur-3xl pointer-events-none transition-opacity duration-300 ${isLight ? 'bg-emerald-400/15' : 'bg-emerald-400/20'}`} />
+          <div className={`absolute -bottom-24 -left-24 w-72 h-72 rounded-full blur-3xl pointer-events-none transition-opacity duration-300 ${isLight ? 'bg-teal-400/15' : 'bg-emerald-500/15'}`} />
+
+          <div className="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+            
+            {/* Left: Dynamic Greetings Hero Header */}
+            <div>
+              {/* Dynamic Time-of-Day Tag & Role */}
+              <div className="flex items-center gap-2 mb-2">
+                <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] sm:text-xs font-bold tracking-wider uppercase transition-colors ${
+                  isLight
+                    ? 'bg-emerald-100 text-emerald-800 border border-emerald-300'
+                    : 'bg-emerald-500/15 text-emerald-300 border border-emerald-500/25'
+                }`}>
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                  {currentRole === 'admin' ? 'Administrator Portal' : currentRole === 'treasurer' ? 'LITE Treasury' : 'Officer Portal'}
+                </span>
+              </div>
+
+              {/* Big Minimalist Greetings */}
+              <h1 className={`text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight drop-shadow-sm transition-colors ${
+                isLight ? 'text-emerald-950' : 'text-white'
+              }`}>
+                {greeting}, {userProfile?.first_name || userProfile?.full_name?.split(' ')[0] || currentUser?.user_metadata?.full_name?.split(' ')[0] || 'Officer'}
+              </h1>
+            </div>
+
+            {/* Right: Quick Action Pods Dock (5 Circular Pods matching mockup) */}
+            <div className={`p-2 sm:p-2.5 rounded-2xl sm:rounded-full backdrop-blur-md flex items-center justify-around sm:justify-start sm:gap-4 shrink-0 transition-all ${
+              isLight
+                ? 'bg-gradient-to-r from-emerald-100/60 via-white/80 to-teal-100/60 border border-emerald-300/60 shadow-xs'
+                : 'bg-[#071c13]/90 border border-emerald-500/25 shadow-inner'
+            }`}>
+              
+              {/* Pod 1: Record Transaction */}
+              <button
+                type="button"
+                onClick={() => setIsNewTxOpen(true)}
+                className="flex flex-col items-center gap-1.5 p-1 sm:px-2.5 group cursor-pointer"
+              >
+                <div className={`w-11 h-11 sm:w-12 sm:h-12 rounded-full flex items-center justify-center transition-all shadow-md ${
+                  isLight
+                    ? 'bg-white/95 border border-emerald-300/70 text-emerald-800 group-hover:bg-emerald-600 group-hover:text-white group-hover:border-emerald-600 group-hover:scale-105 active:scale-95'
+                    : 'bg-[#0c2e1f] border border-emerald-500/35 text-emerald-400 group-hover:bg-[#10b981] group-hover:text-black group-hover:border-emerald-400 group-hover:scale-105 active:scale-95'
+                }`}>
+                  <Plus className="w-5 h-5 stroke-[2.5]" />
+                </div>
+                <span className={`text-[10px] sm:text-[11px] font-bold transition-colors ${
+                  isLight ? 'text-emerald-950/80 group-hover:text-emerald-700' : 'text-white/75 group-hover:text-emerald-300'
+                }`}>
+                  Record
+                </span>
+              </button>
+
+              {/* Pod 2: Cash Box Audit */}
+              <button
+                type="button"
+                onClick={() => setIsDenomOpen(true)}
+                className="flex flex-col items-center gap-1.5 p-1 sm:px-2.5 group cursor-pointer"
+              >
+                <div className={`w-11 h-11 sm:w-12 sm:h-12 rounded-full flex items-center justify-center transition-all shadow-md ${
+                  isLight
+                    ? 'bg-white/95 border border-emerald-300/70 text-emerald-800 group-hover:bg-emerald-600 group-hover:text-white group-hover:border-emerald-600 group-hover:scale-105 active:scale-95'
+                    : 'bg-[#0c2e1f] border border-emerald-500/35 text-emerald-400 group-hover:bg-[#10b981] group-hover:text-black group-hover:border-emerald-400 group-hover:scale-105 active:scale-95'
+                }`}>
+                  <Wallet className="w-5 h-5" />
+                </div>
+                <span className={`text-[10px] sm:text-[11px] font-bold transition-colors ${
+                  isLight ? 'text-emerald-950/80 group-hover:text-emerald-700' : 'text-white/75 group-hover:text-emerald-300'
+                }`}>
+                  Cash Box
+                </span>
+              </button>
+
+              {/* Pod 3: Proposal Creator */}
+              <button
+                type="button"
+                onClick={() => setIsProposalOpen(true)}
+                className="flex flex-col items-center gap-1.5 p-1 sm:px-2.5 group cursor-pointer"
+              >
+                <div className={`w-11 h-11 sm:w-12 sm:h-12 rounded-full flex items-center justify-center transition-all shadow-md ${
+                  isLight
+                    ? 'bg-white/95 border border-emerald-300/70 text-emerald-800 group-hover:bg-emerald-600 group-hover:text-white group-hover:border-emerald-600 group-hover:scale-105 active:scale-95'
+                    : 'bg-[#0c2e1f] border border-emerald-500/35 text-emerald-400 group-hover:bg-[#10b981] group-hover:text-black group-hover:border-emerald-400 group-hover:scale-105 active:scale-95'
+                }`}>
+                  <Calculator className="w-5 h-5" />
+                </div>
+                <span className={`text-[10px] sm:text-[11px] font-bold transition-colors ${
+                  isLight ? 'text-emerald-950/80 group-hover:text-emerald-700' : 'text-white/75 group-hover:text-emerald-300'
+                }`}>
+                  Proposal
+                </span>
+              </button>
+
+              {/* Pod 4: Preview Report */}
+              <button
+                type="button"
+                onClick={handleOpenLiquidationPreview}
+                className="flex flex-col items-center gap-1.5 p-1 sm:px-2.5 group cursor-pointer"
+              >
+                <div className={`w-11 h-11 sm:w-12 sm:h-12 rounded-full flex items-center justify-center transition-all shadow-md ${
+                  isLight
+                    ? 'bg-white/95 border border-emerald-300/70 text-emerald-800 group-hover:bg-emerald-600 group-hover:text-white group-hover:border-emerald-600 group-hover:scale-105 active:scale-95'
+                    : 'bg-[#0c2e1f] border border-emerald-500/35 text-emerald-400 group-hover:bg-[#10b981] group-hover:text-black group-hover:border-emerald-400 group-hover:scale-105 active:scale-95'
+                }`}>
+                  <FileText className="w-5 h-5" />
+                </div>
+                <span className={`text-[10px] sm:text-[11px] font-bold transition-colors ${
+                  isLight ? 'text-emerald-950/80 group-hover:text-emerald-700' : 'text-white/75 group-hover:text-emerald-300'
+                }`}>
+                  Report
+                </span>
+              </button>
+
+              {/* Pod 5: AI Co-Pilot */}
+              <button
+                type="button"
+                onClick={() => setIsAIOpen(true)}
+                className="flex flex-col items-center gap-1.5 p-1 sm:px-2.5 group cursor-pointer"
+              >
+                <div className={`w-11 h-11 sm:w-12 sm:h-12 rounded-full flex items-center justify-center transition-all shadow-md ${
+                  isLight
+                    ? 'bg-white/95 border border-emerald-300/70 text-emerald-800 group-hover:bg-emerald-600 group-hover:text-white group-hover:border-emerald-600 group-hover:scale-105 active:scale-95'
+                    : 'bg-[#0c2e1f] border border-emerald-500/35 text-emerald-400 group-hover:bg-[#10b981] group-hover:text-black group-hover:border-emerald-400 group-hover:scale-105 active:scale-95'
+                }`}>
+                  <Sparkles className="w-5 h-5" />
+                </div>
+                <span className={`text-[10px] sm:text-[11px] font-bold transition-colors ${
+                  isLight ? 'text-emerald-950/80 group-hover:text-emerald-700' : 'text-white/75 group-hover:text-emerald-300'
+                }`}>
+                  AI Co-Pilot
+                </span>
+              </button>
+
+            </div>
+
+          </div>
+        </section>
+
         {/* KPI Metric Cards */}
         <ModuleErrorBoundary moduleName="Financial Overview">
           <StatCards
@@ -1035,35 +1201,108 @@ export default function Dashboard() {
 
       </main>
 
+      {/* Mobile Floating Action Dock (Matching Mockup Navigation) */}
+      <div className={`sm:hidden fixed bottom-3 left-3 right-3 z-40 backdrop-blur-xl rounded-full p-1.5 px-4 flex items-center justify-between shadow-2xl no-print transition-all duration-200 ${
+        isLight
+          ? 'bg-white/95 border border-emerald-200/80 shadow-emerald-950/10'
+          : 'bg-[#07130d]/95 border border-[#163325] shadow-black/80'
+      }`}>
+        <button
+          type="button"
+          onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+          className="flex flex-col items-center gap-0.5 p-1 text-emerald-500 cursor-pointer"
+        >
+          <Home className="w-4 h-4" />
+          <span className="text-[9px] font-bold">Home</span>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => setIsDenomOpen(true)}
+          className={`flex flex-col items-center gap-0.5 p-1 transition-colors cursor-pointer ${
+            isLight ? 'text-emerald-950/60 hover:text-emerald-950' : 'text-white/50 hover:text-white'
+          }`}
+        >
+          <Wallet className="w-4 h-4" />
+          <span className="text-[9px] font-bold">Cash Box</span>
+        </button>
+
+        {/* Center Floating Action Button (Glowing Emerald Pod) */}
+        <button
+          type="button"
+          onClick={() => setIsNewTxOpen(true)}
+          className={`-mt-5 w-12 h-12 rounded-full flex items-center justify-center shadow-lg hover:scale-105 active:scale-95 transition-all cursor-pointer ${
+            isLight
+              ? 'bg-emerald-500 text-white shadow-emerald-500/30 border-2 border-white'
+              : 'bg-[#10b981] text-black shadow-emerald-500/40 border-2 border-[#07130d]'
+          }`}
+          title="Record New Transaction"
+        >
+          <Plus className="w-6 h-6 stroke-[3]" />
+        </button>
+
+        <button
+          type="button"
+          onClick={() => setIsAIOpen(true)}
+          className={`flex flex-col items-center gap-0.5 p-1 transition-colors cursor-pointer ${
+            isLight ? 'text-emerald-950/60 hover:text-emerald-950' : 'text-white/50 hover:text-white'
+          }`}
+        >
+          <Sparkles className="w-4 h-4" />
+          <span className="text-[9px] font-bold">AI Co-Pilot</span>
+        </button>
+
+        <Link
+          href="/profile"
+          className={`flex flex-col items-center gap-0.5 p-1 transition-colors cursor-pointer ${
+            isLight ? 'text-emerald-950/60 hover:text-emerald-950' : 'text-white/50 hover:text-white'
+          }`}
+        >
+          <User className="w-4 h-4" />
+          <span className="text-[9px] font-bold">Profile</span>
+        </Link>
+      </div>
+
+      {/* Dashboard Footer matching reference mockup */}
+      <footer className="max-w-7xl w-full mx-auto px-4 py-6 pb-24 sm:pb-6 text-center no-print">
+        <p className={`text-[11px] font-medium transition-colors ${
+          isLight ? 'text-emerald-950/40' : 'text-white/30'
+        }`}>
+          © 2026 FinLITE · Pambayang Dalubhasaan ng Marilao · All rights reserved.
+        </p>
+      </footer>
+
       {/* Modals & Slide-overs */}
-      <ModuleErrorBoundary moduleName="Semester Management">
-        <NewSemesterModal
-          isOpen={isNewSemesterOpen}
-          onClose={() => setIsNewSemesterOpen(false)}
-          currentSemester={currentSemester}
-          currentSummary={summary}
-          onStartSemester={handleStartSemester}
-        />
-      </ModuleErrorBoundary>
+      <div className="no-print">
+        <ModuleErrorBoundary moduleName="Semester Management">
+          <NewSemesterModal
+            isOpen={isNewSemesterOpen}
+            onClose={() => setIsNewSemesterOpen(false)}
+            currentSemester={currentSemester}
+            currentSummary={summary}
+            onStartSemester={handleStartSemester}
+          />
+        </ModuleErrorBoundary>
 
-      <ModuleErrorBoundary moduleName="Transaction Entry">
-        <NewTransactionModal
-          isOpen={isNewTxOpen}
-          onClose={() => setIsNewTxOpen(false)}
-          onSave={handleManualSaveTransaction}
-          categories={categories}
-          cashBalance={summary.cash_on_hand}
-          gcashBalance={summary.gcash_balance}
-        />
-      </ModuleErrorBoundary>
+        <ModuleErrorBoundary moduleName="Transaction Entry">
+          <NewTransactionModal
+            isOpen={isNewTxOpen}
+            onClose={() => setIsNewTxOpen(false)}
+            onSave={handleManualSaveTransaction}
+            categories={categories}
+            cashBalance={summary.cash_on_hand}
+            gcashBalance={summary.gcash_balance}
+          />
+        </ModuleErrorBoundary>
 
-      <ModuleErrorBoundary moduleName="Proposal Generator">
-        <NewProposalModal
-          isOpen={isProposalOpen}
-          onClose={() => setIsProposalOpen(false)}
-          onOpenPreview={handleOpenProposalPreview}
-        />
-      </ModuleErrorBoundary>
+        <ModuleErrorBoundary moduleName="Proposal Generator">
+          <NewProposalModal
+            isOpen={isProposalOpen}
+            onClose={() => setIsProposalOpen(false)}
+            onOpenPreview={handleOpenProposalPreview}
+          />
+        </ModuleErrorBoundary>
+      </div>
 
       <ModuleErrorBoundary moduleName="Document Preview">
         {isPreviewOpen && previewData && (
@@ -1075,27 +1314,29 @@ export default function Dashboard() {
         )}
       </ModuleErrorBoundary>
 
-      <ModuleErrorBoundary moduleName="Cash Reconciliation">
-        <DenominationCounter
-          isOpen={isDenomOpen}
-          onClose={() => setIsDenomOpen(false)}
-          ledgerCashBalance={summary.cash_on_hand}
-          onDeclareShortage={handleDeclareShortage}
-          onSaveCount={handleSaveAuditCount}
-          currentRole={currentRole}
-          latestReconciliation={latestReconciliation}
-          denominations={denominations}
-        />
-      </ModuleErrorBoundary>
+      <div className="no-print">
+        <ModuleErrorBoundary moduleName="Cash Reconciliation">
+          <DenominationCounter
+            isOpen={isDenomOpen}
+            onClose={() => setIsDenomOpen(false)}
+            ledgerCashBalance={summary.cash_on_hand}
+            onDeclareShortage={handleDeclareShortage}
+            onSaveCount={handleSaveAuditCount}
+            currentRole={currentRole}
+            latestReconciliation={latestReconciliation}
+            denominations={denominations}
+          />
+        </ModuleErrorBoundary>
 
-      <ModuleErrorBoundary moduleName="AI Co-Pilot">
-        <AIChatDrawer
-          isOpen={isAIOpen}
-          onClose={() => setIsAIOpen(false)}
-          summary={summary}
-          transactions={activeTransactions}
-        />
-      </ModuleErrorBoundary>
+        <ModuleErrorBoundary moduleName="AI Co-Pilot">
+          <AIChatDrawer
+            isOpen={isAIOpen}
+            onClose={() => setIsAIOpen(false)}
+            summary={summary}
+            transactions={activeTransactions}
+          />
+        </ModuleErrorBoundary>
+      </div>
 
     </div>
   );
