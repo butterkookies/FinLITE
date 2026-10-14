@@ -1,5 +1,5 @@
 'use client';
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { 
   ArrowDownRight, 
   ArrowUpRight, 
@@ -192,30 +192,35 @@ export default function TransactionTable({
     }
   };
 
-  const filtered = transactions.filter((tx) => {
-    const matchesType = 
-      filterType === 'ALL' ? true :
-      filterType === 'REIMBURSEMENT' ? tx.is_reimbursement :
-      tx.type === filterType;
+  const filtered = useMemo(() => {
+    const query = searchQuery.trim().toLowerCase();
+    return transactions.filter((tx) => {
+      const matchesType = 
+        filterType === 'ALL' ? true :
+        filterType === 'REIMBURSEMENT' ? tx.is_reimbursement :
+        tx.type === filterType;
 
-    const matchesSearch = 
-      (tx.title || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (tx.description && tx.description.toLowerCase().includes(searchQuery.toLowerCase())) ||
-      (tx.event_name && tx.event_name.toLowerCase().includes(searchQuery.toLowerCase())) ||
-      (tx.reimbursement_recipient && tx.reimbursement_recipient.toLowerCase().includes(searchQuery.toLowerCase()));
+      if (!matchesType) return false;
+      if (!query) return true;
 
-    return matchesType && matchesSearch;
-  });
+      return (
+        (tx.title || '').toLowerCase().includes(query) ||
+        (tx.description && tx.description.toLowerCase().includes(query)) ||
+        (tx.event_name && tx.event_name.toLowerCase().includes(query)) ||
+        (tx.reimbursement_recipient && tx.reimbursement_recipient.toLowerCase().includes(query))
+      );
+    });
+  }, [transactions, filterType, searchQuery]);
 
   return (
-    <div className={`rounded-3xl transition-all relative overflow-hidden shadow-xl ${
+    <div className={`rounded-2xl sm:rounded-3xl transition-colors relative overflow-hidden border ${
       isLight
-        ? 'bg-gradient-to-br from-[#f8fbf9]/95 via-[#f2f7f4]/90 to-[#e6f1ea]/85 backdrop-blur-xl shadow-emerald-950/5'
-        : 'bg-[#082218]/85 backdrop-blur-xl shadow-2xl shadow-black/30'
+        ? 'bg-white border-zinc-200/80 shadow-xs'
+        : 'bg-[#0a2419]/90 border-emerald-900/40 shadow-xs'
     }`}>
       {/* Table Header Controls */}
-      <div className={`p-5 sm:p-6 border-b flex flex-col sm:flex-row sm:items-center justify-between gap-4 ${
-        isLight ? 'border-emerald-900/10 bg-emerald-50/20' : 'border-emerald-500/15'
+      <div className={`p-4 sm:p-6 border-b flex flex-col sm:flex-row sm:items-center justify-between gap-4 ${
+        isLight ? 'border-zinc-200/80 bg-zinc-50/50' : 'border-emerald-500/15'
       }`}>
         <div className="min-w-0">
           <div className="flex items-center gap-2.5 flex-wrap">
@@ -347,8 +352,8 @@ export default function TransactionTable({
           <thead>
             <tr className={`border-b text-[10px] sm:text-[11px] font-bold uppercase tracking-wider ${
               isLight
-                ? 'border-emerald-900/10 text-emerald-900/70 bg-gradient-to-r from-emerald-100/40 via-teal-50/40 to-emerald-100/40'
-                : 'border-[#142e20] text-white/40 bg-transparent'
+                ? 'border-zinc-200/80 text-zinc-600 bg-zinc-50/80'
+                : 'border-[#142e20] text-white/50 bg-[#071912]/50'
             }`}>
               <th className="py-3.5 pl-6 pr-3 w-[24%] text-left whitespace-nowrap">Transaction &amp; Event</th>
               <th className="py-3.5 px-3 w-[11%] text-left whitespace-nowrap">Date</th>
@@ -683,10 +688,10 @@ export default function TransactionTable({
                 setSelectedTx(tx);
                 setActiveTxPhotoIndex(0);
               }}
-              className={`rounded-2xl p-4.5 space-y-3 transition-all cursor-pointer ${
+              className={`rounded-2xl p-4.5 space-y-3 transition-colors cursor-pointer border ${
                 isLight
-                  ? 'bg-gradient-to-br from-white/95 to-[#f3faf6]/90 shadow-xs hover:ring-2 hover:ring-emerald-500/30'
-                  : 'bg-[#0c1b14] hover:ring-2 hover:ring-emerald-500/30'
+                  ? 'bg-white border-zinc-200/80 shadow-xs hover:border-emerald-300'
+                  : 'bg-[#0a2419] border-emerald-900/40 shadow-xs hover:border-emerald-700'
               }`}
             >
               {/* Top Row: Amount on left & Status pill badge on right */}
@@ -1511,8 +1516,8 @@ export default function TransactionTable({
                 {/* Hero Amount Banner */}
                 <div className={`p-4 sm:p-5 rounded-2xl border flex flex-col sm:flex-row sm:items-center justify-between gap-4 ${
                   isLight 
-                    ? 'bg-gradient-to-br from-emerald-50/70 via-white to-teal-50/40 border-emerald-200/80' 
-                    : 'bg-gradient-to-br from-[#0d281d] to-[#071710] border-[#1a4231]'
+                    ? 'bg-emerald-50/50 border-emerald-200/80' 
+                    : 'bg-[#0a2419] border-emerald-900/50'
                 }`}>
                   <div>
                     <span className={`text-[10px] font-bold uppercase tracking-wider block mb-1 ${

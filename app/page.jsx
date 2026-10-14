@@ -1,23 +1,44 @@
 'use client';
 import { useState, useEffect } from 'react';
+import dynamic from 'next/dynamic';
 import Link from 'next/link';
-import { Plus, Wallet, Calculator, Sparkles, ShieldCheck, Home, User, FileText } from 'lucide-react';
+import { Plus, Wallet, Calculator, Sparkles, FileText } from 'lucide-react';
 import Navbar from '@/components/layout/Navbar';
 import BottomNav from '@/components/layout/BottomNav';
 import StatCards from '@/components/dashboard/StatCards';
 import TransactionTable from '@/components/ledger/TransactionTable';
-import NewTransactionModal from '@/components/ledger/NewTransactionModal';
-import DenominationCounter from '@/components/reconciliation/DenominationCounter';
-import AIChatDrawer from '@/components/ai/AIChatDrawer';
-import NewProposalModal from '@/components/proposals/NewProposalModal';
-import DocumentPreviewModal from '@/components/reports/DocumentPreviewModal';
-import NewSemesterModal from '@/components/semesters/NewSemesterModal';
 import ModuleErrorBoundary from '@/components/common/ModuleErrorBoundary';
 import { createClient } from '@/lib/supabase/client';
 import { isSuperAdminEmail } from '@/lib/config/admin';
 import { toCentavos, fromCentavos, denomCodeToCountKey } from '@/lib/utils/currency';
 import { validateTransactionAmount, validateOutflowBalance } from '@/lib/utils/validation';
 import { useTheme } from '@/components/theme/ThemeProvider';
+
+// Dynamically split heavy modals out of the initial critical client bundle
+const NewTransactionModal = dynamic(() => import('@/components/ledger/NewTransactionModal'), {
+  ssr: false,
+  loading: () => null,
+});
+const DenominationCounter = dynamic(() => import('@/components/reconciliation/DenominationCounter'), {
+  ssr: false,
+  loading: () => null,
+});
+const AIChatDrawer = dynamic(() => import('@/components/ai/AIChatDrawer'), {
+  ssr: false,
+  loading: () => null,
+});
+const NewProposalModal = dynamic(() => import('@/components/proposals/NewProposalModal'), {
+  ssr: false,
+  loading: () => null,
+});
+const DocumentPreviewModal = dynamic(() => import('@/components/reports/DocumentPreviewModal'), {
+  ssr: false,
+  loading: () => null,
+});
+const NewSemesterModal = dynamic(() => import('@/components/semesters/NewSemesterModal'), {
+  ssr: false,
+  loading: () => null,
+});
 
 const DEFAULT_SEMESTERS = [
   { id: 'sem-26-27-1', academicYear: '2026-2027', semester: '1st Sem', label: 'AY 2026–2027 • 1st Sem', isActive: true },
@@ -1169,15 +1190,12 @@ export default function Dashboard() {
       <main className="flex-1 max-w-7xl w-full mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-6 pb-24 sm:pb-8 space-y-5 sm:space-y-6 no-print">
         
         {/* Modern Minimalist Hero Balance & Action Hub */}
-        <section className={`relative rounded-2xl sm:rounded-3xl p-5 sm:p-7 shadow-sm overflow-hidden transition-all duration-300 border ${
+        <section className={`rounded-2xl sm:rounded-3xl p-5 sm:p-7 shadow-xs overflow-hidden transition-colors border ${
           isLight
-            ? 'bg-white border-zinc-200'
-            : 'bg-[#0a2419]/90 border-emerald-900/40 shadow-sm'
+            ? 'bg-white border-zinc-200/80'
+            : 'bg-[#0a2419]/90 border-emerald-900/40'
         }`}>
-          {/* Subtle ambient corner light aura */}
-          <div className={`absolute -top-24 -right-24 w-72 h-72 rounded-full blur-3xl pointer-events-none transition-opacity duration-300 ${isLight ? 'bg-emerald-400/10' : 'bg-emerald-400/15'}`} />
-
-          <div className="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-5 sm:gap-6">
+          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-5 sm:gap-6">
             
             {/* Left: Dynamic Greetings Hero Header */}
             <div>

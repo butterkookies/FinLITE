@@ -1,8 +1,13 @@
 'use client';
 import { useState, useRef, useEffect } from 'react';
 import { Camera, Check, ChevronDown, Crop, Upload, X } from 'lucide-react';
+import dynamic from 'next/dynamic';
 import { compressReceiptImage } from '@/lib/utils/compression';
-import ReceiptCropModal from '@/components/common/ReceiptCropModal';
+
+const ReceiptCropModal = dynamic(() => import('@/components/common/ReceiptCropModal'), {
+  ssr: false,
+  loading: () => null,
+});
 import {
   sanitizeAmountInput,
   validateTransactionAmount,
