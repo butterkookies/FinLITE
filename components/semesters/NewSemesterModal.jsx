@@ -1,6 +1,6 @@
 'use client';
 import { useState, useRef, useEffect } from 'react';
-import { ArrowRight, Calendar, CheckCircle2, ChevronDown, Check, DollarSign, Wallet, X } from 'lucide-react';
+import { ArrowRight, Calendar, CheckCircle2, ChevronDown, Check, DollarSign, Wallet, X, AlertCircle } from 'lucide-react';
 import { formatPHP } from '@/lib/utils/currency';
 
 export default function NewSemesterModal({
@@ -23,6 +23,9 @@ export default function NewSemesterModal({
   );
   const [isSemesterOpen, setIsSemesterOpen] = useState(false);
   const semesterRef = useRef(null);
+  const academicYearInputRef = useRef(null);
+  const [error, setError] = useState(null);
+  const [shakeKey, setShakeKey] = useState(0);
 
   const [rolloverCash, setRolloverCash] = useState(true);
   const [rolloverGcash, setRolloverGcash] = useState(true);
@@ -42,7 +45,14 @@ export default function NewSemesterModal({
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (!newAcademicYear.trim()) return;
+    if (!newAcademicYear.trim()) {
+      setError('Please enter the academic year (e.g. 2026–2027)');
+      setShakeKey((prev) => prev + 1);
+      if (academicYearInputRef.current) {
+        academicYearInputRef.current.focus();
+      }
+      return;
+    }
 
     onStartSemester({
       academicYear: newAcademicYear.trim(),
@@ -90,7 +100,7 @@ export default function NewSemesterModal({
         </div>
 
         {/* Form Body */}
-        <form onSubmit={handleSubmit} className="p-5 sm:p-6 overflow-y-auto space-y-5 text-xs text-gray-700">
+        <form onSubmit={handleSubmit} noValidate className="p-5 sm:p-6 overflow-y-auto space-y-5 text-xs text-gray-700">
           
           {/* Ending Balance Summary Card */}
           <div className="bg-gray-50 border border-black/[0.08] rounded-2xl p-4 space-y-2.5">
@@ -128,18 +138,32 @@ export default function NewSemesterModal({
             </h4>
             
             <div className="grid grid-cols-2 gap-3">
-              <div>
+              <div className={error ? 'animate-field-shake' : ''} key={`ay-${shakeKey}`}>
                 <label className="block text-gray-700 font-semibold mb-1">
-                  Academic Year
+                  Academic Year <span className="text-red-500">*</span>
                 </label>
                 <input
+                  ref={academicYearInputRef}
                   type="text"
                   value={newAcademicYear}
-                  onChange={(e) => setNewAcademicYear(e.target.value)}
+                  onChange={(e) => {
+                    setNewAcademicYear(e.target.value);
+                    if (error) setError(null);
+                  }}
                   placeholder="e.g. 2026–2027"
-                  className="w-full h-10 px-3 bg-white border border-black/[0.08] rounded-xl text-xs font-semibold text-gray-900 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 select-text"
-                  required
+                  aria-invalid={Boolean(error)}
+                  className={`w-full h-10 px-3 bg-white border rounded-xl text-xs font-semibold text-gray-900 focus:outline-none transition-all select-text ${
+                    error
+                      ? 'border-red-500 ring-2 ring-red-500/20'
+                      : 'border-black/[0.08] focus:ring-2 focus:ring-emerald-500/20'
+                  }`}
                 />
+                {error && (
+                  <p className="text-xs font-semibold text-red-600 mt-1.5 flex items-center gap-1.5 animate-in fade-in duration-150">
+                    <AlertCircle className="w-3.5 h-3.5 shrink-0 text-red-600" />
+                    <span>{error}</span>
+                  </p>
+                )}
               </div>
 
               <div className="relative" ref={semesterRef}>

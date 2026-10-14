@@ -39,10 +39,18 @@ export default function EditProfileModal({
   const [successMsg, setSuccessMsg] = useState(null);
 
   const fileInputRef = useRef(null);
+  const firstNameInputRef = useRef(null);
+  const lastNameInputRef = useRef(null);
+  const usernameInputRef = useRef(null);
+  const contactInputRef = useRef(null);
+  const [formErrors, setFormErrors] = useState({});
+  const [shakeKey, setShakeKey] = useState(0);
 
   useEffect(() => {
     if (isOpen) {
       setError(null);
+      setFormErrors({});
+      setShakeKey(0);
       setSuccessMsg(null);
       setAvatarFile(null);
 
@@ -98,22 +106,39 @@ export default function EditProfileModal({
     setError(null);
     setSuccessMsg(null);
 
-    // Validate Contact Number if entered
+    const nextErrors = {};
+    if (!firstName.trim()) {
+      nextErrors.firstName = 'First name is required';
+    }
+    if (!lastName.trim()) {
+      nextErrors.lastName = 'Last name is required';
+    }
     if (contactNumber && contactNumber.trim()) {
       const contactErr = validateContactNumber(contactNumber.trim());
       if (contactErr) {
-        setError(contactErr);
-        return;
+        nextErrors.contactNumber = contactErr;
       }
     }
-
-    // Validate Username if entered
     if (username && username.trim()) {
       const userErr = validateUsername(username.trim());
       if (userErr) {
-        setError(userErr);
-        return;
+        nextErrors.username = userErr;
       }
+    }
+
+    if (Object.keys(nextErrors).length > 0) {
+      setFormErrors(nextErrors);
+      setShakeKey((prev) => prev + 1);
+      if (nextErrors.firstName && firstNameInputRef.current) {
+        firstNameInputRef.current.focus();
+      } else if (nextErrors.lastName && lastNameInputRef.current) {
+        lastNameInputRef.current.focus();
+      } else if (nextErrors.contactNumber && contactInputRef.current) {
+        contactInputRef.current.focus();
+      } else if (nextErrors.username && usernameInputRef.current) {
+        usernameInputRef.current.focus();
+      }
+      return;
     }
 
     setIsSaving(true);
@@ -232,7 +257,7 @@ export default function EditProfileModal({
         </div>
 
         {/* Form Body */}
-        <form onSubmit={handleSubmit} className="p-5 sm:p-6 space-y-4 text-xs overflow-y-auto">
+        <form onSubmit={handleSubmit} noValidate className="p-5 sm:p-6 space-y-4 text-xs overflow-y-auto">
           
           {/* Avatar Photo Section */}
           <div className="flex items-center gap-4 p-3.5 bg-gray-50/80 rounded-2xl border border-black/[0.06]">
@@ -301,37 +326,65 @@ export default function EditProfileModal({
 
           {/* First & Last Name */}
           <div className="grid grid-cols-2 gap-3">
-            <div>
+            <div className={formErrors.firstName ? 'animate-field-shake' : ''} key={`fn-${shakeKey}`}>
               <label className="block text-gray-700 font-semibold mb-1">
                 First Name <span className="text-rose-500">*</span>
               </label>
               <input
+                ref={firstNameInputRef}
                 type="text"
-                required
                 placeholder="e.g. Andrei John"
                 value={firstName}
-                onChange={(e) => setFirstName(e.target.value)}
-                className="w-full h-10 px-3 bg-white border border-black/[0.08] rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/20 text-gray-900 font-medium"
+                onChange={(e) => {
+                  setFirstName(e.target.value);
+                  if (formErrors.firstName) setFormErrors((prev) => ({ ...prev, firstName: null }));
+                }}
+                aria-invalid={Boolean(formErrors.firstName)}
+                className={`w-full h-10 px-3 bg-white border rounded-xl focus:outline-none transition-all text-gray-900 font-medium ${
+                  formErrors.firstName
+                    ? 'border-red-500 ring-2 ring-red-500/20'
+                    : 'border-black/[0.08] focus:ring-2 focus:ring-emerald-500/20'
+                }`}
               />
+              {formErrors.firstName && (
+                <p className="text-xs font-semibold text-red-600 mt-1.5 flex items-center gap-1.5 animate-in fade-in duration-150">
+                  <AlertCircle className="w-3.5 h-3.5 shrink-0 text-red-600" />
+                  <span>{formErrors.firstName}</span>
+                </p>
+              )}
             </div>
 
-            <div>
+            <div className={formErrors.lastName ? 'animate-field-shake' : ''} key={`ln-${shakeKey}`}>
               <label className="block text-gray-700 font-semibold mb-1">
                 Last Name <span className="text-rose-500">*</span>
               </label>
               <input
+                ref={lastNameInputRef}
                 type="text"
-                required
                 placeholder="e.g. Geronimo"
                 value={lastName}
-                onChange={(e) => setLastName(e.target.value)}
-                className="w-full h-10 px-3 bg-white border border-black/[0.08] rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/20 text-gray-900 font-medium"
+                onChange={(e) => {
+                  setLastName(e.target.value);
+                  if (formErrors.lastName) setFormErrors((prev) => ({ ...prev, lastName: null }));
+                }}
+                aria-invalid={Boolean(formErrors.lastName)}
+                className={`w-full h-10 px-3 bg-white border rounded-xl focus:outline-none transition-all text-gray-900 font-medium ${
+                  formErrors.lastName
+                    ? 'border-red-500 ring-2 ring-red-500/20'
+                    : 'border-black/[0.08] focus:ring-2 focus:ring-emerald-500/20'
+                }`}
               />
+              {formErrors.lastName && (
+                <p className="text-xs font-semibold text-red-600 mt-1.5 flex items-center gap-1.5 animate-in fade-in duration-150">
+                  <AlertCircle className="w-3.5 h-3.5 shrink-0 text-red-600" />
+                  <span>{formErrors.lastName}</span>
+                </p>
+              )}
             </div>
           </div>
 
           {/* Username */}
-          <div>
+          <div className={formErrors.username ? 'animate-field-shake' : ''} key={`un-${shakeKey}`}>
             <div className="flex items-center justify-between mb-1">
               <label className="block text-gray-700 font-semibold">
                 Username Handle
@@ -343,17 +396,32 @@ export default function EditProfileModal({
                 @
               </span>
               <input
+                ref={usernameInputRef}
                 type="text"
                 placeholder="e.g. andreijohn"
                 value={username}
-                onChange={(e) => setUsername(e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, ''))}
-                className="w-full h-10 pl-7 pr-3 bg-white border border-black/[0.08] rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/20 text-gray-900 font-medium"
+                onChange={(e) => {
+                  setUsername(e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, ''));
+                  if (formErrors.username) setFormErrors((prev) => ({ ...prev, username: null }));
+                }}
+                aria-invalid={Boolean(formErrors.username)}
+                className={`w-full h-10 pl-7 pr-3 bg-white border rounded-xl focus:outline-none transition-all text-gray-900 font-medium ${
+                  formErrors.username
+                    ? 'border-red-500 ring-2 ring-red-500/20'
+                    : 'border-black/[0.08] focus:ring-2 focus:ring-emerald-500/20'
+                }`}
               />
             </div>
+            {formErrors.username && (
+              <p className="text-xs font-semibold text-red-600 mt-1.5 flex items-center gap-1.5 animate-in fade-in duration-150">
+                <AlertCircle className="w-3.5 h-3.5 shrink-0 text-red-600" />
+                <span>{formErrors.username}</span>
+              </p>
+            )}
           </div>
 
           {/* Contact Number */}
-          <div>
+          <div className={formErrors.contactNumber ? 'animate-field-shake' : ''} key={`cn-${shakeKey}`}>
             <div className="flex items-center justify-between mb-1">
               <label className="block text-gray-700 font-semibold">
                 Contact Number
@@ -365,15 +433,30 @@ export default function EditProfileModal({
             <div className="relative">
               <Phone className="w-3.5 h-3.5 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
               <input
+                ref={contactInputRef}
                 type="tel"
                 inputMode="tel"
                 maxLength={11}
                 placeholder="09XXXXXXXXX (11 digits)"
                 value={contactNumber}
-                onChange={(e) => setContactNumber(e.target.value.replace(/\D/g, ''))}
-                className="w-full h-10 pl-9 pr-3 bg-white border border-black/[0.08] rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/20 text-gray-900 font-medium tabular-nums"
+                onChange={(e) => {
+                  setContactNumber(e.target.value.replace(/\D/g, ''));
+                  if (formErrors.contactNumber) setFormErrors((prev) => ({ ...prev, contactNumber: null }));
+                }}
+                aria-invalid={Boolean(formErrors.contactNumber)}
+                className={`w-full h-10 pl-9 pr-3 bg-white border rounded-xl focus:outline-none transition-all text-gray-900 font-medium tabular-nums ${
+                  formErrors.contactNumber
+                    ? 'border-red-500 ring-2 ring-red-500/20'
+                    : 'border-black/[0.08] focus:ring-2 focus:ring-emerald-500/20'
+                }`}
               />
             </div>
+            {formErrors.contactNumber && (
+              <p className="text-xs font-semibold text-red-600 mt-1.5 flex items-center gap-1.5 animate-in fade-in duration-150">
+                <AlertCircle className="w-3.5 h-3.5 shrink-0 text-red-600" />
+                <span>{formErrors.contactNumber}</span>
+              </p>
+            )}
             <p className="text-[10px] text-gray-400 mt-1">
               Used for official transaction notifications and club officer emergency reachability.
             </p>

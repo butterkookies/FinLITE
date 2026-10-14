@@ -1,6 +1,6 @@
 'use client';
 import { useState, useRef, useEffect } from 'react';
-import { Camera, Check, ChevronDown, Crop, Upload, X } from 'lucide-react';
+import { Camera, Check, ChevronDown, Crop, Upload, X, AlertCircle } from 'lucide-react';
 import dynamic from 'next/dynamic';
 import { compressReceiptImage } from '@/lib/utils/compression';
 
@@ -36,6 +36,13 @@ export default function NewTransactionModal({
   const [categoryId, setCategoryId] = useState(null);
   const [isCategoryOpen, setIsCategoryOpen] = useState(false);
   const categoryRef = useRef(null);
+
+  // Field refs & validation state
+  const amountInputRef = useRef(null);
+  const titleInputRef = useRef(null);
+  const recipientInputRef = useRef(null);
+  const [formErrors, setFormErrors] = useState({});
+  const [shakeKey, setShakeKey] = useState(0);
 
   const [eventName, setEventName] = useState('');
   const [isReimbursement, setIsReimbursement] = useState(false);
@@ -84,6 +91,8 @@ export default function NewTransactionModal({
       setTitle('');
       setAmount('');
       setAmountTouched(false);
+      setFormErrors({});
+      setShakeKey(0);
       setEventName('');
       setIsReimbursement(false);
       setRecipient('');
@@ -175,7 +184,42 @@ export default function NewTransactionModal({
   const handleSubmit = (e) => {
     e.preventDefault();
     setAmountTouched(true);
-    if (!title.trim() || amountError || balanceError) return;
+
+    const nextErrors = {};
+
+    // 1. Amount validation
+    if (!amount || parseFloat(amount) <= 0) {
+      nextErrors.amount = 'Please enter an amount greater than ₱0.00';
+    } else if (amountError) {
+      nextErrors.amount = amountError;
+    } else if (balanceError) {
+      nextErrors.amount = balanceError;
+    }
+
+    // 2. Title validation
+    if (!title.trim()) {
+      nextErrors.title = 'Please enter a transaction title (e.g. Tarpaulin for Booth)';
+    }
+
+    // 3. Reimbursement Recipient validation
+    if (isReimbursement && !recipient.trim()) {
+      nextErrors.recipient = 'Please enter the name of the officer who paid this advance';
+    }
+
+    if (Object.keys(nextErrors).length > 0) {
+      setFormErrors(nextErrors);
+      setShakeKey((prev) => prev + 1);
+
+      // Auto-focus first invalid input
+      if (nextErrors.amount && amountInputRef.current) {
+        amountInputRef.current.focus();
+      } else if (nextErrors.title && titleInputRef.current) {
+        titleInputRef.current.focus();
+      } else if (nextErrors.recipient && recipientInputRef.current) {
+        recipientInputRef.current.focus();
+      }
+      return;
+    }
 
     onSave({
       title,
@@ -223,7 +267,7 @@ export default function NewTransactionModal({
         </div>
 
         {/* Form Body */}
-        <form onSubmit={handleSubmit} className="p-5 sm:p-6 space-y-4 text-xs overflow-y-auto">
+        <form onSubmit={handleSubmit} noValidate className="p-5 sm:p-6 space-y-4 text-xs overflow-y-auto">
           
           {/* Type Toggle: Inflow vs Outflow */}
           <div className="grid grid-cols-2 gap-2 bg-gray-100/80 p-1 rounded-2xl">
@@ -279,7 +323,7 @@ export default function NewTransactionModal({
           </div>
 
           {/* Amount (₱) — max ₱99,999.99, outflows cannot exceed the selected channel's balance */}
-          <div>
+          <div className={formErrors.amount ? 'animate-field-shake' : ''} key={`amt-${shakeKey}`}>
             <label className="block text-gray-700 font-semibold mb-1">
               Amount (₱) <span className="text-red-500">*</span>
             </label>
@@ -288,24 +332,32 @@ export default function NewTransactionModal({
                 ₱
               </span>
               <input
+                ref={amountInputRef}
                 type="text"
                 inputMode="decimal"
                 maxLength={8}
-                required
                 placeholder="0.00"
                 value={amount}
-                onChange={(e) => setAmount(sanitizeAmountInput(e.target.value))}
+                onChange={(e) => {
+                  setAmount(sanitizeAmountInput(e.target.value));
+                  if (formErrors.amount) {
+                    setFormErrors((prev) => ({ ...prev, amount: null }));
+                  }
+                }}
                 onBlur={() => setAmountTouched(true)}
-                aria-invalid={Boolean(fieldError)}
-                className={`w-full h-10 text-sm font-bold pl-7 pr-3 bg-white text-black placeholder:text-gray-400 border rounded-xl focus:outline-none focus:ring-2 tabular-nums select-text ${
-                  fieldError
-                    ? 'border-red-400 focus:ring-red-500/20'
-                    : 'border-black/[0.08] focus:ring-emerald-500/20'
+                aria-invalid={Boolean(formErrors.amount || fieldError)}
+                className={`w-full h-10 text-sm font-bold pl-7 pr-3 bg-white text-black placeholder:text-gray-400 border rounded-xl focus:outline-none transition-all tabular-nums select-text ${
+                  (formErrors.amount || fieldError)
+                    ? 'border-red-500 ring-2 ring-red-500/20'
+                    : 'border-black/[0.08] focus:ring-2 focus:ring-emerald-500/20'
                 }`}
               />
             </div>
-            {fieldError ? (
-              <p className="text-xs text-red-600 mt-1">{fieldError}</p>
+            {(formErrors.amount || fieldError) ? (
+              <p className="text-xs font-semibold text-red-600 mt-1.5 flex items-center gap-1.5 animate-in fade-in duration-150">
+                <AlertCircle className="w-3.5 h-3.5 shrink-0 text-red-600" />
+                <span>{formErrors.amount || fieldError}</span>
+              </p>
             ) : (
               <p className="text-[11px] text-gray-400 mt-1">
                 Maximum ₱99,999.99
@@ -317,18 +369,34 @@ export default function NewTransactionModal({
           </div>
 
           {/* Title / Description */}
-          <div>
+          <div className={formErrors.title ? 'animate-field-shake' : ''} key={`ttl-${shakeKey}`}>
             <label className="block text-gray-700 font-semibold mb-1">
               Item Title <span className="text-red-500">*</span>
             </label>
             <input
+              ref={titleInputRef}
               type="text"
-              required
               placeholder="e.g. Tarpaulin for Booth, MLBB Team Registration"
               value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              className="w-full h-10 px-3 bg-white border border-black/[0.08] rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/20 text-gray-900 select-text"
+              onChange={(e) => {
+                setTitle(e.target.value);
+                if (formErrors.title) {
+                  setFormErrors((prev) => ({ ...prev, title: null }));
+                }
+              }}
+              aria-invalid={Boolean(formErrors.title)}
+              className={`w-full h-10 px-3 bg-white border rounded-xl focus:outline-none transition-all text-gray-900 select-text ${
+                formErrors.title
+                  ? 'border-red-500 ring-2 ring-red-500/20'
+                  : 'border-black/[0.08] focus:ring-2 focus:ring-emerald-500/20'
+              }`}
             />
+            {formErrors.title && (
+              <p className="text-xs font-semibold text-red-600 mt-1.5 flex items-center gap-1.5 animate-in fade-in duration-150">
+                <AlertCircle className="w-3.5 h-3.5 shrink-0 text-red-600" />
+                <span>{formErrors.title}</span>
+              </p>
+            )}
           </div>
 
           {/* Category & Event in 2 Columns */}
@@ -397,7 +465,12 @@ export default function NewTransactionModal({
                 <input
                   type="checkbox"
                   checked={isReimbursement}
-                  onChange={(e) => setIsReimbursement(e.target.checked)}
+                  onChange={(e) => {
+                    setIsReimbursement(e.target.checked);
+                    if (!e.target.checked && formErrors.recipient) {
+                      setFormErrors((prev) => ({ ...prev, recipient: null }));
+                    }
+                  }}
                   className="rounded text-emerald-700 focus:ring-emerald-500"
                 />
                 <span className="font-semibold text-gray-900">
@@ -406,21 +479,38 @@ export default function NewTransactionModal({
               </label>
 
               {isReimbursement && (
-                <div className="pt-1">
+                <div className={`pt-1 ${formErrors.recipient ? 'animate-field-shake' : ''}`} key={`rec-${shakeKey}`}>
                   <label className="block text-gray-700 font-medium mb-1">
-                    Advance Paid By:
+                    Advance Paid By: <span className="text-red-500">*</span>
                   </label>
                   <input
+                    ref={recipientInputRef}
                     type="text"
-                    required={isReimbursement}
                     placeholder="e.g. Ms. Kimberly Dawn Jatulan"
                     value={recipient}
-                    onChange={(e) => setRecipient(e.target.value)}
-                    className="w-full h-9 px-3 bg-white border border-black/[0.08] rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/20 text-gray-900 select-text"
+                    onChange={(e) => {
+                      setRecipient(e.target.value);
+                      if (formErrors.recipient) {
+                        setFormErrors((prev) => ({ ...prev, recipient: null }));
+                      }
+                    }}
+                    aria-invalid={Boolean(formErrors.recipient)}
+                    className={`w-full h-9 px-3 bg-white border rounded-xl focus:outline-none transition-all text-gray-900 select-text ${
+                      formErrors.recipient
+                        ? 'border-red-500 ring-2 ring-red-500/20'
+                        : 'border-black/[0.08] focus:ring-2 focus:ring-emerald-500/20'
+                    }`}
                   />
-                  <p className="text-[10px] text-gray-500 mt-1">
-                    Will be queued under Pending Reimbursements until cash is refunded.
-                  </p>
+                  {formErrors.recipient ? (
+                    <p className="text-xs font-semibold text-red-600 mt-1 flex items-center gap-1.5 animate-in fade-in duration-150">
+                      <AlertCircle className="w-3.5 h-3.5 shrink-0 text-red-600" />
+                      <span>{formErrors.recipient}</span>
+                    </p>
+                  ) : (
+                    <p className="text-[10px] text-gray-500 mt-1">
+                      Will be queued under Pending Reimbursements until cash is refunded.
+                    </p>
+                  )}
                 </div>
               )}
             </div>
