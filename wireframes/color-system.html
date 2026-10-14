@@ -1091,9 +1091,339 @@
       z-index: 1000;
     }
 
-    .copy-toast.show {
-      opacity: 1;
-      transform: translateY(0);
+    /* ==========================================================================
+       TAB 3: FRONTEND UI COMPONENT STUDIO (REACT + TAILWIND)
+       ========================================================================== */
+    .editor-layout {
+      display: grid;
+      grid-template-columns: 1.05fr 1fr;
+      gap: 36px;
+      align-items: start;
+      margin-top: 24px;
+    }
+
+    @media (max-width: 960px) {
+      .editor-layout {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .editor-section-card {
+      background: #fafafa;
+      border: 1px solid var(--neutral-hairline);
+      border-radius: 16px;
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+
+    .editor-section-title {
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+      margin-bottom: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .editor-section-sub {
+      font-size: 12px;
+      color: var(--neutral-secondary);
+      margin-bottom: 14px;
+      line-height: 1.5;
+    }
+
+    .comp-selector-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+
+    @media (max-width: 600px) {
+      .comp-selector-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    .comp-choice-btn {
+      background: #ffffff;
+      border: 1px solid #e5e7eb;
+      border-radius: 10px;
+      padding: 10px 8px;
+      text-align: center;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--neutral-secondary);
+      transition: all 0.15s ease;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .comp-choice-btn:hover {
+      border-color: #cbd5e1;
+      color: var(--neutral-black);
+    }
+
+    .comp-choice-btn.active {
+      background: #ffffff;
+      border-color: var(--active-primary);
+      color: var(--active-primary);
+      box-shadow: 0 0 0 2px rgba(21, 128, 61, 0.15);
+    }
+
+    .choice-pill-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-bottom: 14px;
+    }
+
+    .choice-pill {
+      background: #ffffff;
+      border: 1px solid #e5e7eb;
+      padding: 6px 12px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--neutral-secondary);
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .choice-pill:hover {
+      border-color: #cbd5e1;
+      color: var(--neutral-black);
+    }
+
+    .choice-pill.active {
+      background: #111827;
+      border-color: #111827;
+      color: #ffffff;
+    }
+
+    .editor-field-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    @media (max-width: 600px) {
+      .editor-field-row {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .editor-label {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--neutral-secondary);
+      margin-bottom: 6px;
+      display: block;
+    }
+
+    .editor-input, .editor-select {
+      width: 100%;
+      background: #ffffff;
+      border: 1px solid #e5e7eb;
+      padding: 8px 12px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-family: inherit;
+      color: var(--neutral-black);
+      outline: none;
+      transition: border-color 0.15s ease;
+    }
+
+    .editor-input:focus, .editor-select:focus {
+      border-color: var(--active-primary);
+      box-shadow: 0 0 0 2px rgba(21, 128, 61, 0.12);
+    }
+
+    /* Sticky Preview & Code Generation Column */
+    .editor-preview-column {
+      position: sticky;
+      top: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .preview-canvas-box {
+      border-radius: 20px;
+      padding: 40px 28px 32px 28px;
+      transition: all 0.25s ease;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 240px;
+      position: relative;
+    }
+
+    .preview-canvas-box.light-mode {
+      background: #ffffff;
+      border: 1px solid #e5e7eb;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+    }
+
+    .preview-canvas-box.dark-mode {
+      background: #090d16;
+      border: 1px solid #1e293b;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35);
+    }
+
+    .canvas-bar-top {
+      position: absolute;
+      top: 12px;
+      left: 16px;
+      right: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .canvas-badge {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 2px 8px;
+      border-radius: 4px;
+    }
+
+    .canvas-badge.light {
+      background: #f3f4f6;
+      color: #4b5563;
+    }
+
+    .canvas-badge.dark {
+      background: #1e293b;
+      color: #94a3b8;
+    }
+
+    .theme-toggle-btn {
+      background: rgba(255, 255, 255, 0.85);
+      border: 1px solid rgba(0, 0, 0, 0.12);
+      padding: 4px 10px;
+      border-radius: 9999px;
+      font-size: 11px;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      transition: all 0.15s ease;
+    }
+
+    .preview-canvas-box.dark-mode .theme-toggle-btn {
+      background: #1e293b;
+      border-color: #334155;
+      color: #f8fafc;
+    }
+
+    /* Live Output Specimen Container */
+    .rendered-component-wrap {
+      width: 100%;
+      max-width: 440px;
+      transition: all 0.2s ease;
+    }
+
+    /* Code View Tabs */
+    .code-tabs-nav {
+      display: flex;
+      background: #1e293b;
+      border-radius: 12px 12px 0 0;
+      padding: 6px 8px;
+      gap: 4px;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid #334155;
+    }
+
+    .code-tabs-left {
+      display: flex;
+      gap: 4px;
+    }
+
+    .code-tab-btn {
+      background: transparent;
+      border: none;
+      color: #94a3b8;
+      font-size: 11px;
+      font-weight: 600;
+      padding: 5px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .code-tab-btn:hover {
+      color: #ffffff;
+    }
+
+    .code-tab-btn.active {
+      background: #0f172a;
+      color: #38bdf8;
+    }
+
+    .copy-action-btn {
+      background: #10b981;
+      border: none;
+      color: #ffffff;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 5px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      transition: all 0.15s ease;
+    }
+
+    .copy-action-btn:hover {
+      background: #059669;
+    }
+
+    .code-output-container {
+      background: #0f172a;
+      border-radius: 0 0 12px 12px;
+      padding: 16px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-size: 11.5px;
+      color: #e2e8f0;
+      line-height: 1.65;
+      max-height: 340px;
+      overflow-y: auto;
+      white-space: pre-wrap;
+      word-break: break-all;
+      border: 1px solid #334155;
+      border-top: none;
+    }
+
+    .techstack-badge-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-top: 8px;
+    }
+
+    .techstack-pill {
+      font-size: 11px;
+      font-weight: 600;
+      background: #f1f5f9;
+      color: #475569;
+      padding: 3px 8px;
+      border-radius: 5px;
+      border: 1px solid #e2e8f0;
     }
   </style>
 </head>
@@ -1126,6 +1456,10 @@
         <button class="tab-btn" id="tab-btn-cards" onclick="switchTab('cards')">
           <span>🃏</span>
           <span>Card Styles & Gradient Customizer</span>
+        </button>
+        <button class="tab-btn" id="tab-btn-editor" onclick="switchTab('editor')">
+          <span>⚡</span>
+          <span>UI Component Studio (React + Tailwind)</span>
         </button>
       </div>
       <div class="tab-meta-hint" id="tabHint">
@@ -2063,6 +2397,351 @@
 
     </div>
 
+    <!-- ======================================================================
+         TAB 3 PANE: FRONTEND UI COMPONENT STUDIO (REACT + TAILWIND)
+         ====================================================================== -->
+    <div class="tab-pane" id="tab-pane-editor">
+
+      <section>
+        <div class="section-kicker">Part III • Interactive UI Editor & Code Generator</div>
+        <h2 class="section-heading">Frontend Component Studio</h2>
+        <p class="section-sub">
+          Visually architect components customized for FinLITE's frontend stack. Tweak surface textures, dimensions, palettes, and typography in real time, then copy production-ready <strong>React 19 / JSX</strong> components and <strong>Tailwind CSS v4</strong> utility strings.
+        </p>
+        <div class="techstack-badge-row">
+          <span class="techstack-pill">⚡ Next.js 15 App Router</span>
+          <span class="techstack-pill">⚛️ React 19 (Server & Client)</span>
+          <span class="techstack-pill">🎨 Tailwind CSS v4</span>
+          <span class="techstack-pill">📦 Lucide React Icons</span>
+          <span class="techstack-pill">🔢 Tabular Numerals</span>
+        </div>
+      </section>
+
+      <div class="editor-layout">
+
+        <!-- Left Controls Column -->
+        <div class="editor-controls-col">
+
+          <!-- 1. Component Type Selector -->
+          <div class="editor-section-card">
+            <div class="editor-section-title">
+              <span>1. Component Type</span>
+              <span class="doc-badge" id="activeCompBadge">StatCard</span>
+            </div>
+            <div class="editor-section-sub">Choose which FinLITE component to design:</div>
+            
+            <div class="comp-selector-grid">
+              <button class="comp-choice-btn active" id="comp-btn-card" onclick="setCompType('card')">
+                <span style="font-size: 18px;">💳</span>
+                <span>Stat / KPI Card</span>
+              </button>
+              <button class="comp-choice-btn" id="comp-btn-button" onclick="setCompType('button')">
+                <span style="font-size: 18px;">🔘</span>
+                <span>Action Button</span>
+              </button>
+              <button class="comp-choice-btn" id="comp-btn-badge" onclick="setCompType('badge')">
+                <span style="font-size: 18px;">🏷️</span>
+                <span>Status Badge</span>
+              </button>
+              <button class="comp-choice-btn" id="comp-btn-row" onclick="setCompType('row')">
+                <span style="font-size: 18px;">📑</span>
+                <span>Ledger Row</span>
+              </button>
+              <button class="comp-choice-btn" id="comp-btn-alert" onclick="setCompType('alert')">
+                <span style="font-size: 18px;">⚠️</span>
+                <span>Audit Alert</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- 2. Surface Texture & FinLITE Palette -->
+          <div class="editor-section-card">
+            <div class="editor-section-title">
+              <span>2. Surface Styling & Palette</span>
+            </div>
+            <div class="editor-section-sub">Select the surface treatment and organizational green tone:</div>
+
+            <label class="editor-label">Surface Material Treatment</label>
+            <div class="choice-pill-group">
+              <button class="choice-pill active" id="surface-gradient" onclick="setSurfaceStyle('gradient')">Cashbox Gradient</button>
+              <button class="choice-pill" id="surface-flat" onclick="setSurfaceStyle('flat')">Flat Light Wash</button>
+              <button class="choice-pill" id="surface-frosted" onclick="setSurfaceStyle('frosted')">Frosted Glass Apple</button>
+              <button class="choice-pill" id="surface-embossed" onclick="setSurfaceStyle('embossed')">Embossed Tactile</button>
+              <button class="choice-pill" id="surface-stripe" onclick="setSurfaceStyle('stripe')">Left Accent Stripe</button>
+              <button class="choice-pill" id="surface-dark" onclick="setSurfaceStyle('dark')">Dark Executive Matte</button>
+            </div>
+
+            <div class="editor-field-row">
+              <div>
+                <label class="editor-label">Color Palette Family</label>
+                <select class="editor-select" id="editorPaletteSelect" onchange="onEditorPaletteChange()">
+                  <option value="01">01 — Institutional Emerald (Default)</option>
+                  <option value="02">02 — Nordic Sage & Alpine</option>
+                  <option value="03">03 — Modern Mint-Jade</option>
+                  <option value="04">04 — British Racing Green</option>
+                  <option value="05">05 — Calming Eucalyptus</option>
+                  <option value="06">06 — Scholastic Olive</option>
+                  <option value="07">07 — Fresh Spring & Pistachio</option>
+                  <option value="08">08 — Cashbox Light Pastel</option>
+                  <option value="custom">Custom Color Palette...</option>
+                </select>
+              </div>
+              <div id="customColorBox" style="display: none;">
+                <label class="editor-label">Custom Accent Hex</label>
+                <div style="display: flex; gap: 8px; align-items: center;">
+                  <input type="color" id="editorCustomHexPicker" value="#15803d" style="width: 36px; height: 36px; border: 1px solid #e5e7eb; border-radius: 6px; cursor: pointer;" oninput="onCustomHexInput()">
+                  <input type="text" class="editor-input" id="editorCustomHexText" value="#15803d" onchange="onCustomHexText()">
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 3. Geometry, Corners & Elevation -->
+          <div class="editor-section-card">
+            <div class="editor-section-title">
+              <span>3. Geometry, Borders & Depth</span>
+            </div>
+            <div class="editor-section-sub">Configure border curvature, line weight, and tactile shadows:</div>
+
+            <div class="editor-field-row">
+              <div>
+                <label class="editor-label">Corner Radius (Tailwind)</label>
+                <select class="editor-select" id="editorRadiusSelect" onchange="renderUiEditor()">
+                  <option value="rounded-xl">rounded-xl (12px - Sharp Apple)</option>
+                  <option value="rounded-2xl" selected>rounded-2xl (16px - Standard Apple)</option>
+                  <option value="rounded-3xl">rounded-3xl (24px - Squircle Card)</option>
+                  <option value="rounded-lg">rounded-lg (8px - Compact)</option>
+                  <option value="rounded-full">rounded-full (Pill Contour)</option>
+                </select>
+              </div>
+              <div>
+                <label class="editor-label">Border Weight</label>
+                <select class="editor-select" id="editorBorderSelect" onchange="renderUiEditor()">
+                  <option value="border" selected>border (1px Hairline Subtle)</option>
+                  <option value="border-2">border-2 (2px Defined Boundary)</option>
+                  <option value="border-0">border-0 (Borderless / Flush)</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="editor-field-row">
+              <div>
+                <label class="editor-label">Shadow / Elevation</label>
+                <select class="editor-select" id="editorShadowSelect" onchange="renderUiEditor()">
+                  <option value="shadow-xs">shadow-xs (Sub-pixel Soft Apple)</option>
+                  <option value="shadow-sm" selected>shadow-sm (Delicate Financial Card)</option>
+                  <option value="shadow-md">shadow-md (Floating Modal Level)</option>
+                  <option value="shadow-inner">shadow-inner (Tactile Inset Bevel)</option>
+                  <option value="shadow-none">shadow-none (Flat Matte)</option>
+                </select>
+              </div>
+              <div>
+                <label class="editor-label">Internal Padding</label>
+                <select class="editor-select" id="editorPaddingSelect" onchange="renderUiEditor()">
+                  <option value="p-4">p-4 (16px - Compact Density)</option>
+                  <option value="p-5" selected>p-5 (20px - Apple Balanced)</option>
+                  <option value="p-6">p-6 (24px - Generous Hero)</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <!-- 4. Dynamic Content & Lucide Icon Controls -->
+          <div class="editor-section-card">
+            <div class="editor-section-title">
+              <span>4. Dynamic Content & Metadata</span>
+            </div>
+            <div class="editor-section-sub">Edit labels, tabular currency, and contextual badges:</div>
+
+            <!-- Content for Stat Card -->
+            <div id="fields-card">
+              <div class="editor-field-row">
+                <div>
+                  <label class="editor-label">Metric Title / Label</label>
+                  <input type="text" class="editor-input" id="fieldCardTitle" value="Physical Cash" oninput="renderUiEditor()">
+                </div>
+                <div>
+                  <label class="editor-label">Eyebrow Tag Badge</label>
+                  <input type="text" class="editor-input" id="fieldCardBadge" value="CASHBOX" oninput="renderUiEditor()">
+                </div>
+              </div>
+
+              <div class="editor-field-row">
+                <div>
+                  <label class="editor-label">Primary Metric Value</label>
+                  <input type="text" class="editor-input" id="fieldCardVal" value="₱14,850.00" oninput="renderUiEditor()">
+                </div>
+                <div>
+                  <label class="editor-label">Lucide Icon</label>
+                  <select class="editor-select" id="fieldCardIcon" onchange="renderUiEditor()">
+                    <option value="Wallet" selected>Wallet</option>
+                    <option value="TrendingUp">TrendingUp</option>
+                    <option value="TrendingDown">TrendingDown</option>
+                    <option value="PiggyBank">PiggyBank</option>
+                    <option value="CreditCard">CreditCard</option>
+                    <option value="Receipt">Receipt</option>
+                    <option value="ShieldCheck">ShieldCheck</option>
+                    <option value="Coins">Coins</option>
+                    <option value="Building2">Building2</option>
+                    <option value="ArrowUpRight">ArrowUpRight</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="editor-field-row">
+                <div>
+                  <label class="editor-label">Trend Delta (or blank to hide)</label>
+                  <input type="text" class="editor-input" id="fieldCardTrend" value="+12.4% vs last mo" oninput="renderUiEditor()">
+                </div>
+                <div>
+                  <label class="editor-label">Trend Sentiment</label>
+                  <select class="editor-select" id="fieldCardTrendSentiment" onchange="renderUiEditor()">
+                    <option value="positive" selected>Positive (Green Surplus)</option>
+                    <option value="negative">Negative (Red Deficit / Outflow)</option>
+                    <option value="neutral">Neutral (Slate / Context)</option>
+                  </select>
+                </div>
+              </div>
+
+              <div>
+                <label class="editor-label">Footnote / Action Hint</label>
+                <input type="text" class="editor-input" id="fieldCardSub" value="Click to count denominations" oninput="renderUiEditor()">
+              </div>
+            </div>
+
+            <!-- Content for Button -->
+            <div id="fields-button" style="display: none;">
+              <div class="editor-field-row">
+                <div>
+                  <label class="editor-label">Button Text</label>
+                  <input type="text" class="editor-input" id="fieldBtnText" value="+ Post Inflow" oninput="renderUiEditor()">
+                </div>
+                <div>
+                  <label class="editor-label">Button Style Variant</label>
+                  <select class="editor-select" id="fieldBtnVariant" onchange="renderUiEditor()">
+                    <option value="solid" selected>Solid Accent Green</option>
+                    <option value="tint">Subtle Tint Pill</option>
+                    <option value="outline">Clean Outline</option>
+                    <option value="ghost">Ghost Minimal</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <!-- Content for Badge -->
+            <div id="fields-badge" style="display: none;">
+              <div class="editor-field-row">
+                <div>
+                  <label class="editor-label">Badge Label Text</label>
+                  <input type="text" class="editor-input" id="fieldBadgeText" value="Verified Ledger" oninput="renderUiEditor()">
+                </div>
+                <div>
+                  <label class="editor-label">Status Tone</label>
+                  <select class="editor-select" id="fieldBadgeTone" onchange="renderUiEditor()">
+                    <option value="green" selected>Emerald / Verified</option>
+                    <option value="amber">Amber / Pending Audit</option>
+                    <option value="red">Rose / Discrepancy Flag</option>
+                    <option value="slate">Slate / Archived</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <!-- Content for Ledger Row -->
+            <div id="fields-row" style="display: none;">
+              <div class="editor-field-row">
+                <div>
+                  <label class="editor-label">Payer / Memo Description</label>
+                  <input type="text" class="editor-input" id="fieldRowPayer" value="Juan Dela Cruz • Student Council Fee" oninput="renderUiEditor()">
+                </div>
+                <div>
+                  <label class="editor-label">Reference ID</label>
+                  <input type="text" class="editor-input" id="fieldRowRef" value="REF-2026-0891" oninput="renderUiEditor()">
+                </div>
+              </div>
+              <div class="editor-field-row">
+                <div>
+                  <label class="editor-label">Transaction Amount</label>
+                  <input type="text" class="editor-input" id="fieldRowAmount" value="+₱500.00" oninput="renderUiEditor()">
+                </div>
+                <div>
+                  <label class="editor-label">Category Pill</label>
+                  <input type="text" class="editor-input" id="fieldRowCategory" value="Membership Fee" oninput="renderUiEditor()">
+                </div>
+              </div>
+            </div>
+
+            <!-- Content for Alert Banner -->
+            <div id="fields-alert" style="display: none;">
+              <div class="editor-field-row">
+                <div>
+                  <label class="editor-label">Banner Title</label>
+                  <input type="text" class="editor-input" id="fieldAlertTitle" value="Cashbox Reconciliation Alert" oninput="renderUiEditor()">
+                </div>
+                <div>
+                  <label class="editor-label">Severity Level</label>
+                  <select class="editor-select" id="fieldAlertTone" onchange="renderUiEditor()">
+                    <option value="warning" selected>Warning (Discrepancy)</option>
+                    <option value="success">Success (Audited & Balanced)</option>
+                    <option value="info">Info (Notice / Reminder)</option>
+                  </select>
+                </div>
+              </div>
+              <div>
+                <label class="editor-label">Alert Message</label>
+                <input type="text" class="editor-input" id="fieldAlertMsg" value="Physical cash in cashbox has a ₱150.00 discrepancy against the logged digital total." oninput="renderUiEditor()">
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+
+        <!-- Right Preview & Code Column -->
+        <div class="editor-preview-column">
+
+          <!-- Live Interactive Canvas Box -->
+          <div class="preview-canvas-box light-mode" id="editorPreviewBox">
+            <div class="canvas-bar-top">
+              <span class="canvas-badge light" id="canvasModeBadge">☀️ Light Canvas</span>
+              <button class="theme-toggle-btn" onclick="toggleEditorCanvasMode()">
+                <span id="canvasModeBtnText">Switch to Dark Canvas 🌙</span>
+              </button>
+            </div>
+
+            <!-- Rendered Component Specimen Target -->
+            <div class="rendered-component-wrap" id="renderedComponentWrap">
+              <!-- Dynamically populated via renderUiEditor() -->
+            </div>
+          </div>
+
+          <!-- Code Generator Container -->
+          <div>
+            <div class="code-tabs-nav">
+              <div class="code-tabs-left">
+                <button class="code-tab-btn active" id="code-tab-jsx" onclick="switchCodeTab('jsx')">⚛️ React 19 / JSX</button>
+                <button class="code-tab-btn" id="code-tab-tailwind" onclick="switchCodeTab('tailwind')">🎨 Tailwind Classes</button>
+                <button class="code-tab-btn" id="code-tab-css" onclick="switchCodeTab('css')">📄 Vanilla CSS</button>
+              </div>
+              <button class="copy-action-btn" onclick="copyUiCode()">
+                <span>⎘ Copy Code</span>
+              </button>
+            </div>
+            
+            <pre class="code-output-container" id="codeOutputPre">Generating code snippet...</pre>
+            
+            <div style="font-size: 11px; color: var(--neutral-secondary); margin-top: 8px; display: flex; align-items: center; justify-content: space-between;">
+              <span id="codeLocationHint">💡 Ready to drop into FinLITE (e.g. components/dashboard/StatCards.jsx)</span>
+              <span>UTF-8 • Standard GFM</span>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
   </div>
 
   <!-- Toast Notification -->
@@ -2091,8 +2770,11 @@
 
       if (tabId === 'colors') {
         hint.textContent = 'Showing 8 Curated Green Palettes';
-      } else {
+      } else if (tabId === 'cards') {
         hint.textContent = '6 Card Styles • Interactive Gradient Studio';
+      } else if (tabId === 'editor') {
+        hint.textContent = 'Frontend Component Studio • React 19 & Tailwind v4 Code Generator';
+        if (typeof renderUiEditor === 'function') renderUiEditor();
       }
     }
 
@@ -2532,6 +3214,712 @@
       });
     }
 
+    // ==========================================================================
+    // TAB 3: FRONTEND UI COMPONENT STUDIO ENGINE (REACT + TAILWIND)
+    // ==========================================================================
+    const editorState = {
+      compType: 'card',       // 'card' | 'button' | 'badge' | 'row' | 'alert'
+      surfaceStyle: 'gradient',// 'gradient' | 'flat' | 'frosted' | 'embossed' | 'stripe' | 'dark'
+      paletteKey: '01',
+      customHex: '#15803d',
+      canvasMode: 'light',    // 'light' | 'dark'
+      codeTab: 'jsx',         // 'jsx' | 'tailwind' | 'css'
+    };
+
+    const SVG_ICONS = {
+      Wallet: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"/><path d="M3 5v14a2 2 0 0 0 2 2h16v-5"/><path d="M18 12a2 2 0 0 0 0 4h4v-4z"/></svg>',
+      TrendingUp: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>',
+      TrendingDown: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 17 13.5 8.5 8.5 13.5 2 7"/><polyline points="16 17 22 17 22 11"/></svg>',
+      PiggyBank: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 5c-1.5 0-2.8 1.4-3 2-3.5-1.5-11-.3-11 5 0 1.8 0 3 2 4.5V20h4v-2h3v2h4v-4c1-.5 1.7-1 2-2h2v-4h-2c0-1-.5-1.5-1-2V5z"/></svg>',
+      CreditCard: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="14" x="2" y="5" rx="2"/><line x1="2" x2="22" y1="10" y2="10"/></svg>',
+      Receipt: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1Z"/><path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8"/><path d="M12 17.5v-11"/></svg>',
+      ShieldCheck: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/></svg>',
+      Coins: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="8" r="6"/><path d="M18.09 10.37A6 6 0 1 1 10.34 18"/><path d="M7 6h1v4"/><path d="m16.71 13.88.7.71-2.82 2.82"/></svg>',
+      Building2: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18Z"/><path d="M6 12H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h2"/><path d="M18 9h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-2"/><path d="M10 6h4"/><path d="M10 10h4"/><path d="M10 14h4"/><path d="M10 18h4"/></svg>',
+      ArrowUpRight: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 7h10v10"/><path d="M7 17 17 7"/></svg>',
+      AlertTriangle: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>',
+      CheckCircle2: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>'
+    };
+
+    function setCompType(type) {
+      editorState.compType = type;
+      document.querySelectorAll('.comp-choice-btn').forEach(btn => btn.classList.remove('active'));
+      const activeBtn = document.getElementById(`comp-btn-${type}`);
+      if (activeBtn) activeBtn.classList.add('active');
+
+      const labels = {
+        card: 'StatCard',
+        button: 'Button',
+        badge: 'StatusBadge',
+        row: 'LedgerRow',
+        alert: 'AuditAlert'
+      };
+      document.getElementById('activeCompBadge').textContent = labels[type] || type;
+
+      // Show / Hide dynamic field groups
+      ['card', 'button', 'badge', 'row', 'alert'].forEach(t => {
+        const el = document.getElementById(`fields-${t}`);
+        if (el) el.style.display = (t === type) ? 'block' : 'none';
+      });
+
+      renderUiEditor();
+    }
+
+    function setSurfaceStyle(style) {
+      editorState.surfaceStyle = style;
+      document.querySelectorAll('.choice-pill-group .choice-pill').forEach(btn => btn.classList.remove('active'));
+      const activeBtn = document.getElementById(`surface-${style}`);
+      if (activeBtn) activeBtn.classList.add('active');
+      renderUiEditor();
+    }
+
+    function onEditorPaletteChange() {
+      const sel = document.getElementById('editorPaletteSelect').value;
+      editorState.paletteKey = sel;
+      const customBox = document.getElementById('customColorBox');
+      if (sel === 'custom') {
+        customBox.style.display = 'block';
+      } else {
+        customBox.style.display = 'none';
+      }
+      renderUiEditor();
+    }
+
+    function onCustomHexInput() {
+      const hex = document.getElementById('editorCustomHexPicker').value;
+      document.getElementById('editorCustomHexText').value = hex;
+      editorState.customHex = hex;
+      renderUiEditor();
+    }
+
+    function onCustomHexText() {
+      const hex = document.getElementById('editorCustomHexText').value;
+      document.getElementById('editorCustomHexPicker').value = hex;
+      editorState.customHex = hex;
+      renderUiEditor();
+    }
+
+    function toggleEditorCanvasMode() {
+      editorState.canvasMode = (editorState.canvasMode === 'light') ? 'dark' : 'light';
+      const box = document.getElementById('editorPreviewBox');
+      const badge = document.getElementById('canvasModeBadge');
+      const btnText = document.getElementById('canvasModeBtnText');
+
+      if (editorState.canvasMode === 'dark') {
+        box.classList.remove('light-mode');
+        box.classList.add('dark-mode');
+        badge.className = 'canvas-badge dark';
+        badge.textContent = '🌙 Dark Canvas Session';
+        btnText.textContent = 'Switch to Light Canvas ☀️';
+      } else {
+        box.classList.remove('dark-mode');
+        box.classList.add('light-mode');
+        badge.className = 'canvas-badge light';
+        badge.textContent = '☀️ Light Canvas';
+        btnText.textContent = 'Switch to Dark Canvas 🌙';
+      }
+      renderUiEditor();
+    }
+
+    function switchCodeTab(tab) {
+      editorState.codeTab = tab;
+      document.querySelectorAll('.code-tab-btn').forEach(btn => btn.classList.remove('active'));
+      const activeBtn = document.getElementById(`code-tab-${tab}`);
+      if (activeBtn) activeBtn.classList.add('active');
+      renderUiEditor();
+    }
+
+    // MAIN RENDER ENGINE FOR UI EDITOR
+    function renderUiEditor() {
+      const wrap = document.getElementById('renderedComponentWrap');
+      if (!wrap) return;
+
+      const comp = editorState.compType;
+      const surface = editorState.surfaceStyle;
+      const radius = document.getElementById('editorRadiusSelect').value;
+      const borderWeight = document.getElementById('editorBorderSelect').value;
+      const shadow = document.getElementById('editorShadowSelect').value;
+      const padding = document.getElementById('editorPaddingSelect').value;
+      const isDark = editorState.canvasMode === 'dark';
+
+      // Determine Colors from active palette or custom
+      let p = PALETTES[editorState.paletteKey];
+      if (editorState.paletteKey === 'custom' || !p) {
+        const c = editorState.customHex || '#15803d';
+        p = {
+          name: 'Custom Accent',
+          primary: c,
+          primaryHover: c,
+          text: c,
+          mid: c,
+          border: '#86efac',
+          tint: '#f0fdf4',
+          gradient: `linear-gradient(180deg, #f0fdf4 0%, #dcfce7 48%, #bbf7d0 100%)`
+        };
+      }
+
+      // Compute Surface Styling & CSS properties
+      let surfaceBg = '#ffffff';
+      let surfaceBorderColor = p.border;
+      let textColor = p.text;
+      let customCssBoxShadow = '0 1px 3px rgba(0, 0, 0, 0.05)';
+      let tailwindSurfaceClass = '';
+      let tailwindTextClass = '';
+      let tailwindBorderClass = '';
+
+      if (surface === 'gradient') {
+        surfaceBg = p.gradient;
+        surfaceBorderColor = p.border;
+        textColor = p.text;
+        tailwindSurfaceClass = 'bg-gradient-to-b from-emerald-50 via-emerald-100/40 to-emerald-200/50';
+        tailwindTextClass = 'text-emerald-950 dark:text-emerald-100';
+        tailwindBorderClass = 'border-emerald-300/70 dark:border-emerald-700/50';
+      } else if (surface === 'flat') {
+        surfaceBg = p.tint;
+        surfaceBorderColor = p.border;
+        textColor = p.text;
+        tailwindSurfaceClass = 'bg-emerald-50/70 dark:bg-emerald-950/30';
+        tailwindTextClass = 'text-emerald-900 dark:text-emerald-200';
+        tailwindBorderClass = 'border-emerald-200 dark:border-emerald-800';
+      } else if (surface === 'frosted') {
+        surfaceBg = isDark ? 'rgba(15, 23, 42, 0.75)' : 'rgba(255, 255, 255, 0.82)';
+        surfaceBorderColor = isDark ? 'rgba(255, 255, 255, 0.12)' : 'rgba(21, 128, 61, 0.2)';
+        textColor = isDark ? '#f8fafc' : p.text;
+        customCssBoxShadow = '0 4px 16px rgba(0, 0, 0, 0.06)';
+        tailwindSurfaceClass = 'backdrop-blur-md bg-white/80 dark:bg-zinc-900/80';
+        tailwindTextClass = 'text-zinc-900 dark:text-zinc-100';
+        tailwindBorderClass = 'border-emerald-200/60 dark:border-zinc-800';
+      } else if (surface === 'embossed') {
+        surfaceBg = p.gradient;
+        surfaceBorderColor = 'rgba(255, 255, 255, 0.85)';
+        textColor = p.text;
+        customCssBoxShadow = '0 2px 6px rgba(22, 101, 52, 0.08), inset 0 1px 1.5px #ffffff, inset 0 -1.5px 2px rgba(22, 101, 52, 0.15)';
+        tailwindSurfaceClass = 'bg-gradient-to-b from-emerald-50 via-emerald-100/50 to-emerald-200/60 shadow-[inset_0_1px_1.5px_#ffffff,inset_0_-1.5px_2px_rgba(22,101,52,0.15)]';
+        tailwindTextClass = 'text-emerald-950 dark:text-emerald-100';
+        tailwindBorderClass = 'border-white/90 dark:border-emerald-600/30';
+      } else if (surface === 'stripe') {
+        surfaceBg = isDark ? '#0f172a' : '#ffffff';
+        surfaceBorderColor = isDark ? '#1e293b' : '#e5e7eb';
+        textColor = isDark ? '#f8fafc' : '#111827';
+        tailwindSurfaceClass = isDark ? 'bg-zinc-900 border-l-4 border-l-emerald-500' : 'bg-white border-l-4 border-l-emerald-600';
+        tailwindTextClass = 'text-zinc-900 dark:text-zinc-100';
+        tailwindBorderClass = 'border-zinc-200 dark:border-zinc-800';
+      } else if (surface === 'dark') {
+        surfaceBg = '#0f172a';
+        surfaceBorderColor = '#1e293b';
+        textColor = '#f8fafc';
+        tailwindSurfaceClass = 'bg-zinc-900 dark:bg-black';
+        tailwindTextClass = 'text-zinc-100';
+        tailwindBorderClass = 'border-zinc-800';
+      }
+
+      // Radius in px map for preview
+      const radiusMap = {
+        'rounded-lg': '8px',
+        'rounded-xl': '12px',
+        'rounded-2xl': '16px',
+        'rounded-3xl': '24px',
+        'rounded-full': '9999px'
+      };
+      const previewRadius = radiusMap[radius] || '16px';
+      const previewBorderWidth = (borderWeight === 'border-0') ? '0px' : (borderWeight === 'border-2' ? '2px' : '1px');
+      const previewPadding = (padding === 'p-4') ? '16px' : (padding === 'p-6' ? '24px' : '20px');
+
+      let previewHtml = '';
+      let jsxSnippet = '';
+      let tailwindClasses = '';
+      let cssSnippet = '';
+      let locationHint = '';
+
+      // -------------------------------------------------------------
+      // 1. STAT / KPI CARD
+      // -------------------------------------------------------------
+      if (comp === 'card') {
+        const title = document.getElementById('fieldCardTitle').value || 'Physical Cash';
+        const badge = document.getElementById('fieldCardBadge').value || 'CASHBOX';
+        const val = document.getElementById('fieldCardVal').value || '₱14,850.00';
+        const iconKey = document.getElementById('fieldCardIcon').value || 'Wallet';
+        const trend = document.getElementById('fieldCardTrend').value || '';
+        const trendSentiment = document.getElementById('fieldCardTrendSentiment').value;
+        const sub = document.getElementById('fieldCardSub').value || '';
+        const iconSvg = SVG_ICONS[iconKey] || SVG_ICONS.Wallet;
+
+        // Visual Specimen HTML
+        let stripeBorderCss = (surface === 'stripe') ? `border-left: 4px solid ${p.primary};` : '';
+        previewHtml = `
+          <div style="
+            background: ${surfaceBg};
+            border: ${previewBorderWidth} solid ${surfaceBorderColor};
+            ${stripeBorderCss}
+            border-radius: ${previewRadius};
+            padding: ${previewPadding};
+            color: ${textColor};
+            box-shadow: ${customCssBoxShadow};
+            font-family: inherit;
+            transition: transform 0.15s ease;
+          ">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px;">
+              <div style="display: flex; align-items: center; gap: 7px; font-size: 12px; font-weight: 600; opacity: 0.9;">
+                <span style="display: inline-flex; color: ${textColor};">${iconSvg}</span>
+                <span>${title}</span>
+              </div>
+              <span style="
+                font-size: 10px;
+                font-weight: 700;
+                letter-spacing: 0.05em;
+                background: ${isDark ? 'rgba(255,255,255,0.1)' : '#ffffff'};
+                border: 1px solid ${surfaceBorderColor};
+                color: ${textColor};
+                padding: 2px 7px;
+                border-radius: 9999px;
+              ">${badge}</span>
+            </div>
+
+            <div style="font-size: 26px; font-weight: 800; letter-spacing: -0.025em; font-variant-numeric: tabular-nums; line-height: 1.15; margin-bottom: 6px;">
+              ${val}
+            </div>
+
+            ${trend ? `
+              <div style="display: inline-flex; align-items: center; gap: 4px; font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 9999px; background: ${trendSentiment === 'negative' ? '#fee2e2' : (trendSentiment === 'positive' ? '#dcfce7' : '#f3f4f6')}; color: ${trendSentiment === 'negative' ? '#991b1b' : (trendSentiment === 'positive' ? '#166534' : '#374151')}; margin-top: 4px;">
+                <span>${trendSentiment === 'negative' ? '↓' : '↑'}</span>
+                <span>${trend}</span>
+              </div>
+            ` : ''}
+
+            ${sub ? `
+              <div style="font-size: 11.5px; opacity: 0.8; margin-top: 10px; display: flex; align-items: center; gap: 6px; font-weight: 500;">
+                <span style="width: 5px; height: 5px; border-radius: 9999px; background: currentColor; opacity: 0.7;"></span>
+                <span>${sub}</span>
+              </div>
+            ` : ''}
+          </div>
+        `;
+
+        tailwindClasses = `${tailwindSurfaceClass} ${borderWeight} ${tailwindBorderClass} ${radius} ${shadow} ${padding} ${tailwindTextClass} transition-all duration-150 hover:translate-y-[-1px]`;
+
+        jsxSnippet = `import React from 'react';
+import { ${iconKey}, TrendingUp } from 'lucide-react';
+
+export default function CashboxStatCard({
+  title = "${title}",
+  value = "${val}",
+  badge = "${badge}",
+  trend = "${trend}",
+  subtitle = "${sub}",
+  onClick,
+}) {
+  return (
+    <div
+      onClick={onClick}
+      className="${tailwindClasses}"
+    >
+      <div className="flex items-center justify-between mb-2.5">
+        <div className="flex items-center gap-2 text-xs font-semibold opacity-90">
+          <${iconKey} className="w-4 h-4 text-emerald-700 dark:text-emerald-300" />
+          <span>{title}</span>
+        </div>
+        <span className="text-[10px] font-bold tracking-wider px-2 py-0.5 rounded-full bg-white/90 dark:bg-zinc-800 border border-emerald-200/70 dark:border-zinc-700">
+          {badge}
+        </span>
+      </div>
+
+      <div className="text-2xl sm:text-3xl font-extrabold tracking-tight tabular-nums">
+        {value}
+      </div>
+
+      {trend && (
+        <div className="inline-flex items-center gap-1.5 mt-2 px-2 py-0.5 rounded-full text-[11px] font-bold bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300">
+          <TrendingUp className="w-3 h-3" />
+          <span>{trend}</span>
+        </div>
+      )}
+
+      {subtitle && (
+        <div className="flex items-center gap-1.5 mt-3 text-xs opacity-75 font-medium">
+          <span className="w-1.5 h-1.5 rounded-full bg-current opacity-70" />
+          <span>{subtitle}</span>
+        </div>
+      )}
+    </div>
+  );
+}`;
+
+        cssSnippet = `.finlite-stat-card {
+  background: ${surfaceBg};
+  border: ${previewBorderWidth} solid ${surfaceBorderColor};
+  border-radius: ${previewRadius};
+  padding: ${previewPadding};
+  color: ${textColor};
+  box-shadow: ${customCssBoxShadow};
+  transition: transform 0.15s ease;
+}
+.finlite-stat-card:hover {
+  transform: translateY(-1px);
+}`;
+        locationHint = '💡 Paste inside components/dashboard/StatCards.jsx or wireframes/dashboard.html';
+      }
+
+      // -------------------------------------------------------------
+      // 2. ACTION BUTTON
+      // -------------------------------------------------------------
+      else if (comp === 'button') {
+        const text = document.getElementById('fieldBtnText').value || '+ Post Inflow';
+        const variant = document.getElementById('fieldBtnVariant').value;
+
+        let btnBg = p.primary;
+        let btnColor = '#ffffff';
+        let btnBorder = 'none';
+        let twBtnClass = 'bg-emerald-600 hover:bg-emerald-700 text-white shadow-xs';
+
+        if (variant === 'tint') {
+          btnBg = p.tint;
+          btnColor = p.text;
+          btnBorder = `1px solid ${p.border}`;
+          twBtnClass = 'bg-emerald-50 hover:bg-emerald-100 text-emerald-900 border border-emerald-300/80';
+        } else if (variant === 'outline') {
+          btnBg = 'transparent';
+          btnColor = isDark ? '#ffffff' : p.primary;
+          btnBorder = `1.5px solid ${p.primary}`;
+          twBtnClass = 'bg-transparent hover:bg-emerald-50/20 text-emerald-600 dark:text-emerald-400 border-2 border-emerald-600';
+        } else if (variant === 'ghost') {
+          btnBg = 'transparent';
+          btnColor = isDark ? '#94a3b8' : '#4b5563';
+          btnBorder = 'none';
+          twBtnClass = 'bg-transparent hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-600 dark:text-zinc-300';
+        }
+
+        previewHtml = `
+          <div style="display: flex; justify-content: center; padding: 20px;">
+            <button style="
+              background: ${btnBg};
+              color: ${btnColor};
+              border: ${btnBorder};
+              border-radius: ${previewRadius};
+              padding: 10px 22px;
+              font-size: 13.5px;
+              font-weight: 700;
+              cursor: pointer;
+              display: inline-flex;
+              align-items: center;
+              gap: 8px;
+              box-shadow: ${variant === 'solid' ? '0 1px 3px rgba(0,0,0,0.1)' : 'none'};
+              transition: all 0.15s ease;
+            ">
+              <span>${text}</span>
+            </button>
+          </div>
+        `;
+
+        tailwindClasses = `inline-flex items-center justify-center gap-2 px-5 py-2.5 text-sm font-bold ${radius} ${twBtnClass} transition-all duration-150 active:scale-[0.98]`;
+
+        jsxSnippet = `import React from 'react';
+
+export default function ActionButton({ children = "${text}", onClick, disabled = false }) {
+  return (
+    <button
+      onClick={onClick}
+      disabled={disabled}
+      className="${tailwindClasses}"
+    >
+      {children}
+    </button>
+  );
+}`;
+
+        cssSnippet = `.finlite-btn {
+  background: ${btnBg};
+  color: ${btnColor};
+  border: ${btnBorder};
+  border-radius: ${previewRadius};
+  padding: 10px 22px;
+  font-size: 13.5px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.finlite-btn:hover {
+  opacity: 0.92;
+  transform: translateY(-1px);
+}`;
+        locationHint = '💡 Paste inside components/ui/Button.jsx or modal footer controls';
+      }
+
+      // -------------------------------------------------------------
+      // 3. STATUS BADGE
+      // -------------------------------------------------------------
+      else if (comp === 'badge') {
+        const text = document.getElementById('fieldBadgeText').value || 'Verified Ledger';
+        const tone = document.getElementById('fieldBadgeTone').value;
+
+        const toneMap = {
+          green: { bg: '#dcfce7', text: '#166534', border: '#86efac', dot: '#15803d', tw: 'bg-emerald-50 text-emerald-800 border-emerald-300/80 dark:bg-emerald-950/60 dark:text-emerald-300' },
+          amber: { bg: '#fef3c7', text: '#92400e', border: '#fcd34d', dot: '#d97706', tw: 'bg-amber-50 text-amber-800 border-amber-300 dark:bg-amber-950/60 dark:text-amber-300' },
+          red: { bg: '#fee2e2', text: '#991b1b', border: '#fca5a5', dot: '#dc2626', tw: 'bg-rose-50 text-rose-800 border-rose-300 dark:bg-rose-950/60 dark:text-rose-300' },
+          slate: { bg: '#f1f5f9', text: '#334155', border: '#cbd5e1', dot: '#64748b', tw: 'bg-slate-100 text-slate-800 border-slate-300 dark:bg-slate-800 dark:text-slate-200' },
+        };
+        const t = toneMap[tone] || toneMap.green;
+
+        previewHtml = `
+          <div style="display: flex; justify-content: center; padding: 24px;">
+            <div style="
+              background: ${t.bg};
+              color: ${t.text};
+              border: 1px solid ${t.border};
+              padding: 4px 12px;
+              border-radius: ${previewRadius};
+              font-size: 11.5px;
+              font-weight: 700;
+              letter-spacing: 0.03em;
+              display: inline-flex;
+              align-items: center;
+              gap: 7px;
+            ">
+              <span style="width: 6px; height: 6px; border-radius: 9999px; background: ${t.dot};"></span>
+              <span>${text}</span>
+            </div>
+          </div>
+        `;
+
+        tailwindClasses = `inline-flex items-center gap-1.5 px-3 py-1 text-xs font-bold ${radius} border ${t.tw}`;
+
+        jsxSnippet = `import React from 'react';
+
+export default function StatusBadge({ label = "${text}" }) {
+  return (
+    <span className="${tailwindClasses}">
+      <span className="w-1.5 h-1.5 rounded-full bg-current animate-pulse" />
+      <span>{label}</span>
+    </span>
+  );
+}`;
+
+        cssSnippet = `.finlite-badge {
+  background: ${t.bg};
+  color: ${t.text};
+  border: 1px solid ${t.border};
+  padding: 4px 12px;
+  border-radius: ${previewRadius};
+  font-size: 11.5px;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+}`;
+        locationHint = '💡 Paste inside components/ledger/StatusBadge.jsx or table status columns';
+      }
+
+      // -------------------------------------------------------------
+      // 4. LEDGER TRANSACTION ROW
+      // -------------------------------------------------------------
+      else if (comp === 'row') {
+        const payer = document.getElementById('fieldRowPayer').value || 'Juan Dela Cruz';
+        const ref = document.getElementById('fieldRowRef').value || 'REF-2026-0891';
+        const amount = document.getElementById('fieldRowAmount').value || '+₱500.00';
+        const cat = document.getElementById('fieldRowCategory').value || 'Membership Fee';
+        const isPositive = amount.startsWith('+');
+
+        previewHtml = `
+          <div style="
+            background: ${isDark ? '#0f172a' : '#ffffff'};
+            border: 1px solid ${isDark ? '#1e293b' : '#e5e7eb'};
+            border-radius: ${previewRadius};
+            padding: 14px 18px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 14px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+          ">
+            <div style="display: flex; align-items: center; gap: 12px; min-width: 0;">
+              <div style="
+                width: 36px;
+                height: 36px;
+                border-radius: 10px;
+                background: ${isPositive ? '#dcfce7' : '#fee2e2'};
+                color: ${isPositive ? '#166534' : '#991b1b'};
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                flex-shrink: 0;
+              ">
+                ${isPositive ? SVG_ICONS.ArrowUpRight : SVG_ICONS.TrendingDown}
+              </div>
+              <div style="min-width: 0;">
+                <div style="font-size: 13px; font-weight: 700; color: ${isDark ? '#f8fafc' : '#111827'}; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                  ${payer}
+                </div>
+                <div style="font-size: 11px; color: ${isDark ? '#94a3b8' : '#6b7280'}; display: flex; align-items: center; gap: 6px;">
+                  <span>${ref}</span>
+                  <span>•</span>
+                  <span style="background: ${isDark ? '#1e293b' : '#f3f4f6'}; padding: 1px 6px; border-radius: 4px; font-weight: 600;">${cat}</span>
+                </div>
+              </div>
+            </div>
+
+            <div style="font-size: 15px; font-weight: 800; font-variant-numeric: tabular-nums; color: ${isPositive ? '#15803d' : '#dc2626'}; text-align: right; flex-shrink: 0;">
+              ${amount}
+            </div>
+          </div>
+        `;
+
+        tailwindClasses = `flex items-center justify-between gap-3 p-3.5 ${radius} border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-xs hover:border-emerald-300 dark:hover:border-emerald-700 transition-colors`;
+
+        jsxSnippet = `import React from 'react';
+import { ArrowUpRight, TrendingDown } from 'lucide-react';
+
+export default function LedgerRowItem({
+  payer = "${payer}",
+  reference = "${ref}",
+  category = "${cat}",
+  amount = "${amount}",
+}) {
+  const isPositive = amount.startsWith('+');
+
+  return (
+    <div className="${tailwindClasses}">
+      <div className="flex items-center gap-3 min-w-0">
+        <div className={\`w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 \${
+          isPositive 
+            ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950/70 dark:text-emerald-300' 
+            : 'bg-rose-100 text-rose-800 dark:bg-rose-950/70 dark:text-rose-300'
+        }\`}>
+          {isPositive ? <ArrowUpRight className="w-4 h-4" /> : <TrendingDown className="w-4 h-4" />}
+        </div>
+        <div className="min-w-0">
+          <div className="text-sm font-bold text-zinc-900 dark:text-zinc-100 truncate">
+            {payer}
+          </div>
+          <div className="flex items-center gap-1.5 text-xs text-zinc-500 dark:text-zinc-400">
+            <span>{reference}</span>
+            <span>•</span>
+            <span className="px-1.5 py-0.5 rounded bg-zinc-100 dark:bg-zinc-800 text-[10px] font-semibold">
+              {category}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <div className={\`text-sm font-extrabold tabular-nums flex-shrink-0 \${
+        isPositive ? 'text-emerald-700 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'
+      }\`}>
+        {amount}
+      </div>
+    </div>
+  );
+}`;
+
+        cssSnippet = `.ledger-row-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 18px;
+  border-radius: ${previewRadius};
+  border: 1px solid #e5e7eb;
+  background: #ffffff;
+}`;
+        locationHint = '💡 Paste inside components/ledger/TransactionTable.jsx row renders';
+      }
+
+      // -------------------------------------------------------------
+      // 5. AUDIT ALERT BANNER
+      // -------------------------------------------------------------
+      else if (comp === 'alert') {
+        const title = document.getElementById('fieldAlertTitle').value || 'Reconciliation Alert';
+        const msg = document.getElementById('fieldAlertMsg').value || 'Discrepancy detected in cashbox audit.';
+        const tone = document.getElementById('fieldAlertTone').value;
+
+        const alertStyles = {
+          warning: { bg: '#fefce8', border: '#fef08a', text: '#854d0e', twBg: 'bg-amber-50 dark:bg-amber-950/30 border-amber-300/80 text-amber-900 dark:text-amber-200' },
+          success: { bg: '#f0fdf4', border: '#bbf7d0', text: '#166534', twBg: 'bg-emerald-50 dark:bg-emerald-950/30 border-emerald-300/80 text-emerald-900 dark:text-emerald-200' },
+          info: { bg: '#f0f9ff', border: '#bae6fd', text: '#075985', twBg: 'bg-sky-50 dark:bg-sky-950/30 border-sky-300/80 text-sky-900 dark:text-sky-200' }
+        };
+        const s = alertStyles[tone] || alertStyles.warning;
+
+        previewHtml = `
+          <div style="
+            background: ${s.bg};
+            border: 1px solid ${s.border};
+            border-radius: ${previewRadius};
+            padding: 16px 20px;
+            color: ${s.text};
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.03);
+          ">
+            <span style="margin-top: 1px; display: inline-flex;">${SVG_ICONS.AlertTriangle}</span>
+            <div>
+              <div style="font-size: 13.5px; font-weight: 700; margin-bottom: 3px;">${title}</div>
+              <div style="font-size: 12px; opacity: 0.9; line-height: 1.5;">${msg}</div>
+            </div>
+          </div>
+        `;
+
+        tailwindClasses = `flex items-start gap-3 p-4 ${radius} border ${s.twBg}`;
+
+        jsxSnippet = `import React from 'react';
+import { AlertTriangle } from 'lucide-react';
+
+export default function AuditAlertBanner({
+  title = "${title}",
+  message = "${msg}",
+}) {
+  return (
+    <div className="${tailwindClasses}">
+      <AlertTriangle className="w-5 h-5 flex-shrink-0 mt-0.5" />
+      <div>
+        <div className="text-sm font-bold">{title}</div>
+        <div className="text-xs opacity-90 mt-0.5 leading-relaxed">{message}</div>
+      </div>
+    </div>
+  );
+}`;
+
+        cssSnippet = `.audit-alert-banner {
+  background: ${s.bg};
+  border: 1px solid ${s.border};
+  border-radius: ${previewRadius};
+  padding: 16px 20px;
+  color: ${s.text};
+  display: flex;
+  gap: 12px;
+}`;
+        locationHint = '💡 Paste inside components/dashboard/CashReconciliation.jsx or audit alerts';
+      }
+
+      // Inject visual specimen
+      wrap.innerHTML = previewHtml;
+
+      // Populate Code Box according to active tab
+      const codePre = document.getElementById('codeOutputPre');
+      if (editorState.codeTab === 'jsx') {
+        codePre.textContent = jsxSnippet;
+      } else if (editorState.codeTab === 'tailwind') {
+        codePre.textContent = `className="${tailwindClasses}"`;
+      } else {
+        codePre.textContent = cssSnippet;
+      }
+
+      // Update location hint
+      document.getElementById('codeLocationHint').textContent = locationHint;
+    }
+
+    function copyUiCode() {
+      const code = document.getElementById('codeOutputPre').textContent;
+      const tabNames = {
+        jsx: 'React 19 / JSX Component',
+        tailwind: 'Tailwind CSS Classes',
+        css: 'Vanilla CSS snippet'
+      };
+      const label = tabNames[editorState.codeTab] || 'Code';
+
+      navigator.clipboard.writeText(code).then(() => {
+        showToast(`Copied ${label} to clipboard!`);
+      }).catch(() => {
+        showToast('Code copied to clipboard!');
+      });
+    }
+
     function showToast(msg) {
       const toast = document.getElementById('copyToast');
       document.getElementById('toastMessage').textContent = msg;
@@ -2542,9 +3930,10 @@
       }, 2400);
     }
 
-    // Initialize custom card on load
+    // Initialize custom card & UI editor on load
     window.addEventListener('DOMContentLoaded', () => {
       renderCustomCard();
+      renderUiEditor();
     });
   </script>
 
