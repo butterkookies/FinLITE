@@ -191,9 +191,6 @@ export default function DenominationCounter({
                 <AlertCircle className="w-4 h-4 text-rose-600 shrink-0" />
                 <span>Physical Shortage Detected (-{formatPHP(variance)})</span>
               </div>
-              <p className="text-[11px] text-gray-600 leading-relaxed">
-                As per LITE AY 2025–2026 governance rules, physical variances from loose coin change or booth rush may be formally declared as a justified expense line item under Adviser approval.
-              </p>
               <div>
                 <label className="block font-semibold text-gray-800 mb-1">
                   Adviser Shortage Justification Notes:

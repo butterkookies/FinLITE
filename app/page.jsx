@@ -1199,18 +1199,6 @@ export default function Dashboard() {
             
             {/* Left: Dynamic Greetings Hero Header */}
             <div>
-              {/* Dynamic Time-of-Day Tag & Role */}
-              <div className="flex items-center gap-2 mb-1.5 sm:mb-2">
-                <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] sm:text-xs font-semibold tracking-wider uppercase transition-colors border ${
-                  isLight
-                    ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
-                    : 'bg-emerald-500/15 text-emerald-300 border-emerald-500/20'
-                }`}>
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                  {currentRole === 'admin' ? 'Administrator Portal' : currentRole === 'treasurer' ? 'LITE Treasury' : 'Officer Portal'}
-                </span>
-              </div>
-
               {/* Minimalist Greetings Header */}
               <h1 className={`text-2xl sm:text-3xl lg:text-4xl font-extrabold tracking-tight transition-colors ${
                 isLight ? 'text-zinc-950' : 'text-white'
@@ -1266,27 +1254,7 @@ export default function Dashboard() {
                 </span>
               </button>
 
-              {/* Pod 3: Proposal Creator */}
-              <button
-                type="button"
-                onClick={() => setIsProposalOpen(true)}
-                className="flex flex-col items-center gap-1 p-1 sm:px-2.5 group cursor-pointer"
-              >
-                <div className={`w-10 h-10 sm:w-11 sm:h-11 rounded-full flex items-center justify-center transition-all shadow-xs border ${
-                  isLight
-                    ? 'bg-white text-zinc-800 border-zinc-200 group-hover:border-emerald-300 group-hover:text-emerald-700 active:scale-95'
-                    : 'bg-[#0c2e1f] text-emerald-400 border-emerald-800/40 group-hover:bg-emerald-900/60 active:scale-95'
-                }`}>
-                  <Calculator className="w-4 h-4 stroke-[2]" />
-                </div>
-                <span className={`text-[10px] sm:text-[11px] font-semibold transition-colors ${
-                  isLight ? 'text-zinc-700 group-hover:text-emerald-700' : 'text-zinc-300 group-hover:text-emerald-300'
-                }`}>
-                  Proposal
-                </span>
-              </button>
-
-              {/* Pod 4: Preview Report */}
+              {/* Pod 3: Preview Report */}
               <button
                 type="button"
                 onClick={handleOpenLiquidationPreview}

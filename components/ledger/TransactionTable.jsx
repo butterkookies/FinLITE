@@ -247,21 +247,7 @@ export default function TransactionTable({
         </div>
 
         {/* Action Buttons */}
-        <div className="grid grid-cols-2 sm:flex sm:items-center gap-2.5 w-full sm:w-auto shrink-0">
-          {/* Create Business Proposal Button */}
-          <button
-            onClick={onNewProposal}
-            className={`h-10 flex items-center justify-center gap-2 px-4 text-xs font-semibold rounded-xl transition-all shadow-xs whitespace-nowrap cursor-pointer border ${
-              isLight
-                ? 'text-emerald-900 bg-emerald-50/80 hover:bg-emerald-100 border-emerald-200 hover:border-emerald-300'
-                : 'text-emerald-200 bg-[#0d1e16] hover:bg-[#122b20] active:bg-[#163527] border-[#1a382b] hover:border-emerald-500/40'
-            }`}
-            title="Create Pre-Activity Business Proposal & Booth Budget"
-          >
-            <Calculator className={`w-3.5 h-3.5 shrink-0 ${isLight ? 'text-emerald-600' : 'text-emerald-400'}`} />
-            <span>Create Proposal</span>
-          </button>
-
+        <div className="flex flex-wrap sm:flex-nowrap items-center gap-2.5 w-full sm:w-auto shrink-0 justify-end">
           {/* Review & Export Report Button */}
           <button
             onClick={onExportReport}
