@@ -1,8 +1,11 @@
 'use client';
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { 
   ArrowDownRight, 
   ArrowUpRight, 
+  ArrowUpDown,
+  ArrowUp,
+  ArrowDown,
   Clock, 
   Download, 
   Filter, 
@@ -29,6 +32,25 @@ import { formatPHP } from '@/lib/utils/currency';
 import { compressReceiptImage } from '@/lib/utils/compression';
 import { useTheme } from '@/components/theme/ThemeProvider';
 
+export function formatFriendlyDate(dateStr) {
+  if (!dateStr) return '—';
+  try {
+    const raw = String(dateStr).split('T')[0];
+    const parts = raw.split('-');
+    if (parts.length !== 3) return dateStr;
+    const [year, month, day] = parts;
+    const date = new Date(Number(year), Number(month) - 1, Number(day));
+    if (isNaN(date.getTime())) return dateStr;
+    return date.toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric'
+    });
+  } catch (_) {
+    return dateStr;
+  }
+}
+
 export default function TransactionTable({ 
   transactions = [], 
   onNewTransaction, 
@@ -46,6 +68,12 @@ export default function TransactionTable({
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedReceipt, setSelectedReceipt] = useState(null);
   const [activePhotoIndex, setActivePhotoIndex] = useState(0);
+
+  // Sorting & Pagination states
+  const [sortField, setSortField] = useState('date');
+  const [sortDirection, setSortDirection] = useState('desc');
+  const [pageSize, setPageSize] = useState(25);
+  const [currentPage, setCurrentPage] = useState(1);
 
   // Post-entry attachment modal states
   const [attachTx, setAttachTx] = useState(null);
@@ -207,10 +235,80 @@ export default function TransactionTable({
         (tx.title || '').toLowerCase().includes(query) ||
         (tx.description && tx.description.toLowerCase().includes(query)) ||
         (tx.event_name && tx.event_name.toLowerCase().includes(query)) ||
-        (tx.reimbursement_recipient && tx.reimbursement_recipient.toLowerCase().includes(query))
+        (tx.reimbursement_recipient && tx.reimbursement_recipient.toLowerCase().includes(query)) ||
+        (tx.category_name && tx.category_name.toLowerCase().includes(query))
       );
     });
   }, [transactions, filterType, searchQuery]);
+
+  // Reset pagination when search, filter, or page size changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [filterType, searchQuery, pageSize]);
+
+  // Multi-column sorting
+  const sortedTransactions = useMemo(() => {
+    const list = [...filtered];
+    return list.sort((a, b) => {
+      let comparison = 0;
+      if (sortField === 'date') {
+        const dateA = a.transaction_date || '';
+        const dateB = b.transaction_date || '';
+        comparison = dateA.localeCompare(dateB);
+      } else if (sortField === 'amount') {
+        const amtA = Number(a.amount) || 0;
+        const amtB = Number(b.amount) || 0;
+        comparison = amtA - amtB;
+      } else if (sortField === 'title') {
+        const titleA = (a.title || '').toLowerCase();
+        const titleB = (b.title || '').toLowerCase();
+        comparison = titleA.localeCompare(titleB);
+      } else if (sortField === 'category') {
+        const catA = (a.category_name || (a.type === 'INFLOW' ? 'Revenue' : 'Disbursement')).toLowerCase();
+        const catB = (b.category_name || (b.type === 'INFLOW' ? 'Revenue' : 'Disbursement')).toLowerCase();
+        comparison = catA.localeCompare(catB);
+      }
+
+      return sortDirection === 'asc' ? comparison : -comparison;
+    });
+  }, [filtered, sortField, sortDirection]);
+
+  // Pagination calculation
+  const totalRecords = sortedTransactions.length;
+  const isAll = pageSize === 'all';
+  const effectivePageSize = isAll ? Math.max(totalRecords, 1) : Number(pageSize);
+  const totalPages = Math.max(1, Math.ceil(totalRecords / effectivePageSize));
+  const safePage = Math.min(Math.max(1, currentPage), totalPages);
+
+  const paginatedTransactions = useMemo(() => {
+    if (isAll) return sortedTransactions;
+    const startIndex = (safePage - 1) * effectivePageSize;
+    return sortedTransactions.slice(startIndex, startIndex + effectivePageSize);
+  }, [sortedTransactions, safePage, effectivePageSize, isAll]);
+
+  const startIndex = totalRecords === 0 ? 0 : (safePage - 1) * effectivePageSize + 1;
+  const endIndex = isAll ? totalRecords : Math.min(safePage * effectivePageSize, totalRecords);
+
+  const handleSort = (field) => {
+    if (sortField === field) {
+      setSortDirection((prev) => (prev === 'asc' ? 'desc' : 'asc'));
+    } else {
+      setSortField(field);
+      setSortDirection(field === 'date' || field === 'amount' ? 'desc' : 'asc');
+    }
+    setCurrentPage(1);
+  };
+
+  const SortIndicator = ({ field }) => {
+    if (sortField !== field) {
+      return <ArrowUpDown className="w-3 h-3 opacity-30 group-hover/th:opacity-80 transition-opacity shrink-0" />;
+    }
+    return sortDirection === 'asc' ? (
+      <ArrowUp className={`w-3.5 h-3.5 shrink-0 ${isLight ? 'text-emerald-600' : 'text-emerald-400'}`} />
+    ) : (
+      <ArrowDown className={`w-3.5 h-3.5 shrink-0 ${isLight ? 'text-emerald-600' : 'text-emerald-400'}`} />
+    );
+  };
 
   return (
     <div className={`rounded-2xl sm:rounded-3xl transition-colors relative overflow-hidden border ${
@@ -341,11 +439,49 @@ export default function TransactionTable({
                 ? 'border-zinc-200/80 text-zinc-600 bg-zinc-50/80'
                 : 'border-[#142e20] text-white/50 bg-[#071912]/50'
             }`}>
-              <th className="py-3.5 pl-6 pr-3 w-[24%] text-left whitespace-nowrap">Transaction &amp; Event</th>
-              <th className="py-3.5 px-3 w-[11%] text-left whitespace-nowrap">Date</th>
+              <th className="py-3.5 pl-6 pr-3 w-[24%] text-left whitespace-nowrap">
+                <button
+                  type="button"
+                  onClick={() => handleSort('title')}
+                  className="group/th inline-flex items-center gap-1.5 hover:text-emerald-500 transition-colors cursor-pointer select-none"
+                >
+                  <span>Transaction &amp; Event</span>
+                  <SortIndicator field="title" />
+                </button>
+              </th>
+              <th className="py-3.5 px-3 w-[11%] text-left whitespace-nowrap">
+                <button
+                  type="button"
+                  onClick={() => handleSort('date')}
+                  className="group/th inline-flex items-center gap-1.5 hover:text-emerald-500 transition-colors cursor-pointer select-none"
+                >
+                  <span>Date</span>
+                  <SortIndicator field="date" />
+                </button>
+              </th>
               <th className="py-3.5 px-3 w-[10%] text-left whitespace-nowrap">Channel</th>
-              <th className="py-3.5 px-3 w-[16%] text-left whitespace-nowrap">Category</th>
-              <th className="py-3.5 px-3 w-[14%] text-right whitespace-nowrap">Amount</th>
+              <th className="py-3.5 px-3 w-[16%] text-left whitespace-nowrap">
+                <button
+                  type="button"
+                  onClick={() => handleSort('category')}
+                  className="group/th inline-flex items-center gap-1.5 hover:text-emerald-500 transition-colors cursor-pointer select-none"
+                >
+                  <span>Category</span>
+                  <SortIndicator field="category" />
+                </button>
+              </th>
+              <th className="py-3.5 px-3 w-[14%] text-right whitespace-nowrap">
+                <div className="flex justify-end">
+                  <button
+                    type="button"
+                    onClick={() => handleSort('amount')}
+                    className="group/th inline-flex items-center gap-1.5 hover:text-emerald-500 transition-colors cursor-pointer select-none"
+                  >
+                    <SortIndicator field="amount" />
+                    <span>Amount</span>
+                  </button>
+                </div>
+              </th>
               <th className="py-3.5 px-3 w-[12%] text-left whitespace-nowrap">Recorded By</th>
               <th className="py-3.5 pl-3 pr-6 w-[13%] text-right whitespace-nowrap">Receipt &amp; Action</th>
             </tr>
@@ -353,7 +489,7 @@ export default function TransactionTable({
           <tbody className={`divide-y text-xs ${
             isLight ? 'divide-emerald-900/10' : 'divide-[#142e20]/60'
           }`}>
-            {filtered.length === 0 ? (
+            {paginatedTransactions.length === 0 ? (
               <tr>
                 <td colSpan="7" className="py-16 text-center">
                   <div className={`w-12 h-12 rounded-xl flex items-center justify-center mx-auto mb-3 shadow-inner border ${
@@ -369,7 +505,7 @@ export default function TransactionTable({
                 </td>
               </tr>
             ) : (
-              filtered.map((tx) => (
+              paginatedTransactions.map((tx) => (
                 <tr 
                   key={tx.id} 
                   onClick={() => {
@@ -432,7 +568,7 @@ export default function TransactionTable({
                   <td className={`py-3.5 px-3 font-medium whitespace-nowrap tabular-nums ${
                     isLight ? 'text-gray-700' : 'text-white/70'
                   }`}>
-                    {tx.transaction_date}
+                    {formatFriendlyDate(tx.transaction_date)}
                   </td>
 
                   {/* Payment Channel */}
@@ -723,7 +859,7 @@ export default function TransactionTable({
 
                 <div className="flex items-center justify-between gap-3">
                   <span className={`font-medium shrink-0 ${isLight ? 'text-gray-500' : 'text-white/50'}`}>Date</span>
-                  <span className={`font-semibold tabular-nums ${isLight ? 'text-gray-700' : 'text-white/80'}`}>{tx.transaction_date}</span>
+                  <span className={`font-semibold tabular-nums ${isLight ? 'text-gray-700' : 'text-white/80'}`}>{formatFriendlyDate(tx.transaction_date)}</span>
                 </div>
 
                 <div className="flex items-center justify-between gap-3">
@@ -1061,6 +1197,118 @@ export default function TransactionTable({
         );
       })()}
 
+      {/* Desktop Pagination & Ledger Summary Footer */}
+      <div className={`hidden md:flex px-6 py-3.5 border-t items-center justify-between gap-3 text-xs ${
+        isLight
+          ? 'border-zinc-200/80 bg-zinc-50/60 text-zinc-600'
+          : 'border-[#142e20] bg-[#071912]/40 text-white/60'
+      }`}>
+        {/* Left: Record Count Summary */}
+        <div className="flex items-center gap-2">
+          <span className="font-medium">
+            {totalRecords === 0 ? (
+              'No records to display'
+            ) : (
+              <>
+                Showing <span className={`font-bold tabular-nums ${isLight ? 'text-zinc-900' : 'text-white'}`}>{startIndex}–{endIndex}</span> of <span className={`font-bold tabular-nums ${isLight ? 'text-zinc-900' : 'text-white'}`}>{totalRecords}</span> {totalRecords === 1 ? 'transaction' : 'transactions'}
+                {totalRecords !== transactions.length && (
+                  <span className="text-[11px] ml-1.5 opacity-70">
+                    (filtered from {transactions.length} total)
+                  </span>
+                )}
+              </>
+            )}
+          </span>
+        </div>
+
+        {/* Right: Page Size Selector + Prev / Next Controls */}
+        <div className="flex items-center gap-3">
+          {/* Page Size Pills */}
+          <div className="flex items-center gap-1">
+            <span className="text-[11px] font-medium mr-1 select-none opacity-80">Per page:</span>
+            {[10, 25, 50, 'all'].map((size) => {
+              const active = pageSize === size;
+              return (
+                <button
+                  key={size}
+                  type="button"
+                  onClick={() => {
+                    setPageSize(size);
+                    setCurrentPage(1);
+                  }}
+                  className={`px-2 py-1 text-[11px] font-semibold rounded-md transition-all cursor-pointer select-none ${
+                    active
+                      ? isLight
+                        ? 'bg-emerald-600 text-white shadow-2xs'
+                        : 'bg-emerald-500/25 text-emerald-300 border border-emerald-500/40 shadow-2xs'
+                      : isLight
+                        ? 'hover:bg-zinc-200/70 text-zinc-600'
+                        : 'hover:bg-[#122e21] text-white/60 hover:text-white'
+                  }`}
+                >
+                  {size === 'all' ? 'All' : size}
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Page Navigation Buttons */}
+          {!isAll && totalPages > 1 && (
+            <div className={`flex items-center gap-1.5 pl-3 border-l ${
+              isLight ? 'border-zinc-200' : 'border-[#142e20]'
+            }`}>
+              <button
+                type="button"
+                disabled={safePage <= 1}
+                onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                className={`p-1.5 rounded-lg border transition-all cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed ${
+                  isLight
+                    ? 'border-zinc-200 hover:bg-zinc-100 text-zinc-700'
+                    : 'border-[#1b3d2b] hover:bg-[#122e21] text-white/80'
+                }`}
+                title="Previous page"
+              >
+                <ChevronLeft className="w-4 h-4" />
+              </button>
+
+              <span className="text-xs font-semibold px-2 select-none tabular-nums">
+                Page <span className={isLight ? 'text-zinc-900 font-bold' : 'text-white font-bold'}>{safePage}</span> of {totalPages}
+              </span>
+
+              <button
+                type="button"
+                disabled={safePage >= totalPages}
+                onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                className={`p-1.5 rounded-lg border transition-all cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed ${
+                  isLight
+                    ? 'border-zinc-200 hover:bg-zinc-100 text-zinc-700'
+                    : 'border-[#1b3d2b] hover:bg-[#122e21] text-white/80'
+                }`}
+                title="Next page"
+              >
+                <ChevronRight className="w-4 h-4" />
+              </button>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Mobile Ledger Summary Footer */}
+      <div className={`md:hidden px-4 py-3 border-t flex items-center justify-between text-xs ${
+        isLight
+          ? 'border-zinc-200/80 bg-zinc-50/60 text-zinc-600'
+          : 'border-[#142e20] bg-[#071912]/40 text-white/60'
+      }`}>
+        <span className="font-medium">
+          Showing <span className={`font-bold tabular-nums ${isLight ? 'text-zinc-900' : 'text-white'}`}>{filtered.length}</span> {filtered.length === 1 ? 'transaction' : 'transactions'}
+        </span>
+        {filtered.length !== transactions.length && (
+          <span className="text-[11px] opacity-70">
+            Filtered from {transactions.length}
+          </span>
+        )}
+      </div>
+
       {/* Receipt Modal Preview (Multi-Receipt Carousel) */}
       {selectedReceipt && (() => {
         const viewReceipts = getTransactionReceipts(selectedReceipt);
@@ -1095,7 +1343,7 @@ export default function TransactionTable({
                       Official Receipt
                     </span>
                     <span className="text-xs text-gray-500 font-medium">
-                      {selectedReceipt.transaction_date}
+                      {formatFriendlyDate(selectedReceipt.transaction_date)}
                     </span>
                   </div>
                   <h3 className="text-base font-bold text-gray-950 mt-1 truncate">
@@ -1275,7 +1523,7 @@ export default function TransactionTable({
                   {attachTx.title}
                 </h3>
                 <p className="text-xs text-gray-500 mt-0.5">
-                  Amount: <span className="font-bold text-gray-900 tabular-nums">{formatPHP(attachTx.amount)}</span> · {attachTx.transaction_date}
+                  Amount: <span className="font-bold text-gray-900 tabular-nums">{formatPHP(attachTx.amount)}</span> · {formatFriendlyDate(attachTx.transaction_date)}
                 </p>
               </div>
 
@@ -1473,7 +1721,7 @@ export default function TransactionTable({
                   )}
 
                   <span className={`text-xs font-medium tabular-nums ${isLight ? 'text-gray-500' : 'text-white/50'}`}>
-                    {tx.transaction_date}
+                    {formatFriendlyDate(tx.transaction_date)}
                   </span>
 
                   {(tx.academic_year || tx.semester) && (
@@ -1886,7 +2134,7 @@ export default function TransactionTable({
                 <div className="flex items-center justify-between">
                   <span className={`font-medium ${isLight ? 'text-gray-500' : 'text-white/50'}`}>Advance Date</span>
                   <span className={`font-semibold tabular-nums ${isLight ? 'text-gray-700' : 'text-white/80'}`}>
-                    {settleTx.transaction_date}
+                    {formatFriendlyDate(settleTx.transaction_date)}
                   </span>
                 </div>
                 <div className={`pt-2.5 border-t flex items-center justify-between ${
