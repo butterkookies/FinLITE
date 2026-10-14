@@ -275,7 +275,7 @@ export default function TransactionTable({
           {(currentRole === 'admin' || currentRole === 'treasurer' || currentRole === 'auditor') && (
             <button
               onClick={onNewTransaction}
-              className={`col-span-2 sm:col-span-1 h-10 flex items-center justify-center gap-2 px-4.5 text-xs font-black rounded-xl transition-all shadow-lg whitespace-nowrap cursor-pointer ${
+              className={`col-span-2 sm:col-span-1 h-10 flex items-center justify-center gap-2 px-4.5 text-xs font-bold rounded-xl transition-all shadow-md whitespace-nowrap cursor-pointer ${
                 isLight
                   ? 'text-white bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 shadow-emerald-600/20'
                   : 'text-black bg-[#10b981] hover:bg-[#059669] active:bg-[#047857] shadow-emerald-500/20'
@@ -289,31 +289,31 @@ export default function TransactionTable({
       </div>
 
       {/* Filter & Search Bar */}
-      <div className={`px-5 sm:px-6 py-3.5 border-b flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 ${
-        isLight ? 'border-emerald-900/10 bg-gradient-to-r from-emerald-50/50 via-teal-50/40 to-emerald-50/50' : 'border-[#142e20] bg-transparent'
+      <div className={`px-4 sm:px-6 py-3 border-b flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5 sm:gap-3 ${
+        isLight ? 'border-zinc-200/90 bg-zinc-50/50' : 'border-[#142e20] bg-transparent'
       }`}>
         
         {/* Search Input */}
         <div className="relative w-full sm:w-80 shrink-0">
           <Search className={`w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none ${
-            isLight ? 'text-emerald-800/40' : 'text-white/40'
+            isLight ? 'text-zinc-400' : 'text-white/40'
           }`} />
           <input
             type="text"
             placeholder="Search items, events, recipients..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className={`w-full h-9 text-xs rounded-xl pl-8.5 pr-3 transition-all select-text shadow-inner focus:outline-none focus:ring-1 ${
+            className={`w-full h-9 text-xs rounded-xl pl-8.5 pr-3 transition-all select-text shadow-2xs focus:outline-none focus:ring-2 ${
               isLight
-                ? 'bg-white/95 focus:bg-white border border-emerald-300/80 text-emerald-950 placeholder:text-gray-400 focus:border-emerald-600 focus:ring-emerald-500/20'
+                ? 'bg-white focus:bg-white border border-zinc-200 text-zinc-900 placeholder:text-zinc-400 focus:border-emerald-500 focus:ring-emerald-500/20'
                 : 'bg-[#06120c] focus:bg-[#091a11] border border-[#163325] focus:border-emerald-500/50 text-white placeholder:text-white/40 focus:ring-emerald-500/30'
             }`}
           />
         </div>
 
         {/* Filter Tabs */}
-        <div className={`grid grid-cols-2 sm:flex sm:items-center gap-1.5 p-1 rounded-2xl sm:rounded-full border w-full sm:w-auto ${
-          isLight ? 'bg-emerald-100/50 border-emerald-200/80' : 'bg-[#06120c] border-[#163325]'
+        <div className={`flex overflow-x-auto scrollbar-none items-center gap-1 sm:gap-1.5 p-1 rounded-xl sm:rounded-full border w-full sm:w-auto shrink-0 ${
+          isLight ? 'bg-zinc-100/80 border-zinc-200' : 'bg-[#06120c] border-[#163325]'
         }`}>
           {[
             { id: 'ALL', label: 'All Records' },
@@ -324,13 +324,13 @@ export default function TransactionTable({
             <button
               key={tab.id}
               onClick={() => setFilterType(tab.id)}
-              className={`h-8 px-3.5 sm:px-4 text-xs font-bold transition-all rounded-xl sm:rounded-full text-center flex items-center justify-center cursor-pointer ${
+              className={`h-7 sm:h-8 px-3 sm:px-4 text-xs font-semibold whitespace-nowrap transition-all rounded-lg sm:rounded-full text-center flex items-center justify-center cursor-pointer shrink-0 ${
                 filterType === tab.id
                   ? isLight
-                    ? 'bg-emerald-600 text-white shadow-sm'
+                    ? 'bg-emerald-600 text-white shadow-xs'
                     : 'bg-[#10b981] text-black shadow-md'
                   : isLight
-                    ? 'text-emerald-900/75 hover:text-emerald-950 hover:bg-white/80'
+                    ? 'text-zinc-600 hover:text-zinc-900 hover:bg-white/80'
                     : 'text-white/60 hover:text-white hover:bg-white/[0.05]'
               }`}
             >
@@ -698,10 +698,10 @@ export default function TransactionTable({
                     {tx.type === 'INFLOW' ? 'Inflow Amount' : 'Disbursement Amount'}
                   </span>
                   <span
-                    className={`text-xl font-black tracking-tight tabular-nums block whitespace-nowrap ${
+                    className={`text-xl font-extrabold tracking-tight tabular-nums block whitespace-nowrap ${
                       tx.type === 'INFLOW' 
                         ? isLight ? 'text-emerald-600' : 'text-emerald-400' 
-                        : isLight ? 'text-gray-900' : 'text-white'
+                        : isLight ? 'text-zinc-900' : 'text-white'
                     }`}
                   >
                     {tx.type === 'INFLOW' ? '+' : '-'}{formatPHP(tx.amount)}

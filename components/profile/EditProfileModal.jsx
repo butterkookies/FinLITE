@@ -366,6 +366,7 @@ export default function EditProfileModal({
               <Phone className="w-3.5 h-3.5 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
               <input
                 type="tel"
+                inputMode="tel"
                 maxLength={11}
                 placeholder="09XXXXXXXXX (11 digits)"
                 value={contactNumber}
@@ -412,7 +413,7 @@ export default function EditProfileModal({
           )}
 
           {/* Action Buttons */}
-          <div className="pt-2 flex items-center justify-end gap-2 border-t border-black/[0.06]">
+          <div className="pt-2 pb-safe sm:pb-0 flex items-center justify-end gap-2 border-t border-black/[0.06]">
             <button
               type="button"
               disabled={isSaving}

@@ -224,6 +224,7 @@ export default function NewProposalModal({ isOpen, onClose, onOpenPreview }) {
                         <td className="p-2 px-3">
                           <input
                             type="number"
+                            inputMode="decimal"
                             step="0.01"
                             min="0"
                             value={item.unitCost}
@@ -234,6 +235,7 @@ export default function NewProposalModal({ isOpen, onClose, onOpenPreview }) {
                         <td className="p-2 px-3">
                           <input
                             type="number"
+                            inputMode="decimal"
                             step="0.01"
                             min="0"
                             value={item.sellingPrice}
@@ -244,6 +246,7 @@ export default function NewProposalModal({ isOpen, onClose, onOpenPreview }) {
                         <td className="p-2 px-3">
                           <input
                             type="number"
+                            inputMode="numeric"
                             min="0"
                             value={item.projectedUnits}
                             onChange={(e) => handleUpdateItem(item.id, 'projectedUnits', e.target.value)}
@@ -303,22 +306,22 @@ export default function NewProposalModal({ isOpen, onClose, onOpenPreview }) {
         </div>
 
         {/* Footer Actions */}
-        <div className="flex items-center justify-between px-6 py-4 border-t border-black/[0.06] bg-gray-50/60">
-          <p className="text-xs text-gray-500">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 px-4 sm:px-6 py-3.5 sm:py-4 pb-safe sm:pb-4 border-t border-black/[0.06] bg-gray-50/60">
+          <p className="text-xs text-gray-500 hidden sm:block">
             Proceeding will generate an interactive 1:1 on-screen paper preview for review and live edits.
           </p>
-          <div className="flex items-center gap-2.5">
+          <div className="flex items-center justify-end gap-2.5 w-full sm:w-auto">
             <button
               type="button"
               onClick={onClose}
-              className="h-10 px-4 text-xs font-semibold text-gray-700 bg-white border border-black/[0.08] hover:bg-gray-50 active:bg-gray-100 rounded-xl transition-colors cursor-pointer"
+              className="h-10 px-4 text-xs font-semibold text-gray-700 bg-white border border-black/[0.08] hover:bg-gray-50 active:bg-gray-100 rounded-xl transition-colors cursor-pointer flex-1 sm:flex-initial"
             >
               Cancel
             </button>
             <button
               type="button"
               onClick={handleProceedToPreview}
-              className="h-10 flex items-center gap-1.5 px-4 text-xs font-semibold text-white bg-emerald-700 hover:bg-emerald-800 active:bg-emerald-900 rounded-xl shadow-xs transition-all cursor-pointer whitespace-nowrap"
+              className="h-10 flex items-center justify-center gap-1.5 px-4 text-xs font-semibold text-white bg-emerald-700 hover:bg-emerald-800 active:bg-emerald-900 rounded-xl shadow-xs transition-all cursor-pointer whitespace-nowrap flex-1 sm:flex-initial"
             >
               <span>Preview & Edit Proposal</span>
               <ArrowRight className="w-3.5 h-3.5" />

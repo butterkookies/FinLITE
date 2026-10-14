@@ -249,6 +249,7 @@ export default function DenominationCounter({
                     </div>
                     <input
                       type="number"
+                      inputMode="numeric"
                       min="0"
                       value={counts[den.key] || ''}
                       placeholder="0"
@@ -282,6 +283,7 @@ export default function DenominationCounter({
                     </div>
                     <input
                       type="number"
+                      inputMode="numeric"
                       min="0"
                       value={counts[den.key] || ''}
                       placeholder="0"
@@ -298,7 +300,7 @@ export default function DenominationCounter({
         </div>
 
         {/* Modal Footer */}
-        <div className="px-6 py-4 border-t border-black/[0.06] bg-gray-50/50 flex items-center justify-between shrink-0">
+        <div className="px-6 py-4 pb-safe sm:pb-4 border-t border-black/[0.06] bg-gray-50/50 flex items-center justify-between shrink-0">
           <div className="text-xs text-gray-500">
             Counted by: <span className="font-semibold text-gray-800">{currentRole.toUpperCase()}</span>
           </div>

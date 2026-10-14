@@ -47,7 +47,7 @@ export default function RootLayout({ children }) {
         />
       </head>
       <body
-        className="min-h-screen text-[var(--text-main)] selection:bg-emerald-400 selection:text-black select-none overscroll-none transition-colors duration-200"
+        className="min-h-screen text-[var(--text-main)] selection:bg-emerald-500 selection:text-white overscroll-none transition-colors duration-200"
         suppressHydrationWarning
       >
         <ThemeProvider>

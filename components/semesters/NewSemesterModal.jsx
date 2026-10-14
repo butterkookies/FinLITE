@@ -225,7 +225,7 @@ export default function NewSemesterModal({
           </div>
 
           {/* Action Buttons */}
-          <div className="pt-2 flex items-center justify-end gap-2 border-t border-black/[0.06]">
+          <div className="pt-2 pb-safe sm:pb-0 flex items-center justify-end gap-2 border-t border-black/[0.06]">
             <button
               type="button"
               onClick={onClose}

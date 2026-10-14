@@ -69,15 +69,32 @@
   }
 
   /* Mobile Ergonomics & Native App Feel */
-  * {
+  body, p, span, h1, h2, h3, h4, td, th, input, textarea, [contenteditable="true"], .tabular-nums, .select-text {
+    -webkit-user-select: text;
+    user-select: text;
+  }
+
+  button, a, nav, .select-none, [role="button"], [role="tab"] {
     -webkit-user-select: none;
     user-select: none;
     -webkit-touch-callout: none;
   }
 
-  input, textarea, [contenteditable="true"], .select-text {
-    -webkit-user-select: text;
-    user-select: text;
+  /* Safe Area insets for native mobile viewports (iOS notch & bottom home bar) */
+  .pb-safe {
+    padding-bottom: calc(0.75rem + env(safe-area-inset-bottom, 0px));
+  }
+  .pt-safe {
+    padding-top: calc(0.5rem + env(safe-area-inset-top, 0px));
+  }
+
+  /* Hide scrollbars while preserving native smooth scrolling */
+  .scrollbar-none::-webkit-scrollbar {
+    display: none;
+  }
+  .scrollbar-none {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
   }
 }
 

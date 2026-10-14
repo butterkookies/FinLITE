@@ -330,7 +330,7 @@ export default function ReceiptCropModal({
         </div>
 
         {/* Toolbar Controls */}
-        <div className="px-5 py-3.5 bg-gray-900 border-t border-gray-800 flex flex-wrap items-center justify-between gap-3 shrink-0">
+        <div className="px-5 py-3.5 pb-safe sm:py-3.5 bg-gray-900 border-t border-gray-800 flex flex-wrap items-center justify-between gap-3 shrink-0">
           <div className="flex items-center gap-2">
             <button
               type="button"

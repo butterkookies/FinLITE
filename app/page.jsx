@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Plus, Wallet, Calculator, Sparkles, ShieldCheck, Home, User, FileText } from 'lucide-react';
 import Navbar from '@/components/layout/Navbar';
+import BottomNav from '@/components/layout/BottomNav';
 import StatCards from '@/components/dashboard/StatCards';
 import TransactionTable from '@/components/ledger/TransactionTable';
 import NewTransactionModal from '@/components/ledger/NewTransactionModal';
@@ -1167,62 +1168,61 @@ export default function Dashboard() {
       {/* Main Content Area */}
       <main className="flex-1 max-w-7xl w-full mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-6 pb-24 sm:pb-8 space-y-5 sm:space-y-6 no-print">
         
-        {/* Modern Minimalist Hero Balance & Action Hub — CONCEPT DESIGN */}
-        <section className={`relative rounded-3xl backdrop-blur-xl p-5 sm:p-7 shadow-xl overflow-hidden transition-all duration-300 ${
+        {/* Modern Minimalist Hero Balance & Action Hub */}
+        <section className={`relative rounded-2xl sm:rounded-3xl p-5 sm:p-7 shadow-sm overflow-hidden transition-all duration-300 border ${
           isLight
-            ? 'bg-gradient-to-br from-[#f8fbf9]/95 via-[#f0f7f3]/90 to-[#e4f1e9]/85 shadow-emerald-950/5'
-            : 'bg-[#0a2419]/85 shadow-2xl'
+            ? 'bg-white border-zinc-200'
+            : 'bg-[#0a2419]/90 border-emerald-900/40 shadow-sm'
         }`}>
           {/* Subtle ambient corner light aura */}
-          <div className={`absolute -top-24 -right-24 w-72 h-72 rounded-full blur-3xl pointer-events-none transition-opacity duration-300 ${isLight ? 'bg-emerald-400/15' : 'bg-emerald-400/20'}`} />
-          <div className={`absolute -bottom-24 -left-24 w-72 h-72 rounded-full blur-3xl pointer-events-none transition-opacity duration-300 ${isLight ? 'bg-teal-400/15' : 'bg-emerald-500/15'}`} />
+          <div className={`absolute -top-24 -right-24 w-72 h-72 rounded-full blur-3xl pointer-events-none transition-opacity duration-300 ${isLight ? 'bg-emerald-400/10' : 'bg-emerald-400/15'}`} />
 
-          <div className="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+          <div className="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-5 sm:gap-6">
             
             {/* Left: Dynamic Greetings Hero Header */}
             <div>
               {/* Dynamic Time-of-Day Tag & Role */}
-              <div className="flex items-center gap-2 mb-2">
-                <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] sm:text-xs font-bold tracking-wider uppercase transition-colors ${
+              <div className="flex items-center gap-2 mb-1.5 sm:mb-2">
+                <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] sm:text-xs font-semibold tracking-wider uppercase transition-colors border ${
                   isLight
-                    ? 'bg-emerald-100 text-emerald-800'
-                    : 'bg-emerald-500/15 text-emerald-300'
+                    ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
+                    : 'bg-emerald-500/15 text-emerald-300 border-emerald-500/20'
                 }`}>
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
                   {currentRole === 'admin' ? 'Administrator Portal' : currentRole === 'treasurer' ? 'LITE Treasury' : 'Officer Portal'}
                 </span>
               </div>
 
-              {/* Big Minimalist Greetings */}
-              <h1 className={`text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight drop-shadow-sm transition-colors ${
-                isLight ? 'text-emerald-950' : 'text-white'
+              {/* Minimalist Greetings Header */}
+              <h1 className={`text-2xl sm:text-3xl lg:text-4xl font-extrabold tracking-tight transition-colors ${
+                isLight ? 'text-zinc-950' : 'text-white'
               }`}>
                 {greeting}, {userProfile?.first_name || userProfile?.full_name?.split(' ')[0] || currentUser?.user_metadata?.full_name?.split(' ')[0] || 'Officer'}
               </h1>
             </div>
 
-            {/* Right: Quick Action Pods Dock (5 Circular Pods matching mockup) */}
-            <div className={`p-2 sm:p-2.5 rounded-2xl sm:rounded-full backdrop-blur-md flex items-center justify-around sm:justify-start sm:gap-4 shrink-0 transition-all ${
+            {/* Right: Quick Action Pods Dock */}
+            <div className={`p-1.5 sm:p-2.5 rounded-2xl sm:rounded-full flex items-center justify-around sm:justify-start sm:gap-4 shrink-0 transition-all border ${
               isLight
-                ? 'bg-gradient-to-r from-emerald-100/60 via-white/80 to-teal-100/60 shadow-xs'
-                : 'bg-[#071c13]/90 shadow-inner'
+                ? 'bg-zinc-50 border-zinc-200 shadow-2xs'
+                : 'bg-[#071c13] border-emerald-950 shadow-inner'
             }`}>
               
               {/* Pod 1: Record Transaction */}
               <button
                 type="button"
                 onClick={() => setIsNewTxOpen(true)}
-                className="flex flex-col items-center gap-1.5 p-1 sm:px-2.5 group cursor-pointer"
+                className="flex flex-col items-center gap-1 p-1 sm:px-2.5 group cursor-pointer"
               >
-                <div className={`w-11 h-11 sm:w-12 sm:h-12 rounded-full flex items-center justify-center transition-all shadow-md ${
+                <div className={`w-10 h-10 sm:w-11 sm:h-11 rounded-full flex items-center justify-center transition-all shadow-xs ${
                   isLight
-                    ? 'bg-white/95 text-emerald-800 group-hover:bg-emerald-600 group-hover:text-white group-hover:scale-105 active:scale-95'
-                    : 'bg-[#0c2e1f] text-emerald-400 group-hover:bg-[#10b981] group-hover:text-black group-hover:scale-105 active:scale-95'
+                    ? 'bg-emerald-600 text-white group-hover:bg-emerald-700 active:scale-95'
+                    : 'bg-[#10b981] text-black group-hover:bg-emerald-400 active:scale-95'
                 }`}>
                   <Plus className="w-5 h-5 stroke-[2.5]" />
                 </div>
-                <span className={`text-[10px] sm:text-[11px] font-bold transition-colors ${
-                  isLight ? 'text-emerald-950/80 group-hover:text-emerald-700' : 'text-white/75 group-hover:text-emerald-300'
+                <span className={`text-[10px] sm:text-[11px] font-semibold transition-colors ${
+                  isLight ? 'text-zinc-700 group-hover:text-emerald-700' : 'text-zinc-300 group-hover:text-emerald-300'
                 }`}>
                   Record
                 </span>
@@ -1232,17 +1232,17 @@ export default function Dashboard() {
               <button
                 type="button"
                 onClick={() => setIsDenomOpen(true)}
-                className="flex flex-col items-center gap-1.5 p-1 sm:px-2.5 group cursor-pointer"
+                className="flex flex-col items-center gap-1 p-1 sm:px-2.5 group cursor-pointer"
               >
-                <div className={`w-11 h-11 sm:w-12 sm:h-12 rounded-full flex items-center justify-center transition-all shadow-md ${
+                <div className={`w-10 h-10 sm:w-11 sm:h-11 rounded-full flex items-center justify-center transition-all shadow-xs border ${
                   isLight
-                    ? 'bg-white/95 text-emerald-800 group-hover:bg-emerald-600 group-hover:text-white group-hover:scale-105 active:scale-95'
-                    : 'bg-[#0c2e1f] text-emerald-400 group-hover:bg-[#10b981] group-hover:text-black group-hover:scale-105 active:scale-95'
+                    ? 'bg-white text-zinc-800 border-zinc-200 group-hover:border-emerald-300 group-hover:text-emerald-700 active:scale-95'
+                    : 'bg-[#0c2e1f] text-emerald-400 border-emerald-800/40 group-hover:bg-emerald-900/60 active:scale-95'
                 }`}>
-                  <Wallet className="w-5 h-5" />
+                  <Wallet className="w-4 h-4 stroke-[2]" />
                 </div>
-                <span className={`text-[10px] sm:text-[11px] font-bold transition-colors ${
-                  isLight ? 'text-emerald-950/80 group-hover:text-emerald-700' : 'text-white/75 group-hover:text-emerald-300'
+                <span className={`text-[10px] sm:text-[11px] font-semibold transition-colors ${
+                  isLight ? 'text-zinc-700 group-hover:text-emerald-700' : 'text-zinc-300 group-hover:text-emerald-300'
                 }`}>
                   Cash Box
                 </span>
@@ -1252,17 +1252,17 @@ export default function Dashboard() {
               <button
                 type="button"
                 onClick={() => setIsProposalOpen(true)}
-                className="flex flex-col items-center gap-1.5 p-1 sm:px-2.5 group cursor-pointer"
+                className="flex flex-col items-center gap-1 p-1 sm:px-2.5 group cursor-pointer"
               >
-                <div className={`w-11 h-11 sm:w-12 sm:h-12 rounded-full flex items-center justify-center transition-all shadow-md ${
+                <div className={`w-10 h-10 sm:w-11 sm:h-11 rounded-full flex items-center justify-center transition-all shadow-xs border ${
                   isLight
-                    ? 'bg-white/95 text-emerald-800 group-hover:bg-emerald-600 group-hover:text-white group-hover:scale-105 active:scale-95'
-                    : 'bg-[#0c2e1f] text-emerald-400 group-hover:bg-[#10b981] group-hover:text-black group-hover:scale-105 active:scale-95'
+                    ? 'bg-white text-zinc-800 border-zinc-200 group-hover:border-emerald-300 group-hover:text-emerald-700 active:scale-95'
+                    : 'bg-[#0c2e1f] text-emerald-400 border-emerald-800/40 group-hover:bg-emerald-900/60 active:scale-95'
                 }`}>
-                  <Calculator className="w-5 h-5" />
+                  <Calculator className="w-4 h-4 stroke-[2]" />
                 </div>
-                <span className={`text-[10px] sm:text-[11px] font-bold transition-colors ${
-                  isLight ? 'text-emerald-950/80 group-hover:text-emerald-700' : 'text-white/75 group-hover:text-emerald-300'
+                <span className={`text-[10px] sm:text-[11px] font-semibold transition-colors ${
+                  isLight ? 'text-zinc-700 group-hover:text-emerald-700' : 'text-zinc-300 group-hover:text-emerald-300'
                 }`}>
                   Proposal
                 </span>
@@ -1272,17 +1272,17 @@ export default function Dashboard() {
               <button
                 type="button"
                 onClick={handleOpenLiquidationPreview}
-                className="flex flex-col items-center gap-1.5 p-1 sm:px-2.5 group cursor-pointer"
+                className="flex flex-col items-center gap-1 p-1 sm:px-2.5 group cursor-pointer"
               >
-                <div className={`w-11 h-11 sm:w-12 sm:h-12 rounded-full flex items-center justify-center transition-all shadow-md ${
+                <div className={`w-10 h-10 sm:w-11 sm:h-11 rounded-full flex items-center justify-center transition-all shadow-xs border ${
                   isLight
-                    ? 'bg-white/95 text-emerald-800 group-hover:bg-emerald-600 group-hover:text-white group-hover:scale-105 active:scale-95'
-                    : 'bg-[#0c2e1f] text-emerald-400 group-hover:bg-[#10b981] group-hover:text-black group-hover:scale-105 active:scale-95'
+                    ? 'bg-white text-zinc-800 border-zinc-200 group-hover:border-emerald-300 group-hover:text-emerald-700 active:scale-95'
+                    : 'bg-[#0c2e1f] text-emerald-400 border-emerald-800/40 group-hover:bg-emerald-900/60 active:scale-95'
                 }`}>
-                  <FileText className="w-5 h-5" />
+                  <FileText className="w-4 h-4 stroke-[2]" />
                 </div>
-                <span className={`text-[10px] sm:text-[11px] font-bold transition-colors ${
-                  isLight ? 'text-emerald-950/80 group-hover:text-emerald-700' : 'text-white/75 group-hover:text-emerald-300'
+                <span className={`text-[10px] sm:text-[11px] font-semibold transition-colors ${
+                  isLight ? 'text-zinc-700 group-hover:text-emerald-700' : 'text-zinc-300 group-hover:text-emerald-300'
                 }`}>
                   Report
                 </span>
@@ -1292,17 +1292,17 @@ export default function Dashboard() {
               <button
                 type="button"
                 onClick={() => setIsAIOpen(true)}
-                className="flex flex-col items-center gap-1.5 p-1 sm:px-2.5 group cursor-pointer"
+                className="flex flex-col items-center gap-1 p-1 sm:px-2.5 group cursor-pointer"
               >
-                <div className={`w-11 h-11 sm:w-12 sm:h-12 rounded-full flex items-center justify-center transition-all shadow-md ${
+                <div className={`w-10 h-10 sm:w-11 sm:h-11 rounded-full flex items-center justify-center transition-all shadow-xs border ${
                   isLight
-                    ? 'bg-white/95 text-emerald-800 group-hover:bg-emerald-600 group-hover:text-white group-hover:scale-105 active:scale-95'
-                    : 'bg-[#0c2e1f] text-emerald-400 group-hover:bg-[#10b981] group-hover:text-black group-hover:scale-105 active:scale-95'
+                    ? 'bg-emerald-50 text-emerald-800 border-emerald-200 group-hover:bg-emerald-100 active:scale-95'
+                    : 'bg-[#0c2e1f] text-emerald-400 border-emerald-800/40 group-hover:bg-emerald-900/60 active:scale-95'
                 }`}>
-                  <Sparkles className="w-5 h-5" />
+                  <Sparkles className="w-4 h-4 stroke-[2]" />
                 </div>
-                <span className={`text-[10px] sm:text-[11px] font-bold transition-colors ${
-                  isLight ? 'text-emerald-950/80 group-hover:text-emerald-700' : 'text-white/75 group-hover:text-emerald-300'
+                <span className={`text-[10px] sm:text-[11px] font-semibold transition-colors ${
+                  isLight ? 'text-zinc-700 group-hover:text-emerald-700' : 'text-zinc-300 group-hover:text-emerald-300'
                 }`}>
                   AI Co-Pilot
                 </span>
@@ -1322,89 +1322,40 @@ export default function Dashboard() {
         </ModuleErrorBoundary>
 
         {/* Ledger & Transaction Table */}
-        <ModuleErrorBoundary moduleName="Financial Ledger">
-          <TransactionTable
-            transactions={activeTransactions}
-            onNewTransaction={() => setIsNewTxOpen(true)}
-            onExportReport={handleOpenLiquidationPreview}
-            onNewProposal={() => setIsProposalOpen(true)}
-            onAttachReceipt={handleAttachReceipt}
-            onSettleReimbursement={handleSettleReimbursement}
-            cashBalance={summary.cash_on_hand}
-            gcashBalance={summary.gcash_balance}
-            currentRole={currentRole}
-            isDbConnected={isDbConnected}
-          />
-        </ModuleErrorBoundary>
+        <div id="financial-ledger">
+          <ModuleErrorBoundary moduleName="Financial Ledger">
+            <TransactionTable
+              transactions={activeTransactions}
+              onNewTransaction={() => setIsNewTxOpen(true)}
+              onExportReport={handleOpenLiquidationPreview}
+              onNewProposal={() => setIsProposalOpen(true)}
+              onAttachReceipt={handleAttachReceipt}
+              onSettleReimbursement={handleSettleReimbursement}
+              cashBalance={summary.cash_on_hand}
+              gcashBalance={summary.gcash_balance}
+              currentRole={currentRole}
+              isDbConnected={isDbConnected}
+            />
+          </ModuleErrorBoundary>
+        </div>
 
       </main>
 
-      {/* Mobile Floating Action Dock (Matching Mockup Navigation) */}
-      <div className={`sm:hidden fixed bottom-3 left-3 right-3 z-40 backdrop-blur-xl rounded-full p-1.5 px-4 flex items-center justify-between shadow-2xl no-print transition-all duration-200 ${
-        isLight
-          ? 'bg-white/95 shadow-emerald-950/10'
-          : 'bg-[#07130d]/95 shadow-black/80'
-      }`}>
-        <button
-          type="button"
-          onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-          className="flex flex-col items-center gap-0.5 p-1 text-emerald-500 cursor-pointer"
-        >
-          <Home className="w-4 h-4" />
-          <span className="text-[9px] font-bold">Home</span>
-        </button>
+      {/* Native Mobile Bottom Navigation Bar */}
+      <BottomNav
+        onOpenNewTx={() => setIsNewTxOpen(true)}
+        onOpenDenominations={() => setIsDenomOpen(true)}
+        onOpenAI={() => setIsAIOpen(true)}
+        onScrollToLedger={() => {
+          const el = document.getElementById('financial-ledger');
+          if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }}
+      />
 
-        <button
-          type="button"
-          onClick={() => setIsDenomOpen(true)}
-          className={`flex flex-col items-center gap-0.5 p-1 transition-colors cursor-pointer ${
-            isLight ? 'text-emerald-950/60 hover:text-emerald-950' : 'text-white/50 hover:text-white'
-          }`}
-        >
-          <Wallet className="w-4 h-4" />
-          <span className="text-[9px] font-bold">Cash Box</span>
-        </button>
-
-        {/* Center Floating Action Button (Glowing Emerald Pod) */}
-        <button
-          type="button"
-          onClick={() => setIsNewTxOpen(true)}
-          className={`-mt-5 w-12 h-12 rounded-full flex items-center justify-center shadow-lg hover:scale-105 active:scale-95 transition-all cursor-pointer ${
-            isLight
-              ? 'bg-emerald-500 text-white shadow-emerald-500/30 border-2 border-white'
-              : 'bg-[#10b981] text-black shadow-emerald-500/40 border-2 border-[#07130d]'
-          }`}
-          title="Record New Transaction"
-        >
-          <Plus className="w-6 h-6 stroke-[3]" />
-        </button>
-
-        <button
-          type="button"
-          onClick={() => setIsAIOpen(true)}
-          className={`flex flex-col items-center gap-0.5 p-1 transition-colors cursor-pointer ${
-            isLight ? 'text-emerald-950/60 hover:text-emerald-950' : 'text-white/50 hover:text-white'
-          }`}
-        >
-          <Sparkles className="w-4 h-4" />
-          <span className="text-[9px] font-bold">AI Co-Pilot</span>
-        </button>
-
-        <Link
-          href="/profile"
-          className={`flex flex-col items-center gap-0.5 p-1 transition-colors cursor-pointer ${
-            isLight ? 'text-emerald-950/60 hover:text-emerald-950' : 'text-white/50 hover:text-white'
-          }`}
-        >
-          <User className="w-4 h-4" />
-          <span className="text-[9px] font-bold">Profile</span>
-        </Link>
-      </div>
-
-      {/* Dashboard Footer matching reference mockup */}
+      {/* Dashboard Footer */}
       <footer className="max-w-7xl w-full mx-auto px-4 py-6 pb-24 sm:pb-6 text-center no-print">
         <p className={`text-[11px] font-medium transition-colors ${
-          isLight ? 'text-emerald-950/40' : 'text-white/30'
+          isLight ? 'text-zinc-400' : 'text-white/30'
         }`}>
           © 2026 FinLITE · Pambayang Dalubhasaan ng Marilao · All rights reserved.
         </p>
