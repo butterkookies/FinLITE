@@ -39,6 +39,7 @@ import {
   checkRateLimit,
   applyRateLimitHeaders,
 } from '../lib/security/ratelimit.js';
+import { fetchAuditTrail, logAuditEvent } from '../lib/supabase/audit.js';
 import { execFileSync, spawn } from 'child_process';
 import fs from 'fs';
 import path from 'path';
@@ -806,6 +807,14 @@ async function testDatabase() {
   } else {
     assert(true, 'transaction_receipts 3NF table exists and is accessible');
   }
+
+  // Check audit_logs table
+  const { error: auditErr } = await supabase.from('audit_logs').select('id').limit(1);
+  if (auditErr) {
+    console.log(`  ⚠️ Notice: audit_logs table: ${auditErr.message}`);
+  } else {
+    assert(true, 'audit_logs table exists and is accessible');
+  }
 }
 await testDatabase();
 
@@ -974,6 +983,120 @@ async function testRateLimiting() {
   }
 }
 await testRateLimiting();
+
+
+// ==============================================================================
+// 9. FINANCIAL AUDIT TRAIL & IMMUTABILITY ENGINE TESTS
+// ==============================================================================
+console.log('\n============================================================');
+console.log('9. RUNNING FINANCIAL AUDIT TRAIL ENGINE TESTS');
+console.log('============================================================');
+
+async function testAuditTrail() {
+  // 1. fetchAuditTrail with null client returns empty array and error
+  const resNull = await fetchAuditTrail(null);
+  assert(Array.isArray(resNull.data) && resNull.data.length === 0, 'fetchAuditTrail(null) safely returns empty data array');
+  assert(resNull.error !== null, 'fetchAuditTrail(null) returns error indicating client not initialized');
+
+  // 2. fetchAuditTrail with mock RPC success
+  const mockRpcData = [
+    {
+      id: 'audit-1',
+      action: 'INSERT',
+      entity_type: 'transactions',
+      entity_id: 'tx-1',
+      details: { amount: 1500, type: 'inflow' },
+      created_at: new Date().toISOString(),
+      actor_name: 'Rose Marielle Cabanag',
+      actor_email: 'cabanag@gmail.com',
+      actor_role: 'treasurer',
+      actor_avatar: null,
+    }
+  ];
+  const mockSupabaseRpc = {
+    rpc: async (fnName, params) => {
+      if (fnName === 'get_financial_audit_trail') {
+        return { data: mockRpcData, error: null };
+      }
+      return { data: null, error: new Error('Unknown RPC') };
+    }
+  };
+  const resRpc = await fetchAuditTrail(mockSupabaseRpc, 50);
+  assert(resRpc.error === null, 'fetchAuditTrail succeeds via get_financial_audit_trail RPC');
+  assert(resRpc.data.length === 1, 'fetchAuditTrail returns expected record count via RPC');
+  assert(resRpc.data[0].actor_name === 'Rose Marielle Cabanag', 'fetchAuditTrail preserves actor_name from RPC');
+
+  // 3. fetchAuditTrail falls back to select query when RPC fails
+  const mockFallbackRows = [
+    {
+      id: 'audit-2',
+      action: 'ABONO_SETTLED',
+      entity_type: 'transactions',
+      entity_id: 'tx-2',
+      details: { amount: 250 },
+      created_at: new Date().toISOString(),
+      profiles: {
+        full_name: 'Rishame Sara',
+        email: 'sara@gmail.com',
+        role: 'auditor',
+        avatar_url: null,
+      }
+    }
+  ];
+  const mockSupabaseFallback = {
+    rpc: async () => ({ data: null, error: new Error('function get_financial_audit_trail does not exist') }),
+    from: (table) => ({
+      select: () => ({
+        order: () => ({
+          limit: async () => ({ data: mockFallbackRows, error: null })
+        })
+      })
+    })
+  };
+  const resFallback = await fetchAuditTrail(mockSupabaseFallback, 50);
+  assert(resFallback.error === null, 'fetchAuditTrail gracefully falls back to joined query when RPC missing');
+  assert(resFallback.data[0].actor_name === 'Rishame Sara', 'fetchAuditTrail normalizes fallback actor_name from joined profiles');
+  assert(resFallback.data[0].actor_role === 'auditor', 'fetchAuditTrail normalizes fallback actor_role from joined profiles');
+
+  // 4. logAuditEvent with null client returns false without throwing
+  const resLogNull = await logAuditEvent(null, { action: 'TEST_EVENT' });
+  assert(resLogNull === false, 'logAuditEvent with null supabase client returns false safely without throwing');
+
+  // 5. logAuditEvent records event with proper payload
+  let loggedPayload = null;
+  const mockSupabaseInsert = {
+    auth: {
+      getUser: async () => ({ data: { user: { id: 'usr-123' } } })
+    },
+    from: (table) => ({
+      insert: async (rows) => {
+        loggedPayload = rows;
+        return { error: null };
+      }
+    })
+  };
+  const resLogSuccess = await logAuditEvent(mockSupabaseInsert, {
+    action: 'EXPORT_LIQUIDATION',
+    entityType: 'reports',
+    entityId: 'sem-26-27-1',
+    details: { format: 'docx', signatoriesCount: 4 }
+  });
+  assert(resLogSuccess === true, 'logAuditEvent returns true on successful audit log insertion');
+  assert(loggedPayload !== null && loggedPayload[0].action === 'EXPORT_LIQUIDATION', 'logAuditEvent correctly passes action');
+  assert(loggedPayload[0].entity_type === 'reports', 'logAuditEvent correctly passes entity_type');
+  assert(loggedPayload[0].user_id === 'usr-123', 'logAuditEvent resolves user_id from auth.getUser()');
+
+  // 6. logAuditEvent catches error non-blockingly and returns false
+  const mockSupabaseError = {
+    auth: { getUser: async () => ({ data: { user: null } }) },
+    from: () => ({
+      insert: async () => ({ error: new Error('Database connection dropped') })
+    })
+  };
+  const resLogError = await logAuditEvent(mockSupabaseError, { action: 'FAIL_EVENT' });
+  assert(resLogError === false, 'logAuditEvent returns false on error without throwing or blocking UI');
+}
+await testAuditTrail();
 
 
 // ==============================================================================

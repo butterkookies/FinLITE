@@ -39,6 +39,10 @@ const NewSemesterModal = dynamic(() => import('@/components/semesters/NewSemeste
   ssr: false,
   loading: () => null,
 });
+const AuditTrailDrawer = dynamic(() => import('@/components/audit/AuditTrailDrawer'), {
+  ssr: false,
+  loading: () => null,
+});
 
 const DEFAULT_SEMESTERS = [
   { id: 'sem-26-27-1', academicYear: '2026-2027', semester: '1st Sem', label: 'AY 2026–2027 • 1st Sem', isActive: true },
@@ -102,6 +106,7 @@ export default function Dashboard() {
   const [isAIOpen, setIsAIOpen] = useState(false);
   const [isProposalOpen, setIsProposalOpen] = useState(false);
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
+  const [isAuditOpen, setIsAuditOpen] = useState(false);
   const [previewData, setPreviewData] = useState(null);
   const [latestReconciliation, setLatestReconciliation] = useState(null);
   const [semesterSignatories, setSemesterSignatories] = useState(DEFAULT_LITE_SIGNATORIES);
@@ -1317,6 +1322,7 @@ export default function Dashboard() {
               onNewProposal={() => setIsProposalOpen(true)}
               onAttachReceipt={handleAttachReceipt}
               onSettleReimbursement={handleSettleReimbursement}
+              onOpenAuditTrail={() => setIsAuditOpen(true)}
               cashBalance={summary.cash_on_hand}
               gcashBalance={summary.gcash_balance}
               currentRole={currentRole}
@@ -1409,6 +1415,15 @@ export default function Dashboard() {
             onClose={() => setIsAIOpen(false)}
             summary={summary}
             transactions={activeTransactions}
+          />
+        </ModuleErrorBoundary>
+
+        <ModuleErrorBoundary moduleName="Financial Audit Trail">
+          <AuditTrailDrawer
+            isOpen={isAuditOpen}
+            onClose={() => setIsAuditOpen(false)}
+            supabase={supabase}
+            currentRole={currentRole}
           />
         </ModuleErrorBoundary>
       </div>

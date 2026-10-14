@@ -26,7 +26,8 @@ import {
   CheckCircle2,
   HandCoins,
   Check,
-  AlertTriangle
+  AlertTriangle,
+  ShieldCheck
 } from 'lucide-react';
 import { formatPHP } from '@/lib/utils/currency';
 import { compressReceiptImage } from '@/lib/utils/compression';
@@ -58,12 +59,14 @@ export default function TransactionTable({
   onNewProposal,
   onAttachReceipt,
   onSettleReimbursement,
+  onOpenAuditTrail,
   cashBalance = 0,
   gcashBalance = 0,
   currentRole,
   isDbConnected = false
 }) {
   const { isLight } = useTheme();
+  const canViewAudit = ['admin', 'auditor', 'treasurer', 'president', 'adviser'].includes(currentRole);
   const [filterType, setFilterType] = useState('ALL');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedReceipt, setSelectedReceipt] = useState(null);
@@ -346,6 +349,22 @@ export default function TransactionTable({
 
         {/* Action Buttons */}
         <div className="flex flex-wrap sm:flex-nowrap items-center gap-2.5 w-full sm:w-auto shrink-0 justify-end">
+          {/* Audit Trail Button (Auditor/Treasurer/President/Adviser/Admin) */}
+          {canViewAudit && onOpenAuditTrail && (
+            <button
+              onClick={onOpenAuditTrail}
+              className={`h-10 flex items-center justify-center gap-2 px-3.5 text-xs font-semibold rounded-xl transition-all shadow-xs whitespace-nowrap cursor-pointer border ${
+                isLight
+                  ? 'text-zinc-700 bg-white hover:bg-zinc-50 border-zinc-200 hover:border-emerald-300'
+                  : 'text-zinc-200 bg-[#0d1e16] hover:bg-[#122b20] active:bg-[#163527] border-[#1a382b] hover:border-emerald-500/40'
+              }`}
+              title="View immutable financial audit trail and governance log"
+            >
+              <ShieldCheck className={`w-3.5 h-3.5 shrink-0 ${isLight ? 'text-emerald-600' : 'text-emerald-400'}`} />
+              <span>Audit Trail</span>
+            </button>
+          )}
+
           {/* Review & Export Report Button */}
           <button
             onClick={onExportReport}
