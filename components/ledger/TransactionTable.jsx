@@ -33,7 +33,7 @@ import {
 import { formatPHP } from '@/lib/utils/currency';
 import { compressReceiptImage } from '@/lib/utils/compression';
 import { useTheme } from '@/components/theme/ThemeProvider';
-import { Button, Badge, Input } from '@/components/ui';
+import { Button, Badge, Input, Card, Modal } from '@/components/ui';
 import TransactionCommentsDrawer from '@/components/ledger/TransactionCommentsDrawer';
 
 export function formatFriendlyDate(dateStr) {
@@ -493,20 +493,14 @@ export default function TransactionTable({
               <th className="py-3.5 pl-3 pr-6 w-[13%] text-right whitespace-nowrap">Receipt &amp; Action</th>
             </tr>
           </thead>
-          <tbody className={`divide-y text-xs ${
-            isLight ? 'divide-emerald-900/10' : 'divide-[#142e20]/60'
-          }`}>
+          <tbody className="divide-y divide-zinc-200 dark:divide-zinc-800 text-xs">
             {paginatedTransactions.length === 0 ? (
               <tr>
                 <td colSpan="7" className="py-16 text-center">
-                  <div className={`w-12 h-12 rounded-xl flex items-center justify-center mx-auto mb-3 shadow-inner border ${
-                    isLight
-                      ? 'bg-emerald-100 text-emerald-700 border-emerald-200'
-                      : 'bg-[#064e3b]/30 text-emerald-400 border-emerald-500/20'
-                  }`}>
+                  <div className="w-12 h-12 rounded-xl flex items-center justify-center mx-auto mb-3 border bg-zinc-100 dark:bg-zinc-900 text-zinc-500 dark:text-zinc-400 border-zinc-200 dark:border-zinc-800">
                     <Folder className="w-6 h-6" />
                   </div>
-                  <p className={`text-xs font-medium ${isLight ? 'text-gray-500' : 'text-white/50'}`}>
+                  <p className="text-xs font-medium text-zinc-500 dark:text-zinc-400">
                     No matching transactions found.
                   </p>
                 </td>
@@ -519,107 +513,84 @@ export default function TransactionTable({
                     setSelectedTx(tx);
                     setActiveTxPhotoIndex(0);
                   }}
-                  className={`group transition-all cursor-pointer ${
-                    isLight 
-                      ? 'hover:bg-emerald-500/[0.08] active:bg-emerald-500/[0.12]' 
-                      : 'hover:bg-emerald-500/[0.06] active:bg-emerald-500/[0.1]'
-                  }`}
+                  className="group transition-colors cursor-pointer hover:bg-zinc-50 dark:hover:bg-zinc-900/40 active:bg-zinc-100 dark:active:bg-zinc-900/60"
                   title="Click anywhere on row to view full transaction details"
                 >
                   
                   {/* Title & Event */}
                   <td className="py-3.5 pl-6 pr-3 min-w-0">
-                    <div className={`font-bold flex items-center gap-1.5 ${
-                      isLight ? 'text-gray-900' : 'text-white'
-                    }`}>
+                    <div className="font-bold flex items-center gap-1.5 text-zinc-950 dark:text-zinc-100">
                       {tx.type === 'INFLOW' ? (
-                        <ArrowDownRight className={`w-4 h-4 shrink-0 ${isLight ? 'text-emerald-600' : 'text-emerald-400'}`} />
+                        <ArrowDownRight className="w-4 h-4 shrink-0 text-emerald-600 dark:text-emerald-400" />
                       ) : (
-                        <ArrowUpRight className={`w-4 h-4 shrink-0 ${isLight ? 'text-amber-600' : 'text-amber-400'}`} />
+                        <ArrowUpRight className="w-4 h-4 shrink-0 text-amber-600 dark:text-amber-400" />
                       )}
-                      <span className="truncate group-hover:text-emerald-500 transition-colors">{tx.title}</span>
+                      <span className="truncate group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">{tx.title}</span>
                     </div>
                     {tx.event_name && (
-                      <span className={`text-[10px] font-medium block mt-0.5 truncate ${
-                        isLight ? 'text-gray-500' : 'text-white/50'
-                      }`}>
+                      <span className="text-[10px] font-medium block mt-0.5 truncate text-zinc-500 dark:text-zinc-400">
                         {tx.event_name}
                       </span>
                     )}
                     {tx.is_reimbursement && (
                       <div className="flex items-center gap-1.5 flex-wrap mt-1">
-                        {tx.status === 'REIMBURSED' ? (
-                          <span className={`inline-flex items-center gap-1 text-[10px] font-semibold px-1.5 py-0.5 rounded-md border ${
-                            isLight
-                              ? 'text-emerald-800 bg-emerald-100/80 border-emerald-300'
-                              : 'text-emerald-300 bg-emerald-500/10 border-emerald-500/20'
-                          }`}>
-                            <CheckCircle2 className={`w-2.5 h-2.5 shrink-0 ${isLight ? 'text-emerald-700' : 'text-emerald-400'}`} />
-                            <span className="truncate max-w-[150px]">Settled · {tx.reimbursement_recipient || 'Officer'}</span>
-                          </span>
-                        ) : (
-                          <span className={`inline-flex items-center gap-1 text-[10px] font-semibold px-1.5 py-0.5 rounded-md border ${
-                            isLight
-                              ? 'text-amber-800 bg-amber-100/80 border-amber-300'
-                              : 'text-amber-300 bg-amber-500/10 border-amber-500/20'
-                          }`}>
-                            <Clock className={`w-2.5 h-2.5 shrink-0 ${isLight ? 'text-amber-700' : 'text-amber-400'}`} />
-                            <span className="truncate max-w-[150px]">Advance by: {tx.reimbursement_recipient || 'Officer'}</span>
-                          </span>
-                        )}
+                        <Badge 
+                          variant={tx.status === 'REIMBURSED' ? 'emerald' : 'amber'} 
+                          size="xs"
+                        >
+                          {tx.status === 'REIMBURSED' ? (
+                            <>
+                              <CheckCircle2 className="w-2.5 h-2.5 shrink-0" />
+                              <span className="truncate max-w-[150px]">Settled · {tx.reimbursement_recipient || 'Officer'}</span>
+                            </>
+                          ) : (
+                            <>
+                              <Clock className="w-2.5 h-2.5 shrink-0" />
+                              <span className="truncate max-w-[150px]">Advance by: {tx.reimbursement_recipient || 'Officer'}</span>
+                            </>
+                          )}
+                        </Badge>
                       </div>
                     )}
                   </td>
 
                   {/* Date */}
-                  <td className={`py-3.5 px-3 font-medium whitespace-nowrap tabular-nums ${
-                    isLight ? 'text-gray-700' : 'text-white/70'
-                  }`}>
+                  <td className="py-3.5 px-3 font-medium whitespace-nowrap tabular-nums text-zinc-600 dark:text-zinc-300">
                     {formatFriendlyDate(tx.transaction_date)}
                   </td>
 
                   {/* Payment Channel */}
                   <td className="py-3.5 px-3 whitespace-nowrap">
-                    {tx.payment_method === 'CASH' ? (
-                      <span className={`inline-flex items-center gap-1 text-[11px] font-semibold px-2 py-0.5 rounded-md border ${
-                        isLight
-                          ? 'text-emerald-800 bg-emerald-100/90 border-emerald-300'
-                          : 'text-emerald-300 bg-emerald-500/10 border-emerald-500/20'
-                      }`}>
-                        <Wallet className={`w-3 h-3 ${isLight ? 'text-emerald-700' : 'text-emerald-400'}`} />
-                        Cash
-                      </span>
-                    ) : (
-                      <span className={`inline-flex items-center gap-1 text-[11px] font-semibold px-2 py-0.5 rounded-md border ${
-                        isLight
-                          ? 'text-sky-800 bg-sky-100/90 border-sky-300'
-                          : 'text-blue-300 bg-blue-500/10 border-blue-500/20'
-                      }`}>
-                        <Smartphone className={`w-3 h-3 ${isLight ? 'text-sky-700' : 'text-blue-400'}`} />
-                        GCash
-                      </span>
-                    )}
+                    <Badge
+                      variant={tx.payment_method === 'CASH' ? 'emerald' : 'sky'}
+                      size="xs"
+                    >
+                      {tx.payment_method === 'CASH' ? (
+                        <>
+                          <Wallet className="w-3 h-3" />
+                          <span>Cash</span>
+                        </>
+                      ) : (
+                        <>
+                          <Smartphone className="w-3 h-3" />
+                          <span>GCash</span>
+                        </>
+                      )}
+                    </Badge>
                   </td>
 
                   {/* Category */}
                   <td className="py-3.5 px-3 min-w-0">
-                    <span 
-                      className={`text-[11px] px-2 py-0.5 rounded-md font-semibold border truncate max-w-full inline-block ${
-                        isLight
-                          ? 'bg-gray-100 border-gray-200 text-gray-800'
-                          : 'bg-zinc-900 border-zinc-800 text-zinc-300'
-                      }`}
-                      title={tx.category_name || (tx.type === 'INFLOW' ? 'Revenue' : 'Disbursement')}
-                    >
+                    <Badge variant="neutral" size="xs" className="truncate max-w-full inline-block">
                       {tx.category_name || (tx.type === 'INFLOW' ? 'Revenue' : 'Disbursement')}
-                    </span>
+                    </Badge>
                   </td>
 
                   {/* Amount */}
                   <td className={`py-3.5 px-3 text-right font-black whitespace-nowrap tabular-nums text-sm ${
                     tx.type === 'INFLOW' 
-                      ? isLight ? 'text-emerald-600' : 'text-emerald-400' 
-                      : isLight ? 'text-gray-900' : 'text-white'
+                      ? 'text-emerald-600 dark:text-emerald-400' 
+                      : 'text-zinc-950 dark:text-zinc-100'
                   }`}>
                     {tx.type === 'INFLOW' ? '+' : '-'}{formatPHP(tx.amount)}
                   </td>
@@ -634,31 +605,11 @@ export default function TransactionTable({
 
                       if (!loggerName && !loggerRole && !tx.logged_by) {
                         return (
-                          <span className={`text-[11px] font-medium italic ${
-                            isLight ? 'text-gray-400' : 'text-white/40'
-                          }`}>
+                          <span className="text-[11px] font-medium italic text-zinc-400 dark:text-zinc-500">
                             System
                           </span>
                         );
                       }
-
-                      const roleBadgeStyles = {
-                        admin: isLight
-                          ? 'bg-rose-100 text-rose-800 border-rose-200'
-                          : 'bg-rose-500/15 text-rose-300 border-rose-500/20',
-                        treasurer: isLight
-                          ? 'bg-emerald-100 text-emerald-800 border-emerald-200'
-                          : 'bg-emerald-500/15 text-emerald-300 border-emerald-500/20',
-                        auditor: isLight
-                          ? 'bg-amber-100 text-amber-800 border-amber-200'
-                          : 'bg-amber-500/15 text-amber-300 border-amber-500/20',
-                        president: isLight
-                          ? 'bg-blue-100 text-blue-800 border-blue-200'
-                          : 'bg-blue-500/15 text-blue-300 border-blue-500/20',
-                        adviser: isLight
-                          ? 'bg-purple-100 text-purple-800 border-purple-200'
-                          : 'bg-purple-500/15 text-purple-300 border-purple-500/20',
-                      }[loggerRole?.toLowerCase()] || (isLight ? 'bg-gray-100 text-gray-700 border-gray-200' : 'bg-white/10 text-white/70 border-white/10');
 
                       return (
                         <div 
@@ -669,29 +620,21 @@ export default function TransactionTable({
                             <img 
                               src={loggerAvatar} 
                               alt={loggerName || 'Officer'} 
-                              className={`w-6 h-6 rounded-full object-cover shrink-0 border ${
-                                isLight ? 'border-gray-200 shadow-2xs' : 'border-emerald-500/30'
-                              }`} 
+                              className="w-6 h-6 rounded-full object-cover shrink-0 border border-zinc-200 dark:border-zinc-700 shadow-2xs" 
                             />
                           ) : (
-                            <div className={`w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold shrink-0 border ${
-                              isLight 
-                                ? 'bg-emerald-100 text-emerald-800 border-emerald-200 shadow-2xs' 
-                                : 'bg-emerald-950 text-emerald-300 border-emerald-500/30'
-                            }`}>
+                            <div className="w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold shrink-0 border bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20 shadow-2xs">
                               {(loggerName || 'O').charAt(0).toUpperCase()}
                             </div>
                           )}
                           <div className="min-w-0">
-                            <div className={`text-xs font-semibold truncate max-w-[110px] ${
-                              isLight ? 'text-gray-900' : 'text-white'
-                            }`}>
+                            <div className="text-xs font-semibold truncate max-w-[110px] text-zinc-950 dark:text-zinc-100">
                               {loggerName || 'Officer'}
                             </div>
                             {loggerRole && (
-                              <span className={`inline-block text-[9px] font-semibold uppercase tracking-wider px-1.5 py-0.5 rounded border leading-none mt-0.5 ${roleBadgeStyles}`}>
+                              <Badge variant="neutral" size="xs" className="text-[9px] uppercase tracking-wider py-0 px-1 leading-none mt-0.5">
                                 {loggerRole}
-                              </span>
+                              </Badge>
                             )}
                           </div>
                         </div>
@@ -709,29 +652,26 @@ export default function TransactionTable({
                         const receipts = getTransactionReceipts(tx);
                         if (receipts.length > 0) {
                           return (
-                            <button
-                              type="button"
+                            <Button
+                              variant="emerald-subtle"
+                              size="xs"
                               onClick={(e) => {
                                 e.stopPropagation();
                                 setSelectedReceipt(tx);
                                 setActivePhotoIndex(0);
                               }}
-                              className={`h-7 inline-flex items-center gap-1.5 text-[11px] font-semibold px-2.5 rounded-lg transition-colors cursor-pointer border ${
-                                isLight
-                                  ? 'text-emerald-800 hover:text-emerald-950 bg-emerald-50 hover:bg-emerald-100 border-emerald-200'
-                                  : 'text-emerald-300 hover:text-emerald-200 bg-zinc-900 hover:bg-zinc-800 border-zinc-800 hover:border-zinc-700'
-                              }`}
+                              leftIcon={<Receipt className="w-3 h-3" />}
                               title={`View ${receipts.length} attached receipt photo${receipts.length > 1 ? 's' : ''}`}
                             >
-                              <Receipt className={`w-3 h-3 ${isLight ? 'text-emerald-600' : 'text-emerald-400'}`} />
                               <span>{receipts.length > 1 ? `Receipts (${receipts.length})` : 'Receipt'}</span>
-                            </button>
+                            </Button>
                           );
                         }
                         if (isAuthorized) {
                           return (
-                            <button
-                              type="button"
+                            <Button
+                              variant="outline"
+                              size="xs"
                               onClick={(e) => {
                                 e.stopPropagation();
                                 setAttachTx(tx);
@@ -739,66 +679,50 @@ export default function TransactionTable({
                                 setAttachPreviews([]);
                                 setAttachError(null);
                               }}
-                              className={`h-7 inline-flex items-center gap-1 text-[11px] font-semibold px-2 rounded-lg transition-colors cursor-pointer border border-dashed ${
-                                isLight
-                                  ? 'text-emerald-700 hover:text-emerald-900 bg-emerald-50/70 hover:bg-emerald-100/80 border-emerald-300'
-                                  : 'text-emerald-300 hover:text-emerald-200 bg-zinc-900/60 hover:bg-zinc-800 border-zinc-700'
-                              }`}
+                              leftIcon={<Plus className="w-3 h-3" />}
                               title="Attach receipt or proof for this transaction"
+                              className="border-dashed"
                             >
-                              <Plus className={`w-3 h-3 ${isLight ? 'text-emerald-600' : 'text-emerald-400'}`} />
                               <span>Attach</span>
-                            </button>
+                            </Button>
                           );
                         }
-                        return <span className={`text-[11px] italic ${isLight ? 'text-gray-400' : 'text-white/40'}`}>None</span>;
+                        return <span className="text-[11px] italic text-zinc-400 dark:text-zinc-500">None</span>;
                       })()}
 
                       {/* Settle Abono Button */}
                       {tx.is_reimbursement && tx.status === 'PENDING_REIMBURSEMENT' && canSettleAbono && (
-                        <button
-                          type="button"
+                        <Button
+                          variant="amber-subtle"
+                          size="xs"
                           onClick={(e) => {
                             e.stopPropagation();
                             setSettleTx(tx);
                             setSettleMethod(tx.payment_method === 'GCASH' ? 'GCASH' : 'CASH');
                             setSettleError(null);
                           }}
-                          className={`h-7 inline-flex items-center gap-1 text-[11px] font-bold px-2 rounded-lg transition-all cursor-pointer border shadow-2xs ${
-                            isLight
-                              ? 'text-amber-900 hover:text-amber-950 bg-amber-100 hover:bg-amber-200 border-amber-300'
-                              : 'text-amber-300 hover:text-amber-200 bg-amber-500/15 hover:bg-amber-500/25 border-amber-500/30'
-                          }`}
+                          leftIcon={<HandCoins className="w-3 h-3" />}
                           title={`Disburse ${formatPHP(tx.amount)} refund to ${tx.reimbursement_recipient || 'claimant'}`}
                         >
-                          <HandCoins className={`w-3 h-3 ${isLight ? 'text-amber-700' : 'text-amber-400'}`} />
                           <span>Settle</span>
-                        </button>
+                        </Button>
                       )}
 
                       {/* Comments / Remarks Indicator Button */}
-                      <button
-                        type="button"
+                      <Button
+                        variant={commentCounts[tx.id] ? "emerald-subtle" : "ghost"}
+                        size="xs"
                         onClick={(e) => {
                           e.stopPropagation();
                           setCommentTx(tx);
                         }}
-                        className={`h-7 inline-flex items-center gap-1.5 text-[11px] font-semibold px-2 rounded-lg transition-colors cursor-pointer border ${
-                          commentCounts[tx.id]
-                            ? isLight
-                              ? 'text-emerald-900 bg-emerald-100/90 hover:bg-emerald-200 border-emerald-300'
-                              : 'text-emerald-300 bg-emerald-500/15 hover:bg-emerald-500/25 border-emerald-500/30'
-                            : isLight
-                              ? 'text-gray-500 hover:text-gray-900 bg-gray-50 hover:bg-gray-100 border-gray-200'
-                              : 'text-zinc-400 hover:text-zinc-200 bg-zinc-900 hover:bg-zinc-800 border-zinc-800 hover:border-zinc-700'
-                        }`}
+                        leftIcon={<MessageSquare className="w-3 h-3 shrink-0" />}
                         title={commentCounts[tx.id] ? `${commentCounts[tx.id]} audit remark${commentCounts[tx.id] > 1 ? 's' : ''}` : 'View / Add audit remarks'}
                       >
-                        <MessageSquare className="w-3 h-3 shrink-0" />
                         {commentCounts[tx.id] ? (
                           <span className="tabular-nums font-bold text-[10px]">{commentCounts[tx.id]}</span>
                         ) : null}
-                      </button>
+                      </Button>
                     </div>
                   </td>
 
@@ -835,31 +759,25 @@ export default function TransactionTable({
         const renderCard = (tx, badgeConfig) => {
           const receipts = getTransactionReceipts(tx);
           return (
-            <div
+            <Card
               key={tx.id}
               onClick={() => {
                 setSelectedTx(tx);
                 setActiveTxPhotoIndex(0);
               }}
-              className={`rounded-xl p-4.5 space-y-3 transition-colors cursor-pointer border ${
-                isLight
-                  ? 'bg-white border-zinc-200 shadow-xs hover:border-zinc-300'
-                  : 'bg-[#121214] border-zinc-800 shadow-xs hover:border-zinc-700'
-              }`}
+              className="p-4.5 space-y-3 cursor-pointer hover:border-zinc-300 dark:hover:border-zinc-700"
             >
               {/* Top Row: Amount on left & Status pill badge on right */}
               <div className="flex items-start justify-between gap-3">
                 <div>
-                  <span className={`text-[10px] font-bold uppercase tracking-wider block mb-0.5 ${
-                    isLight ? 'text-gray-500' : 'text-white/40'
-                  }`}>
+                  <span className="text-[10px] font-bold uppercase tracking-wider block mb-0.5 text-zinc-500 dark:text-zinc-400">
                     {tx.type === 'INFLOW' ? 'Inflow Amount' : 'Disbursement Amount'}
                   </span>
                   <span
                     className={`text-xl font-extrabold tracking-tight tabular-nums block whitespace-nowrap ${
                       tx.type === 'INFLOW' 
-                        ? isLight ? 'text-emerald-600' : 'text-emerald-400' 
-                        : isLight ? 'text-zinc-900' : 'text-white'
+                        ? 'text-emerald-600 dark:text-emerald-400' 
+                        : 'text-zinc-950 dark:text-zinc-100'
                     }`}
                   >
                     {tx.type === 'INFLOW' ? '+' : '-'}{formatPHP(tx.amount)}
@@ -867,58 +785,58 @@ export default function TransactionTable({
                 </div>
 
                 {/* Status Badge Pill */}
-                <span className={`text-[11px] font-bold px-2.5 py-1 rounded-lg shrink-0 ${badgeConfig.style}`}>
+                <Badge variant={tx.type === 'INFLOW' ? 'emerald' : tx.is_reimbursement ? 'amber' : 'neutral'} size="sm">
                   {badgeConfig.label}
-                </span>
+                </Badge>
               </div>
 
               {/* Middle Section: Key-Value Details */}
-              <div className={`space-y-2 pt-2.5 border-t text-xs ${
-                isLight ? 'border-gray-100' : 'border-[#142e20]'
-              }`}>
+              <div className="space-y-2 pt-2.5 border-t border-zinc-100 dark:border-zinc-800 text-xs">
                 <div className="flex items-start justify-between gap-3">
-                  <span className={`font-medium shrink-0 ${isLight ? 'text-gray-500' : 'text-white/50'}`}>Transaction</span>
-                  <span className={`font-bold text-right truncate max-w-[200px] ${isLight ? 'text-gray-900' : 'text-white'}`}>{tx.title}</span>
+                  <span className="font-medium shrink-0 text-zinc-500 dark:text-zinc-400">Transaction</span>
+                  <span className="font-bold text-right truncate max-w-[200px] text-zinc-950 dark:text-zinc-100">{tx.title}</span>
                 </div>
 
                 {tx.event_name && (
                   <div className="flex items-center justify-between gap-3">
-                    <span className={`font-medium shrink-0 ${isLight ? 'text-gray-500' : 'text-white/50'}`}>Event</span>
-                    <span className={`font-medium text-right truncate max-w-[200px] ${isLight ? 'text-gray-700' : 'text-white/80'}`}>{tx.event_name}</span>
+                    <span className="font-medium shrink-0 text-zinc-500 dark:text-zinc-400">Event</span>
+                    <span className="font-medium text-right truncate max-w-[200px] text-zinc-700 dark:text-zinc-300">{tx.event_name}</span>
                   </div>
                 )}
 
                 <div className="flex items-center justify-between gap-3">
-                  <span className={`font-medium shrink-0 ${isLight ? 'text-gray-500' : 'text-white/50'}`}>Date</span>
-                  <span className={`font-semibold tabular-nums ${isLight ? 'text-gray-700' : 'text-white/80'}`}>{formatFriendlyDate(tx.transaction_date)}</span>
+                  <span className="font-medium shrink-0 text-zinc-500 dark:text-zinc-400">Date</span>
+                  <span className="font-semibold tabular-nums text-zinc-700 dark:text-zinc-300">{formatFriendlyDate(tx.transaction_date)}</span>
                 </div>
 
                 <div className="flex items-center justify-between gap-3">
-                  <span className={`font-medium shrink-0 ${isLight ? 'text-gray-500' : 'text-white/50'}`}>Payment Channel</span>
-                  <span className={`inline-flex items-center gap-1 font-semibold ${isLight ? 'text-gray-900' : 'text-white/90'}`}>
+                  <span className="font-medium shrink-0 text-zinc-500 dark:text-zinc-400">Payment Channel</span>
+                  <Badge variant={tx.payment_method === 'CASH' ? 'emerald' : 'sky'} size="xs">
                     {tx.payment_method === 'CASH' ? (
                       <>
-                        <Wallet className={`w-3.5 h-3.5 ${isLight ? 'text-emerald-600' : 'text-emerald-400'}`} />
+                        <Wallet className="w-3.5 h-3.5" />
                         <span>Cash</span>
                       </>
                     ) : (
                       <>
-                        <Smartphone className={`w-3.5 h-3.5 ${isLight ? 'text-sky-600' : 'text-blue-400'}`} />
+                        <Smartphone className="w-3.5 h-3.5" />
                         <span>GCash</span>
                       </>
                     )}
-                  </span>
+                  </Badge>
                 </div>
 
                 <div className="flex items-center justify-between gap-3">
-                  <span className={`font-medium shrink-0 ${isLight ? 'text-gray-500' : 'text-white/50'}`}>Category</span>
-                  <span className={`font-semibold ${isLight ? 'text-gray-700' : 'text-white/80'}`}>{tx.category_name || (tx.type === 'INFLOW' ? 'Revenue' : 'Disbursement')}</span>
+                  <span className="font-medium shrink-0 text-zinc-500 dark:text-zinc-400">Category</span>
+                  <Badge variant="neutral" size="xs">
+                    {tx.category_name || (tx.type === 'INFLOW' ? 'Revenue' : 'Disbursement')}
+                  </Badge>
                 </div>
 
                 {tx.is_reimbursement && tx.reimbursement_recipient && (
                   <div className="flex items-center justify-between gap-3">
-                    <span className={`font-medium shrink-0 ${isLight ? 'text-gray-500' : 'text-white/50'}`}>Advance By</span>
-                    <span className={`font-bold ${isLight ? 'text-amber-800' : 'text-amber-300'}`}>{tx.reimbursement_recipient}</span>
+                    <span className="font-medium shrink-0 text-zinc-500 dark:text-zinc-400">Advance By</span>
+                    <span className="font-bold text-amber-600 dark:text-amber-400">{tx.reimbursement_recipient}</span>
                   </div>
                 )}
 
@@ -928,26 +846,22 @@ export default function TransactionTable({
                   const loggerAvatar = tx.logged_by_avatar_url || tx.logged_by_profile?.avatar_url;
                   return (
                     <div className="flex items-center justify-between gap-3">
-                      <span className={`font-medium shrink-0 ${isLight ? 'text-gray-500' : 'text-white/50'}`}>Recorded By</span>
+                      <span className="font-medium shrink-0 text-zinc-500 dark:text-zinc-400">Recorded By</span>
                       <span className="inline-flex items-center gap-1.5 font-semibold text-right max-w-[200px]">
                         {loggerAvatar ? (
                           <img src={loggerAvatar} alt="" className="w-4 h-4 rounded-full object-cover shrink-0" />
                         ) : (
-                          <span className={`w-4 h-4 rounded-full flex items-center justify-center text-[9px] font-bold shrink-0 ${
-                            isLight ? 'bg-emerald-100 text-emerald-800' : 'bg-emerald-950 text-emerald-300'
-                          }`}>
+                          <span className="w-4 h-4 rounded-full flex items-center justify-center text-[9px] font-bold shrink-0 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
                             {(loggerName || 'O').charAt(0).toUpperCase()}
                           </span>
                         )}
-                        <span className={`truncate text-xs ${isLight ? 'text-gray-900' : 'text-white'}`}>
+                        <span className="truncate text-xs text-zinc-950 dark:text-zinc-100">
                           {loggerName || (tx.logged_by ? 'Officer' : 'System')}
                         </span>
                         {loggerRole && (
-                          <span className={`text-[9px] uppercase tracking-wider font-semibold px-1 rounded ${
-                            isLight ? 'text-emerald-800 bg-emerald-100' : 'text-emerald-300 bg-emerald-500/20'
-                          }`}>
+                          <Badge variant="neutral" size="xs" className="text-[9px] uppercase tracking-wider py-0 px-1 leading-none">
                             {loggerRole}
-                          </span>
+                          </Badge>
                         )}
                       </span>
                     </div>
@@ -961,45 +875,41 @@ export default function TransactionTable({
                 onClick={(e) => e.stopPropagation()}
               >
                 {tx.is_reimbursement && tx.status === 'PENDING_REIMBURSEMENT' && canSettleAbono && (
-                  <button
-                    type="button"
+                  <Button
+                    variant="amber-subtle"
+                    size="sm"
+                    className="w-full"
                     onClick={(e) => {
                       e.stopPropagation();
                       setSettleTx(tx);
                       setSettleMethod(tx.payment_method === 'GCASH' ? 'GCASH' : 'CASH');
                       setSettleError(null);
                     }}
-                    className={`w-full h-9 flex items-center justify-center gap-1.5 px-3 text-xs font-bold rounded-xl transition-all cursor-pointer shadow-xs ${
-                      isLight
-                        ? 'text-amber-950 bg-amber-200 hover:bg-amber-300 active:bg-amber-400 border border-amber-300'
-                        : 'text-amber-200 bg-amber-500/20 hover:bg-amber-500/30 active:bg-amber-500/40 border border-amber-500/40'
-                    }`}
+                    leftIcon={<HandCoins className="w-3.5 h-3.5" />}
                   >
-                    <HandCoins className="w-3.5 h-3.5 shrink-0" />
                     <span>Disburse / Settle Advance ({formatPHP(tx.amount)})</span>
-                  </button>
+                  </Button>
                 )}
 
                 {receipts.length > 0 ? (
-                  <button
-                    type="button"
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    className="w-full"
                     onClick={(e) => {
                       e.stopPropagation();
                       setSelectedReceipt(tx);
                       setActivePhotoIndex(0);
                     }}
-                    className={`w-full h-9 flex items-center justify-center gap-1.5 px-3 text-xs font-bold rounded-xl transition-all cursor-pointer shadow-2xs ${
-                      isLight
-                        ? 'text-emerald-900 bg-emerald-50 hover:bg-emerald-100'
-                        : 'text-emerald-300 bg-[#0d1e16] hover:bg-[#122b20] active:bg-[#163527]'
-                    }`}
+                    leftIcon={<Receipt className="w-3.5 h-3.5 text-emerald-500" />}
                   >
-                    <Receipt className={`w-3.5 h-3.5 shrink-0 ${isLight ? 'text-emerald-600' : 'text-emerald-400'}`} />
                     <span>{receipts.length > 1 ? `View Receipts (${receipts.length})` : 'View Receipt Details'}</span>
-                  </button>
+                  </Button>
                 ) : isAuthorized ? (
-                  <button
-                    type="button"
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="w-full border-dashed"
                     onClick={(e) => {
                       e.stopPropagation();
                       setAttachTx(tx);
@@ -1007,51 +917,35 @@ export default function TransactionTable({
                       setAttachPreviews([]);
                       setAttachError(null);
                     }}
-                    className={`w-full h-9 flex items-center justify-center gap-1.5 px-3 text-xs font-bold rounded-xl transition-all cursor-pointer border border-dashed ${
-                      isLight
-                        ? 'text-emerald-700 hover:text-emerald-900 bg-emerald-50/70 hover:bg-emerald-100/80 border-emerald-300'
-                        : 'text-emerald-300 hover:text-emerald-200 bg-[#0d1e16]/70 hover:bg-[#122b20] border-emerald-500/40'
-                    }`}
+                    leftIcon={<Plus className="w-3.5 h-3.5 text-emerald-500" />}
                   >
-                    <Plus className={`w-3.5 h-3.5 shrink-0 ${isLight ? 'text-emerald-600' : 'text-emerald-400'}`} />
                     <span>Attach Receipt / Proof</span>
-                  </button>
+                  </Button>
                 ) : (
-                  <div className={`w-full h-8 flex items-center justify-center text-[11px] font-medium rounded-xl ${
-                    isLight
-                      ? 'text-gray-400 bg-gray-50'
-                      : 'text-white/30 bg-[#07130e]'
-                  }`}>
+                  <div className="w-full h-8 flex items-center justify-center text-[11px] font-medium rounded-lg text-zinc-400 dark:text-zinc-500 bg-zinc-50 dark:bg-zinc-900/40 border border-zinc-200 dark:border-zinc-800">
                     <span>No Receipt Attached</span>
                   </div>
                 )}
 
                 {/* Mobile Remarks & Notes Button */}
-                <button
-                  type="button"
+                <Button
+                  variant={commentCounts[tx.id] ? "emerald-subtle" : "secondary"}
+                  size="sm"
+                  className="w-full"
                   onClick={(e) => {
                     e.stopPropagation();
                     setCommentTx(tx);
                   }}
-                  className={`w-full h-9 flex items-center justify-center gap-1.5 px-3 text-xs font-bold rounded-xl transition-all cursor-pointer border ${
-                    commentCounts[tx.id]
-                      ? isLight
-                        ? 'text-emerald-900 bg-emerald-100/90 hover:bg-emerald-200 border-emerald-300'
-                        : 'text-emerald-300 bg-emerald-500/15 hover:bg-emerald-500/25 border-emerald-500/30'
-                      : isLight
-                        ? 'text-gray-700 bg-gray-50 hover:bg-gray-100 border-gray-200'
-                        : 'text-white/70 bg-[#0d1e16] hover:bg-[#122b20] border-[#1a382b]'
-                  }`}
+                  leftIcon={<MessageSquare className="w-3.5 h-3.5 shrink-0" />}
                 >
-                  <MessageSquare className="w-3.5 h-3.5 shrink-0" />
                   <span>
                     {commentCounts[tx.id]
                       ? `Audit Remarks (${commentCounts[tx.id]})`
                       : 'Audit Remarks & Notes'}
                   </span>
-                </button>
+                </Button>
               </div>
-            </div>
+            </Card>
           );
         };
 
@@ -1359,337 +1253,308 @@ export default function TransactionTable({
         };
 
         return (
-          <div 
-            className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4"
-            onClick={() => setSelectedReceipt(null)}
+          <Modal
+            isOpen={!!selectedReceipt}
+            onClose={() => setSelectedReceipt(null)}
+            maxWidth="lg"
+            showCloseButton={false}
           >
-            <div 
-              className="bg-white rounded-t-3xl sm:rounded-3xl max-w-lg w-full p-5 sm:p-6 border border-black/[0.08] shadow-2xl animate-in fade-in slide-in-from-bottom-4 sm:zoom-in-95 duration-150 flex flex-col max-h-[92vh]"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <div className="w-10 h-1 bg-gray-300 rounded-full mx-auto mb-3 sm:hidden shrink-0" />
-              
-              {/* Header */}
-              <div className="flex items-start justify-between gap-3 mb-3 shrink-0">
-                <div className="min-w-0">
-                  <div className="flex items-center gap-2">
-                    <span className="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider bg-emerald-50 text-emerald-800 border border-emerald-200">
-                      Official Receipt
-                    </span>
-                    <span className="text-xs text-gray-500 font-medium">
-                      {formatFriendlyDate(selectedReceipt.transaction_date)}
-                    </span>
-                  </div>
-                  <h3 className="text-base font-bold text-gray-950 mt-1 truncate">
-                    {selectedReceipt.title}
-                  </h3>
-                  <p className="text-xs text-gray-600 mt-0.5">
-                    Amount: <span className="tabular-nums font-bold text-gray-950">{formatPHP(selectedReceipt.amount)}</span>
-                    {selectedReceipt.payment_method && (
-                      <span className="ml-2 text-gray-400">· via {selectedReceipt.payment_method}</span>
-                    )}
-                  </p>
-                  {(() => {
-                    const loggerName = selectedReceipt.logged_by_name || selectedReceipt.logged_by_profile?.full_name;
-                    const loggerRole = selectedReceipt.logged_by_role || selectedReceipt.logged_by_profile?.role;
-                    const loggerAvatar = selectedReceipt.logged_by_avatar_url || selectedReceipt.logged_by_profile?.avatar_url;
-                    if (!loggerName && !loggerRole && !selectedReceipt.logged_by) return null;
-                    return (
-                      <div className="flex items-center gap-1.5 text-[11px] text-gray-600 mt-1.5 pt-1.5 border-t border-black/[0.05]">
-                        {loggerAvatar ? (
-                          <img src={loggerAvatar} alt="" className="w-4 h-4 rounded-full object-cover shrink-0 border border-black/10" />
-                        ) : (
-                          <span className="w-4 h-4 rounded-full bg-emerald-100 text-emerald-800 flex items-center justify-center text-[9px] font-bold shrink-0">
-                            {(loggerName || 'O').charAt(0).toUpperCase()}
-                          </span>
-                        )}
-                        <span className="text-gray-400 font-medium">Recorded by:</span>
-                        <span className="font-semibold text-gray-900">{loggerName || 'Officer'}</span>
-                        {loggerRole && (
-                          <span className="text-[9px] uppercase tracking-wider font-semibold px-1.5 py-0.5 rounded bg-gray-100 text-gray-700 border border-black/[0.05]">
-                            {loggerRole}
-                          </span>
-                        )}
-                      </div>
-                    );
-                  })()}
+            {/* Header */}
+            <div className="flex items-start justify-between gap-3 mb-3 shrink-0">
+              <div className="min-w-0">
+                <div className="flex items-center gap-2">
+                  <Badge variant="emerald" size="xs">
+                    Official Receipt
+                  </Badge>
+                  <span className="text-xs text-zinc-500 dark:text-zinc-400 font-medium">
+                    {formatFriendlyDate(selectedReceipt.transaction_date)}
+                  </span>
                 </div>
-
-                <button
-                  onClick={() => setSelectedReceipt(null)}
-                  className="w-8 h-8 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-500 hover:text-gray-900 flex items-center justify-center transition-colors cursor-pointer shrink-0"
-                >
-                  <X className="w-4 h-4" />
-                </button>
-              </div>
-
-              {/* Receipt Image Display with Carousel Controls */}
-              <div className="relative rounded-2xl overflow-hidden bg-gray-950/5 border border-black/[0.08] flex-1 min-h-[220px] max-h-[48vh] flex items-center justify-center mb-3 group">
-                <img 
-                  key={currentPhotoUrl}
-                  src={currentPhotoUrl} 
-                  alt={`Official Disbursement Receipt ${activePhotoIndex + 1}`} 
-                  className="w-full h-full object-contain max-h-[48vh]" 
-                  onError={(e) => {
-                    e.currentTarget.style.display = 'none';
-                    e.currentTarget.nextElementSibling?.classList.remove('hidden');
-                  }}
-                />
-                <div className="hidden p-6 text-center text-gray-500 text-xs">
-                  Unable to preview receipt image.
-                </div>
-
-                {viewReceipts.length > 1 && (
-                  <>
-                    <button
-                      type="button"
-                      onClick={handlePrevPhoto}
-                      className="absolute left-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-black/60 hover:bg-black/80 text-white flex items-center justify-center transition-all cursor-pointer shadow-md"
-                      title="Previous photo"
-                    >
-                      <ChevronLeft className="w-5 h-5" />
-                    </button>
-                    <button
-                      type="button"
-                      onClick={handleNextPhoto}
-                      className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-black/60 hover:bg-black/80 text-white flex items-center justify-center transition-all cursor-pointer shadow-md"
-                      title="Next photo"
-                    >
-                      <ChevronRight className="w-5 h-5" />
-                    </button>
-                    <div className="absolute top-2 right-2 px-2 py-0.5 rounded-full bg-black/60 text-white text-[10px] font-semibold tracking-wide backdrop-blur-xs">
-                      {activePhotoIndex + 1} / {viewReceipts.length}
+                <h3 className="text-base font-bold text-zinc-900 dark:text-zinc-100 mt-1 truncate">
+                  {selectedReceipt.title}
+                </h3>
+                <p className="text-xs text-zinc-600 dark:text-zinc-400 mt-0.5">
+                  Amount: <span className="tabular-nums font-bold text-zinc-900 dark:text-zinc-100">{formatPHP(selectedReceipt.amount)}</span>
+                  {selectedReceipt.payment_method && (
+                    <span className="ml-2 text-zinc-400">· via {selectedReceipt.payment_method}</span>
+                  )}
+                </p>
+                {(() => {
+                  const loggerName = selectedReceipt.logged_by_name || selectedReceipt.logged_by_profile?.full_name;
+                  const loggerRole = selectedReceipt.logged_by_role || selectedReceipt.logged_by_profile?.role;
+                  const loggerAvatar = selectedReceipt.logged_by_avatar_url || selectedReceipt.logged_by_profile?.avatar_url;
+                  if (!loggerName && !loggerRole && !selectedReceipt.logged_by) return null;
+                  return (
+                    <div className="flex items-center gap-1.5 text-[11px] text-zinc-600 dark:text-zinc-400 mt-1.5 pt-1.5 border-t border-zinc-200 dark:border-zinc-800">
+                      {loggerAvatar ? (
+                        <img src={loggerAvatar} alt="" className="w-4 h-4 rounded-full object-cover shrink-0 border border-zinc-200 dark:border-zinc-700" />
+                      ) : (
+                        <span className="w-4 h-4 rounded-full bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 flex items-center justify-center text-[9px] font-bold shrink-0">
+                          {(loggerName || 'O').charAt(0).toUpperCase()}
+                        </span>
+                      )}
+                      <span className="text-zinc-400 font-medium">Recorded by:</span>
+                      <span className="font-semibold text-zinc-900 dark:text-zinc-100">{loggerName || 'Officer'}</span>
+                      {loggerRole && (
+                        <Badge variant="neutral" size="xs">
+                          {loggerRole}
+                        </Badge>
+                      )}
                     </div>
-                  </>
-                )}
+                  );
+                })()}
               </div>
 
-              {/* Thumbnail Strip (if multiple photos) */}
+              <Button
+                variant="ghost"
+                size="icon-sm"
+                onClick={() => setSelectedReceipt(null)}
+                aria-label="Close"
+              >
+                <X className="w-4 h-4" />
+              </Button>
+            </div>
+
+            {/* Receipt Image Display with Carousel Controls */}
+            <div className="relative rounded-2xl overflow-hidden bg-zinc-950/5 dark:bg-zinc-900/40 border border-zinc-200 dark:border-zinc-800 flex-1 min-h-[220px] max-h-[48vh] flex items-center justify-center mb-3 group">
+              <img 
+                key={currentPhotoUrl}
+                src={currentPhotoUrl} 
+                alt={`Official Disbursement Receipt ${activePhotoIndex + 1}`} 
+                className="w-full h-full object-contain max-h-[48vh]" 
+                onError={(e) => {
+                  e.currentTarget.style.display = 'none';
+                  e.currentTarget.nextElementSibling?.classList.remove('hidden');
+                }}
+              />
+              <div className="hidden p-6 text-center text-zinc-400 text-xs">
+                Unable to preview receipt image.
+              </div>
+
               {viewReceipts.length > 1 && (
-                <div className="flex items-center justify-center gap-2 mb-3 shrink-0">
-                  {viewReceipts.map((url, idx) => (
-                    <button
-                      key={idx}
-                      type="button"
-                      onClick={() => setActivePhotoIndex(idx)}
-                      className={`relative w-12 h-12 rounded-xl overflow-hidden border-2 transition-all cursor-pointer ${
-                        idx === activePhotoIndex
-                          ? 'border-emerald-600 ring-2 ring-emerald-500/20 shadow-xs'
-                          : 'border-black/10 opacity-60 hover:opacity-100'
-                      }`}
-                    >
-                      <img src={url} alt={`Thumbnail ${idx + 1}`} className="w-full h-full object-cover" />
-                      <span className="absolute bottom-0 inset-x-0 bg-black/60 text-[8px] font-bold text-white text-center py-0.5">
-                        #{idx + 1}
-                      </span>
-                    </button>
-                  ))}
-                </div>
-              )}
-
-              {/* Footer Buttons */}
-              <div className="flex items-center gap-2 shrink-0">
-                <a
-                  href={currentPhotoUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex-1 h-9 bg-white hover:bg-gray-50 active:bg-gray-100 text-gray-800 border border-black/[0.08] rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors cursor-pointer shadow-2xs"
-                >
-                  <ExternalLink className="w-3.5 h-3.5 text-emerald-700" />
-                  <span>Open Full Image</span>
-                </a>
-
-                {/* Add Photo Button if < 3 and authorized */}
-                {isAuthorized && viewReceipts.length < 3 && (
+                <>
                   <button
                     type="button"
-                    onClick={() => {
-                      const txToAttach = selectedReceipt;
-                      setSelectedReceipt(null);
-                      setAttachTx(txToAttach);
-                      setAttachFiles([]);
-                      setAttachPreviews([]);
-                      setAttachError(null);
-                    }}
-                    className="h-9 px-3 bg-emerald-50 hover:bg-emerald-100 active:bg-emerald-200 text-emerald-800 border border-emerald-200 rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
-                    title="Add another photo proof (up to 3 max)"
+                    onClick={handlePrevPhoto}
+                    className="absolute left-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-black/60 hover:bg-black/80 text-white flex items-center justify-center transition-all cursor-pointer shadow-md"
+                    title="Previous photo"
                   >
-                    <Plus className="w-3.5 h-3.5 text-emerald-700" />
-                    <span>+ Add Photo ({viewReceipts.length}/3)</span>
+                    <ChevronLeft className="w-5 h-5" />
                   </button>
-                )}
-
-                <button
-                  onClick={() => setSelectedReceipt(null)}
-                  className="px-4 h-9 bg-gray-900 hover:bg-gray-800 active:bg-black text-white rounded-xl text-xs font-semibold transition-colors cursor-pointer shadow-xs"
-                >
-                  Close
-                </button>
-              </div>
-
+                  <button
+                    type="button"
+                    onClick={handleNextPhoto}
+                    className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-black/60 hover:bg-black/80 text-white flex items-center justify-center transition-all cursor-pointer shadow-md"
+                    title="Next photo"
+                  >
+                    <ChevronRight className="w-5 h-5" />
+                  </button>
+                  <div className="absolute top-2 right-2 px-2 py-0.5 rounded-full bg-black/60 text-white text-[10px] font-semibold tracking-wide backdrop-blur-xs">
+                    {activePhotoIndex + 1} / {viewReceipts.length}
+                  </div>
+                </>
+              )}
             </div>
-          </div>
+
+            {/* Thumbnail Strip (if multiple photos) */}
+            {viewReceipts.length > 1 && (
+              <div className="flex items-center justify-center gap-2 mb-3 shrink-0">
+                {viewReceipts.map((url, idx) => (
+                  <button
+                    key={idx}
+                    type="button"
+                    onClick={() => setActivePhotoIndex(idx)}
+                    className={`relative w-12 h-12 rounded-xl overflow-hidden border-2 transition-all cursor-pointer ${
+                      idx === activePhotoIndex
+                        ? 'border-emerald-600 ring-2 ring-emerald-500/20 shadow-xs'
+                        : 'border-zinc-200 dark:border-zinc-800 opacity-60 hover:opacity-100'
+                    }`}
+                  >
+                    <img src={url} alt={`Thumbnail ${idx + 1}`} className="w-full h-full object-cover" />
+                    <span className="absolute bottom-0 inset-x-0 bg-black/60 text-[8px] font-bold text-white text-center py-0.5">
+                      #{idx + 1}
+                    </span>
+                  </button>
+                ))}
+              </div>
+            )}
+
+            {/* Footer Buttons */}
+            <div className="flex items-center gap-2 shrink-0 pt-2 border-t border-zinc-100 dark:border-zinc-800">
+              <a
+                href={currentPhotoUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex-1"
+              >
+                <Button variant="outline" size="sm" className="w-full">
+                  <ExternalLink className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
+                  <span>Open Full Image</span>
+                </Button>
+              </a>
+
+              {/* Add Photo Button if < 3 and authorized */}
+              {isAuthorized && viewReceipts.length < 3 && (
+                <Button
+                  type="button"
+                  variant="emerald-subtle"
+                  size="sm"
+                  onClick={() => {
+                    const txToAttach = selectedReceipt;
+                    setSelectedReceipt(null);
+                    setAttachTx(txToAttach);
+                    setAttachFiles([]);
+                    setAttachPreviews([]);
+                    setAttachError(null);
+                  }}
+                  title="Add another photo proof (up to 3 max)"
+                >
+                  <Plus className="w-3.5 h-3.5" />
+                  <span>+ Add Photo ({viewReceipts.length}/3)</span>
+                </Button>
+              )}
+
+              <Button
+                variant="secondary"
+                size="sm"
+                onClick={() => setSelectedReceipt(null)}
+              >
+                Close
+              </Button>
+            </div>
+          </Modal>
         );
       })()}
 
       {/* Attach Receipt Modal (Post-Entry) */}
       {attachTx && (
-        <div 
-          className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4"
-          onClick={() => {
+        <Modal
+          isOpen={!!attachTx}
+          onClose={() => {
             if (!isSubmittingAttach) setAttachTx(null);
           }}
-        >
-          <div 
-            className="bg-white rounded-t-3xl sm:rounded-3xl max-w-md w-full p-5 sm:p-6 border border-black/[0.08] shadow-2xl animate-in fade-in slide-in-from-bottom-4 sm:zoom-in-95 duration-150 flex flex-col max-h-[90vh]"
-            onClick={(e) => e.stopPropagation()}
-          >
-            {/* Mobile Pull Handle */}
-            <div className="w-10 h-1 bg-gray-300 rounded-full mx-auto mb-3 sm:hidden shrink-0" />
-
-            {/* Header */}
-            <div className="flex items-start justify-between gap-3 mb-4 shrink-0">
-              <div className="min-w-0">
-                <span className="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider bg-emerald-50 text-emerald-800 border border-emerald-200">
-                  Attach Receipts &amp; Proofs
-                </span>
-                <h3 className="text-base font-bold text-gray-950 mt-1 truncate">
-                  {attachTx.title}
-                </h3>
-                <p className="text-xs text-gray-500 mt-0.5">
-                  Amount: <span className="font-bold text-gray-900 tabular-nums">{formatPHP(attachTx.amount)}</span> · {formatFriendlyDate(attachTx.transaction_date)}
-                </p>
-              </div>
-
-              <button
+          maxWidth="md"
+          showCloseButton={!isSubmittingAttach}
+          title="Attach Receipts & Proofs"
+          description={
+            <span>
+              <span className="font-bold text-zinc-900 dark:text-zinc-100">{attachTx.title}</span> · Amount: <span className="font-bold text-zinc-900 dark:text-zinc-100 tabular-nums">{formatPHP(attachTx.amount)}</span> · {formatFriendlyDate(attachTx.transaction_date)}
+            </span>
+          }
+          footer={
+            <>
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
                 disabled={isSubmittingAttach}
                 onClick={() => setAttachTx(null)}
-                className="w-8 h-8 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-500 hover:text-gray-900 flex items-center justify-center transition-colors cursor-pointer shrink-0 disabled:opacity-50"
               >
-                <X className="w-4 h-4" />
-              </button>
-            </div>
+                Cancel
+              </Button>
+              <Button
+                type="button"
+                variant="primary"
+                size="sm"
+                disabled={isSubmittingAttach || attachFiles.length === 0}
+                isLoading={isSubmittingAttach}
+                onClick={handleConfirmAttach}
+              >
+                Upload &amp; Attach ({attachFiles.length})
+              </Button>
+            </>
+          }
+        >
+          {(() => {
+            const existing = getTransactionReceipts(attachTx);
+            const remaining = Math.max(0, 3 - existing.length - attachFiles.length);
 
-            {/* Existing Receipts Display (if any) */}
-            {(() => {
-              const existing = getTransactionReceipts(attachTx);
-              const remaining = Math.max(0, 3 - existing.length - attachFiles.length);
+            return (
+              <div className="space-y-4 text-xs">
+                {existing.length > 0 && (
+                  <div className="space-y-1.5">
+                    <span className="text-[11px] font-semibold text-zinc-700 dark:text-zinc-300">
+                      Existing Attached Proofs ({existing.length}/3)
+                    </span>
+                    <div className="grid grid-cols-3 gap-2">
+                      {existing.map((url, idx) => (
+                        <div key={idx} className="relative rounded-xl overflow-hidden border border-zinc-200 dark:border-zinc-800 bg-zinc-100 dark:bg-zinc-900 aspect-square">
+                          <img src={url} alt={`Existing ${idx + 1}`} className="w-full h-full object-cover" />
+                          <span className="absolute bottom-1 left-1 px-1.5 py-0.5 bg-black/60 rounded text-[9px] font-semibold text-white">
+                            Saved #{idx + 1}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
 
-              return (
-                <div className="space-y-4 text-xs overflow-y-auto">
-                  {existing.length > 0 && (
-                    <div className="space-y-1.5">
-                      <span className="text-[11px] font-semibold text-gray-700">
-                        Existing Attached Proofs ({existing.length}/3)
-                      </span>
-                      <div className="grid grid-cols-3 gap-2">
-                        {existing.map((url, idx) => (
-                          <div key={idx} className="relative rounded-xl overflow-hidden border border-black/[0.08] bg-gray-100 aspect-square">
-                            <img src={url} alt={`Existing ${idx + 1}`} className="w-full h-full object-cover" />
-                            <span className="absolute bottom-1 left-1 px-1.5 py-0.5 bg-black/60 rounded text-[9px] font-semibold text-white">
-                              Saved #{idx + 1}
-                            </span>
-                          </div>
-                        ))}
-                      </div>
+                {/* New Photo Upload Area */}
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[11px] font-semibold text-zinc-700 dark:text-zinc-300">
+                      Add New Photos (Max {3 - existing.length} more)
+                    </span>
+                    <span className="text-[10px] text-zinc-400">
+                      {remaining} slot{remaining === 1 ? '' : 's'} remaining
+                    </span>
+                  </div>
+
+                  {/* Previews of newly selected files */}
+                  {attachPreviews.length > 0 && (
+                    <div className="grid grid-cols-3 gap-2">
+                      {attachPreviews.map((url, idx) => (
+                        <div key={idx} className="relative group rounded-xl overflow-hidden border border-emerald-300 dark:border-emerald-600/40 bg-zinc-50 dark:bg-zinc-900 aspect-square">
+                          <img src={url} alt={`New upload ${idx + 1}`} className="w-full h-full object-cover" />
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveAttachFile(idx)}
+                            disabled={isSubmittingAttach}
+                            className="absolute top-1 right-1 w-5 h-5 rounded-full bg-black/70 hover:bg-black text-white flex items-center justify-center transition-colors cursor-pointer"
+                            title="Remove photo"
+                          >
+                            <X className="w-3 h-3" />
+                          </button>
+                          <span className="absolute bottom-1 left-1 px-1.5 py-0.5 bg-emerald-600 rounded text-[9px] font-semibold text-white">
+                            New #{idx + 1}
+                          </span>
+                        </div>
+                      ))}
                     </div>
                   )}
 
-                  {/* New Photo Upload Area */}
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between">
-                      <span className="text-[11px] font-semibold text-gray-700">
-                        Add New Photos (Max {3 - existing.length} more)
+                  {/* Pick File Button */}
+                  {remaining > 0 && (
+                    <label className="h-10 flex items-center justify-center gap-2 px-3 bg-white dark:bg-zinc-900 hover:bg-zinc-50 dark:hover:bg-zinc-800 border border-dashed border-zinc-300 dark:border-zinc-700 rounded-xl cursor-pointer transition-colors shadow-2xs">
+                      <Camera className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+                      <span className="text-zinc-700 dark:text-zinc-300 font-medium">
+                        {isCompressing ? 'Compressing photo...' : attachFiles.length === 0 ? 'Select or Take Photo' : `Add Another (${remaining} left)`}
                       </span>
-                      <span className="text-[10px] text-gray-400">
-                        {remaining} slot{remaining === 1 ? '' : 's'} remaining
-                      </span>
-                    </div>
-
-                    {/* Previews of newly selected files */}
-                    {attachPreviews.length > 0 && (
-                      <div className="grid grid-cols-3 gap-2">
-                        {attachPreviews.map((url, idx) => (
-                          <div key={idx} className="relative group rounded-xl overflow-hidden border border-emerald-300 bg-gray-50 aspect-square">
-                            <img src={url} alt={`New upload ${idx + 1}`} className="w-full h-full object-cover" />
-                            <button
-                              type="button"
-                              onClick={() => handleRemoveAttachFile(idx)}
-                              disabled={isSubmittingAttach}
-                              className="absolute top-1 right-1 w-5 h-5 rounded-full bg-black/70 hover:bg-black text-white flex items-center justify-center transition-colors cursor-pointer"
-                              title="Remove photo"
-                            >
-                              <X className="w-3 h-3" />
-                            </button>
-                            <span className="absolute bottom-1 left-1 px-1.5 py-0.5 bg-emerald-700 rounded text-[9px] font-semibold text-white">
-                              New #{idx + 1}
-                            </span>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-
-                    {/* Pick File Button */}
-                    {remaining > 0 && (
-                      <label className="h-10 flex items-center justify-center gap-2 px-3 bg-white hover:bg-gray-50 active:bg-gray-100 border border-dashed border-gray-300 rounded-xl cursor-pointer transition-colors shadow-2xs">
-                        <Camera className="w-4 h-4 text-emerald-700" />
-                        <span className="text-gray-700 font-medium">
-                          {isCompressing ? 'Compressing photo...' : attachFiles.length === 0 ? 'Select or Take Photo' : `Add Another (${remaining} left)`}
-                        </span>
-                        <input
-                          type="file"
-                          accept="image/*"
-                          multiple
-                          disabled={isCompressing || isSubmittingAttach}
-                          onChange={handleAttachFilesChange}
-                          className="hidden"
-                        />
-                      </label>
-                    )}
-
-                    <p className="text-[10px] text-gray-400">
-                      Images are automatically compressed to &lt;350KB before upload.
-                    </p>
-                  </div>
-
-                  {attachError && (
-                    <div className="p-2.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-[11px]">
-                      {attachError}
-                    </div>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        multiple
+                        disabled={isCompressing || isSubmittingAttach}
+                        onChange={handleAttachFilesChange}
+                        className="hidden"
+                      />
+                    </label>
                   )}
 
-                  {/* Action Buttons */}
-                  <div className="pt-2 flex items-center justify-end gap-2 border-t border-black/[0.06]">
-                    <button
-                      type="button"
-                      disabled={isSubmittingAttach}
-                      onClick={() => setAttachTx(null)}
-                      className="h-9 px-4 text-xs font-semibold text-gray-700 hover:bg-gray-100 rounded-xl transition-colors cursor-pointer disabled:opacity-50"
-                    >
-                      Cancel
-                    </button>
-                    <button
-                      type="button"
-                      disabled={isSubmittingAttach || attachFiles.length === 0}
-                      onClick={handleConfirmAttach}
-                      className="h-9 px-4 bg-emerald-700 hover:bg-emerald-800 active:bg-emerald-900 text-white rounded-xl text-xs font-semibold shadow-xs transition-all cursor-pointer whitespace-nowrap flex items-center gap-1.5 disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                      {isSubmittingAttach ? (
-                        <>
-                          <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                          <span>Uploading...</span>
-                        </>
-                      ) : (
-                        <span>Upload &amp; Attach ({attachFiles.length})</span>
-                      )}
-                    </button>
-                  </div>
+                  <p className="text-[10px] text-zinc-400">
+                    Images are automatically compressed to &lt;350KB before upload.
+                  </p>
                 </div>
-              );
-            })()}
 
-          </div>
-        </div>
+                {attachError && (
+                  <div className="p-2.5 rounded-xl bg-rose-50 dark:bg-rose-950/30 border border-rose-200 dark:border-rose-900/40 text-rose-800 dark:text-rose-300 text-[11px]">
+                    {attachError}
+                  </div>
+                )}
+              </div>
+            );
+          })()}
+        </Modal>
       )}
 
       {/* Expanded Transaction Details Modal */}
@@ -1706,634 +1571,505 @@ export default function TransactionTable({
         const loggerAvatar = tx.logged_by_avatar_url || tx.logged_by_profile?.avatar_url;
 
         return (
-          <div 
-            className="fixed inset-0 z-50 bg-black/70 backdrop-blur-md flex items-center justify-center p-3 sm:p-5 overflow-y-auto animate-in fade-in duration-200"
-            onClick={() => setSelectedTx(null)}
-          >
-            <div 
-              className={`w-full max-w-2xl rounded-3xl shadow-2xl border overflow-hidden animate-in zoom-in-95 duration-200 my-auto flex flex-col max-h-[92vh] ${
-                isLight ? 'bg-white border-black/10' : 'bg-[#0a1e16] border-[#1b3d2c]'
-              }`}
-              onClick={(e) => e.stopPropagation()}
-            >
-              {/* Header */}
-              <div className={`p-5 sm:p-6 border-b flex items-center justify-between shrink-0 ${
-                isLight ? 'bg-gray-50/70 border-black/[0.06]' : 'bg-[#06150f] border-[#163626]'
-              }`}>
-                <div className="flex items-center gap-2.5 flex-wrap min-w-0">
-                  {/* Type Badge */}
-                  {tx.type === 'INFLOW' ? (
-                    <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl text-xs font-bold border ${
-                      isLight ? 'bg-emerald-100 text-emerald-800 border-emerald-300' : 'bg-emerald-500/15 text-emerald-300 border-emerald-500/25'
-                    }`}>
-                      <ArrowDownRight className="w-3.5 h-3.5" />
-                      Revenue Inflow
-                    </span>
-                  ) : isAbono ? (
-                    isSettled ? (
-                      <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl text-xs font-bold border ${
-                        isLight ? 'bg-emerald-100 text-emerald-800 border-emerald-300' : 'bg-emerald-500/15 text-emerald-300 border-emerald-500/25'
-                      }`}>
-                        <CheckCircle2 className="w-3.5 h-3.5" />
-                        Settled Abono Advance
-                      </span>
-                    ) : (
-                      <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl text-xs font-bold border ${
-                        isLight ? 'bg-amber-100 text-amber-900 border-amber-300' : 'bg-amber-500/20 text-amber-300 border-amber-500/30'
-                      }`}>
-                        <Clock className="w-3.5 h-3.5" />
-                        Pending Abono Advance
-                      </span>
-                    )
-                  ) : (
-                    <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl text-xs font-bold border ${
-                      isLight ? 'bg-rose-100 text-rose-800 border-rose-200' : 'bg-rose-500/15 text-rose-300 border-rose-500/25'
-                    }`}>
-                      <ArrowUpRight className="w-3.5 h-3.5" />
-                      Disbursement Outflow
-                    </span>
-                  )}
-
-                  <span className={`text-xs font-medium tabular-nums ${isLight ? 'text-gray-500' : 'text-white/50'}`}>
-                    {formatFriendlyDate(tx.transaction_date)}
-                  </span>
-
-                  {(tx.academic_year || tx.semester) && (
-                    <span className={`text-[11px] font-semibold px-2 py-0.5 rounded-lg border ${
-                      isLight ? 'bg-gray-100 text-gray-700 border-gray-200' : 'bg-[#0f281e] text-white/70 border-[#1c4230]'
-                    }`}>
-                      {tx.academic_year || '2025-2026'} · {tx.semester || '2nd Sem'}
-                    </span>
-                  )}
-                </div>
-
-                <button
+          <Modal
+            isOpen={!!selectedTx}
+            onClose={() => setSelectedTx(null)}
+            maxWidth="2xl"
+            showCloseButton={false}
+            footer={
+              <div className="flex items-center justify-between w-full">
+                <Button
                   type="button"
+                  variant="ghost"
+                  size="sm"
                   onClick={() => setSelectedTx(null)}
-                  className={`w-8 h-8 rounded-full flex items-center justify-center transition-colors cursor-pointer shrink-0 ${
-                    isLight ? 'text-gray-400 hover:text-gray-700 hover:bg-black/5' : 'text-white/40 hover:text-white hover:bg-white/10'
-                  }`}
-                >
-                  <X className="w-4 h-4" />
-                </button>
-              </div>
-
-              {/* Scrollable Modal Content */}
-              <div className="p-5 sm:p-6 overflow-y-auto space-y-5 text-xs">
-                
-                {/* Hero Amount Banner */}
-                <div className={`p-4 sm:p-5 rounded-xl border flex flex-col sm:flex-row sm:items-center justify-between gap-4 ${
-                  isLight 
-                    ? 'bg-emerald-50/50 border-emerald-200/80' 
-                    : 'bg-zinc-900/80 border-zinc-800'
-                }`}>
-                  <div>
-                    <span className={`text-[10px] font-bold uppercase tracking-wider block mb-1 ${
-                      isLight ? 'text-gray-500' : 'text-white/50'
-                    }`}>
-                      {tx.type === 'INFLOW' ? 'Total Inflow Amount' : isAbono ? 'Advance Out-of-Pocket Amount' : 'Disbursement Amount'}
-                    </span>
-                    <span className={`text-2xl sm:text-3xl font-black tracking-tight tabular-nums block ${
-                      tx.type === 'INFLOW' 
-                        ? isLight ? 'text-emerald-600' : 'text-emerald-400' 
-                        : isLight ? 'text-gray-900' : 'text-white'
-                    }`}>
-                      {tx.type === 'INFLOW' ? '+' : '-'}{formatPHP(tx.amount)}
-                    </span>
-                  </div>
-
-                  <div className="flex items-center gap-2 flex-wrap">
-                    {/* Channel Pill */}
-                    <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl font-bold text-xs border ${
-                      tx.payment_method === 'CASH'
-                        ? isLight ? 'bg-emerald-100 text-emerald-900 border-emerald-300' : 'bg-emerald-500/15 text-emerald-300 border-emerald-500/25'
-                        : isLight ? 'bg-sky-100 text-sky-900 border-sky-300' : 'bg-blue-500/15 text-blue-300 border-blue-500/25'
-                    }`}>
-                      {tx.payment_method === 'CASH' ? (
-                        <>
-                          <Wallet className="w-3.5 h-3.5" />
-                          <span>Cashbox</span>
-                        </>
-                      ) : (
-                        <>
-                          <Smartphone className="w-3.5 h-3.5" />
-                          <span>GCash Wallet</span>
-                        </>
-                      )}
-                    </span>
-
-                    {/* Category Pill */}
-                    <span className={`px-3 py-1.5 rounded-xl font-bold text-xs border ${
-                      isLight ? 'bg-gray-100 text-gray-800 border-gray-200' : 'bg-[#122e22] text-white/90 border-[#1e4835]'
-                    }`}>
-                      {tx.category_name || (tx.type === 'INFLOW' ? 'Revenue' : 'Disbursement')}
-                    </span>
-                  </div>
-                </div>
-
-                {/* Details Grid */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
-                  
-                  {/* Left Card: Transaction Info */}
-                  <div className={`p-4 rounded-2xl border space-y-3 ${
-                    isLight ? 'bg-gray-50/60 border-gray-200/80' : 'bg-[#081811] border-[#153425]'
-                  }`}>
-                    <div>
-                      <span className={`text-[10px] font-bold uppercase tracking-wider block mb-0.5 ${
-                        isLight ? 'text-gray-500' : 'text-white/40'
-                      }`}>
-                        Title / Name
-                      </span>
-                      <p className={`text-sm font-bold break-words ${isLight ? 'text-gray-900' : 'text-white'}`}>
-                        {tx.title}
-                      </p>
-                    </div>
-
-                    {tx.event_name && (
-                      <div>
-                        <span className={`text-[10px] font-bold uppercase tracking-wider block mb-0.5 ${
-                          isLight ? 'text-gray-500' : 'text-white/40'
-                        }`}>
-                          Event / Activity
-                        </span>
-                        <p className={`font-semibold ${isLight ? 'text-gray-800' : 'text-white/90'}`}>
-                          {tx.event_name}
-                        </p>
-                      </div>
-                    )}
-
-                    <div>
-                      <span className={`text-[10px] font-bold uppercase tracking-wider block mb-0.5 ${
-                        isLight ? 'text-gray-500' : 'text-white/40'
-                      }`}>
-                        Description &amp; Notes
-                      </span>
-                      <p className={`leading-relaxed ${
-                        tx.description 
-                          ? isLight ? 'text-gray-700 font-medium' : 'text-white/80 font-medium' 
-                          : isLight ? 'text-gray-400 italic' : 'text-white/30 italic'
-                      }`}>
-                        {tx.description || 'No additional notes recorded for this transaction.'}
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* Right Card: Abono / Accountability */}
-                  <div className={`p-4 rounded-2xl border space-y-3 ${
-                    isLight ? 'bg-gray-50/60 border-gray-200/80' : 'bg-[#081811] border-[#153425]'
-                  }`}>
-                    {/* Abono Details (if applicable) */}
-                    {isAbono && (
-                      <div className={`p-3 rounded-xl border ${
-                        isSettled
-                          ? isLight ? 'bg-emerald-50 border-emerald-200' : 'bg-emerald-500/10 border-emerald-500/20'
-                          : isLight ? 'bg-amber-50 border-amber-200' : 'bg-amber-500/10 border-amber-500/20'
-                      }`}>
-                        <span className={`text-[10px] font-bold uppercase tracking-wider block mb-1 ${
-                          isSettled 
-                            ? isLight ? 'text-emerald-800' : 'text-emerald-300' 
-                            : isLight ? 'text-amber-800' : 'text-amber-300'
-                        }`}>
-                          Personal Advance (Abono)
-                        </span>
-                        <div className="flex items-center justify-between gap-2">
-                          <span className={`text-xs font-bold ${
-                            isSettled ? isLight ? 'text-emerald-950' : 'text-white' : isLight ? 'text-amber-950' : 'text-white'
-                          }`}>
-                            Advanced by: {tx.reimbursement_recipient || 'Officer'}
-                          </span>
-                          <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
-                            isSettled
-                              ? isLight ? 'bg-emerald-200 text-emerald-900' : 'bg-emerald-500/20 text-emerald-300'
-                              : isLight ? 'bg-amber-200 text-amber-900' : 'bg-amber-500/25 text-amber-300'
-                          }`}>
-                            {isSettled ? 'Settled / Reimbursed' : 'Awaiting Payout'}
-                          </span>
-                        </div>
-                        <p className={`text-[11px] mt-1.5 leading-snug ${
-                          isSettled ? isLight ? 'text-emerald-800' : 'text-emerald-400' : isLight ? 'text-amber-800' : 'text-amber-400'
-                        }`}>
-                          {isSettled
-                            ? 'Funds have been disbursed to the claimant and recognized as a formal ledger outflow.'
-                            : 'Personal funds advanced off-campus. Will be reimbursed once cashbox liquidates.'}
-                        </p>
-                      </div>
-                    )}
-
-                    {/* Accountability: Logged by */}
-                    <div>
-                      <span className={`text-[10px] font-bold uppercase tracking-wider block mb-1.5 ${
-                        isLight ? 'text-gray-500' : 'text-white/40'
-                      }`}>
-                        Recorded By
-                      </span>
-                      <div className="flex items-center gap-2.5">
-                        {loggerAvatar ? (
-                          <img src={loggerAvatar} alt="" className="w-8 h-8 rounded-full object-cover shrink-0 border border-black/10" />
-                        ) : (
-                          <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs shrink-0 ${
-                            isLight ? 'bg-emerald-100 text-emerald-800' : 'bg-emerald-950 text-emerald-300'
-                          }`}>
-                            {(loggerName || 'O').charAt(0).toUpperCase()}
-                          </div>
-                        )}
-                        <div className="min-w-0">
-                          <div className="flex items-center gap-1.5">
-                            <span className={`font-bold truncate text-xs ${isLight ? 'text-gray-900' : 'text-white'}`}>
-                              {loggerName || 'Officer'}
-                            </span>
-                            {loggerRole && (
-                              <span className={`text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded ${
-                                isLight ? 'bg-gray-200 text-gray-800' : 'bg-white/15 text-white'
-                              }`}>
-                                {loggerRole}
-                              </span>
-                            )}
-                          </div>
-                          {loggerEmail && (
-                            <span className={`text-[11px] truncate block ${isLight ? 'text-gray-500' : 'text-white/50'}`}>
-                              {loggerEmail}
-                            </span>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Record ID / Timestamp */}
-                    <div className="pt-2 border-t border-black/[0.05] dark:border-white/[0.05] flex items-center justify-between text-[11px]">
-                      <span className={isLight ? 'text-gray-500' : 'text-white/40'}>Transaction ID</span>
-                      <span className={`font-mono text-[10px] ${isLight ? 'text-gray-600' : 'text-white/60'}`}>
-                        {String(tx.id).slice(0, 18)}...
-                      </span>
-                    </div>
-
-                  </div>
-                </div>
-
-                {/* Receipts Gallery Section */}
-                <div className={`p-4 rounded-2xl border space-y-3 ${
-                  isLight ? 'bg-gray-50/60 border-gray-200/80' : 'bg-[#081811] border-[#153425]'
-                }`}>
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <Receipt className={`w-4 h-4 ${isLight ? 'text-emerald-700' : 'text-emerald-400'}`} />
-                      <span className={`font-bold text-xs ${isLight ? 'text-gray-900' : 'text-white'}`}>
-                        Attached Receipts &amp; Proof ({txReceipts.length})
-                      </span>
-                    </div>
-
-                    {isAuthorized && txReceipts.length < 3 && (
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setAttachTx(tx);
-                          setAttachFiles([]);
-                          setAttachPreviews([]);
-                          setAttachError(null);
-                        }}
-                        className={`inline-flex items-center gap-1 text-[11px] font-bold px-2.5 py-1 rounded-lg border border-dashed transition-colors cursor-pointer ${
-                          isLight 
-                            ? 'text-emerald-800 bg-emerald-50 hover:bg-emerald-100 border-emerald-300' 
-                            : 'text-emerald-300 bg-emerald-500/10 hover:bg-emerald-500/20 border-emerald-500/30'
-                        }`}
-                      >
-                        <Plus className="w-3 h-3" />
-                        <span>Add Photo</span>
-                      </button>
-                    )}
-                  </div>
-
-                  {txReceipts.length === 0 ? (
-                    <div className={`p-6 text-center rounded-xl border border-dashed ${
-                      isLight ? 'bg-white border-gray-200 text-gray-400' : 'bg-[#05110c] border-[#153425] text-white/30'
-                    }`}>
-                      <Receipt className="w-8 h-8 mx-auto mb-2 opacity-50" />
-                      <p className="font-semibold text-xs">No receipt photo attached to this entry.</p>
-                      <p className="text-[11px] mt-0.5">Physical paper receipt or signed petty cash voucher may be filed offline.</p>
-                    </div>
-                  ) : (
-                    <div className="space-y-3">
-                      {/* Active Large Preview */}
-                      <div className="relative aspect-4/3 max-h-[340px] rounded-xl overflow-hidden bg-black/80 flex items-center justify-center">
-                        {currentPhoto && (
-                          <img 
-                            src={currentPhoto} 
-                            alt={`Receipt ${activeTxPhotoIndex + 1}`} 
-                            className="w-full h-full object-contain"
-                          />
-                        )}
-                        <a
-                          href={currentPhoto}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="absolute top-2.5 right-2.5 px-2.5 py-1 rounded-lg bg-black/70 hover:bg-black text-white text-[10px] font-bold flex items-center gap-1 backdrop-blur-xs transition-colors"
-                        >
-                          <ExternalLink className="w-3 h-3" />
-                          <span>Full Resolution</span>
-                        </a>
-                      </div>
-
-                      {/* Thumbnail Selector Strip (if > 1) */}
-                      {txReceipts.length > 1 && (
-                        <div className="flex items-center gap-2 overflow-x-auto pb-1">
-                          {txReceipts.map((url, idx) => (
-                            <button
-                              key={idx}
-                              type="button"
-                              onClick={() => setActiveTxPhotoIndex(idx)}
-                              className={`relative w-16 h-16 rounded-lg overflow-hidden border-2 shrink-0 transition-all cursor-pointer ${
-                                activeTxPhotoIndex === idx 
-                                  ? 'border-emerald-500 ring-2 ring-emerald-500/30' 
-                                  : 'border-transparent opacity-60 hover:opacity-100'
-                              }`}
-                            >
-                              <img src={url} alt="" className="w-full h-full object-cover" />
-                              <span className="absolute bottom-0.5 right-0.5 px-1 bg-black/70 text-[9px] font-bold text-white rounded">
-                                #{idx + 1}
-                              </span>
-                            </button>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                  )}
-                </div>
-
-              </div>
-
-              {/* Footer Actions */}
-              <div className={`p-4 sm:p-5 border-t flex items-center justify-between gap-3 shrink-0 ${
-                isLight ? 'bg-gray-50/80 border-black/[0.06]' : 'bg-[#06150f] border-[#163626]'
-              }`}>
-                <button
-                  type="button"
-                  onClick={() => setSelectedTx(null)}
-                  className={`h-9.5 px-4 text-xs font-semibold rounded-xl transition-colors cursor-pointer ${
-                    isLight ? 'text-gray-700 hover:bg-gray-200/80' : 'text-white/70 hover:bg-white/10'
-                  }`}
                 >
                   Close
-                </button>
+                </Button>
 
                 <div className="flex items-center gap-2">
-                  {/* If pending abono and user can settle, offer Settle directly in modal! */}
                   {isPendingAbono && canSettleAbono && (
-                    <button
+                    <Button
                       type="button"
+                      variant="amber-subtle"
+                      size="sm"
                       onClick={() => {
                         setSettleTx(tx);
                         setSettleMethod(tx.payment_method === 'GCASH' ? 'GCASH' : 'CASH');
                         setSettleError(null);
                       }}
-                      className="h-9.5 px-4 bg-amber-500 hover:bg-amber-600 active:bg-amber-700 text-black font-bold rounded-xl text-xs transition-colors cursor-pointer shadow-xs flex items-center gap-1.5"
                     >
                       <HandCoins className="w-3.5 h-3.5" />
                       <span>Disburse Refund ({formatPHP(tx.amount)})</span>
-                    </button>
+                    </Button>
                   )}
                 </div>
               </div>
+            }
+          >
+            {/* Header */}
+            <div className="flex items-center justify-between gap-2.5 pb-4 mb-4 border-b border-zinc-100 dark:border-zinc-800 shrink-0">
+              <div className="flex items-center gap-2 flex-wrap min-w-0">
+                {tx.type === 'INFLOW' ? (
+                  <Badge variant="emerald">
+                    <ArrowDownRight className="w-3.5 h-3.5" />
+                    Revenue Inflow
+                  </Badge>
+                ) : isAbono ? (
+                  isSettled ? (
+                    <Badge variant="emerald">
+                      <CheckCircle2 className="w-3.5 h-3.5" />
+                      Settled Abono Advance
+                    </Badge>
+                  ) : (
+                    <Badge variant="amber">
+                      <Clock className="w-3.5 h-3.5" />
+                      Pending Abono Advance
+                    </Badge>
+                  )
+                ) : (
+                  <Badge variant="rose">
+                    <ArrowUpRight className="w-3.5 h-3.5" />
+                    Disbursement Outflow
+                  </Badge>
+                )}
 
+                <span className="text-xs font-medium tabular-nums text-zinc-500 dark:text-zinc-400">
+                  {formatFriendlyDate(tx.transaction_date)}
+                </span>
+
+                {(tx.academic_year || tx.semester) && (
+                  <Badge variant="neutral" size="xs">
+                    {tx.academic_year || '2025-2026'} · {tx.semester || '2nd Sem'}
+                  </Badge>
+                )}
+              </div>
+
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon-sm"
+                onClick={() => setSelectedTx(null)}
+                aria-label="Close"
+              >
+                <X className="w-4 h-4" />
+              </Button>
             </div>
-          </div>
+
+            {/* Scrollable Modal Content */}
+            <div className="space-y-4 text-xs">
+              {/* Hero Amount Banner */}
+              <div className="p-4 sm:p-5 rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-zinc-50/70 dark:bg-zinc-900/60 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div>
+                  <span className="text-[10px] font-bold uppercase tracking-wider block mb-1 text-zinc-500 dark:text-zinc-400">
+                    {tx.type === 'INFLOW' ? 'Total Inflow Amount' : isAbono ? 'Advance Out-of-Pocket Amount' : 'Disbursement Amount'}
+                  </span>
+                  <span className={`text-2xl sm:text-3xl font-black tracking-tight tabular-nums block ${
+                    tx.type === 'INFLOW' ? 'text-emerald-600 dark:text-emerald-400' : 'text-zinc-900 dark:text-zinc-100'
+                  }`}>
+                    {tx.type === 'INFLOW' ? '+' : '-'}{formatPHP(tx.amount)}
+                  </span>
+                </div>
+
+                <div className="flex items-center gap-2 flex-wrap">
+                  <Badge variant={tx.payment_method === 'CASH' ? 'emerald' : 'sky'}>
+                    {tx.payment_method === 'CASH' ? (
+                      <>
+                        <Wallet className="w-3.5 h-3.5" />
+                        <span>Cashbox</span>
+                      </>
+                    ) : (
+                      <>
+                        <Smartphone className="w-3.5 h-3.5" />
+                        <span>GCash Wallet</span>
+                      </>
+                    )}
+                  </Badge>
+
+                  <Badge variant="neutral">
+                    {tx.category_name || (tx.type === 'INFLOW' ? 'Revenue' : 'Disbursement')}
+                  </Badge>
+                </div>
+              </div>
+
+              {/* Details Grid */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                {/* Left: Transaction Info */}
+                <div className="p-4 rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-900/40 space-y-3">
+                  <div>
+                    <span className="text-[10px] font-bold uppercase tracking-wider block mb-0.5 text-zinc-500 dark:text-zinc-400">
+                      Title / Name
+                    </span>
+                    <p className="text-sm font-bold break-words text-zinc-900 dark:text-zinc-100">
+                      {tx.title}
+                    </p>
+                  </div>
+
+                  {tx.event_name && (
+                    <div>
+                      <span className="text-[10px] font-bold uppercase tracking-wider block mb-0.5 text-zinc-500 dark:text-zinc-400">
+                        Event / Activity
+                      </span>
+                      <p className="font-semibold text-zinc-800 dark:text-zinc-200">
+                        {tx.event_name}
+                      </p>
+                    </div>
+                  )}
+
+                  <div>
+                    <span className="text-[10px] font-bold uppercase tracking-wider block mb-0.5 text-zinc-500 dark:text-zinc-400">
+                      Description &amp; Notes
+                    </span>
+                    <p className={`leading-relaxed ${
+                      tx.description 
+                        ? 'text-zinc-700 dark:text-zinc-300 font-medium' 
+                        : 'text-zinc-400 dark:text-zinc-500 italic'
+                    }`}>
+                      {tx.description || 'No additional notes recorded for this transaction.'}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Right: Abono / Accountability */}
+                <div className="p-4 rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-900/40 space-y-3">
+                  {isAbono && (
+                    <div className={`p-3 rounded-xl border ${
+                      isSettled
+                        ? 'bg-emerald-50/60 dark:bg-emerald-950/20 border-emerald-200 dark:border-emerald-900/40'
+                        : 'bg-amber-50/60 dark:bg-amber-950/20 border-amber-200 dark:border-amber-900/40'
+                    }`}>
+                      <span className={`text-[10px] font-bold uppercase tracking-wider block mb-1 ${
+                        isSettled ? 'text-emerald-800 dark:text-emerald-300' : 'text-amber-800 dark:text-amber-300'
+                      }`}>
+                        Personal Advance (Abono)
+                      </span>
+                      <div className="flex items-center justify-between gap-2">
+                        <span className="text-xs font-bold text-zinc-900 dark:text-zinc-100">
+                          Advanced by: {tx.reimbursement_recipient || 'Officer'}
+                        </span>
+                        <Badge variant={isSettled ? 'emerald' : 'amber'} size="xs">
+                          {isSettled ? 'Settled / Reimbursed' : 'Awaiting Payout'}
+                        </Badge>
+                      </div>
+                      <p className={`text-[11px] mt-1.5 leading-snug ${
+                        isSettled ? 'text-emerald-700 dark:text-emerald-400' : 'text-amber-700 dark:text-amber-400'
+                      }`}>
+                        {isSettled
+                          ? 'Funds have been disbursed to the claimant and recognized as a formal ledger outflow.'
+                          : 'Personal funds advanced off-campus. Will be reimbursed once cashbox liquidates.'}
+                      </p>
+                    </div>
+                  )}
+
+                  {/* Recorded By */}
+                  <div>
+                    <span className="text-[10px] font-bold uppercase tracking-wider block mb-1.5 text-zinc-500 dark:text-zinc-400">
+                      Recorded By
+                    </span>
+                    <div className="flex items-center gap-2.5">
+                      {loggerAvatar ? (
+                        <img src={loggerAvatar} alt="" className="w-8 h-8 rounded-full object-cover shrink-0 border border-zinc-200 dark:border-zinc-700" />
+                      ) : (
+                        <div className="w-8 h-8 rounded-full bg-emerald-100 dark:bg-emerald-950/80 text-emerald-800 dark:text-emerald-300 flex items-center justify-center font-bold text-xs shrink-0">
+                          {(loggerName || 'O').charAt(0).toUpperCase()}
+                        </div>
+                      )}
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-1.5">
+                          <span className="font-bold truncate text-xs text-zinc-900 dark:text-zinc-100">
+                            {loggerName || 'Officer'}
+                          </span>
+                          {loggerRole && (
+                            <Badge variant="neutral" size="xs">
+                              {loggerRole}
+                            </Badge>
+                          )}
+                        </div>
+                        {loggerEmail && (
+                          <span className="text-[11px] truncate block text-zinc-500 dark:text-zinc-400">
+                            {loggerEmail}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Record ID */}
+                  <div className="pt-2 border-t border-zinc-200 dark:border-zinc-800 flex items-center justify-between text-[11px]">
+                    <span className="text-zinc-500 dark:text-zinc-400">Transaction ID</span>
+                    <span className="font-mono text-[10px] text-zinc-600 dark:text-zinc-400">
+                      {String(tx.id).slice(0, 18)}...
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Receipts Gallery Section */}
+              <div className="p-4 rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-900/40 space-y-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Receipt className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+                    <span className="font-bold text-xs text-zinc-900 dark:text-zinc-100">
+                      Attached Receipts &amp; Proof ({txReceipts.length})
+                    </span>
+                  </div>
+
+                  {isAuthorized && txReceipts.length < 3 && (
+                    <Button
+                      type="button"
+                      variant="emerald-subtle"
+                      size="xs"
+                      onClick={() => {
+                        setAttachTx(tx);
+                        setAttachFiles([]);
+                        setAttachPreviews([]);
+                        setAttachError(null);
+                      }}
+                    >
+                      <Plus className="w-3 h-3" />
+                      <span>Add Photo</span>
+                    </Button>
+                  )}
+                </div>
+
+                {txReceipts.length === 0 ? (
+                  <div className="p-6 text-center rounded-xl border border-dashed border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900/30 text-zinc-400 dark:text-zinc-500">
+                    <Receipt className="w-8 h-8 mx-auto mb-2 opacity-50" />
+                    <p className="font-semibold text-xs">No receipt photo attached to this entry.</p>
+                    <p className="text-[11px] mt-0.5">Physical paper receipt or signed petty cash voucher may be filed offline.</p>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {/* Active Large Preview */}
+                    <div className="relative aspect-4/3 max-h-[340px] rounded-xl overflow-hidden bg-black/80 flex items-center justify-center">
+                      {currentPhoto && (
+                        <img 
+                          src={currentPhoto} 
+                          alt={`Receipt ${activeTxPhotoIndex + 1}`} 
+                          className="w-full h-full object-contain"
+                        />
+                      )}
+                      <a
+                        href={currentPhoto}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="absolute top-2.5 right-2.5 px-2.5 py-1 rounded-lg bg-black/70 hover:bg-black text-white text-[10px] font-bold flex items-center gap-1 backdrop-blur-xs transition-colors"
+                      >
+                        <ExternalLink className="w-3 h-3" />
+                        <span>Full Resolution</span>
+                      </a>
+                    </div>
+
+                    {/* Thumbnail Selector Strip */}
+                    {txReceipts.length > 1 && (
+                      <div className="flex items-center gap-2 overflow-x-auto pb-1">
+                        {txReceipts.map((url, idx) => (
+                          <button
+                            key={idx}
+                            type="button"
+                            onClick={() => setActiveTxPhotoIndex(idx)}
+                            className={`relative w-16 h-16 rounded-lg overflow-hidden border-2 shrink-0 transition-all cursor-pointer ${
+                              activeTxPhotoIndex === idx 
+                                ? 'border-emerald-500 ring-2 ring-emerald-500/30' 
+                                : 'border-transparent opacity-60 hover:opacity-100'
+                            }`}
+                          >
+                            <img src={url} alt="" className="w-full h-full object-cover" />
+                            <span className="absolute bottom-0.5 right-0.5 px-1 bg-black/70 text-[9px] font-bold text-white rounded">
+                              #{idx + 1}
+                            </span>
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            </div>
+          </Modal>
         );
       })()}
 
       {/* Settle Abono Reimbursement Modal */}
       {settleTx && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-in fade-in duration-200">
-          <div className={`w-full max-w-md rounded-3xl shadow-2xl border overflow-hidden animate-in zoom-in-95 duration-200 ${
-            isLight
-              ? 'bg-white border-black/10'
-              : 'bg-[#091b13] border-[#1a382b]'
-          }`}>
-            {/* Modal Header */}
-            <div className={`p-5 border-b flex items-center justify-between ${
-              isLight ? 'bg-amber-50/60 border-black/[0.06]' : 'bg-amber-500/10 border-amber-500/20'
-            }`}>
-              <div className="flex items-center gap-2.5">
-                <div className={`w-9 h-9 rounded-xl flex items-center justify-center shadow-2xs border ${
-                  isLight
-                    ? 'bg-amber-100 text-amber-800 border-amber-200'
-                    : 'bg-amber-500/20 text-amber-300 border-amber-500/30'
-                }`}>
-                  <HandCoins className="w-5 h-5" />
-                </div>
-                <div>
-                  <h3 className={`text-base font-bold ${isLight ? 'text-gray-900' : 'text-white'}`}>
-                    Settle Abono Advance
-                  </h3>
-                  <p className={`text-xs ${isLight ? 'text-gray-500' : 'text-white/60'}`}>
-                    Disburse out-of-pocket reimbursement
-                  </p>
-                </div>
-              </div>
-              <button
+        <Modal
+          isOpen={!!settleTx}
+          onClose={() => setSettleTx(null)}
+          maxWidth="md"
+          title="Settle Abono Advance"
+          description="Disburse out-of-pocket reimbursement"
+          footer={
+            <>
+              <Button
                 type="button"
+                variant="ghost"
+                size="sm"
+                disabled={isSubmittingSettle}
                 onClick={() => setSettleTx(null)}
-                className={`w-8 h-8 rounded-full flex items-center justify-center transition-colors cursor-pointer ${
-                  isLight ? 'text-gray-400 hover:text-gray-700 hover:bg-black/5' : 'text-white/40 hover:text-white hover:bg-white/10'
-                }`}
               >
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-
-            {/* Modal Body */}
-            <div className="p-5 space-y-4 text-xs">
-              {/* Advance Summary Card */}
-              <div className={`p-4 rounded-2xl border space-y-2.5 ${
-                isLight ? 'bg-gray-50 border-gray-200/80' : 'bg-[#06140e] border-[#153224]'
-              }`}>
-                <div className="flex items-center justify-between">
-                  <span className={`font-medium ${isLight ? 'text-gray-500' : 'text-white/50'}`}>Claimant / Recipient</span>
-                  <span className={`font-bold text-sm ${isLight ? 'text-amber-900' : 'text-amber-300'}`}>
-                    {settleTx.reimbursement_recipient || 'Officer'}
-                  </span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className={`font-medium ${isLight ? 'text-gray-500' : 'text-white/50'}`}>Expense Title</span>
-                  <span className={`font-semibold text-right truncate max-w-[210px] ${isLight ? 'text-gray-800' : 'text-white/90'}`}>
-                    {settleTx.title}
-                  </span>
-                </div>
-                {settleTx.event_name && (
-                  <div className="flex items-center justify-between">
-                    <span className={`font-medium ${isLight ? 'text-gray-500' : 'text-white/50'}`}>Event / Activity</span>
-                    <span className={`font-medium ${isLight ? 'text-gray-700' : 'text-white/80'}`}>
-                      {settleTx.event_name}
-                    </span>
-                  </div>
-                )}
-                <div className="flex items-center justify-between">
-                  <span className={`font-medium ${isLight ? 'text-gray-500' : 'text-white/50'}`}>Advance Date</span>
-                  <span className={`font-semibold tabular-nums ${isLight ? 'text-gray-700' : 'text-white/80'}`}>
-                    {formatFriendlyDate(settleTx.transaction_date)}
-                  </span>
-                </div>
-                <div className={`pt-2.5 border-t flex items-center justify-between ${
-                  isLight ? 'border-gray-200' : 'border-[#153224]'
-                }`}>
-                  <span className={`font-bold text-xs uppercase tracking-wider ${isLight ? 'text-gray-700' : 'text-white/70'}`}>
-                    Refund Amount
-                  </span>
-                  <span className={`text-lg font-black tabular-nums ${isLight ? 'text-gray-900' : 'text-emerald-400'}`}>
-                    {formatPHP(settleTx.amount)}
-                  </span>
-                </div>
-              </div>
-
-              {/* Payment Channel Selection */}
-              <div className="space-y-2">
-                <label className={`block font-bold text-xs ${isLight ? 'text-gray-800' : 'text-white/90'}`}>
-                  Disburse Payment From Channel:
-                </label>
-                <div className="grid grid-cols-2 gap-2.5">
-                  {/* Cashbox Option */}
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setSettleMethod('CASH');
-                      setSettleError(null);
-                    }}
-                    className={`p-3 rounded-2xl text-left border transition-all cursor-pointer ${
-                      settleMethod === 'CASH'
-                        ? isLight
-                          ? 'border-emerald-600 bg-emerald-50/90 ring-2 ring-emerald-500/20'
-                          : 'border-emerald-500 bg-emerald-500/20 ring-2 ring-emerald-500/30'
-                        : isLight
-                          ? 'border-gray-200 bg-white hover:bg-gray-50'
-                          : 'border-[#153224] bg-[#0c1f16] hover:bg-[#112a1e]'
-                    }`}
-                  >
-                    <div className="flex items-center justify-between mb-1">
-                      <div className="flex items-center gap-1.5 font-bold text-xs">
-                        <Wallet className={`w-3.5 h-3.5 ${isLight ? 'text-emerald-700' : 'text-emerald-400'}`} />
-                        <span className={isLight ? 'text-gray-900' : 'text-white'}>Cashbox</span>
-                      </div>
-                      {settleMethod === 'CASH' && (
-                        <span className="w-4 h-4 rounded-full bg-emerald-600 text-white flex items-center justify-center text-[10px] font-bold">
-                          ✓
-                        </span>
-                      )}
-                    </div>
-                    <p className={`text-[11px] ${isLight ? 'text-gray-500' : 'text-white/50'}`}>Physical Box</p>
-                    <p className={`text-[11px] font-bold mt-1 tabular-nums ${
-                      cashBalance < Number(settleTx.amount)
-                        ? 'text-rose-600'
-                        : isLight ? 'text-emerald-700' : 'text-emerald-400'
-                    }`}>
-                      Avail: {formatPHP(cashBalance)}
-                    </p>
-                  </button>
-
-                  {/* GCash Option */}
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setSettleMethod('GCASH');
-                      setSettleError(null);
-                    }}
-                    className={`p-3 rounded-2xl text-left border transition-all cursor-pointer ${
-                      settleMethod === 'GCASH'
-                        ? isLight
-                          ? 'border-sky-600 bg-sky-50/90 ring-2 ring-sky-500/20'
-                          : 'border-sky-500 bg-sky-500/20 ring-2 ring-sky-500/30'
-                        : isLight
-                          ? 'border-gray-200 bg-white hover:bg-gray-50'
-                          : 'border-[#153224] bg-[#0c1f16] hover:bg-[#112a1e]'
-                    }`}
-                  >
-                    <div className="flex items-center justify-between mb-1">
-                      <div className="flex items-center gap-1.5 font-bold text-xs">
-                        <Smartphone className={`w-3.5 h-3.5 ${isLight ? 'text-sky-700' : 'text-sky-400'}`} />
-                        <span className={isLight ? 'text-gray-900' : 'text-white'}>GCash</span>
-                      </div>
-                      {settleMethod === 'GCASH' && (
-                        <span className="w-4 h-4 rounded-full bg-sky-600 text-white flex items-center justify-center text-[10px] font-bold">
-                          ✓
-                        </span>
-                      )}
-                    </div>
-                    <p className={`text-[11px] ${isLight ? 'text-gray-500' : 'text-white/50'}`}>Digital Wallet</p>
-                    <p className={`text-[11px] font-bold mt-1 tabular-nums ${
-                      gcashBalance < Number(settleTx.amount)
-                        ? 'text-rose-600'
-                        : isLight ? 'text-sky-700' : 'text-sky-400'
-                    }`}>
-                      Avail: {formatPHP(gcashBalance)}
-                    </p>
-                  </button>
-                </div>
-              </div>
-
-              {/* Insufficient balance notice */}
-              {(() => {
-                const isGcash = settleMethod === 'GCASH';
-                const avail = isGcash ? gcashBalance : cashBalance;
-                const req = Number(settleTx.amount || 0);
-                if (req > avail) {
-                  return (
-                    <div className="p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-xs flex items-start gap-2">
-                      <AlertTriangle className="w-4 h-4 text-rose-600 shrink-0 mt-0.5" />
-                      <div>
-                        <span className="font-bold">Insufficient {isGcash ? 'GCash' : 'Cashbox'} funds.</span>{' '}
-                        Requires {formatPHP(req)} but only {formatPHP(avail)} is available. Please select another channel or replenish funds first.
-                      </div>
-                    </div>
-                  );
+                Cancel
+              </Button>
+              <Button
+                type="button"
+                variant="primary"
+                size="sm"
+                disabled={
+                  isSubmittingSettle ||
+                  (settleMethod === 'CASH' && cashBalance < Number(settleTx.amount)) ||
+                  (settleMethod === 'GCASH' && gcashBalance < Number(settleTx.amount))
                 }
-                return null;
-              })()}
-
-              {/* Error message from submission */}
-              {settleError && (
-                <div className="p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-xs flex items-center gap-2">
-                  <AlertTriangle className="w-4 h-4 text-rose-600 shrink-0" />
-                  <span>{settleError}</span>
+                isLoading={isSubmittingSettle}
+                onClick={handleConfirmSettle}
+              >
+                <Check className="w-4 h-4" />
+                <span>Confirm Disbursement</span>
+              </Button>
+            </>
+          }
+        >
+          <div className="space-y-4 text-xs">
+            {/* Advance Summary Card */}
+            <div className="p-4 rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-zinc-50/70 dark:bg-zinc-900/50 space-y-2.5">
+              <div className="flex items-center justify-between">
+                <span className="font-medium text-zinc-500 dark:text-zinc-400">Claimant / Recipient</span>
+                <span className="font-bold text-sm text-amber-700 dark:text-amber-400">
+                  {settleTx.reimbursement_recipient || 'Officer'}
+                </span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="font-medium text-zinc-500 dark:text-zinc-400">Expense Title</span>
+                <span className="font-semibold text-right truncate max-w-[210px] text-zinc-800 dark:text-zinc-200">
+                  {settleTx.title}
+                </span>
+              </div>
+              {settleTx.event_name && (
+                <div className="flex items-center justify-between">
+                  <span className="font-medium text-zinc-500 dark:text-zinc-400">Event / Activity</span>
+                  <span className="font-medium text-zinc-700 dark:text-zinc-300">
+                    {settleTx.event_name}
+                  </span>
                 </div>
               )}
+              <div className="flex items-center justify-between">
+                <span className="font-medium text-zinc-500 dark:text-zinc-400">Advance Date</span>
+                <span className="font-semibold tabular-nums text-zinc-700 dark:text-zinc-300">
+                  {formatFriendlyDate(settleTx.transaction_date)}
+                </span>
+              </div>
+              <div className="pt-2.5 border-t border-zinc-200 dark:border-zinc-800 flex items-center justify-between">
+                <span className="font-bold text-xs uppercase tracking-wider text-zinc-700 dark:text-zinc-300">
+                  Refund Amount
+                </span>
+                <span className="text-lg font-black tabular-nums text-zinc-900 dark:text-emerald-400">
+                  {formatPHP(settleTx.amount)}
+                </span>
+              </div>
+            </div>
 
-              {/* Footer Actions */}
-              <div className={`pt-2 flex items-center justify-end gap-2 border-t ${
-                isLight ? 'border-black/[0.06]' : 'border-[#153224]'
-              }`}>
+            {/* Payment Channel Selection */}
+            <div className="space-y-2">
+              <label className="block font-bold text-xs text-zinc-800 dark:text-zinc-200">
+                Disburse Payment From Channel:
+              </label>
+              <div className="grid grid-cols-2 gap-2.5">
+                {/* Cashbox Option */}
                 <button
                   type="button"
-                  disabled={isSubmittingSettle}
-                  onClick={() => setSettleTx(null)}
-                  className={`h-9.5 px-4 text-xs font-semibold rounded-xl transition-colors cursor-pointer disabled:opacity-50 ${
-                    isLight ? 'text-gray-700 hover:bg-gray-100' : 'text-white/70 hover:bg-white/10'
+                  onClick={() => {
+                    setSettleMethod('CASH');
+                    setSettleError(null);
+                  }}
+                  className={`p-3 rounded-2xl text-left border transition-all cursor-pointer ${
+                    settleMethod === 'CASH'
+                      ? 'border-emerald-600 bg-emerald-50/90 dark:bg-emerald-950/30 ring-2 ring-emerald-500/20'
+                      : 'border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 hover:bg-zinc-50 dark:hover:bg-zinc-800'
                   }`}
                 >
-                  Cancel
+                  <div className="flex items-center justify-between mb-1">
+                    <div className="flex items-center gap-1.5 font-bold text-xs">
+                      <Wallet className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
+                      <span className="text-zinc-900 dark:text-zinc-100">Cashbox</span>
+                    </div>
+                    {settleMethod === 'CASH' && (
+                      <span className="w-4 h-4 rounded-full bg-emerald-600 text-white flex items-center justify-center text-[10px] font-bold">
+                        ✓
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-[11px] text-zinc-500 dark:text-zinc-400">Physical Box</p>
+                  <p className={`text-[11px] font-bold mt-1 tabular-nums ${
+                    cashBalance < Number(settleTx.amount)
+                      ? 'text-rose-600 dark:text-rose-400'
+                      : 'text-emerald-600 dark:text-emerald-400'
+                  }`}>
+                    Avail: {formatPHP(cashBalance)}
+                  </p>
                 </button>
+
+                {/* GCash Option */}
                 <button
                   type="button"
-                  disabled={
-                    isSubmittingSettle ||
-                    (settleMethod === 'CASH' && cashBalance < Number(settleTx.amount)) ||
-                    (settleMethod === 'GCASH' && gcashBalance < Number(settleTx.amount))
-                  }
-                  onClick={handleConfirmSettle}
-                  className="h-9.5 px-5 bg-emerald-700 hover:bg-emerald-800 active:bg-emerald-900 text-white rounded-xl text-xs font-bold shadow-xs transition-all cursor-pointer whitespace-nowrap flex items-center gap-1.5 disabled:opacity-50 disabled:cursor-not-allowed"
+                  onClick={() => {
+                    setSettleMethod('GCASH');
+                    setSettleError(null);
+                  }}
+                  className={`p-3 rounded-2xl text-left border transition-all cursor-pointer ${
+                    settleMethod === 'GCASH'
+                      ? 'border-sky-600 bg-sky-50/90 dark:bg-sky-950/30 ring-2 ring-sky-500/20'
+                      : 'border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 hover:bg-zinc-50 dark:hover:bg-zinc-800'
+                  }`}
                 >
-                  {isSubmittingSettle ? (
-                    <>
-                      <Loader2 className="w-4 h-4 animate-spin" />
-                      <span>Disbursing...</span>
-                    </>
-                  ) : (
-                    <>
-                      <Check className="w-4 h-4" />
-                      <span>Confirm Disbursement</span>
-                    </>
-                  )}
+                  <div className="flex items-center justify-between mb-1">
+                    <div className="flex items-center gap-1.5 font-bold text-xs">
+                      <Smartphone className="w-3.5 h-3.5 text-sky-600 dark:text-sky-400" />
+                      <span className="text-zinc-900 dark:text-zinc-100">GCash</span>
+                    </div>
+                    {settleMethod === 'GCASH' && (
+                      <span className="w-4 h-4 rounded-full bg-sky-600 text-white flex items-center justify-center text-[10px] font-bold">
+                        ✓
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-[11px] text-zinc-500 dark:text-zinc-400">Digital Wallet</p>
+                  <p className={`text-[11px] font-bold mt-1 tabular-nums ${
+                    gcashBalance < Number(settleTx.amount)
+                      ? 'text-rose-600 dark:text-rose-400'
+                      : 'text-sky-600 dark:text-sky-400'
+                  }`}>
+                    Avail: {formatPHP(gcashBalance)}
+                  </p>
                 </button>
               </div>
             </div>
+
+            {/* Insufficient balance notice */}
+            {(() => {
+              const isGcash = settleMethod === 'GCASH';
+              const avail = isGcash ? gcashBalance : cashBalance;
+              const req = Number(settleTx.amount || 0);
+              if (req > avail) {
+                return (
+                  <div className="p-3 rounded-xl bg-rose-50 dark:bg-rose-950/30 border border-rose-200 dark:border-rose-900/40 text-rose-800 dark:text-rose-300 text-xs flex items-start gap-2">
+                    <AlertTriangle className="w-4 h-4 text-rose-600 shrink-0 mt-0.5" />
+                    <div>
+                      <span className="font-bold">Insufficient {isGcash ? 'GCash' : 'Cashbox'} funds.</span>{' '}
+                      Requires {formatPHP(req)} but only {formatPHP(avail)} is available. Please select another channel or replenish funds first.
+                    </div>
+                  </div>
+                );
+              }
+              return null;
+            })()}
+
+            {/* Error message from submission */}
+            {settleError && (
+              <div className="p-3 rounded-xl bg-rose-50 dark:bg-rose-950/30 border border-rose-200 dark:border-rose-900/40 text-rose-800 dark:text-rose-300 text-xs flex items-center gap-2">
+                <AlertTriangle className="w-4 h-4 text-rose-600 shrink-0" />
+                <span>{settleError}</span>
+              </div>
+            )}
           </div>
-        </div>
+        </Modal>
       )}
 
       {/* Floating Success Toast */}
