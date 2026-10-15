@@ -11,15 +11,14 @@ export default function TechWaveBackground() {
       className="fixed inset-0 pointer-events-none -z-10 overflow-hidden select-none transition-colors duration-300"
     >
       {isLight ? (
-        // Pure, clean light mode canvas with subtle institutional emerald aura
-        <div className="absolute inset-0 bg-[#f8faf9]">
-          <div className="absolute -top-32 left-1/2 -translate-x-1/2 w-[900px] h-[450px] bg-gradient-to-b from-emerald-100/60 to-transparent rounded-full blur-3xl opacity-70" />
+        // Pure, clean light mode canvas with minimal hairline ambient light
+        <div className="absolute inset-0 bg-[#ffffff]">
+          <div className="absolute -top-32 left-1/2 -translate-x-1/2 w-[800px] h-[350px] bg-gradient-to-b from-emerald-50/50 to-transparent rounded-full blur-3xl opacity-50" />
         </div>
       ) : (
-        // Refined matte dark session canvas with subtle ambient top glow
-        <div className="absolute inset-0 bg-[#07130d]">
-          <div className="absolute -top-40 left-1/2 -translate-x-1/2 w-[900px] h-[500px] bg-gradient-to-b from-emerald-950/60 via-emerald-900/20 to-transparent rounded-full blur-3xl opacity-60" />
-          <div className="absolute bottom-0 right-0 w-[500px] h-[300px] bg-emerald-950/20 rounded-full blur-3xl opacity-40" />
+        // High-contrast True Obsidian Black canvas with restrained ambient highlight
+        <div className="absolute inset-0 bg-[#09090b]">
+          <div className="absolute -top-40 left-1/2 -translate-x-1/2 w-[800px] h-[350px] bg-gradient-to-b from-emerald-950/30 to-transparent rounded-full blur-3xl opacity-40" />
         </div>
       )}
     </div>

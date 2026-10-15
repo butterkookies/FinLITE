@@ -46,10 +46,10 @@ export default function StatCards({ summary, onOpenDenominations }) {
           onClick={onOpenDenominations}
           role="button"
           tabIndex={0}
-          className={`shrink-0 w-[84vw] max-w-[320px] sm:w-auto snap-center group relative p-4.5 sm:p-5 rounded-2xl sm:rounded-3xl cursor-pointer transition-all duration-200 flex flex-col justify-between overflow-hidden shadow-sm hover:shadow-md active:scale-[0.99] border ${
+          className={`shrink-0 w-[84vw] max-w-[320px] sm:w-auto snap-center group relative p-4.5 sm:p-5 rounded-xl cursor-pointer transition-all duration-200 flex flex-col justify-between overflow-hidden shadow-xs hover:shadow-sm active:scale-[0.99] border ${
             isLight
-              ? 'bg-gradient-to-b from-emerald-50 via-emerald-100/50 to-emerald-200/40 border-emerald-300/80 hover:border-emerald-400'
-              : 'bg-gradient-to-b from-[#0a2919] via-[#072014] to-[#05170e] border-emerald-800/60 hover:border-emerald-700'
+              ? 'bg-white border-zinc-200 hover:border-zinc-300'
+              : 'bg-[#121214] border-zinc-800 hover:border-zinc-700'
           }`}
         >
           <div className="flex items-center justify-between mb-3 gap-2 relative z-10">
@@ -98,17 +98,17 @@ export default function StatCards({ summary, onOpenDenominations }) {
         </div>
 
         {/* 2. E-Money / GCash — Clean Neutral Surface */}
-        <div className={`shrink-0 w-[84vw] max-w-[320px] sm:w-auto snap-center group relative p-4.5 sm:p-5 rounded-2xl sm:rounded-3xl transition-all duration-200 flex flex-col justify-between overflow-hidden shadow-sm hover:shadow-md border ${
+        <div className={`shrink-0 w-[84vw] max-w-[320px] sm:w-auto snap-center group relative p-4.5 sm:p-5 rounded-xl transition-all duration-200 flex flex-col justify-between overflow-hidden shadow-xs hover:shadow-sm border ${
           isLight
             ? 'bg-white border-zinc-200 hover:border-zinc-300'
-            : 'bg-[#091a11] border-emerald-900/40 hover:border-emerald-800/60'
+            : 'bg-[#121214] border-zinc-800 hover:border-zinc-700'
         }`}>
           <div className="flex items-center justify-between mb-3 gap-2 relative z-10">
             <div className="flex items-center gap-2.5">
-              <div className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 border ${
+              <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 border ${
                 isLight
                   ? 'bg-zinc-100 text-zinc-800 border-zinc-200'
-                  : 'bg-emerald-950/60 text-emerald-400 border-emerald-800/50'
+                  : 'bg-zinc-900 text-zinc-200 border-zinc-800'
               }`}>
                 <Smartphone className="w-4 h-4 stroke-[2]" />
               </div>
@@ -118,10 +118,10 @@ export default function StatCards({ summary, onOpenDenominations }) {
                 GCash Wallet
               </span>
             </div>
-            <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${
+            <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full border ${
               isLight
                 ? 'text-zinc-700 bg-zinc-100 border-zinc-200'
-                : 'text-zinc-300 bg-zinc-800 border-zinc-700'
+                : 'text-zinc-300 bg-zinc-900 border-zinc-800'
             }`}>
               Electronic
             </span>
@@ -129,7 +129,7 @@ export default function StatCards({ summary, onOpenDenominations }) {
 
           <div className="my-1 relative z-10">
             <p className={`text-2xl sm:text-3xl font-extrabold tracking-tight tabular-nums truncate transition-colors ${
-              isLight ? 'text-zinc-900' : 'text-white'
+              isLight ? 'text-zinc-900' : 'text-zinc-100'
             }`}>
               {formatPHP(gcash_balance)}
             </p>
@@ -144,17 +144,17 @@ export default function StatCards({ summary, onOpenDenominations }) {
         </div>
 
         {/* 3. Net Cashflow & Coverage */}
-        <div className={`shrink-0 w-[84vw] max-w-[320px] sm:w-auto snap-center group relative p-4.5 sm:p-5 rounded-2xl sm:rounded-3xl transition-all duration-200 flex flex-col justify-between overflow-hidden shadow-sm hover:shadow-md border ${
+        <div className={`shrink-0 w-[84vw] max-w-[320px] sm:w-auto snap-center group relative p-4.5 sm:p-5 rounded-xl transition-all duration-200 flex flex-col justify-between overflow-hidden shadow-xs hover:shadow-sm border ${
           isLight
             ? 'bg-white border-zinc-200 hover:border-zinc-300'
-            : 'bg-[#091a11] border-emerald-900/40 hover:border-emerald-800/60'
+            : 'bg-[#121214] border-zinc-800 hover:border-zinc-700'
         }`}>
           <div className="flex items-center justify-between mb-3 gap-2 relative z-10">
             <div className="flex items-center gap-2 min-w-0">
-              <div className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 border ${
+              <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 border ${
                 isLight
                   ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
-                  : 'bg-emerald-500/15 text-emerald-400 border-emerald-500/20'
+                  : 'bg-emerald-950/40 text-emerald-400 border-emerald-900/40'
               }`}>
                 <ArrowDownRight className="w-4 h-4 stroke-[2]" />
               </div>
@@ -164,14 +164,14 @@ export default function StatCards({ summary, onOpenDenominations }) {
                 Net Cashflow
               </span>
             </div>
-            <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border tabular-nums ${
+            <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full border tabular-nums ${
               netCashflow >= 0
                 ? isLight
                   ? 'text-emerald-800 bg-emerald-50 border-emerald-200'
-                  : 'text-emerald-300 bg-emerald-500/15 border-emerald-500/20'
+                  : 'text-emerald-300 bg-emerald-950/40 border-emerald-900/40'
                 : isLight
                   ? 'text-rose-800 bg-rose-50 border-rose-200'
-                  : 'text-rose-300 bg-rose-500/15 border-rose-500/20'
+                  : 'text-rose-300 bg-rose-950/40 border-rose-900/40'
             }`}>
               {netSign}{formatPHP(Math.abs(netCashflow))}
             </span>
@@ -179,10 +179,10 @@ export default function StatCards({ summary, onOpenDenominations }) {
 
           {/* Inflow vs Outflow Mini-Chips */}
           <div className="grid grid-cols-2 gap-2 my-1 relative z-10">
-            <div className={`p-2 rounded-xl border ${
+            <div className={`p-2 rounded-lg border ${
               isLight
                 ? 'bg-emerald-50/60 border-emerald-100'
-                : 'bg-[#062013] border-emerald-900/60'
+                : 'bg-emerald-950/30 border-emerald-900/40'
             }`}>
               <div className="flex items-center gap-1 mb-0.5">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
@@ -191,13 +191,13 @@ export default function StatCards({ summary, onOpenDenominations }) {
                 }`}>Inflow</span>
               </div>
               <p className={`text-sm sm:text-base font-bold tabular-nums truncate ${
-                isLight ? 'text-emerald-950' : 'text-white'
+                isLight ? 'text-emerald-950' : 'text-zinc-100'
               }`}>
                 {formatPHP(total_inflows)}
               </p>
             </div>
 
-            <div className={`p-2 rounded-xl border ${
+            <div className={`p-2 rounded-lg border ${
               isLight
                 ? 'bg-zinc-50 border-zinc-200'
                 : 'bg-zinc-900/60 border-zinc-800'
@@ -234,10 +234,10 @@ export default function StatCards({ summary, onOpenDenominations }) {
         </div>
 
         {/* 4. Pending Abono / Advances */}
-        <div className={`shrink-0 w-[84vw] max-w-[320px] sm:w-auto snap-center group relative p-4.5 sm:p-5 rounded-2xl sm:rounded-3xl transition-all duration-200 flex flex-col justify-between overflow-hidden shadow-sm hover:shadow-md border ${
+        <div className={`shrink-0 w-[84vw] max-w-[320px] sm:w-auto snap-center group relative p-4.5 sm:p-5 rounded-xl transition-all duration-200 flex flex-col justify-between overflow-hidden shadow-xs hover:shadow-sm border ${
           isLight
             ? 'bg-white border-zinc-200 hover:border-zinc-300'
-            : 'bg-[#091a11] border-emerald-900/40 hover:border-emerald-800/60'
+            : 'bg-[#121214] border-zinc-800 hover:border-zinc-700'
         }`}>
           <div className="flex items-center justify-between mb-3 gap-2 relative z-10">
             <div className="flex items-center gap-2.5">
@@ -265,7 +265,7 @@ export default function StatCards({ summary, onOpenDenominations }) {
 
           <div className="my-1 relative z-10">
             <p className={`text-2xl sm:text-3xl font-extrabold tracking-tight tabular-nums truncate transition-colors ${
-              isLight ? 'text-zinc-900' : 'text-white'
+              isLight ? 'text-zinc-900' : 'text-zinc-100'
             }`}>
               {formatPHP(pending_reimbursements)}
             </p>

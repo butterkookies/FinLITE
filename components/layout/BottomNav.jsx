@@ -16,8 +16,8 @@ export default function BottomNav({
       aria-label="Mobile Bottom Navigation"
       className={`md:hidden fixed bottom-0 left-0 right-0 z-40 backdrop-blur-xl border-t transition-colors duration-200 select-none no-print ${
         isLight
-          ? 'bg-white/95 border-zinc-200/90 text-zinc-900 shadow-[0_-4px_20px_rgba(0,0,0,0.04)]'
-          : 'bg-[#07130d]/95 border-emerald-950/80 text-white shadow-[0_-4px_25px_rgba(0,0,0,0.6)]'
+          ? 'bg-white/95 border-zinc-200 text-zinc-900 shadow-[0_-4px_20px_rgba(0,0,0,0.04)]'
+          : 'bg-[#09090b]/95 border-zinc-800 text-zinc-100 shadow-[0_-4px_25px_rgba(0,0,0,0.8)]'
       }`}
       style={{
         paddingBottom: 'calc(0.5rem + env(safe-area-inset-bottom, 0px))',
@@ -70,7 +70,7 @@ export default function BottomNav({
           className={`-mt-5 w-12 h-12 rounded-2xl flex items-center justify-center shadow-lg transition-transform active:scale-90 cursor-pointer ${
             isLight
               ? 'bg-emerald-600 text-white shadow-emerald-600/30 border-2 border-white'
-              : 'bg-emerald-500 text-black shadow-emerald-500/30 border-2 border-[#07130d]'
+              : 'bg-emerald-500 text-black shadow-emerald-500/30 border-2 border-[#09090b]'
           }`}
           title="Record New Transaction"
         >

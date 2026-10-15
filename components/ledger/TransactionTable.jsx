@@ -335,14 +335,14 @@ export default function TransactionTable({
   };
 
   return (
-    <div className={`rounded-2xl sm:rounded-3xl transition-colors relative overflow-hidden border ${
+    <div className={`rounded-xl transition-colors relative overflow-hidden border ${
       isLight
-        ? 'bg-white border-zinc-200/80 shadow-xs'
-        : 'bg-[#0a2419]/90 border-emerald-900/40 shadow-xs'
+        ? 'bg-white border-zinc-200 shadow-xs'
+        : 'bg-[#121214] border-zinc-800 shadow-xs'
     }`}>
       {/* Table Header Controls */}
       <div className={`p-4 sm:p-6 border-b flex flex-col sm:flex-row sm:items-center justify-between gap-4 ${
-        isLight ? 'border-zinc-200/80 bg-zinc-50/50' : 'border-emerald-500/15'
+        isLight ? 'border-zinc-200 bg-zinc-50/50' : 'border-zinc-800 bg-[#121214]'
       }`}>
         <div className="min-w-0">
           <div className="flex items-center gap-2.5 flex-wrap">
@@ -640,7 +640,7 @@ export default function TransactionTable({
                       className={`text-[11px] px-2 py-0.5 rounded-md font-semibold border truncate max-w-full inline-block ${
                         isLight
                           ? 'bg-gray-100 border-gray-200 text-gray-800'
-                          : 'bg-[#0c1e16] border-[#1a382b] text-white/90'
+                          : 'bg-zinc-900 border-zinc-800 text-zinc-300'
                       }`}
                       title={tx.category_name || (tx.type === 'INFLOW' ? 'Revenue' : 'Disbursement')}
                     >
@@ -752,7 +752,7 @@ export default function TransactionTable({
                               className={`h-7 inline-flex items-center gap-1.5 text-[11px] font-semibold px-2.5 rounded-lg transition-colors cursor-pointer border ${
                                 isLight
                                   ? 'text-emerald-800 hover:text-emerald-950 bg-emerald-50 hover:bg-emerald-100 border-emerald-200'
-                                  : 'text-emerald-300 hover:text-emerald-200 bg-[#0c1e16] hover:bg-[#122b20] border-[#1a382b]'
+                                  : 'text-emerald-300 hover:text-emerald-200 bg-zinc-900 hover:bg-zinc-800 border-zinc-800 hover:border-zinc-700'
                               }`}
                               title={`View ${receipts.length} attached receipt photo${receipts.length > 1 ? 's' : ''}`}
                             >
@@ -775,7 +775,7 @@ export default function TransactionTable({
                               className={`h-7 inline-flex items-center gap-1 text-[11px] font-semibold px-2 rounded-lg transition-colors cursor-pointer border border-dashed ${
                                 isLight
                                   ? 'text-emerald-700 hover:text-emerald-900 bg-emerald-50/70 hover:bg-emerald-100/80 border-emerald-300'
-                                  : 'text-emerald-300 hover:text-emerald-200 bg-[#0c1e16]/70 hover:bg-[#122b20] border-emerald-500/40'
+                                  : 'text-emerald-300 hover:text-emerald-200 bg-zinc-900/60 hover:bg-zinc-800 border-zinc-700'
                               }`}
                               title="Attach receipt or proof for this transaction"
                             >
@@ -823,7 +823,7 @@ export default function TransactionTable({
                               : 'text-emerald-300 bg-emerald-500/15 hover:bg-emerald-500/25 border-emerald-500/30'
                             : isLight
                               ? 'text-gray-500 hover:text-gray-900 bg-gray-50 hover:bg-gray-100 border-gray-200'
-                              : 'text-white/50 hover:text-white bg-[#0c1e16] hover:bg-[#122b20] border-[#1a382b]'
+                              : 'text-zinc-400 hover:text-zinc-200 bg-zinc-900 hover:bg-zinc-800 border-zinc-800 hover:border-zinc-700'
                         }`}
                         title={commentCounts[tx.id] ? `${commentCounts[tx.id]} audit remark${commentCounts[tx.id] > 1 ? 's' : ''}` : 'View / Add audit remarks'}
                       >
@@ -874,10 +874,10 @@ export default function TransactionTable({
                 setSelectedTx(tx);
                 setActiveTxPhotoIndex(0);
               }}
-              className={`rounded-2xl p-4.5 space-y-3 transition-colors cursor-pointer border ${
+              className={`rounded-xl p-4.5 space-y-3 transition-colors cursor-pointer border ${
                 isLight
-                  ? 'bg-white border-zinc-200/80 shadow-xs hover:border-emerald-300'
-                  : 'bg-[#0a2419] border-emerald-900/40 shadow-xs hover:border-emerald-700'
+                  ? 'bg-white border-zinc-200 shadow-xs hover:border-zinc-300'
+                  : 'bg-[#121214] border-zinc-800 shadow-xs hover:border-zinc-700'
               }`}
             >
               {/* Top Row: Amount on left & Status pill badge on right */}
@@ -1837,10 +1837,10 @@ export default function TransactionTable({
               <div className="p-5 sm:p-6 overflow-y-auto space-y-5 text-xs">
                 
                 {/* Hero Amount Banner */}
-                <div className={`p-4 sm:p-5 rounded-2xl border flex flex-col sm:flex-row sm:items-center justify-between gap-4 ${
+                <div className={`p-4 sm:p-5 rounded-xl border flex flex-col sm:flex-row sm:items-center justify-between gap-4 ${
                   isLight 
                     ? 'bg-emerald-50/50 border-emerald-200/80' 
-                    : 'bg-[#0a2419] border-emerald-900/50'
+                    : 'bg-zinc-900/80 border-zinc-800'
                 }`}>
                   <div>
                     <span className={`text-[10px] font-bold uppercase tracking-wider block mb-1 ${

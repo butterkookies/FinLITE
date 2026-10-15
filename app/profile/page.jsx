@@ -125,28 +125,28 @@ export default function ProfilePage() {
   return (
     <div className="min-h-screen flex flex-col font-sans">
       
-      {/* Top Header — Frosted Emerald Header matching Navbar */}
-      <header className="sticky top-0 z-30 bg-[#082217]/85 backdrop-blur-xl border-b border-emerald-500/15 transition-all">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
+      {/* Top Header — Matching Global Obsidian Header */}
+      <header className="sticky top-0 z-30 bg-[#09090b]/95 backdrop-blur-xl border-b border-zinc-800 transition-colors">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <Link
               href="/"
-              className="flex items-center gap-2 p-1.5 rounded-xl hover:bg-emerald-500/15 transition-colors text-white/60 hover:text-white"
+              className="flex items-center gap-2 p-1.5 rounded-lg hover:bg-zinc-800 transition-colors text-zinc-400 hover:text-zinc-100"
               title="Return to Dashboard"
             >
               <ArrowLeft className="w-5 h-5" />
             </Link>
-            <div className="h-6 w-px bg-emerald-500/20" />
+            <div className="h-5 w-px bg-zinc-800" />
             <div>
-              <h1 className="text-sm sm:text-base font-bold text-white">Account Profile</h1>
-              <p className="text-[11px] text-emerald-400 font-medium">FinLITE Identity &amp; Security Credentials</p>
+              <h1 className="text-sm sm:text-base font-bold text-zinc-100">Account Profile</h1>
+              <p className="text-[10px] text-zinc-400 font-medium">FinLITE Identity &amp; Security Credentials</p>
             </div>
           </div>
 
           <div className="flex items-center gap-2">
             <button
               onClick={() => setIsEditOpen(true)}
-              className="h-9 px-3 text-xs font-semibold text-emerald-200 bg-[#0c1e16] hover:bg-[#122b20] active:bg-[#163527] border border-[#1a382b] rounded-xl transition-all shadow-sm flex items-center gap-1.5 cursor-pointer whitespace-nowrap"
+              className="h-8 px-2.5 text-xs font-medium text-zinc-200 bg-zinc-900/60 hover:bg-zinc-900 border border-zinc-800 hover:border-zinc-700 rounded-lg transition-colors flex items-center gap-1.5 cursor-pointer whitespace-nowrap"
             >
               <Pencil className="w-3.5 h-3.5 text-emerald-400" />
               <span>Edit Profile</span>
@@ -155,7 +155,7 @@ export default function ProfilePage() {
             {isAdmin && (
               <Link
                 href="/admin"
-                className="h-9 px-3 text-xs font-semibold text-amber-300 bg-gradient-to-br from-[#271f09] to-[#181204] hover:from-[#33290b] hover:to-[#201805] active:scale-98 border border-amber-500/30 rounded-xl transition-all shadow-sm flex items-center gap-1.5 cursor-pointer whitespace-nowrap"
+                className="h-8 px-2.5 text-xs font-medium text-amber-300 bg-amber-950/30 hover:bg-amber-950/60 border border-amber-900/40 rounded-lg transition-colors flex items-center gap-1.5 cursor-pointer whitespace-nowrap"
               >
                 <ShieldCheck className="w-3.5 h-3.5 text-amber-400" />
                 <span className="hidden sm:inline">Admin Console</span>

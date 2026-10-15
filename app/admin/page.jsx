@@ -371,10 +371,10 @@ export default function AdminPage() {
     <div className="min-h-screen flex flex-col font-sans">
       
       {/* Top Header */}
-      <header className={`sticky top-0 z-30 border-b backdrop-blur-xl transition-all ${
+      <header className={`sticky top-0 z-30 border-b backdrop-blur-xl transition-colors ${
         isLight
-          ? 'bg-white/95 border-black/[0.08] text-gray-900 shadow-2xs'
-          : 'bg-[#082217]/90 border-white/[0.08] text-white shadow-md'
+          ? 'bg-white/95 border-zinc-200 text-gray-900 shadow-2xs'
+          : 'bg-[#09090b]/95 border-zinc-800 text-zinc-100 shadow-xs'
       }`}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
           
@@ -382,21 +382,21 @@ export default function AdminPage() {
           <div className="flex items-center gap-3">
             <Link 
               href="/" 
-              className={`flex items-center gap-2 p-1.5 rounded-xl transition-colors ${
-                isLight ? 'text-gray-500 hover:text-gray-900 hover:bg-gray-100' : 'text-white/60 hover:text-white hover:bg-white/[0.06]'
+              className={`flex items-center gap-2 p-1.5 rounded-lg transition-colors ${
+                isLight ? 'text-gray-500 hover:text-gray-900 hover:bg-gray-100' : 'text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800'
               }`}
               title="Return to Main Dashboard"
             >
               <ArrowLeft className="w-5 h-5" />
             </Link>
 
-            <div className={`h-6 w-px ${isLight ? 'bg-gray-200' : 'bg-white/[0.1]'}`} />
+            <div className={`h-6 w-px ${isLight ? 'bg-gray-200' : 'bg-zinc-800'}`} />
 
             <div className="flex items-center gap-2.5">
-              <div className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 border ${
+              <div className={`w-9 h-9 rounded-lg flex items-center justify-center shrink-0 border ${
                 isLight 
                   ? 'bg-emerald-100 border-emerald-300 text-emerald-800' 
-                  : 'bg-emerald-500/20 border-white/[0.08] text-emerald-300'
+                  : 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400'
               }`}>
                 <ShieldCheck className="w-5 h-5" />
               </div>
@@ -408,12 +408,12 @@ export default function AdminPage() {
                   <span className={`hidden sm:inline px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider rounded-md shrink-0 border ${
                     isLight 
                       ? 'bg-emerald-50 text-emerald-800 border-emerald-200' 
-                      : 'bg-emerald-500/15 text-emerald-300 border-white/[0.08]'
+                      : 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
                   }`}>
                     Access Control
                   </span>
                 </div>
-                <p className={`hidden sm:block text-xs font-medium truncate ${isLight ? 'text-gray-500' : 'text-white/60'}`}>
+                <p className={`hidden sm:block text-xs font-medium truncate ${isLight ? 'text-gray-500' : 'text-zinc-400'}`}>
                   User Access Verification, Account Lifecycle &amp; Telemetry
                 </p>
               </div>
@@ -422,8 +422,8 @@ export default function AdminPage() {
 
           {/* Right: Identity & Actions */}
           <div className="flex items-center gap-2.5">
-            <div className={`hidden md:flex items-center gap-2 px-3 py-1.5 border rounded-xl ${
-              isLight ? 'bg-gray-50 border-black/[0.08]' : 'bg-[#0c1e16] border-white/[0.08]'
+            <div className={`hidden md:flex items-center gap-2 px-3 py-1.5 border rounded-lg ${
+              isLight ? 'bg-gray-50 border-zinc-200' : 'bg-zinc-900/60 border-zinc-800'
             }`}>
               <Lock className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
               <div className="text-right">
@@ -438,10 +438,10 @@ export default function AdminPage() {
                 if (activeTab === 'audit') fetchAuditLogs(auditFilter);
               }}
               disabled={isRefreshing}
-              className={`h-9 px-3 text-xs font-semibold rounded-xl border transition-all flex items-center gap-1.5 cursor-pointer disabled:opacity-50 ${
+              className={`h-9 px-3 text-xs font-medium rounded-lg border transition-colors flex items-center gap-1.5 cursor-pointer disabled:opacity-50 ${
                 isLight 
-                  ? 'bg-white hover:bg-gray-50 text-gray-800 border-black/[0.08] shadow-2xs' 
-                  : 'bg-[#0c1e16] hover:bg-[#122b20] text-emerald-100 border-white/[0.08]'
+                  ? 'bg-white hover:bg-gray-50 text-gray-800 border-zinc-200 shadow-2xs' 
+                  : 'bg-zinc-900/60 hover:bg-zinc-900 text-zinc-200 border-zinc-800 hover:border-zinc-700'
               }`}
               title="Refresh Records"
             >
@@ -712,11 +712,11 @@ export default function AdminPage() {
                         className={`text-xs font-semibold rounded-xl px-3 py-2 cursor-pointer focus:outline-none focus:ring-1 border ${
                           isLight
                             ? 'bg-white border-black/[0.08] text-gray-900 focus:ring-emerald-500/20'
-                            : 'bg-[#05140d] border-white/[0.08] text-white focus:ring-emerald-500/30'
+                            : 'bg-zinc-900 border-zinc-800 text-zinc-100 focus:ring-emerald-500/30'
                         }`}
                       >
                         {ROLE_OPTIONS.map((opt) => (
-                          <option key={opt.value} value={opt.value} className={isLight ? 'bg-white text-gray-900' : 'bg-[#0c1e16] text-white'}>
+                          <option key={opt.value} value={opt.value} className={isLight ? 'bg-white text-gray-900' : 'bg-[#121214] text-zinc-100'}>
                             {opt.label}
                           </option>
                         ))}
@@ -848,12 +848,12 @@ export default function AdminPage() {
                             onChange={(e) => handleUpdateUserRole(user.id, e.target.value)}
                             className={`text-xs font-semibold rounded-xl px-2.5 py-1.5 cursor-pointer focus:outline-none focus:ring-1 border disabled:opacity-50 disabled:cursor-not-allowed ${
                               isLight
-                                ? 'bg-white border-black/[0.08] text-gray-900 focus:ring-emerald-500/20'
-                                : 'bg-[#05140d] border-white/[0.08] text-white focus:ring-emerald-500/30'
+                                ? 'bg-white border-zinc-200 text-gray-900 focus:ring-emerald-500/20'
+                                : 'bg-zinc-900 border-zinc-800 text-zinc-100 focus:ring-emerald-500/30'
                             }`}
                           >
                             {ROLE_OPTIONS.map((opt) => (
-                              <option key={opt.value} value={opt.value} className={isLight ? 'bg-white text-gray-900' : 'bg-[#0c1e16] text-white'}>
+                              <option key={opt.value} value={opt.value} className={isLight ? 'bg-white text-gray-900' : 'bg-[#121214] text-zinc-100'}>
                                 {opt.label}
                               </option>
                             ))}
