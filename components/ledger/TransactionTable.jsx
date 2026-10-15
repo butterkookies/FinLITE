@@ -28,7 +28,9 @@ import {
   Check,
   AlertTriangle,
   ShieldCheck,
-  MessageSquare
+  MessageSquare,
+  Table,
+  LayoutList
 } from 'lucide-react';
 import { formatPHP } from '@/lib/utils/currency';
 import { compressReceiptImage } from '@/lib/utils/compression';
@@ -70,6 +72,7 @@ export default function TransactionTable({
   const canViewAudit = ['admin', 'auditor', 'treasurer', 'president', 'adviser'].includes(currentRole);
   const [filterType, setFilterType] = useState('ALL');
   const [searchQuery, setSearchQuery] = useState('');
+  const [viewMode, setViewMode] = useState('auto'); // 'auto' (table on desktop, cards on mobile) | 'table' | 'cards'
   const [selectedReceipt, setSelectedReceipt] = useState(null);
   const [activePhotoIndex, setActivePhotoIndex] = useState(0);
 
@@ -334,7 +337,7 @@ export default function TransactionTable({
   };
 
   return (
-    <div className="rounded-xl transition-colors relative overflow-hidden border bg-white dark:bg-[#121214] border-zinc-200 dark:border-zinc-800 shadow-xs">
+    <div className="rounded-2xl transition-colors relative overflow-hidden bg-white dark:bg-[#121214] border border-zinc-200/70 dark:border-zinc-800/70 shadow-2xs">
       {/* Table Header Controls */}
       <div className="p-4 sm:p-5 border-b flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-zinc-200 dark:border-zinc-800 bg-zinc-50/50 dark:bg-[#121214]">
         <div className="min-w-0">
@@ -407,40 +410,72 @@ export default function TransactionTable({
           />
         </div>
 
-        {/* Filter Tabs */}
-        <div className="flex overflow-x-auto scrollbar-none items-center gap-1 p-1 rounded-lg border w-full sm:w-auto shrink-0 bg-zinc-100 dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800">
-          {[
-            { id: 'ALL', label: 'All Records' },
-            { id: 'INFLOW', label: 'Inflows' },
-            { id: 'OUTFLOW', label: 'Outflows' },
-            { id: 'REIMBURSEMENT', label: 'Pending Abono' },
-          ].map((tab) => {
-            const isActive = filterType === tab.id;
-            return (
-              <button
-                key={tab.id}
-                type="button"
-                onClick={() => setFilterType(tab.id)}
-                className={`h-7 px-3 text-xs font-semibold whitespace-nowrap transition-all rounded-md text-center flex items-center justify-center cursor-pointer shrink-0 ${
-                  isActive
-                    ? 'bg-emerald-600 text-white shadow-xs'
-                    : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-200/60 dark:hover:bg-zinc-800'
-                }`}
-              >
-                {tab.label}
-              </button>
-            );
-          })}
+        {/* Filter Tabs & View Mode Switcher */}
+        <div className="flex flex-wrap items-center justify-between sm:justify-end gap-2 w-full sm:w-auto">
+          <div className="flex overflow-x-auto scrollbar-none items-center gap-1 p-1 rounded-lg border shrink-0 bg-zinc-100 dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800">
+            {[
+              { id: 'ALL', label: 'All Records' },
+              { id: 'INFLOW', label: 'Inflows' },
+              { id: 'OUTFLOW', label: 'Outflows' },
+              { id: 'REIMBURSEMENT', label: 'Pending Abono' },
+            ].map((tab) => {
+              const isActive = filterType === tab.id;
+              return (
+                <button
+                  key={tab.id}
+                  type="button"
+                  onClick={() => setFilterType(tab.id)}
+                  className={`h-7 px-3 text-xs font-semibold whitespace-nowrap transition-all rounded-md text-center flex items-center justify-center cursor-pointer shrink-0 ${
+                    isActive
+                      ? 'bg-emerald-600 text-white shadow-xs'
+                      : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-200/60 dark:hover:bg-zinc-800'
+                  }`}
+                >
+                  {tab.label}
+                </button>
+              );
+            })}
+          </div>
+
+          {/* View Mode Toggle: Spreadsheet vs Slim Cards */}
+          <div className="flex items-center gap-0.5 p-1 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-zinc-100 dark:bg-zinc-900 shrink-0">
+            <button
+              type="button"
+              onClick={() => setViewMode('table')}
+              className={`h-7 px-2.5 text-xs font-semibold rounded-md flex items-center gap-1.5 transition-all cursor-pointer ${
+                viewMode === 'table' || (viewMode === 'auto')
+                  ? 'bg-white dark:bg-zinc-800 text-zinc-950 dark:text-white shadow-xs'
+                  : 'text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100'
+              }`}
+              title="Dense Spreadsheet Table View"
+            >
+              <Table className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">Spreadsheet</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setViewMode('cards')}
+              className={`h-7 px-2.5 text-xs font-semibold rounded-md flex items-center gap-1.5 transition-all cursor-pointer ${
+                viewMode === 'cards'
+                  ? 'bg-white dark:bg-zinc-800 text-zinc-950 dark:text-white shadow-xs'
+                  : 'text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100'
+              }`}
+              title="Mobile Slim Cards View"
+            >
+              <LayoutList className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">Slim Cards</span>
+            </button>
+          </div>
         </div>
 
       </div>
 
-      {/* Desktop/Tablet Transactions Table (>= md) */}
-      <div className="hidden md:block overflow-x-auto scrollbar-thin">
-        <table className="w-full min-w-[980px] text-left border-collapse table-fixed">
+      {/* Desktop/Tablet Transactions Table */}
+      <div className={`${viewMode === 'cards' ? 'hidden' : viewMode === 'table' ? 'block' : 'hidden md:block'} overflow-x-auto lg:overflow-x-visible scrollbar-thin`}>
+        <table className="w-full min-w-[960px] 2xl:min-w-full text-left border-collapse table-fixed">
           <thead>
             <tr className="border-b text-[10px] sm:text-[11px] font-bold uppercase tracking-wider border-zinc-200 dark:border-zinc-800 text-zinc-500 dark:text-zinc-400 bg-zinc-50/80 dark:bg-zinc-900/60">
-              <th className="py-3.5 pl-6 pr-3 w-[24%] text-left whitespace-nowrap">
+              <th className="py-3.5 pl-6 pr-3 w-[32%] text-left whitespace-nowrap">
                 <button
                   type="button"
                   onClick={() => handleSort('title')}
@@ -450,7 +485,7 @@ export default function TransactionTable({
                   <SortIndicator field="title" />
                 </button>
               </th>
-              <th className="py-3.5 px-3 w-[11%] text-left whitespace-nowrap">
+              <th className="py-3.5 px-3 w-[9%] text-left whitespace-nowrap">
                 <button
                   type="button"
                   onClick={() => handleSort('date')}
@@ -460,8 +495,8 @@ export default function TransactionTable({
                   <SortIndicator field="date" />
                 </button>
               </th>
-              <th className="py-3.5 px-3 w-[10%] text-left whitespace-nowrap">Channel</th>
-              <th className="py-3.5 px-3 w-[16%] text-left whitespace-nowrap">
+              <th className="py-3.5 px-3 w-[7%] text-left whitespace-nowrap">Channel</th>
+              <th className="py-3.5 px-3 w-[20%] text-left whitespace-nowrap">
                 <button
                   type="button"
                   onClick={() => handleSort('category')}
@@ -471,7 +506,7 @@ export default function TransactionTable({
                   <SortIndicator field="category" />
                 </button>
               </th>
-              <th className="py-3.5 px-3 w-[14%] text-right whitespace-nowrap">
+              <th className="py-3.5 px-3 w-[11%] text-right whitespace-nowrap">
                 <div className="flex justify-end">
                   <button
                     type="button"
@@ -483,8 +518,8 @@ export default function TransactionTable({
                   </button>
                 </div>
               </th>
-              <th className="py-3.5 px-3 w-[12%] text-left whitespace-nowrap">Recorded By</th>
-              <th className="py-3.5 pl-3 pr-6 w-[13%] text-right whitespace-nowrap">Receipt &amp; Action</th>
+              <th className="py-3.5 px-3 w-[10%] text-left whitespace-nowrap">Recorded By</th>
+              <th className="py-3.5 pl-3 pr-6 w-[11%] text-right whitespace-nowrap">Receipt &amp; Action</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-zinc-200 dark:divide-zinc-800 text-xs">
@@ -512,17 +547,17 @@ export default function TransactionTable({
                 >
                   
                   {/* Title & Event */}
-                  <td className="py-3.5 pl-6 pr-3 min-w-0">
+                  <td className="py-3.5 pl-6 pr-3 min-w-0" title={tx.title}>
                     <div className="font-bold flex items-center gap-1.5 text-zinc-950 dark:text-zinc-100">
                       {tx.type === 'INFLOW' ? (
                         <ArrowDownRight className="w-4 h-4 shrink-0 text-emerald-600 dark:text-emerald-400" />
                       ) : (
                         <ArrowUpRight className="w-4 h-4 shrink-0 text-amber-600 dark:text-amber-400" />
                       )}
-                      <span className="truncate group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">{tx.title}</span>
+                      <span className="truncate group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors" title={tx.title}>{tx.title}</span>
                     </div>
                     {tx.event_name && (
-                      <span className="text-[10px] font-medium block mt-0.5 truncate text-zinc-500 dark:text-zinc-400">
+                      <span className="text-[10px] font-medium block mt-0.5 truncate text-zinc-500 dark:text-zinc-400" title={tx.event_name}>
                         {tx.event_name}
                       </span>
                     )}
@@ -574,8 +609,8 @@ export default function TransactionTable({
                   </td>
 
                   {/* Category */}
-                  <td className="py-3.5 px-3 min-w-0">
-                    <Badge variant="neutral" size="xs" className="truncate max-w-full inline-block">
+                  <td className="py-3.5 px-3 min-w-0" title={tx.category_name || (tx.type === 'INFLOW' ? 'Revenue' : 'Disbursement')}>
+                    <Badge variant="neutral" size="xs" className="truncate max-w-full inline-block" title={tx.category_name || (tx.type === 'INFLOW' ? 'Revenue' : 'Disbursement')}>
                       {tx.category_name || (tx.type === 'INFLOW' ? 'Revenue' : 'Disbursement')}
                     </Badge>
                   </td>
@@ -622,7 +657,7 @@ export default function TransactionTable({
                             </div>
                           )}
                           <div className="min-w-0">
-                            <div className="text-xs font-semibold truncate max-w-[110px] text-zinc-950 dark:text-zinc-100">
+                            <div className="text-xs font-semibold truncate max-w-[130px] text-zinc-950 dark:text-zinc-100" title={loggerName || 'Officer'}>
                               {loggerName || 'Officer'}
                             </div>
                             {loggerRole && (
@@ -752,199 +787,100 @@ export default function TransactionTable({
 
         const renderCard = (tx, badgeConfig) => {
           const receipts = getTransactionReceipts(tx);
+          const hasComments = Boolean(commentCounts[tx.id]);
+          const isAbonoPending = tx.is_reimbursement && tx.status === 'PENDING_REIMBURSEMENT';
+
           return (
-            <Card
+            <div
               key={tx.id}
               onClick={() => {
                 setSelectedTx(tx);
                 setActiveTxPhotoIndex(0);
               }}
-              className="p-4.5 space-y-3 cursor-pointer hover:border-zinc-300 dark:hover:border-zinc-700"
+              className="p-3 sm:p-3.5 rounded-xl bg-white dark:bg-zinc-900/60 border border-zinc-100 dark:border-zinc-800/80 hover:border-zinc-300 dark:hover:border-zinc-700 cursor-pointer flex items-center justify-between gap-3 transition-all active:scale-[0.99]"
             >
-              {/* Top Row: Amount on left & Status pill badge on right */}
-              <div className="flex items-start justify-between gap-3">
-                <div>
-                  <span className="text-[10px] font-bold uppercase tracking-wider block mb-0.5 text-zinc-500 dark:text-zinc-400">
-                    {tx.type === 'INFLOW' ? 'Inflow Amount' : 'Disbursement Amount'}
-                  </span>
-                  <span
-                    className={`text-xl font-extrabold tracking-tight tabular-nums block whitespace-nowrap ${
-                      tx.type === 'INFLOW' 
-                        ? 'text-emerald-600 dark:text-emerald-400' 
-                        : 'text-zinc-950 dark:text-zinc-100'
-                    }`}
-                  >
-                    {tx.type === 'INFLOW' ? '+' : '-'}{formatPHP(tx.amount)}
-                  </span>
+              {/* Left: Icon & Metadata */}
+              <div className="flex items-center gap-3 min-w-0 flex-1">
+                <div
+                  className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 ${
+                    tx.type === 'INFLOW'
+                      ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400'
+                      : tx.is_reimbursement
+                      ? 'bg-amber-500/10 text-amber-600 dark:text-amber-400'
+                      : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300'
+                  }`}
+                >
+                  {tx.payment_method === 'GCASH' ? (
+                    <Smartphone className="w-4 h-4 stroke-[2]" />
+                  ) : (
+                    <Wallet className="w-4 h-4 stroke-[2]" />
+                  )}
                 </div>
 
-                {/* Status Badge Pill */}
-                <Badge variant={tx.type === 'INFLOW' ? 'emerald' : tx.is_reimbursement ? 'amber' : 'neutral'} size="sm">
-                  {badgeConfig.label}
-                </Badge>
-              </div>
-
-              {/* Middle Section: Key-Value Details */}
-              <div className="space-y-2 pt-2.5 border-t border-zinc-100 dark:border-zinc-800 text-xs">
-                <div className="flex items-start justify-between gap-3">
-                  <span className="font-medium shrink-0 text-zinc-500 dark:text-zinc-400">Transaction</span>
-                  <span className="font-bold text-right truncate max-w-[200px] text-zinc-950 dark:text-zinc-100">{tx.title}</span>
-                </div>
-
-                {tx.event_name && (
-                  <div className="flex items-center justify-between gap-3">
-                    <span className="font-medium shrink-0 text-zinc-500 dark:text-zinc-400">Event</span>
-                    <span className="font-medium text-right truncate max-w-[200px] text-zinc-700 dark:text-zinc-300">{tx.event_name}</span>
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs sm:text-sm font-bold text-zinc-950 dark:text-zinc-100 truncate">
+                      {tx.title}
+                    </span>
+                    {hasComments && (
+                      <span className="text-[10px] text-emerald-600 dark:text-emerald-400 flex items-center gap-0.5 shrink-0">
+                        <MessageSquare className="w-3 h-3" />
+                        <span>{commentCounts[tx.id]}</span>
+                      </span>
+                    )}
                   </div>
-                )}
 
-                <div className="flex items-center justify-between gap-3">
-                  <span className="font-medium shrink-0 text-zinc-500 dark:text-zinc-400">Date</span>
-                  <span className="font-semibold tabular-nums text-zinc-700 dark:text-zinc-300">{formatFriendlyDate(tx.transaction_date)}</span>
-                </div>
-
-                <div className="flex items-center justify-between gap-3">
-                  <span className="font-medium shrink-0 text-zinc-500 dark:text-zinc-400">Payment Channel</span>
-                  <Badge variant={tx.payment_method === 'CASH' ? 'emerald' : 'sky'} size="xs">
-                    {tx.payment_method === 'CASH' ? (
+                  <p className="text-[11px] text-zinc-500 dark:text-zinc-400 flex items-center gap-1.5 truncate mt-0.5">
+                    <span>{formatFriendlyDate(tx.transaction_date)}</span>
+                    <span>•</span>
+                    <span className="truncate">{tx.category_name || (tx.type === 'INFLOW' ? 'Revenue' : 'Disbursement')}</span>
+                    {tx.is_reimbursement && tx.reimbursement_recipient && (
                       <>
-                        <Wallet className="w-3.5 h-3.5" />
-                        <span>Cash</span>
-                      </>
-                    ) : (
-                      <>
-                        <Smartphone className="w-3.5 h-3.5" />
-                        <span>GCash</span>
+                        <span>•</span>
+                        <span className="text-amber-600 dark:text-amber-400 font-medium truncate">{tx.reimbursement_recipient}</span>
                       </>
                     )}
-                  </Badge>
+                  </p>
                 </div>
-
-                <div className="flex items-center justify-between gap-3">
-                  <span className="font-medium shrink-0 text-zinc-500 dark:text-zinc-400">Category</span>
-                  <Badge variant="neutral" size="xs">
-                    {tx.category_name || (tx.type === 'INFLOW' ? 'Revenue' : 'Disbursement')}
-                  </Badge>
-                </div>
-
-                {tx.is_reimbursement && tx.reimbursement_recipient && (
-                  <div className="flex items-center justify-between gap-3">
-                    <span className="font-medium shrink-0 text-zinc-500 dark:text-zinc-400">Advance By</span>
-                    <span className="font-bold text-amber-600 dark:text-amber-400">{tx.reimbursement_recipient}</span>
-                  </div>
-                )}
-
-                {(() => {
-                  const loggerName = tx.logged_by_name || tx.logged_by_profile?.full_name;
-                  const loggerRole = tx.logged_by_role || tx.logged_by_profile?.role;
-                  const loggerAvatar = tx.logged_by_avatar_url || tx.logged_by_profile?.avatar_url;
-                  return (
-                    <div className="flex items-center justify-between gap-3">
-                      <span className="font-medium shrink-0 text-zinc-500 dark:text-zinc-400">Recorded By</span>
-                      <span className="inline-flex items-center gap-1.5 font-semibold text-right max-w-[200px]">
-                        {loggerAvatar ? (
-                          <img src={loggerAvatar} alt="" className="w-4 h-4 rounded-full object-cover shrink-0" />
-                        ) : (
-                          <span className="w-4 h-4 rounded-full flex items-center justify-center text-[9px] font-bold shrink-0 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
-                            {(loggerName || 'O').charAt(0).toUpperCase()}
-                          </span>
-                        )}
-                        <span className="truncate text-xs text-zinc-950 dark:text-zinc-100">
-                          {loggerName || (tx.logged_by ? 'Officer' : 'System')}
-                        </span>
-                        {loggerRole && (
-                          <Badge variant="neutral" size="xs" className="text-[9px] uppercase tracking-wider py-0 px-1 leading-none">
-                            {loggerRole}
-                          </Badge>
-                        )}
-                      </span>
-                    </div>
-                  );
-                })()}
               </div>
 
-              {/* Bottom Action Buttons */}
-              <div 
-                className="space-y-2 mt-2"
-                onClick={(e) => e.stopPropagation()}
-              >
-                {tx.is_reimbursement && tx.status === 'PENDING_REIMBURSEMENT' && canSettleAbono && (
-                  <Button
-                    variant="amber-subtle"
-                    size="sm"
-                    className="w-full"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setSettleTx(tx);
-                      setSettleMethod(tx.payment_method === 'GCASH' ? 'GCASH' : 'CASH');
-                      setSettleError(null);
-                    }}
-                    leftIcon={<HandCoins className="w-3.5 h-3.5" />}
-                  >
-                    <span>Disburse / Settle Advance ({formatPHP(tx.amount)})</span>
-                  </Button>
-                )}
-
-                {receipts.length > 0 ? (
-                  <Button
-                    variant="secondary"
-                    size="sm"
-                    className="w-full"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setSelectedReceipt(tx);
-                      setActivePhotoIndex(0);
-                    }}
-                    leftIcon={<Receipt className="w-3.5 h-3.5 text-emerald-500" />}
-                  >
-                    <span>{receipts.length > 1 ? `View Receipts (${receipts.length})` : 'View Receipt Details'}</span>
-                  </Button>
-                ) : isAuthorized ? (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="w-full border-dashed"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setAttachTx(tx);
-                      setAttachFiles([]);
-                      setAttachPreviews([]);
-                      setAttachError(null);
-                    }}
-                    leftIcon={<Plus className="w-3.5 h-3.5 text-emerald-500" />}
-                  >
-                    <span>Attach Receipt / Proof</span>
-                  </Button>
-                ) : (
-                  <div className="w-full h-8 flex items-center justify-center text-[11px] font-medium rounded-lg text-zinc-400 dark:text-zinc-500 bg-zinc-50 dark:bg-zinc-900/40 border border-zinc-200 dark:border-zinc-800">
-                    <span>No Receipt Attached</span>
-                  </div>
-                )}
-
-                {/* Mobile Remarks & Notes Button */}
-                <Button
-                  variant={commentCounts[tx.id] ? "emerald-subtle" : "secondary"}
-                  size="sm"
-                  className="w-full"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setCommentTx(tx);
-                  }}
-                  leftIcon={<MessageSquare className="w-3.5 h-3.5 shrink-0" />}
+              {/* Right: Amount & Status */}
+              <div className="text-right shrink-0 flex flex-col items-end gap-1">
+                <span
+                  className={`text-sm sm:text-base font-extrabold tracking-tight tabular-nums block ${
+                    tx.type === 'INFLOW'
+                      ? 'text-emerald-600 dark:text-emerald-400'
+                      : 'text-zinc-950 dark:text-zinc-100'
+                  }`}
                 >
-                  <span>
-                    {commentCounts[tx.id]
-                      ? `Audit Remarks (${commentCounts[tx.id]})`
-                      : 'Audit Remarks & Notes'}
-                  </span>
-                </Button>
+                  {tx.type === 'INFLOW' ? '+' : '-'}{formatPHP(tx.amount)}
+                </span>
+
+                <div className="flex items-center gap-1.5">
+                  {receipts.length > 0 && (
+                    <span className="text-[10px] text-zinc-400 flex items-center gap-0.5">
+                      <Receipt className="w-3 h-3 text-emerald-500" />
+                      <span>{receipts.length}</span>
+                    </span>
+                  )}
+
+                  {isAbonoPending ? (
+                    <span className="text-[10px] font-bold text-amber-600 dark:text-amber-400 bg-amber-500/10 px-1.5 py-0.5 rounded">
+                      Pending Abono
+                    </span>
+                  ) : (
+                    <span className="text-[10px] font-medium text-zinc-400">
+                      {tx.payment_method}
+                    </span>
+                  )}
+                </div>
               </div>
-            </Card>
+            </div>
           );
         };
 
         return (
-          <div className="md:hidden p-4 space-y-6">
+          <div className={`${viewMode === 'cards' ? 'block' : viewMode === 'table' ? 'hidden' : 'md:hidden'} p-3 sm:p-4 space-y-5`}>
 
             {/* Global Empty State */}
             {/* Global Empty State */}

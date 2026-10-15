@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
-import { Plus, Wallet, Calculator, Sparkles, FileText } from 'lucide-react';
+import { Plus, Wallet, Calculator, Sparkles, FileText, CreditCard } from 'lucide-react';
 import Navbar from '@/components/layout/Navbar';
 import BottomNav from '@/components/layout/BottomNav';
 import StatCards from '@/components/dashboard/StatCards';
@@ -40,6 +40,14 @@ const NewSemesterModal = dynamic(() => import('@/components/semesters/NewSemeste
   loading: () => null,
 });
 const AuditTrailDrawer = dynamic(() => import('@/components/audit/AuditTrailDrawer'), {
+  ssr: false,
+  loading: () => null,
+});
+const DebtsManagementModal = dynamic(() => import('@/components/debts/DebtsManagementModal'), {
+  ssr: false,
+  loading: () => null,
+});
+const AdvancesManagementModal = dynamic(() => import('@/components/debts/AdvancesManagementModal'), {
   ssr: false,
   loading: () => null,
 });
@@ -106,6 +114,9 @@ export default function Dashboard() {
   const [isProposalOpen, setIsProposalOpen] = useState(false);
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   const [isAuditOpen, setIsAuditOpen] = useState(false);
+  const [debts, setDebts] = useState([]);
+  const [isDebtsOpen, setIsDebtsOpen] = useState(false);
+  const [isAdvancesOpen, setIsAdvancesOpen] = useState(false);
   const [previewData, setPreviewData] = useState(null);
   const [latestReconciliation, setLatestReconciliation] = useState(null);
   const [semesterSignatories, setSemesterSignatories] = useState(DEFAULT_LITE_SIGNATORIES);
@@ -134,6 +145,8 @@ export default function Dashboard() {
   }, []);
 
   const supabase = createClient();
+  const isSuperAdmin = isSuperAdminEmail(currentUser?.email || userProfile?.email);
+  const canManageFinancials = currentRole === 'treasurer' || currentRole === 'president' || currentRole === 'admin' || isSuperAdmin;
 
   // Load user profile, semesters, categories, denominations & transactions from Supabase on mount
   useEffect(() => {
@@ -392,6 +405,35 @@ export default function Dashboard() {
         } catch (reconErr) {
           console.warn('Reconciliation fetch note:', reconErr);
         }
+
+        // 7. Load Debts & Receivables (with payment installments join)
+        try {
+          const { data: debtsData, error: debtsError } = await supabase
+            .from('debts_receivables')
+            .select(`
+              *,
+              debt_payments (*)
+            `)
+            .order('created_at', { ascending: false });
+
+          if (!debtsError && debtsData && debtsData.length > 0) {
+            setDebts(debtsData);
+            if (typeof window !== 'undefined') {
+              try { localStorage.setItem('finlite_debts', JSON.stringify(debtsData)); } catch (_) {}
+            }
+          } else {
+            const cachedDebts = typeof window !== 'undefined' ? localStorage.getItem('finlite_debts') : null;
+            if (cachedDebts) {
+              try { setDebts(JSON.parse(cachedDebts)); } catch (_) {}
+            }
+          }
+        } catch (debtsErr) {
+          console.warn('Debts fetch note:', debtsErr);
+          const cachedDebts = typeof window !== 'undefined' ? localStorage.getItem('finlite_debts') : null;
+          if (cachedDebts) {
+            try { setDebts(JSON.parse(cachedDebts)); } catch (_) {}
+          }
+        }
       } catch (err) {
         console.error('Database connection error:', err);
         setTransactions([]);
@@ -402,6 +444,15 @@ export default function Dashboard() {
 
     loadData();
   }, []);
+
+  // Persist debts state to localStorage whenever it changes
+  useEffect(() => {
+    if (typeof window !== 'undefined' && debts && debts.length > 0) {
+      try {
+        localStorage.setItem('finlite_debts', JSON.stringify(debts));
+      } catch (_) {}
+    }
+  }, [debts]);
 
   // Load official semester signatories from Supabase whenever active semester changes
   useEffect(() => {
@@ -478,8 +529,14 @@ export default function Dashboard() {
     return txAY === currentSemester.academicYear && txSem === currentSemester.semester;
   });
 
+  // Filter active debts for the current semester
+  const activeDebts = debts.filter((d) => {
+    if (!d.semester_id) return true;
+    return d.semester_id === currentSemester?.id || d.semester_id === `${currentSemester?.academicYear}-${currentSemester?.semester}`;
+  });
+
   // Recalculate summary totals atomically with precision centavo math
-  const calculateSummary = (txs) => {
+  const calculateSummary = (txs, debtsList = []) => {
     let inflows_c = 0;
     let outflows_c = 0;
     let cash_c = 0;
@@ -505,16 +562,24 @@ export default function Dashboard() {
       }
     });
 
+    const uncollected_debts = debtsList.reduce((acc, d) => {
+      if (d.status === 'CANCELLED' || d.status === 'SETTLED') return acc;
+      const total = Number(d.total_amount || 0);
+      const paid = Number(d.amount_paid || 0);
+      return acc + Math.max(0, total - paid);
+    }, 0);
+
     return {
       total_inflows: fromCentavos(inflows_c),
       total_outflows: fromCentavos(outflows_c),
       cash_on_hand: fromCentavos(cash_c),
       gcash_balance: fromCentavos(gcash_c),
       pending_reimbursements: fromCentavos(pending_reimbursements_c),
+      uncollected_debts,
     };
   };
 
-  const summary = calculateSummary(activeTransactions);
+  const summary = calculateSummary(activeTransactions, activeDebts);
 
   // Manual entry from the New Transaction form: enforce ₱99,999.99 cap and channel balance check.
   const handleManualSaveTransaction = async (newTx) => {
@@ -881,6 +946,120 @@ export default function Dashboard() {
     return { success: true };
   };
 
+  // Handler for collecting payments on uncollected member debts and pre-orders
+  const handleRecordDebtPayment = async (debtId, { amount, tendered, paymentMethod = 'CASH', notes = '' }) => {
+    try {
+      const targetDebt = debts.find((d) => d.id === debtId);
+      if (!targetDebt) return { error: 'Debt record not found.' };
+
+      // 1. Immediately create a linked INFLOW in the general ledger
+      const paymentTx = {
+        title: `Debt Settlement: ${targetDebt.title} (${targetDebt.debtor_name})`,
+        description: notes || `Installment collection of ₱${Number(amount).toFixed(2)} from ${targetDebt.debtor_name}`,
+        amount,
+        type: 'INFLOW',
+        payment_method: paymentMethod,
+        category_name: 'Other Verified Inflow',
+        transaction_date: new Date().toISOString().split('T')[0],
+        is_reimbursement: false,
+        status: 'COMPLETED',
+      };
+      await handleSaveTransaction(paymentTx);
+
+      // 2. Update local debts state
+      const updatedPaid = Number(targetDebt.amount_paid || 0) + Number(amount);
+      const isSettled = updatedPaid >= Number(targetDebt.total_amount);
+      const updatedStatus = isSettled ? 'SETTLED' : 'PARTIALLY_PAID';
+
+      setDebts((prev) =>
+        prev.map((d) =>
+          d.id === debtId
+            ? { ...d, amount_paid: updatedPaid, status: updatedStatus }
+            : d
+        )
+      );
+
+      // 3. Best-effort persistence to Supabase
+      if (supabase) {
+        try {
+          await supabase
+            .from('debts_receivables')
+            .update({
+              amount_paid: updatedPaid,
+              status: updatedStatus,
+              updated_at: new Date().toISOString()
+            })
+            .eq('id', debtId);
+
+          await supabase.from('debt_payments').insert([{
+            debt_id: debtId,
+            amount,
+            payment_method: paymentMethod,
+            notes,
+            received_by: userProfile?.id || null,
+          }]);
+        } catch (dbErr) {
+          console.warn('Persisting debt settlement to Supabase skipped:', dbErr);
+        }
+      }
+
+      return { success: true };
+    } catch (err) {
+      console.error('Record debt payment error:', err);
+      return { error: err?.message || 'Failed to record debt payment' };
+    }
+  };
+
+  // Handler for creating a new debt / receivable record
+  const handleCreateDebt = async (debtData) => {
+    try {
+      const tempId = `debt-${Date.now()}`;
+      const newDebt = {
+        id: tempId,
+        semester_id: currentSemester?.id || 'sem-26-27-1',
+        debtor_name: debtData.debtor_name,
+        debtor_contact: debtData.debtor_contact || null,
+        title: debtData.title,
+        total_amount: Number(debtData.total_amount),
+        amount_paid: 0,
+        status: 'UNPAID',
+        due_date: debtData.due_date || null,
+        notes: debtData.notes || null,
+        created_at: new Date().toISOString(),
+      };
+
+      setDebts((prev) => [newDebt, ...prev]);
+
+      if (supabase) {
+        try {
+          const { data, error } = await supabase.from('debts_receivables').insert([{
+            semester_id: newDebt.semester_id,
+            debtor_name: newDebt.debtor_name,
+            debtor_contact: newDebt.debtor_contact,
+            title: newDebt.title,
+            total_amount: newDebt.total_amount,
+            amount_paid: 0,
+            status: 'UNPAID',
+            due_date: newDebt.due_date,
+            notes: newDebt.notes,
+            created_by: userProfile?.id || null,
+          }]).select().single();
+
+          if (!error && data) {
+            setDebts((prev) => prev.map((d) => d.id === tempId ? data : d));
+          }
+        } catch (dbErr) {
+          console.warn('Persisting new debt to Supabase skipped:', dbErr);
+        }
+      }
+
+      return { success: true };
+    } catch (err) {
+      console.error('Create debt error:', err);
+      return { error: err?.message || 'Failed to create debt record' };
+    }
+  };
+
   // Handler for starting a new semester with carry-over rollover balance
   const handleStartSemester = async ({ academicYear, semester, label, rolloverCash, rolloverGcash, previousTermLabel }) => {
     const newSemObj = {
@@ -1191,10 +1370,10 @@ export default function Dashboard() {
       </div>
 
       {/* Main Content Area */}
-      <main className="flex-1 max-w-7xl w-full mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-6 pb-24 sm:pb-8 space-y-5 sm:space-y-6 no-print">
+      <main className="flex-1 max-w-[1600px] w-full mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-6 pb-24 sm:pb-8 space-y-5 sm:space-y-6 no-print">
         
-        {/* Modern Minimalist Hero Balance & Action Hub */}
-        <Card className="p-5 sm:p-6 mb-5 sm:mb-6">
+        {/* Modern Minimalist Hero Balance & Action Hub (De-cluttered borderless canvas) */}
+        <div className="py-2 mb-2 sm:mb-3">
           <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-5 sm:gap-6">
             
             {/* Left: Dynamic Greetings Hero Header */}
@@ -1269,13 +1448,15 @@ export default function Dashboard() {
             </div>
 
           </div>
-        </Card>
+        </div>
 
-        {/* KPI Metric Cards */}
+        {/* KPI Metric Cards (6 Preserved Account Containers) */}
         <ModuleErrorBoundary moduleName="Financial Overview">
           <StatCards
             summary={summary}
             onOpenDenominations={() => setIsDenomOpen(true)}
+            onOpenAdvances={() => setIsAdvancesOpen(true)}
+            onOpenDebts={() => setIsDebtsOpen(true)}
           />
         </ModuleErrorBoundary>
 
@@ -1312,7 +1493,7 @@ export default function Dashboard() {
       />
 
       {/* Dashboard Footer */}
-      <footer className="max-w-7xl w-full mx-auto px-4 py-6 pb-24 sm:pb-6 text-center no-print">
+      <footer className="max-w-[1600px] w-full mx-auto px-4 py-6 pb-24 sm:pb-6 text-center no-print">
         <p className="text-[11px] font-medium transition-colors text-zinc-400 dark:text-zinc-600">
           © 2026 FinLITE · Pambayang Dalubhasaan ng Marilao · All rights reserved.
         </p>
@@ -1346,6 +1527,27 @@ export default function Dashboard() {
             isOpen={isProposalOpen}
             onClose={() => setIsProposalOpen(false)}
             onOpenPreview={handleOpenProposalPreview}
+          />
+        </ModuleErrorBoundary>
+
+        <ModuleErrorBoundary moduleName="Debts & Receivables Management">
+          <DebtsManagementModal
+            isOpen={isDebtsOpen}
+            onClose={() => setIsDebtsOpen(false)}
+            debts={activeDebts}
+            onRecordPayment={handleRecordDebtPayment}
+            onCreateDebt={handleCreateDebt}
+            canManage={canManageFinancials}
+          />
+        </ModuleErrorBoundary>
+
+        <ModuleErrorBoundary moduleName="Advances Abono Settlement">
+          <AdvancesManagementModal
+            isOpen={isAdvancesOpen}
+            onClose={() => setIsAdvancesOpen(false)}
+            transactions={activeTransactions}
+            onSettleReimbursement={handleSettleReimbursement}
+            canSettle={canManageFinancials}
           />
         </ModuleErrorBoundary>
       </div>

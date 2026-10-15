@@ -38,6 +38,7 @@ const Button = forwardRef(function Button(
     variant = 'secondary',
     size = 'md',
     isLoading = false,
+    loading = false,
     disabled = false,
     leftIcon,
     rightIcon,
@@ -47,6 +48,7 @@ const Button = forwardRef(function Button(
   },
   ref
 ) {
+  const isButtonLoading = isLoading || loading;
   const variantClass = buttonVariants[variant] || buttonVariants.secondary;
   const sizeClass = buttonSizes[size] || buttonSizes.md;
 
@@ -54,7 +56,7 @@ const Button = forwardRef(function Button(
     <button
       ref={ref}
       type={type}
-      disabled={disabled || isLoading}
+      disabled={disabled || isButtonLoading}
       className={cn(
         'inline-flex items-center justify-center font-medium transition-all select-none cursor-pointer',
         'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-1',
@@ -65,13 +67,13 @@ const Button = forwardRef(function Button(
       )}
       {...props}
     >
-      {isLoading ? (
+      {isButtonLoading ? (
         <Loader2 className="w-3.5 h-3.5 animate-spin shrink-0" />
       ) : (
         leftIcon && <span className="shrink-0">{leftIcon}</span>
       )}
       {children}
-      {!isLoading && rightIcon && <span className="shrink-0">{rightIcon}</span>}
+      {!isButtonLoading && rightIcon && <span className="shrink-0">{rightIcon}</span>}
     </button>
   );
 });

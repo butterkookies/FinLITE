@@ -68,8 +68,8 @@ export default function Navbar({
   };
 
   return (
-    <header className="sticky top-0 z-30 backdrop-blur-xl border-b transition-colors duration-200 bg-white/95 dark:bg-[#09090b]/95 border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-zinc-100 shadow-xs">
-      <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 h-14 flex items-center justify-between gap-3">
+    <header className="sticky top-0 z-30 backdrop-blur-xl transition-colors duration-200 bg-white/95 dark:bg-[#09090b]/95 text-zinc-900 dark:text-zinc-100">
+      <div className="max-w-[1600px] mx-auto px-3 sm:px-6 lg:px-8 h-14 flex items-center justify-between gap-3">
         
         {/* Left: Organization Branding & Desktop Semester Switcher */}
         <div className="flex items-center gap-2.5 sm:gap-4 min-w-0 shrink-0">

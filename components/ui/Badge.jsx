@@ -22,6 +22,10 @@ export const badgeVariants = {
     'bg-sky-500/10 text-sky-700 dark:text-sky-400 border-sky-500/20',
   info:
     'bg-sky-500/10 text-sky-700 dark:text-sky-400 border-sky-500/20',
+  orange:
+    'bg-orange-500/10 text-orange-700 dark:text-orange-400 border-orange-500/20',
+  teal:
+    'bg-teal-500/10 text-teal-700 dark:text-teal-400 border-teal-500/20',
   outline:
     'border-zinc-200 dark:border-zinc-800 text-zinc-600 dark:text-zinc-400',
 };
@@ -53,6 +57,8 @@ export default function Badge({
     warning: 'bg-amber-500',
     sky: 'bg-sky-500',
     info: 'bg-sky-500',
+    orange: 'bg-orange-500',
+    teal: 'bg-teal-500',
     neutral: 'bg-zinc-400',
   };
 
