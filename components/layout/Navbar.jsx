@@ -56,6 +56,9 @@ export default function Navbar({
   }, []);
 
   const handleSignOut = async () => {
+    try {
+      await fetch('/api/auth/logout', { method: 'POST' });
+    } catch (_) {}
     const supabase = createClient();
     if (supabase) {
       await supabase.auth.signOut();

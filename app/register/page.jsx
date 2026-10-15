@@ -231,7 +231,7 @@ function RegisterForm() {
                 {isGoogleLoading ? (
                   <div className="w-5 h-5 border-2 border-gray-300 border-t-gray-600 rounded-full animate-spin" />
                 ) : <GoogleIcon />}
-                <span>{isGoogleLoading ? 'Redirecting...' : 'Continue with Google'}</span>
+                <span>{isGoogleLoading ? 'Redirecting...' : 'Register for FinLITE with Google'}</span>
               </button>
 
               <div className="flex items-center gap-3 mb-5">

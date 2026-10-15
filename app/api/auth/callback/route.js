@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { isSuperAdminEmail } from '@/lib/config/admin';
+import { getClientIp } from '@/lib/security/ratelimit';
 
 // GET /api/auth/callback — Supabase OAuth callback handler
 // After Google OAuth, check if user is new (needs profile completion) or returning
@@ -29,6 +30,7 @@ export async function GET(req) {
     const googleEmail = user.email?.toLowerCase();
     const googleName = user.user_metadata?.full_name || user.user_metadata?.name || '';
     const googleAvatar = user.user_metadata?.avatar_url || user.user_metadata?.picture || null;
+    const clientIp = getClientIp(req);
 
     // --- SUPER ADMIN AUTO-SETUP ---
     // If the logging-in user is one of the designated super admins, auto-promote them to admin
@@ -38,7 +40,7 @@ export async function GET(req) {
       const lastName = nameParts.slice(1).join(' ') || 'Geronimo';
 
       try {
-        await supabase
+        const { data: adminProf } = await supabase
           .from('profiles')
           .upsert({
             auth_user_id: user.id,
@@ -50,7 +52,9 @@ export async function GET(req) {
             status: 'approved',
             auth_provider: 'google',
             approved_at: new Date().toISOString(),
-          }, { onConflict: 'email' });
+          }, { onConflict: 'email' })
+          .select('id')
+          .maybeSingle();
 
         await supabase
           .from('registration_requests')
@@ -60,6 +64,21 @@ export async function GET(req) {
             reviewed_at: new Date().toISOString(),
           })
           .eq('email', googleEmail);
+
+        // Telemetry: Capture AUTH_LOGIN for Super Admin via Google
+        await supabase.from('audit_logs').insert([{
+          action: 'AUTH_LOGIN',
+          entity_type: 'auth_session',
+          entity_id: adminProf?.id || user.id,
+          user_id: adminProf?.id || null,
+          details: {
+            auth_method: 'Google',
+            email: googleEmail,
+            role: 'admin',
+            is_super_admin: true,
+            ip_address: clientIp,
+          },
+        }]);
       } catch (adminErr) {
         console.warn('Super admin auto-upsert note:', adminErr);
       }
@@ -71,12 +90,34 @@ export async function GET(req) {
     // --- Check if already an approved profile (returning user) ---
     const { data: existingProfile } = await supabase
       .from('profiles')
-      .select('id, status, username')
+      .select('id, status, role, username')
       .eq('auth_user_id', user.id)
       .maybeSingle();
 
     if (existingProfile) {
+      if (existingProfile.status === 'suspended') {
+        await supabase.auth.signOut();
+        return NextResponse.redirect(`${appUrl}/login?error=account_suspended`);
+      }
       if (existingProfile.status === 'approved') {
+        // Telemetry: Capture AUTH_LOGIN for Google OAuth user
+        try {
+          await supabase.from('audit_logs').insert([{
+            action: 'AUTH_LOGIN',
+            entity_type: 'auth_session',
+            entity_id: existingProfile.id,
+            user_id: existingProfile.id,
+            details: {
+              auth_method: 'Google',
+              email: googleEmail,
+              role: existingProfile.role || 'member',
+              ip_address: clientIp,
+            },
+          }]);
+        } catch (auditErr) {
+          console.warn('OAuth login audit telemetry note:', auditErr.message);
+        }
+
         // Approved member — go to dashboard
         return NextResponse.redirect(`${appUrl}/`);
       }

@@ -27,11 +27,13 @@ import {
   HandCoins,
   Check,
   AlertTriangle,
-  ShieldCheck
+  ShieldCheck,
+  MessageSquare
 } from 'lucide-react';
 import { formatPHP } from '@/lib/utils/currency';
 import { compressReceiptImage } from '@/lib/utils/compression';
 import { useTheme } from '@/components/theme/ThemeProvider';
+import TransactionCommentsDrawer from '@/components/ledger/TransactionCommentsDrawer';
 
 export function formatFriendlyDate(dateStr) {
   if (!dateStr) return '—';
@@ -96,6 +98,25 @@ export default function TransactionTable({
   // Expanded transaction details modal state
   const [selectedTx, setSelectedTx] = useState(null);
   const [activeTxPhotoIndex, setActiveTxPhotoIndex] = useState(0);
+
+  // Transaction Comments & Audit Remarks drawer state
+  const [commentTx, setCommentTx] = useState(null);
+  const [commentCounts, setCommentCounts] = useState({});
+
+  useEffect(() => {
+    let isMounted = true;
+    fetch('/api/transactions/comments-count')
+      .then((res) => res.json())
+      .then((data) => {
+        if (isMounted && data.success && data.counts) {
+          setCommentCounts(data.counts);
+        }
+      })
+      .catch(() => {});
+    return () => {
+      isMounted = false;
+    };
+  }, [transactions]);
 
   const isAuthorized = currentRole === 'admin' || currentRole === 'treasurer' || currentRole === 'auditor';
   const canSettleAbono = currentRole === 'admin' || currentRole === 'treasurer' || currentRole === 'president' || currentRole === 'adviser';
@@ -787,6 +808,30 @@ export default function TransactionTable({
                           <span>Settle</span>
                         </button>
                       )}
+
+                      {/* Comments / Remarks Indicator Button */}
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setCommentTx(tx);
+                        }}
+                        className={`h-7 inline-flex items-center gap-1.5 text-[11px] font-semibold px-2 rounded-lg transition-colors cursor-pointer border ${
+                          commentCounts[tx.id]
+                            ? isLight
+                              ? 'text-emerald-900 bg-emerald-100/90 hover:bg-emerald-200 border-emerald-300'
+                              : 'text-emerald-300 bg-emerald-500/15 hover:bg-emerald-500/25 border-emerald-500/30'
+                            : isLight
+                              ? 'text-gray-500 hover:text-gray-900 bg-gray-50 hover:bg-gray-100 border-gray-200'
+                              : 'text-white/50 hover:text-white bg-[#0c1e16] hover:bg-[#122b20] border-[#1a382b]'
+                        }`}
+                        title={commentCounts[tx.id] ? `${commentCounts[tx.id]} audit remark${commentCounts[tx.id] > 1 ? 's' : ''}` : 'View / Add audit remarks'}
+                      >
+                        <MessageSquare className="w-3 h-3 shrink-0" />
+                        {commentCounts[tx.id] ? (
+                          <span className="tabular-nums font-bold text-[10px]">{commentCounts[tx.id]}</span>
+                        ) : null}
+                      </button>
                     </div>
                   </td>
 
@@ -1013,6 +1058,31 @@ export default function TransactionTable({
                     <span>No Receipt Attached</span>
                   </div>
                 )}
+
+                {/* Mobile Remarks & Notes Button */}
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setCommentTx(tx);
+                  }}
+                  className={`w-full h-9 flex items-center justify-center gap-1.5 px-3 text-xs font-bold rounded-xl transition-all cursor-pointer border ${
+                    commentCounts[tx.id]
+                      ? isLight
+                        ? 'text-emerald-900 bg-emerald-100/90 hover:bg-emerald-200 border-emerald-300'
+                        : 'text-emerald-300 bg-emerald-500/15 hover:bg-emerald-500/25 border-emerald-500/30'
+                      : isLight
+                        ? 'text-gray-700 bg-gray-50 hover:bg-gray-100 border-gray-200'
+                        : 'text-white/70 bg-[#0d1e16] hover:bg-[#122b20] border-[#1a382b]'
+                  }`}
+                >
+                  <MessageSquare className="w-3.5 h-3.5 shrink-0" />
+                  <span>
+                    {commentCounts[tx.id]
+                      ? `Audit Remarks (${commentCounts[tx.id]})`
+                      : 'Audit Remarks & Notes'}
+                  </span>
+                </button>
               </div>
             </div>
           );
@@ -2331,6 +2401,14 @@ export default function TransactionTable({
           </button>
         </div>
       )}
+
+      {/* Transaction Comments & Audit Remarks Drawer */}
+      <TransactionCommentsDrawer
+        isOpen={!!commentTx}
+        onClose={() => setCommentTx(null)}
+        transaction={commentTx}
+        onCommentAdded={(txId, count) => setCommentCounts((prev) => ({ ...prev, [txId]: count }))}
+      />
 
     </div>
   );

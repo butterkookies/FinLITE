@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { isSuperAdminEmail } from '@/lib/config/admin';
+import { getClientIp } from '@/lib/security/ratelimit';
 
 // POST /api/auth/login
 export async function POST(req) {
@@ -101,6 +102,26 @@ export async function POST(req) {
           .eq('id', profile.id);
       }
 
+      // Telemetry: Capture AUTH_LOGIN for Super Admin
+      try {
+        const clientIp = getClientIp(req);
+        await supabase.from('audit_logs').insert([{
+          action: 'AUTH_LOGIN',
+          entity_type: 'auth_session',
+          entity_id: profile?.id || userId,
+          user_id: profile?.id || null,
+          details: {
+            auth_method: 'Password',
+            email: userEmail,
+            role: 'admin',
+            is_super_admin: true,
+            ip_address: clientIp,
+          },
+        }]);
+      } catch (auditErr) {
+        console.warn('Super admin login audit telemetry note:', auditErr.message);
+      }
+
       return NextResponse.json({
         success: true,
         user: {
@@ -133,6 +154,15 @@ export async function POST(req) {
       return NextResponse.json({ error: 'Account not found. Please register first.' }, { status: 404 });
     }
 
+    if (profile.status === 'suspended') {
+      await supabase.auth.signOut();
+      return NextResponse.json({
+        error: 'suspended',
+        message: 'Your account has been suspended by an administrator. Please contact your adviser or admin.',
+        email: userEmail,
+      }, { status: 403 });
+    }
+
     if (profile.status === 'pending') {
       await supabase.auth.signOut();
       return NextResponse.json({
@@ -148,6 +178,25 @@ export async function POST(req) {
         error: 'rejected',
         message: 'Your registration request was not approved. Please contact the admin.',
       }, { status: 403 });
+    }
+
+    // Telemetry: Capture AUTH_LOGIN for standard user
+    try {
+      const clientIp = getClientIp(req);
+      await supabase.from('audit_logs').insert([{
+        action: 'AUTH_LOGIN',
+        entity_type: 'auth_session',
+        entity_id: profile.id,
+        user_id: profile.id,
+        details: {
+          auth_method: 'Password',
+          email: userEmail,
+          role: profile.role,
+          ip_address: clientIp,
+        },
+      }]);
+    } catch (auditErr) {
+      console.warn('Login audit telemetry note:', auditErr.message);
     }
 
     return NextResponse.json({
