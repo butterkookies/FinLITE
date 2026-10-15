@@ -8,6 +8,7 @@ import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import ThemeToggle from '@/components/theme/ThemeToggle';
 import { useTheme } from '@/components/theme/ThemeProvider';
+import { Button, Badge, Input } from '@/components/ui';
 
 export default function Navbar({ 
   currentRole = 'member',
@@ -67,11 +68,7 @@ export default function Navbar({
   };
 
   return (
-    <header className={`sticky top-0 z-30 backdrop-blur-xl border-b transition-colors duration-200 ${
-      isLight
-        ? 'bg-white/95 border-zinc-200 text-zinc-900 shadow-xs'
-        : 'bg-[#09090b]/95 border-zinc-800 text-zinc-100 shadow-xs'
-    }`}>
+    <header className="sticky top-0 z-30 backdrop-blur-xl border-b transition-colors duration-200 bg-white/95 dark:bg-[#09090b]/95 border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-zinc-100 shadow-xs">
       <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 h-14 flex items-center justify-between gap-3">
         
         {/* Left: Organization Branding & Desktop Semester Switcher */}
@@ -90,14 +87,12 @@ export default function Navbar({
             </div>
             <div className="flex flex-col justify-center shrink-0">
               <div className="flex items-center gap-1.5">
-                <span className={`text-sm font-bold tracking-tight leading-tight ${
-                  isLight ? 'text-zinc-950' : 'text-zinc-100'
-                }`}>
+                <span className="text-sm font-bold tracking-tight leading-tight text-zinc-950 dark:text-zinc-100">
                   FinLITE
                 </span>
-                <span className="text-[10px] font-mono font-medium px-1.5 py-0.2 rounded bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+                <Badge variant="emerald" size="xs">
                   LITE • PDM
-                </span>
+                </Badge>
               </div>
             </div>
           </div>
@@ -106,27 +101,20 @@ export default function Navbar({
 
           {/* Desktop Interactive Semester Switcher (Hidden on mobile, shown on sm+) */}
           <div className="hidden sm:flex items-center relative" ref={semesterMenuRef}>
-            <button
-              type="button"
+            <Button
+              variant="secondary"
+              size="sm"
               onClick={() => setIsSemesterOpen(!isSemesterOpen)}
-              className={`h-8 text-xs font-medium px-2.5 rounded-lg flex items-center gap-2 cursor-pointer focus:outline-none focus:ring-1 focus:ring-emerald-500/40 max-w-[240px] truncate transition-colors border ${
-                isLight
-                  ? 'bg-zinc-100/80 hover:bg-zinc-200/80 text-zinc-900 border-zinc-200'
-                  : 'bg-zinc-900/60 hover:bg-zinc-900 text-zinc-200 border-zinc-800 hover:border-zinc-700'
-              }`}
+              className="max-w-[240px] truncate"
+              leftIcon={<Calendar className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />}
+              rightIcon={<ChevronDown className={`w-3.5 h-3.5 opacity-60 transition-transform duration-150 ${isSemesterOpen ? 'rotate-180' : ''}`} />}
               title="Select Academic Year / Semester or Start New Term"
             >
-              <Calendar className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 shrink-0" />
               <span className="truncate">{currentSemester?.label || 'Select Semester'}</span>
-              <ChevronDown className={`w-3.5 h-3.5 opacity-60 transition-transform duration-150 shrink-0 ${isSemesterOpen ? 'rotate-180' : ''}`} />
-            </button>
+            </Button>
 
             {isSemesterOpen && (
-              <div className={`absolute left-0 top-full mt-1.5 w-60 rounded-xl shadow-xl border p-1.5 z-50 animate-in fade-in zoom-in-95 duration-100 ${
-                isLight
-                  ? 'bg-white border-zinc-200 text-zinc-800'
-                  : 'bg-[#121214] border-zinc-800 text-zinc-100'
-              }`}>
+              <div className="absolute left-0 top-full mt-1.5 w-60 rounded-xl shadow-xl border p-1.5 z-50 animate-in fade-in zoom-in-95 duration-100 bg-white dark:bg-[#121214] border-zinc-200 dark:border-zinc-800 text-zinc-800 dark:text-zinc-100">
                 <div className="px-2.5 py-1.5 text-[10px] font-bold uppercase tracking-wider text-zinc-400 dark:text-zinc-500">
                   Academic Term
                 </div>
@@ -143,12 +131,8 @@ export default function Navbar({
                         }}
                         className={`w-full flex items-center justify-between px-2.5 py-1.5 text-xs font-medium rounded-lg transition-colors cursor-pointer text-left ${
                           isSelected
-                            ? isLight
-                              ? 'bg-emerald-50 text-emerald-900 font-bold'
-                              : 'bg-emerald-950/60 text-emerald-300 font-bold'
-                            : isLight
-                              ? 'text-zinc-700 hover:bg-zinc-100'
-                              : 'text-zinc-300 hover:bg-zinc-800'
+                            ? 'bg-emerald-50 dark:bg-emerald-950/60 text-emerald-900 dark:text-emerald-300 font-bold'
+                            : 'text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800'
                         }`}
                       >
                         <span className="truncate">{s.label}</span>
@@ -159,18 +143,14 @@ export default function Navbar({
                 </div>
 
                 {isOfficer && (
-                  <div className={`pt-1 mt-1 border-t ${isLight ? 'border-zinc-100' : 'border-zinc-800'}`}>
+                  <div className="pt-1 mt-1 border-t border-zinc-100 dark:border-zinc-800">
                     <button
                       type="button"
                       onClick={() => {
                         setIsSemesterOpen(false);
                         onOpenNewSemester();
                       }}
-                      className={`w-full flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium rounded-lg transition-colors cursor-pointer text-left ${
-                        isLight
-                          ? 'text-emerald-700 hover:bg-emerald-50'
-                          : 'text-emerald-400 hover:bg-emerald-950/50'
-                      }`}
+                      className="w-full flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium rounded-lg transition-colors cursor-pointer text-left text-emerald-700 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-950/50"
                     >
                       <Plus className="w-3.5 h-3.5" />
                       <span>Start New Semester...</span>
@@ -183,12 +163,16 @@ export default function Navbar({
         </div>
 
         {/* Center: Command Palette / Quick Search Trigger */}
-        <div className="hidden lg:flex items-center w-64 xl:w-72 relative">
-          <Search className="w-3.5 h-3.5 absolute left-2.5 text-zinc-400" />
-          <input 
-            type="text" 
+        <div className="hidden lg:flex items-center w-64 xl:w-72">
+          <Input 
+            size="sm"
+            leftIcon={<Search className="w-3.5 h-3.5" />}
+            rightElement={
+              <kbd className="text-[9px] font-mono px-1 py-0.5 rounded border border-zinc-200 bg-zinc-100 text-zinc-500 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-400 pointer-events-none">
+                ⌘K
+              </kbd>
+            }
             placeholder="Quick search voucher, payee..." 
-            className="w-full h-8 pl-8 pr-8 text-xs rounded-lg border transition-colors focus:outline-none focus:ring-1 focus:ring-emerald-500 bg-zinc-50 border-zinc-200 text-zinc-900 placeholder:text-zinc-400 dark:bg-zinc-900/60 dark:border-zinc-800 dark:text-zinc-200 dark:placeholder:text-zinc-500 dark:focus:border-emerald-500/60"
             onKeyDown={(e) => {
               if (e.key === 'Enter') {
                 const tableSearch = document.querySelector('input[placeholder*="Search"]');
@@ -200,7 +184,6 @@ export default function Navbar({
               }
             }}
           />
-          <kbd className="absolute right-2 text-[9px] font-mono px-1 py-0.5 rounded border border-zinc-200 bg-zinc-100 text-zinc-500 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-400">⌘K</kbd>
         </div>
 
         {/* Right: Actions, Theme Toggle, AI Co-Pilot & Google Profile */}
@@ -211,48 +194,40 @@ export default function Navbar({
 
           {/* Quick Cash Reconciliation Button (Officer Gated) */}
           {isOfficer && (
-            <button
+            <Button
+              variant="secondary"
+              size="sm"
               onClick={onOpenDenominations}
-              className={`h-8 px-2.5 text-xs font-medium rounded-lg transition-colors flex items-center gap-1.5 cursor-pointer shrink-0 border ${
-                isLight
-                  ? 'text-zinc-800 bg-zinc-100/80 hover:bg-zinc-200/80 border-zinc-200'
-                  : 'text-zinc-200 bg-zinc-900/60 hover:bg-zinc-900 border-zinc-800 hover:border-zinc-700'
-              }`}
+              leftIcon={<Wallet className="w-3.5 h-3.5 text-emerald-500 shrink-0" />}
               title="Open Cash Box & Denomination Counter"
             >
-              <Wallet className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
               <span className="hidden sm:inline">Cash Box</span>
-            </button>
+            </Button>
           )}
 
           {/* AI Co-Pilot Button */}
-          <button
+          <Button
+            variant="emerald-subtle"
+            size="sm"
             onClick={onOpenAI}
-            className={`h-8 px-2.5 text-xs font-medium rounded-lg transition-colors flex items-center gap-1.5 cursor-pointer shrink-0 border ${
-              isLight
-                ? 'text-emerald-900 bg-emerald-50 hover:bg-emerald-100 border-emerald-200'
-                : 'text-emerald-300 bg-emerald-950/40 hover:bg-emerald-950/70 border-emerald-900/40 hover:border-emerald-800/60'
-            }`}
+            leftIcon={<Sparkles className="w-3.5 h-3.5 text-emerald-500 dark:text-emerald-400 shrink-0" />}
             title="FinLITE Accounting Copilot"
           >
-            <Sparkles className="w-3.5 h-3.5 text-emerald-500 dark:text-emerald-400 shrink-0" />
             <span className="hidden sm:inline">Copilot</span>
             <span className="sm:hidden text-[11px] font-bold">AI</span>
-          </button>
+          </Button>
 
           {/* Admin Console Link Button — STRICTLY VISIBLE TO ADMIN ONLY */}
           {isAdmin && (
-            <Link
-              href="/admin"
-              className={`h-8 px-2.5 text-xs font-medium rounded-lg transition-colors flex items-center gap-1.5 shrink-0 border ${
-                isLight
-                  ? 'text-amber-900 bg-amber-50 hover:bg-amber-100 border-amber-200'
-                  : 'text-amber-300 bg-amber-950/30 hover:bg-amber-950/60 border-amber-900/40 hover:border-amber-800/60'
-              }`}
-              title="Open Admin Console & Approvals"
-            >
-              <ShieldCheck className="w-3.5 h-3.5 text-amber-500 shrink-0" />
-              <span className="hidden sm:inline">Admin</span>
+            <Link href="/admin">
+              <Button
+                variant="amber-subtle"
+                size="sm"
+                leftIcon={<ShieldCheck className="w-3.5 h-3.5 text-amber-500 shrink-0" />}
+                title="Open Admin Console & Approvals"
+              >
+                <span className="hidden sm:inline">Admin</span>
+              </Button>
             </Link>
           )}
 
@@ -260,11 +235,7 @@ export default function Navbar({
           <div className="relative pl-1" ref={profileMenuRef}>
             <button
               onClick={() => setIsProfileOpen(!isProfileOpen)}
-              className={`h-8 flex items-center gap-2 px-2 rounded-lg transition-colors cursor-pointer focus:outline-none focus:ring-1 focus:ring-emerald-500/40 border ${
-                isLight
-                  ? 'bg-zinc-100/80 hover:bg-zinc-200/80 border-zinc-200 text-zinc-800'
-                  : 'bg-zinc-900/60 hover:bg-zinc-900 border-zinc-800 hover:border-zinc-700 text-zinc-100'
-              }`}
+              className="h-8 flex items-center gap-2 px-2 rounded-lg transition-colors cursor-pointer focus:outline-none focus:ring-1 focus:ring-emerald-500/40 border bg-zinc-100/80 hover:bg-zinc-200/80 dark:bg-zinc-900/60 dark:hover:bg-zinc-900 border-zinc-200 dark:border-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-700 text-zinc-800 dark:text-zinc-100"
               title="View Account Profile"
             >
               {avatarUrl ? (
@@ -286,9 +257,7 @@ export default function Navbar({
               )}
 
               <div className="hidden md:flex flex-col text-left">
-                <span className={`text-xs font-semibold leading-tight truncate max-w-[110px] ${
-                  isLight ? 'text-zinc-900' : 'text-zinc-100'
-                }`}>
+                <span className="text-xs font-semibold leading-tight truncate max-w-[110px] text-zinc-900 dark:text-zinc-100">
                   {fullName}
                 </span>
                 <span className="text-[10px] font-medium text-emerald-600 dark:text-emerald-400 capitalize leading-none">
@@ -301,15 +270,9 @@ export default function Navbar({
 
             {/* Profile Dropdown Menu */}
             {isProfileOpen && (
-              <div className={`absolute right-0 mt-1.5 w-60 rounded-xl shadow-xl py-1.5 z-50 animate-in fade-in zoom-in-95 duration-100 border ${
-                isLight
-                  ? 'bg-white border-zinc-200 text-zinc-900'
-                  : 'bg-[#121214] border-zinc-800 text-zinc-100'
-              }`}>
+              <div className="absolute right-0 mt-1.5 w-60 rounded-xl shadow-xl py-1.5 z-50 animate-in fade-in zoom-in-95 duration-100 border bg-white dark:bg-[#121214] border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-zinc-100">
                 {/* User Header Info */}
-                <div className={`px-3 py-2.5 border-b ${
-                  isLight ? 'border-zinc-100' : 'border-zinc-800'
-                }`}>
+                <div className="px-3 py-2.5 border-b border-zinc-100 dark:border-zinc-800">
                   <div className="flex items-center gap-2.5">
                     {avatarUrl ? (
                       <div className="w-9 h-9 rounded-lg overflow-hidden border border-zinc-200 dark:border-zinc-700 relative shrink-0">
@@ -329,23 +292,21 @@ export default function Navbar({
                       </div>
                     )}
                     <div className="min-w-0">
-                      <p className={`text-xs font-bold truncate ${isLight ? 'text-zinc-900' : 'text-zinc-100'}`}>{fullName}</p>
-                      <p className={`text-[10px] truncate ${isLight ? 'text-zinc-500' : 'text-zinc-400'}`}>{email}</p>
-                      <span className="inline-block mt-0.5 px-1.5 py-0.2 rounded text-[9px] font-medium uppercase tracking-wider bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+                      <p className="text-xs font-bold truncate text-zinc-900 dark:text-zinc-100">{fullName}</p>
+                      <p className="text-[10px] truncate text-zinc-500 dark:text-zinc-400">{email}</p>
+                      <Badge variant="emerald" size="xs" className="mt-0.5 uppercase tracking-wider text-[9px]">
                         {isAdmin ? 'Super Admin' : currentRole}
-                      </span>
+                      </Badge>
                     </div>
                   </div>
                 </div>
 
                 {/* Appearance Theme Switcher Row */}
-                <div className={`py-1 border-b ${isLight ? 'border-zinc-100' : 'border-zinc-800'}`}>
+                <div className="py-1 border-b border-zinc-100 dark:border-zinc-800">
                   <button
                     type="button"
                     onClick={toggleTheme}
-                    className={`w-full flex items-center justify-between px-3 py-2 text-xs font-medium transition-colors cursor-pointer text-left ${
-                      isLight ? 'text-zinc-800 hover:bg-zinc-100' : 'text-zinc-200 hover:bg-zinc-800/60'
-                    }`}
+                    className="w-full flex items-center justify-between px-3 py-2 text-xs font-medium transition-colors cursor-pointer text-left text-zinc-800 dark:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-800/60"
                   >
                     <span className="flex items-center gap-2">
                       {isLight ? <Sun className="w-3.5 h-3.5 text-amber-500" /> : <Moon className="w-3.5 h-3.5 text-emerald-400" />}
@@ -362,9 +323,7 @@ export default function Navbar({
                   <Link
                     href="/profile"
                     onClick={() => setIsProfileOpen(false)}
-                    className={`flex items-center gap-2 px-3 py-2 text-xs font-medium transition-colors ${
-                      isLight ? 'text-zinc-800 hover:bg-zinc-100' : 'text-zinc-200 hover:bg-zinc-800/60'
-                    }`}
+                    className="flex items-center gap-2 px-3 py-2 text-xs font-medium transition-colors text-zinc-800 dark:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-800/60"
                   >
                     <User className="w-3.5 h-3.5 text-emerald-500" />
                     <span>My Profile</span>
@@ -374,9 +333,7 @@ export default function Navbar({
                     <Link
                       href="/admin"
                       onClick={() => setIsProfileOpen(false)}
-                      className={`flex items-center gap-2 px-3 py-2 text-xs font-medium transition-colors ${
-                        isLight ? 'text-amber-800 hover:bg-amber-50' : 'text-amber-300 hover:bg-amber-950/40'
-                      }`}
+                      className="flex items-center gap-2 px-3 py-2 text-xs font-medium transition-colors text-amber-800 dark:text-amber-300 hover:bg-amber-50 dark:hover:bg-amber-950/40"
                     >
                       <ShieldCheck className="w-3.5 h-3.5 text-amber-500" />
                       <span>Admin Console</span>
@@ -385,7 +342,7 @@ export default function Navbar({
                 </div>
 
                 {/* Sign Out */}
-                <div className={`pt-1 border-t ${isLight ? 'border-zinc-100' : 'border-zinc-800'}`}>
+                <div className="pt-1 border-t border-zinc-100 dark:border-zinc-800">
                   <button
                     onClick={handleSignOut}
                     className="w-full flex items-center gap-2 px-3 py-2 text-xs font-medium transition-colors cursor-pointer text-left text-rose-500 hover:bg-rose-500/10"
@@ -404,18 +361,12 @@ export default function Navbar({
       {/* Mobile Dedicated Semester Switcher Bar */}
       <div 
         ref={mobileSemesterRef}
-        className={`sm:hidden px-3 pb-2 pt-1 border-t relative ${
-          isLight ? 'border-zinc-200 bg-white' : 'border-zinc-800 bg-[#09090b]'
-        }`}
+        className="sm:hidden px-3 pb-2 pt-1 border-t relative border-zinc-200 dark:border-zinc-800 bg-white dark:bg-[#09090b]"
       >
         <button
           type="button"
           onClick={() => setIsMobileSemesterOpen(!isMobileSemesterOpen)}
-          className={`h-8 w-full text-xs font-medium px-2.5 rounded-lg flex items-center justify-between cursor-pointer focus:outline-none focus:ring-1 focus:ring-emerald-500/40 truncate transition-colors border ${
-            isLight
-              ? 'bg-zinc-100/80 hover:bg-zinc-200/80 text-zinc-900 border-zinc-200'
-              : 'bg-zinc-900/60 hover:bg-zinc-900 text-zinc-200 border-zinc-800'
-          }`}
+          className="h-8 w-full text-xs font-medium px-2.5 rounded-lg flex items-center justify-between cursor-pointer focus:outline-none focus:ring-1 focus:ring-emerald-500/40 truncate transition-colors border bg-zinc-100/80 hover:bg-zinc-200/80 dark:bg-zinc-900/60 dark:hover:bg-zinc-900 text-zinc-900 dark:text-zinc-200 border-zinc-200 dark:border-zinc-800"
         >
           <div className="flex items-center gap-2 truncate">
             <Calendar className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 shrink-0" />
@@ -425,11 +376,7 @@ export default function Navbar({
         </button>
 
         {isMobileSemesterOpen && (
-          <div className={`mt-1.5 w-full rounded-xl shadow-xl border p-1.5 animate-in fade-in zoom-in-95 duration-100 ${
-            isLight
-              ? 'bg-white border-zinc-200 text-zinc-800'
-              : 'bg-[#121214] border-zinc-800 text-zinc-100'
-          }`}>
+          <div className="mt-1.5 w-full rounded-xl shadow-xl border p-1.5 animate-in fade-in zoom-in-95 duration-100 bg-white dark:bg-[#121214] border-zinc-200 dark:border-zinc-800 text-zinc-800 dark:text-zinc-100">
             <div className="px-2.5 py-1.5 text-[10px] font-bold uppercase tracking-wider text-zinc-400 dark:text-zinc-500">
               Academic Term
             </div>
@@ -446,12 +393,8 @@ export default function Navbar({
                     }}
                     className={`w-full flex items-center justify-between px-2.5 py-1.5 text-xs font-medium rounded-lg transition-colors cursor-pointer text-left ${
                       isSelected
-                        ? isLight
-                          ? 'bg-emerald-50 text-emerald-900 font-bold'
-                          : 'bg-emerald-950/60 text-emerald-300 font-bold'
-                        : isLight
-                          ? 'text-zinc-700 hover:bg-zinc-100'
-                          : 'text-zinc-300 hover:bg-zinc-800'
+                        ? 'bg-emerald-50 dark:bg-emerald-950/60 text-emerald-900 dark:text-emerald-300 font-bold'
+                        : 'text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800'
                     }`}
                   >
                     <span className="truncate">{s.label}</span>
@@ -462,18 +405,14 @@ export default function Navbar({
             </div>
 
             {isOfficer && (
-              <div className={`pt-1 mt-1 border-t ${isLight ? 'border-zinc-100' : 'border-zinc-800'}`}>
+              <div className="pt-1 mt-1 border-t border-zinc-100 dark:border-zinc-800">
                 <button
                   type="button"
                   onClick={() => {
                     setIsMobileSemesterOpen(false);
                     onOpenNewSemester();
                   }}
-                  className={`w-full flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium rounded-lg transition-colors cursor-pointer text-left ${
-                    isLight
-                      ? 'text-emerald-700 hover:bg-emerald-50'
-                      : 'text-emerald-400 hover:bg-emerald-950/50'
-                  }`}
+                  className="w-full flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium rounded-lg transition-colors cursor-pointer text-left text-emerald-700 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-950/50"
                 >
                   <Plus className="w-3.5 h-3.5" />
                   <span>Start New Semester...</span>

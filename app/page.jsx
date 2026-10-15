@@ -13,6 +13,7 @@ import { isSuperAdminEmail } from '@/lib/config/admin';
 import { toCentavos, fromCentavos, denomCodeToCountKey } from '@/lib/utils/currency';
 import { validateTransactionAmount, validateOutflowBalance } from '@/lib/utils/validation';
 import { useTheme } from '@/components/theme/ThemeProvider';
+import { Card, Badge, Button } from '@/components/ui';
 
 // Dynamically split heavy modals out of the initial critical client bundle
 const NewTransactionModal = dynamic(() => import('@/components/ledger/NewTransactionModal'), {
@@ -1195,33 +1196,21 @@ export default function Dashboard() {
       <main className="flex-1 max-w-7xl w-full mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-6 pb-24 sm:pb-8 space-y-5 sm:space-y-6 no-print">
         
         {/* Modern Minimalist Hero Balance & Action Hub */}
-        <section className={`rounded-xl p-5 sm:p-6 shadow-xs overflow-hidden transition-colors border ${
-          isLight
-            ? 'bg-white border-zinc-200'
-            : 'bg-[#121214] border-zinc-800'
-        }`}>
+        <Card className="p-5 sm:p-6 mb-5 sm:mb-6">
           <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-5 sm:gap-6">
             
             {/* Left: Dynamic Greetings Hero Header */}
             <div>
-              <h1 className={`text-2xl sm:text-3xl font-bold tracking-tight transition-colors ${
-                isLight ? 'text-zinc-950' : 'text-zinc-100'
-              }`}>
+              <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-zinc-950 dark:text-zinc-100">
                 {greeting}, {userProfile?.first_name || userProfile?.full_name?.split(' ')[0] || currentUser?.user_metadata?.full_name?.split(' ')[0] || 'Officer'}
               </h1>
-              <p className={`text-xs mt-1 transition-colors ${
-                isLight ? 'text-zinc-500' : 'text-zinc-400'
-              }`}>
+              <p className="text-xs mt-1 text-zinc-500 dark:text-zinc-400">
                 Welcome to FinLITE. Review cash flow, reconcile vault reserves, and generate reports.
               </p>
             </div>
 
             {/* Right: Quick Action Pods Dock */}
-            <div className={`p-1.5 sm:p-2 rounded-xl flex items-center justify-around sm:justify-start sm:gap-3 shrink-0 transition-colors border ${
-              isLight
-                ? 'bg-zinc-50 border-zinc-200 shadow-2xs'
-                : 'bg-[#18181b] border-zinc-800'
-            }`}>
+            <div className="p-1.5 sm:p-2 rounded-xl flex items-center justify-around sm:justify-start sm:gap-3 shrink-0 transition-colors border bg-zinc-50 dark:bg-zinc-900/60 border-zinc-200 dark:border-zinc-800">
               
               {/* Pod 1: Record Transaction */}
               <button
@@ -1229,16 +1218,10 @@ export default function Dashboard() {
                 onClick={() => setIsNewTxOpen(true)}
                 className="flex flex-col items-center gap-1 p-1 sm:px-2 group cursor-pointer"
               >
-                <div className={`w-9 h-9 sm:w-10 sm:h-10 rounded-lg flex items-center justify-center transition-all shadow-xs ${
-                  isLight
-                    ? 'bg-emerald-600 text-white group-hover:bg-emerald-700 active:scale-95'
-                    : 'bg-emerald-500 text-black group-hover:bg-emerald-400 active:scale-95'
-                }`}>
+                <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-lg flex items-center justify-center transition-all shadow-xs bg-emerald-600 text-white group-hover:bg-emerald-500 active:scale-95">
                   <Plus className="w-5 h-5 stroke-[2.5]" />
                 </div>
-                <span className={`text-[10px] sm:text-[11px] font-medium transition-colors ${
-                  isLight ? 'text-zinc-700 group-hover:text-emerald-700' : 'text-zinc-300 group-hover:text-emerald-400'
-                }`}>
+                <span className="text-[10px] sm:text-[11px] font-medium transition-colors text-zinc-600 dark:text-zinc-300 group-hover:text-emerald-600 dark:group-hover:text-emerald-400">
                   Record
                 </span>
               </button>
@@ -1249,16 +1232,10 @@ export default function Dashboard() {
                 onClick={() => setIsDenomOpen(true)}
                 className="flex flex-col items-center gap-1 p-1 sm:px-2 group cursor-pointer"
               >
-                <div className={`w-9 h-9 sm:w-10 sm:h-10 rounded-lg flex items-center justify-center transition-all border ${
-                  isLight
-                    ? 'bg-white text-zinc-800 border-zinc-200 group-hover:border-emerald-300 group-hover:text-emerald-700 active:scale-95'
-                    : 'bg-zinc-900 text-zinc-300 border-zinc-800 group-hover:border-zinc-700 group-hover:text-emerald-400 active:scale-95'
-                }`}>
+                <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-lg flex items-center justify-center transition-all border bg-white dark:bg-zinc-900 text-zinc-700 dark:text-zinc-300 border-zinc-200 dark:border-zinc-800 group-hover:border-emerald-500/40 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 active:scale-95">
                   <Wallet className="w-4 h-4 stroke-[2]" />
                 </div>
-                <span className={`text-[10px] sm:text-[11px] font-medium transition-colors ${
-                  isLight ? 'text-zinc-700 group-hover:text-emerald-700' : 'text-zinc-300 group-hover:text-emerald-400'
-                }`}>
+                <span className="text-[10px] sm:text-[11px] font-medium transition-colors text-zinc-600 dark:text-zinc-300 group-hover:text-emerald-600 dark:group-hover:text-emerald-400">
                   Cash Box
                 </span>
               </button>
@@ -1269,36 +1246,24 @@ export default function Dashboard() {
                 onClick={handleOpenLiquidationPreview}
                 className="flex flex-col items-center gap-1 p-1 sm:px-2 group cursor-pointer"
               >
-                <div className={`w-9 h-9 sm:w-10 sm:h-10 rounded-lg flex items-center justify-center transition-all border ${
-                  isLight
-                    ? 'bg-white text-zinc-800 border-zinc-200 group-hover:border-emerald-300 group-hover:text-emerald-700 active:scale-95'
-                    : 'bg-zinc-900 text-zinc-300 border-zinc-800 group-hover:border-zinc-700 group-hover:text-emerald-400 active:scale-95'
-                }`}>
+                <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-lg flex items-center justify-center transition-all border bg-white dark:bg-zinc-900 text-zinc-700 dark:text-zinc-300 border-zinc-200 dark:border-zinc-800 group-hover:border-emerald-500/40 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 active:scale-95">
                   <FileText className="w-4 h-4 stroke-[2]" />
                 </div>
-                <span className={`text-[10px] sm:text-[11px] font-medium transition-colors ${
-                  isLight ? 'text-zinc-700 group-hover:text-emerald-700' : 'text-zinc-300 group-hover:text-emerald-400'
-                }`}>
+                <span className="text-[10px] sm:text-[11px] font-medium transition-colors text-zinc-600 dark:text-zinc-300 group-hover:text-emerald-600 dark:group-hover:text-emerald-400">
                   Report
                 </span>
               </button>
 
-              {/* Pod 5: AI Co-Pilot */}
+              {/* Pod 4: AI Co-Pilot */}
               <button
                 type="button"
                 onClick={() => setIsAIOpen(true)}
                 className="flex flex-col items-center gap-1 p-1 sm:px-2 group cursor-pointer"
               >
-                <div className={`w-9 h-9 sm:w-10 sm:h-10 rounded-lg flex items-center justify-center transition-all border ${
-                  isLight
-                    ? 'bg-emerald-50 text-emerald-800 border-emerald-200 group-hover:bg-emerald-100 active:scale-95'
-                    : 'bg-emerald-950/40 text-emerald-300 border-emerald-900/40 group-hover:border-emerald-800/60 active:scale-95'
-                }`}>
+                <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-lg flex items-center justify-center transition-all border bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20 group-hover:bg-emerald-500/20 active:scale-95">
                   <Sparkles className="w-4 h-4 stroke-[2]" />
                 </div>
-                <span className={`text-[10px] sm:text-[11px] font-medium transition-colors ${
-                  isLight ? 'text-zinc-700 group-hover:text-emerald-700' : 'text-zinc-300 group-hover:text-emerald-400'
-                }`}>
+                <span className="text-[10px] sm:text-[11px] font-medium transition-colors text-zinc-600 dark:text-zinc-300 group-hover:text-emerald-600 dark:group-hover:text-emerald-400">
                   Copilot
                 </span>
               </button>
@@ -1306,7 +1271,7 @@ export default function Dashboard() {
             </div>
 
           </div>
-        </section>
+        </Card>
 
         {/* KPI Metric Cards */}
         <ModuleErrorBoundary moduleName="Financial Overview">

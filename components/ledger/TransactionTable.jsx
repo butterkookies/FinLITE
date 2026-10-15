@@ -33,6 +33,7 @@ import {
 import { formatPHP } from '@/lib/utils/currency';
 import { compressReceiptImage } from '@/lib/utils/compression';
 import { useTheme } from '@/components/theme/ThemeProvider';
+import { Button, Badge, Input } from '@/components/ui';
 import TransactionCommentsDrawer from '@/components/ledger/TransactionCommentsDrawer';
 
 export function formatFriendlyDate(dateStr) {
@@ -341,131 +342,101 @@ export default function TransactionTable({
         : 'bg-[#121214] border-zinc-800 shadow-xs'
     }`}>
       {/* Table Header Controls */}
-      <div className={`p-4 sm:p-6 border-b flex flex-col sm:flex-row sm:items-center justify-between gap-4 ${
-        isLight ? 'border-zinc-200 bg-zinc-50/50' : 'border-zinc-800 bg-[#121214]'
-      }`}>
+      <div className="p-4 sm:p-5 border-b flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-zinc-200 dark:border-zinc-800 bg-zinc-50/50 dark:bg-[#121214]">
         <div className="min-w-0">
           <div className="flex items-center gap-2.5 flex-wrap">
-            <h2 className={`text-xl sm:text-2xl font-black tracking-tight ${
-              isLight ? 'text-gray-900' : 'text-white'
-            }`}>
+            <h2 className="text-xl sm:text-2xl font-black tracking-tight text-zinc-950 dark:text-white">
               Financial Ledger &amp; Transactions
             </h2>
             {isDbConnected && (
-              <span className={`inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider shrink-0 border ${
-                isLight
-                  ? 'bg-emerald-100 text-emerald-800 border-emerald-300'
-                  : 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30'
-              }`}>
+              <Badge variant="emerald" size="xs">
                 Live
-              </span>
+              </Badge>
             )}
           </div>
-          <p className={`text-xs font-medium mt-1 truncate ${
-            isLight ? 'text-emerald-900/60' : 'text-white/50'
-          }`}>
+          <p className="text-xs font-medium mt-1 truncate text-zinc-500 dark:text-zinc-400">
             Real-time auditable record of organization inflows and disbursements
           </p>
         </div>
 
         {/* Action Buttons */}
-        <div className="flex flex-wrap sm:flex-nowrap items-center gap-2.5 w-full sm:w-auto shrink-0 justify-end">
+        <div className="flex flex-wrap sm:flex-nowrap items-center gap-2 w-full sm:w-auto shrink-0 justify-end">
           {/* Audit Trail Button (Auditor/Treasurer/President/Adviser/Admin) */}
           {canViewAudit && onOpenAuditTrail && (
-            <button
+            <Button
+              variant="outline"
+              size="sm"
               onClick={onOpenAuditTrail}
-              className={`h-10 flex items-center justify-center gap-2 px-3.5 text-xs font-semibold rounded-xl transition-all shadow-xs whitespace-nowrap cursor-pointer border ${
-                isLight
-                  ? 'text-zinc-700 bg-white hover:bg-zinc-50 border-zinc-200 hover:border-emerald-300'
-                  : 'text-zinc-200 bg-[#0d1e16] hover:bg-[#122b20] active:bg-[#163527] border-[#1a382b] hover:border-emerald-500/40'
-              }`}
+              leftIcon={<ShieldCheck className="w-3.5 h-3.5 text-emerald-500 shrink-0" />}
               title="View immutable financial audit trail and governance log"
             >
-              <ShieldCheck className={`w-3.5 h-3.5 shrink-0 ${isLight ? 'text-emerald-600' : 'text-emerald-400'}`} />
               <span>Audit Trail</span>
-            </button>
+            </Button>
           )}
 
           {/* Review & Export Report Button */}
-          <button
+          <Button
+            variant="secondary"
+            size="sm"
             onClick={onExportReport}
-            className={`h-10 flex items-center justify-center gap-2 px-4 text-xs font-semibold rounded-xl transition-all shadow-xs whitespace-nowrap cursor-pointer border ${
-              isLight
-                ? 'text-emerald-900 bg-emerald-50/80 hover:bg-emerald-100 border-emerald-200 hover:border-emerald-300'
-                : 'text-emerald-200 bg-[#0d1e16] hover:bg-[#122b20] active:bg-[#163527] border-[#1a382b] hover:border-emerald-500/40'
-            }`}
+            leftIcon={<FileText className="w-3.5 h-3.5 text-emerald-500 shrink-0" />}
             title="Preview 1:1 PDM CCS Formal Word Liquidation Report & Live Edit"
           >
-            <FileText className={`w-3.5 h-3.5 shrink-0 ${isLight ? 'text-emerald-600' : 'text-emerald-400'}`} />
             <span>Preview Report</span>
-          </button>
+          </Button>
 
           {/* New Transaction Button (Admin/Treasurer/Auditor) */}
           {(currentRole === 'admin' || currentRole === 'treasurer' || currentRole === 'auditor') && (
-            <button
+            <Button
+              variant="primary"
+              size="sm"
               onClick={onNewTransaction}
-              className={`col-span-2 sm:col-span-1 h-10 flex items-center justify-center gap-2 px-4.5 text-xs font-bold rounded-xl transition-all shadow-md whitespace-nowrap cursor-pointer ${
-                isLight
-                  ? 'text-white bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 shadow-emerald-600/20'
-                  : 'text-black bg-[#10b981] hover:bg-[#059669] active:bg-[#047857] shadow-emerald-500/20'
-              }`}
+              leftIcon={<Plus className="w-3.5 h-3.5 shrink-0 stroke-[2.5]" />}
             >
-              <Plus className="w-4 h-4 shrink-0 stroke-[3]" />
               <span>Record Transaction</span>
-            </button>
+            </Button>
           )}
         </div>
       </div>
 
       {/* Filter & Search Bar */}
-      <div className={`px-4 sm:px-6 py-3 border-b flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5 sm:gap-3 ${
-        isLight ? 'border-zinc-200/90 bg-zinc-50/50' : 'border-[#142e20] bg-transparent'
-      }`}>
+      <div className="px-4 sm:px-6 py-3 border-b flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5 sm:gap-3 border-zinc-200 dark:border-zinc-800 bg-white dark:bg-[#121214]">
         
         {/* Search Input */}
-        <div className="relative w-full sm:w-80 shrink-0">
-          <Search className={`w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none ${
-            isLight ? 'text-zinc-400' : 'text-white/40'
-          }`} />
-          <input
-            type="text"
+        <div className="w-full sm:w-80 shrink-0">
+          <Input
+            size="sm"
+            leftIcon={<Search className="w-3.5 h-3.5" />}
             placeholder="Search items, events, recipients..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className={`w-full h-9 text-xs rounded-xl pl-8.5 pr-3 transition-all select-text shadow-2xs focus:outline-none focus:ring-2 ${
-              isLight
-                ? 'bg-white focus:bg-white border border-zinc-200 text-zinc-900 placeholder:text-zinc-400 focus:border-emerald-500 focus:ring-emerald-500/20'
-                : 'bg-[#06120c] focus:bg-[#091a11] border border-[#163325] focus:border-emerald-500/50 text-white placeholder:text-white/40 focus:ring-emerald-500/30'
-            }`}
           />
         </div>
 
         {/* Filter Tabs */}
-        <div className={`flex overflow-x-auto scrollbar-none items-center gap-1 sm:gap-1.5 p-1 rounded-xl sm:rounded-full border w-full sm:w-auto shrink-0 ${
-          isLight ? 'bg-zinc-100/80 border-zinc-200' : 'bg-[#06120c] border-[#163325]'
-        }`}>
+        <div className="flex overflow-x-auto scrollbar-none items-center gap-1 p-1 rounded-lg border w-full sm:w-auto shrink-0 bg-zinc-100 dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800">
           {[
             { id: 'ALL', label: 'All Records' },
             { id: 'INFLOW', label: 'Inflows' },
             { id: 'OUTFLOW', label: 'Outflows' },
             { id: 'REIMBURSEMENT', label: 'Pending Abono' },
-          ].map((tab) => (
-            <button
-              key={tab.id}
-              onClick={() => setFilterType(tab.id)}
-              className={`h-7 sm:h-8 px-3 sm:px-4 text-xs font-semibold whitespace-nowrap transition-all rounded-lg sm:rounded-full text-center flex items-center justify-center cursor-pointer shrink-0 ${
-                filterType === tab.id
-                  ? isLight
+          ].map((tab) => {
+            const isActive = filterType === tab.id;
+            return (
+              <button
+                key={tab.id}
+                type="button"
+                onClick={() => setFilterType(tab.id)}
+                className={`h-7 px-3 text-xs font-semibold whitespace-nowrap transition-all rounded-md text-center flex items-center justify-center cursor-pointer shrink-0 ${
+                  isActive
                     ? 'bg-emerald-600 text-white shadow-xs'
-                    : 'bg-[#10b981] text-black shadow-md'
-                  : isLight
-                    ? 'text-zinc-600 hover:text-zinc-900 hover:bg-white/80'
-                    : 'text-white/60 hover:text-white hover:bg-white/[0.05]'
-              }`}
-            >
-              {tab.label}
-            </button>
-          ))}
+                    : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-200/60 dark:hover:bg-zinc-800'
+                }`}
+              >
+                {tab.label}
+              </button>
+            );
+          })}
         </div>
 
       </div>
@@ -474,11 +445,7 @@ export default function TransactionTable({
       <div className="hidden md:block overflow-x-auto scrollbar-thin">
         <table className="w-full min-w-[980px] text-left border-collapse table-fixed">
           <thead>
-            <tr className={`border-b text-[10px] sm:text-[11px] font-bold uppercase tracking-wider ${
-              isLight
-                ? 'border-zinc-200/80 text-zinc-600 bg-zinc-50/80'
-                : 'border-[#142e20] text-white/50 bg-[#071912]/50'
-            }`}>
+            <tr className="border-b text-[10px] sm:text-[11px] font-bold uppercase tracking-wider border-zinc-200 dark:border-zinc-800 text-zinc-500 dark:text-zinc-400 bg-zinc-50/80 dark:bg-zinc-900/60">
               <th className="py-3.5 pl-6 pr-3 w-[24%] text-left whitespace-nowrap">
                 <button
                   type="button"
@@ -1287,11 +1254,7 @@ export default function TransactionTable({
       })()}
 
       {/* Desktop Pagination & Ledger Summary Footer */}
-      <div className={`hidden md:flex px-6 py-3.5 border-t items-center justify-between gap-3 text-xs ${
-        isLight
-          ? 'border-zinc-200/80 bg-zinc-50/60 text-zinc-600'
-          : 'border-[#142e20] bg-[#071912]/40 text-white/60'
-      }`}>
+      <div className="hidden md:flex px-6 py-3.5 border-t items-center justify-between gap-3 text-xs border-zinc-200 dark:border-zinc-800 bg-zinc-50/60 dark:bg-[#121214] text-zinc-600 dark:text-zinc-400">
         {/* Left: Record Count Summary */}
         <div className="flex items-center gap-2">
           <span className="font-medium">
@@ -1299,7 +1262,7 @@ export default function TransactionTable({
               'No records to display'
             ) : (
               <>
-                Showing <span className={`font-bold tabular-nums ${isLight ? 'text-zinc-900' : 'text-white'}`}>{startIndex}–{endIndex}</span> of <span className={`font-bold tabular-nums ${isLight ? 'text-zinc-900' : 'text-white'}`}>{totalRecords}</span> {totalRecords === 1 ? 'transaction' : 'transactions'}
+                Showing <span className="font-bold tabular-nums text-zinc-950 dark:text-white">{startIndex}–{endIndex}</span> of <span className="font-bold tabular-nums text-zinc-950 dark:text-white">{totalRecords}</span> {totalRecords === 1 ? 'transaction' : 'transactions'}
                 {totalRecords !== transactions.length && (
                   <span className="text-[11px] ml-1.5 opacity-70">
                     (filtered from {transactions.length} total)
@@ -1327,12 +1290,8 @@ export default function TransactionTable({
                   }}
                   className={`px-2 py-1 text-[11px] font-semibold rounded-md transition-all cursor-pointer select-none ${
                     active
-                      ? isLight
-                        ? 'bg-emerald-600 text-white shadow-2xs'
-                        : 'bg-emerald-500/25 text-emerald-300 border border-emerald-500/40 shadow-2xs'
-                      : isLight
-                        ? 'hover:bg-zinc-200/70 text-zinc-600'
-                        : 'hover:bg-[#122e21] text-white/60 hover:text-white'
+                      ? 'bg-emerald-600 text-white shadow-2xs'
+                      : 'hover:bg-zinc-200/60 dark:hover:bg-zinc-800 text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100'
                   }`}
                 >
                   {size === 'all' ? 'All' : size}
@@ -1343,36 +1302,26 @@ export default function TransactionTable({
 
           {/* Page Navigation Buttons */}
           {!isAll && totalPages > 1 && (
-            <div className={`flex items-center gap-1.5 pl-3 border-l ${
-              isLight ? 'border-zinc-200' : 'border-[#142e20]'
-            }`}>
+            <div className="flex items-center gap-1.5 pl-3 border-l border-zinc-200 dark:border-zinc-800">
               <button
                 type="button"
                 disabled={safePage <= 1}
                 onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-                className={`p-1.5 rounded-lg border transition-all cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed ${
-                  isLight
-                    ? 'border-zinc-200 hover:bg-zinc-100 text-zinc-700'
-                    : 'border-[#1b3d2b] hover:bg-[#122e21] text-white/80'
-                }`}
+                className="p-1.5 rounded-lg border transition-all cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-700 dark:text-zinc-300"
                 title="Previous page"
               >
                 <ChevronLeft className="w-4 h-4" />
               </button>
 
               <span className="text-xs font-semibold px-2 select-none tabular-nums">
-                Page <span className={isLight ? 'text-zinc-900 font-bold' : 'text-white font-bold'}>{safePage}</span> of {totalPages}
+                Page <span className="text-zinc-950 dark:text-white font-bold">{safePage}</span> of {totalPages}
               </span>
 
               <button
                 type="button"
                 disabled={safePage >= totalPages}
                 onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-                className={`p-1.5 rounded-lg border transition-all cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed ${
-                  isLight
-                    ? 'border-zinc-200 hover:bg-zinc-100 text-zinc-700'
-                    : 'border-[#1b3d2b] hover:bg-[#122e21] text-white/80'
-                }`}
+                className="p-1.5 rounded-lg border transition-all cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-700 dark:text-zinc-300"
                 title="Next page"
               >
                 <ChevronRight className="w-4 h-4" />
@@ -1383,11 +1332,7 @@ export default function TransactionTable({
       </div>
 
       {/* Mobile Ledger Summary Footer */}
-      <div className={`md:hidden px-4 py-3 border-t flex items-center justify-between text-xs ${
-        isLight
-          ? 'border-zinc-200/80 bg-zinc-50/60 text-zinc-600'
-          : 'border-[#142e20] bg-[#071912]/40 text-white/60'
-      }`}>
+      <div className="md:hidden px-4 py-3 border-t flex items-center justify-between text-xs border-zinc-200 dark:border-zinc-800 bg-zinc-50/60 dark:bg-[#121214] text-zinc-600 dark:text-zinc-400">
         <span className="font-medium">
           Showing <span className={`font-bold tabular-nums ${isLight ? 'text-zinc-900' : 'text-white'}`}>{filtered.length}</span> {filtered.length === 1 ? 'transaction' : 'transactions'}
         </span>
