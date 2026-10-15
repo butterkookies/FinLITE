@@ -12,9 +12,9 @@ import {
   FileText,
   User
 } from 'lucide-react';
-import { useTheme } from '@/components/theme/ThemeProvider';
 import { formatPHP } from '@/lib/utils/currency';
 import { formatFriendlyDate } from '@/components/ledger/TransactionTable';
+import { Button, Badge } from '@/components/ui';
 
 export default function TransactionCommentsDrawer({
   isOpen,
@@ -22,7 +22,6 @@ export default function TransactionCommentsDrawer({
   transaction,
   onCommentAdded,
 }) {
-  const { isLight } = useTheme();
   const [comments, setComments] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [newComment, setNewComment] = useState('');
@@ -114,32 +113,26 @@ export default function TransactionCommentsDrawer({
 
   if (!isOpen || !transaction) return null;
 
-  const roleBadgeStyles = {
-    admin: isLight ? 'bg-rose-100 text-rose-800 border-rose-200' : 'bg-rose-500/15 text-rose-300 border-rose-500/20',
-    treasurer: isLight ? 'bg-emerald-100 text-emerald-800 border-emerald-200' : 'bg-emerald-500/15 text-emerald-300 border-emerald-500/20',
-    auditor: isLight ? 'bg-amber-100 text-amber-800 border-amber-200' : 'bg-amber-500/15 text-amber-300 border-amber-500/20',
-    president: isLight ? 'bg-blue-100 text-blue-800 border-blue-200' : 'bg-blue-500/15 text-blue-300 border-blue-500/20',
-    adviser: isLight ? 'bg-purple-100 text-purple-800 border-purple-200' : 'bg-purple-500/15 text-purple-300 border-purple-500/20',
+  const getRoleBadgeVariant = (role) => {
+    switch (role?.toLowerCase()) {
+      case 'admin': return 'rose';
+      case 'treasurer': return 'emerald';
+      case 'auditor': return 'amber';
+      case 'president': return 'sky';
+      default: return 'neutral';
+    }
   };
 
   return (
     <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex justify-end animate-in fade-in duration-150">
       <div 
-        className={`w-full max-w-md h-full flex flex-col shadow-2xl border-l transition-all animate-in slide-in-from-right duration-200 ${
-          isLight
-            ? 'bg-white border-black/[0.08] text-gray-900'
-            : 'bg-[#081b12] border-white/[0.08] text-white'
-        }`}
+        className="w-full max-w-md h-full flex flex-col shadow-2xl border-l transition-all animate-in slide-in-from-right duration-200 bg-white dark:bg-[#121214] border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-zinc-100"
       >
         {/* Drawer Header */}
-        <div className={`p-4 sm:p-5 border-b flex items-start justify-between gap-3 shrink-0 ${
-          isLight ? 'border-black/[0.08] bg-gray-50/70' : 'border-white/[0.08] bg-[#05140d]'
-        }`}>
+        <div className="p-4 sm:p-5 border-b flex items-start justify-between gap-3 shrink-0 border-zinc-200 dark:border-zinc-800 bg-zinc-50/70 dark:bg-zinc-900/40">
           <div className="min-w-0">
             <div className="flex items-center gap-2">
-              <div className={`w-7 h-7 rounded-lg flex items-center justify-center shrink-0 ${
-                isLight ? 'bg-emerald-100 text-emerald-800' : 'bg-emerald-500/20 text-emerald-300'
-              }`}>
+              <div className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
                 <MessageSquare className="w-4 h-4" />
               </div>
               <h3 className="text-sm sm:text-base font-bold truncate">Audit Remarks &amp; Notes</h3>
@@ -147,8 +140,8 @@ export default function TransactionCommentsDrawer({
             
             <div className="mt-2 text-xs">
               <span className="font-semibold block truncate">{transaction.title}</span>
-              <div className="flex items-center gap-2 mt-0.5 text-[11px] opacity-70">
-                <span className="font-bold tabular-nums">
+              <div className="flex items-center gap-2 mt-0.5 text-[11px] text-zinc-500 dark:text-zinc-400">
+                <span className={`font-bold tabular-nums ${transaction.type === 'INFLOW' ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'}`}>
                   {transaction.type === 'INFLOW' ? '+' : '-'}{formatPHP(transaction.amount)}
                 </span>
                 <span>•</span>
@@ -159,38 +152,34 @@ export default function TransactionCommentsDrawer({
             </div>
           </div>
 
-          <button
+          <Button
+            variant="ghost"
+            size="icon"
             onClick={onClose}
-            className={`p-1.5 rounded-lg transition-colors cursor-pointer shrink-0 ${
-              isLight ? 'text-gray-400 hover:text-gray-700 hover:bg-gray-200/60' : 'text-white/40 hover:text-white hover:bg-white/[0.06]'
-            }`}
+            className="text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 shrink-0"
             title="Close Drawer"
           >
             <X className="w-4 h-4" />
-          </button>
+          </Button>
         </div>
 
         {/* Remarks Thread Stream */}
-        <div className="flex-1 overflow-y-auto p-4 sm:p-5 space-y-3.5">
+        <div className="flex-1 overflow-y-auto p-4 sm:p-5 space-y-3.5 bg-white dark:bg-[#09090B]">
           {isLoading ? (
-            <div className="h-48 flex flex-col items-center justify-center gap-2 text-xs opacity-60">
+            <div className="h-48 flex flex-col items-center justify-center gap-2 text-xs text-zinc-500 dark:text-zinc-400">
               <Loader2 className="w-5 h-5 animate-spin text-emerald-500" />
               <span>Loading remarks thread...</span>
             </div>
           ) : error ? (
-            <div className={`p-4 rounded-xl border flex items-center gap-2.5 text-xs ${
-              isLight ? 'bg-rose-50 border-rose-200 text-rose-700' : 'bg-rose-500/10 border-rose-500/20 text-rose-300'
-            }`}>
+            <div className="p-4 rounded-xl border flex items-center gap-2.5 text-xs bg-rose-500/10 border-rose-500/20 text-rose-700 dark:text-rose-300">
               <AlertCircle className="w-4 h-4 shrink-0" />
               <span>{error}</span>
             </div>
           ) : comments.length === 0 ? (
-            <div className={`p-8 text-center rounded-2xl border ${
-              isLight ? 'bg-gray-50 border-black/[0.06]' : 'bg-[#05140d] border-white/[0.06]'
-            }`}>
-              <MessageSquare className={`w-8 h-8 mx-auto mb-2.5 ${isLight ? 'text-gray-400' : 'text-white/30'}`} />
-              <h4 className="text-xs font-bold mb-1">No remarks recorded yet</h4>
-              <p className={`text-[11px] max-w-xs mx-auto leading-relaxed ${isLight ? 'text-gray-500' : 'text-white/50'}`}>
+            <div className="p-8 text-center rounded-2xl border bg-zinc-50 dark:bg-zinc-900/30 border-zinc-200 dark:border-zinc-800">
+              <MessageSquare className="w-8 h-8 mx-auto mb-2.5 text-zinc-400 dark:text-zinc-600" />
+              <h4 className="text-xs font-bold mb-1 text-zinc-900 dark:text-zinc-100">No remarks recorded yet</h4>
+              <p className="text-[11px] max-w-xs mx-auto leading-relaxed text-zinc-500 dark:text-zinc-400">
                 Auditors, treasurers, and advisers can post instructions, verification notes, or queries here without altering ledger totals.
               </p>
             </div>
@@ -198,11 +187,7 @@ export default function TransactionCommentsDrawer({
             comments.map((c) => (
               <div 
                 key={c.id}
-                className={`p-3.5 rounded-xl border transition-all ${
-                  isLight 
-                    ? 'bg-white border-black/[0.08] shadow-2xs' 
-                    : 'bg-[#05140d] border-white/[0.08]'
-                }`}
+                className="p-3.5 rounded-xl border transition-all bg-white dark:bg-[#121214] border-zinc-200 dark:border-zinc-800 shadow-2xs"
               >
                 {/* Author Metadata Header */}
                 <div className="flex items-center justify-between gap-2 mb-2">
@@ -211,30 +196,26 @@ export default function TransactionCommentsDrawer({
                       <img 
                         src={c.author_avatar} 
                         alt={c.author_name} 
-                        className="w-5 h-5 rounded-full object-cover shrink-0 border border-black/10" 
+                        className="w-5 h-5 rounded-full object-cover shrink-0 border border-zinc-200 dark:border-zinc-700" 
                       />
                     ) : (
-                      <div className={`w-5 h-5 rounded-full flex items-center justify-center text-[9px] font-bold shrink-0 ${
-                        isLight ? 'bg-emerald-100 text-emerald-800' : 'bg-emerald-950 text-emerald-300'
-                      }`}>
+                      <div className="w-5 h-5 rounded-full flex items-center justify-center text-[9px] font-bold shrink-0 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
                         {(c.author_name || 'U').charAt(0).toUpperCase()}
                       </div>
                     )}
-                    <span className="text-xs font-bold truncate">{c.author_name}</span>
-                    <span className={`text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded border leading-none shrink-0 ${
-                      roleBadgeStyles[c.author_role?.toLowerCase()] || (isLight ? 'bg-gray-100 text-gray-700 border-gray-200' : 'bg-white/10 text-white/70 border-white/10')
-                    }`}>
+                    <span className="text-xs font-bold truncate text-zinc-900 dark:text-zinc-100">{c.author_name}</span>
+                    <Badge variant={getRoleBadgeVariant(c.author_role)} size="xs">
                       {c.author_role || 'Officer'}
-                    </span>
+                    </Badge>
                   </div>
 
-                  <span className={`text-[10px] whitespace-nowrap tabular-nums ${isLight ? 'text-gray-400' : 'text-white/40'}`}>
+                  <span className="text-[10px] whitespace-nowrap tabular-nums text-zinc-400 dark:text-zinc-500">
                     {c.created_at ? new Date(c.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', month: 'short', day: 'numeric' }) : ''}
                   </span>
                 </div>
 
                 {/* Remark Text */}
-                <p className={`text-xs whitespace-pre-wrap leading-relaxed select-text ${isLight ? 'text-gray-800' : 'text-white/90'}`}>
+                <p className="text-xs whitespace-pre-wrap leading-relaxed select-text text-zinc-800 dark:text-zinc-200">
                   {c.comment}
                 </p>
               </div>
@@ -244,9 +225,7 @@ export default function TransactionCommentsDrawer({
         </div>
 
         {/* Minimal Remark Input Box */}
-        <div className={`p-3 sm:p-4 border-t shrink-0 ${
-          isLight ? 'border-black/[0.08] bg-gray-50/80' : 'border-white/[0.08] bg-[#05140d]'
-        }`}>
+        <div className="p-3 sm:p-4 border-t shrink-0 border-zinc-200 dark:border-zinc-800 bg-zinc-50/80 dark:bg-zinc-900/40">
           <form onSubmit={handlePostComment} className="flex items-end gap-2">
             <div className="flex-1 relative">
               <textarea
@@ -256,18 +235,16 @@ export default function TransactionCommentsDrawer({
                 placeholder="Write an auditor remark or instruction... (Enter to post)"
                 rows={2}
                 disabled={isSubmitting}
-                className={`w-full text-xs rounded-xl p-2.5 transition-all resize-none border focus:outline-none focus:ring-1 select-text ${
-                  isLight
-                    ? 'bg-white border-black/[0.08] text-gray-900 placeholder:text-gray-400 focus:border-emerald-600 focus:ring-emerald-500/20'
-                    : 'bg-[#092216] border-white/[0.08] text-white placeholder:text-white/35 focus:border-emerald-400 focus:ring-emerald-500/30'
-                }`}
+                className="w-full text-xs rounded-xl p-2.5 transition-all resize-none border focus:outline-none focus:ring-1 select-text bg-white dark:bg-[#121214] border-zinc-200 dark:border-zinc-700 text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 dark:placeholder:text-zinc-500 focus:border-emerald-500 focus:ring-emerald-500/20"
               />
             </div>
 
-            <button
+            <Button
               type="submit"
+              variant="primary"
+              size="sm"
               disabled={isSubmitting || !newComment.trim()}
-              className="h-10 px-3.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 active:bg-emerald-700 text-white text-xs font-bold transition-all disabled:opacity-40 cursor-pointer flex items-center justify-center gap-1.5 shrink-0 shadow-xs"
+              className="h-10 px-3.5 shrink-0"
               title="Post Remark (Enter)"
             >
               {isSubmitting ? (
@@ -276,9 +253,9 @@ export default function TransactionCommentsDrawer({
                 <Send className="w-3.5 h-3.5" />
               )}
               <span className="hidden sm:inline">Post</span>
-            </button>
+            </Button>
           </form>
-          <p className={`text-[10px] mt-1.5 text-center ${isLight ? 'text-gray-400' : 'text-white/35'}`}>
+          <p className="text-[10px] mt-1.5 text-center text-zinc-400 dark:text-zinc-500">
             Audit remarks are timestamped and preserved for institutional accountability.
           </p>
         </div>
