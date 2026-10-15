@@ -1,6 +1,7 @@
 'use client';
 import { useState, useRef, useEffect, useCallback } from 'react';
-import { RotateCw, RotateCcw, Crop, Check, X, RefreshCw } from 'lucide-react';
+import { RotateCw, RotateCcw, Crop, Check, RefreshCw } from 'lucide-react';
+import { Modal, Button } from '@/components/ui';
 
 /**
  * ReceiptCropModal
@@ -209,35 +210,29 @@ export default function ReceiptCropModal({
     }
   };
 
-  if (!isOpen) return null;
-
   const isVertical = rotation === 90 || rotation === 270;
 
   return (
-    <div className="fixed inset-0 z-60 bg-black/80 backdrop-blur-sm flex items-center justify-center p-3 sm:p-6 select-none animate-in fade-in duration-150">
-      <div className="bg-gray-900 border border-gray-700 text-white rounded-3xl max-w-2xl w-full flex flex-col max-h-[92vh] shadow-2xl overflow-hidden">
-        
-        {/* Header */}
-        <div className="px-5 py-3.5 border-b border-gray-800 flex items-center justify-between shrink-0">
-          <div className="flex items-center gap-2">
-            <div className="w-7 h-7 rounded-lg bg-emerald-600/30 text-emerald-400 border border-emerald-500/40 flex items-center justify-center">
-              <Crop className="w-4 h-4" />
-            </div>
-            <div>
-              <h3 className="text-sm font-bold text-gray-100">Adjust &amp; Rotate Receipt</h3>
-              <p className="text-[11px] text-gray-400">Straighten orientation and crop borders</p>
-            </div>
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      title={
+        <div className="flex items-center gap-2">
+          <div className="w-7 h-7 rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 flex items-center justify-center">
+            <Crop className="w-4 h-4" />
           </div>
-          <button
-            onClick={onClose}
-            className="p-1.5 rounded-full text-gray-400 hover:text-white hover:bg-gray-800 transition-colors"
-          >
-            <X className="w-4 h-4" />
-          </button>
+          <div>
+            <h3 className="text-sm font-bold text-zinc-900 dark:text-zinc-100">Adjust &amp; Rotate Receipt</h3>
+            <p className="text-[11px] text-zinc-500 dark:text-zinc-400">Straighten orientation and crop borders</p>
+          </div>
         </div>
-
+      }
+      maxWidth="2xl"
+      className="p-0 overflow-hidden"
+    >
+      <div className="flex flex-col select-none">
         {/* Viewport Canvas / Image Preview Area */}
-        <div className="flex-1 bg-black/40 flex items-center justify-center p-4 min-h-[300px] overflow-hidden relative">
+        <div className="bg-zinc-950 flex items-center justify-center p-4 min-h-[300px] overflow-hidden relative">
           {imageSrc && (
             <div
               ref={containerRef}
@@ -297,8 +292,8 @@ export default function ReceiptCropModal({
                     <div className="border-r border-b border-white/60" />
                     <div className="border-r border-b border-white/60" />
                     <div className="border-b border-white/60" />
-                    <div className="border-r border-white/60" />
-                    <div className="border-r border-white/60" />
+                    <div className="border-r border-b border-white/60" />
+                    <div className="border-r border-b border-white/60" />
                     <div />
                   </div>
 
@@ -330,58 +325,63 @@ export default function ReceiptCropModal({
         </div>
 
         {/* Toolbar Controls */}
-        <div className="px-5 py-3.5 pb-safe sm:py-3.5 bg-gray-900 border-t border-gray-800 flex flex-wrap items-center justify-between gap-3 shrink-0">
+        <div className="px-5 py-3.5 pb-safe sm:py-3.5 bg-zinc-50 dark:bg-zinc-900/60 border-t border-zinc-200 dark:border-zinc-800 flex flex-wrap items-center justify-between gap-3 shrink-0">
           <div className="flex items-center gap-2">
-            <button
+            <Button
               type="button"
+              variant="outline"
+              size="sm"
               onClick={() => handleRotate('ccw')}
-              className="flex items-center gap-1.5 px-3 py-1.5 bg-gray-800 hover:bg-gray-700 text-gray-200 text-xs font-semibold rounded-xl border border-gray-700 transition-colors"
+              leftIcon={<RotateCcw className="w-3.5 h-3.5" />}
               title="Rotate 90 degrees counter-clockwise"
             >
-              <RotateCcw className="w-3.5 h-3.5" />
-              <span>Rotate CCW</span>
-            </button>
-            <button
+              Rotate CCW
+            </Button>
+            <Button
               type="button"
+              variant="outline"
+              size="sm"
               onClick={() => handleRotate('cw')}
-              className="flex items-center gap-1.5 px-3 py-1.5 bg-gray-800 hover:bg-gray-700 text-gray-200 text-xs font-semibold rounded-xl border border-gray-700 transition-colors"
+              leftIcon={<RotateCw className="w-3.5 h-3.5" />}
               title="Rotate 90 degrees clockwise"
             >
-              <RotateCw className="w-3.5 h-3.5" />
-              <span>Rotate CW</span>
-            </button>
-            <button
+              Rotate CW
+            </Button>
+            <Button
               type="button"
+              variant="ghost"
+              size="sm"
               onClick={handleReset}
-              className="flex items-center gap-1 px-2.5 py-1.5 bg-gray-800/60 hover:bg-gray-800 text-gray-400 hover:text-gray-200 text-xs rounded-xl border border-gray-700/60 transition-colors"
+              leftIcon={<RefreshCw className="w-3.5 h-3.5" />}
               title="Reset rotation and crop"
             >
-              <RefreshCw className="w-3.5 h-3.5" />
-              <span>Reset</span>
-            </button>
+              Reset
+            </Button>
           </div>
 
           <div className="flex items-center gap-2 ml-auto">
-            <button
+            <Button
               type="button"
+              variant="ghost"
+              size="sm"
               onClick={onClose}
-              className="px-4 py-1.5 text-xs font-medium text-gray-400 hover:text-white transition-colors"
             >
               Cancel
-            </button>
-            <button
+            </Button>
+            <Button
               type="button"
+              variant="primary"
+              size="sm"
               onClick={handleApply}
+              loading={isProcessing}
               disabled={isProcessing || !imageLoaded}
-              className="flex items-center gap-1.5 px-4 py-1.5 bg-emerald-600 hover:bg-emerald-500 active:bg-emerald-700 text-white text-xs font-bold rounded-xl shadow-sm transition-all disabled:opacity-50"
+              leftIcon={<Check className="w-4 h-4" />}
             >
-              <Check className="w-4 h-4" />
-              <span>{isProcessing ? 'Processing...' : 'Apply & Save'}</span>
-            </button>
+              Apply &amp; Save
+            </Button>
           </div>
         </div>
-
       </div>
-    </div>
+    </Modal>
   );
 }

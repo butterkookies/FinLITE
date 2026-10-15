@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import { Download, Printer, X, FileText, Edit3 } from 'lucide-react';
 import './DocumentPreview.css';
+import { Button, Badge } from '@/components/ui';
 
 // Header Banner replicating PDM CCS & LITE official template banner with authentic graphic
 function OfficialHeaderBanner() {
@@ -458,7 +459,7 @@ export default function DocumentPreviewModal({ isOpen, onClose, documentData }) 
     <div className="fixed inset-0 z-50 flex flex-col document-preview-overlay overflow-y-auto">
       
       {/* Top Floating Action & Navigation Bar */}
-      <header className="sticky top-0 z-50 bg-[#1e232a]/95 backdrop-blur border-b border-gray-700 text-white px-3 sm:px-6 py-2.5 sm:py-3 flex flex-wrap items-center justify-between gap-2.5 sm:gap-3 no-print shadow-xl">
+      <header className="sticky top-0 z-50 bg-zinc-950/95 backdrop-blur border-b border-zinc-800 text-zinc-100 px-3 sm:px-6 py-2.5 sm:py-3 flex flex-wrap items-center justify-between gap-2.5 sm:gap-3 no-print shadow-xl">
         <div className="flex items-center gap-2 sm:gap-3 min-w-0">
           <div className="w-8 h-8 rounded-lg bg-emerald-600 flex items-center justify-center font-bold text-white shadow-sm shrink-0">
             <FileText className="w-4 h-4" />
@@ -468,11 +469,11 @@ export default function DocumentPreviewModal({ isOpen, onClose, documentData }) 
               <span className="text-xs sm:text-sm font-bold tracking-tight truncate">
                 {isProposal ? 'Activity Proposal Preview' : '1:1 Official PDM LITE Preview'}
               </span>
-              <span className="hidden xs:inline-block px-1.5 py-0.5 rounded text-[9px] sm:text-[10px] font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 shrink-0">
+              <Badge variant="emerald" size="xs" className="hidden xs:inline-flex">
                 Exact Replicant
-              </span>
+              </Badge>
             </div>
-            <p className="text-[10px] sm:text-[11px] text-gray-400 flex items-center gap-1 truncate">
+            <p className="text-[10px] sm:text-[11px] text-zinc-400 flex items-center gap-1 truncate">
               <Edit3 className="w-3 h-3 text-amber-400 shrink-0" />
               <span className="truncate">In-place editing active: adjust values before export.</span>
             </p>
@@ -483,8 +484,8 @@ export default function DocumentPreviewModal({ isOpen, onClose, documentData }) 
         <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 ml-auto shrink-0">
           {/* Export Scope Radio Buttons */}
           {!isProposal && (
-            <div className="flex items-center gap-2 bg-gray-800 border border-gray-700 rounded-lg px-2.5 py-1 text-xs text-gray-300 shadow-sm">
-              <span className="text-gray-400 font-medium hidden md:inline">Scope:</span>
+            <div className="flex items-center gap-2 bg-zinc-900 border border-zinc-800 rounded-lg px-2.5 py-1 text-xs text-zinc-300 shadow-sm">
+              <span className="text-zinc-400 font-medium hidden md:inline">Scope:</span>
               <label className="flex items-center gap-1 cursor-pointer hover:text-white" title="Financial Report Only">
                 <input
                   type="radio"
@@ -523,77 +524,81 @@ export default function DocumentPreviewModal({ isOpen, onClose, documentData }) 
 
           {/* CC Routing Toggle */}
           {!isProposal && (
-            <button
+            <Button
               type="button"
+              variant={includeCc ? 'primary' : 'outline'}
+              size="sm"
               onClick={() => setIncludeCc(!includeCc)}
-              className={`flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-semibold rounded-lg border transition-all ${
-                includeCc
-                  ? 'bg-emerald-600/30 text-emerald-300 border-emerald-500/50 shadow-sm'
-                  : 'bg-gray-800 text-gray-400 border-gray-700 hover:text-gray-200'
-              }`}
+              className={includeCc ? '' : 'bg-zinc-900 text-zinc-300 border-zinc-800 hover:bg-zinc-800'}
               title="Toggle CC Routing block on Transmittal Letter"
+              leftIcon={<span className={`w-2 h-2 rounded-full ${includeCc ? 'bg-white' : 'bg-zinc-500'}`} />}
             >
-              <span className={`w-2 h-2 rounded-full ${includeCc ? 'bg-emerald-400' : 'bg-gray-500'}`} />
-              <span>CC: {includeCc ? 'Included' : 'Excluded'}</span>
-            </button>
+              CC: {includeCc ? 'Included' : 'Excluded'}
+            </Button>
           )}
 
           {/* Page Numbering Format Tool */}
-          <div className="flex items-center gap-1 bg-gray-800 border border-gray-700 rounded-lg px-2 py-1 text-xs text-gray-300 shadow-sm">
-            <span className="text-gray-400 font-medium hidden xs:inline">Footer:</span>
+          <div className="flex items-center gap-1 bg-zinc-900 border border-zinc-800 rounded-lg px-2 py-1 text-xs text-zinc-300 shadow-sm">
+            <span className="text-zinc-400 font-medium hidden xs:inline">Footer:</span>
             <select
               value={pageNumberStyle}
               onChange={(e) => setPageNumberStyle(e.target.value)}
               className="bg-transparent text-white text-xs font-semibold border-none outline-none cursor-pointer pr-1"
               title="Page numbering style in footer"
             >
-              <option value="page_x_of_y" className="bg-gray-800 text-white">Page X of Y</option>
-              <option value="page_x_of_y_no_cover" className="bg-gray-800 text-white">Page X of Y (Start P2)</option>
-              <option value="simple" className="bg-gray-800 text-white">Simple (1, 2...)</option>
-              <option value="none" className="bg-gray-800 text-white">No Page Numbers</option>
+              <option value="page_x_of_y" className="bg-zinc-900 text-white">Page X of Y</option>
+              <option value="page_x_of_y_no_cover" className="bg-zinc-900 text-white">Page X of Y (Start P2)</option>
+              <option value="simple" className="bg-zinc-900 text-white">Simple (1, 2...)</option>
+              <option value="none" className="bg-zinc-900 text-white">No Page Numbers</option>
             </select>
           </div>
 
-          <button
+          <Button
+            variant="outline"
+            size="sm"
             onClick={() => window.print()}
-            className="hidden xs:flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 text-xs font-medium text-gray-300 bg-gray-800 hover:bg-gray-700 hover:text-white rounded-lg transition-colors border border-gray-700"
+            className="hidden xs:flex bg-zinc-900 text-zinc-300 border-zinc-800 hover:bg-zinc-800"
+            leftIcon={<Printer className="w-3.5 h-3.5" />}
             title="Print or Save as PDF"
           >
-            <Printer className="w-3.5 h-3.5" />
             <span className="hidden sm:inline">Print / PDF</span>
-          </button>
+          </Button>
 
-          <button
+          <Button
+            variant="primary"
+            size="sm"
             onClick={handleExportDocx}
-            disabled={isExporting}
-            className="flex items-center gap-1.5 px-3 sm:px-4 py-1.5 text-xs font-semibold text-white bg-emerald-600 hover:bg-emerald-500 rounded-lg shadow-sm transition-all disabled:opacity-50"
+            loading={isExporting}
+            leftIcon={<Download className="w-3.5 h-3.5" />}
           >
-            <Download className="w-3.5 h-3.5 shrink-0" />
-            <span>{isExporting ? 'Exporting...' : 'Export .docx'}</span>
-          </button>
+            {isExporting ? 'Exporting...' : 'Export .docx'}
+          </Button>
 
-          <button
+          <Button
+            variant="ghost"
+            size="icon"
             onClick={onClose}
-            className="w-8 h-8 rounded-lg flex items-center justify-center text-gray-400 hover:text-white hover:bg-gray-800 transition-colors ml-0.5 sm:ml-1"
+            className="text-zinc-400 hover:text-white hover:bg-zinc-800 ml-0.5 sm:ml-1"
+            title="Close Preview"
           >
-            <X className="w-5 h-5" />
-          </button>
+            <X className="w-4 h-4" />
+          </Button>
         </div>
 
         {/* Signatory Inclusion Matrix Strip */}
         {!isProposal && (
-          <div className="w-full flex flex-wrap items-center justify-between gap-2 px-3 py-1.5 bg-gray-900/90 rounded-xl border border-gray-800 text-[11px] text-gray-300 order-last">
-            <span className="font-semibold text-gray-400 shrink-0">Signatories:</span>
+          <div className="w-full flex flex-wrap items-center justify-between gap-2 px-3 py-1.5 bg-zinc-900/90 rounded-xl border border-zinc-800 text-[11px] text-zinc-300 order-last">
+            <span className="font-semibold text-zinc-400 shrink-0">Signatories:</span>
             <div className="flex flex-wrap items-center gap-3">
               {allSignatoryDefs.map((sig) => (
-                <label key={sig.key} className="flex items-center gap-1.5 cursor-pointer text-gray-300 hover:text-white select-none">
+                <label key={sig.key} className="flex items-center gap-1.5 cursor-pointer text-zinc-300 hover:text-white select-none">
                   <input
                     type="checkbox"
                     checked={includedSignatories[sig.key]}
                     onChange={() => toggleSignatory(sig.key)}
-                    className="rounded text-emerald-500 focus:ring-emerald-500 w-3.5 h-3.5 cursor-pointer"
+                    className="rounded text-emerald-500 focus:ring-emerald-500 w-3.5 h-3.5 cursor-pointer bg-zinc-800 border-zinc-700"
                   />
-                  <span className={includedSignatories[sig.key] ? 'font-medium text-emerald-300' : 'text-gray-500 line-through'}>
+                  <span className={includedSignatories[sig.key] ? 'font-medium text-emerald-400' : 'text-zinc-500 line-through'}>
                     {sig.label}
                   </span>
                 </label>
@@ -604,44 +609,56 @@ export default function DocumentPreviewModal({ isOpen, onClose, documentData }) 
 
         {/* Page Selector Tabs */}
         {!isProposal && (
-          <div className="w-full flex items-center gap-1 bg-gray-800/90 p-1 rounded-xl border border-gray-700 text-xs overflow-x-auto scrollbar-none order-last">
-            <button
+          <div className="w-full flex items-center gap-1 bg-zinc-900/90 p-1 rounded-xl border border-zinc-800 text-xs overflow-x-auto scrollbar-none order-last">
+            <Button
+              variant={activePage === 0 ? 'primary' : 'ghost'}
+              size="sm"
               onClick={() => setActivePage(0)}
-              className={`px-2.5 py-1 rounded-lg transition-all whitespace-nowrap ${activePage === 0 ? 'bg-emerald-700 text-white font-bold' : 'text-gray-300 hover:text-white'}`}
+              className="text-xs font-semibold whitespace-nowrap h-7 px-2.5"
             >
               All Pages ({receiptPages.length > 0 && receiptsMode !== 'NONE' ? 4 + receiptPages.length : 4})
-            </button>
-            <button
+            </Button>
+            <Button
+              variant={activePage === 1 ? 'primary' : 'ghost'}
+              size="sm"
               onClick={() => setActivePage(1)}
-              className={`px-2.5 py-1 rounded-lg transition-all whitespace-nowrap ${activePage === 1 ? 'bg-emerald-700 text-white font-bold' : 'text-gray-300 hover:text-white'}`}
+              className="text-xs font-semibold whitespace-nowrap h-7 px-2.5"
             >
               Page 1: Transmittal
-            </button>
-            <button
+            </Button>
+            <Button
+              variant={activePage === 2 ? 'primary' : 'ghost'}
+              size="sm"
               onClick={() => setActivePage(2)}
-              className={`px-2.5 py-1 rounded-lg transition-all whitespace-nowrap ${activePage === 2 ? 'bg-emerald-700 text-white font-bold' : 'text-gray-300 hover:text-white'}`}
+              className="text-xs font-semibold whitespace-nowrap h-7 px-2.5"
             >
               Page 2: Income
-            </button>
-            <button
+            </Button>
+            <Button
+              variant={activePage === 3 ? 'primary' : 'ghost'}
+              size="sm"
               onClick={() => setActivePage(3)}
-              className={`px-2.5 py-1 rounded-lg transition-all whitespace-nowrap ${activePage === 3 ? 'bg-emerald-700 text-white font-bold' : 'text-gray-300 hover:text-white'}`}
+              className="text-xs font-semibold whitespace-nowrap h-7 px-2.5"
             >
               Page 3: Expenses
-            </button>
-            <button
+            </Button>
+            <Button
+              variant={activePage === 4 ? 'primary' : 'ghost'}
+              size="sm"
               onClick={() => setActivePage(4)}
-              className={`px-2.5 py-1 rounded-lg transition-all whitespace-nowrap ${activePage === 4 ? 'bg-emerald-700 text-white font-bold' : 'text-gray-300 hover:text-white'}`}
+              className="text-xs font-semibold whitespace-nowrap h-7 px-2.5"
             >
               Page 4: Reconciliation
-            </button>
+            </Button>
             {receiptPages.length > 0 && (
-              <button
+              <Button
+                variant={activePage === 5 ? 'primary' : 'ghost'}
+                size="sm"
                 onClick={() => setActivePage(5)}
-                className={`px-2.5 py-1 rounded-lg transition-all whitespace-nowrap ${activePage === 5 ? 'bg-emerald-700 text-white font-bold' : 'text-gray-300 hover:text-white'}`}
+                className="text-xs font-semibold whitespace-nowrap h-7 px-2.5"
               >
                 Receipts &amp; Proofs ({receiptPages.length} {receiptPages.length === 1 ? 'Sheet' : 'Sheets'})
-              </button>
+              </Button>
             )}
           </div>
         )}
