@@ -1,0 +1,1372 @@
+<!DOCTYPE html>
+<html lang="en" class="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FinLITE — Design System Showcase & Custom Builder</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- Inter Font -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', '-apple-system', 'BlinkMacSystemFont', 'sans-serif'],
+            mono: ['JetBrains Mono', 'ui-monospace', 'monospace'],
+          },
+        }
+      }
+    }
+  </script>
+
+  <style>
+    :root {
+      --theme-radius: 8px;
+      --theme-pad-y: 0.5rem;
+      --theme-pad-x: 0.875rem;
+      --theme-font-size: 0.875rem;
+      --theme-border-width: 1px;
+      --theme-border-style: solid;
+      
+      /* Light Mode Palette Defaults (Pure White dominant) */
+      --canvas: #FFFFFF;
+      --surface: #FAFAFA;
+      --surface-subtle: #F4F4F5;
+      --border-color: #E4E4E7;
+      --border-strong: #D4D4D8;
+      --foreground: #09090B;
+      --muted-foreground: #71717A;
+      --primary: #059669;
+      --primary-hover: #047857;
+      --primary-subtle: #ECFDF5;
+      --primary-text: #065F46;
+      --card-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05), 0 1px 2px -1px rgba(0, 0, 0, 0.05);
+    }
+
+    .dark {
+      /* Dark Mode Palette Defaults (True Obsidian Black dominant) */
+      --canvas: #09090B;
+      --surface: #121214;
+      --surface-subtle: #18181B;
+      --border-color: #27272A;
+      --border-strong: #3F3F46;
+      --foreground: #F4F4F5;
+      --muted-foreground: #A1A1AA;
+      --primary: #10B981;
+      --primary-hover: #059669;
+      --primary-subtle: #06281B;
+      --primary-text: #6EE7B7;
+      --card-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.4);
+    }
+
+    body {
+      background-color: var(--canvas);
+      color: var(--foreground);
+      font-family: 'Inter', sans-serif;
+      transition: background-color 0.2s ease, color 0.2s ease;
+    }
+
+    .tabular-nums {
+      font-variant-numeric: tabular-nums;
+    }
+
+    .theme-card {
+      background-color: var(--surface);
+      border-color: var(--border-color);
+      border-width: var(--theme-border-width);
+      border-style: var(--theme-border-style);
+      border-radius: var(--theme-radius);
+      box-shadow: var(--card-shadow);
+      position: relative;
+    }
+
+    .theme-subtle {
+      background-color: var(--surface-subtle);
+    }
+
+    .theme-primary-btn {
+      background-color: var(--primary);
+      color: #FFFFFF;
+      border-radius: var(--theme-radius);
+      transition: background-color 0.15s ease, transform 0.1s ease;
+    }
+    .theme-primary-btn:hover {
+      background-color: var(--primary-hover);
+    }
+    .theme-primary-btn:active {
+      transform: scale(0.99);
+    }
+
+    .theme-secondary-btn {
+      background-color: var(--surface-subtle);
+      color: var(--foreground);
+      border: 1px solid var(--border-color);
+      border-radius: var(--theme-radius);
+      transition: background-color 0.15s ease;
+    }
+    .theme-secondary-btn:hover {
+      border-color: var(--border-strong);
+    }
+
+    .theme-input {
+      background-color: var(--surface);
+      border: 1px solid var(--border-color);
+      color: var(--foreground);
+      border-radius: var(--theme-radius);
+      transition: border-color 0.15s ease;
+    }
+    .theme-input:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.2);
+    }
+
+    .theme-table-th {
+      background-color: var(--surface-subtle);
+      border-bottom: 1px solid var(--border-color);
+      padding: var(--theme-pad-y) var(--theme-pad-x);
+      font-size: var(--theme-font-size);
+      color: var(--muted-foreground);
+    }
+
+    .theme-table-td {
+      border-bottom: 1px solid var(--border-color);
+      padding: var(--theme-pad-y) var(--theme-pad-x);
+      font-size: var(--theme-font-size);
+    }
+
+    /* Pinned Comment Marker */
+    .annotation-pin {
+      position: absolute;
+      transform: translate(-50%, -50%);
+      z-index: 40;
+      cursor: pointer;
+      animation: pinDrop 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    @keyframes pinDrop {
+      0% { transform: translate(-50%, -70%) scale(0.6); opacity: 0; }
+      100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+    }
+
+    /* Custom Toast */
+    #toast-notification {
+      transition: opacity 0.25s ease, transform 0.25s ease;
+    }
+    
+    /* Code block styling */
+    pre code {
+      font-family: 'JetBrains Mono', monospace;
+    }
+  </style>
+</head>
+<body class="min-h-screen selection:bg-emerald-500/20 selection:text-emerald-500">
+
+  <!-- ============================================================== -->
+  <!-- 1. STICKY TOP CONTROL PANEL (THE BUILDER CONTROLS)            -->
+  <!-- ============================================================== -->
+  <header class="sticky top-0 z-50 backdrop-blur-md border-b border-[var(--border-color)] bg-[var(--canvas)]/90 px-4 py-2.5 transition-colors">
+    <div class="max-w-[1700px] mx-auto flex flex-wrap items-center justify-between gap-3">
+      
+      <!-- Brand & Title -->
+      <div class="flex items-center gap-3">
+        <div class="h-8 w-8 rounded-lg bg-emerald-600 flex items-center justify-center text-white font-bold text-sm shadow-sm">
+          FL
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <h1 class="font-semibold text-sm tracking-tight text-[var(--foreground)]">FinLITE Design System Workbench</h1>
+            <span class="text-[10px] font-mono uppercase px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-medium">LITE IT31-SAD</span>
+          </div>
+          <p class="text-[11px] text-[var(--muted-foreground)]">Kill AI Slop • True Black / Pure White Canvas • Institutional Taste</p>
+        </div>
+      </div>
+
+      <!-- Layout Archetype Selector -->
+      <div class="flex items-center p-1 bg-[var(--surface-subtle)] border border-[var(--border-color)] rounded-lg text-xs font-medium">
+        <button id="btn-arch-top" onclick="setLayoutArchetype('top')" class="px-2.5 py-1 rounded bg-[var(--surface)] text-[var(--foreground)] shadow-xs transition-all flex items-center gap-1.5 font-medium">
+          <i data-lucide="layout-template" class="w-3.5 h-3.5 text-emerald-600"></i>
+          <span>A: Executive Top-Nav</span>
+        </button>
+        <button id="btn-arch-sidebar" onclick="setLayoutArchetype('sidebar')" class="px-2.5 py-1 rounded text-[var(--muted-foreground)] hover:text-[var(--foreground)] transition-all flex items-center gap-1.5">
+          <i data-lucide="columns-2" class="w-3.5 h-3.5"></i>
+          <span>B: Modern Sidebar</span>
+        </button>
+        <button id="btn-arch-split" onclick="setLayoutArchetype('split')" class="px-2.5 py-1 rounded text-[var(--muted-foreground)] hover:text-[var(--foreground)] transition-all flex items-center gap-1.5">
+          <i data-lucide="split-square-vertical" class="w-3.5 h-3.5"></i>
+          <span>C: Auditor Split-Pane</span>
+        </button>
+      </div>
+
+      <!-- Presets & Granular Controls Trigger -->
+      <div class="flex items-center gap-2">
+        <!-- Preset Dropdown -->
+        <div class="flex items-center gap-1 text-xs">
+          <span class="text-[var(--muted-foreground)] text-[11px] font-medium hidden sm:inline">Theme Preset:</span>
+          <select id="preset-selector" onchange="applyPreset(this.value)" class="text-xs bg-[var(--surface)] border border-[var(--border-color)] text-[var(--foreground)] rounded-md px-2 py-1 focus:outline-none focus:ring-1 focus:ring-emerald-500">
+            <option value="stripe">Stripe Institutional (Balanced)</option>
+            <option value="swiss">Swiss Minimalist (Sharp & Dense)</option>
+            <option value="linear">Linear High-Density (Charcoal/Mono)</option>
+            <option value="fintech">Modern FinTech (Soft & Elevated)</option>
+          </select>
+        </div>
+
+        <!-- Customizer Drawer Toggle Button -->
+        <button onclick="toggleCustomizerBar()" class="theme-secondary-btn px-2.5 py-1 text-xs flex items-center gap-1.5 font-medium" title="Fine-tune borders, radius, density">
+          <i data-lucide="sliders-horizontal" class="w-3.5 h-3.5 text-emerald-600"></i>
+          <span>Custom Levers</span>
+        </button>
+
+        <!-- Feedback Mode Toggle -->
+        <button id="btn-feedback-mode" onclick="toggleFeedbackMode()" class="px-2.5 py-1 text-xs rounded-md border border-[var(--border-color)] bg-[var(--surface-subtle)] text-[var(--muted-foreground)] font-medium flex items-center gap-1.5 transition-all">
+          <i data-lucide="message-square-plus" class="w-3.5 h-3.5"></i>
+          <span>Feedback Mode</span>
+          <span id="pin-counter" class="ml-0.5 px-1.5 py-0.2 rounded-full text-[10px] font-mono bg-zinc-300 dark:bg-zinc-700 text-zinc-900 dark:text-zinc-100">0</span>
+        </button>
+
+        <!-- Theme Toggle (Light / Dark) -->
+        <button onclick="toggleColorMode()" class="p-1.5 rounded-md border border-[var(--border-color)] bg-[var(--surface-subtle)] text-[var(--foreground)] hover:border-[var(--border-strong)] transition-all" title="Toggle Light/Dark Canvas">
+          <i id="theme-toggle-icon" data-lucide="moon" class="w-4 h-4"></i>
+        </button>
+
+        <!-- Export Buttons -->
+        <button onclick="openExportModal()" class="theme-primary-btn px-3 py-1 text-xs font-medium flex items-center gap-1.5 shadow-xs">
+          <i data-lucide="download" class="w-3.5 h-3.5"></i>
+          <span>Export Spec</span>
+        </button>
+      </div>
+
+    </div>
+
+    <!-- ============================================================== -->
+    <!-- EXPANDABLE GRANULAR CUSTOMIZATION TOOLBAR                      -->
+    <!-- ============================================================== -->
+    <div id="customizer-toolbar" class="hidden mt-2.5 pt-2.5 border-t border-[var(--border-color)] text-xs">
+      <div class="max-w-[1700px] mx-auto grid grid-cols-2 sm:grid-cols-4 md:grid-cols-5 gap-4 items-center">
+        
+        <!-- 1. Corner Radius -->
+        <div>
+          <div class="flex justify-between text-[11px] text-[var(--muted-foreground)] mb-1">
+            <span class="font-medium">Corner Radius</span>
+            <span id="val-radius" class="font-mono">8px</span>
+          </div>
+          <input type="range" min="0" max="16" step="2" value="8" oninput="setCornerRadius(this.value)" class="w-full h-1 bg-[var(--border-color)] rounded-lg appearance-none cursor-pointer accent-emerald-600">
+          <div class="flex justify-between text-[9px] text-[var(--muted-foreground)] mt-0.5">
+            <span>Sharp (0px)</span>
+            <span>Smooth (16px)</span>
+          </div>
+        </div>
+
+        <!-- 2. Data Density / Row Height -->
+        <div>
+          <span class="block text-[11px] font-medium text-[var(--muted-foreground)] mb-1">Data Density</span>
+          <div class="grid grid-cols-3 gap-1 bg-[var(--surface-subtle)] p-0.5 border border-[var(--border-color)] rounded-md text-center text-[10px]">
+            <button onclick="setDataDensity('compact')" class="density-btn py-0.5 rounded text-[var(--muted-foreground)]" id="density-compact">Compact</button>
+            <button onclick="setDataDensity('balanced')" class="density-btn py-0.5 rounded bg-[var(--surface)] font-semibold text-[var(--foreground)] shadow-xs" id="density-balanced">Balanced</button>
+            <button onclick="setDataDensity('relaxed')" class="density-btn py-0.5 rounded text-[var(--muted-foreground)]" id="density-relaxed">Relaxed</button>
+          </div>
+        </div>
+
+        <!-- 3. Border Contrast -->
+        <div>
+          <span class="block text-[11px] font-medium text-[var(--muted-foreground)] mb-1">Border Contrast</span>
+          <div class="grid grid-cols-3 gap-1 bg-[var(--surface-subtle)] p-0.5 border border-[var(--border-color)] rounded-md text-center text-[10px]">
+            <button onclick="setBorderContrast('hairline')" class="border-btn py-0.5 rounded bg-[var(--surface)] font-semibold text-[var(--foreground)] shadow-xs" id="border-hairline">Hairline</button>
+            <button onclick="setBorderContrast('structural')" class="border-btn py-0.5 rounded text-[var(--muted-foreground)]" id="border-structural">Solid</button>
+            <button onclick="setBorderContrast('flat')" class="border-btn py-0.5 rounded text-[var(--muted-foreground)]" id="border-flat">Flat</button>
+          </div>
+        </div>
+
+        <!-- 4. Emerald Accent Saturation -->
+        <div>
+          <span class="block text-[11px] font-medium text-[var(--muted-foreground)] mb-1">LITE Green Accent</span>
+          <div class="grid grid-cols-3 gap-1 bg-[var(--surface-subtle)] p-0.5 border border-[var(--border-color)] rounded-md text-center text-[10px]">
+            <button onclick="setAccentStyle('institutional')" class="accent-btn py-0.5 rounded bg-[var(--surface)] font-semibold text-[var(--foreground)] shadow-xs" id="accent-inst">Forest 600</button>
+            <button onclick="setAccentStyle('emerald')" class="accent-btn py-0.5 rounded text-[var(--muted-foreground)]" id="accent-em">Emerald 500</button>
+            <button onclick="setAccentStyle('mono')" class="accent-btn py-0.5 rounded text-[var(--muted-foreground)]" id="accent-mono">Minimal Mint</button>
+          </div>
+        </div>
+
+        <!-- 5. Active Feedback Notes Action -->
+        <div class="flex items-center justify-end gap-2">
+          <button onclick="copyMarkdownNotes()" class="theme-secondary-btn w-full py-1.5 px-2 text-[11px] flex items-center justify-center gap-1.5 font-medium">
+            <i data-lucide="clipboard-copy" class="w-3.5 h-3.5 text-emerald-600"></i>
+            <span>Copy Review Notes</span>
+          </button>
+        </div>
+
+      </div>
+    </div>
+  </header>
+
+  <!-- FEEDBACK MODE BANNER -->
+  <div id="feedback-active-banner" class="hidden bg-emerald-600 text-white px-4 py-1.5 text-xs flex items-center justify-between font-medium">
+    <div class="flex items-center gap-2">
+      <span class="flex h-2 w-2 relative">
+        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
+        <span class="relative inline-flex rounded-full h-2 w-2 bg-white"></span>
+      </span>
+      <span><strong>Feedback Mode Active:</strong> Right-click anywhere on any component to drop a pinned comment.</span>
+    </div>
+    <button onclick="toggleFeedbackMode()" class="underline hover:opacity-80 text-[11px]">Exit Feedback Mode</button>
+  </div>
+
+  <!-- ============================================================== -->
+  <!-- 2. MAIN WORKSPACE / LIVE INTERACTIVE DASHBOARD CANVAS          -->
+  <!-- ============================================================== -->
+  <main class="max-w-[1700px] mx-auto p-4 sm:p-6 transition-all" id="workspace-canvas">
+
+    <!-- ============================================================ -->
+    <!-- ARCHETYPE A: CLASSIC EXECUTIVE TOP-NAV                       -->
+    <!-- ============================================================ -->
+    <div id="archetype-top-nav" class="space-y-6">
+      
+      <!-- Component 1: In-App Top Navbar -->
+      <section data-component-id="navbar-executive" class="theme-card p-3 sm:px-5 sm:py-3 flex flex-wrap items-center justify-between gap-3">
+        <div class="flex items-center gap-4">
+          <!-- Org Badge -->
+          <div class="flex items-center gap-2.5">
+            <div class="h-9 w-9 rounded-lg bg-emerald-600/10 border border-emerald-500/30 flex items-center justify-center font-bold text-emerald-600 dark:text-emerald-400">
+              <i data-lucide="landmark" class="w-4 h-4"></i>
+            </div>
+            <div>
+              <div class="text-sm font-semibold tracking-tight">FinLITE • PDM LITE</div>
+              <div class="text-[11px] text-[var(--muted-foreground)]">Financial Management System</div>
+            </div>
+          </div>
+
+          <div class="h-4 w-px bg-[var(--border-color)] hidden sm:block"></div>
+
+          <!-- Academic Year & Semester Switcher -->
+          <div class="relative">
+            <button class="flex items-center gap-1.5 text-xs px-2.5 py-1.5 rounded-md bg-[var(--surface-subtle)] border border-[var(--border-color)] text-[var(--foreground)] font-medium hover:border-[var(--border-strong)]">
+              <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+              <span>AY 2026–2027 • 1st Sem</span>
+              <i data-lucide="chevron-down" class="w-3.5 h-3.5 text-[var(--muted-foreground)]"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- Center Search / Command Trigger -->
+        <div class="hidden md:flex items-center w-72 relative">
+          <i data-lucide="search" class="w-3.5 h-3.5 absolute left-3 text-[var(--muted-foreground)]"></i>
+          <input type="text" placeholder="Search voucher, receipt, payee..." class="theme-input w-full pl-8 pr-3 py-1.5 text-xs">
+          <kbd class="absolute right-2.5 text-[9px] font-mono px-1 py-0.5 rounded bg-[var(--surface-subtle)] text-[var(--muted-foreground)] border border-[var(--border-color)]">⌘K</kbd>
+        </div>
+
+        <!-- Right User Actions -->
+        <div class="flex items-center gap-2">
+          <!-- Quick Status Pill -->
+          <div class="hidden lg:flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-medium bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+            <i data-lucide="shield-check" class="w-3.5 h-3.5"></i>
+            <span>Audited & Verified</span>
+          </div>
+
+          <!-- Profile -->
+          <div class="flex items-center gap-2 pl-2 border-l border-[var(--border-color)]">
+            <div class="h-8 w-8 rounded-full bg-emerald-600 text-white flex items-center justify-center font-semibold text-xs">
+              AG
+            </div>
+            <div class="hidden xl:block text-left text-xs">
+              <div class="font-medium text-[var(--foreground)] leading-tight">Andrei Geronimo</div>
+              <div class="text-[10px] text-[var(--muted-foreground)]">LITE President</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Component 2: Stat Cards (KPI Overview) -->
+      <section data-component-id="stat-cards-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        
+        <!-- Card 1: Total Org Balance -->
+        <div class="theme-card p-4 transition-all hover:border-[var(--border-strong)]">
+          <div class="flex items-center justify-between text-xs text-[var(--muted-foreground)] mb-2 font-medium">
+            <span>Total Cash In Vault</span>
+            <div class="p-1.5 rounded-md bg-[var(--surface-subtle)] text-emerald-600 dark:text-emerald-400">
+              <i data-lucide="wallet" class="w-4 h-4"></i>
+            </div>
+          </div>
+          <div class="text-2xl font-bold font-mono tracking-tight tabular-nums text-[var(--foreground)]">
+            ₱48,250.00
+          </div>
+          <div class="flex items-center gap-2 mt-2 text-[11px]">
+            <span class="inline-flex items-center gap-0.5 font-medium text-emerald-600 dark:text-emerald-400">
+              <i data-lucide="trending-up" class="w-3 h-3"></i> +12.4%
+            </span>
+            <span class="text-[var(--muted-foreground)]">from start of term</span>
+          </div>
+        </div>
+
+        <!-- Card 2: Total Collections (Inflows) -->
+        <div class="theme-card p-4 transition-all hover:border-[var(--border-strong)]">
+          <div class="flex items-center justify-between text-xs text-[var(--muted-foreground)] mb-2 font-medium">
+            <span>Semester Inflows</span>
+            <div class="p-1.5 rounded-md bg-[var(--surface-subtle)] text-emerald-600 dark:text-emerald-400">
+              <i data-lucide="arrow-down-left" class="w-4 h-4"></i>
+            </div>
+          </div>
+          <div class="text-2xl font-bold font-mono tracking-tight tabular-nums text-emerald-600 dark:text-emerald-400">
+            +₱62,100.00
+          </div>
+          <div class="flex items-center gap-1.5 mt-2 text-[11px] text-[var(--muted-foreground)]">
+            <span>342 member contributions</span>
+          </div>
+        </div>
+
+        <!-- Card 3: Total Expenses (Outflows) -->
+        <div class="theme-card p-4 transition-all hover:border-[var(--border-strong)]">
+          <div class="flex items-center justify-between text-xs text-[var(--muted-foreground)] mb-2 font-medium">
+            <span>Semester Expenses</span>
+            <div class="p-1.5 rounded-md bg-[var(--surface-subtle)] text-red-600 dark:text-red-400">
+              <i data-lucide="arrow-up-right" class="w-4 h-4"></i>
+            </div>
+          </div>
+          <div class="text-2xl font-bold font-mono tracking-tight tabular-nums text-red-600 dark:text-red-400">
+            -₱13,850.00
+          </div>
+          <div class="flex items-center gap-1.5 mt-2 text-[11px] text-[var(--muted-foreground)]">
+            <span>18 validated disbursements</span>
+          </div>
+        </div>
+
+        <!-- Card 4: Reconciliation Variance -->
+        <div class="theme-card p-4 transition-all hover:border-[var(--border-strong)] border-l-4 border-l-emerald-500">
+          <div class="flex items-center justify-between text-xs text-[var(--muted-foreground)] mb-2 font-medium">
+            <span>Reconciliation Status</span>
+            <div class="p-1.5 rounded-md bg-[var(--surface-subtle)] text-emerald-600 dark:text-emerald-400">
+              <i data-lucide="check-circle-2" class="w-4 h-4"></i>
+            </div>
+          </div>
+          <div class="text-2xl font-bold font-mono tracking-tight tabular-nums text-[var(--foreground)]">
+            ₱0.00 <span class="text-xs font-sans font-medium text-emerald-600 dark:text-emerald-400">Exact Match</span>
+          </div>
+          <div class="flex items-center gap-1.5 mt-2 text-[11px] text-[var(--muted-foreground)]">
+            <span>Physical count = Ledger count</span>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- Component 3: Quick Action Bar & Utility Row -->
+      <section data-component-id="quick-action-bar" class="flex flex-wrap items-center justify-between gap-3">
+        <div class="flex flex-wrap items-center gap-2">
+          <button class="theme-primary-btn px-3.5 py-1.5 text-xs font-semibold flex items-center gap-1.5">
+            <i data-lucide="plus" class="w-3.5 h-3.5"></i>
+            <span>New Transaction</span>
+          </button>
+          <button class="theme-secondary-btn px-3 py-1.5 text-xs font-medium flex items-center gap-1.5">
+            <i data-lucide="calculator" class="w-3.5 h-3.5 text-emerald-600"></i>
+            <span>Count Cash Drawer</span>
+          </button>
+          <button class="theme-secondary-btn px-3 py-1.5 text-xs font-medium flex items-center gap-1.5">
+            <i data-lucide="file-text" class="w-3.5 h-3.5"></i>
+            <span>Export Liquidation DOCX</span>
+          </button>
+          <button class="theme-secondary-btn px-3 py-1.5 text-xs font-medium flex items-center gap-1.5">
+            <i data-lucide="history" class="w-3.5 h-3.5"></i>
+            <span>Audit Trail</span>
+          </button>
+        </div>
+
+        <!-- Quiet AI Copilot Bar -->
+        <div class="flex items-center gap-2 w-full sm:w-auto">
+          <div class="flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-[var(--surface-subtle)] border border-[var(--border-color)] text-xs w-full sm:w-80">
+            <i data-lucide="sparkles" class="w-3.5 h-3.5 text-emerald-600"></i>
+            <input type="text" placeholder="Ask FinLITE Copilot: 'variance in sports fest'..." class="bg-transparent border-none outline-none text-xs w-full text-[var(--foreground)] placeholder:text-[var(--muted-foreground)]">
+            <kbd class="text-[9px] font-mono text-[var(--muted-foreground)] px-1 border border-[var(--border-color)] rounded">↵</kbd>
+          </div>
+        </div>
+      </section>
+
+      <!-- Component 4: Transaction Ledger Table -->
+      <section data-component-id="ledger-table" class="theme-card overflow-hidden">
+        
+        <!-- Table Toolbar -->
+        <div class="p-4 border-b border-[var(--border-color)] flex flex-wrap items-center justify-between gap-3">
+          <div class="flex items-center gap-2">
+            <h2 class="text-sm font-semibold tracking-tight text-[var(--foreground)]">General Ledger Transactions</h2>
+            <span class="text-xs font-mono px-2 py-0.5 rounded-full bg-[var(--surface-subtle)] text-[var(--muted-foreground)] border border-[var(--border-color)]">24 Entries</span>
+          </div>
+
+          <div class="flex items-center gap-2 text-xs">
+            <!-- Filter Pills -->
+            <div class="flex items-center p-0.5 bg-[var(--surface-subtle)] border border-[var(--border-color)] rounded-md text-[11px] font-medium">
+              <button class="px-2 py-0.5 rounded bg-[var(--surface)] text-[var(--foreground)] shadow-xs">All</button>
+              <button class="px-2 py-0.5 rounded text-[var(--muted-foreground)] hover:text-[var(--foreground)]">Inflows</button>
+              <button class="px-2 py-0.5 rounded text-[var(--muted-foreground)] hover:text-[var(--foreground)]">Outflows</button>
+            </div>
+            
+            <button class="theme-secondary-btn px-2.5 py-1 text-xs flex items-center gap-1.5">
+              <i data-lucide="filter" class="w-3.5 h-3.5 text-[var(--muted-foreground)]"></i>
+              <span>Category Filter</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Table Viewport -->
+        <div class="overflow-x-auto">
+          <table class="w-full text-left border-collapse">
+            <thead>
+              <tr>
+                <th class="theme-table-th">Date</th>
+                <th class="theme-table-th">Voucher Ref</th>
+                <th class="theme-table-th">Description & Payee</th>
+                <th class="theme-table-th">Category</th>
+                <th class="theme-table-th text-right">Outflow (Debit)</th>
+                <th class="theme-table-th text-right">Inflow (Credit)</th>
+                <th class="theme-table-th text-right">Running Balance</th>
+                <th class="theme-table-th text-center">Receipt</th>
+                <th class="theme-table-th text-center">Status</th>
+                <th class="theme-table-th text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="transaction-rows" class="divide-y divide-[var(--border-color)]">
+              
+              <!-- Sample Row 1: Inflow -->
+              <tr class="hover:bg-[var(--surface-subtle)] transition-colors">
+                <td class="theme-table-td font-mono text-[11px] text-[var(--muted-foreground)]">2026-10-12</td>
+                <td class="theme-table-td font-mono text-xs font-semibold text-emerald-600 dark:text-emerald-400">CR-2026-042</td>
+                <td class="theme-table-td">
+                  <div class="font-medium text-[var(--foreground)]">LITE Membership Fee Batch 3</div>
+                  <div class="text-[11px] text-[var(--muted-foreground)]">Collected from 120 BSIT 1st Year Students</div>
+                </td>
+                <td class="theme-table-td">
+                  <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+                    Collections
+                  </span>
+                </td>
+                <td class="theme-table-td text-right font-mono text-[var(--muted-foreground)]">—</td>
+                <td class="theme-table-td text-right font-mono font-semibold text-emerald-600 dark:text-emerald-400 tabular-nums">+₱12,000.00</td>
+                <td class="theme-table-td text-right font-mono font-semibold tabular-nums text-[var(--foreground)]">₱48,250.00</td>
+                <td class="theme-table-td text-center">
+                  <button class="p-1 rounded text-[var(--muted-foreground)] hover:text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-950/40" title="View Official Receipt Image">
+                    <i data-lucide="image" class="w-3.5 h-3.5"></i>
+                  </button>
+                </td>
+                <td class="theme-table-td text-center">
+                  <span class="inline-flex items-center gap-1 text-[10px] font-medium text-emerald-600 dark:text-emerald-400">
+                    <i data-lucide="check" class="w-3 h-3"></i> Reconciled
+                  </span>
+                </td>
+                <td class="theme-table-td text-right">
+                  <button class="p-1 text-[var(--muted-foreground)] hover:text-[var(--foreground)]">
+                    <i data-lucide="more-horizontal" class="w-4 h-4"></i>
+                  </button>
+                </td>
+              </tr>
+
+              <!-- Sample Row 2: Outflow -->
+              <tr class="hover:bg-[var(--surface-subtle)] transition-colors">
+                <td class="theme-table-td font-mono text-[11px] text-[var(--muted-foreground)]">2026-10-10</td>
+                <td class="theme-table-td font-mono text-xs font-semibold text-zinc-500">DV-2026-089</td>
+                <td class="theme-table-td">
+                  <div class="font-medium text-[var(--foreground)]">Tarpaulin & Printing Materials</div>
+                  <div class="text-[11px] text-[var(--muted-foreground)]">Payee: Marikina QuickPrint • IT General Assembly</div>
+                </td>
+                <td class="theme-table-td">
+                  <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium bg-zinc-500/10 text-zinc-600 dark:text-zinc-400 border border-[var(--border-color)]">
+                    Event Logistics
+                  </span>
+                </td>
+                <td class="theme-table-td text-right font-mono font-semibold text-red-600 dark:text-red-400 tabular-nums">-₱2,450.00</td>
+                <td class="theme-table-td text-right font-mono text-[var(--muted-foreground)]">—</td>
+                <td class="theme-table-td text-right font-mono font-semibold tabular-nums text-[var(--foreground)]">₱36,250.00</td>
+                <td class="theme-table-td text-center">
+                  <button class="p-1 rounded text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-950/40" title="Receipt verified">
+                    <i data-lucide="file-check" class="w-3.5 h-3.5"></i>
+                  </button>
+                </td>
+                <td class="theme-table-td text-center">
+                  <span class="inline-flex items-center gap-1 text-[10px] font-medium text-emerald-600 dark:text-emerald-400">
+                    <i data-lucide="check" class="w-3 h-3"></i> Reconciled
+                  </span>
+                </td>
+                <td class="theme-table-td text-right">
+                  <button class="p-1 text-[var(--muted-foreground)] hover:text-[var(--foreground)]">
+                    <i data-lucide="more-horizontal" class="w-4 h-4"></i>
+                  </button>
+                </td>
+              </tr>
+
+              <!-- Sample Row 3: Outflow Pending Review -->
+              <tr class="hover:bg-[var(--surface-subtle)] transition-colors">
+                <td class="theme-table-td font-mono text-[11px] text-[var(--muted-foreground)]">2026-10-08</td>
+                <td class="theme-table-td font-mono text-xs font-semibold text-amber-600 dark:text-amber-400">DV-2026-088</td>
+                <td class="theme-table-td">
+                  <div class="font-medium text-[var(--foreground)]">Snacks & Refreshments for Officers</div>
+                  <div class="text-[11px] text-[var(--muted-foreground)]">Payee: Andrei Geronimo • Reimbursement Request</div>
+                </td>
+                <td class="theme-table-td">
+                  <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20">
+                    Food & Meals
+                  </span>
+                </td>
+                <td class="theme-table-td text-right font-mono font-semibold text-red-600 dark:text-red-400 tabular-nums">-₱1,200.00</td>
+                <td class="theme-table-td text-right font-mono text-[var(--muted-foreground)]">—</td>
+                <td class="theme-table-td text-right font-mono font-semibold tabular-nums text-[var(--foreground)]">₱38,700.00</td>
+                <td class="theme-table-td text-center">
+                  <button class="p-1 rounded text-amber-500 hover:bg-amber-50 dark:hover:bg-amber-950/40" title="Awaiting receipt crop">
+                    <i data-lucide="alert-circle" class="w-3.5 h-3.5"></i>
+                  </button>
+                </td>
+                <td class="theme-table-td text-center">
+                  <span class="inline-flex items-center gap-1 text-[10px] font-medium text-amber-600 dark:text-amber-400">
+                    <i data-lucide="clock" class="w-3 h-3"></i> Pending Sign-off
+                  </span>
+                </td>
+                <td class="theme-table-td text-right">
+                  <button class="p-1 text-[var(--muted-foreground)] hover:text-[var(--foreground)]">
+                    <i data-lucide="more-horizontal" class="w-4 h-4"></i>
+                  </button>
+                </td>
+              </tr>
+
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Table Footer / Pagination -->
+        <div class="p-3 border-t border-[var(--border-color)] flex items-center justify-between text-xs text-[var(--muted-foreground)]">
+          <span>Showing <strong>1-3</strong> of <strong>24</strong> transactions</span>
+          <div class="flex items-center gap-1">
+            <button class="theme-secondary-btn px-2 py-1 text-xs" disabled>Previous</button>
+            <button class="theme-secondary-btn px-2 py-1 text-xs bg-[var(--surface)] text-[var(--foreground)]">Next</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Component 5: Cash Reconciliation (Denomination Counter) -->
+      <section data-component-id="denomination-counter" class="theme-card p-5">
+        <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
+          <div>
+            <h3 class="text-sm font-semibold tracking-tight text-[var(--foreground)] flex items-center gap-2">
+              <i data-lucide="calculator" class="w-4 h-4 text-emerald-600"></i>
+              <span>Physical Cash Reconciliation (Vault Cash Box Breakdown)</span>
+            </h3>
+            <p class="text-xs text-[var(--muted-foreground)]">Enter the physical quantity of bills and coins in the LITE cash box.</p>
+          </div>
+
+          <div class="flex items-center gap-3">
+            <div class="text-right">
+              <div class="text-[10px] uppercase font-mono text-[var(--muted-foreground)]">Calculated Cash Count</div>
+              <div id="denom-total" class="text-lg font-bold font-mono text-emerald-600 dark:text-emerald-400 tabular-nums">₱48,250.00</div>
+            </div>
+            <div class="text-right pl-3 border-l border-[var(--border-color)]">
+              <div class="text-[10px] uppercase font-mono text-[var(--muted-foreground)]">Discrepancy / Variance</div>
+              <div class="text-lg font-bold font-mono text-[var(--foreground)] tabular-nums">₱0.00</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Denomination Grid -->
+        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 lg:grid-cols-9 gap-2">
+          <!-- ₱1000 -->
+          <div class="p-2 rounded border border-[var(--border-color)] bg-[var(--surface-subtle)]">
+            <div class="text-xs font-bold text-emerald-700 dark:text-emerald-400 font-mono">₱1,000</div>
+            <input type="number" min="0" value="40" oninput="updateDenominationCalculation()" class="theme-input w-full mt-1.5 px-2 py-1 text-xs font-mono text-center" placeholder="0">
+            <div class="text-[10px] text-right font-mono text-[var(--muted-foreground)] mt-1">₱40,000</div>
+          </div>
+          <!-- ₱500 -->
+          <div class="p-2 rounded border border-[var(--border-color)] bg-[var(--surface-subtle)]">
+            <div class="text-xs font-bold text-amber-700 dark:text-amber-400 font-mono">₱500</div>
+            <input type="number" min="0" value="12" oninput="updateDenominationCalculation()" class="theme-input w-full mt-1.5 px-2 py-1 text-xs font-mono text-center" placeholder="0">
+            <div class="text-[10px] text-right font-mono text-[var(--muted-foreground)] mt-1">₱6,000</div>
+          </div>
+          <!-- ₱200 -->
+          <div class="p-2 rounded border border-[var(--border-color)] bg-[var(--surface-subtle)]">
+            <div class="text-xs font-bold text-green-700 dark:text-green-400 font-mono">₱200</div>
+            <input type="number" min="0" value="5" oninput="updateDenominationCalculation()" class="theme-input w-full mt-1.5 px-2 py-1 text-xs font-mono text-center" placeholder="0">
+            <div class="text-[10px] text-right font-mono text-[var(--muted-foreground)] mt-1">₱1,000</div>
+          </div>
+          <!-- ₱100 -->
+          <div class="p-2 rounded border border-[var(--border-color)] bg-[var(--surface-subtle)]">
+            <div class="text-xs font-bold text-violet-700 dark:text-violet-400 font-mono">₱100</div>
+            <input type="number" min="0" value="8" oninput="updateDenominationCalculation()" class="theme-input w-full mt-1.5 px-2 py-1 text-xs font-mono text-center" placeholder="0">
+            <div class="text-[10px] text-right font-mono text-[var(--muted-foreground)] mt-1">₱800</div>
+          </div>
+          <!-- ₱50 -->
+          <div class="p-2 rounded border border-[var(--border-color)] bg-[var(--surface-subtle)]">
+            <div class="text-xs font-bold text-rose-700 dark:text-rose-400 font-mono">₱50</div>
+            <input type="number" min="0" value="6" oninput="updateDenominationCalculation()" class="theme-input w-full mt-1.5 px-2 py-1 text-xs font-mono text-center" placeholder="0">
+            <div class="text-[10px] text-right font-mono text-[var(--muted-foreground)] mt-1">₱300</div>
+          </div>
+          <!-- ₱20 -->
+          <div class="p-2 rounded border border-[var(--border-color)] bg-[var(--surface-subtle)]">
+            <div class="text-xs font-bold text-orange-700 dark:text-orange-400 font-mono">₱20</div>
+            <input type="number" min="0" value="5" oninput="updateDenominationCalculation()" class="theme-input w-full mt-1.5 px-2 py-1 text-xs font-mono text-center" placeholder="0">
+            <div class="text-[10px] text-right font-mono text-[var(--muted-foreground)] mt-1">₱100</div>
+          </div>
+          <!-- ₱10 -->
+          <div class="p-2 rounded border border-[var(--border-color)] bg-[var(--surface-subtle)]">
+            <div class="text-xs font-bold text-zinc-600 dark:text-zinc-400 font-mono">₱10</div>
+            <input type="number" min="0" value="4" oninput="updateDenominationCalculation()" class="theme-input w-full mt-1.5 px-2 py-1 text-xs font-mono text-center" placeholder="0">
+            <div class="text-[10px] text-right font-mono text-[var(--muted-foreground)] mt-1">₱40</div>
+          </div>
+          <!-- ₱5 -->
+          <div class="p-2 rounded border border-[var(--border-color)] bg-[var(--surface-subtle)]">
+            <div class="text-xs font-bold text-zinc-600 dark:text-zinc-400 font-mono">₱5</div>
+            <input type="number" min="0" value="2" oninput="updateDenominationCalculation()" class="theme-input w-full mt-1.5 px-2 py-1 text-xs font-mono text-center" placeholder="0">
+            <div class="text-[10px] text-right font-mono text-[var(--muted-foreground)] mt-1">₱10</div>
+          </div>
+          <!-- ₱1 -->
+          <div class="p-2 rounded border border-[var(--border-color)] bg-[var(--surface-subtle)]">
+            <div class="text-xs font-bold text-zinc-600 dark:text-zinc-400 font-mono">₱1</div>
+            <input type="number" min="0" value="0" oninput="updateDenominationCalculation()" class="theme-input w-full mt-1.5 px-2 py-1 text-xs font-mono text-center" placeholder="0">
+            <div class="text-[10px] text-right font-mono text-[var(--muted-foreground)] mt-1">₱0</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Component 6: Official PDM Liquidation Report Docx Preview Mockup -->
+      <section data-component-id="docx-preview-modal" class="theme-card p-5">
+        <div class="flex items-center justify-between border-b border-[var(--border-color)] pb-3 mb-4">
+          <div class="flex items-center gap-2">
+            <i data-lucide="file-check-2" class="w-4 h-4 text-emerald-600"></i>
+            <h3 class="text-sm font-semibold tracking-tight">Official PDM Liquidation Report Document Engine</h3>
+          </div>
+          <button class="theme-primary-btn px-3 py-1 text-xs font-medium flex items-center gap-1.5">
+            <i data-lucide="download" class="w-3.5 h-3.5"></i>
+            <span>Generate .DOCX</span>
+          </button>
+        </div>
+
+        <div class="max-w-3xl mx-auto bg-white text-zinc-900 border border-zinc-200 p-8 shadow-sm rounded-md font-serif text-xs">
+          <!-- Institutional Header -->
+          <div class="text-center space-y-0.5 border-b border-zinc-200 pb-3 mb-4">
+            <div class="font-bold text-xs uppercase tracking-widest text-zinc-800">Pamantasan ng Lungsod ng Marikina</div>
+            <div class="text-[11px] text-zinc-600 font-sans">College of Information and Communications Technology</div>
+            <div class="text-xs font-bold text-emerald-800 mt-1 uppercase font-sans">League of Information Technology Enthusiasts (LITE)</div>
+            <div class="text-[10px] uppercase tracking-wider text-zinc-500 font-sans">Financial Report & Liquidation Statement • AY 2026–2027</div>
+          </div>
+
+          <!-- Signatories Sign-off Block -->
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 pt-6 border-t border-zinc-200 font-sans text-center text-[10px]">
+            <div>
+              <div class="font-bold uppercase">ANDREI JOHN P. GERONIMO</div>
+              <div class="text-zinc-500 text-[9px]">LITE President</div>
+            </div>
+            <div>
+              <div class="font-bold uppercase">ROSE MARIELLE P. CABANAG</div>
+              <div class="text-zinc-500 text-[9px]">LITE Treasurer</div>
+            </div>
+            <div>
+              <div class="font-bold uppercase">RISHAME P. SARA</div>
+              <div class="text-zinc-500 text-[9px]">LITE Auditor</div>
+            </div>
+            <div>
+              <div class="font-bold uppercase">KIMBERLY V. LEYNES</div>
+              <div class="text-zinc-500 text-[9px]">Faculty Adviser</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- ARCHETYPE B: MODERN DENSE LEFT-SIDEBAR (LINEAR / STRIPE STYLE) -->
+    <!-- ============================================================ -->
+    <div id="archetype-sidebar" class="hidden grid grid-cols-1 md:grid-cols-12 gap-6">
+      
+      <!-- Left Rail Sidebar -->
+      <aside data-component-id="sidebar-navigation" class="md:col-span-3 lg:col-span-2 theme-card p-3 space-y-4 h-fit">
+        <div class="flex items-center gap-2.5 px-2 py-1">
+          <div class="h-7 w-7 rounded-md bg-emerald-600 flex items-center justify-center text-white font-bold text-xs">
+            FL
+          </div>
+          <div>
+            <div class="font-semibold text-xs text-[var(--foreground)]">FinLITE Studio</div>
+            <div class="text-[10px] text-[var(--muted-foreground)]">AY 2026-27 • 1st Sem</div>
+          </div>
+        </div>
+
+        <nav class="space-y-1 text-xs font-medium">
+          <a href="#" class="flex items-center gap-2.5 px-2.5 py-1.5 rounded-md bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
+            <i data-lucide="layout-dashboard" class="w-4 h-4"></i>
+            <span>Overview & Stats</span>
+          </a>
+          <a href="#" class="flex items-center gap-2.5 px-2.5 py-1.5 rounded-md text-[var(--muted-foreground)] hover:text-[var(--foreground)] hover:bg-[var(--surface-subtle)]">
+            <i data-lucide="receipt" class="w-4 h-4"></i>
+            <span>Transactions Ledger</span>
+          </a>
+          <a href="#" class="flex items-center gap-2.5 px-2.5 py-1.5 rounded-md text-[var(--muted-foreground)] hover:text-[var(--foreground)] hover:bg-[var(--surface-subtle)]">
+            <i data-lucide="coins" class="w-4 h-4"></i>
+            <span>Reconciliation</span>
+          </a>
+          <a href="#" class="flex items-center gap-2.5 px-2.5 py-1.5 rounded-md text-[var(--muted-foreground)] hover:text-[var(--foreground)] hover:bg-[var(--surface-subtle)]">
+            <i data-lucide="file-spreadsheet" class="w-4 h-4"></i>
+            <span>DOCX Reports</span>
+          </a>
+          <a href="#" class="flex items-center gap-2.5 px-2.5 py-1.5 rounded-md text-[var(--muted-foreground)] hover:text-[var(--foreground)] hover:bg-[var(--surface-subtle)]">
+            <i data-lucide="shield-alert" class="w-4 h-4"></i>
+            <span>Audit Trail</span>
+          </a>
+        </nav>
+      </aside>
+
+      <!-- Main Workspace Area -->
+      <div class="md:col-span-9 lg:col-span-10 space-y-4">
+        <div class="theme-card p-4 flex items-center justify-between">
+          <div>
+            <h2 class="text-base font-bold text-[var(--foreground)] tracking-tight">Treasurer Ledger Workspace</h2>
+            <p class="text-xs text-[var(--muted-foreground)]">Continuous live audit stream with keyboard shortcuts.</p>
+          </div>
+          <button class="theme-primary-btn px-3 py-1.5 text-xs font-semibold flex items-center gap-1.5">
+            <i data-lucide="plus" class="w-3.5 h-3.5"></i>
+            <span>Record Entry (N)</span>
+          </button>
+        </div>
+
+        <div class="theme-card p-4">
+          <div class="text-xs text-[var(--muted-foreground)] font-mono mb-2 uppercase">Dense Ledger View (Archetype B)</div>
+          <div class="text-sm font-semibold text-[var(--foreground)]">Clean Full-Width Multi-Column Grid</div>
+          <p class="text-xs text-[var(--muted-foreground)] mt-1">Optimized for high-resolution displays where sidebars minimize horizontal panning.</p>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- ARCHETYPE C: AUDITOR SPLIT-PANE                              -->
+    <!-- ============================================================ -->
+    <div id="archetype-split" class="hidden grid grid-cols-1 lg:grid-cols-12 gap-6">
+      
+      <!-- Left 60%: High Density Ledger -->
+      <div class="lg:col-span-7 space-y-4">
+        <div class="theme-card p-4">
+          <div class="flex items-center justify-between mb-3">
+            <h3 class="text-sm font-bold text-[var(--foreground)]">Ledger Activity Stream</h3>
+            <span class="text-xs font-mono text-emerald-600">Live Sync</span>
+          </div>
+          <p class="text-xs text-[var(--muted-foreground)] mb-3">Auditors review transactions on the left while checking physical vault balances and receipt images on the right.</p>
+          <div class="p-3 rounded border border-[var(--border-color)] bg-[var(--surface-subtle)] font-mono text-xs space-y-2">
+            <div class="flex justify-between">
+              <span>CR-2026-042 • LITE Membership Batch 3</span>
+              <span class="font-bold text-emerald-600">+₱12,000.00</span>
+            </div>
+            <div class="flex justify-between">
+              <span>DV-2026-089 • Tarpaulin & Printing</span>
+              <span class="font-bold text-red-600">-₱2,450.00</span>
+            </div>
+            <div class="flex justify-between">
+              <span>DV-2026-088 • Snacks for Officers</span>
+              <span class="font-bold text-red-600">-₱1,200.00</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right 40%: Real-Time Reconciliation & Inspector -->
+      <div class="lg:col-span-5 space-y-4">
+        <div class="theme-card p-4 border-l-4 border-l-emerald-500">
+          <h3 class="text-sm font-bold text-[var(--foreground)] mb-1">Vault Inspector</h3>
+          <p class="text-xs text-[var(--muted-foreground)] mb-3">Physical denomination counter directly alongside the ledger.</p>
+          <div class="bg-[var(--surface-subtle)] p-3 rounded text-xs font-mono space-y-1">
+            <div class="flex justify-between">
+              <span class="text-[var(--muted-foreground)]">System Balance:</span>
+              <span class="font-bold text-[var(--foreground)]">₱48,250.00</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-[var(--muted-foreground)]">Physical Count:</span>
+              <span class="font-bold text-emerald-600">₱48,250.00</span>
+            </div>
+            <div class="flex justify-between pt-1 border-t border-[var(--border-color)]">
+              <span class="font-semibold text-[var(--foreground)]">Variance:</span>
+              <span class="font-bold text-emerald-600">₱0.00 (Balanced)</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+  </main>
+
+  <!-- ============================================================== -->
+  <!-- 3. RIGHT-CLICK ANNOTATION POPUP MODAL                          -->
+  <!-- ============================================================== -->
+  <div id="comment-popover" class="fixed z-50 hidden bg-[var(--surface)] text-[var(--foreground)] border border-[var(--border-color)] rounded-lg p-3 shadow-xl w-72 text-xs">
+    <div class="flex items-center justify-between pb-1.5 border-b border-[var(--border-color)] mb-2">
+      <span class="font-semibold text-emerald-600 flex items-center gap-1">
+        <i data-lucide="message-square" class="w-3.5 h-3.5"></i>
+        <span id="popover-component-name">Component Note</span>
+      </span>
+      <button onclick="closeCommentPopover()" class="text-[var(--muted-foreground)] hover:text-[var(--foreground)]">
+        <i data-lucide="x" class="w-3.5 h-3.5"></i>
+      </button>
+    </div>
+    <textarea id="popover-textarea" rows="3" class="theme-input w-full p-2 text-xs mb-2" placeholder="Write UI feedback (e.g. 'Make font smaller', 'Approve this table style')..."></textarea>
+    <div class="flex items-center justify-between">
+      <button onclick="deleteCurrentPin()" id="btn-delete-pin" class="text-red-500 hover:text-red-700 text-[11px] hidden">Delete</button>
+      <div class="flex items-center gap-1 ml-auto">
+        <button onclick="closeCommentPopover()" class="theme-secondary-btn px-2 py-1 text-[11px]">Cancel</button>
+        <button onclick="saveCommentPin()" class="theme-primary-btn px-2.5 py-1 text-[11px] font-medium">Save Pin</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================== -->
+  <!-- 4. EXPORT SPEC MODAL                                          -->
+  <!-- ============================================================== -->
+  <div id="export-modal" class="fixed inset-0 z-50 hidden bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
+    <div class="theme-card max-w-2xl w-full p-6 max-h-[90vh] flex flex-col">
+      <div class="flex items-center justify-between border-b border-[var(--border-color)] pb-3 mb-4">
+        <div>
+          <h3 class="text-sm font-bold text-[var(--foreground)]">Export Approved FinLITE Design Spec</h3>
+          <p class="text-xs text-[var(--muted-foreground)]">Drop these exact tokens into globals.css and Tailwind config.</p>
+        </div>
+        <button onclick="closeExportModal()" class="text-[var(--muted-foreground)] hover:text-[var(--foreground)]">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+
+      <!-- Generated CSS Variables View -->
+      <div class="flex-1 overflow-y-auto space-y-3 font-mono text-xs">
+        <div>
+          <span class="text-[11px] font-sans font-semibold text-[var(--muted-foreground)] uppercase">CSS Variables for app/globals.css:</span>
+          <pre id="export-css-tokens" class="mt-1 p-3 rounded bg-[var(--surface-subtle)] border border-[var(--border-color)] text-[11px] overflow-x-auto text-[var(--foreground)]"></pre>
+        </div>
+      </div>
+
+      <div class="flex items-center justify-between pt-4 border-t border-[var(--border-color)] mt-4">
+        <button onclick="copyMarkdownNotes()" class="theme-secondary-btn px-3 py-1.5 text-xs font-medium flex items-center gap-1.5">
+          <i data-lucide="file-text" class="w-3.5 h-3.5"></i>
+          <span>Copy All Feedback Notes</span>
+        </button>
+        <button onclick="copyExportedTokens()" class="theme-primary-btn px-4 py-1.5 text-xs font-semibold flex items-center gap-1.5">
+          <i data-lucide="copy" class="w-3.5 h-3.5"></i>
+          <span>Copy CSS Variables</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOAST NOTIFICATION -->
+  <div id="toast-notification" class="fixed bottom-5 right-5 z-50 pointer-events-none opacity-0 translate-y-2 bg-emerald-600 text-white text-xs font-medium px-4 py-2.5 rounded-lg shadow-lg flex items-center gap-2">
+    <i data-lucide="check-circle" class="w-4 h-4"></i>
+    <span id="toast-message">Copied to clipboard!</span>
+  </div>
+
+  <!-- ============================================================== -->
+  <!-- 5. JAVASCRIPT ENGINE (REACTIVITY, ANNOTATIONS, EXPORTS)        -->
+  <!-- ============================================================== -->
+  <script>
+    // System State
+    const state = {
+      theme: 'light',
+      radius: 8,
+      density: 'balanced',
+      border: 'hairline',
+      accent: 'institutional',
+      archetype: 'top',
+      feedbackMode: false,
+      activePinId: null,
+      tempPinCoords: null,
+      comments: []
+    };
+
+    // Initialize Lucide Icons
+    document.addEventListener('DOMContentLoaded', () => {
+      lucide.createIcons();
+      initRightClickAnnotationEngine();
+      updateDenominationCalculation();
+    });
+
+    // Toggle Light / Dark Mode Canvas
+    function toggleColorMode() {
+      const html = document.documentElement;
+      const isDark = html.classList.contains('dark');
+      if (isDark) {
+        html.classList.remove('dark');
+        html.classList.add('light');
+        state.theme = 'light';
+        document.getElementById('theme-toggle-icon').setAttribute('data-lucide', 'moon');
+      } else {
+        html.classList.remove('light');
+        html.classList.add('dark');
+        state.theme = 'dark';
+        document.getElementById('theme-toggle-icon').setAttribute('data-lucide', 'sun');
+      }
+      lucide.createIcons();
+    }
+
+    // Toggle Expandable Customizer Toolbar
+    function toggleCustomizerBar() {
+      const bar = document.getElementById('customizer-toolbar');
+      bar.classList.toggle('hidden');
+    }
+
+    // Toggle Layout Archetype
+    function setLayoutArchetype(arch) {
+      state.archetype = arch;
+      document.getElementById('archetype-top-nav').classList.add('hidden');
+      document.getElementById('archetype-sidebar').classList.add('hidden');
+      document.getElementById('archetype-split').classList.add('hidden');
+
+      ['btn-arch-top', 'btn-arch-sidebar', 'btn-arch-split'].forEach(id => {
+        const btn = document.getElementById(id);
+        btn.classList.remove('bg-[var(--surface)]', 'text-[var(--foreground)]', 'shadow-xs');
+        btn.classList.add('text-[var(--muted-foreground)]');
+      });
+
+      if (arch === 'top') {
+        document.getElementById('archetype-top-nav').classList.remove('hidden');
+        setActiveArchButton('btn-arch-top');
+      } else if (arch === 'sidebar') {
+        document.getElementById('archetype-sidebar').classList.remove('hidden');
+        setActiveArchButton('btn-arch-sidebar');
+      } else if (arch === 'split') {
+        document.getElementById('archetype-split').classList.remove('hidden');
+        setActiveArchButton('btn-arch-split');
+      }
+      lucide.createIcons();
+    }
+
+    function setActiveArchButton(btnId) {
+      const btn = document.getElementById(btnId);
+      btn.classList.remove('text-[var(--muted-foreground)]');
+      btn.classList.add('bg-[var(--surface)]', 'text-[var(--foreground)]', 'shadow-xs');
+    }
+
+    // Granular Slider: Corner Radius
+    function setCornerRadius(val) {
+      state.radius = parseInt(val);
+      document.documentElement.style.setProperty('--theme-radius', `${val}px`);
+      document.getElementById('val-radius').innerText = `${val}px`;
+    }
+
+    // Granular Button: Data Density
+    function setDataDensity(level) {
+      state.density = level;
+      const root = document.documentElement;
+      ['density-compact', 'density-balanced', 'density-relaxed'].forEach(id => {
+        document.getElementById(id).classList.remove('bg-[var(--surface)]', 'font-semibold', 'text-[var(--foreground)]', 'shadow-xs');
+        document.getElementById(id).classList.add('text-[var(--muted-foreground)]');
+      });
+      document.getElementById(`density-${level}`).classList.add('bg-[var(--surface)]', 'font-semibold', 'text-[var(--foreground)]', 'shadow-xs');
+
+      if (level === 'compact') {
+        root.style.setProperty('--theme-pad-y', '0.35rem');
+        root.style.setProperty('--theme-pad-x', '0.625rem');
+        root.style.setProperty('--theme-font-size', '0.75rem');
+      } else if (level === 'balanced') {
+        root.style.setProperty('--theme-pad-y', '0.5rem');
+        root.style.setProperty('--theme-pad-x', '0.875rem');
+        root.style.setProperty('--theme-font-size', '0.875rem');
+      } else if (level === 'relaxed') {
+        root.style.setProperty('--theme-pad-y', '0.75rem');
+        root.style.setProperty('--theme-pad-x', '1.125rem');
+        root.style.setProperty('--theme-font-size', '0.9375rem');
+      }
+    }
+
+    // Granular Button: Border Contrast
+    function setBorderContrast(mode) {
+      state.border = mode;
+      const root = document.documentElement;
+      ['border-hairline', 'border-structural', 'border-flat'].forEach(id => {
+        document.getElementById(id).classList.remove('bg-[var(--surface)]', 'font-semibold', 'text-[var(--foreground)]', 'shadow-xs');
+        document.getElementById(id).classList.add('text-[var(--muted-foreground)]');
+      });
+      document.getElementById(`border-${mode}`).classList.add('bg-[var(--surface)]', 'font-semibold', 'text-[var(--foreground)]', 'shadow-xs');
+
+      if (mode === 'hairline') {
+        root.style.setProperty('--theme-border-width', '1px');
+        root.style.setProperty('--theme-border-style', 'solid');
+      } else if (mode === 'structural') {
+        root.style.setProperty('--theme-border-width', '2px');
+        root.style.setProperty('--theme-border-style', 'solid');
+      } else if (mode === 'flat') {
+        root.style.setProperty('--theme-border-width', '0px');
+      }
+    }
+
+    // Granular Button: Accent Saturation
+    function setAccentStyle(style) {
+      state.accent = style;
+      const root = document.documentElement;
+      ['accent-inst', 'accent-em', 'accent-mono'].forEach(id => {
+        document.getElementById(id).classList.remove('bg-[var(--surface)]', 'font-semibold', 'text-[var(--foreground)]', 'shadow-xs');
+        document.getElementById(id).classList.add('text-[var(--muted-foreground)]');
+      });
+      const targetId = style === 'institutional' ? 'accent-inst' : (style === 'emerald' ? 'accent-em' : 'accent-mono');
+      document.getElementById(targetId).classList.add('bg-[var(--surface)]', 'font-semibold', 'text-[var(--foreground)]', 'shadow-xs');
+
+      if (style === 'institutional') {
+        root.style.setProperty('--primary', '#059669');
+        root.style.setProperty('--primary-hover', '#047857');
+      } else if (style === 'emerald') {
+        root.style.setProperty('--primary', '#10B981');
+        root.style.setProperty('--primary-hover', '#059669');
+      } else if (style === 'mono') {
+        root.style.setProperty('--primary', '#15803D');
+        root.style.setProperty('--primary-hover', '#166534');
+      }
+    }
+
+    // Apply Curated Preset
+    function applyPreset(preset) {
+      if (preset === 'swiss') {
+        setCornerRadius(4);
+        setDataDensity('compact');
+        setBorderContrast('hairline');
+        setAccentStyle('mono');
+      } else if (preset === 'stripe') {
+        setCornerRadius(8);
+        setDataDensity('balanced');
+        setBorderContrast('hairline');
+        setAccentStyle('institutional');
+      } else if (preset === 'linear') {
+        setCornerRadius(6);
+        setDataDensity('compact');
+        setBorderContrast('structural');
+        setAccentStyle('emerald');
+        if (!document.documentElement.classList.contains('dark')) toggleColorMode();
+      } else if (preset === 'fintech') {
+        setCornerRadius(12);
+        setDataDensity('relaxed');
+        setBorderContrast('hairline');
+        setAccentStyle('institutional');
+      }
+    }
+
+    // Real-time Denomination Calculator
+    function updateDenominationCalculation() {
+      const rates = [1000, 500, 200, 100, 50, 20, 10, 5, 1];
+      const inputs = document.querySelectorAll('[data-component-id="denomination-counter"] input[type="number"]');
+      let total = 0;
+      inputs.forEach((inp, idx) => {
+        const count = parseInt(inp.value) || 0;
+        total += count * rates[idx];
+      });
+      document.getElementById('denom-total').innerText = '₱' + total.toLocaleString('en-US', { minimumFractionDigits: 2 });
+    }
+
+    // ==============================================================
+    // RIGHT-CLICK ANNOTATION & PINNING SYSTEM
+    // ==============================================================
+    function toggleFeedbackMode() {
+      state.feedbackMode = !state.feedbackMode;
+      const btn = document.getElementById('btn-feedback-mode');
+      const banner = document.getElementById('feedback-active-banner');
+
+      if (state.feedbackMode) {
+        btn.classList.add('bg-emerald-600', 'text-white', 'border-emerald-600');
+        btn.classList.remove('bg-[var(--surface-subtle)]', 'text-[var(--muted-foreground)]');
+        banner.classList.remove('hidden');
+        showToast('Feedback Mode ON: Right-click any component to add notes');
+      } else {
+        btn.classList.remove('bg-emerald-600', 'text-white', 'border-emerald-600');
+        btn.classList.add('bg-[var(--surface-subtle)]', 'text-[var(--muted-foreground)]');
+        banner.classList.add('hidden');
+        closeCommentPopover();
+      }
+    }
+
+    function initRightClickAnnotationEngine() {
+      const canvas = document.getElementById('workspace-canvas');
+
+      canvas.addEventListener('contextmenu', (e) => {
+        if (!state.feedbackMode) return; // Allow normal right-click unless Feedback Mode is ON
+
+        e.preventDefault();
+        const component = e.target.closest('[data-component-id]') || e.target.closest('.theme-card') || canvas;
+        const rect = component.getBoundingClientRect();
+        
+        // Calculate relative coordinates (percentage) inside the component container
+        const xPercent = ((e.clientX - rect.left) / rect.width) * 100;
+        const yPercent = ((e.clientY - rect.top) / rect.height) * 100;
+        const compId = component.getAttribute('data-component-id') || 'General Layout';
+
+        state.tempPinCoords = {
+          component,
+          compId,
+          xPercent,
+          yPercent,
+          screenX: e.clientX,
+          screenY: e.clientY
+        };
+
+        openCommentPopover(compId, '', false, e.clientX, e.clientY);
+      });
+    }
+
+    function openCommentPopover(compId, initialText, isExisting, x, y) {
+      const popover = document.getElementById('comment-popover');
+      document.getElementById('popover-component-name').innerText = compId;
+      document.getElementById('popover-textarea').value = initialText || '';
+      document.getElementById('btn-delete-pin').style.display = isExisting ? 'block' : 'none';
+
+      // Keep within screen bounds
+      const popX = Math.min(x + 10, window.innerWidth - 300);
+      const popY = Math.min(y + 10, window.innerHeight - 200);
+
+      popover.style.left = `${popX}px`;
+      popover.style.top = `${popY}px`;
+      popover.classList.remove('hidden');
+      document.getElementById('popover-textarea').focus();
+    }
+
+    function closeCommentPopover() {
+      document.getElementById('comment-popover').classList.add('hidden');
+      state.activePinId = null;
+      state.tempPinCoords = null;
+    }
+
+    function saveCommentPin() {
+      const text = document.getElementById('popover-textarea').value.trim();
+      if (!text) {
+        closeCommentPopover();
+        return;
+      }
+
+      if (state.activePinId !== null) {
+        // Edit existing pin
+        const pinObj = state.comments.find(c => c.id === state.activePinId);
+        if (pinObj) pinObj.text = text;
+      } else if (state.tempPinCoords) {
+        // Create new pin
+        const id = state.comments.length + 1;
+        const newPin = {
+          id,
+          componentId: state.tempPinCoords.compId,
+          xPercent: state.tempPinCoords.xPercent,
+          yPercent: state.tempPinCoords.yPercent,
+          text,
+          timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+        };
+
+        state.comments.push(newPin);
+        renderPinOnDOM(state.tempPinCoords.component, newPin);
+        updatePinCount();
+      }
+
+      closeCommentPopover();
+      showToast('Comment pinned successfully');
+    }
+
+    function renderPinOnDOM(container, pin) {
+      const pinEl = document.createElement('button');
+      pinEl.id = `pin-marker-${pin.id}`;
+      pinEl.className = 'annotation-pin flex items-center justify-center h-6 w-6 rounded-full bg-emerald-600 text-white font-mono text-[10px] font-bold shadow-md hover:scale-110 transition-transform';
+      pinEl.innerText = pin.id;
+      pinEl.style.left = `${pin.xPercent}%`;
+      pinEl.style.top = `${pin.yPercent}%`;
+      pinEl.title = `[Pin #${pin.id}] ${pin.componentId}: ${pin.text}`;
+
+      pinEl.onclick = (e) => {
+        e.stopPropagation();
+        state.activePinId = pin.id;
+        openCommentPopover(pin.componentId, pin.text, true, e.clientX, e.clientY);
+      };
+
+      container.appendChild(pinEl);
+    }
+
+    function deleteCurrentPin() {
+      if (state.activePinId === null) return;
+      state.comments = state.comments.filter(c => c.id !== state.activePinId);
+      const el = document.getElementById(`pin-marker-${state.activePinId}`);
+      if (el) el.remove();
+      updatePinCount();
+      closeCommentPopover();
+      showToast('Pin removed');
+    }
+
+    function updatePinCount() {
+      document.getElementById('pin-counter').innerText = state.comments.length;
+    }
+
+    // Export Notes as Markdown
+    function copyMarkdownNotes() {
+      if (state.comments.length === 0) {
+        showToast('No feedback pins yet. Right-click to drop pins!');
+        return;
+      }
+
+      let md = `### FinLITE UI/UX Overhaul — Pinned Review Feedback\n\n`;
+      md += `| Pin # | Component Target | Timestamp | Reviewer Instruction & Notes |\n`;
+      md += `| :--- | :--- | :--- | :--- |\n`;
+      state.comments.forEach(c => {
+        md += `| **#${c.id}** | \`${c.componentId}\` | ${c.timestamp} | ${c.text.replace(/\n/g, ' ')} |\n`;
+      });
+
+      navigator.clipboard.writeText(md).then(() => {
+        showToast(`Copied ${state.comments.length} review notes as Markdown!`);
+      });
+    }
+
+    // ==============================================================
+    // EXPORT SPEC MODAL & TOKENS
+    // ==============================================================
+    function openExportModal() {
+      const modal = document.getElementById('export-modal');
+      const cssTarget = document.getElementById('export-css-tokens');
+
+      const css = `/* FinLITE Approved Design Tokens (Generated from Workbench) */
+@layer base {
+  :root {
+    --canvas: #FFFFFF;
+    --surface: #FAFAFA;
+    --surface-subtle: #F4F4F5;
+    --border: #E4E4E7;
+    --foreground: #09090B;
+    --muted-foreground: #71717A;
+    --primary: #059669; /* Emerald 600 */
+    --primary-hover: #047857;
+    --primary-subtle: #ECFDF5;
+    --theme-radius: ${state.radius}px;
+    --theme-density-y: ${state.density === 'compact' ? '0.35rem' : (state.density === 'balanced' ? '0.5rem' : '0.75rem')};
+  }
+
+  html.dark,
+  html[data-theme="dark"] {
+    --canvas: #09090B; /* True Obsidian Black */
+    --surface: #121214;
+    --surface-subtle: #18181B;
+    --border: #27272A;
+    --foreground: #F4F4F5;
+    --muted-foreground: #A1A1AA;
+    --primary: #10B981; /* Emerald 500 */
+    --primary-hover: #059669;
+    --primary-subtle: #06281B;
+  }
+}`;
+
+      cssTarget.innerText = css;
+      modal.classList.remove('hidden');
+      lucide.createIcons();
+    }
+
+    function closeExportModal() {
+      document.getElementById('export-modal').classList.add('hidden');
+    }
+
+    function copyExportedTokens() {
+      const code = document.getElementById('export-css-tokens').innerText;
+      navigator.clipboard.writeText(code).then(() => {
+        showToast('CSS Variables copied to clipboard!');
+      });
+    }
+
+    function showToast(msg) {
+      const toast = document.getElementById('toast-notification');
+      document.getElementById('toast-message').innerText = msg;
+      toast.classList.remove('opacity-0', 'translate-y-2');
+      toast.classList.add('opacity-100', 'translate-y-0');
+
+      setTimeout(() => {
+        toast.classList.remove('opacity-100', 'translate-y-0');
+        toast.classList.add('opacity-0', 'translate-y-2');
+      }, 3000);
+    }
+  </script>
+</body>
+</html>
