@@ -5,6 +5,7 @@ import { createClient } from '@/lib/supabase/client';
 import { Eye, EyeOff, LogIn, AlertCircle, CheckCircle2 } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
+import { Button } from '@/components/ui';
 
 function GoogleIcon() {
   return (
@@ -104,11 +105,11 @@ function LoginForm() {
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4 sm:p-6 lg:p-8">
-      {/* Outer Card Container with hairline border and zero decorative blur noise */}
-      <div className="w-full max-w-5xl rounded-3xl border border-white/[0.08] bg-[#071910] shadow-2xl overflow-hidden grid grid-cols-1 lg:grid-cols-12 p-3 sm:p-4 lg:p-4 gap-4 relative">
+      {/* Outer Card Container with obsidian background and zinc hairline border */}
+      <div className="w-full max-w-5xl rounded-3xl border border-zinc-800 bg-[#09090B] shadow-2xl overflow-hidden grid grid-cols-1 lg:grid-cols-12 p-3 sm:p-4 lg:p-4 gap-4 relative">
         
         {/* Left Side: Clean high-contrast brand panel */}
-        <div className="lg:col-span-6 relative rounded-2xl sm:rounded-3xl bg-[#0a2317] border border-white/[0.08] p-8 sm:p-10 flex flex-col justify-between min-h-[300px] lg:min-h-[540px] select-none">
+        <div className="lg:col-span-6 relative rounded-2xl sm:rounded-3xl bg-[#121214] border border-zinc-800/80 p-8 sm:p-10 flex flex-col justify-between min-h-[300px] lg:min-h-[540px] select-none">
           {/* Top Branding / Logo Mark */}
           <div className="flex items-center gap-3.5 sm:gap-4">
             <div className="w-13 h-13 sm:w-15 sm:h-15 flex items-center justify-center shrink-0">
@@ -125,7 +126,7 @@ function LoginForm() {
               <span className="text-white font-black text-xl sm:text-2xl lg:text-[1.65rem] tracking-tight leading-none block">
                 FinLITE
               </span>
-              <p className="text-xs sm:text-sm text-emerald-200/90 font-medium leading-snug mt-1">
+              <p className="text-xs sm:text-sm text-emerald-400/90 font-medium leading-snug mt-1">
                 League of Information Technology Enthusiasts
               </p>
             </div>
@@ -136,7 +137,7 @@ function LoginForm() {
             <h2 className="text-2xl sm:text-3xl lg:text-[2.1rem] font-black text-white leading-[1.25] tracking-tight">
               Get access to your financial hub for clarity and accountability.
             </h2>
-            <p className="text-xs sm:text-sm text-emerald-200/70 font-medium mt-3 leading-relaxed">
+            <p className="text-xs sm:text-sm text-zinc-400 font-medium mt-3 leading-relaxed">
               Pambayang Dalubhasaan ng Marilao · College of Computer Studies
             </p>
           </div>
@@ -146,7 +147,7 @@ function LoginForm() {
         <div className="lg:col-span-6 p-6 sm:p-8 lg:p-10 flex flex-col justify-between relative z-10">
           <div className="max-w-md w-full mx-auto">
             <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">Welcome back</h1>
-            <p className="text-xs text-white/60 mt-1.5 mb-7 leading-relaxed">
+            <p className="text-xs text-zinc-400 mt-1.5 mb-7 leading-relaxed">
               Access your tasks, ledgers, and financial records anytime — keeping everything flowing in one place.
             </p>
 
@@ -167,29 +168,35 @@ function LoginForm() {
             )}
 
             {/* Google OAuth Button */}
-            <button
+            <Button
               type="button"
+              variant="outline"
+              size="lg"
               onClick={handleGoogleLogin}
               disabled={isGoogleLoading || isLoading}
-              className="w-full h-11 flex items-center justify-center gap-3 px-4 border border-white/[0.08] rounded-xl text-xs font-semibold text-white bg-[#0a2317] hover:bg-[#0e2e1f] active:bg-[#123b27] transition-all disabled:opacity-50 mb-5 cursor-pointer shadow-sm hover:border-white/[0.15]"
+              className="w-full mb-5 bg-[#121214] border-zinc-800 hover:bg-zinc-800/60 text-white font-semibold"
+              leftIcon={
+                isGoogleLoading ? (
+                  <div className="w-4 h-4 border-2 border-emerald-300 border-t-white rounded-full animate-spin" />
+                ) : (
+                  <GoogleIcon />
+                )
+              }
             >
-              {isGoogleLoading ? (
-                <div className="w-4 h-4 border-2 border-emerald-300 border-t-white rounded-full animate-spin" />
-              ) : <GoogleIcon />}
               <span>{isGoogleLoading ? 'Redirecting...' : 'Continue to FinLITE with Google'}</span>
-            </button>
+            </Button>
 
             {/* Divider */}
             <div className="flex items-center gap-3 mb-5">
-              <div className="flex-1 h-px bg-white/[0.08]" />
-              <span className="text-xs text-white/40 font-medium">or sign in with Gmail</span>
-              <div className="flex-1 h-px bg-white/[0.08]" />
+              <div className="flex-1 h-px bg-zinc-800" />
+              <span className="text-xs text-zinc-500 font-medium">or sign in with Gmail</span>
+              <div className="flex-1 h-px bg-zinc-800" />
             </div>
 
             {/* Login Form */}
             <form onSubmit={handleLogin} className="space-y-4">
               <div>
-                <label className="block text-xs font-semibold text-emerald-100/80 mb-1.5">Gmail Address</label>
+                <label className="block text-xs font-semibold text-zinc-300 mb-1.5">Gmail Address</label>
                 <input
                   type="email"
                   value={email}
@@ -197,13 +204,13 @@ function LoginForm() {
                   placeholder="yourname@gmail.com"
                   required
                   autoComplete="email"
-                  className="w-full h-11 px-3.5 rounded-xl border border-white/[0.08] text-xs text-white placeholder-white/30 focus:outline-none focus:ring-1 focus:ring-emerald-500/50 focus:border-emerald-400 transition-all select-text bg-[#05140d]"
+                  className="w-full h-11 px-3.5 rounded-xl border border-zinc-800 text-xs text-white placeholder-zinc-500 focus:outline-none focus:ring-1 focus:ring-emerald-500/50 focus:border-emerald-500 transition-all select-text bg-[#121214]"
                 />
               </div>
 
               <div>
                 <div className="flex items-center justify-between mb-1.5">
-                  <label className="block text-xs font-semibold text-emerald-100/80">Password</label>
+                  <label className="block text-xs font-semibold text-zinc-300">Password</label>
                   <Link
                     href="/forgot-password"
                     className="text-[11px] font-semibold text-emerald-400 hover:text-emerald-300 transition-colors"
@@ -219,12 +226,12 @@ function LoginForm() {
                     placeholder="••••••••••••"
                     required
                     autoComplete="current-password"
-                    className="w-full h-11 px-3.5 pr-10 rounded-xl border border-white/[0.08] text-xs text-white placeholder-white/30 focus:outline-none focus:ring-1 focus:ring-emerald-500/50 focus:border-emerald-400 transition-all select-text bg-[#05140d]"
+                    className="w-full h-11 px-3.5 pr-10 rounded-xl border border-zinc-800 text-xs text-white placeholder-zinc-500 focus:outline-none focus:ring-1 focus:ring-emerald-500/50 focus:border-emerald-500 transition-all select-text bg-[#121214]"
                   />
                   <button
                     type="button"
                     onClick={() => setShowPass(!showPass)}
-                    className="absolute right-3.5 top-1/2 -translate-y-1/2 text-white/40 hover:text-white cursor-pointer p-1"
+                    className="absolute right-3.5 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-white cursor-pointer p-1"
                     tabIndex={-1}
                   >
                     {showPass ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
@@ -232,28 +239,29 @@ function LoginForm() {
                 </div>
               </div>
 
-              <button
+              <Button
                 type="submit"
+                variant="primary"
+                size="lg"
                 disabled={isLoading || isGoogleLoading}
-                className="w-full h-11 flex items-center justify-center gap-2 bg-emerald-500 hover:bg-emerald-400 active:bg-emerald-600 text-black rounded-xl text-xs font-bold transition-all shadow-md disabled:opacity-50 mt-2 cursor-pointer"
+                loading={isLoading}
+                leftIcon={<LogIn className="w-4 h-4" />}
+                className="w-full mt-2"
               >
-                {isLoading ? (
-                  <div className="w-4 h-4 border-2 border-black/40 border-t-black rounded-full animate-spin" />
-                ) : <LogIn className="w-4 h-4" />}
                 {isLoading ? 'Signing in...' : 'Sign In'}
-              </button>
+              </Button>
             </form>
           </div>
 
           {/* Footer Link */}
-          <div className="mt-8 pt-4 border-t border-white/[0.08] text-center">
-            <p className="text-xs text-white/50">
+          <div className="mt-8 pt-4 border-t border-zinc-800 text-center">
+            <p className="text-xs text-zinc-400">
               Don&apos;t have an account?{' '}
               <Link href="/register" className="text-emerald-400 hover:text-emerald-300 font-bold transition-colors">
                 Request Access
               </Link>
             </p>
-            <p className="text-[11px] text-white/35 mt-2">
+            <p className="text-[11px] text-zinc-600 mt-2">
               Pambayang Dalubhasaan ng Marilao — LITE
             </p>
           </div>

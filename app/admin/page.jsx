@@ -31,6 +31,7 @@ import {
   Loader2
 } from 'lucide-react';
 import { useTheme } from '@/components/theme/ThemeProvider';
+import { Modal, Button, Badge, Input } from '@/components/ui';
 
 const ROLE_OPTIONS = [
   { value: 'treasurer', label: 'Treasurer', desc: 'Disbursements & Collections' },
@@ -498,13 +499,13 @@ export default function AdminPage() {
         <div className={`p-4 rounded-2xl mb-6 border transition-all ${
           isLight
             ? 'bg-white border-black/[0.08] shadow-2xs'
-            : 'bg-[#081a11] border-white/[0.08]'
+            : 'bg-[#121214] border-zinc-800'
         }`}>
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
             
             {/* Tab Selector Pills */}
             <div className={`flex items-center p-1 rounded-xl gap-1 overflow-x-auto border ${
-              isLight ? 'bg-gray-100/80 border-black/[0.06]' : 'bg-[#05140d] border-white/[0.06]'
+              isLight ? 'bg-gray-100/80 border-black/[0.06]' : 'bg-zinc-900 border-zinc-800'
             }`}>
               {/* Pending Tab */}
               <button
@@ -599,7 +600,7 @@ export default function AdminPage() {
             {/* Search Input */}
             <div className="relative min-w-[240px]">
               <Search className={`w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none ${
-                isLight ? 'text-gray-400' : 'text-white/40'
+                isLight ? 'text-gray-400' : 'text-zinc-500'
               }`} />
               <input
                 type="text"
@@ -609,7 +610,7 @@ export default function AdminPage() {
                 className={`w-full text-xs rounded-xl pl-9 pr-3.5 py-2 transition-all select-text border focus:outline-none focus:ring-1 ${
                   isLight
                     ? 'bg-gray-50 border-black/[0.08] text-gray-900 placeholder:text-gray-400 focus:bg-white focus:border-emerald-600 focus:ring-emerald-500/20'
-                    : 'bg-[#05140d] border-white/[0.08] text-white placeholder:text-white/35 focus:border-emerald-400 focus:ring-emerald-500/30'
+                    : 'bg-[#121214] border-zinc-800 text-white placeholder:text-zinc-500 focus:border-emerald-400 focus:ring-emerald-500/30'
                 }`}
               />
             </div>
@@ -622,14 +623,14 @@ export default function AdminPage() {
           <div className="space-y-3">
             {isLoading ? (
               <div className={`p-12 text-center rounded-2xl border ${
-                isLight ? 'bg-white border-black/[0.08]' : 'bg-[#081a11] border-white/[0.08]'
+                isLight ? 'bg-white border-black/[0.08]' : 'bg-[#121214] border-zinc-800'
               }`}>
                 <RefreshCw className="w-6 h-6 text-emerald-500 animate-spin mx-auto mb-2" />
-                <p className={`text-xs font-medium ${isLight ? 'text-gray-600' : 'text-white/60'}`}>Loading pending registration requests...</p>
+                <p className={`text-xs font-medium ${isLight ? 'text-gray-600' : 'text-zinc-400'}`}>Loading pending registration requests...</p>
               </div>
             ) : filteredRequests.length === 0 ? (
               <div className={`p-12 sm:p-16 text-center rounded-2xl border ${
-                isLight ? 'bg-white border-black/[0.08]' : 'bg-[#081a11] border-white/[0.08]'
+                isLight ? 'bg-white border-black/[0.08]' : 'bg-[#121214] border-zinc-800'
               }`}>
                 <div className={`w-12 h-12 rounded-xl flex items-center justify-center mx-auto mb-3 ${
                   isLight ? 'bg-emerald-100 text-emerald-700' : 'bg-emerald-500/20 text-emerald-400'
@@ -637,7 +638,7 @@ export default function AdminPage() {
                   <CheckCircle2 className="w-6 h-6" />
                 </div>
                 <h3 className="text-base font-bold mb-1">Queue is Clear!</h3>
-                <p className={`text-xs max-w-sm mx-auto font-medium ${isLight ? 'text-gray-500' : 'text-white/50'}`}>
+                <p className={`text-xs max-w-sm mx-auto font-medium ${isLight ? 'text-gray-500' : 'text-zinc-400'}`}>
                   {searchQuery ? 'No pending requests matched your search query.' : 'There are currently no new registration requests awaiting approval.'}
                 </p>
               </div>
@@ -646,7 +647,7 @@ export default function AdminPage() {
                 <div 
                   key={req.id}
                   className={`rounded-2xl p-5 transition-all border flex flex-col lg:flex-row lg:items-center justify-between gap-4 ${
-                    isLight ? 'bg-white border-black/[0.08]' : 'bg-[#081a11] border-white/[0.08]'
+                    isLight ? 'bg-white border-black/[0.08]' : 'bg-[#121214] border-zinc-800'
                   }`}
                 >
                   {/* Left: Applicant Identity */}
@@ -664,7 +665,7 @@ export default function AdminPage() {
                           {req.first_name} {req.last_name}
                         </h4>
                         <span className={`px-2 py-0.5 text-[10px] font-semibold rounded-md ${
-                          isLight ? 'bg-gray-100 text-gray-700' : 'bg-[#05140d] text-white/80'
+                          isLight ? 'bg-gray-100 text-gray-700' : 'bg-zinc-800 text-zinc-300'
                         }`}>
                           {req.auth_provider === 'google' ? 'Google OAuth' : 'Email/Password'}
                         </span>
@@ -751,10 +752,10 @@ export default function AdminPage() {
         {/* Tab 2: Active Officers / User Access Management */}
         {activeTab === 'users' && (
           <div className={`rounded-2xl overflow-hidden border ${
-            isLight ? 'bg-white border-black/[0.08]' : 'bg-[#081a11] border-white/[0.08]'
+            isLight ? 'bg-white border-black/[0.08]' : 'bg-[#121214] border-zinc-800'
           }`}>
             <div className={`p-4 border-b flex items-center justify-between ${
-              isLight ? 'border-black/[0.06] bg-gray-50/70' : 'border-white/[0.06] bg-[#05140d]'
+              isLight ? 'border-black/[0.06] bg-gray-50/70' : 'border-zinc-800 bg-zinc-900/60'
             }`}>
               <div>
                 <h3 className="text-sm font-bold">Authorized Accounts &amp; Access Controls</h3>
@@ -927,11 +928,11 @@ export default function AdminPage() {
         {/* Tab 3: Activity & Access Logs (Telemetry) */}
         {activeTab === 'audit' && (
           <div className={`rounded-2xl overflow-hidden border ${
-            isLight ? 'bg-white border-black/[0.08]' : 'bg-[#081a11] border-white/[0.08]'
+            isLight ? 'bg-white border-black/[0.08]' : 'bg-[#121214] border-zinc-800'
           }`}>
             {/* Telemetry Filter Sub-Toolbar */}
             <div className={`p-4 border-b flex flex-col sm:flex-row sm:items-center justify-between gap-3 ${
-              isLight ? 'border-black/[0.06] bg-gray-50/70' : 'border-white/[0.06] bg-[#05140d]'
+              isLight ? 'border-black/[0.06] bg-gray-50/70' : 'border-zinc-800 bg-zinc-900/60'
             }`}>
               <div className="flex items-center gap-2">
                 <Activity className="w-4 h-4 text-emerald-500" />
@@ -940,7 +941,7 @@ export default function AdminPage() {
 
               {/* Category Filter Pills */}
               <div className={`flex items-center p-1 rounded-xl gap-1 border ${
-                isLight ? 'bg-white border-black/[0.08]' : 'bg-[#092216] border-white/[0.08]'
+                isLight ? 'bg-white border-black/[0.08]' : 'bg-zinc-900 border-zinc-800'
               }`}>
                 {AUDIT_FILTER_OPTIONS.map((f) => (
                   <button
@@ -1079,14 +1080,14 @@ export default function AdminPage() {
           <div className="space-y-3">
             {filteredRequests.length === 0 ? (
               <div className={`p-12 text-center rounded-2xl text-xs font-semibold border ${
-                isLight ? 'bg-white border-black/[0.08] text-gray-400' : 'bg-[#081a11] border-white/[0.08] text-white/45'
+                isLight ? 'bg-white border-black/[0.08] text-gray-400' : 'bg-[#121214] border-zinc-800 text-zinc-500'
               }`}>
                 No approved request records found.
               </div>
             ) : (
               filteredRequests.map((req) => (
                 <div key={req.id} className={`rounded-2xl p-4 flex items-center justify-between gap-4 border transition-all ${
-                  isLight ? 'bg-white border-black/[0.08]' : 'bg-[#081a11] border-white/[0.08]'
+                  isLight ? 'bg-white border-black/[0.08]' : 'bg-[#121214] border-zinc-800'
                 }`}>
                   <div className="flex items-center gap-3">
                     <div className={`w-10 h-10 rounded-xl flex items-center justify-center font-bold text-sm ${
@@ -1103,11 +1104,11 @@ export default function AdminPage() {
                           {req.requested_role}
                         </span>
                       </div>
-                      <p className={`text-xs font-medium ${isLight ? 'text-gray-500' : 'text-white/50'}`}>{req.email}</p>
+                      <p className={`text-xs font-medium ${isLight ? 'text-gray-500' : 'text-zinc-400'}`}>{req.email}</p>
                     </div>
                   </div>
 
-                  <span className={`text-[11px] font-medium ${isLight ? 'text-gray-400' : 'text-white/45'}`}>
+                  <span className={`text-[11px] font-medium ${isLight ? 'text-gray-400' : 'text-zinc-500'}`}>
                     Approved: {req.reviewed_at ? new Date(req.reviewed_at).toLocaleDateString() : 'Active'}
                   </span>
                 </div>
@@ -1121,7 +1122,7 @@ export default function AdminPage() {
           <div className="space-y-3">
             {filteredRequests.length === 0 ? (
               <div className={`p-12 text-center rounded-2xl text-xs font-semibold border ${
-                isLight ? 'bg-white border-black/[0.08] text-gray-400' : 'bg-[#081a11] border-white/[0.08] text-white/45'
+                isLight ? 'bg-white border-black/[0.08] text-gray-400' : 'bg-[#121214] border-zinc-800 text-zinc-500'
               }`}>
                 No declined requests recorded.
               </div>
@@ -1161,37 +1162,38 @@ export default function AdminPage() {
       </main>
 
       {/* Safe Account Deletion Modal (Financial Ledger Dependency Check) */}
-      {removingUser && (
-        <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className={`rounded-2xl max-w-md w-full p-6 shadow-2xl border animate-in fade-in zoom-in-95 duration-150 ${
-            isLight ? 'bg-white border-black/[0.08]' : 'bg-[#081a11] border-white/[0.08]'
-          }`}>
-            <div className="flex items-center gap-3 mb-4">
-              <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 border ${
-                isLight ? 'bg-rose-100 border-rose-200 text-rose-700' : 'bg-rose-500/15 border-rose-500/30 text-rose-400'
-              }`}>
+      <Modal
+        isOpen={Boolean(removingUser)}
+        onClose={() => setRemovingUser(null)}
+        title={
+          removingUser ? (
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 border bg-rose-500/10 border-rose-500/20 text-rose-600 dark:text-rose-400">
                 <Trash2 className="w-5 h-5" />
               </div>
               <div>
-                <h3 className="text-base font-bold">Safe Account Removal</h3>
-                <p className={`text-xs ${isLight ? 'text-gray-500' : 'text-white/50'}`}>
+                <h3 className="text-base font-bold text-zinc-950 dark:text-zinc-50">Safe Account Removal</h3>
+                <p className="text-xs text-zinc-500 dark:text-zinc-400">
                   {removingUser.full_name || removingUser.email} ({removingUser.email})
                 </p>
               </div>
             </div>
-
+          ) : null
+        }
+        maxWidth="md"
+      >
+        {removingUser && (
+          <div className="p-6">
             {isCheckingDeps ? (
-              <div className="py-6 text-center text-xs opacity-60">
+              <div className="py-6 text-center text-xs text-zinc-500 dark:text-zinc-400">
                 <Loader2 className="w-6 h-6 animate-spin mx-auto mb-2 text-emerald-500" />
                 <span>Checking financial ledger dependencies...</span>
               </div>
             ) : userDeps && userDeps.transactionCount > 0 ? (
               <div className="space-y-4">
-                <div className={`p-4 rounded-xl border text-xs ${
-                  isLight ? 'bg-amber-50 border-amber-200 text-amber-900' : 'bg-amber-500/10 border-amber-500/30 text-amber-200'
-                }`}>
+                <div className="p-4 rounded-xl border text-xs bg-amber-500/10 border-amber-500/20 text-amber-800 dark:text-amber-200">
                   <div className="flex items-center gap-2 font-bold mb-1.5">
-                    <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0" />
+                    <AlertTriangle className="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0" />
                     <span>Hard Deletion Disallowed: Ledger History Detected</span>
                   </div>
                   <p className="leading-relaxed">
@@ -1206,92 +1208,90 @@ export default function AdminPage() {
                 </div>
 
                 <div className="flex items-center justify-end gap-2.5">
-                  <button
+                  <Button
                     type="button"
+                    variant="ghost"
                     onClick={() => setRemovingUser(null)}
-                    className={`px-4 py-2 text-xs font-semibold rounded-xl transition-all cursor-pointer ${
-                      isLight ? 'text-gray-600 hover:bg-gray-100' : 'text-white/60 hover:text-white hover:bg-white/[0.05]'
-                    }`}
                   >
                     Close
-                  </button>
-                  <button
+                  </Button>
+                  <Button
                     type="button"
+                    variant="warning"
                     onClick={() => {
                       handleToggleUserStatus(removingUser);
                       setRemovingUser(null);
                     }}
-                    className="px-4 py-2 text-xs font-bold text-white bg-amber-600 hover:bg-amber-500 rounded-xl transition-all cursor-pointer"
                   >
                     Suspend Account Instead
-                  </button>
+                  </Button>
                 </div>
               </div>
             ) : (
               <div className="space-y-4">
-                <div className={`p-4 rounded-xl border text-xs leading-relaxed ${
-                  isLight ? 'bg-emerald-50 border-emerald-200 text-emerald-900' : 'bg-emerald-500/10 border-emerald-500/20 text-emerald-200'
-                }`}>
+                <div className="p-4 rounded-xl border text-xs leading-relaxed bg-emerald-500/10 border-emerald-500/20 text-emerald-800 dark:text-emerald-200">
                   <div className="flex items-center gap-2 font-bold mb-1">
-                    <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                    <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
                     <span>0 Ledger Transactions Recorded</span>
                   </div>
                   <p>
                     This account has no associated transactions or cashbox entries in the ledger. It is safe to remove from <code>profiles</code> and auth credentials.
                   </p>
-                  <p className="mt-2 text-rose-600 font-semibold">
+                  <p className="mt-2 text-rose-600 dark:text-rose-400 font-semibold">
                     Warning: This action is permanent.
                   </p>
                 </div>
 
                 <div className="flex items-center justify-end gap-2.5">
-                  <button
+                  <Button
                     type="button"
+                    variant="ghost"
                     onClick={() => setRemovingUser(null)}
                     disabled={isDeletingUser}
-                    className={`px-4 py-2 text-xs font-semibold rounded-xl transition-all cursor-pointer ${
-                      isLight ? 'text-gray-600 hover:bg-gray-100' : 'text-white/60 hover:text-white hover:bg-white/[0.05]'
-                    }`}
                   >
                     Cancel
-                  </button>
-                  <button
+                  </Button>
+                  <Button
                     type="button"
+                    variant="danger"
                     onClick={handleConfirmRemoveUser}
+                    loading={isDeletingUser}
                     disabled={isDeletingUser}
-                    className="px-4 py-2 text-xs font-bold text-white bg-rose-600 hover:bg-rose-500 rounded-xl transition-all shadow-xs cursor-pointer disabled:opacity-50 flex items-center gap-1.5"
+                    leftIcon={<Trash2 className="w-3.5 h-3.5" />}
                   >
-                    {isDeletingUser ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Trash2 className="w-3.5 h-3.5" />}
-                    <span>Confirm Removal</span>
-                  </button>
+                    Confirm Removal
+                  </Button>
                 </div>
               </div>
             )}
           </div>
-        </div>
-      )}
+        )}
+      </Modal>
 
       {/* Rejection Reason Modal */}
-      {rejectingRequest && (
-        <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className={`rounded-2xl max-w-md w-full p-6 shadow-2xl border animate-in fade-in zoom-in-95 duration-150 ${
-            isLight ? 'bg-white border-black/[0.08]' : 'bg-[#081a11] border-white/[0.08]'
-          }`}>
-            <div className="flex items-center gap-3 mb-4">
-              <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 border ${
-                isLight ? 'bg-rose-100 border-rose-200 text-rose-700' : 'bg-rose-500/15 border-rose-500/30 text-rose-400'
-              }`}>
+      <Modal
+        isOpen={Boolean(rejectingRequest)}
+        onClose={() => setRejectingRequest(null)}
+        title={
+          rejectingRequest ? (
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 border bg-rose-500/10 border-rose-500/20 text-rose-600 dark:text-rose-400">
                 <XCircle className="w-5 h-5" />
               </div>
               <div>
-                <h3 className="text-base font-bold">Decline Registration</h3>
-                <p className={`text-xs ${isLight ? 'text-gray-500' : 'text-white/50'}`}>
+                <h3 className="text-base font-bold text-zinc-950 dark:text-zinc-50">Decline Registration</h3>
+                <p className="text-xs text-zinc-500 dark:text-zinc-400">
                   {rejectingRequest.first_name} {rejectingRequest.last_name} ({rejectingRequest.email})
                 </p>
               </div>
             </div>
-
-            <p className={`text-xs mb-3 font-medium ${isLight ? 'text-gray-600' : 'text-white/60'}`}>
+          ) : null
+        }
+        maxWidth="md"
+      >
+        {rejectingRequest && (
+          <div className="p-6">
+            <p className="text-xs mb-3 font-medium text-zinc-600 dark:text-zinc-400">
               Please specify the reason for declining this applicant. This reason is saved for institutional audit trails.
             </p>
 
@@ -1300,35 +1300,30 @@ export default function AdminPage() {
               value={rejectionReason}
               onChange={(e) => setRejectionReason(e.target.value)}
               placeholder="e.g. Not an active officer, invalid student number..."
-              className={`w-full text-xs font-medium rounded-xl p-3 mb-4 select-text border focus:outline-none focus:ring-1 ${
-                isLight
-                  ? 'bg-gray-50 border-black/[0.08] text-gray-900 placeholder:text-gray-400 focus:bg-white focus:ring-rose-500/20 focus:border-rose-500'
-                  : 'bg-[#05140d] border-white/[0.08] text-white placeholder:text-white/30 focus:ring-rose-500/30 focus:border-rose-500/50'
-              }`}
+              className="w-full text-xs font-medium rounded-xl p-3 mb-4 select-text border focus:outline-none focus:ring-1 bg-white dark:bg-[#121214] border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 dark:placeholder:text-zinc-500 focus:ring-rose-500/20 focus:border-rose-500"
             />
 
             <div className="flex items-center justify-end gap-2.5">
-              <button
+              <Button
                 type="button"
+                variant="ghost"
                 onClick={() => setRejectingRequest(null)}
-                className={`px-4 py-2 text-xs font-semibold rounded-xl transition-all cursor-pointer ${
-                  isLight ? 'text-gray-600 hover:bg-gray-100' : 'text-white/60 hover:text-white hover:bg-white/[0.05]'
-                }`}
               >
                 Cancel
-              </button>
-              <button
+              </Button>
+              <Button
                 type="button"
+                variant="danger"
                 onClick={handleConfirmReject}
+                loading={isSubmittingAction}
                 disabled={isSubmittingAction}
-                className="px-4 py-2 text-xs font-bold text-white bg-rose-600 hover:bg-rose-500 rounded-xl transition-all shadow-xs cursor-pointer disabled:opacity-50"
               >
                 Confirm Decline
-              </button>
+              </Button>
             </div>
           </div>
-        </div>
-      )}
+        )}
+      </Modal>
 
     </div>
   );
