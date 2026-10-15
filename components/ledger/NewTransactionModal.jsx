@@ -18,6 +18,7 @@ import {
   OFFICIAL_INFLOW_CATEGORIES, 
   OFFICIAL_OUTFLOW_CATEGORIES 
 } from '@/lib/config/categories';
+import { Button, Badge, Modal } from '@/components/ui';
 
 export default function NewTransactionModal({
   isOpen,
@@ -246,89 +247,90 @@ export default function NewTransactionModal({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-xs flex items-end sm:items-center justify-center p-0 sm:p-4">
-      <div className="bg-white rounded-t-3xl sm:rounded-3xl max-w-md w-full border border-black/10 shadow-2xl overflow-hidden max-h-[90vh] flex flex-col animate-in fade-in slide-in-from-bottom-4 sm:zoom-in-95 duration-150">
-        
-        {/* Mobile Pull Handle */}
-        <div className="w-10 h-1 bg-gray-300 rounded-full mx-auto mt-2.5 -mb-1 sm:hidden shrink-0" />
-
-        {/* Modal Header */}
-        <div className="px-5 sm:px-6 py-4 border-b border-black/[0.06] flex items-center justify-between shrink-0">
-          <div>
-            <h3 className="text-base font-bold text-gray-950">Record Transaction</h3>
-            <p className="text-xs text-gray-500">Log an authorized inflow or disbursement</p>
-          </div>
-          <button 
-            onClick={onClose}
-            className="p-1.5 rounded-full text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
-          >
-            <X className="w-4 h-4" />
-          </button>
-        </div>
-
+    <>
+      <Modal
+        isOpen={isOpen}
+        onClose={onClose}
+        maxWidth="md"
+        title="Record Transaction"
+        description="Log an authorized inflow or disbursement"
+        footer={
+          <>
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              onClick={onClose}
+            >
+              Cancel
+            </Button>
+            <Button
+              type="submit"
+              form="new-transaction-form"
+              variant="primary"
+              size="sm"
+            >
+              Save Record
+            </Button>
+          </>
+        }
+      >
         {/* Form Body */}
-        <form onSubmit={handleSubmit} noValidate className="p-5 sm:p-6 space-y-4 text-xs overflow-y-auto">
+        <form id="new-transaction-form" onSubmit={handleSubmit} noValidate className="space-y-4 text-xs">
           
           {/* Type Toggle: Inflow vs Outflow */}
-          <div className="grid grid-cols-2 gap-2 bg-gray-100/80 p-1 rounded-2xl">
-            <button
+          <div className="grid grid-cols-2 gap-2 bg-zinc-100 dark:bg-zinc-900 p-1 rounded-2xl border border-zinc-200 dark:border-zinc-800">
+            <Button
               type="button"
+              variant={type === 'INFLOW' ? 'primary' : 'ghost'}
+              size="md"
               onClick={() => {
                 setType('INFLOW');
                 setCategoryName('Tournament & E-Sports Registration Fees');
               }}
-              className={`h-10 rounded-xl font-semibold transition-all cursor-pointer ${
-                type === 'INFLOW' 
-                  ? 'bg-emerald-700 text-white shadow-xs' 
-                  : 'text-gray-600 hover:text-gray-900 active:bg-gray-200/60'
-              }`}
+              className={type === 'INFLOW' ? 'bg-emerald-600 dark:bg-emerald-600 text-white' : 'text-zinc-600 dark:text-zinc-400'}
             >
               + Inflow (Income)
-            </button>
-            <button
+            </Button>
+            <Button
               type="button"
+              variant={type === 'OUTFLOW' ? 'amber-subtle' : 'ghost'}
+              size="md"
               onClick={() => {
                 setType('OUTFLOW');
                 setCategoryName('Supplies & Materials');
               }}
-              className={`h-10 rounded-xl font-semibold transition-all cursor-pointer ${
-                type === 'OUTFLOW' 
-                  ? 'bg-amber-600 text-white shadow-xs' 
-                  : 'text-gray-600 hover:text-gray-900 active:bg-gray-200/60'
-              }`}
+              className={type === 'OUTFLOW' ? 'bg-amber-600 text-white hover:bg-amber-700' : 'text-zinc-600 dark:text-zinc-400'}
             >
               - Outflow (Disbursement)
-            </button>
+            </Button>
           </div>
 
           {/* Payment Method Toggle */}
           <div className="flex items-center gap-2">
-            <span className="text-gray-500 font-medium">Channel:</span>
+            <span className="text-zinc-500 dark:text-zinc-400 font-medium">Channel:</span>
             <div className="flex gap-2">
               {['CASH', 'GCASH'].map((m) => (
-                <button
+                <Button
                   key={m}
                   type="button"
+                  variant={paymentMethod === m ? 'secondary' : 'outline'}
+                  size="sm"
                   onClick={() => setPaymentMethod(m)}
-                  className={`h-8 px-3 rounded-lg font-semibold transition-all cursor-pointer ${
-                    paymentMethod === m 
-                      ? 'bg-gray-900 text-white' 
-                      : 'bg-white hover:bg-gray-50 active:bg-gray-100 border border-black/[0.08] text-gray-700'
-                  }`}
                 >
                   {m === 'CASH' ? 'Physical Cashbox' : 'GCash Wallet'}
-                </button>
+                </Button>
               ))}
             </div>
           </div>
 
           {/* Amount (₱) — max ₱99,999.99, outflows cannot exceed the selected channel's balance */}
           <div className={formErrors.amount ? 'animate-field-shake' : ''} key={`amt-${shakeKey}`}>
-            <label className="block text-gray-700 font-semibold mb-1">
-              Amount (₱) <span className="text-red-500">*</span>
+            <label className="block text-zinc-700 dark:text-zinc-300 font-semibold mb-1">
+              Amount (₱) <span className="text-rose-500">*</span>
             </label>
             <div className="relative">
-              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-600 font-bold text-sm pointer-events-none">
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500 dark:text-zinc-400 font-bold text-sm pointer-events-none">
                 ₱
               </span>
               <input
@@ -346,20 +348,20 @@ export default function NewTransactionModal({
                 }}
                 onBlur={() => setAmountTouched(true)}
                 aria-invalid={Boolean(formErrors.amount || fieldError)}
-                className={`w-full h-10 text-sm font-bold pl-7 pr-3 bg-white text-black placeholder:text-gray-400 border rounded-xl focus:outline-none transition-all tabular-nums select-text ${
+                className={`w-full h-10 text-sm font-bold pl-7 pr-3 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 border rounded-xl focus:outline-none transition-all tabular-nums select-text ${
                   (formErrors.amount || fieldError)
-                    ? 'border-red-500 ring-2 ring-red-500/20'
-                    : 'border-black/[0.08] focus:ring-2 focus:ring-emerald-500/20'
+                    ? 'border-rose-500 ring-2 ring-rose-500/20'
+                    : 'border-zinc-200 dark:border-zinc-800 focus:ring-2 focus:ring-emerald-500/20'
                 }`}
               />
             </div>
             {(formErrors.amount || fieldError) ? (
-              <p className="text-xs font-semibold text-red-600 mt-1.5 flex items-center gap-1.5 animate-in fade-in duration-150">
-                <AlertCircle className="w-3.5 h-3.5 shrink-0 text-red-600" />
+              <p className="text-xs font-semibold text-rose-600 dark:text-rose-400 mt-1.5 flex items-center gap-1.5 animate-in fade-in duration-150">
+                <AlertCircle className="w-3.5 h-3.5 shrink-0 text-rose-600 dark:text-rose-400" />
                 <span>{formErrors.amount || fieldError}</span>
               </p>
             ) : (
-              <p className="text-[11px] text-gray-400 mt-1">
+              <p className="text-[11px] text-zinc-400 mt-1">
                 Maximum ₱99,999.99
                 {showOutflowBalance && (
                   <> · Available in {paymentMethod === 'GCASH' ? 'GCash Wallet' : 'Physical Cashbox'}: {formatPHP(availableBalance)}</>
@@ -370,8 +372,8 @@ export default function NewTransactionModal({
 
           {/* Title / Description */}
           <div className={formErrors.title ? 'animate-field-shake' : ''} key={`ttl-${shakeKey}`}>
-            <label className="block text-gray-700 font-semibold mb-1">
-              Item Title <span className="text-red-500">*</span>
+            <label className="block text-zinc-700 dark:text-zinc-300 font-semibold mb-1">
+              Item Title <span className="text-rose-500">*</span>
             </label>
             <input
               ref={titleInputRef}
@@ -385,15 +387,15 @@ export default function NewTransactionModal({
                 }
               }}
               aria-invalid={Boolean(formErrors.title)}
-              className={`w-full h-10 px-3 bg-white border rounded-xl focus:outline-none transition-all text-gray-900 select-text ${
+              className={`w-full h-10 px-3 bg-white dark:bg-zinc-900 border rounded-xl focus:outline-none transition-all text-zinc-900 dark:text-zinc-100 select-text ${
                 formErrors.title
-                  ? 'border-red-500 ring-2 ring-red-500/20'
-                  : 'border-black/[0.08] focus:ring-2 focus:ring-emerald-500/20'
+                  ? 'border-rose-500 ring-2 ring-rose-500/20'
+                  : 'border-zinc-200 dark:border-zinc-800 focus:ring-2 focus:ring-emerald-500/20'
               }`}
             />
             {formErrors.title && (
-              <p className="text-xs font-semibold text-red-600 mt-1.5 flex items-center gap-1.5 animate-in fade-in duration-150">
-                <AlertCircle className="w-3.5 h-3.5 shrink-0 text-red-600" />
+              <p className="text-xs font-semibold text-rose-600 dark:text-rose-400 mt-1.5 flex items-center gap-1.5 animate-in fade-in duration-150">
+                <AlertCircle className="w-3.5 h-3.5 shrink-0 text-rose-600 dark:text-rose-400" />
                 <span>{formErrors.title}</span>
               </p>
             )}
@@ -402,18 +404,18 @@ export default function NewTransactionModal({
           {/* Category & Event in 2 Columns */}
           <div className="grid grid-cols-2 gap-3">
             <div className="relative" ref={categoryRef}>
-              <label className="block text-gray-700 font-semibold mb-1">Category</label>
+              <label className="block text-zinc-700 dark:text-zinc-300 font-semibold mb-1">Category</label>
               <button
                 type="button"
                 onClick={() => setIsCategoryOpen(!isCategoryOpen)}
-                className="w-full h-10 px-3 bg-white hover:bg-gray-50 active:bg-gray-100 border border-black/[0.08] rounded-xl flex items-center justify-between text-gray-900 font-medium transition-colors cursor-pointer text-left"
+                className="w-full h-10 px-3 bg-white dark:bg-zinc-900 hover:bg-zinc-50 dark:hover:bg-zinc-800 border border-zinc-200 dark:border-zinc-800 rounded-xl flex items-center justify-between text-zinc-900 dark:text-zinc-100 font-medium transition-colors cursor-pointer text-left"
               >
                 <span className="truncate">{categoryName}</span>
-                <ChevronDown className="w-3.5 h-3.5 text-gray-400 shrink-0 ml-1" />
+                <ChevronDown className="w-3.5 h-3.5 text-zinc-400 shrink-0 ml-1" />
               </button>
 
               {isCategoryOpen && (
-                <div className="absolute left-0 right-0 mt-1 bg-white border border-black/[0.08] rounded-xl shadow-lg py-1 z-50 animate-in fade-in zoom-in-95 duration-100 max-h-48 overflow-y-auto">
+                <div className="absolute left-0 right-0 mt-1 bg-white dark:bg-[#18181b] border border-zinc-200 dark:border-zinc-800 rounded-xl shadow-lg py-1 z-50 animate-in fade-in zoom-in-95 duration-100 max-h-48 overflow-y-auto">
                   {(categories && categories.length > 0
                     ? categories.filter((c) => c.type === type)
                     : (type === 'INFLOW' ? OFFICIAL_INFLOW_CATEGORIES : OFFICIAL_OUTFLOW_CATEGORIES).map((catName) => ({ id: null, name: catName }))
@@ -431,13 +433,13 @@ export default function NewTransactionModal({
                         }}
                         className={`w-full h-9 flex items-center justify-between px-3 text-xs text-left cursor-pointer transition-colors ${
                           categoryName === cName 
-                            ? 'bg-gray-50 font-semibold text-gray-950' 
-                            : 'text-gray-700 hover:bg-gray-50'
+                            ? 'bg-zinc-100 dark:bg-zinc-800 font-semibold text-zinc-900 dark:text-zinc-100' 
+                            : 'text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-800/60'
                         }`}
                       >
                         <span className="truncate">{cName}</span>
                         {categoryName === cName && (
-                          <Check className="w-3.5 h-3.5 text-emerald-700 shrink-0 ml-1" />
+                          <Check className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 shrink-0 ml-1" />
                         )}
                       </button>
                     );
@@ -447,20 +449,20 @@ export default function NewTransactionModal({
             </div>
 
             <div>
-              <label className="block text-gray-700 font-semibold mb-1">Event Tag</label>
+              <label className="block text-zinc-700 dark:text-zinc-300 font-semibold mb-1">Event Tag</label>
               <input
                 type="text"
                 placeholder="e.g. Club Week 2026"
                 value={eventName}
                 onChange={(e) => setEventName(e.target.value)}
-                className="w-full h-10 px-3 bg-white border border-black/[0.08] rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/20 text-gray-900 select-text"
+                className="w-full h-10 px-3 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/20 text-zinc-900 dark:text-zinc-100 select-text"
               />
             </div>
           </div>
 
           {/* Abono / Personal Advance Checkbox (Outflow only) */}
           {type === 'OUTFLOW' && (
-            <div className="p-3 bg-gray-50 border border-black/[0.08] rounded-xl space-y-2">
+            <div className="p-3 bg-zinc-50 dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800 rounded-xl space-y-2">
               <label className="flex items-center gap-2 cursor-pointer">
                 <input
                   type="checkbox"
@@ -471,17 +473,17 @@ export default function NewTransactionModal({
                       setFormErrors((prev) => ({ ...prev, recipient: null }));
                     }
                   }}
-                  className="rounded text-emerald-700 focus:ring-emerald-500"
+                  className="rounded text-emerald-600 focus:ring-emerald-500"
                 />
-                <span className="font-semibold text-gray-900">
+                <span className="font-semibold text-zinc-900 dark:text-zinc-100">
                   This was an out-of-pocket advance (Abono)
                 </span>
               </label>
 
               {isReimbursement && (
                 <div className={`pt-1 ${formErrors.recipient ? 'animate-field-shake' : ''}`} key={`rec-${shakeKey}`}>
-                  <label className="block text-gray-700 font-medium mb-1">
-                    Advance Paid By: <span className="text-red-500">*</span>
+                  <label className="block text-zinc-700 dark:text-zinc-300 font-medium mb-1">
+                    Advance Paid By: <span className="text-rose-500">*</span>
                   </label>
                   <input
                     ref={recipientInputRef}
@@ -495,19 +497,19 @@ export default function NewTransactionModal({
                       }
                     }}
                     aria-invalid={Boolean(formErrors.recipient)}
-                    className={`w-full h-9 px-3 bg-white border rounded-xl focus:outline-none transition-all text-gray-900 select-text ${
+                    className={`w-full h-9 px-3 bg-white dark:bg-zinc-900 border rounded-xl focus:outline-none transition-all text-zinc-900 dark:text-zinc-100 select-text ${
                       formErrors.recipient
-                        ? 'border-red-500 ring-2 ring-red-500/20'
-                        : 'border-black/[0.08] focus:ring-2 focus:ring-emerald-500/20'
+                        ? 'border-rose-500 ring-2 ring-rose-500/20'
+                        : 'border-zinc-200 dark:border-zinc-800 focus:ring-2 focus:ring-emerald-500/20'
                     }`}
                   />
                   {formErrors.recipient ? (
-                    <p className="text-xs font-semibold text-red-600 mt-1 flex items-center gap-1.5 animate-in fade-in duration-150">
-                      <AlertCircle className="w-3.5 h-3.5 shrink-0 text-red-600" />
+                    <p className="text-xs font-semibold text-rose-600 dark:text-rose-400 mt-1 flex items-center gap-1.5 animate-in fade-in duration-150">
+                      <AlertCircle className="w-3.5 h-3.5 shrink-0 text-rose-600 dark:text-rose-400" />
                       <span>{formErrors.recipient}</span>
                     </p>
                   ) : (
-                    <p className="text-[10px] text-gray-500 mt-1">
+                    <p className="text-[10px] text-zinc-400 mt-1">
                       Will be queued under Pending Reimbursements until cash is refunded.
                     </p>
                   )}
@@ -519,10 +521,10 @@ export default function NewTransactionModal({
           {/* Receipt Image Upload with Auto-compression (Up to 3 images) */}
           <div className="space-y-2">
             <div className="flex items-center justify-between">
-              <label className="block text-gray-700 font-semibold">
+              <label className="block text-zinc-700 dark:text-zinc-300 font-semibold">
                 Receipts / Proofs ({receiptFiles.length}/3)
               </label>
-              <span className="text-[10px] text-gray-400">
+              <span className="text-[10px] text-zinc-400">
                 Max 3 images (OR, GCash, delivery/slip)
               </span>
             </div>
@@ -531,7 +533,7 @@ export default function NewTransactionModal({
             {previewUrls.length > 0 && (
               <div className="grid grid-cols-3 gap-2">
                 {previewUrls.map((url, idx) => (
-                  <div key={idx} className="relative group rounded-xl overflow-hidden border border-black/[0.08] bg-gray-100 aspect-square">
+                  <div key={idx} className="relative group rounded-xl overflow-hidden border border-zinc-200 dark:border-zinc-800 bg-zinc-100 dark:bg-zinc-900 aspect-square">
                     <img src={url} alt={`Receipt ${idx + 1}`} className="w-full h-full object-cover" />
                     <button
                       type="button"
@@ -559,9 +561,9 @@ export default function NewTransactionModal({
 
             {/* Add / Upload Photo Button */}
             {receiptFiles.length < 3 && (
-              <label className="h-10 flex items-center justify-center gap-2 px-3 bg-white hover:bg-gray-50 active:bg-gray-100 border border-black/[0.08] rounded-xl cursor-pointer transition-colors shadow-2xs">
-                <Camera className="w-4 h-4 text-emerald-700" />
-                <span className="text-gray-700 font-medium">
+              <label className="h-10 flex items-center justify-center gap-2 px-3 bg-white dark:bg-zinc-900 hover:bg-zinc-50 dark:hover:bg-zinc-800 active:bg-zinc-100 dark:active:bg-zinc-700 border border-zinc-200 dark:border-zinc-800 rounded-xl cursor-pointer transition-colors shadow-2xs">
+                <Camera className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+                <span className="text-zinc-700 dark:text-zinc-300 font-medium">
                   {compressing ? 'Compressing photo...' : receiptFiles.length === 0 ? 'Take or Upload Photo (Up to 3)' : `Add Another Photo (${receiptFiles.length}/3)`}
                 </span>
                 <input
@@ -575,31 +577,12 @@ export default function NewTransactionModal({
               </label>
             )}
 
-            <p className="text-[10px] text-gray-400">
+            <p className="text-[10px] text-zinc-400">
               Automatically compressed to &lt;350KB each before cloud storage.
             </p>
           </div>
-
-          {/* Action Buttons */}
-          <div className="pt-2 pb-safe sm:pb-0 flex items-center justify-end gap-2">
-            <button
-              type="button"
-              onClick={onClose}
-              className="h-10 px-4 text-gray-700 hover:bg-gray-100 active:bg-gray-200 rounded-xl font-semibold transition-colors cursor-pointer"
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              className="h-10 px-5 bg-emerald-700 hover:bg-emerald-800 active:bg-emerald-900 text-white rounded-xl font-semibold shadow-xs transition-all cursor-pointer whitespace-nowrap"
-            >
-              Save Record
-            </button>
-          </div>
-
         </form>
-
-      </div>
+      </Modal>
 
       {/* Interactive Crop & Rotation Modal */}
       {croppingIndex !== null && receiptFiles[croppingIndex] && (
@@ -610,6 +593,6 @@ export default function NewTransactionModal({
           onConfirm={handleConfirmCrop}
         />
       )}
-    </div>
+    </>
   );
 }
