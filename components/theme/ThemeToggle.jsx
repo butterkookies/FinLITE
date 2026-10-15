@@ -11,11 +11,7 @@ export default function ThemeToggle({ className = '', showLabel = false }) {
     <button
       type="button"
       onClick={toggleTheme}
-      className={`relative h-8 w-8 flex items-center justify-center rounded-lg transition-colors cursor-pointer select-none border ${
-        isLight
-          ? 'bg-zinc-100 hover:bg-zinc-200 text-zinc-700 border-zinc-200'
-          : 'bg-zinc-900/60 hover:bg-zinc-900 text-zinc-300 border-zinc-800 hover:border-zinc-700'
-      } ${className}`}
+      className={`relative h-8 w-8 flex items-center justify-center rounded-lg transition-colors cursor-pointer select-none border bg-zinc-100 hover:bg-zinc-200 text-zinc-700 border-zinc-200 dark:bg-zinc-900/60 dark:hover:bg-zinc-900 dark:text-zinc-300 dark:border-zinc-800 dark:hover:border-zinc-700 ${className}`}
       title={isLight ? 'Switch to Dark Mode' : 'Switch to Light Mode'}
       aria-label={isLight ? 'Switch to Dark Mode' : 'Switch to Light Mode'}
     >

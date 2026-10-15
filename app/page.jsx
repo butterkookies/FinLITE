@@ -12,7 +12,6 @@ import { createClient } from '@/lib/supabase/client';
 import { isSuperAdminEmail } from '@/lib/config/admin';
 import { toCentavos, fromCentavos, denomCodeToCountKey } from '@/lib/utils/currency';
 import { validateTransactionAmount, validateOutflowBalance } from '@/lib/utils/validation';
-import { useTheme } from '@/components/theme/ThemeProvider';
 import { Card, Badge, Button } from '@/components/ui';
 
 // Dynamically split heavy modals out of the initial critical client bundle
@@ -95,7 +94,6 @@ const DEFAULT_LITE_SIGNATORIES_25_26 = {
 const DEFAULT_LITE_SIGNATORIES = DEFAULT_LITE_SIGNATORIES_26_27;
 
 export default function Dashboard() {
-  const { isLight } = useTheme();
   const [currentUser, setCurrentUser] = useState(null);
   const [userProfile, setUserProfile] = useState(null);
   const [currentRole, setCurrentRole] = useState('treasurer');
@@ -1315,9 +1313,7 @@ export default function Dashboard() {
 
       {/* Dashboard Footer */}
       <footer className="max-w-7xl w-full mx-auto px-4 py-6 pb-24 sm:pb-6 text-center no-print">
-        <p className={`text-[11px] font-medium transition-colors ${
-          isLight ? 'text-zinc-400' : 'text-white/30'
-        }`}>
+        <p className="text-[11px] font-medium transition-colors text-zinc-400 dark:text-zinc-600">
           © 2026 FinLITE · Pambayang Dalubhasaan ng Marilao · All rights reserved.
         </p>
       </footer>

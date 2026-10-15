@@ -32,7 +32,6 @@ import {
 } from 'lucide-react';
 import { formatPHP } from '@/lib/utils/currency';
 import { compressReceiptImage } from '@/lib/utils/compression';
-import { useTheme } from '@/components/theme/ThemeProvider';
 import { Button, Badge, Input, Card, Modal } from '@/components/ui';
 import TransactionCommentsDrawer from '@/components/ledger/TransactionCommentsDrawer';
 
@@ -68,7 +67,6 @@ export default function TransactionTable({
   currentRole,
   isDbConnected = false
 }) {
-  const { isLight } = useTheme();
   const canViewAudit = ['admin', 'auditor', 'treasurer', 'president', 'adviser'].includes(currentRole);
   const [filterType, setFilterType] = useState('ALL');
   const [searchQuery, setSearchQuery] = useState('');
@@ -329,18 +327,14 @@ export default function TransactionTable({
       return <ArrowUpDown className="w-3 h-3 opacity-30 group-hover/th:opacity-80 transition-opacity shrink-0" />;
     }
     return sortDirection === 'asc' ? (
-      <ArrowUp className={`w-3.5 h-3.5 shrink-0 ${isLight ? 'text-emerald-600' : 'text-emerald-400'}`} />
+      <ArrowUp className="w-3.5 h-3.5 shrink-0 text-emerald-600 dark:text-emerald-400" />
     ) : (
-      <ArrowDown className={`w-3.5 h-3.5 shrink-0 ${isLight ? 'text-emerald-600' : 'text-emerald-400'}`} />
+      <ArrowDown className="w-3.5 h-3.5 shrink-0 text-emerald-600 dark:text-emerald-400" />
     );
   };
 
   return (
-    <div className={`rounded-xl transition-colors relative overflow-hidden border ${
-      isLight
-        ? 'bg-white border-zinc-200 shadow-xs'
-        : 'bg-[#121214] border-zinc-800 shadow-xs'
-    }`}>
+    <div className="rounded-xl transition-colors relative overflow-hidden border bg-white dark:bg-[#121214] border-zinc-200 dark:border-zinc-800 shadow-xs">
       {/* Table Header Controls */}
       <div className="p-4 sm:p-5 border-b flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-zinc-200 dark:border-zinc-800 bg-zinc-50/50 dark:bg-[#121214]">
         <div className="min-w-0">
@@ -953,17 +947,10 @@ export default function TransactionTable({
           <div className="md:hidden p-4 space-y-6">
 
             {/* Global Empty State */}
+            {/* Global Empty State */}
             {mobileInflows.length === 0 && mobileOutflows.length === 0 && mobileReimbursements.length === 0 && (
-              <div className={`py-12 text-center font-semibold text-xs rounded-2xl p-6 ${
-                isLight
-                  ? 'text-gray-500 bg-white'
-                  : 'text-white/50 bg-[#07130e]'
-              }`}>
-                <div className={`w-12 h-12 rounded-xl flex items-center justify-center mx-auto mb-3 shadow-inner ${
-                  isLight
-                    ? 'bg-emerald-100 text-emerald-700'
-                    : 'bg-[#064e3b]/30 text-emerald-400'
-                }`}>
+              <div className="py-12 text-center font-semibold text-xs rounded-2xl p-6 text-zinc-500 dark:text-zinc-400 bg-zinc-50 dark:bg-zinc-900/40 border border-zinc-200 dark:border-zinc-800">
+                <div className="w-12 h-12 rounded-xl flex items-center justify-center mx-auto mb-3 shadow-2xs bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
                   <Folder className="w-6 h-6" />
                 </div>
                 No matching transactions found.
@@ -976,31 +963,21 @@ export default function TransactionTable({
                 <div className="flex items-center justify-between gap-2 px-1">
                   <div className="flex items-center gap-1.5 sm:gap-2 min-w-0">
                     <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 shrink-0" />
-                    <h3 className={`text-xs font-bold uppercase tracking-wider truncate ${
-                      isLight ? 'text-gray-900' : 'text-white'
-                    }`}>
+                    <h3 className="text-xs font-bold uppercase tracking-wider truncate text-zinc-950 dark:text-zinc-100">
                       <span className="sm:hidden">Inflows</span>
                       <span className="hidden sm:inline">Inflows &amp; Revenue</span>
                     </h3>
-                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full shrink-0 ${
-                      isLight
-                        ? 'text-emerald-800 bg-emerald-100'
-                        : 'text-emerald-300 bg-emerald-500/15'
-                    }`}>
+                    <Badge variant="emerald" size="xs">
                       {mobileInflows.length}
-                    </span>
+                    </Badge>
                   </div>
-                  <span className={`text-xs font-black tabular-nums whitespace-nowrap shrink-0 text-right ${
-                    isLight ? 'text-emerald-700' : 'text-emerald-400'
-                  }`}>
+                  <span className="text-xs font-black tabular-nums whitespace-nowrap shrink-0 text-right text-emerald-600 dark:text-emerald-400">
                     +{formatPHP(totalInflowsSum)}
                   </span>
                 </div>
 
                 {mobileInflows.length === 0 ? (
-                  <div className={`p-4 text-center text-xs rounded-xl ${
-                    isLight ? 'text-gray-400 bg-white' : 'text-white/40 bg-[#07130e]'
-                  }`}>
+                  <div className="p-4 text-center text-xs rounded-xl text-zinc-400 dark:text-zinc-500 bg-zinc-50 dark:bg-zinc-900/40 border border-zinc-200 dark:border-zinc-800">
                     No inflow records found
                   </div>
                 ) : (
@@ -1008,9 +985,6 @@ export default function TransactionTable({
                     {mobileInflows.map((tx) =>
                       renderCard(tx, {
                         label: tx.category_name || 'Revenue',
-                        style: isLight
-                          ? 'bg-emerald-100 text-emerald-800'
-                          : 'bg-emerald-500/15 text-emerald-300',
                       })
                     )}
                   </div>
@@ -1024,31 +998,21 @@ export default function TransactionTable({
                 <div className="flex items-center justify-between gap-2 px-1">
                   <div className="flex items-center gap-1.5 sm:gap-2 min-w-0">
                     <span className="w-2.5 h-2.5 rounded-full bg-amber-500 shrink-0" />
-                    <h3 className={`text-xs font-bold uppercase tracking-wider truncate ${
-                      isLight ? 'text-gray-900' : 'text-white'
-                    }`}>
+                    <h3 className="text-xs font-bold uppercase tracking-wider truncate text-zinc-950 dark:text-zinc-100">
                       <span className="sm:hidden">Outflows</span>
                       <span className="hidden sm:inline">Outflows &amp; Disbursements</span>
                     </h3>
-                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full shrink-0 ${
-                      isLight
-                        ? 'text-amber-800 bg-amber-100'
-                        : 'text-amber-300 bg-amber-500/15'
-                    }`}>
+                    <Badge variant="amber" size="xs">
                       {mobileOutflows.length}
-                    </span>
+                    </Badge>
                   </div>
-                  <span className={`text-xs font-black tabular-nums whitespace-nowrap shrink-0 text-right ${
-                    isLight ? 'text-gray-900' : 'text-white'
-                  }`}>
+                  <span className="text-xs font-black tabular-nums whitespace-nowrap shrink-0 text-right text-zinc-950 dark:text-zinc-100">
                     -{formatPHP(totalOutflowsSum)}
                   </span>
                 </div>
 
                 {mobileOutflows.length === 0 ? (
-                  <div className={`p-4 text-center text-xs rounded-xl ${
-                    isLight ? 'text-gray-400 bg-white' : 'text-white/40 bg-[#07130e]'
-                  }`}>
+                  <div className="p-4 text-center text-xs rounded-xl text-zinc-400 dark:text-zinc-500 bg-zinc-50 dark:bg-zinc-900/40 border border-zinc-200 dark:border-zinc-800">
                     No outflow records found
                   </div>
                 ) : (
@@ -1056,9 +1020,6 @@ export default function TransactionTable({
                     {mobileOutflows.map((tx) =>
                       renderCard(tx, {
                         label: tx.category_name || 'Disbursement',
-                        style: isLight
-                          ? 'bg-rose-100 text-rose-800'
-                          : 'bg-rose-500/15 text-rose-300',
                       })
                     )}
                   </div>
@@ -1072,31 +1033,21 @@ export default function TransactionTable({
                 <div className="flex items-center justify-between gap-2 px-1">
                   <div className="flex items-center gap-1.5 sm:gap-2 min-w-0">
                     <span className="w-2.5 h-2.5 rounded-full bg-amber-500 shrink-0" />
-                    <h3 className={`text-xs font-bold uppercase tracking-wider truncate ${
-                      isLight ? 'text-gray-900' : 'text-white'
-                    }`}>
+                    <h3 className="text-xs font-bold uppercase tracking-wider truncate text-zinc-950 dark:text-zinc-100">
                       <span className="sm:hidden">Pending Abono</span>
                       <span className="hidden sm:inline">Pending Abono (Advances)</span>
                     </h3>
-                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full shrink-0 ${
-                      isLight
-                        ? 'text-amber-800 bg-amber-100'
-                        : 'text-amber-300 bg-amber-500/15'
-                    }`}>
+                    <Badge variant="amber" size="xs">
                       {mobileReimbursements.length}
-                    </span>
+                    </Badge>
                   </div>
-                  <span className={`text-xs font-black tabular-nums whitespace-nowrap shrink-0 text-right ${
-                    isLight ? 'text-amber-800' : 'text-amber-300'
-                  }`}>
+                  <span className="text-xs font-black tabular-nums whitespace-nowrap shrink-0 text-right text-amber-600 dark:text-amber-400">
                     {formatPHP(totalReimbursementsSum)}
                   </span>
                 </div>
 
                 {mobileReimbursements.length === 0 ? (
-                  <div className={`p-4 text-center text-xs rounded-xl ${
-                    isLight ? 'text-gray-400 bg-white' : 'text-white/40 bg-[#07130e]'
-                  }`}>
+                  <div className="p-4 text-center text-xs rounded-xl text-zinc-400 dark:text-zinc-500 bg-zinc-50 dark:bg-zinc-900/40 border border-zinc-200 dark:border-zinc-800">
                     No pending abono requests
                   </div>
                 ) : (
@@ -1104,9 +1055,6 @@ export default function TransactionTable({
                     {mobileReimbursements.map((tx) =>
                       renderCard(tx, {
                         label: 'Pending Abono',
-                        style: isLight
-                          ? 'bg-amber-100 text-amber-800'
-                          : 'bg-amber-500/15 text-amber-300',
                       })
                     )}
                   </div>
@@ -1116,27 +1064,22 @@ export default function TransactionTable({
 
             {/* Settled Abono in REIMBURSEMENT tab */}
             {filterType === 'REIMBURSEMENT' && mobileAllReimbursements.filter((t) => t.status === 'REIMBURSED').length > 0 && (
-              <div className="space-y-3 pt-3 border-t border-dashed border-emerald-900/10">
+              <div className="space-y-3 pt-3 border-t border-dashed border-zinc-200 dark:border-zinc-800">
                 <div className="flex items-center justify-between gap-2 px-1">
                   <div className="flex items-center gap-1.5 sm:gap-2 min-w-0">
                     <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 shrink-0" />
-                    <h3 className={`text-xs font-bold uppercase tracking-wider truncate ${
-                      isLight ? 'text-gray-900' : 'text-white'
-                    }`}>
+                    <h3 className="text-xs font-bold uppercase tracking-wider truncate text-zinc-950 dark:text-zinc-100">
                       <span>Settled Abono (Reimbursed)</span>
                     </h3>
-                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full shrink-0 ${
-                      isLight ? 'text-emerald-800 bg-emerald-100' : 'text-emerald-300 bg-emerald-500/15'
-                    }`}>
+                    <Badge variant="emerald" size="xs">
                       {mobileAllReimbursements.filter((t) => t.status === 'REIMBURSED').length}
-                    </span>
+                    </Badge>
                   </div>
                 </div>
                 <div className="space-y-3">
                   {mobileAllReimbursements.filter((t) => t.status === 'REIMBURSED').map((tx) =>
                     renderCard(tx, {
                       label: 'Settled Abono',
-                      style: isLight ? 'bg-emerald-100 text-emerald-800' : 'bg-emerald-500/15 text-emerald-300',
                     })
                   )}
                 </div>
@@ -1228,7 +1171,7 @@ export default function TransactionTable({
       {/* Mobile Ledger Summary Footer */}
       <div className="md:hidden px-4 py-3 border-t flex items-center justify-between text-xs border-zinc-200 dark:border-zinc-800 bg-zinc-50/60 dark:bg-[#121214] text-zinc-600 dark:text-zinc-400">
         <span className="font-medium">
-          Showing <span className={`font-bold tabular-nums ${isLight ? 'text-zinc-900' : 'text-white'}`}>{filtered.length}</span> {filtered.length === 1 ? 'transaction' : 'transactions'}
+          Showing <span className="font-bold tabular-nums text-zinc-900 dark:text-zinc-100">{filtered.length}</span> {filtered.length === 1 ? 'transaction' : 'transactions'}
         </span>
         {filtered.length !== transactions.length && (
           <span className="text-[11px] opacity-70">
