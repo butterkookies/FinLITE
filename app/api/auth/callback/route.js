@@ -9,7 +9,12 @@ export async function GET(req) {
   const url = new URL(req.url);
   const code = url.searchParams.get('code');
   const next = url.searchParams.get('next') || '/';
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+
+  // Dynamically resolve application origin from request headers to avoid cross-domain redirect issues (e.g., Render vs Vercel)
+  const forwardedHost = req.headers.get('x-forwarded-host') || req.headers.get('host');
+  const forwardedProto = req.headers.get('x-forwarded-proto') || (url.protocol.replace(':', '') || 'https');
+  const origin = forwardedHost ? `${forwardedProto}://${forwardedHost}` : url.origin;
+  const appUrl = origin || process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
 
   if (!code) {
     return NextResponse.redirect(`${appUrl}/login?error=oauth_failed`);
