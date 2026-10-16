@@ -507,7 +507,7 @@ export default function FloatingSidebar({
             {(!isCollapsed || isMobileOpen) && (
               <Settings className="w-3.5 h-3.5 text-zinc-400 group-hover:text-zinc-600 dark:group-hover:text-zinc-200 transition-colors shrink-0" />
             )}
-          </div>
+          </Link>
 
           {/* Footer Controls: Theme Toggle, Sign Out, Collapse Button */}
           <div className={`flex items-center pt-1 border-t border-zinc-100 dark:border-zinc-900/60
