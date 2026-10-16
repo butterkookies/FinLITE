@@ -30,7 +30,8 @@ import {
   ShieldCheck,
   MessageSquare,
   Table,
-  LayoutList
+  LayoutList,
+  CreditCard
 } from 'lucide-react';
 import { formatPHP } from '@/lib/utils/currency';
 import { compressReceiptImage } from '@/lib/utils/compression';
@@ -58,12 +59,14 @@ export function formatFriendlyDate(dateStr) {
 
 export default function TransactionTable({ 
   transactions = [], 
+  debts = [],
   onNewTransaction, 
   onExportReport,
   onNewProposal,
   onAttachReceipt,
   onSettleReimbursement,
   onOpenAuditTrail,
+  onOpenDebts,
   cashBalance = 0,
   gcashBalance = 0,
   currentRole,
@@ -274,6 +277,14 @@ export default function TransactionTable({
       const matchesType = 
         filterType === 'ALL' ? true :
         filterType === 'REIMBURSEMENT' ? tx.is_reimbursement :
+        filterType === 'RECEIVABLE' ? (
+          tx.type === 'RECEIVABLE' ||
+          tx.is_receivable === true ||
+          (tx.title || '').toLowerCase().includes('receivable') ||
+          (tx.title || '').toLowerCase().includes('debt') ||
+          (tx.category_name || '').toLowerCase().includes('receivable') ||
+          (tx.category_name || '').toLowerCase().includes('debt')
+        ) :
         tx.type === filterType;
 
       if (!matchesType) return false;
@@ -367,11 +378,6 @@ export default function TransactionTable({
             <h2 className="text-xl sm:text-2xl font-black tracking-tight text-zinc-950 dark:text-white">
               Financial Ledger &amp; Transactions
             </h2>
-            {isDbConnected && (
-              <Badge variant="emerald" size="xs">
-                Live
-              </Badge>
-            )}
           </div>
           <p className="text-xs font-medium mt-1 truncate text-zinc-500 dark:text-zinc-400">
             Real-time auditable record of organization inflows and disbursements
@@ -440,6 +446,7 @@ export default function TransactionTable({
               { id: 'INFLOW', label: 'Inflows' },
               { id: 'OUTFLOW', label: 'Outflows' },
               { id: 'REIMBURSEMENT', label: 'Pending Abono' },
+              { id: 'RECEIVABLE', label: 'Receivables' },
             ].map((tab) => {
               const isActive = filterType === tab.id;
               return (
@@ -491,6 +498,28 @@ export default function TransactionTable({
         </div>
 
       </div>
+
+      {/* Receivables Management Context Banner */}
+      {filterType === 'RECEIVABLE' && (
+        <div className="mx-4 sm:mx-6 my-3 p-3 rounded-xl border border-indigo-200/80 dark:border-indigo-900/60 bg-indigo-50/60 dark:bg-indigo-950/20 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
+          <div className="flex items-center gap-2">
+            <CreditCard className="w-4 h-4 text-indigo-600 dark:text-indigo-400 shrink-0" />
+            <span className="text-xs font-medium text-zinc-700 dark:text-zinc-300">
+              Showing organization receivables and debt collection settlement entries.
+            </span>
+          </div>
+          {onOpenDebts && (
+            <button
+              type="button"
+              onClick={onOpenDebts}
+              className="px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-xs flex items-center gap-1.5 transition-colors cursor-pointer shrink-0 self-start sm:self-auto shadow-xs"
+            >
+              <span>Manage Debts &amp; Receivables</span>
+              <ExternalLink className="w-3 h-3" />
+            </button>
+          )}
+        </div>
+      )}
 
       {/* Desktop/Tablet Transactions Table */}
       <div className={`${viewMode === 'cards' ? 'hidden' : viewMode === 'table' ? 'block' : 'hidden md:block'} overflow-x-auto lg:overflow-x-visible scrollbar-thin`}>
@@ -827,10 +856,19 @@ export default function TransactionTable({
         const mobileOutflows = filterBySearch(transactions.filter((tx) => tx.type === 'OUTFLOW' && (!tx.is_reimbursement || tx.status === 'REIMBURSED')));
         const mobileReimbursements = filterBySearch(transactions.filter((tx) => tx.is_reimbursement && tx.status === 'PENDING_REIMBURSEMENT'));
         const mobileAllReimbursements = filterBySearch(transactions.filter((tx) => tx.is_reimbursement));
+        const mobileReceivables = filterBySearch(transactions.filter((tx) => 
+          tx.type === 'RECEIVABLE' ||
+          tx.is_receivable === true ||
+          (tx.title || '').toLowerCase().includes('receivable') ||
+          (tx.title || '').toLowerCase().includes('debt') ||
+          (tx.category_name || '').toLowerCase().includes('receivable') ||
+          (tx.category_name || '').toLowerCase().includes('debt')
+        ));
 
         const totalInflowsSum = mobileInflows.reduce((acc, t) => acc + (Number(t.amount) || 0), 0);
         const totalOutflowsSum = mobileOutflows.reduce((acc, t) => acc + (Number(t.amount) || 0), 0);
         const totalReimbursementsSum = mobileReimbursements.reduce((acc, t) => acc + (Number(t.amount) || 0), 0);
+        const totalReceivablesSum = mobileReceivables.reduce((acc, t) => acc + (Number(t.amount) || 0), 0);
 
         const renderCard = (tx, badgeConfig) => {
           const receipts = getTransactionReceipts(tx);
@@ -930,8 +968,7 @@ export default function TransactionTable({
           <div className={`${viewMode === 'cards' ? 'block' : viewMode === 'table' ? 'hidden' : 'md:hidden'} p-3 sm:p-4 space-y-5`}>
 
             {/* Global Empty State */}
-            {/* Global Empty State */}
-            {mobileInflows.length === 0 && mobileOutflows.length === 0 && mobileReimbursements.length === 0 && (
+            {mobileInflows.length === 0 && mobileOutflows.length === 0 && mobileReimbursements.length === 0 && mobileReceivables.length === 0 && (
               <div className="py-12 text-center font-semibold text-xs rounded-2xl p-6 text-zinc-500 dark:text-zinc-400 bg-zinc-50 dark:bg-zinc-900/40 border border-zinc-200 dark:border-zinc-800">
                 <div className="w-12 h-12 rounded-xl flex items-center justify-center mx-auto mb-3 shadow-2xs bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
                   <Folder className="w-6 h-6" />
@@ -1066,6 +1103,40 @@ export default function TransactionTable({
                     })
                   )}
                 </div>
+              </div>
+            )}
+
+            {/* 4. Receivables Section (Mobile Cards View) */}
+            {(filterType === 'ALL' || filterType === 'RECEIVABLE') && (mobileReceivables.length > 0 || filterType === 'RECEIVABLE') && (
+              <div className="space-y-3 pt-2">
+                <div className="flex items-center justify-between gap-2 px-1">
+                  <div className="flex items-center gap-1.5 sm:gap-2 min-w-0">
+                    <span className="w-2.5 h-2.5 rounded-full bg-indigo-500 shrink-0" />
+                    <h3 className="text-xs font-bold uppercase tracking-wider truncate text-zinc-950 dark:text-zinc-100">
+                      <span>Receivables &amp; Debts</span>
+                    </h3>
+                    <Badge variant="indigo" size="xs">
+                      {mobileReceivables.length}
+                    </Badge>
+                  </div>
+                  <span className="text-xs font-black tabular-nums whitespace-nowrap shrink-0 text-right text-indigo-600 dark:text-indigo-400">
+                    {formatPHP(totalReceivablesSum)}
+                  </span>
+                </div>
+
+                {mobileReceivables.length === 0 ? (
+                  <div className="p-4 text-center text-xs rounded-xl text-zinc-400 dark:text-zinc-500 bg-zinc-50 dark:bg-zinc-900/40 border border-zinc-200 dark:border-zinc-800">
+                    No receivable settlement records found
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {mobileReceivables.map((tx) =>
+                      renderCard(tx, {
+                        label: 'Receivable Settlement',
+                      })
+                    )}
+                  </div>
+                )}
               </div>
             )}
 

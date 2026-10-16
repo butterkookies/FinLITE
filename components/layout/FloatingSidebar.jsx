@@ -24,7 +24,8 @@ import {
   Settings,
   Menu,
   X,
-  ExternalLink
+  ExternalLink,
+  Crosshair
 } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import { useTheme } from '@/components/theme/ThemeProvider';
@@ -46,8 +47,9 @@ export default function FloatingSidebar({
   onOpenAI = () => {},
   onOpenAuditTrail = () => {},
   onOpenEditProfile = () => {},
-  activeTab = 'dashboard',
-  onSelectTab = () => {},
+  onExportReport = () => {},
+  activeTab: controlledActiveTab,
+  onSelectTab: controlledOnSelectTab,
   isCollapsed: controlledCollapsed,
   onToggleCollapse,
 }) {
@@ -55,6 +57,16 @@ export default function FloatingSidebar({
   const pathname = usePathname();
   const [internalCollapsed, setInternalCollapsed] = useState(false);
   const isCollapsed = controlledCollapsed !== undefined ? controlledCollapsed : internalCollapsed;
+
+  const [internalActiveTab, setInternalActiveTab] = useState('dashboard');
+  const activeTab = controlledActiveTab !== undefined ? controlledActiveTab : internalActiveTab;
+
+  const handleSelectTab = (tabId) => {
+    setInternalActiveTab(tabId);
+    if (typeof controlledOnSelectTab === 'function') {
+      controlledOnSelectTab(tabId);
+    }
+  };
   
   const toggleCollapse = () => {
     if (onToggleCollapse) {
@@ -111,8 +123,12 @@ export default function FloatingSidebar({
       label: 'Dashboard',
       icon: Home,
       action: () => {
-        onSelectTab('dashboard');
-        window.scrollTo({ top: 0, behavior: 'smooth' });
+        handleSelectTab('dashboard');
+        if (pathname !== '/') {
+          router.push('/');
+        } else {
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
       },
     },
     {
@@ -120,35 +136,47 @@ export default function FloatingSidebar({
       label: 'Financial Ledger',
       icon: FileText,
       action: () => {
-        onSelectTab('ledger');
-        const el = document.getElementById('financial-ledger');
-        if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        handleSelectTab('ledger');
+        if (pathname !== '/') {
+          router.push('/#financial-ledger');
+        } else {
+          const el = document.getElementById('financial-ledger');
+          if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
       },
     },
     {
       id: 'cashbox',
       label: 'Cash Box & Audit',
       icon: Wallet,
-      action: () => onOpenDenominations(),
+      action: () => {
+        if (typeof onOpenDenominations === 'function') onOpenDenominations();
+      },
     },
     {
       id: 'advances',
       label: 'Personal Advances',
       badge: 'Abono',
       icon: HandCoins,
-      action: () => onOpenAdvances(),
+      action: () => {
+        if (typeof onOpenAdvances === 'function') onOpenAdvances();
+      },
     },
     {
       id: 'debts',
       label: 'Debts & Receivables',
       icon: CreditCard,
-      action: () => onOpenDebts(),
+      action: () => {
+        if (typeof onOpenDebts === 'function') onOpenDebts();
+      },
     },
     {
       id: 'reports',
-      label: 'Liquidation Reports',
+      label: 'Financial Report',
       icon: FileSpreadsheet,
-      action: () => onExportReport(),
+      action: () => {
+        if (typeof onExportReport === 'function') onExportReport();
+      },
     },
   ];
 
@@ -158,13 +186,17 @@ export default function FloatingSidebar({
       label: 'AI Copilot',
       icon: Sparkles,
       highlight: true,
-      action: () => onOpenAI(),
+      action: () => {
+        if (typeof onOpenAI === 'function') onOpenAI();
+      },
     },
     {
       id: 'audit',
       label: 'Audit Trail',
       icon: ShieldCheck,
-      action: () => onOpenAuditTrail(),
+      action: () => {
+        if (typeof onOpenAuditTrail === 'function') onOpenAuditTrail();
+      },
     },
     ...(isOfficer ? [
       {
@@ -215,19 +247,20 @@ export default function FloatingSidebar({
           ${isCollapsed ? 'md:w-[72px]' : 'md:w-[260px]'}
         `}
       >
-        {/* 1. TOP HEADER: Organization Brand & Mobile Close */}
-        <div className="p-3.5 pb-2 flex items-center justify-between border-b border-zinc-100 dark:border-zinc-900/80">
+        {/* 1. TOP HEADER: Organization Brand, Desktop Collapse & Mobile Close */}
+        <div className={`p-3 pb-2 flex items-center border-b border-zinc-100 dark:border-zinc-900/80 ${isCollapsed && !isMobileOpen ? 'flex-col gap-2 justify-center' : 'justify-between'}`}>
           <Link 
             href="/"
             className="flex items-center gap-2.5 min-w-0 group"
             title="FinLITE Homepage"
           >
-            <div className="w-8 h-8 rounded-xl flex items-center justify-center shrink-0 bg-emerald-500/10 border border-emerald-500/20 group-hover:scale-105 transition-transform">
+            {/* Pure Logo without boxy border (Pin #2) */}
+            <div className="w-8 h-8 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
               <Image 
                 src="/assets/lite-logo.png" 
                 alt="LITE Logo" 
-                width={24} 
-                height={24} 
+                width={30} 
+                height={30} 
                 className="object-contain"
                 onError={(e) => { e.currentTarget.style.display = 'none'; }}
               />
@@ -235,20 +268,30 @@ export default function FloatingSidebar({
 
             {(!isCollapsed || isMobileOpen) && (
               <div className="flex flex-col truncate">
-                <div className="flex items-center gap-1.5">
-                  <span className="text-sm font-bold tracking-tight text-zinc-900 dark:text-zinc-100">
-                    FinLITE
-                  </span>
-                  <Badge variant="emerald" size="xs">
-                    LITE
-                  </Badge>
-                </div>
+                <span className="text-sm font-bold tracking-tight text-zinc-900 dark:text-zinc-100">
+                  FinLITE
+                </span>
                 <span className="text-[10px] text-zinc-500 dark:text-zinc-400 truncate">
                   Financial Assistant
                 </span>
               </div>
             )}
           </Link>
+
+          {/* Desktop Collapse / Expand Toggle Button - Relocated to Top (Pin #3) */}
+          <button
+            type="button"
+            onClick={toggleCollapse}
+            className="hidden md:flex h-7 w-7 items-center justify-center rounded-lg text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors cursor-pointer shrink-0"
+            title={isCollapsed ? 'Expand Sidebar' : 'Collapse Sidebar'}
+            aria-label={isCollapsed ? 'Expand Sidebar' : 'Collapse Sidebar'}
+          >
+            {isCollapsed ? (
+              <ChevronRight className="w-4 h-4" />
+            ) : (
+              <ChevronLeft className="w-4 h-4" />
+            )}
+          </button>
 
           {/* Mobile Close Button */}
           {isMobileOpen && (
@@ -332,9 +375,9 @@ export default function FloatingSidebar({
           /* Collapsed Mini Term Badge */
           <div className="pt-2 px-2 flex justify-center">
             <div 
-              className="w-9 h-9 rounded-xl flex items-center justify-center border bg-zinc-50 dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 text-[10px] font-bold text-emerald-600 dark:text-emerald-400 cursor-pointer"
-              title={`Term: ${currentSemester?.label || 'AY 2026–2027'}`}
-              onClick={() => setIsCollapsed(false)}
+              className="w-9 h-9 rounded-xl flex items-center justify-center border bg-zinc-50 dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 text-[10px] font-bold text-emerald-600 dark:text-emerald-400 cursor-pointer hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
+              title={`Term: ${currentSemester?.label || 'AY 2026–2027'} (Click to expand sidebar)`}
+              onClick={toggleCollapse}
             >
               SEM
             </div>
@@ -397,6 +440,7 @@ export default function FloatingSidebar({
               {utilityItems.map((item) => {
                 const Icon = item.icon;
                 if (item.isLink) {
+                  const isLinkActive = pathname === item.href;
                   return (
                     <Link
                       key={item.id}
@@ -404,14 +448,16 @@ export default function FloatingSidebar({
                       title={isCollapsed && !isMobileOpen ? item.label : undefined}
                       className={`w-full flex items-center gap-2.5 rounded-xl transition-all cursor-pointer group text-xs font-medium
                         ${isCollapsed && !isMobileOpen ? 'justify-center p-2.5' : 'px-3 py-2'}
-                        text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-900 hover:text-zinc-900 dark:hover:text-zinc-100
+                        ${isLinkActive
+                          ? 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 font-semibold shadow-xs'
+                          : 'text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-900 hover:text-zinc-900 dark:hover:text-zinc-100'}
                       `}
                     >
-                      <Icon className="w-4 h-4 shrink-0 text-emerald-700 dark:text-emerald-400 transition-transform group-hover:scale-110" />
+                      <Icon className={`w-4 h-4 shrink-0 transition-transform group-hover:scale-110 ${isLinkActive ? 'text-emerald-700 dark:text-emerald-400' : 'text-zinc-600 dark:text-zinc-400'}`} />
                       {(!isCollapsed || isMobileOpen) && (
                         <div className="flex items-center justify-between flex-1 min-w-0">
                           <span className="truncate">{item.label}</span>
-                          <ExternalLink className="w-3 h-3 text-zinc-400 opacity-60" />
+                          {!isLinkActive && <ExternalLink className="w-3 h-3 text-zinc-400 opacity-60" />}
                         </div>
                       )}
                     </Link>
@@ -516,6 +562,21 @@ export default function FloatingSidebar({
             {/* Theme Toggle */}
             <ThemeToggle className="hover:scale-105 active:scale-95" />
 
+            {/* Dev Pin Inspector Button (Admin Only) */}
+            {isAdmin && (
+              <button
+                type="button"
+                onClick={() => {
+                  window.dispatchEvent(new KeyboardEvent('keydown', { key: 'd', altKey: true }));
+                }}
+                className="h-8 w-8 flex items-center justify-center rounded-lg text-zinc-500 hover:text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-950/30 transition-colors cursor-pointer"
+                title="Toggle Dev Pin Inspector (Alt + D / Right-click to pin UI)"
+                aria-label="Toggle Dev Pin Inspector"
+              >
+                <Crosshair className="w-4 h-4" />
+              </button>
+            )}
+
             {/* Sign Out Button */}
             <button
               type="button"
@@ -525,21 +586,6 @@ export default function FloatingSidebar({
               aria-label="Sign Out"
             >
               <LogOut className="w-4 h-4" />
-            </button>
-
-            {/* Desktop Collapse / Expand Toggle Button */}
-            <button
-              type="button"
-              onClick={toggleCollapse}
-              className="hidden md:flex h-8 w-8 items-center justify-center rounded-lg text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors cursor-pointer"
-              title={isCollapsed ? 'Expand Sidebar' : 'Collapse Sidebar'}
-              aria-label={isCollapsed ? 'Expand Sidebar' : 'Collapse Sidebar'}
-            >
-              {isCollapsed ? (
-                <ChevronRight className="w-4 h-4" />
-              ) : (
-                <ChevronLeft className="w-4 h-4" />
-              )}
             </button>
           </div>
 

@@ -57,47 +57,23 @@ Relevant & Recent Transactions (${relevantTransactions.length} items):
 ${relevantTransactions.map((t) => `- [${t.type}] ${t.title}: ₱${t.amount} (${t.payment_method}) [Status: ${t.status || 'COMPLETED'}] ${t.is_reimbursement ? `[Advance by ${t.reimbursement_recipient}]` : ''} ${t.category_name ? `[Category: ${t.category_name}]` : ''}`).join('\n')}
 `;
 
-    if (!apiKey) {
-      // Deterministic rule-based response when API key is not configured locally
-      let reply = 'Ang ating kasalukuyang financial status batay sa database:';
-      const q = lastMessage.toLowerCase();
+    const CANDIDATE_MODELS = [
+      'gemini-3.5-flash',
+      'gemini-3.5-flash-lite',
+      'gemini-3.8-flash',
+    ];
 
-      if (q.includes('jatulan') || q.includes('abono') || q.includes('reimburse')) {
-        const reimbursements = transactions.filter((t) => t.is_reimbursement && t.status === 'PENDING_REIMBURSEMENT');
-        if (reimbursements.length > 0) {
-          const list = reimbursements
-            .map((r) => `**${r.reimbursement_recipient || 'Officer'}** (₱${Number(r.amount).toLocaleString('en-PH', { minimumFractionDigits: 2 })} para sa *${r.title}*)`)
-            .join(', ');
-          reply = `Ayon sa ating verified database records, may mga nakabinbing advance (abono): ${list}. Ito ay naghihintay pa ng cash box refund kapag na-liquidate na ang event.`;
-        } else {
-          reply = 'Ayon sa ating verified database records, walang nakatalang pending reimbursement (abono) sa kasalukuyan.';
-        }
-      } else if (q.includes('cash') || q.includes('on hand')) {
-        reply = `Ang kabuuang **Physical Cash on Hand** sa ating cashbox ay **₱${(summary.cash_on_hand || 0).toLocaleString('en-PH', { minimumFractionDigits: 2 })}**. Samantala, ang digital balance sa **GCash** ay **₱${(summary.gcash_balance || 0).toLocaleString('en-PH', { minimumFractionDigits: 2 })}**.`;
-      } else if (q.includes('shortage')) {
-        const shortages = transactions.filter((t) => (t.category_name && t.category_name.toLowerCase().includes('shortage')) || (t.title && t.title.toLowerCase().includes('shortage')));
-        if (shortages.length > 0) {
-          const totalShortage = shortages.reduce((sum, s) => sum + (Number(s.amount) || 0), 0);
-          reply = `Mayroong naitalang kabuuang **₱${totalShortage.toLocaleString('en-PH', { minimumFractionDigits: 2 })} Cash Shortage** sa ating talaan na pormal nang ini-log at inaprubahan ng ating Club Adviser.`;
-        } else {
-          reply = 'Walang naitalang cash shortage discrepancy sa ating kasalukuyang talaan.';
-        }
-      } else if (matchedTx.length > 0) {
-        const matchedList = matchedTx.slice(0, 3).map((t) => `**${t.title}** (₱${Number(t.amount).toLocaleString('en-PH', { minimumFractionDigits: 2 })})`).join(', ');
-        reply = `Ayon sa talaan kaugnay ng iyong tanong, natagpuan ang mga sumusunod: ${matchedList}. Kabuuang Net Balance: ₱${((summary.total_inflows || 0) - (summary.total_outflows || 0)).toLocaleString('en-PH', { minimumFractionDigits: 2 })}.`;
-      } else {
-        reply = `Ang FinLITE ledger ay nagpapakita ng kabuuang Inflows na **₱${(summary.total_inflows || 0).toLocaleString('en-PH', { minimumFractionDigits: 2 })}** at Outflows na **₱${(summary.total_outflows || 0).toLocaleString('en-PH', { minimumFractionDigits: 2 })}**, na may net balance na **₱${((summary.total_inflows || 0) - (summary.total_outflows || 0)).toLocaleString('en-PH', { minimumFractionDigits: 2 })}**.`;
-      }
+    let reply = null;
+    let lastApiError = null;
 
-      return NextResponse.json({ reply });
-    }
-
-    // When GEMINI_API_KEY is available:
-    try {
+    if (apiKey) {
       const genAI = new GoogleGenerativeAI(apiKey);
-      const model = genAI.getGenerativeModel({
-        model: 'gemini-2.5-flash',
-        systemInstruction: `You are FinLITE Co-Pilot, the senior financial assistant for the League of Information Technology Enthusiasts (LITE) at Pambayang Dalubhasaan ng Marilao (PDM).
+
+      for (const modelName of CANDIDATE_MODELS) {
+        try {
+          const model = genAI.getGenerativeModel({
+            model: modelName,
+            systemInstruction: `You are FinLITE Co-Pilot, the senior financial assistant for the League of Information Technology Enthusiasts (LITE) at Pambayang Dalubhasaan ng Marilao (PDM).
 
 Operational Standards:
 1. Tone & Language: Professional, courteous, concise, and helpful. Fluently respond in natural Taglish, Filipino, or English matching the user's prompt.
@@ -111,32 +87,35 @@ Operational Standards:
 
 Grounding Data:
 ${ledgerContext}`,
-      });
+          });
 
-      const chat = model.startChat();
-      const result = await chat.sendMessage(lastMessage);
-      const response = await result.response;
-      const reply = response.text();
-
-      return NextResponse.json({ reply });
-    } catch (apiErr) {
-      console.warn('Gemini API call failed, falling back to rule engine:', apiErr?.message);
-      // Fallback rule engine on transient Gemini 503 or quota limits
-      const q = lastMessage.toLowerCase();
-      let fallbackReply = `Ayon sa ating kasalukuyang FinLITE ledger: May kabuuang Physical Cash on Hand na ₱${(summary.cash_on_hand || 0).toLocaleString('en-PH', { minimumFractionDigits: 2 })} at GCash na ₱${(summary.gcash_balance || 0).toLocaleString('en-PH', { minimumFractionDigits: 2 })}.`;
-      if (q.includes('jatulan') || q.includes('abono') || q.includes('reimburse')) {
-        const reimbursements = transactions.filter((t) => t.is_reimbursement && t.status === 'PENDING_REIMBURSEMENT');
-        if (reimbursements.length > 0) {
-          const list = reimbursements
-            .map((r) => `**${r.reimbursement_recipient || 'Officer'}** (₱${Number(r.amount).toLocaleString('en-PH', { minimumFractionDigits: 2 })} para sa *${r.title}*)`)
-            .join(', ');
-          fallbackReply = `May nakabinbing advance (abono): ${list}.`;
-        } else {
-          fallbackReply = 'Walang nakatalang pending reimbursement (abono) sa kasalukuyang ledger.';
+          const result = await model.generateContent(lastMessage);
+          const response = await result.response;
+          const text = response.text();
+          if (text) {
+            reply = text;
+            break;
+          }
+        } catch (mErr) {
+          lastApiError = mErr;
+          console.warn(`Model ${modelName} call failed, trying next candidate:`, mErr?.message);
         }
       }
-      return NextResponse.json({ reply: fallbackReply });
     }
+
+    if (!reply) {
+      if (lastApiError) {
+        console.warn('Gemini API calls failed, falling back to rule engine:', lastApiError?.message);
+      }
+      reply = generateRuleEngineReply({
+        lastMessage,
+        summary,
+        transactions,
+        matchedTx,
+      });
+    }
+
+    return NextResponse.json({ reply });
   } catch (err) {
     console.error('AI Route Error:', err);
     return NextResponse.json(
@@ -144,4 +123,74 @@ ${ledgerContext}`,
       { status: 500 }
     );
   }
+}
+
+function generateRuleEngineReply({ lastMessage = '', summary = {}, transactions = [], matchedTx = [] }) {
+  const q = lastMessage.toLowerCase();
+
+  // 1. Reimbursements / Abono
+  if (q.includes('jatulan') || q.includes('abono') || q.includes('reimburse') || q.includes('advance')) {
+    const reimbursements = transactions.filter((t) => t.is_reimbursement && t.status === 'PENDING_REIMBURSEMENT');
+    if (reimbursements.length > 0) {
+      const list = reimbursements
+        .map((r) => `**${r.reimbursement_recipient || 'Officer'}** (₱${Number(r.amount).toLocaleString('en-PH', { minimumFractionDigits: 2 })} para sa *${r.title}*)`)
+        .join(', ');
+      return `Ayon sa ating verified database records, may mga nakabinbing advance (abono): ${list}. Ito ay naghihintay pa ng cash box refund kapag na-liquidate na ang event.`;
+    }
+    return 'Ayon sa ating verified database records, walang nakatalang pending reimbursement (abono) sa kasalukuyan.';
+  }
+
+  // 2. Shortages / Discrepancies
+  if (q.includes('shortage') || q.includes('discrepanc') || q.includes('kulang')) {
+    const shortages = transactions.filter((t) =>
+      (t.category_name && t.category_name.toLowerCase().includes('shortage')) ||
+      (t.title && t.title.toLowerCase().includes('shortage')) ||
+      (t.description && t.description.toLowerCase().includes('shortage'))
+    );
+    if (shortages.length > 0) {
+      const totalShortage = shortages.reduce((sum, s) => sum + (Number(s.amount) || 0), 0);
+      const list = shortages.map((s) => `**${s.title}** (₱${Number(s.amount).toLocaleString('en-PH', { minimumFractionDigits: 2 })})`).join(', ');
+      return `Mayroong naitalang kabuuang **₱${totalShortage.toLocaleString('en-PH', { minimumFractionDigits: 2 })} Cash Shortage** sa ating talaan (${list}) na pormal nang ini-log at dumaan sa beripikasyon.`;
+    }
+    return 'Walang naitalang cash shortage o discrepancy sa ating kasalukuyang talaan.';
+  }
+
+  // 3. Receivables / Debts / Pautang
+  if (q.includes('receivable') || q.includes('pautang') || q.includes('utang') || q.includes('debt') || q.includes('collectible')) {
+    const receivables = transactions.filter((t) =>
+      (t.category_name && (t.category_name.toLowerCase().includes('receivable') || t.category_name.toLowerCase().includes('pautang') || t.category_name.toLowerCase().includes('utang'))) ||
+      (t.title && (t.title.toLowerCase().includes('receivable') || t.title.toLowerCase().includes('pautang') || t.title.toLowerCase().includes('utang')))
+    );
+    if (receivables.length > 0) {
+      const totalReceivables = receivables.reduce((sum, r) => sum + (Number(r.amount) || 0), 0);
+      const list = receivables.map((r) => `**${r.title}** (₱${Number(r.amount).toLocaleString('en-PH', { minimumFractionDigits: 2 })})`).join(', ');
+      return `May kabuuang **₱${totalReceivables.toLocaleString('en-PH', { minimumFractionDigits: 2 })}** na receivables / collectibles sa ledger: ${list}. Maaari ring buksan ang **Debts & Receivables** module mula sa sidebar para sa kumpletong breakdown.`;
+    }
+    return 'Walang naitalang active receivables o pautang sa kasalukuyang talaan. Maaari ring bisitahin ang **Debts & Receivables** module mula sa sidebar para sa buong detalye.';
+  }
+
+  // 4. Inflows & Outflows / Totals
+  if (q.includes('inflow') || q.includes('outflow') || q.includes('pasok') || q.includes('labas') || q.includes('gastos')) {
+    return `Ang ating kabuuang Inflows ngayong semestre ay **₱${(summary.total_inflows || 0).toLocaleString('en-PH', { minimumFractionDigits: 2 })}** at ang kabuuang Outflows ay **₱${(summary.total_outflows || 0).toLocaleString('en-PH', { minimumFractionDigits: 2 })}**. Ang ating Net Semester Balance ay **₱${((summary.total_inflows || 0) - (summary.total_outflows || 0)).toLocaleString('en-PH', { minimumFractionDigits: 2 })}**.`;
+  }
+
+  // 5. Physical Cash on Hand specifically
+  if (q.includes('physical cash') || q.includes('on hand') || q.includes('cashbox') || q.includes('cash box') || q.includes('hawak na pera')) {
+    return `Ang kasalukuyang verified **Physical Cash on Hand** sa ating cashbox ay **₱${(summary.cash_on_hand || 0).toLocaleString('en-PH', { minimumFractionDigits: 2 })}**, habang may **₱${(summary.gcash_balance || 0).toLocaleString('en-PH', { minimumFractionDigits: 2 })}** sa GCash.`;
+  }
+
+  // 6. Balance across Cash and GCash / Remaining
+  if (q.includes('balance') || q.includes('remaining') || q.includes('gcash') || q.includes('reserve') || q.includes('vault') || q.includes('cash')) {
+    const netVault = (summary.cash_on_hand || 0) + (summary.gcash_balance || 0);
+    return `Ang kasalukuyang verified balance: **Physical Cash on Hand** ay **₱${(summary.cash_on_hand || 0).toLocaleString('en-PH', { minimumFractionDigits: 2 })}** at **GCash** ay **₱${(summary.gcash_balance || 0).toLocaleString('en-PH', { minimumFractionDigits: 2 })}**. Ang kabuuang Net Reserve across Cash & GCash ay **₱${netVault.toLocaleString('en-PH', { minimumFractionDigits: 2 })}**.`;
+  }
+
+  // 7. Matched transactions
+  if (matchedTx && matchedTx.length > 0) {
+    const matchedList = matchedTx.slice(0, 3).map((t) => `**${t.title}** (₱${Number(t.amount).toLocaleString('en-PH', { minimumFractionDigits: 2 })})`).join(', ');
+    return `Ayon sa talaan kaugnay ng iyong katanungan, natagpuan ang mga sumusunod: ${matchedList}. Kabuuang Net Balance: ₱${((summary.total_inflows || 0) - (summary.total_outflows || 0)).toLocaleString('en-PH', { minimumFractionDigits: 2 })}.`;
+  }
+
+  // 8. General fallback overview
+  return `Batay sa kasalukuyang FinLITE ledger: May verified Physical Cash on Hand na **₱${(summary.cash_on_hand || 0).toLocaleString('en-PH', { minimumFractionDigits: 2 })}**, GCash na **₱${(summary.gcash_balance || 0).toLocaleString('en-PH', { minimumFractionDigits: 2 })}**, kabuuang Inflows na **₱${(summary.total_inflows || 0).toLocaleString('en-PH', { minimumFractionDigits: 2 })}**, at Outflows na **₱${(summary.total_outflows || 0).toLocaleString('en-PH', { minimumFractionDigits: 2 })}**.`;
 }

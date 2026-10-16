@@ -655,6 +655,8 @@ export default function SidebarMockupDashboard() {
             <ModuleErrorBoundary moduleName="Financial Ledger">
               <TransactionTable
                 transactions={activeTransactions}
+                debts={activeDebts}
+                onOpenDebts={() => setIsDebtsOpen(true)}
                 onNewTransaction={() => setIsNewTxOpen(true)}
                 onExportReport={handleOpenLiquidationPreview}
                 onNewProposal={() => setIsProposalOpen(true)}

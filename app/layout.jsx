@@ -1,6 +1,7 @@
 import './globals.css';
 import TechWaveBackground from '@/components/layout/TechWaveBackground';
 import { ThemeProvider } from '@/components/theme/ThemeProvider';
+import DevPinInspector from '@/components/dev/DevPinInspector';
 
 export const metadata = {
   title: 'FinLITE — Financial Management & Automated Document Generation System',
@@ -58,6 +59,9 @@ export default function RootLayout({ children }) {
           <div className="relative z-10 min-h-screen">
             {children}
           </div>
+
+          {/* Developer Visual Pin & Prompt Tool (Andrei / Dev Mode) */}
+          <DevPinInspector />
         </ThemeProvider>
       </body>
     </html>

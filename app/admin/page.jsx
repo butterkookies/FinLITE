@@ -28,8 +28,12 @@ import {
   KeyRound,
   FileSpreadsheet,
   AlertOctagon,
-  Loader2
+  Loader2,
+  ChevronLeft,
+  ChevronRight
 } from 'lucide-react';
+import FloatingSidebar from '@/components/layout/FloatingSidebar';
+import { createClient } from '@/lib/supabase/client';
 import { useTheme } from '@/components/theme/ThemeProvider';
 import { Modal, Button, Badge, Input } from '@/components/ui';
 
@@ -48,6 +52,30 @@ const AUDIT_FILTER_OPTIONS = [
   { id: 'governance', label: 'Governance Changes' },
 ];
 
+// Solid fill action tags without border (Pin #4)
+const getActionTagClass = (action) => {
+  switch (action) {
+    case 'AUTH_LOGIN':
+      return 'bg-emerald-600 text-white';
+    case 'AUTH_LOGOUT':
+      return 'bg-zinc-600 text-white';
+    case 'ACCOUNT_DELETED':
+    case 'USER_REJECTED':
+      return 'bg-rose-600 text-white';
+    case 'STATUS_UPDATE':
+    case 'ROLE_UPDATE':
+      return 'bg-amber-600 text-white';
+    case 'USER_APPROVED':
+      return 'bg-teal-600 text-white';
+    case 'TRANSACTION_CREATE':
+    case 'TRANSACTION_DELETE':
+    case 'TRANSACTION_UPDATE':
+      return 'bg-blue-600 text-white';
+    default:
+      return 'bg-indigo-600 text-white';
+  }
+};
+
 export default function AdminPage() {
   const router = useRouter();
   const { isLight } = useTheme();
@@ -59,6 +87,17 @@ export default function AdminPage() {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   
+  // Sidebar State (Pin #5)
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+  const [currentUser, setCurrentUser] = useState(null);
+  const [userProfile, setUserProfile] = useState(null);
+
+  // Category Filtering & Limit/Pagination State (Pin #3)
+  const [roleFilter, setRoleFilter] = useState('all');
+  const [statusFilter, setStatusFilter] = useState('all');
+  const [pageSize, setPageSize] = useState(10);
+  const [currentPage, setCurrentPage] = useState(1);
+
   // Pending approvals state: selected role per request
   const [selectedRoles, setSelectedRoles] = useState({});
 
@@ -80,6 +119,46 @@ export default function AdminPage() {
   const [auditLogs, setAuditLogs] = useState([]);
   const [auditFilter, setAuditFilter] = useState('all');
   const [isLoadingAudit, setIsLoadingAudit] = useState(false);
+
+  // Load authenticated officer for FloatingSidebar (Pin #5)
+  useEffect(() => {
+    async function loadAuth() {
+      const supabase = createClient();
+      if (!supabase) return;
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+          setCurrentUser(user);
+          const email = user.email?.toLowerCase();
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('*')
+            .eq('auth_user_id', user.id)
+            .maybeSingle();
+          if (profile) {
+            setUserProfile(profile);
+          } else if (email) {
+            const { data: profileByEmail } = await supabase
+              .from('profiles')
+              .select('*')
+              .eq('email', email)
+              .maybeSingle();
+            if (profileByEmail) {
+              setUserProfile(profileByEmail);
+            }
+          }
+        }
+      } catch (err) {
+        console.error('Failed to load user for sidebar:', err);
+      }
+    }
+    loadAuth();
+  }, []);
+
+  // Reset pagination on filter or tab change (Pin #3)
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [activeTab, roleFilter, statusFilter, auditFilter, searchQuery, pageSize]);
 
   // Fetch Requests & Stats & Users
   const fetchData = useCallback(async (showRefreshIndicator = false) => {
@@ -344,8 +423,10 @@ export default function AdminPage() {
     return true;
   });
 
-  // Filtered users for users tab
+  // Filtered users for users tab (with role & status filtering)
   const filteredUsers = users.filter((u) => {
+    if (roleFilter !== 'all' && u.role !== roleFilter) return false;
+    if (statusFilter !== 'all' && (u.status || 'active').toLowerCase() !== statusFilter.toLowerCase()) return false;
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase();
       const matchName = (u.full_name || `${u.first_name || ''} ${u.last_name || ''}`).toLowerCase().includes(q);
@@ -368,70 +449,145 @@ export default function AdminPage() {
     return matchActor || matchAction || matchEntity || matchIp;
   });
 
-  return (
-    <div className="min-h-screen flex flex-col font-sans">
-      
-      {/* Top Header */}
-      <header className={`sticky top-0 z-30 border-b backdrop-blur-xl transition-colors ${
-        isLight
-          ? 'bg-white/95 border-zinc-200 text-gray-900 shadow-2xs'
-          : 'bg-[#09090b]/95 border-zinc-800 text-zinc-100 shadow-xs'
+  // Current active dataset & pagination calculations (Pin #3)
+  const currentList = activeTab === 'pending'
+    ? filteredRequests
+    : activeTab === 'users'
+    ? filteredUsers
+    : activeTab === 'audit'
+    ? filteredAuditLogs
+    : filteredRequests;
+
+  const totalItems = currentList.length;
+  const totalPages = Math.max(1, Math.ceil(totalItems / pageSize));
+  const startIndex = (currentPage - 1) * pageSize;
+  const endIndex = Math.min(startIndex + pageSize, totalItems);
+  const paginatedList = currentList.slice(startIndex, endIndex);
+
+  // Reusable Standardized Pagination Component (Pin #3)
+  const renderPagination = () => {
+    if (totalItems === 0) return null;
+    return (
+      <div className={`p-4 border-t flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs transition-colors ${
+        isLight ? 'border-black/[0.06] bg-gray-50/70 text-gray-700' : 'border-zinc-800 bg-zinc-900/60 text-zinc-300'
       }`}>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-          
-          {/* Left: Branding & Portal Badge */}
-          <div className="flex items-center gap-3">
-            <Link 
-              href="/" 
-              className={`flex items-center gap-2 p-1.5 rounded-lg transition-colors ${
-                isLight ? 'text-gray-500 hover:text-gray-900 hover:bg-gray-100' : 'text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800'
+        <div className="flex items-center gap-3">
+          <span className="font-medium">
+            Showing <strong className="font-bold">{totalItems === 0 ? 0 : startIndex + 1}</strong> to <strong className="font-bold">{endIndex}</strong> of <strong className="font-bold">{totalItems}</strong> entries
+          </span>
+          <div className="hidden sm:flex items-center gap-1.5 ml-2 pl-3 border-l border-zinc-200 dark:border-zinc-800">
+            <span className="text-[11px] opacity-70">Rows:</span>
+            <select
+              value={pageSize}
+              onChange={(e) => setPageSize(Number(e.target.value))}
+              className={`text-xs font-semibold rounded-lg px-2 py-1 cursor-pointer border ${
+                isLight ? 'bg-white border-zinc-200 text-gray-900' : 'bg-zinc-900 border-zinc-800 text-zinc-200'
               }`}
-              title="Return to Main Dashboard"
             >
-              <ArrowLeft className="w-5 h-5" />
-            </Link>
-
-            <div className={`h-6 w-px ${isLight ? 'bg-gray-200' : 'bg-zinc-800'}`} />
-
-            <div className="flex items-center gap-2.5">
-              <div className={`w-9 h-9 rounded-lg flex items-center justify-center shrink-0 border ${
-                isLight 
-                  ? 'bg-emerald-100 border-emerald-300 text-emerald-800' 
-                  : 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400'
-              }`}>
-                <ShieldCheck className="w-5 h-5" />
-              </div>
-              <div className="min-w-0">
-                <div className="flex items-center gap-2">
-                  <span className="text-base font-bold">
-                    <span className="hidden sm:inline">FinLITE </span>Admin Console
-                  </span>
-                  <span className={`hidden sm:inline px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider rounded-md shrink-0 border ${
-                    isLight 
-                      ? 'bg-emerald-50 text-emerald-800 border-emerald-200' 
-                      : 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
-                  }`}>
-                    Access Control
-                  </span>
-                </div>
-                <p className={`hidden sm:block text-xs font-medium truncate ${isLight ? 'text-gray-500' : 'text-zinc-400'}`}>
-                  User Access Verification, Account Lifecycle &amp; Telemetry
-                </p>
-              </div>
-            </div>
+              <option value={10}>10</option>
+              <option value={25}>25</option>
+              <option value={50}>50</option>
+              <option value={100}>100</option>
+            </select>
           </div>
+        </div>
 
-          {/* Right: Identity & Actions */}
-          <div className="flex items-center gap-2.5">
-            <div className={`hidden md:flex items-center gap-2 px-3 py-1.5 border rounded-lg ${
-              isLight ? 'bg-gray-50 border-zinc-200' : 'bg-zinc-900/60 border-zinc-800'
-            }`}>
-              <Lock className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
-              <div className="text-right">
-                <p className="text-xs font-semibold">geronimoandreijohn.pdm@gmail.com</p>
-                <p className={`text-[10px] font-medium ${isLight ? 'text-emerald-700' : 'text-emerald-400'}`}>Primary Super Admin</p>
+        <div className="flex items-center gap-2 self-end sm:self-auto">
+          <button
+            type="button"
+            onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+            disabled={currentPage === 1}
+            className={`px-3 py-1.5 rounded-lg border font-semibold transition-all flex items-center gap-1 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed ${
+              isLight ? 'bg-white hover:bg-gray-50 border-zinc-200 text-gray-900' : 'bg-zinc-900 hover:bg-zinc-800 border-zinc-800 text-zinc-200'
+            }`}
+          >
+            <ChevronLeft className="w-3.5 h-3.5" />
+            <span>Prev</span>
+          </button>
+          <span className="px-2 text-xs font-bold whitespace-nowrap">
+            Page {currentPage} of {totalPages}
+          </span>
+          <button
+            type="button"
+            onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+            disabled={currentPage >= totalPages}
+            className={`px-3 py-1.5 rounded-lg border font-semibold transition-all flex items-center gap-1 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed ${
+              isLight ? 'bg-white hover:bg-gray-50 border-zinc-200 text-gray-900' : 'bg-zinc-900 hover:bg-zinc-800 border-zinc-800 text-zinc-200'
+            }`}
+          >
+            <span>Next</span>
+            <ChevronRight className="w-3.5 h-3.5" />
+          </button>
+        </div>
+      </div>
+    );
+  };
+
+  return (
+    <div className="min-h-screen flex font-sans">
+      
+      {/* 1. Desktop & Mobile Floating Sidebar (Pin #5) */}
+      <FloatingSidebar
+        currentRole="admin"
+        userProfile={userProfile}
+        currentUser={currentUser}
+        activeTab="admin"
+        isCollapsed={isSidebarCollapsed}
+        onToggleCollapse={setIsSidebarCollapsed}
+      />
+
+      {/* 2. Main Content Canvas with dynamic left padding on desktop */}
+      <div 
+        className={`flex-1 flex flex-col transition-all duration-300 ease-in-out min-w-0 ${
+          isSidebarCollapsed ? 'md:pl-[88px]' : 'md:pl-[280px]'
+        }`}
+      >
+        
+        {/* Top Header */}
+        <header className={`sticky top-0 z-30 border-b backdrop-blur-xl transition-colors ${
+          isLight
+            ? 'bg-white/95 border-zinc-200 text-gray-900 shadow-2xs'
+            : 'bg-[#09090b]/95 border-zinc-800 text-zinc-100 shadow-xs'
+        }`}>
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            
+            {/* Left: Branding & Return Button */}
+            <div className="flex items-center gap-3 pl-12 md:pl-0">
+              <Link 
+                href="/" 
+                className={`flex items-center gap-2 p-1.5 rounded-lg transition-colors ${
+                  isLight ? 'text-gray-500 hover:text-gray-900 hover:bg-gray-100' : 'text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800'
+                }`}
+                title="Return to Main Dashboard"
+              >
+                <ArrowLeft className="w-5 h-5" />
+              </Link>
+
+              <div className={`h-6 w-px ${isLight ? 'bg-gray-200' : 'bg-zinc-800'}`} />
+
+              <div className="flex items-center gap-2.5">
+                <div className={`w-9 h-9 rounded-lg flex items-center justify-center shrink-0 border ${
+                  isLight 
+                    ? 'bg-emerald-100 border-emerald-300 text-emerald-800' 
+                    : 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400'
+                }`}>
+                  <ShieldCheck className="w-5 h-5" />
+                </div>
+                <div className="min-w-0">
+                  <div className="flex items-center gap-2">
+                    <span className="text-base font-bold">
+                      <span className="hidden sm:inline">FinLITE </span>Admin Console
+                    </span>
+                  </div>
+                  <p className={`hidden sm:block text-xs font-medium truncate ${isLight ? 'text-gray-500' : 'text-zinc-400'}`}>
+                    User Access Verification, Account Lifecycle &amp; Telemetry
+                  </p>
+                </div>
               </div>
             </div>
+
+            {/* Right: Actions (Pin #1 removed unnecessary profile badge) */}
+            <div className="flex items-center gap-2.5">
 
             <button
               onClick={() => {
@@ -597,22 +753,82 @@ export default function AdminPage() {
               </button>
             </div>
 
-            {/* Search Input */}
-            <div className="relative min-w-[240px]">
-              <Search className={`w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none ${
-                isLight ? 'text-gray-400' : 'text-zinc-500'
-              }`} />
-              <input
-                type="text"
-                placeholder={activeTab === 'audit' ? 'Search by user, action, IP...' : 'Search by name, email, phone...'}
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className={`w-full text-xs rounded-xl pl-9 pr-3.5 py-2 transition-all select-text border focus:outline-none focus:ring-1 ${
-                  isLight
-                    ? 'bg-gray-50 border-black/[0.08] text-gray-900 placeholder:text-gray-400 focus:bg-white focus:border-emerald-600 focus:ring-emerald-500/20'
-                    : 'bg-[#121214] border-zinc-800 text-white placeholder:text-zinc-500 focus:border-emerald-400 focus:ring-emerald-500/30'
-                }`}
-              />
+            {/* Controls: Filtering, Limit & Search (Pin #3) */}
+            <div className="flex items-center gap-2 flex-wrap">
+              {/* Category-specific filters for Users tab */}
+              {activeTab === 'users' && (
+                <>
+                  <select
+                    value={roleFilter}
+                    onChange={(e) => setRoleFilter(e.target.value)}
+                    className={`text-xs font-semibold rounded-xl px-2.5 py-2 cursor-pointer border ${
+                      isLight
+                        ? 'bg-gray-50 border-black/[0.08] text-gray-800'
+                        : 'bg-[#121214] border-zinc-800 text-zinc-200'
+                    }`}
+                    title="Filter by Role"
+                  >
+                    <option value="all">All Roles</option>
+                    {ROLE_OPTIONS.map((opt) => (
+                      <option key={opt.value} value={opt.value} className={isLight ? 'bg-white text-gray-900' : 'bg-[#121214] text-zinc-100'}>
+                        {opt.label}
+                      </option>
+                    ))}
+                  </select>
+
+                  <select
+                    value={statusFilter}
+                    onChange={(e) => setStatusFilter(e.target.value)}
+                    className={`text-xs font-semibold rounded-xl px-2.5 py-2 cursor-pointer border ${
+                      isLight
+                        ? 'bg-gray-50 border-black/[0.08] text-gray-800'
+                        : 'bg-[#121214] border-zinc-800 text-zinc-200'
+                    }`}
+                    title="Filter by Account Status"
+                  >
+                    <option value="all">All Status</option>
+                    <option value="active">Active Only</option>
+                    <option value="suspended">Suspended Only</option>
+                  </select>
+                </>
+              )}
+
+              {/* Rows per page selector */}
+              <div className="flex items-center gap-1.5">
+                <select
+                  value={pageSize}
+                  onChange={(e) => setPageSize(Number(e.target.value))}
+                  className={`text-xs font-semibold rounded-xl px-2.5 py-2 cursor-pointer border ${
+                    isLight
+                      ? 'bg-gray-50 border-black/[0.08] text-gray-800'
+                      : 'bg-[#121214] border-zinc-800 text-zinc-200'
+                  }`}
+                  title="Rows per page limit"
+                >
+                  <option value={10}>10 rows</option>
+                  <option value={25}>25 rows</option>
+                  <option value={50}>50 rows</option>
+                  <option value={100}>100 rows</option>
+                </select>
+              </div>
+
+              {/* Search Input */}
+              <div className="relative min-w-[200px] flex-1 sm:flex-initial">
+                <Search className={`w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none ${
+                  isLight ? 'text-gray-400' : 'text-zinc-500'
+                }`} />
+                <input
+                  type="text"
+                  placeholder={activeTab === 'audit' ? 'Search by user, action, IP...' : 'Search by name, email, phone...'}
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className={`w-full text-xs rounded-xl pl-9 pr-3.5 py-2 transition-all select-text border focus:outline-none focus:ring-1 ${
+                    isLight
+                      ? 'bg-gray-50 border-black/[0.08] text-gray-900 placeholder:text-gray-400 focus:bg-white focus:border-emerald-600 focus:ring-emerald-500/20'
+                      : 'bg-[#121214] border-zinc-800 text-white placeholder:text-zinc-500 focus:border-emerald-400 focus:ring-emerald-500/30'
+                  }`}
+                />
+              </div>
             </div>
 
           </div>
@@ -620,18 +836,32 @@ export default function AdminPage() {
 
         {/* Tab 1: Pending Approvals View */}
         {activeTab === 'pending' && (
-          <div className="space-y-3">
-            {isLoading ? (
-              <div className={`p-12 text-center rounded-2xl border ${
-                isLight ? 'bg-white border-black/[0.08]' : 'bg-[#121214] border-zinc-800'
+          <div className={`rounded-2xl overflow-hidden border ${
+            isLight ? 'bg-white border-black/[0.08]' : 'bg-[#121214] border-zinc-800'
+          }`}>
+            <div className={`p-4 border-b flex items-center justify-between ${
+              isLight ? 'border-black/[0.06] bg-gray-50/70' : 'border-zinc-800 bg-zinc-900/60'
+            }`}>
+              <div>
+                <h3 className="text-sm font-bold">Pending Registration Approvals</h3>
+                <p className={`text-xs ${isLight ? 'text-gray-500' : 'text-zinc-400'}`}>
+                  Review applicant details, assign officer roles, and approve or decline access
+                </p>
+              </div>
+              <span className={`text-xs font-semibold px-2.5 py-1 rounded-lg ${
+                isLight ? 'text-amber-900 bg-amber-100' : 'text-amber-300 bg-amber-500/15'
               }`}>
+                {filteredRequests.length} Pending
+              </span>
+            </div>
+
+            {isLoading ? (
+              <div className="p-12 text-center text-xs opacity-60">
                 <RefreshCw className="w-6 h-6 text-emerald-500 animate-spin mx-auto mb-2" />
-                <p className={`text-xs font-medium ${isLight ? 'text-gray-600' : 'text-zinc-400'}`}>Loading pending registration requests...</p>
+                <p className={`font-medium ${isLight ? 'text-gray-600' : 'text-zinc-400'}`}>Loading pending registration requests...</p>
               </div>
             ) : filteredRequests.length === 0 ? (
-              <div className={`p-12 sm:p-16 text-center rounded-2xl border ${
-                isLight ? 'bg-white border-black/[0.08]' : 'bg-[#121214] border-zinc-800'
-              }`}>
+              <div className="p-12 sm:p-16 text-center">
                 <div className={`w-12 h-12 rounded-xl flex items-center justify-center mx-auto mb-3 ${
                   isLight ? 'bg-emerald-100 text-emerald-700' : 'bg-emerald-500/20 text-emerald-400'
                 }`}>
@@ -643,108 +873,109 @@ export default function AdminPage() {
                 </p>
               </div>
             ) : (
-              filteredRequests.map((req) => (
-                <div 
-                  key={req.id}
-                  className={`rounded-2xl p-5 transition-all border flex flex-col lg:flex-row lg:items-center justify-between gap-4 ${
-                    isLight ? 'bg-white border-black/[0.08]' : 'bg-[#121214] border-zinc-800'
-                  }`}
-                >
-                  {/* Left: Applicant Identity */}
-                  <div className="flex items-start gap-4">
-                    <div className={`w-11 h-11 rounded-2xl flex items-center justify-center font-bold text-base shrink-0 ${
-                      isLight ? 'bg-emerald-100 text-emerald-800' : 'bg-emerald-500/20 text-emerald-300'
-                    }`}>
-                      {req.first_name?.[0]?.toUpperCase() || 'U'}
-                      {req.last_name?.[0]?.toUpperCase() || ''}
-                    </div>
+              <>
+                <div className="hidden lg:grid grid-cols-12 px-5 py-3 text-[10px] font-bold uppercase tracking-wider text-zinc-500 dark:text-zinc-400 bg-zinc-50/70 dark:bg-zinc-900/40 border-b border-black/[0.06] dark:border-zinc-800">
+                  <div className="col-span-5">Applicant & Submission</div>
+                  <div className="col-span-4">Assign Role</div>
+                  <div className="col-span-3 text-right">Approval Decision</div>
+                </div>
 
-                    <div>
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <h4 className="text-sm sm:text-base font-bold">
-                          {req.first_name} {req.last_name}
-                        </h4>
-                        <span className={`px-2 py-0.5 text-[10px] font-semibold rounded-md ${
-                          isLight ? 'bg-gray-100 text-gray-700' : 'bg-zinc-800 text-zinc-300'
-                        }`}>
-                          {req.auth_provider === 'google' ? 'Google OAuth' : 'Email/Password'}
-                        </span>
-                        <span className={`px-2 py-0.5 text-[10px] font-bold rounded-md uppercase tracking-wider ${
-                          isLight ? 'bg-amber-100 text-amber-900' : 'bg-amber-500/15 text-amber-300'
-                        }`}>
-                          Pending Approval
-                        </span>
-                      </div>
-
-                      <div className={`flex flex-wrap items-center gap-x-4 gap-y-1 mt-1 text-xs font-medium ${
-                        isLight ? 'text-gray-600' : 'text-white/70'
-                      }`}>
-                        <div className="flex items-center gap-1.5">
-                          <Mail className={`w-3.5 h-3.5 ${isLight ? 'text-gray-400' : 'text-white/40'}`} />
-                          <span className="font-semibold">{req.email}</span>
-                        </div>
-                        {req.contact_number && (
-                          <div className="flex items-center gap-1.5">
-                            <Phone className={`w-3.5 h-3.5 ${isLight ? 'text-gray-400' : 'text-white/40'}`} />
-                            <span>{req.contact_number}</span>
-                          </div>
-                        )}
-                        <div className={`flex items-center gap-1.5 ${isLight ? 'text-gray-400' : 'text-white/45'}`}>
-                          <Calendar className="w-3.5 h-3.5" />
-                          <span>Submitted: {new Date(req.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' })}</span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Right: Role Assignment & Controls */}
-                  <div className={`flex items-center gap-2.5 pt-3 lg:pt-0 border-t lg:border-t-0 justify-end flex-wrap ${
-                    isLight ? 'border-gray-100' : 'border-white/[0.06]'
-                  }`}>
-                    <div className="flex items-center gap-1.5">
-                      <span className={`text-[11px] font-bold uppercase tracking-wider hidden sm:inline ${
-                        isLight ? 'text-gray-500' : 'text-white/60'
-                      }`}>
-                        Assign Role:
-                      </span>
-                      <select
-                        value={selectedRoles[req.id] || 'treasurer'}
-                        onChange={(e) => setSelectedRoles((prev) => ({ ...prev, [req.id]: e.target.value }))}
-                        className={`text-xs font-semibold rounded-xl px-3 py-2 cursor-pointer focus:outline-none focus:ring-1 border ${
-                          isLight
-                            ? 'bg-white border-black/[0.08] text-gray-900 focus:ring-emerald-500/20'
-                            : 'bg-zinc-900 border-zinc-800 text-zinc-100 focus:ring-emerald-500/30'
-                        }`}
-                      >
-                        {ROLE_OPTIONS.map((opt) => (
-                          <option key={opt.value} value={opt.value} className={isLight ? 'bg-white text-gray-900' : 'bg-[#121214] text-zinc-100'}>
-                            {opt.label}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-
-                    <button
-                      onClick={() => handleOpenReject(req)}
-                      disabled={isSubmittingAction}
-                      className={`px-3 py-2 text-xs font-semibold rounded-xl transition-all cursor-pointer disabled:opacity-50 ${
-                        isLight ? 'text-rose-700 bg-rose-50 hover:bg-rose-100' : 'text-rose-300 bg-rose-500/15 hover:bg-rose-500/25'
+                <div className={`divide-y ${isLight ? 'divide-black/[0.06]' : 'divide-white/[0.06]'}`}>
+                  {paginatedList.map((req) => (
+                    <div 
+                      key={req.id}
+                      className={`p-4 lg:px-5 lg:py-4 transition-all flex flex-col lg:grid lg:grid-cols-12 items-start lg:items-center gap-3 lg:gap-4 ${
+                        isLight ? 'hover:bg-gray-50/80' : 'hover:bg-white/[0.02]'
                       }`}
                     >
-                      Decline
-                    </button>
+                      {/* Left: Applicant Identity (col-span-5) */}
+                      <div className="col-span-5 flex items-start gap-3.5 min-w-0 w-full">
+                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center font-bold text-sm shrink-0 ${
+                          isLight ? 'bg-emerald-100 text-emerald-800' : 'bg-emerald-500/20 text-emerald-300'
+                        }`}>
+                          {req.first_name?.[0]?.toUpperCase() || 'U'}
+                          {req.last_name?.[0]?.toUpperCase() || ''}
+                        </div>
 
-                    <button
-                      onClick={() => handleApprove(req.id)}
-                      disabled={isSubmittingAction}
-                      className="px-4 py-2 text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-500 active:bg-emerald-700 rounded-xl transition-all shadow-xs flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
-                    >
-                      <CheckCircle2 className="w-3.5 h-3.5" />
-                      <span>Approve Access</span>
-                    </button>
-                  </div>
+                        <div className="min-w-0 flex-1">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <h4 className="text-sm font-bold truncate">
+                              {req.first_name} {req.last_name}
+                            </h4>
+                            <span className={`px-2 py-0.5 text-[9px] font-semibold rounded-md ${
+                              isLight ? 'bg-gray-100 text-gray-700' : 'bg-zinc-800 text-zinc-300'
+                            }`}>
+                              {req.auth_provider === 'google' ? 'Google OAuth' : 'Email/Password'}
+                            </span>
+                            <span className="px-2 py-0.5 text-[9px] font-bold rounded-md uppercase tracking-wider bg-amber-600 text-white">
+                              Pending
+                            </span>
+                          </div>
+
+                          <div className={`flex flex-wrap items-center gap-x-3 gap-y-0.5 mt-1 text-xs font-medium ${
+                            isLight ? 'text-gray-600' : 'text-zinc-400'
+                          }`}>
+                            <span className="font-semibold">{req.email}</span>
+                            {req.contact_number && <span>• {req.contact_number}</span>}
+                          </div>
+                          <div className={`flex items-center gap-1.5 mt-0.5 text-[11px] ${isLight ? 'text-gray-400' : 'text-zinc-500'}`}>
+                            <Calendar className="w-3 h-3" />
+                            <span>Submitted: {new Date(req.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' })}</span>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Middle: Role Assignment (col-span-4) */}
+                      <div className="col-span-4 flex items-center gap-2 w-full">
+                        <span className={`text-[11px] font-bold uppercase tracking-wider hidden sm:inline ${
+                          isLight ? 'text-gray-500' : 'text-zinc-400'
+                        }`}>
+                          Assign:
+                        </span>
+                        <select
+                          value={selectedRoles[req.id] || 'treasurer'}
+                          onChange={(e) => setSelectedRoles((prev) => ({ ...prev, [req.id]: e.target.value }))}
+                          className={`text-xs font-semibold rounded-xl px-3 py-2 cursor-pointer focus:outline-none focus:ring-1 border w-full max-w-[200px] ${
+                            isLight
+                              ? 'bg-white border-black/[0.08] text-gray-900 focus:ring-emerald-500/20'
+                              : 'bg-zinc-900 border-zinc-800 text-zinc-100 focus:ring-emerald-500/30'
+                          }`}
+                        >
+                          {ROLE_OPTIONS.map((opt) => (
+                            <option key={opt.value} value={opt.value} className={isLight ? 'bg-white text-gray-900' : 'bg-[#121214] text-zinc-100'}>
+                              {opt.label}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+
+                      {/* Right: Decision Controls (col-span-3 text-right) */}
+                      <div className="col-span-3 flex items-center justify-start lg:justify-end gap-2 w-full">
+                        <button
+                          onClick={() => handleOpenReject(req)}
+                          disabled={isSubmittingAction}
+                          className={`px-3 py-2 text-xs font-semibold rounded-xl transition-all cursor-pointer disabled:opacity-50 ${
+                            isLight ? 'text-rose-700 bg-rose-50 hover:bg-rose-100' : 'text-rose-300 bg-rose-500/15 hover:bg-rose-500/25'
+                          }`}
+                        >
+                          Decline
+                        </button>
+
+                        <button
+                          onClick={() => handleApprove(req.id)}
+                          disabled={isSubmittingAction}
+                          className="px-4 py-2 text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-500 active:bg-emerald-700 rounded-xl transition-all shadow-xs flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
+                        >
+                          <CheckCircle2 className="w-3.5 h-3.5" />
+                          <span>Approve Access</span>
+                        </button>
+                      </div>
+                    </div>
+                  ))}
                 </div>
-              ))
+
+                {renderPagination()}
+              </>
             )}
           </div>
         )}
@@ -754,100 +985,90 @@ export default function AdminPage() {
           <div className={`rounded-2xl overflow-hidden border ${
             isLight ? 'bg-white border-black/[0.08]' : 'bg-[#121214] border-zinc-800'
           }`}>
-            <div className={`p-4 border-b flex items-center justify-between ${
+            <div className={`p-4 border-b flex flex-col sm:flex-row sm:items-center justify-between gap-3 ${
               isLight ? 'border-black/[0.06] bg-gray-50/70' : 'border-zinc-800 bg-zinc-900/60'
             }`}>
               <div>
                 <h3 className="text-sm font-bold">Authorized Accounts &amp; Access Controls</h3>
-                <p className={`text-xs ${isLight ? 'text-gray-500' : 'text-white/50'}`}>
+                <p className={`text-xs ${isLight ? 'text-gray-500' : 'text-zinc-400'}`}>
                   Manage status (Active vs Suspended), role assignments, and safe account lifecycle
                 </p>
               </div>
-              <span className={`text-xs font-semibold px-2.5 py-1 rounded-lg ${
-                isLight ? 'text-emerald-900 bg-emerald-100' : 'text-emerald-300 bg-emerald-500/15'
-              }`}>
-                {filteredUsers.length} Accounts
-              </span>
+              <div className="flex items-center gap-2">
+                <span className={`text-xs font-semibold px-2.5 py-1 rounded-lg ${
+                  isLight ? 'text-emerald-900 bg-emerald-100' : 'text-emerald-300 bg-emerald-500/15'
+                }`}>
+                  {filteredUsers.length} Accounts Found
+                </span>
+              </div>
             </div>
 
             {filteredUsers.length === 0 ? (
-              <div className={`p-12 text-center text-xs font-semibold ${isLight ? 'text-gray-400' : 'text-white/40'}`}>
-                No user accounts found matching your query.
+              <div className={`p-12 text-center text-xs font-semibold ${isLight ? 'text-gray-400' : 'text-zinc-500'}`}>
+                No user accounts found matching your query or filter.
               </div>
             ) : (
-              <div className={`divide-y ${isLight ? 'divide-black/[0.06]' : 'divide-white/[0.06]'}`}>
-                {filteredUsers.map((user) => {
-                  const isPrimarySuperAdmin = user.email === 'geronimoandreijohn.pdm@gmail.com';
-                  const isSuspended = user.status === 'suspended';
+              <>
+                <div className="hidden lg:grid grid-cols-12 px-5 py-3 text-[10px] font-bold uppercase tracking-wider text-zinc-500 dark:text-zinc-400 bg-zinc-50/70 dark:bg-zinc-900/40 border-b border-black/[0.06] dark:border-zinc-800">
+                  <div className="col-span-5">Officer / Account Details</div>
+                  <div className="col-span-3">Assigned Role</div>
+                  <div className="col-span-2 text-center">Status</div>
+                  <div className="col-span-2 text-right">Actions</div>
+                </div>
 
-                  return (
-                    <div 
-                      key={user.id} 
-                      className={`p-4 flex flex-col md:flex-row md:items-center justify-between gap-3 transition-colors ${
-                        isLight ? 'hover:bg-gray-50/80' : 'hover:bg-white/[0.02]'
-                      } ${isSuspended ? (isLight ? 'bg-amber-50/30' : 'bg-amber-950/10') : ''}`}
-                    >
-                      {/* Identity & Status */}
-                      <div className="flex items-center gap-3">
-                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center font-bold text-sm shrink-0 ${
-                          isPrimarySuperAdmin
-                            ? isLight ? 'bg-purple-100 text-purple-900' : 'bg-purple-500/20 text-purple-300'
-                            : isSuspended
-                            ? isLight ? 'bg-amber-100 text-amber-900' : 'bg-amber-500/20 text-amber-300'
-                            : isLight ? 'bg-emerald-100 text-emerald-800' : 'bg-emerald-500/20 text-emerald-300'
-                        }`}>
-                          {user.first_name?.[0] || user.full_name?.[0] || 'U'}
-                        </div>
-                        <div>
-                          <div className="flex items-center gap-2 flex-wrap">
-                            <span className="text-sm font-bold">
-                              {user.full_name || `${user.first_name || ''} ${user.last_name || ''}`.trim()}
-                            </span>
+                <div className={`divide-y ${isLight ? 'divide-black/[0.06]' : 'divide-white/[0.06]'}`}>
+                  {paginatedList.map((user) => {
+                    const isPrimarySuperAdmin = user.email === 'geronimoandreijohn.pdm@gmail.com';
+                    const isSuspended = user.status === 'suspended';
 
-                            {/* Status Badge */}
-                            <span className={`px-2 py-0.5 text-[10px] font-bold uppercase rounded-md tracking-wider border ${
-                              isSuspended
-                                ? isLight ? 'bg-amber-100 text-amber-900 border-amber-300' : 'bg-amber-500/15 text-amber-300 border-amber-500/30'
-                                : isLight ? 'bg-emerald-100 text-emerald-900 border-emerald-300' : 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30'
-                            }`}>
-                              {isSuspended ? 'SUSPENDED' : 'ACTIVE'}
-                            </span>
-
-                            {/* Role Badge */}
-                            <span className={`px-2 py-0.5 text-[10px] font-bold uppercase rounded-md ${
-                              isLight ? 'bg-gray-100 text-gray-800' : 'bg-white/10 text-white/80'
-                            }`}>
-                              {user.role}
-                            </span>
-
-                            {/* Super Admin Lock Badge */}
-                            {isPrimarySuperAdmin && (
-                              <span className={`px-2 py-0.5 text-[10px] font-bold uppercase rounded-md border flex items-center gap-1 ${
-                                isLight ? 'bg-purple-100 text-purple-900 border-purple-200' : 'bg-purple-500/20 text-purple-200 border-purple-500/30'
-                              }`}>
-                                <Lock className="w-2.5 h-2.5" />
-                                <span>Primary Super Admin</span>
-                              </span>
-                            )}
+                    return (
+                      <div 
+                        key={user.id} 
+                        className={`p-4 lg:px-5 lg:py-3.5 flex flex-col lg:grid lg:grid-cols-12 items-start lg:items-center gap-3 lg:gap-4 transition-colors ${
+                          isLight ? 'hover:bg-gray-50/80' : 'hover:bg-white/[0.02]'
+                        } ${isSuspended ? (isLight ? 'bg-amber-50/30' : 'bg-amber-950/10') : ''}`}
+                      >
+                        {/* Column 1: Identity (col-span-5) */}
+                        <div className="col-span-5 flex items-center gap-3 min-w-0 w-full">
+                          <div className={`w-10 h-10 rounded-xl flex items-center justify-center font-bold text-sm shrink-0 ${
+                            isPrimarySuperAdmin
+                              ? isLight ? 'bg-purple-100 text-purple-900' : 'bg-purple-500/20 text-purple-300'
+                              : isSuspended
+                              ? isLight ? 'bg-amber-100 text-amber-900' : 'bg-amber-500/20 text-amber-300'
+                              : isLight ? 'bg-emerald-100 text-emerald-800' : 'bg-emerald-500/20 text-emerald-300'
+                          }`}>
+                            {user.first_name?.[0] || user.full_name?.[0] || 'U'}
                           </div>
+                          <div className="min-w-0 flex-1">
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <span className="text-sm font-bold truncate">
+                                {user.full_name || `${user.first_name || ''} ${user.last_name || ''}`.trim()}
+                              </span>
 
-                          <p className={`text-xs font-medium mt-0.5 ${isLight ? 'text-gray-500' : 'text-white/50'}`}>
-                            {user.email} {user.contact_number ? `• ${user.contact_number}` : ''}
-                          </p>
+                              {/* Super Admin Lock Badge */}
+                              {isPrimarySuperAdmin && (
+                                <span className={`px-1.5 py-0.5 text-[9px] font-bold uppercase rounded flex items-center gap-1 ${
+                                  isLight ? 'bg-purple-100 text-purple-900' : 'bg-purple-500/20 text-purple-200'
+                                }`}>
+                                  <Lock className="w-2.5 h-2.5" />
+                                  <span>Super Admin</span>
+                                </span>
+                              )}
+                            </div>
+
+                            <p className={`text-xs font-medium truncate mt-0.5 ${isLight ? 'text-gray-500' : 'text-zinc-400'}`}>
+                              {user.email} {user.contact_number ? `• ${user.contact_number}` : ''}
+                            </p>
+                          </div>
                         </div>
-                      </div>
 
-                      {/* Controls Toolbar */}
-                      <div className="flex items-center gap-2.5 self-end md:self-center flex-wrap">
-                        
-                        {/* Change Role Selector (locked for primary super admin) */}
-                        <div className="flex items-center gap-1.5">
-                          <span className={`text-[11px] font-semibold ${isLight ? 'text-gray-500' : 'text-white/60'}`}>Role:</span>
+                        {/* Column 2: Role Assignment (col-span-3) */}
+                        <div className="col-span-3 flex items-center gap-2 w-full">
                           <select
                             disabled={isPrimarySuperAdmin}
                             value={user.role}
                             onChange={(e) => handleUpdateUserRole(user.id, e.target.value)}
-                            className={`text-xs font-semibold rounded-xl px-2.5 py-1.5 cursor-pointer focus:outline-none focus:ring-1 border disabled:opacity-50 disabled:cursor-not-allowed ${
+                            className={`text-xs font-semibold rounded-xl px-2.5 py-1.5 cursor-pointer focus:outline-none focus:ring-1 border disabled:opacity-50 disabled:cursor-not-allowed w-full max-w-[170px] ${
                               isLight
                                 ? 'bg-white border-zinc-200 text-gray-900 focus:ring-emerald-500/20'
                                 : 'bg-zinc-900 border-zinc-800 text-zinc-100 focus:ring-emerald-500/30'
@@ -861,66 +1082,79 @@ export default function AdminPage() {
                           </select>
                         </div>
 
-                        {/* Suspend / Reactivate Toggle Button */}
-                        {isPrimarySuperAdmin ? (
-                          <div className={`px-2.5 py-1 text-xs font-semibold rounded-xl border flex items-center gap-1 ${
-                            isLight ? 'bg-gray-100 border-gray-200 text-gray-500' : 'bg-white/[0.04] border-white/[0.06] text-white/40'
+                        {/* Column 3: Status Badge (col-span-2 text-center) */}
+                        <div className="col-span-2 flex lg:justify-center w-full lg:w-auto">
+                          <span className={`px-2.5 py-1 text-[10px] font-bold uppercase rounded-md tracking-wider ${
+                            isSuspended
+                              ? 'bg-amber-600 text-white'
+                              : 'bg-emerald-600 text-white'
                           }`}>
-                            <Lock className="w-3 h-3" />
-                            <span>Immutable</span>
-                          </div>
-                        ) : (
-                          <button
-                            type="button"
-                            onClick={() => handleToggleUserStatus(user)}
-                            disabled={isSubmittingAction}
-                            className={`px-3 py-1.5 text-xs font-bold rounded-xl transition-all cursor-pointer border flex items-center gap-1.5 ${
-                              isSuspended
-                                ? isLight
-                                  ? 'bg-emerald-50 text-emerald-800 hover:bg-emerald-100 border-emerald-300'
-                                  : 'bg-emerald-500/15 text-emerald-300 hover:bg-emerald-500/25 border-emerald-500/30'
-                                : isLight
-                                  ? 'bg-amber-50 text-amber-900 hover:bg-amber-100 border-amber-300'
-                                  : 'bg-amber-500/15 text-amber-300 hover:bg-amber-500/25 border-amber-500/30'
-                            }`}
-                            title={isSuspended ? 'Reactivate account access' : 'Suspend account to block login'}
-                          >
-                            {isSuspended ? (
-                              <>
-                                <UserCheck className="w-3.5 h-3.5" />
-                                <span>Reactivate</span>
-                              </>
-                            ) : (
-                              <>
-                                <UserX className="w-3.5 h-3.5" />
-                                <span>Suspend</span>
-                              </>
-                            )}
-                          </button>
-                        )}
+                            {isSuspended ? 'SUSPENDED' : 'ACTIVE'}
+                          </span>
+                        </div>
 
-                        {/* Safe Remove Account Button */}
-                        {!isPrimarySuperAdmin && (
-                          <button
-                            type="button"
-                            onClick={() => handleOpenRemoveUser(user)}
-                            className={`px-2.5 py-1.5 text-xs font-semibold rounded-xl transition-all cursor-pointer border flex items-center gap-1 ${
-                              isLight
-                                ? 'text-rose-700 bg-rose-50 hover:bg-rose-100 border-rose-200'
-                                : 'text-rose-300 bg-rose-500/10 hover:bg-rose-500/20 border-rose-500/20'
-                            }`}
-                            title="Safe account removal with financial dependency check"
-                          >
-                            <Trash2 className="w-3.5 h-3.5" />
-                            <span className="hidden sm:inline">Remove</span>
-                          </button>
-                        )}
+                        {/* Column 4: Controls & Lifecycle Actions (col-span-2 text-right) */}
+                        <div className="col-span-2 flex items-center justify-start lg:justify-end gap-2 w-full">
+                          {isPrimarySuperAdmin ? (
+                            <div className={`px-2.5 py-1 text-xs font-semibold rounded-xl border flex items-center gap-1 ${
+                              isLight ? 'bg-gray-100 border-gray-200 text-gray-500' : 'bg-white/[0.04] border-white/[0.06] text-white/40'
+                            }`}>
+                              <Lock className="w-3 h-3" />
+                              <span>Immutable</span>
+                            </div>
+                          ) : (
+                            <>
+                              <button
+                                type="button"
+                                onClick={() => handleToggleUserStatus(user)}
+                                disabled={isSubmittingAction}
+                                className={`px-3 py-1.5 text-xs font-bold rounded-xl transition-all cursor-pointer border flex items-center gap-1.5 ${
+                                  isSuspended
+                                    ? isLight
+                                      ? 'bg-emerald-50 text-emerald-800 hover:bg-emerald-100 border-emerald-300'
+                                      : 'bg-emerald-500/15 text-emerald-300 hover:bg-emerald-500/25 border-emerald-500/30'
+                                    : isLight
+                                      ? 'bg-amber-50 text-amber-900 hover:bg-amber-100 border-amber-300'
+                                      : 'bg-amber-500/15 text-amber-300 hover:bg-amber-500/25 border-amber-500/30'
+                                }`}
+                                title={isSuspended ? 'Reactivate account access' : 'Suspend account to block login'}
+                              >
+                                {isSuspended ? (
+                                  <>
+                                    <UserCheck className="w-3.5 h-3.5" />
+                                    <span>Reactivate</span>
+                                  </>
+                                ) : (
+                                  <>
+                                    <UserX className="w-3.5 h-3.5" />
+                                    <span>Suspend</span>
+                                  </>
+                                )}
+                              </button>
 
+                              <button
+                                type="button"
+                                onClick={() => handleOpenRemoveUser(user)}
+                                className={`px-2.5 py-1.5 text-xs font-semibold rounded-xl transition-all cursor-pointer border flex items-center gap-1 ${
+                                  isLight
+                                    ? 'text-rose-700 bg-rose-50 hover:bg-rose-100 border-rose-200'
+                                    : 'text-rose-300 bg-rose-500/10 hover:bg-rose-500/20 border-rose-500/20'
+                                }`}
+                                title="Safe account removal with financial dependency check"
+                              >
+                                <Trash2 className="w-3.5 h-3.5" />
+                                <span className="hidden sm:inline">Remove</span>
+                              </button>
+                            </>
+                          )}
+                        </div>
                       </div>
-                    </div>
-                  );
-                })}
-              </div>
+                    );
+                  })}
+                </div>
+
+                {renderPagination()}
+              </>
             )}
           </div>
         )}
@@ -940,7 +1174,7 @@ export default function AdminPage() {
               </div>
 
               {/* Category Filter Pills */}
-              <div className={`flex items-center p-1 rounded-xl gap-1 border ${
+              <div className={`flex items-center p-1 rounded-xl gap-1 border overflow-x-auto ${
                 isLight ? 'bg-white border-black/[0.08]' : 'bg-zinc-900 border-zinc-800'
               }`}>
                 {AUDIT_FILTER_OPTIONS.map((f) => (
@@ -950,7 +1184,7 @@ export default function AdminPage() {
                       setAuditFilter(f.id);
                       fetchAuditLogs(f.id);
                     }}
-                    className={`px-2.5 py-1 text-xs rounded-lg transition-all cursor-pointer ${
+                    className={`px-2.5 py-1 text-xs rounded-lg transition-all cursor-pointer whitespace-nowrap ${
                       auditFilter === f.id
                         ? isLight
                           ? 'bg-emerald-600 text-white font-bold shadow-2xs'
@@ -973,188 +1207,267 @@ export default function AdminPage() {
                 <span>Loading activity trail records...</span>
               </div>
             ) : filteredAuditLogs.length === 0 ? (
-              <div className={`p-12 text-center text-xs font-semibold ${isLight ? 'text-gray-400' : 'text-white/40'}`}>
+              <div className={`p-12 text-center text-xs font-semibold ${isLight ? 'text-gray-400' : 'text-zinc-500'}`}>
                 No telemetry activity records found for this filter.
               </div>
             ) : (
-              <div className={`divide-y ${isLight ? 'divide-black/[0.06]' : 'divide-white/[0.06]'}`}>
-                {filteredAuditLogs.map((log) => {
-                  const isAuthEvent = log.action === 'AUTH_LOGIN' || log.action === 'AUTH_LOGOUT';
-                  const isGovernance = ['ROLE_UPDATE', 'STATUS_UPDATE', 'ACCOUNT_DELETED', 'USER_APPROVED', 'USER_REJECTED'].includes(log.action);
-                  
-                  return (
-                    <div key={log.id} className={`p-4 flex flex-col md:flex-row md:items-center justify-between gap-3 text-xs ${
-                      isLight ? 'hover:bg-gray-50/70' : 'hover:bg-white/[0.02]'
-                    }`}>
-                      {/* Left: Event Type, Actor, Details */}
-                      <div className="flex items-start gap-3">
-                        <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 mt-0.5 ${
-                          isAuthEvent
-                            ? log.action === 'AUTH_LOGIN'
-                              ? isLight ? 'bg-blue-100 text-blue-800' : 'bg-blue-500/20 text-blue-300'
-                              : isLight ? 'bg-purple-100 text-purple-800' : 'bg-purple-500/20 text-purple-300'
-                            : isGovernance
-                            ? isLight ? 'bg-amber-100 text-amber-900' : 'bg-amber-500/20 text-amber-300'
-                            : isLight ? 'bg-emerald-100 text-emerald-900' : 'bg-emerald-500/20 text-emerald-300'
+              <>
+                <div className="hidden lg:grid grid-cols-12 px-5 py-3 text-[10px] font-bold uppercase tracking-wider text-zinc-500 dark:text-zinc-400 bg-zinc-50/70 dark:bg-zinc-900/40 border-b border-black/[0.06] dark:border-zinc-800">
+                  <div className="col-span-4">Actor & Identity</div>
+                  <div className="col-span-3">Action & Entity</div>
+                  <div className="col-span-3">Event Telemetry / Details</div>
+                  <div className="col-span-2 text-right">Timestamp</div>
+                </div>
+
+                <div className={`divide-y ${isLight ? 'divide-black/[0.06]' : 'divide-white/[0.06]'}`}>
+                  {paginatedList.map((log) => {
+                    const isAuthEvent = log.action === 'AUTH_LOGIN' || log.action === 'AUTH_LOGOUT';
+                    const isGovernance = ['ROLE_UPDATE', 'STATUS_UPDATE', 'ACCOUNT_DELETED', 'USER_APPROVED', 'USER_REJECTED'].includes(log.action);
+                    
+                    return (
+                      <div 
+                        key={log.id} 
+                        className={`p-4 lg:px-5 lg:py-3.5 flex flex-col lg:grid lg:grid-cols-12 items-start lg:items-center gap-3 lg:gap-4 transition-colors text-xs ${
+                          isLight ? 'hover:bg-gray-50/70' : 'hover:bg-white/[0.02]'
+                        }`}
+                      >
+                        {/* Column 1: Actor & Identity (col-span-4) */}
+                        <div className="col-span-4 flex items-center gap-3 min-w-0 w-full">
+                          <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${
+                            isAuthEvent
+                              ? log.action === 'AUTH_LOGIN'
+                                ? isLight ? 'bg-blue-100 text-blue-800' : 'bg-blue-500/20 text-blue-300'
+                                : isLight ? 'bg-purple-100 text-purple-800' : 'bg-purple-500/20 text-purple-300'
+                              : isGovernance
+                              ? isLight ? 'bg-amber-100 text-amber-900' : 'bg-amber-500/20 text-amber-300'
+                              : isLight ? 'bg-emerald-100 text-emerald-900' : 'bg-emerald-500/20 text-emerald-300'
+                          }`}>
+                            {isAuthEvent ? <KeyRound className="w-4 h-4" /> : <Shield className="w-4 h-4" />}
+                          </div>
+
+                          <div className="min-w-0 flex-1">
+                            <div className="flex items-center gap-1.5 flex-wrap">
+                              <span className="font-bold truncate">{log.actor_name || 'System User'}</span>
+                              <span className={`px-1.5 py-0.2 rounded text-[10px] font-bold uppercase ${
+                                isLight ? 'bg-gray-100 text-gray-700' : 'bg-white/10 text-white/70'
+                              }`}>
+                                {log.actor_role}
+                              </span>
+                            </div>
+                            {log.actor_email && (
+                              <p className={`text-[11px] truncate mt-0.5 ${isLight ? 'text-gray-500' : 'text-zinc-400'}`}>
+                                {log.actor_email}
+                              </p>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Column 2: Action & Entity (col-span-3) - Pin #4 Solid fill without border! */}
+                        <div className="col-span-3 flex items-center gap-2 flex-wrap w-full">
+                          <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider ${getActionTagClass(log.action)}`}>
+                            {log.action}
+                          </span>
+                          <span className={`text-[10px] ${isLight ? 'text-gray-400' : 'text-zinc-500'}`}>
+                            on <span className="font-mono font-medium">{log.entity_type}</span>
+                          </span>
+                        </div>
+
+                        {/* Column 3: Event Telemetry / Details (col-span-3) */}
+                        <div className="col-span-3 flex flex-wrap items-center gap-2 text-[11px] opacity-80 w-full">
+                          {log.details?.auth_method && (
+                            <span className="inline-flex items-center gap-1 font-medium">
+                              <span className="opacity-70">Method:</span>
+                              <strong className="font-bold">{log.details.auth_method}</strong>
+                            </span>
+                          )}
+                          {log.details?.ip_address && (
+                            <span className="inline-flex items-center gap-1 font-mono">
+                              <Globe className="w-3 h-3 opacity-60" />
+                              <span>{log.details.ip_address}</span>
+                            </span>
+                          )}
+                          {log.details?.target_email && (
+                            <span className="truncate">Target: <strong>{log.details.target_email}</strong></span>
+                          )}
+                          {log.details?.previous_status && log.details?.new_status && (
+                            <span>{log.details.previous_status} → <strong>{log.details.new_status}</strong></span>
+                          )}
+                        </div>
+
+                        {/* Column 4: Timestamp (col-span-2 text-right) */}
+                        <div className={`col-span-2 text-left lg:text-right text-[11px] whitespace-nowrap tabular-nums font-medium ${
+                          isLight ? 'text-gray-400' : 'text-zinc-400'
                         }`}>
-                          {isAuthEvent ? <KeyRound className="w-4 h-4" /> : <Shield className="w-4 h-4" />}
-                        </div>
-
-                        <div>
-                          <div className="flex items-center gap-2 flex-wrap">
-                            <span className="font-bold">{log.actor_name}</span>
-                            <span className={`px-1.5 py-0.2 rounded text-[10px] font-bold uppercase ${
-                              isLight ? 'bg-gray-100 text-gray-700' : 'bg-white/10 text-white/70'
-                            }`}>
-                              {log.actor_role}
-                            </span>
-                            
-                            {/* Action Tag */}
-                            <span className={`px-2 py-0.5 rounded text-[10px] font-black uppercase tracking-wider border ${
-                              log.action === 'AUTH_LOGIN'
-                                ? isLight ? 'bg-emerald-50 border-emerald-300 text-emerald-800' : 'bg-emerald-500/15 border-emerald-500/30 text-emerald-300'
-                                : log.action === 'AUTH_LOGOUT'
-                                ? isLight ? 'bg-gray-100 border-gray-300 text-gray-700' : 'bg-white/10 border-white/20 text-white/70'
-                                : log.action === 'ACCOUNT_DELETED'
-                                ? isLight ? 'bg-rose-50 border-rose-300 text-rose-800' : 'bg-rose-500/15 border-rose-500/30 text-rose-300'
-                                : log.action === 'STATUS_UPDATE' || log.action === 'ROLE_UPDATE'
-                                ? isLight ? 'bg-amber-50 border-amber-300 text-amber-800' : 'bg-amber-500/15 border-amber-500/30 text-amber-300'
-                                : isLight ? 'bg-blue-50 border-blue-300 text-blue-800' : 'bg-blue-500/15 border-blue-500/30 text-blue-300'
-                            }`}>
-                              {log.action}
-                            </span>
-
-                            {/* Entity Type */}
-                            <span className={`text-[10px] ${isLight ? 'text-gray-400' : 'text-white/40'}`}>
-                              on <span className="font-mono">{log.entity_type}</span>
-                            </span>
-                          </div>
-
-                          {/* Event Metadata: Auth method, IP, details */}
-                          <div className="flex items-center gap-3 mt-1 text-[11px] flex-wrap opacity-75">
-                            {log.details?.auth_method && (
-                              <span className="inline-flex items-center gap-1 font-medium">
-                                <span>Method:</span>
-                                <strong className="font-bold">{log.details.auth_method}</strong>
-                              </span>
-                            )}
-                            {log.details?.ip_address && (
-                              <span className="inline-flex items-center gap-1 font-mono">
-                                <Globe className="w-3 h-3" />
-                                <span>{log.details.ip_address}</span>
-                              </span>
-                            )}
-                            {log.details?.target_email && (
-                              <span>Target: <strong>{log.details.target_email}</strong></span>
-                            )}
-                            {log.details?.previous_status && log.details?.new_status && (
-                              <span>Status: {log.details.previous_status} → <strong>{log.details.new_status}</strong></span>
-                            )}
-                          </div>
+                          {log.created_at ? new Date(log.created_at).toLocaleString('en-US', {
+                            month: 'short',
+                            day: 'numeric',
+                            year: 'numeric',
+                            hour: '2-digit',
+                            minute: '2-digit',
+                            second: '2-digit',
+                          }) : ''}
                         </div>
                       </div>
+                    );
+                  })}
+                </div>
 
-                      {/* Right: Timestamp */}
-                      <div className={`text-[11px] whitespace-nowrap tabular-nums font-medium ${
-                        isLight ? 'text-gray-400' : 'text-white/45'
-                      }`}>
-                        {log.created_at ? new Date(log.created_at).toLocaleString('en-US', {
-                          month: 'short',
-                          day: 'numeric',
-                          year: 'numeric',
-                          hour: '2-digit',
-                          minute: '2-digit',
-                          second: '2-digit',
-                        }) : ''}
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
+                {renderPagination()}
+              </>
             )}
           </div>
         )}
 
         {/* Tab 4: Approved Requests Log */}
         {activeTab === 'approved' && (
-          <div className="space-y-3">
+          <div className={`rounded-2xl overflow-hidden border ${
+            isLight ? 'bg-white border-black/[0.08]' : 'bg-[#121214] border-zinc-800'
+          }`}>
+            <div className={`p-4 border-b flex items-center justify-between ${
+              isLight ? 'border-black/[0.06] bg-gray-50/70' : 'border-zinc-800 bg-zinc-900/60'
+            }`}>
+              <div>
+                <h3 className="text-sm font-bold">Approved Officer Records</h3>
+                <p className={`text-xs ${isLight ? 'text-gray-500' : 'text-zinc-400'}`}>
+                  Historical log of successfully verified and granted access requests
+                </p>
+              </div>
+              <span className={`text-xs font-semibold px-2.5 py-1 rounded-lg ${
+                isLight ? 'text-emerald-900 bg-emerald-100' : 'text-emerald-300 bg-emerald-500/15'
+              }`}>
+                {filteredRequests.length} Approved
+              </span>
+            </div>
+
             {filteredRequests.length === 0 ? (
-              <div className={`p-12 text-center rounded-2xl text-xs font-semibold border ${
-                isLight ? 'bg-white border-black/[0.08] text-gray-400' : 'bg-[#121214] border-zinc-800 text-zinc-500'
+              <div className={`p-12 text-center text-xs font-semibold ${
+                isLight ? 'text-gray-400' : 'text-zinc-500'
               }`}>
                 No approved request records found.
               </div>
             ) : (
-              filteredRequests.map((req) => (
-                <div key={req.id} className={`rounded-2xl p-4 flex items-center justify-between gap-4 border transition-all ${
-                  isLight ? 'bg-white border-black/[0.08]' : 'bg-[#121214] border-zinc-800'
-                }`}>
-                  <div className="flex items-center gap-3">
-                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center font-bold text-sm ${
-                      isLight ? 'bg-emerald-100 text-emerald-700' : 'bg-emerald-500/20 text-emerald-400'
-                    }`}>
-                      <CheckCircle2 className="w-5 h-5" />
-                    </div>
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <span className="text-sm font-bold">{req.first_name} {req.last_name}</span>
-                        <span className={`px-2 py-0.5 text-[10px] font-bold uppercase rounded-md ${
-                          isLight ? 'bg-emerald-100 text-emerald-800' : 'bg-emerald-500/15 text-emerald-300'
+              <>
+                <div className="hidden lg:grid grid-cols-12 px-5 py-3 text-[10px] font-bold uppercase tracking-wider text-zinc-500 dark:text-zinc-400 bg-zinc-50/70 dark:bg-zinc-900/40 border-b border-black/[0.06] dark:border-zinc-800">
+                  <div className="col-span-5">Officer / Email</div>
+                  <div className="col-span-4">Granted Role</div>
+                  <div className="col-span-3 text-right">Approval Date</div>
+                </div>
+
+                <div className={`divide-y ${isLight ? 'divide-black/[0.06]' : 'divide-white/[0.06]'}`}>
+                  {paginatedList.map((req) => (
+                    <div 
+                      key={req.id} 
+                      className={`p-4 lg:px-5 lg:py-3.5 flex flex-col lg:grid lg:grid-cols-12 items-start lg:items-center gap-3 lg:gap-4 transition-colors ${
+                        isLight ? 'hover:bg-gray-50/80' : 'hover:bg-white/[0.02]'
+                      }`}
+                    >
+                      <div className="col-span-5 flex items-center gap-3 min-w-0 w-full">
+                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center font-bold text-sm shrink-0 ${
+                          isLight ? 'bg-emerald-100 text-emerald-700' : 'bg-emerald-500/20 text-emerald-400'
                         }`}>
+                          <CheckCircle2 className="w-5 h-5" />
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <span className="text-sm font-bold truncate block">{req.first_name} {req.last_name}</span>
+                          <p className={`text-xs font-medium truncate ${isLight ? 'text-gray-500' : 'text-zinc-400'}`}>{req.email}</p>
+                        </div>
+                      </div>
+
+                      <div className="col-span-4 flex items-center w-full">
+                        <span className="px-2.5 py-0.5 text-[10px] font-bold uppercase rounded-md bg-emerald-600 text-white">
                           {req.requested_role}
                         </span>
                       </div>
-                      <p className={`text-xs font-medium ${isLight ? 'text-gray-500' : 'text-zinc-400'}`}>{req.email}</p>
-                    </div>
-                  </div>
 
-                  <span className={`text-[11px] font-medium ${isLight ? 'text-gray-400' : 'text-zinc-500'}`}>
-                    Approved: {req.reviewed_at ? new Date(req.reviewed_at).toLocaleDateString() : 'Active'}
-                  </span>
+                      <div className={`col-span-3 text-left lg:text-right text-[11px] font-medium ${isLight ? 'text-gray-400' : 'text-zinc-500'} w-full`}>
+                        Approved: {req.reviewed_at ? new Date(req.reviewed_at).toLocaleDateString() : 'Active'}
+                      </div>
+                    </div>
+                  ))}
                 </div>
-              ))
+
+                {renderPagination()}
+              </>
             )}
           </div>
         )}
 
         {/* Tab 5: Declined Requests */}
         {activeTab === 'rejected' && (
-          <div className="space-y-3">
+          <div className={`rounded-2xl overflow-hidden border ${
+            isLight ? 'bg-white border-black/[0.08]' : 'bg-[#121214] border-zinc-800'
+          }`}>
+            <div className={`p-4 border-b flex items-center justify-between ${
+              isLight ? 'border-black/[0.06] bg-gray-50/70' : 'border-zinc-800 bg-zinc-900/60'
+            }`}>
+              <div>
+                <h3 className="text-sm font-bold">Declined Registration Requests</h3>
+                <p className={`text-xs ${isLight ? 'text-gray-500' : 'text-zinc-400'}`}>
+                  Record of applicants that did not meet verification criteria
+                </p>
+              </div>
+              <span className={`text-xs font-semibold px-2.5 py-1 rounded-lg ${
+                isLight ? 'text-rose-900 bg-rose-100' : 'text-rose-300 bg-rose-500/15'
+              }`}>
+                {filteredRequests.length} Declined
+              </span>
+            </div>
+
             {filteredRequests.length === 0 ? (
-              <div className={`p-12 text-center rounded-2xl text-xs font-semibold border ${
-                isLight ? 'bg-white border-black/[0.08] text-gray-400' : 'bg-[#121214] border-zinc-800 text-zinc-500'
+              <div className={`p-12 text-center text-xs font-semibold ${
+                isLight ? 'text-gray-400' : 'text-zinc-500'
               }`}>
                 No declined requests recorded.
               </div>
             ) : (
-              filteredRequests.map((req) => (
-                <div key={req.id} className={`rounded-2xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 border transition-all ${
-                  isLight ? 'bg-rose-50/40 border-rose-200' : 'bg-rose-950/10 border-rose-500/20'
-                }`}>
-                  <div className="flex items-center gap-3">
-                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center font-bold text-sm shrink-0 ${
-                      isLight ? 'bg-rose-100 text-rose-700' : 'bg-rose-500/15 text-rose-400'
-                    }`}>
-                      <XCircle className="w-5 h-5" />
-                    </div>
-                    <div>
-                      <span className="text-sm font-bold">{req.first_name} {req.last_name}</span>
-                      <p className={`text-xs font-medium ${isLight ? 'text-gray-500' : 'text-white/50'}`}>{req.email}</p>
-                      {req.rejection_reason && (
-                        <p className={`text-xs font-medium mt-1 px-2.5 py-1 rounded-md inline-block ${
-                          isLight ? 'bg-rose-100 text-rose-900' : 'bg-rose-950/60 text-rose-300'
-                        }`}>
-                          Reason: {req.rejection_reason}
-                        </p>
-                      )}
-                    </div>
-                  </div>
-
-                  <span className={`text-[11px] font-medium ${isLight ? 'text-gray-400' : 'text-white/45'}`}>
-                    Declined: {req.reviewed_at ? new Date(req.reviewed_at).toLocaleDateString() : 'N/A'}
-                  </span>
+              <>
+                <div className="hidden lg:grid grid-cols-12 px-5 py-3 text-[10px] font-bold uppercase tracking-wider text-zinc-500 dark:text-zinc-400 bg-zinc-50/70 dark:bg-zinc-900/40 border-b border-black/[0.06] dark:border-zinc-800">
+                  <div className="col-span-4">Applicant / Email</div>
+                  <div className="col-span-5">Reason For Rejection</div>
+                  <div className="col-span-3 text-right">Reviewed Date</div>
                 </div>
-              ))
+
+                <div className={`divide-y ${isLight ? 'divide-black/[0.06]' : 'divide-white/[0.06]'}`}>
+                  {paginatedList.map((req) => (
+                    <div 
+                      key={req.id} 
+                      className={`p-4 lg:px-5 lg:py-3.5 flex flex-col lg:grid lg:grid-cols-12 items-start lg:items-center gap-3 lg:gap-4 transition-colors ${
+                        isLight ? 'hover:bg-gray-50/80' : 'hover:bg-white/[0.02]'
+                      }`}
+                    >
+                      <div className="col-span-4 flex items-center gap-3 min-w-0 w-full">
+                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center font-bold text-sm shrink-0 ${
+                          isLight ? 'bg-rose-100 text-rose-700' : 'bg-rose-500/15 text-rose-400'
+                        }`}>
+                          <XCircle className="w-5 h-5" />
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <span className="text-sm font-bold truncate block">{req.first_name} {req.last_name}</span>
+                          <p className={`text-xs font-medium truncate ${isLight ? 'text-gray-500' : 'text-zinc-400'}`}>{req.email}</p>
+                        </div>
+                      </div>
+
+                      <div className="col-span-5 w-full">
+                        {req.rejection_reason ? (
+                          <span className={`text-xs font-medium px-2.5 py-1 rounded-md inline-block ${
+                            isLight ? 'bg-rose-100 text-rose-900' : 'bg-rose-950/60 text-rose-300'
+                          }`}>
+                            {req.rejection_reason}
+                          </span>
+                        ) : (
+                          <span className="text-xs text-zinc-400 italic">No specific reason provided</span>
+                        )}
+                      </div>
+
+                      <div className={`col-span-3 text-left lg:text-right text-[11px] font-medium ${isLight ? 'text-gray-400' : 'text-zinc-500'} w-full`}>
+                        Declined: {req.reviewed_at ? new Date(req.reviewed_at).toLocaleDateString() : 'N/A'}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                {renderPagination()}
+              </>
             )}
           </div>
         )}
@@ -1325,6 +1638,7 @@ export default function AdminPage() {
         )}
       </Modal>
 
+      </div>
     </div>
   );
 }

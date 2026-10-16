@@ -127,6 +127,7 @@ export default function Dashboard() {
   const [currentSemester, setCurrentSemester] = useState(DEFAULT_SEMESTERS[0]);
   const [isNewSemesterOpen, setIsNewSemesterOpen] = useState(false);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+  const [activeTab, setActiveTab] = useState('dashboard');
 
   // 3NF Master Catalog States
   const [categories, setCategories] = useState([]);
@@ -1718,6 +1719,8 @@ export default function Dashboard() {
             onOpenAI={() => setIsAIOpen(true)}
             onOpenAuditTrail={() => setIsAuditOpen(true)}
             onExportReport={handleOpenLiquidationPreview}
+            activeTab={activeTab}
+            onSelectTab={setActiveTab}
             isCollapsed={isSidebarCollapsed}
             onToggleCollapse={setIsSidebarCollapsed}
           />
@@ -1747,8 +1750,8 @@ export default function Dashboard() {
                 </p>
               </div>
 
-              {/* Right: Quick Action Pods Dock */}
-              <div className="p-1.5 sm:p-2 rounded-xl flex items-center justify-around sm:justify-start sm:gap-3 shrink-0 transition-colors border bg-zinc-50 dark:bg-zinc-900/60 border-zinc-200 dark:border-zinc-800">
+              {/* Right: Quick Action Pods Dock (Borderless floating buttons) */}
+              <div className="flex items-center justify-around sm:justify-start gap-2 sm:gap-3 shrink-0">
                 
                 {/* Pod 1: Record Transaction */}
                 <button
@@ -1826,6 +1829,8 @@ export default function Dashboard() {
             <ModuleErrorBoundary moduleName="Financial Ledger">
               <TransactionTable
                 transactions={activeTransactions}
+                debts={activeDebts}
+                onOpenDebts={() => setIsDebtsOpen(true)}
                 onNewTransaction={() => setIsNewTxOpen(true)}
                 onExportReport={handleOpenLiquidationPreview}
                 onNewProposal={() => setIsProposalOpen(true)}
