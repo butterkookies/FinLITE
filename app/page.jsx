@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import { Plus, Wallet, Calculator, Sparkles, FileText, CreditCard } from 'lucide-react';
-import Navbar from '@/components/layout/Navbar';
+import FloatingSidebar from '@/components/layout/FloatingSidebar';
 import BottomNav from '@/components/layout/BottomNav';
 import StatCards from '@/components/dashboard/StatCards';
 import TransactionTable from '@/components/ledger/TransactionTable';
@@ -125,6 +125,7 @@ export default function Dashboard() {
   const [semesters, setSemesters] = useState(DEFAULT_SEMESTERS);
   const [currentSemester, setCurrentSemester] = useState(DEFAULT_SEMESTERS[0]);
   const [isNewSemesterOpen, setIsNewSemesterOpen] = useState(false);
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
 
   // 3NF Master Catalog States
   const [categories, setCategories] = useState([]);
@@ -1342,17 +1343,15 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex">
       
-      {/* Top Navigation */}
+      {/* 1. Floating Island Left Sidebar (Desktop fixed island + Mobile slide-over drawer) */}
       <div className="no-print">
-        <ModuleErrorBoundary moduleName="Navigation Bar">
-          <Navbar
+        <ModuleErrorBoundary moduleName="Navigation Sidebar">
+          <FloatingSidebar
             currentRole={currentRole}
             userProfile={userProfile}
             currentUser={currentUser}
-            onOpenAI={() => setIsAIOpen(true)}
-            onOpenDenominations={() => setIsDenomOpen(true)}
             currentSemester={currentSemester}
             semesters={semesters}
             onSelectSemester={(semId) => {
@@ -1365,123 +1364,147 @@ export default function Dashboard() {
               }
             }}
             onOpenNewSemester={() => setIsNewSemesterOpen(true)}
+            onOpenNewTx={() => setIsNewTxOpen(true)}
+            onOpenDenominations={() => setIsDenomOpen(true)}
+            onOpenAdvances={() => setIsAdvancesOpen(true)}
+            onOpenDebts={() => setIsDebtsOpen(true)}
+            onOpenAI={() => setIsAIOpen(true)}
+            onOpenAuditTrail={() => setIsAuditOpen(true)}
+            onExportReport={handleOpenLiquidationPreview}
+            isCollapsed={isSidebarCollapsed}
+            onToggleCollapse={setIsSidebarCollapsed}
           />
         </ModuleErrorBoundary>
       </div>
 
-      {/* Main Content Area */}
-      <main className="flex-1 max-w-[1600px] w-full mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-6 pb-24 sm:pb-8 space-y-5 sm:space-y-6 no-print">
-        
-        {/* Modern Minimalist Hero Balance & Action Hub (De-cluttered borderless canvas) */}
-        <div className="py-2 mb-2 sm:mb-3">
-          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-5 sm:gap-6">
-            
-            {/* Left: Dynamic Greetings Hero Header */}
-            <div>
-              <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-zinc-950 dark:text-zinc-100">
-                {greeting}, {userProfile?.first_name || userProfile?.full_name?.split(' ')[0] || currentUser?.user_metadata?.full_name?.split(' ')[0] || 'Officer'}
-              </h1>
-              <p className="text-xs mt-1 text-zinc-500 dark:text-zinc-400">
-                Welcome to FinLITE. Review cash flow, reconcile vault reserves, and generate reports.
-              </p>
-            </div>
-
-            {/* Right: Quick Action Pods Dock */}
-            <div className="p-1.5 sm:p-2 rounded-xl flex items-center justify-around sm:justify-start sm:gap-3 shrink-0 transition-colors border bg-zinc-50 dark:bg-zinc-900/60 border-zinc-200 dark:border-zinc-800">
+      {/* 2. Main Content Canvas with dynamic left padding on desktop */}
+      <div 
+        className={`flex-1 flex flex-col transition-all duration-300 ease-in-out min-w-0
+          ${isSidebarCollapsed ? 'md:pl-[88px]' : 'md:pl-[280px]'}
+          p-3 sm:p-6 lg:p-8 pt-16 md:pt-6
+        `}
+      >
+        <main className="max-w-[1550px] w-full mx-auto space-y-5 sm:space-y-6 pb-24 md:pb-8 no-print">
+          
+          {/* Modern Minimalist Hero Balance & Action Hub (De-cluttered borderless canvas) */}
+          <div className="py-2 mb-2 sm:mb-3">
+            <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-5 sm:gap-6">
               
-              {/* Pod 1: Record Transaction */}
-              <button
-                type="button"
-                onClick={() => setIsNewTxOpen(true)}
-                className="flex flex-col items-center gap-1 p-1 sm:px-2 group cursor-pointer"
-              >
-                <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-lg flex items-center justify-center transition-all shadow-xs bg-emerald-600 text-white group-hover:bg-emerald-500 active:scale-95">
-                  <Plus className="w-5 h-5 stroke-[2.5]" />
-                </div>
-                <span className="text-[10px] sm:text-[11px] font-medium transition-colors text-zinc-600 dark:text-zinc-300 group-hover:text-emerald-600 dark:group-hover:text-emerald-400">
-                  Record
-                </span>
-              </button>
+              {/* Left: Dynamic Greetings Hero Header */}
+              <div>
+                <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-zinc-950 dark:text-zinc-100">
+                  {greeting}, {userProfile?.first_name || userProfile?.full_name?.split(' ')[0] || currentUser?.user_metadata?.full_name?.split(' ')[0] || 'Officer'}
+                </h1>
+                <p className="text-xs mt-1 text-zinc-500 dark:text-zinc-400">
+                  Active Term: <strong className="text-zinc-700 dark:text-zinc-300">{currentSemester?.label}</strong> · Review cash flow, reconcile vault reserves, and generate reports.
+                </p>
+              </div>
 
-              {/* Pod 2: Cash Box Audit */}
-              <button
-                type="button"
-                onClick={() => setIsDenomOpen(true)}
-                className="flex flex-col items-center gap-1 p-1 sm:px-2 group cursor-pointer"
-              >
-                <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-lg flex items-center justify-center transition-all border bg-white dark:bg-zinc-900 text-zinc-700 dark:text-zinc-300 border-zinc-200 dark:border-zinc-800 group-hover:border-emerald-500/40 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 active:scale-95">
-                  <Wallet className="w-4 h-4 stroke-[2]" />
-                </div>
-                <span className="text-[10px] sm:text-[11px] font-medium transition-colors text-zinc-600 dark:text-zinc-300 group-hover:text-emerald-600 dark:group-hover:text-emerald-400">
-                  Cash Box
-                </span>
-              </button>
+              {/* Right: Quick Action Pods Dock */}
+              <div className="p-1.5 sm:p-2 rounded-xl flex items-center justify-around sm:justify-start sm:gap-3 shrink-0 transition-colors border bg-zinc-50 dark:bg-zinc-900/60 border-zinc-200 dark:border-zinc-800">
+                
+                {/* Pod 1: Record Transaction */}
+                <button
+                  type="button"
+                  onClick={() => setIsNewTxOpen(true)}
+                  className="flex flex-col items-center gap-1 p-1 sm:px-2 group cursor-pointer"
+                >
+                  <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-lg flex items-center justify-center transition-all shadow-xs bg-emerald-600 text-white group-hover:bg-emerald-500 active:scale-95">
+                    <Plus className="w-5 h-5 stroke-[2.5]" />
+                  </div>
+                  <span className="text-[10px] sm:text-[11px] font-medium transition-colors text-zinc-600 dark:text-zinc-300 group-hover:text-emerald-600 dark:group-hover:text-emerald-400">
+                    Record
+                  </span>
+                </button>
 
-              {/* Pod 3: Preview Report */}
-              <button
-                type="button"
-                onClick={handleOpenLiquidationPreview}
-                className="flex flex-col items-center gap-1 p-1 sm:px-2 group cursor-pointer"
-              >
-                <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-lg flex items-center justify-center transition-all border bg-white dark:bg-zinc-900 text-zinc-700 dark:text-zinc-300 border-zinc-200 dark:border-zinc-800 group-hover:border-emerald-500/40 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 active:scale-95">
-                  <FileText className="w-4 h-4 stroke-[2]" />
-                </div>
-                <span className="text-[10px] sm:text-[11px] font-medium transition-colors text-zinc-600 dark:text-zinc-300 group-hover:text-emerald-600 dark:group-hover:text-emerald-400">
-                  Report
-                </span>
-              </button>
+                {/* Pod 2: Cash Box Audit */}
+                <button
+                  type="button"
+                  onClick={() => setIsDenomOpen(true)}
+                  className="flex flex-col items-center gap-1 p-1 sm:px-2 group cursor-pointer"
+                >
+                  <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-lg flex items-center justify-center transition-all border bg-white dark:bg-zinc-900 text-zinc-700 dark:text-zinc-300 border-zinc-200 dark:border-zinc-800 group-hover:border-emerald-500/40 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 active:scale-95">
+                    <Wallet className="w-4 h-4 stroke-[2]" />
+                  </div>
+                  <span className="text-[10px] sm:text-[11px] font-medium transition-colors text-zinc-600 dark:text-zinc-300 group-hover:text-emerald-600 dark:group-hover:text-emerald-400">
+                    Cash Box
+                  </span>
+                </button>
 
-              {/* Pod 4: AI Co-Pilot */}
-              <button
-                type="button"
-                onClick={() => setIsAIOpen(true)}
-                className="flex flex-col items-center gap-1 p-1 sm:px-2 group cursor-pointer"
-              >
-                <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-lg flex items-center justify-center transition-all border bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20 group-hover:bg-emerald-500/20 active:scale-95">
-                  <Sparkles className="w-4 h-4 stroke-[2]" />
-                </div>
-                <span className="text-[10px] sm:text-[11px] font-medium transition-colors text-zinc-600 dark:text-zinc-300 group-hover:text-emerald-600 dark:group-hover:text-emerald-400">
-                  Copilot
-                </span>
-              </button>
+                {/* Pod 3: Preview Report */}
+                <button
+                  type="button"
+                  onClick={handleOpenLiquidationPreview}
+                  className="flex flex-col items-center gap-1 p-1 sm:px-2 group cursor-pointer"
+                >
+                  <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-lg flex items-center justify-center transition-all border bg-white dark:bg-zinc-900 text-zinc-700 dark:text-zinc-300 border-zinc-200 dark:border-zinc-800 group-hover:border-emerald-500/40 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 active:scale-95">
+                    <FileText className="w-4 h-4 stroke-[2]" />
+                  </div>
+                  <span className="text-[10px] sm:text-[11px] font-medium transition-colors text-zinc-600 dark:text-zinc-300 group-hover:text-emerald-600 dark:group-hover:text-emerald-400">
+                    Report
+                  </span>
+                </button>
+
+                {/* Pod 4: AI Co-Pilot */}
+                <button
+                  type="button"
+                  onClick={() => setIsAIOpen(true)}
+                  className="flex flex-col items-center gap-1 p-1 sm:px-2 group cursor-pointer"
+                >
+                  <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-lg flex items-center justify-center transition-all border bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20 group-hover:bg-emerald-500/20 active:scale-95">
+                    <Sparkles className="w-4 h-4 stroke-[2]" />
+                  </div>
+                  <span className="text-[10px] sm:text-[11px] font-medium transition-colors text-zinc-600 dark:text-zinc-300 group-hover:text-emerald-600 dark:group-hover:text-emerald-400">
+                    Copilot
+                  </span>
+                </button>
+
+              </div>
 
             </div>
-
           </div>
-        </div>
 
-        {/* KPI Metric Cards (6 Preserved Account Containers) */}
-        <ModuleErrorBoundary moduleName="Financial Overview">
-          <StatCards
-            summary={summary}
-            onOpenDenominations={() => setIsDenomOpen(true)}
-            onOpenAdvances={() => setIsAdvancesOpen(true)}
-            onOpenDebts={() => setIsDebtsOpen(true)}
-          />
-        </ModuleErrorBoundary>
-
-        {/* Ledger & Transaction Table */}
-        <div id="financial-ledger">
-          <ModuleErrorBoundary moduleName="Financial Ledger">
-            <TransactionTable
-              transactions={activeTransactions}
-              onNewTransaction={() => setIsNewTxOpen(true)}
-              onExportReport={handleOpenLiquidationPreview}
-              onNewProposal={() => setIsProposalOpen(true)}
-              onAttachReceipt={handleAttachReceipt}
-              onSettleReimbursement={handleSettleReimbursement}
-              onOpenAuditTrail={() => setIsAuditOpen(true)}
-              cashBalance={summary.cash_on_hand}
-              gcashBalance={summary.gcash_balance}
-              currentRole={currentRole}
-              isDbConnected={isDbConnected}
+          {/* KPI Metric Cards (6 Preserved Account Containers) */}
+          <ModuleErrorBoundary moduleName="Financial Overview">
+            <StatCards
+              summary={summary}
+              onOpenDenominations={() => setIsDenomOpen(true)}
+              onOpenAdvances={() => setIsAdvancesOpen(true)}
+              onOpenDebts={() => setIsDebtsOpen(true)}
             />
           </ModuleErrorBoundary>
-        </div>
 
-      </main>
+          {/* Ledger & Transaction Table */}
+          <div id="financial-ledger">
+            <ModuleErrorBoundary moduleName="Financial Ledger">
+              <TransactionTable
+                transactions={activeTransactions}
+                onNewTransaction={() => setIsNewTxOpen(true)}
+                onExportReport={handleOpenLiquidationPreview}
+                onNewProposal={() => setIsProposalOpen(true)}
+                onAttachReceipt={handleAttachReceipt}
+                onSettleReimbursement={handleSettleReimbursement}
+                onOpenAuditTrail={() => setIsAuditOpen(true)}
+                cashBalance={summary.cash_on_hand}
+                gcashBalance={summary.gcash_balance}
+                currentRole={currentRole}
+                isDbConnected={isDbConnected}
+              />
+            </ModuleErrorBoundary>
+          </div>
 
-      {/* Native Mobile Bottom Navigation Bar */}
+        </main>
+
+        {/* Dashboard Footer */}
+        <footer className="max-w-[1550px] w-full mx-auto px-4 py-6 pb-24 md:pb-6 text-center no-print">
+          <p className="text-[11px] font-medium transition-colors text-zinc-400 dark:text-zinc-600">
+            © 2026 FinLITE · Pambayang Dalubhasaan ng Marilao · All rights reserved.
+          </p>
+        </footer>
+
+      </div>
+
+      {/* Native Mobile Bottom Navigation Bar (Option 1: Quick thumb access for daily events) */}
       <BottomNav
         onOpenNewTx={() => setIsNewTxOpen(true)}
         onOpenDenominations={() => setIsDenomOpen(true)}
@@ -1491,13 +1514,6 @@ export default function Dashboard() {
           if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }}
       />
-
-      {/* Dashboard Footer */}
-      <footer className="max-w-[1600px] w-full mx-auto px-4 py-6 pb-24 sm:pb-6 text-center no-print">
-        <p className="text-[11px] font-medium transition-colors text-zinc-400 dark:text-zinc-600">
-          © 2026 FinLITE · Pambayang Dalubhasaan ng Marilao · All rights reserved.
-        </p>
-      </footer>
 
       {/* Modals & Slide-overs */}
       <div className="no-print">
