@@ -760,6 +760,8 @@ export default function SidebarMockupDashboard() {
             ledgerCashBalance={summary.cash_on_hand}
             currentSemester={currentSemester}
             latestReconciliation={latestReconciliation}
+            denominations={denominations}
+            currentRole={currentRole}
             onSaveAuditCount={() => {}}
             onLogShortageExpense={() => {}}
           />

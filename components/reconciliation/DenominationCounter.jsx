@@ -4,6 +4,8 @@ import { AlertCircle, CheckCircle2, ShieldAlert, Wallet, X, RotateCcw } from 'lu
 import { calculatePhysicalTotal, calculateVariance, formatPHP, denomCodeToCountKey } from '@/lib/utils/currency';
 import { Button, Badge, Modal } from '@/components/ui';
 
+const EMPTY_DENOMINATIONS = [];
+
 export default function DenominationCounter({ 
   isOpen, 
   onClose, 
@@ -12,7 +14,7 @@ export default function DenominationCounter({
   onSaveCount,
   currentRole,
   latestReconciliation = null,
-  denominations = [],
+  denominations = EMPTY_DENOMINATIONS,
 }) {
   const [counts, setCounts] = useState({
     bills_1000: 0,
@@ -34,39 +36,39 @@ export default function DenominationCounter({
 
   // Sync state whenever latestReconciliation loads or when modal opens
   useEffect(() => {
-    if (latestReconciliation) {
-      const initialCounts = {
-        bills_1000: Number(latestReconciliation.bills_1000) || 0,
-        bills_500: Number(latestReconciliation.bills_500) || 0,
-        bills_200: Number(latestReconciliation.bills_200) || 0,
-        bills_100: Number(latestReconciliation.bills_100) || 0,
-        bills_50: Number(latestReconciliation.bills_50) || 0,
-        bills_20: Number(latestReconciliation.bills_20) || 0,
-        coins_20: Number(latestReconciliation.coins_20) || 0,
-        coins_10: Number(latestReconciliation.coins_10) || 0,
-        coins_5: Number(latestReconciliation.coins_5) || 0,
-        coins_1: Number(latestReconciliation.coins_1) || 0,
-        coins_cents: Number(latestReconciliation.coins_cents) || 0,
-      };
+    if (!isOpen || !latestReconciliation) return;
 
-      // If normalized child items are present, override with relational counts
-      if (Array.isArray(latestReconciliation.cash_reconciliation_items) && latestReconciliation.cash_reconciliation_items.length > 0) {
-        latestReconciliation.cash_reconciliation_items.forEach((item) => {
-          const code = item.denominations?.code || denominations.find((d) => d.id === item.denomination_id)?.code;
-          if (code) {
-            const countKey = denomCodeToCountKey(code);
-            initialCounts[countKey] = Number(item.quantity) || 0;
-            initialCounts[code.toLowerCase()] = Number(item.quantity) || 0;
-          }
-        });
-      }
+    const initialCounts = {
+      bills_1000: Number(latestReconciliation.bills_1000) || 0,
+      bills_500: Number(latestReconciliation.bills_500) || 0,
+      bills_200: Number(latestReconciliation.bills_200) || 0,
+      bills_100: Number(latestReconciliation.bills_100) || 0,
+      bills_50: Number(latestReconciliation.bills_50) || 0,
+      bills_20: Number(latestReconciliation.bills_20) || 0,
+      coins_20: Number(latestReconciliation.coins_20) || 0,
+      coins_10: Number(latestReconciliation.coins_10) || 0,
+      coins_5: Number(latestReconciliation.coins_5) || 0,
+      coins_1: Number(latestReconciliation.coins_1) || 0,
+      coins_cents: Number(latestReconciliation.coins_cents) || 0,
+    };
 
-      setCounts(initialCounts);
-      if (latestReconciliation.notes) {
-        setJustificationNotes(latestReconciliation.notes);
-      }
+    // If normalized child items are present, override with relational counts
+    if (Array.isArray(latestReconciliation.cash_reconciliation_items) && latestReconciliation.cash_reconciliation_items.length > 0) {
+      latestReconciliation.cash_reconciliation_items.forEach((item) => {
+        const code = item.denominations?.code || denominations.find((d) => d.id === item.denomination_id)?.code;
+        if (code) {
+          const countKey = denomCodeToCountKey(code);
+          initialCounts[countKey] = Number(item.quantity) || 0;
+          initialCounts[code.toLowerCase()] = Number(item.quantity) || 0;
+        }
+      });
     }
-  }, [isOpen, latestReconciliation, denominations]);
+
+    setCounts(initialCounts);
+    if (latestReconciliation.notes) {
+      setJustificationNotes(latestReconciliation.notes);
+    }
+  }, [isOpen, latestReconciliation?.id, latestReconciliation?.created_at, denominations?.length]);
 
   const handleResetCounts = () => {
     setCounts({
