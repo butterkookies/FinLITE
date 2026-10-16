@@ -526,22 +526,20 @@ export default function AdminPage() {
   return (
     <div className="min-h-screen flex font-sans">
       
-      {/* 1. Desktop & Mobile Floating Sidebar (Pin #5) */}
-      <FloatingSidebar
-        currentRole="admin"
-        userProfile={userProfile}
-        currentUser={currentUser}
-        activeTab="admin"
-        isCollapsed={isSidebarCollapsed}
-        onToggleCollapse={setIsSidebarCollapsed}
-      />
+      {/* 1. Desktop & Mobile Sidebar */}
+      <div className="no-print shrink-0">
+        <FloatingSidebar
+          currentRole="admin"
+          userProfile={userProfile}
+          currentUser={currentUser}
+          activeTab="admin"
+          isCollapsed={isSidebarCollapsed}
+          onToggleCollapse={setIsSidebarCollapsed}
+        />
+      </div>
 
-      {/* 2. Main Content Canvas with dynamic left padding on desktop */}
-      <div 
-        className={`flex-1 flex flex-col transition-all duration-300 ease-in-out min-w-0 ${
-          isSidebarCollapsed ? 'md:pl-[88px]' : 'md:pl-[280px]'
-        }`}
-      >
+      {/* 2. Main Content Canvas */}
+      <div className="flex-1 flex flex-col transition-all duration-300 ease-in-out min-w-0">
         
         {/* Top Header */}
         <header className={`sticky top-0 z-30 border-b backdrop-blur-xl transition-colors ${

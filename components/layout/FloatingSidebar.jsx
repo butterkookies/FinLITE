@@ -24,8 +24,7 @@ import {
   Settings,
   Menu,
   X,
-  ExternalLink,
-  Crosshair
+  ExternalLink
 } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import { useTheme } from '@/components/theme/ThemeProvider';
@@ -232,18 +231,15 @@ export default function FloatingSidebar({
         />
       )}
 
-      {/* The Floating Island Sidebar Container */}
+      {/* Modern SaaS Full-Height Sidebar Column */}
       <aside
-        className={`fixed z-50 flex flex-col transition-all duration-300 ease-in-out select-none
-          border border-zinc-200/90 dark:border-zinc-800/90 
-          bg-white/95 dark:bg-[#09090b]/95 backdrop-blur-xl 
-          shadow-[0_8px_30px_rgb(0,0,0,0.08)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.45)]
-          rounded-2xl
-          ${/* Mobile Layout: off-screen slide-over drawer */ ''}
-          ${isMobileOpen 
-            ? 'top-3 left-3 bottom-3 w-[270px] translate-x-0' 
-            : 'max-md:-translate-x-[110%] md:translate-x-0 top-3 left-3 bottom-3'}
-          ${/* Desktop Collapsible Width */ ''}
+        className={`select-none flex flex-col transition-[width,transform] duration-300 ease-in-out
+          border-r border-zinc-200/90 dark:border-zinc-800/90 
+          bg-white/95 dark:bg-[#09090b]/95 backdrop-blur-xl
+          ${/* Mobile: fixed off-canvas slide-over drawer */ ''}
+          fixed md:sticky top-0 bottom-0 inset-y-0 left-0 z-40 md:z-30 h-screen shrink-0
+          ${isMobileOpen ? 'translate-x-0 shadow-2xl w-[270px]' : 'max-md:-translate-x-full md:translate-x-0'}
+          ${/* Desktop In-Flow Column Width */ ''}
           ${isCollapsed ? 'md:w-[72px]' : 'md:w-[260px]'}
         `}
       >
@@ -561,21 +557,6 @@ export default function FloatingSidebar({
           `}>
             {/* Theme Toggle */}
             <ThemeToggle className="hover:scale-105 active:scale-95" />
-
-            {/* Dev Pin Inspector Button (Admin Only) */}
-            {isAdmin && (
-              <button
-                type="button"
-                onClick={() => {
-                  window.dispatchEvent(new KeyboardEvent('keydown', { key: 'd', altKey: true }));
-                }}
-                className="h-8 w-8 flex items-center justify-center rounded-lg text-zinc-500 hover:text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-950/30 transition-colors cursor-pointer"
-                title="Toggle Dev Pin Inspector (Alt + D / Right-click to pin UI)"
-                aria-label="Toggle Dev Pin Inspector"
-              >
-                <Crosshair className="w-4 h-4" />
-              </button>
-            )}
 
             {/* Sign Out Button */}
             <button

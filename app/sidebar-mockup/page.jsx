@@ -493,38 +493,35 @@ export default function SidebarMockupDashboard() {
   return (
     <div className="min-h-screen bg-zinc-50/50 dark:bg-[#070709] text-zinc-900 dark:text-zinc-100 flex">
       
-      {/* 1. Floating Island Left Sidebar */}
-      <FloatingSidebar
-        currentRole={currentRole}
-        userProfile={userProfile}
-        currentUser={currentUser}
-        currentSemester={currentSemester}
-        semesters={semesters}
-        onSelectSemester={(semId) => {
-          const found = semesters.find((s) => s.id === semId || `${s.academicYear}-${s.semester}` === semId);
-          if (found) setCurrentSemester(found);
-        }}
-        onOpenNewSemester={() => setIsNewSemesterOpen(true)}
-        onOpenNewTx={() => setIsNewTxOpen(true)}
-        onOpenDenominations={() => setIsDenomOpen(true)}
-        onOpenAdvances={() => setIsAdvancesOpen(true)}
-        onOpenDebts={() => setIsDebtsOpen(true)}
-        onOpenAI={() => setIsAIOpen(true)}
-        onOpenAuditTrail={() => setIsAuditOpen(true)}
-        onExportReport={handleOpenLiquidationPreview}
-        activeTab={activeTab}
-        onSelectTab={setActiveTab}
-        isCollapsed={isSidebarCollapsed}
-        onToggleCollapse={setIsSidebarCollapsed}
-      />
+      {/* 1. Left Sidebar */}
+      <div className="no-print shrink-0">
+        <FloatingSidebar
+          currentRole={currentRole}
+          userProfile={userProfile}
+          currentUser={currentUser}
+          currentSemester={currentSemester}
+          semesters={semesters}
+          onSelectSemester={(semId) => {
+            const found = semesters.find((s) => s.id === semId || `${s.academicYear}-${s.semester}` === semId);
+            if (found) setCurrentSemester(found);
+          }}
+          onOpenNewSemester={() => setIsNewSemesterOpen(true)}
+          onOpenNewTx={() => setIsNewTxOpen(true)}
+          onOpenDenominations={() => setIsDenomOpen(true)}
+          onOpenAdvances={() => setIsAdvancesOpen(true)}
+          onOpenDebts={() => setIsDebtsOpen(true)}
+          onOpenAI={() => setIsAIOpen(true)}
+          onOpenAuditTrail={() => setIsAuditOpen(true)}
+          onExportReport={handleOpenLiquidationPreview}
+          activeTab={activeTab}
+          onSelectTab={setActiveTab}
+          isCollapsed={isSidebarCollapsed}
+          onToggleCollapse={setIsSidebarCollapsed}
+        />
+      </div>
 
-      {/* 2. Main Content Canvas with dynamic left padding to account for floating sidebar */}
-      <div 
-        className={`flex-1 flex flex-col transition-all duration-300 ease-in-out min-w-0
-          ${isSidebarCollapsed ? 'md:pl-[88px]' : 'md:pl-[280px]'}
-          p-3 sm:p-6 lg:p-8 pt-16 md:pt-6
-        `}
-      >
+      {/* 2. Main Content Canvas */}
+      <div className="flex-1 flex flex-col transition-all duration-300 ease-in-out min-w-0 p-3 sm:p-6 lg:p-8 pt-16 md:pt-6">
         <main className="max-w-[1500px] w-full mx-auto space-y-6">
           
           {/* Exploration Banner */}

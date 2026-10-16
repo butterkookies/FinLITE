@@ -1693,8 +1693,8 @@ export default function Dashboard() {
   return (
     <div className="min-h-screen flex">
       
-      {/* 1. Floating Island Left Sidebar (Desktop fixed island + Mobile slide-over drawer) */}
-      <div className="no-print">
+      {/* 1. Left Sidebar Column (Desktop in-flow sticky + Mobile slide-over) */}
+      <div className="no-print shrink-0">
         <ModuleErrorBoundary moduleName="Navigation Sidebar">
           <FloatingSidebar
             currentRole={currentRole}
@@ -1727,13 +1727,8 @@ export default function Dashboard() {
         </ModuleErrorBoundary>
       </div>
 
-      {/* 2. Main Content Canvas with dynamic left padding on desktop */}
-      <div 
-        className={`flex-1 flex flex-col transition-all duration-300 ease-in-out min-w-0
-          ${isSidebarCollapsed ? 'md:pl-[88px]' : 'md:pl-[280px]'}
-          p-3 sm:p-6 lg:p-8 pt-16 md:pt-6
-        `}
-      >
+      {/* 2. Main Content Canvas */}
+      <div className="flex-1 flex flex-col transition-all duration-300 ease-in-out min-w-0 p-3 sm:p-6 lg:p-8 pt-16 md:pt-6">
         <main className="max-w-[1550px] w-full mx-auto space-y-5 sm:space-y-6 pb-24 md:pb-8 no-print">
           
           {/* Modern Minimalist Hero Balance & Action Hub (De-cluttered borderless canvas) */}
