@@ -116,6 +116,7 @@ export default function Dashboard() {
   const [isAuditOpen, setIsAuditOpen] = useState(false);
   const [debts, setDebts] = useState([]);
   const [isDebtsOpen, setIsDebtsOpen] = useState(false);
+  const [advances, setAdvances] = useState([]);
   const [isAdvancesOpen, setIsAdvancesOpen] = useState(false);
   const [previewData, setPreviewData] = useState(null);
   const [latestReconciliation, setLatestReconciliation] = useState(null);
@@ -435,6 +436,61 @@ export default function Dashboard() {
             try { setDebts(JSON.parse(cachedDebts)); } catch (_) {}
           }
         }
+
+        // 8. Load Advances & Payables (with installment disbursements join)
+        try {
+          const { data: advData, error: advError } = await supabase
+            .from('advances_payable')
+            .select(`
+              *,
+              advance_disbursements (*)
+            `)
+            .order('created_at', { ascending: false });
+
+          if (!advError && advData && advData.length > 0) {
+            setAdvances(advData);
+            if (typeof window !== 'undefined') {
+              try { localStorage.setItem('finlite_advances', JSON.stringify(advData)); } catch (_) {}
+            }
+          } else {
+            const cachedAdv = typeof window !== 'undefined' ? localStorage.getItem('finlite_advances') : null;
+            if (cachedAdv) {
+              try { setAdvances(JSON.parse(cachedAdv)); } catch (_) {}
+            } else if (normalized && normalized.length > 0) {
+              const mappedFromTx = normalized
+                .filter((t) => t.is_reimbursement)
+                .map((t) => ({
+                  id: t.id,
+                  semester_id: t.semester_id || 'sem-26-27-1',
+                  claimant_name: t.reimbursement_recipient || 'Club Officer',
+                  title: t.title,
+                  category_name: t.category_name,
+                  event_name: t.event_name,
+                  total_amount: Number(t.amount || 0),
+                  amount_reimbursed: t.status === 'REIMBURSED' ? Number(t.amount || 0) : 0,
+                  status: t.status === 'REIMBURSED' ? 'SETTLED' : 'UNPAID',
+                  advance_date: t.transaction_date,
+                  receipt_url: t.receipt_url,
+                  receipt_urls: t.receipt_urls || [],
+                  notes: t.description,
+                  advance_disbursements: t.status === 'REIMBURSED' ? [{
+                    id: `disb-${t.id}`,
+                    advance_id: t.id,
+                    amount: Number(t.amount || 0),
+                    payment_method: t.payment_method || 'CASH',
+                    disbursement_date: t.transaction_date || new Date().toISOString(),
+                  }] : [],
+                }));
+              setAdvances(mappedFromTx);
+            }
+          }
+        } catch (advErr) {
+          console.warn('Advances fetch note:', advErr);
+          const cachedAdv = typeof window !== 'undefined' ? localStorage.getItem('finlite_advances') : null;
+          if (cachedAdv) {
+            try { setAdvances(JSON.parse(cachedAdv)); } catch (_) {}
+          }
+        }
       } catch (err) {
         console.error('Database connection error:', err);
         setTransactions([]);
@@ -454,6 +510,15 @@ export default function Dashboard() {
       } catch (_) {}
     }
   }, [debts]);
+
+  // Persist advances state to localStorage whenever it changes
+  useEffect(() => {
+    if (typeof window !== 'undefined' && advances && advances.length > 0) {
+      try {
+        localStorage.setItem('finlite_advances', JSON.stringify(advances));
+      } catch (_) {}
+    }
+  }, [advances]);
 
   // Load official semester signatories from Supabase whenever active semester changes
   useEffect(() => {
@@ -536,8 +601,14 @@ export default function Dashboard() {
     return d.semester_id === currentSemester?.id || d.semester_id === `${currentSemester?.academicYear}-${currentSemester?.semester}`;
   });
 
+  // Filter active advances for the current semester
+  const activeAdvances = advances.filter((a) => {
+    if (!a.semester_id) return true;
+    return a.semester_id === currentSemester?.id || a.semester_id === `${currentSemester?.academicYear}-${currentSemester?.semester}`;
+  });
+
   // Recalculate summary totals atomically with precision centavo math
-  const calculateSummary = (txs, debtsList = []) => {
+  const calculateSummary = (txs, debtsList = [], advancesList = []) => {
     let inflows_c = 0;
     let outflows_c = 0;
     let cash_c = 0;
@@ -570,17 +641,26 @@ export default function Dashboard() {
       return acc + Math.max(0, total - paid);
     }, 0);
 
+    const pending_advances = advancesList.length > 0
+      ? advancesList.reduce((acc, a) => {
+          if (a.status === 'CANCELLED' || a.status === 'SETTLED') return acc;
+          const total = Number(a.total_amount || 0);
+          const reimbursed = Number(a.amount_reimbursed || 0);
+          return acc + Math.max(0, total - reimbursed);
+        }, 0)
+      : fromCentavos(pending_reimbursements_c);
+
     return {
       total_inflows: fromCentavos(inflows_c),
       total_outflows: fromCentavos(outflows_c),
       cash_on_hand: fromCentavos(cash_c),
       gcash_balance: fromCentavos(gcash_c),
-      pending_reimbursements: fromCentavos(pending_reimbursements_c),
+      pending_reimbursements: pending_advances,
       uncollected_debts,
     };
   };
 
-  const summary = calculateSummary(activeTransactions, activeDebts);
+  const summary = calculateSummary(activeTransactions, activeDebts, activeAdvances);
 
   // Manual entry from the New Transaction form: enforce ₱99,999.99 cap and channel balance check.
   const handleManualSaveTransaction = async (newTx) => {
@@ -871,7 +951,7 @@ export default function Dashboard() {
   };
 
   // Handler for settling an out-of-pocket advance (abono)
-  const handleSettleReimbursement = async (transactionId, { paymentMethod = 'CASH' } = {}) => {
+  const handleSettleReimbursement = async (transactionId, { paymentMethod = 'CASH', amount = null } = {}) => {
     const isAuthorized = currentRole === 'admin' || currentRole === 'treasurer' || currentRole === 'president' || currentRole === 'adviser';
     if (!isAuthorized) {
       return { success: false, error: 'Unauthorized. Only club officers and advisers can settle abono advances.' };
@@ -882,12 +962,19 @@ export default function Dashboard() {
       return { success: false, error: 'Transaction not found.' };
     }
 
+    const totalClaim = Number(targetTx.amount || 0);
+    const payoutAmount = amount !== null ? Math.min(Number(amount), totalClaim) : totalClaim;
+
+    if (payoutAmount <= 0) {
+      return { success: false, error: 'Disbursement amount must be greater than ₱0.00' };
+    }
+
     // Validate channel balance: ensure disbursing vault has sufficient liquid balance
     const balanceError = validateOutflowBalance({
       type: 'OUTFLOW',
       paymentMethod,
       isReimbursement: false,
-      amount: targetTx.amount,
+      amount: payoutAmount,
       cashBalance: summary.cash_on_hand,
       gcashBalance: summary.gcash_balance,
     });
@@ -896,33 +983,76 @@ export default function Dashboard() {
       return { success: false, error: balanceError };
     }
 
+    const remainingBal = Math.max(0, totalClaim - payoutAmount);
+    const isFullSettlement = remainingBal === 0;
+
     // Update in Supabase if connected
     if (supabase && typeof transactionId === 'string' && !transactionId.startsWith('tx-')) {
       try {
-        const { error: updateError } = await supabase
-          .from('transactions')
-          .update({
-            status: 'REIMBURSED',
-            payment_method: paymentMethod,
-            updated_at: new Date().toISOString(),
-          })
-          .eq('id', transactionId);
+        if (isFullSettlement) {
+          const { error: updateError } = await supabase
+            .from('transactions')
+            .update({
+              status: 'REIMBURSED',
+              payment_method: paymentMethod,
+              updated_at: new Date().toISOString(),
+            })
+            .eq('id', transactionId);
 
-        if (updateError) {
-          console.error('Failed to update abono reimbursement status in Supabase:', updateError);
-          return { success: false, error: updateError.message };
+          if (updateError) {
+            console.error('Failed to update abono reimbursement status in Supabase:', updateError);
+            return { success: false, error: updateError.message };
+          }
+        } else {
+          // Partial Settlement:
+          // 1. Current transaction becomes the settled partial outflow
+          await supabase
+            .from('transactions')
+            .update({
+              amount: payoutAmount,
+              status: 'REIMBURSED',
+              payment_method: paymentMethod,
+              updated_at: new Date().toISOString(),
+            })
+            .eq('id', transactionId);
+
+          // 2. Spawn remaining tranche transaction so ledger remains accurate
+          await supabase
+            .from('transactions')
+            .insert([{
+              title: targetTx.title,
+              description: `Remaining balance of ${formatPHP(totalClaim)} advance by ${targetTx.reimbursement_recipient || 'Officer'}`,
+              amount: remainingBal,
+              type: 'OUTFLOW',
+              payment_method: targetTx.payment_method || 'CASH',
+              category_id: targetTx.category_id || null,
+              category_name: targetTx.category_name || null,
+              semester_id: targetTx.semester_id || null,
+              logged_by: userProfile?.id || null,
+              transaction_date: targetTx.transaction_date || new Date().toISOString().split('T')[0],
+              is_reimbursement: true,
+              reimbursement_recipient: targetTx.reimbursement_recipient,
+              receipt_url: targetTx.receipt_url || null,
+              receipt_urls: targetTx.receipt_urls || [],
+              status: 'PENDING_REIMBURSEMENT',
+              event_name: targetTx.event_name || null,
+              academic_year: targetTx.academic_year || currentSemester.academicYear,
+              semester: targetTx.semester || currentSemester.semester,
+            }]);
         }
 
         // Best-effort immutable audit log entry
         try {
           await supabase.from('audit_logs').insert([{
             user_id: userProfile?.id || currentUser?.id || null,
-            action: 'SETTLE_ABONO_REIMBURSEMENT',
+            action: isFullSettlement ? 'SETTLE_ABONO_REIMBURSEMENT' : 'PARTIAL_ABONO_DISBURSEMENT',
             entity_type: 'transactions',
             entity_id: String(transactionId),
             details: {
               title: targetTx.title,
-              amount: targetTx.amount,
+              total_claim: totalClaim,
+              disbursed_amount: payoutAmount,
+              remaining_balance: remainingBal,
               recipient: targetTx.reimbursement_recipient,
               payment_method: paymentMethod,
               settled_by: userProfile?.full_name || currentUser?.email || 'Officer',
@@ -936,15 +1066,232 @@ export default function Dashboard() {
     }
 
     // Optimistically update local transactions state
-    setTransactions((prev) =>
-      prev.map((t) => (t.id === transactionId ? {
-        ...t,
-        status: 'REIMBURSED',
-        payment_method: paymentMethod,
-      } : t))
+    if (isFullSettlement) {
+      setTransactions((prev) =>
+        prev.map((t) => (t.id === transactionId ? {
+          ...t,
+          status: 'REIMBURSED',
+          payment_method: paymentMethod,
+        } : t))
+      );
+    } else {
+      const remainingTx = {
+        ...targetTx,
+        id: `tx-${Date.now()}`,
+        amount: remainingBal,
+        description: `Remaining balance of ${formatPHP(totalClaim)} advance by ${targetTx.reimbursement_recipient || 'Officer'}`,
+        status: 'PENDING_REIMBURSEMENT',
+      };
+      setTransactions((prev) => [
+        remainingTx,
+        ...prev.map((t) => (t.id === transactionId ? {
+          ...t,
+          amount: payoutAmount,
+          status: 'REIMBURSED',
+          payment_method: paymentMethod,
+        } : t))
+      ]);
+    }
+
+    // Sync advances_payable state if matching record exists
+    setAdvances((prev) =>
+      prev.map((a) => {
+        if (a.id === transactionId || a.title === targetTx.title) {
+          const newReimbursed = Math.min(Number(a.total_amount || totalClaim), Number(a.amount_reimbursed || 0) + payoutAmount);
+          const newStatus = newReimbursed >= Number(a.total_amount || totalClaim) ? 'SETTLED' : 'PARTIALLY_REIMBURSED';
+          const newDisb = {
+            id: `disb-${Date.now()}`,
+            advance_id: a.id,
+            amount: payoutAmount,
+            payment_method: paymentMethod,
+            disbursement_date: new Date().toISOString(),
+          };
+          return {
+            ...a,
+            amount_reimbursed: newReimbursed,
+            status: newStatus,
+            advance_disbursements: [newDisb, ...(a.advance_disbursements || [])],
+          };
+        }
+        return a;
+      })
     );
 
     return { success: true };
+  };
+
+  // Handler for disbursing partial or full reimbursement payouts directly from AdvancesManagementModal
+  const handleRecordAdvanceDisbursement = async (advanceId, { amount, paymentMethod = 'CASH', notes = '' }) => {
+    try {
+      const isAuthorized = currentRole === 'admin' || currentRole === 'treasurer' || currentRole === 'president' || currentRole === 'adviser';
+      if (!isAuthorized) {
+        return { error: 'Unauthorized. Only club officers and advisers can disburse reimbursements.' };
+      }
+
+      const targetAdvance = advances.find((a) => a.id === advanceId);
+      if (!targetAdvance) return { error: 'Advance record not found.' };
+
+      const remaining = Math.max(0, Number(targetAdvance.total_amount || 0) - Number(targetAdvance.amount_reimbursed || 0));
+      const payoutAmount = Math.min(Number(amount), remaining);
+
+      if (payoutAmount <= 0) {
+        return { error: 'Disbursement amount must be greater than ₱0.00' };
+      }
+
+      // Validate vault liquidity balance
+      const balanceError = validateOutflowBalance({
+        type: 'OUTFLOW',
+        paymentMethod,
+        isReimbursement: false,
+        amount: payoutAmount,
+        cashBalance: summary.cash_on_hand,
+        gcashBalance: summary.gcash_balance,
+      });
+
+      if (balanceError) {
+        return { error: balanceError };
+      }
+
+      // 1. Immediately create a completed OUTFLOW in the general ledger
+      const disbursementTx = {
+        title: `Abono Reimbursement: ${targetAdvance.title} (${targetAdvance.claimant_name})`,
+        description: notes || `Reimbursement payout of ₱${payoutAmount.toFixed(2)} to ${targetAdvance.claimant_name}`,
+        amount: payoutAmount,
+        type: 'OUTFLOW',
+        payment_method: paymentMethod,
+        category_name: targetAdvance.category_name || 'Food & Refreshments',
+        event_name: targetAdvance.event_name || null,
+        transaction_date: new Date().toISOString().split('T')[0],
+        is_reimbursement: false,
+        status: 'COMPLETED',
+      };
+      await handleSaveTransaction(disbursementTx);
+
+      // 2. Update local advances state
+      const updatedReimbursed = Number(targetAdvance.amount_reimbursed || 0) + payoutAmount;
+      const isSettled = updatedReimbursed >= Number(targetAdvance.total_amount);
+      const updatedStatus = isSettled ? 'SETTLED' : 'PARTIALLY_REIMBURSED';
+      const newDisbursement = {
+        id: `disb-${Date.now()}`,
+        advance_id: advanceId,
+        amount: payoutAmount,
+        payment_method: paymentMethod,
+        disbursement_date: new Date().toISOString(),
+        notes,
+      };
+
+      setAdvances((prev) =>
+        prev.map((a) =>
+          a.id === advanceId
+            ? {
+                ...a,
+                amount_reimbursed: updatedReimbursed,
+                status: updatedStatus,
+                advance_disbursements: [newDisbursement, ...(a.advance_disbursements || [])],
+              }
+            : a
+        )
+      );
+
+      // 3. Best-effort persistence to Supabase
+      if (supabase && typeof advanceId === 'string' && !advanceId.startsWith('adv-')) {
+        try {
+          await supabase
+            .from('advances_payable')
+            .update({
+              amount_reimbursed: updatedReimbursed,
+              status: updatedStatus,
+              updated_at: new Date().toISOString(),
+            })
+            .eq('id', advanceId);
+
+          await supabase.from('advance_disbursements').insert([{
+            advance_id: advanceId,
+            amount: payoutAmount,
+            payment_method: paymentMethod,
+            notes,
+            disbursed_by: userProfile?.id || null,
+          }]);
+
+          // Audit log
+          await supabase.from('audit_logs').insert([{
+            user_id: userProfile?.id || currentUser?.id || null,
+            action: 'DISBURSE_ABONO_PAYOUT',
+            entity_type: 'advances_payable',
+            entity_id: String(advanceId),
+            details: {
+              title: targetAdvance.title,
+              amount: payoutAmount,
+              claimant: targetAdvance.claimant_name,
+              payment_method: paymentMethod,
+              disbursed_by: userProfile?.full_name || currentUser?.email || 'Officer',
+            },
+          }]);
+        } catch (dbErr) {
+          console.warn('Persisting advance disbursement to Supabase skipped:', dbErr);
+        }
+      }
+
+      return { success: true };
+    } catch (err) {
+      console.error('Record advance disbursement error:', err);
+      return { error: err?.message || 'Failed to record advance disbursement' };
+    }
+  };
+
+  // Handler for creating a new advance record directly
+  const handleCreateAdvance = async (advanceData) => {
+    try {
+      const tempId = `adv-${Date.now()}`;
+      const newAdv = {
+        id: tempId,
+        semester_id: currentSemester?.id || 'sem-26-27-1',
+        claimant_name: advanceData.claimant_name,
+        claimant_contact: advanceData.claimant_contact || null,
+        title: advanceData.title,
+        category_name: advanceData.category_name || 'Food & Refreshments',
+        event_name: advanceData.event_name || null,
+        total_amount: Number(advanceData.total_amount),
+        amount_reimbursed: 0,
+        status: 'UNPAID',
+        advance_date: new Date().toISOString().split('T')[0],
+        notes: advanceData.notes || null,
+        advance_disbursements: [],
+        created_at: new Date().toISOString(),
+      };
+
+      setAdvances((prev) => [newAdv, ...prev]);
+
+      if (supabase) {
+        try {
+          const { data, error } = await supabase.from('advances_payable').insert([{
+            semester_id: newAdv.semester_id,
+            claimant_name: newAdv.claimant_name,
+            claimant_contact: newAdv.claimant_contact,
+            title: newAdv.title,
+            category_name: newAdv.category_name,
+            event_name: newAdv.event_name,
+            total_amount: newAdv.total_amount,
+            amount_reimbursed: 0,
+            status: 'UNPAID',
+            advance_date: newAdv.advance_date,
+            notes: newAdv.notes,
+            created_by: userProfile?.id || null,
+          }]).select().single();
+
+          if (!error && data) {
+            setAdvances((prev) => prev.map((a) => (a.id === tempId ? { ...data, advance_disbursements: [] } : a)));
+          }
+        } catch (dbErr) {
+          console.warn('Persisting advance to Supabase skipped:', dbErr);
+        }
+      }
+
+      return { success: true };
+    } catch (err) {
+      console.error('Create advance error:', err);
+      return { error: err?.message || 'Failed to create advance record' };
+    }
   };
 
   // Handler for collecting payments on uncollected member debts and pre-orders
@@ -1561,9 +1908,12 @@ export default function Dashboard() {
           <AdvancesManagementModal
             isOpen={isAdvancesOpen}
             onClose={() => setIsAdvancesOpen(false)}
-            transactions={activeTransactions}
-            onSettleReimbursement={handleSettleReimbursement}
-            canSettle={canManageFinancials}
+            advances={activeAdvances}
+            onRecordDisbursement={handleRecordAdvanceDisbursement}
+            onCreateAdvance={handleCreateAdvance}
+            cashBalance={summary.cash_on_hand}
+            gcashBalance={summary.gcash_balance}
+            canManage={canManageFinancials}
           />
         </ModuleErrorBoundary>
       </div>

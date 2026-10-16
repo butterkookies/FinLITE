@@ -92,6 +92,7 @@ export default function TransactionTable({
 
   // Settle abono advance modal states
   const [settleTx, setSettleTx] = useState(null);
+  const [settleAmount, setSettleAmount] = useState('');
   const [settleMethod, setSettleMethod] = useState('CASH');
   const [isSubmittingSettle, setIsSubmittingSettle] = useState(false);
   const [settleError, setSettleError] = useState(null);
@@ -128,9 +129,21 @@ export default function TransactionTable({
     setIsSubmittingSettle(true);
     setSettleError(null);
 
+    const payoutVal = parseFloat(settleAmount);
+    if (isNaN(payoutVal) || payoutVal <= 0) {
+      setSettleError('Please enter a valid disbursement amount greater than ₱0.00');
+      setIsSubmittingSettle(false);
+      return;
+    }
+    if (payoutVal > Number(settleTx.amount || 0)) {
+      setSettleError(`Disbursement amount cannot exceed ${formatPHP(settleTx.amount)}`);
+      setIsSubmittingSettle(false);
+      return;
+    }
+
     const isGcash = settleMethod === 'GCASH';
     const available = Number(isGcash ? gcashBalance : cashBalance) || 0;
-    if (Number(settleTx.amount || 0) > available) {
+    if (payoutVal > available) {
       const channelLabel = isGcash ? 'GCash Wallet' : 'Physical Cashbox';
       setSettleError(`Insufficient ${channelLabel} balance. Available: ${formatPHP(available)}`);
       setIsSubmittingSettle(false);
@@ -139,17 +152,26 @@ export default function TransactionTable({
 
     try {
       if (onSettleReimbursement) {
-        const res = await onSettleReimbursement(settleTx.id, { paymentMethod: settleMethod });
+        const res = await onSettleReimbursement(settleTx.id, { 
+          paymentMethod: settleMethod,
+          amount: payoutVal 
+        });
         if (res && res.error) {
           setSettleError(res.error);
           setIsSubmittingSettle(false);
           return;
         }
       }
-      setSettleToast(`Successfully disbursed ${formatPHP(settleTx.amount)} to ${settleTx.reimbursement_recipient || 'claimant'}.`);
+      setSettleToast(`Successfully disbursed ${formatPHP(payoutVal)} to ${settleTx.reimbursement_recipient || 'claimant'}.`);
       setTimeout(() => setSettleToast(null), 4000);
       if (selectedTx && selectedTx.id === settleTx.id) {
-        setSelectedTx((prev) => prev ? { ...prev, status: 'REIMBURSED', payment_method: settleMethod } : null);
+        const remainingBal = Math.max(0, Number(settleTx.amount || 0) - payoutVal);
+        setSelectedTx((prev) => prev ? { 
+          ...prev, 
+          status: remainingBal === 0 ? 'REIMBURSED' : 'PENDING_REIMBURSEMENT', 
+          amount: remainingBal === 0 ? payoutVal : remainingBal,
+          payment_method: settleMethod 
+        } : null);
       }
       setSettleTx(null);
     } catch (err) {
@@ -748,6 +770,7 @@ export default function TransactionTable({
                                 onClick={(e) => {
                                   e.stopPropagation();
                                   setSettleTx(tx);
+                                  setSettleAmount(Number(tx.amount || 0).toString());
                                   setSettleMethod(tx.payment_method === 'GCASH' ? 'GCASH' : 'CASH');
                                   setSettleError(null);
                                 }}
@@ -1498,6 +1521,7 @@ export default function TransactionTable({
                       size="sm"
                       onClick={() => {
                         setSettleTx(tx);
+                        setSettleAmount(Number(tx.amount || 0).toString());
                         setSettleMethod(tx.payment_method === 'GCASH' ? 'GCASH' : 'CASH');
                         setSettleError(null);
                       }}
@@ -1818,8 +1842,11 @@ export default function TransactionTable({
                 size="sm"
                 disabled={
                   isSubmittingSettle ||
-                  (settleMethod === 'CASH' && cashBalance < Number(settleTx.amount)) ||
-                  (settleMethod === 'GCASH' && gcashBalance < Number(settleTx.amount))
+                  !settleAmount ||
+                  parseFloat(settleAmount) <= 0 ||
+                  parseFloat(settleAmount) > Number(settleTx.amount) ||
+                  (settleMethod === 'CASH' && cashBalance < parseFloat(settleAmount)) ||
+                  (settleMethod === 'GCASH' && gcashBalance < parseFloat(settleAmount))
                 }
                 isLoading={isSubmittingSettle}
                 onClick={handleConfirmSettle}
@@ -1859,13 +1886,57 @@ export default function TransactionTable({
                   {formatFriendlyDate(settleTx.transaction_date)}
                 </span>
               </div>
-              <div className="pt-2.5 border-t border-zinc-200 dark:border-zinc-800 flex items-center justify-between">
-                <span className="font-bold text-xs uppercase tracking-wider text-zinc-700 dark:text-zinc-300">
-                  Refund Amount
-                </span>
-                <span className="text-lg font-black tabular-nums text-zinc-900 dark:text-emerald-400">
-                  {formatPHP(settleTx.amount)}
-                </span>
+
+              {/* Editable Refund / Disbursement Amount */}
+              <div className="pt-2.5 border-t border-zinc-200 dark:border-zinc-800 space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="font-bold text-xs uppercase tracking-wider text-zinc-700 dark:text-zinc-300">
+                    Disbursement Amount
+                  </span>
+                  <span className="text-xs text-zinc-500">
+                    Total Claim: <strong className="text-zinc-900 dark:text-zinc-100">{formatPHP(settleTx.amount)}</strong>
+                  </span>
+                </div>
+                <div className="relative">
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm font-bold text-zinc-400">₱</span>
+                  <input
+                    type="number"
+                    step="0.01"
+                    min="0.01"
+                    max={settleTx.amount}
+                    value={settleAmount}
+                    onChange={(e) => {
+                      setSettleAmount(e.target.value);
+                      setSettleError(null);
+                    }}
+                    placeholder="Enter amount to disburse..."
+                    className="w-full text-base font-bold pl-7 pr-3 py-2 rounded-xl bg-white dark:bg-zinc-800/80 border border-zinc-200 dark:border-zinc-700 text-zinc-900 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500"
+                  />
+                </div>
+                <div className="flex items-center justify-between text-[11px] text-zinc-500">
+                  <span>
+                    Remaining after payout:{' '}
+                    <strong className="text-zinc-800 dark:text-zinc-200">
+                      {formatPHP(Math.max(0, Number(settleTx.amount || 0) - (parseFloat(settleAmount) || 0)))}
+                    </strong>
+                  </span>
+                  <div className="flex gap-1.5">
+                    <button
+                      type="button"
+                      onClick={() => setSettleAmount((Number(settleTx.amount || 0) * 0.5).toFixed(2))}
+                      className="px-2 py-0.5 rounded text-[10px] font-semibold bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-700 cursor-pointer"
+                    >
+                      50%
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setSettleAmount(settleTx.amount.toString())}
+                      className="px-2 py-0.5 rounded text-[10px] font-semibold bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-100 dark:hover:bg-emerald-900/60 cursor-pointer"
+                    >
+                      Full
+                    </button>
+                  </div>
+                </div>
               </div>
             </div>
 
@@ -1901,7 +1972,7 @@ export default function TransactionTable({
                   </div>
                   <p className="text-[11px] text-zinc-500 dark:text-zinc-400">Physical Box</p>
                   <p className={`text-[11px] font-bold mt-1 tabular-nums ${
-                    cashBalance < Number(settleTx.amount)
+                    cashBalance < (parseFloat(settleAmount) || 0)
                       ? 'text-rose-600 dark:text-rose-400'
                       : 'text-emerald-600 dark:text-emerald-400'
                   }`}>
@@ -1935,7 +2006,7 @@ export default function TransactionTable({
                   </div>
                   <p className="text-[11px] text-zinc-500 dark:text-zinc-400">Digital Wallet</p>
                   <p className={`text-[11px] font-bold mt-1 tabular-nums ${
-                    gcashBalance < Number(settleTx.amount)
+                    gcashBalance < (parseFloat(settleAmount) || 0)
                       ? 'text-rose-600 dark:text-rose-400'
                       : 'text-sky-600 dark:text-sky-400'
                   }`}>
@@ -1949,7 +2020,7 @@ export default function TransactionTable({
             {(() => {
               const isGcash = settleMethod === 'GCASH';
               const avail = isGcash ? gcashBalance : cashBalance;
-              const req = Number(settleTx.amount || 0);
+              const req = parseFloat(settleAmount) || 0;
               if (req > avail) {
                 return (
                   <div className="p-3 rounded-xl bg-rose-50 dark:bg-rose-950/30 border border-rose-200 dark:border-rose-900/40 text-rose-800 dark:text-rose-300 text-xs flex items-start gap-2">
