@@ -58,7 +58,11 @@ function LoginForm() {
           setError(data.message || 'Your account has been suspended by an administrator. Please contact your adviser or admin.');
           return;
         }
-        setError(data.error || 'Login failed. Please check your credentials.');
+        if (data.error === 'google_only_account') {
+          setError(data.message || 'This account was registered using Google. Please click "Continue with Google" to sign in.');
+          return;
+        }
+        setError(data.message || data.error || 'Login failed. Please check your credentials.');
         return;
       }
 

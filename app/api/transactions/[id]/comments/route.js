@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { createClient } from '@/lib/supabase/server';
+import { createClient, createAdminClient } from '@/lib/supabase/server';
 
 // GET /api/transactions/[id]/comments — Fetch comments thread for a transaction
 export async function GET(req, { params }) {
@@ -150,28 +150,54 @@ export async function POST(req, { params }) {
       }, { status: 404 });
     }
 
-    // 2. Resolve author profile
-    let { data: profile } = await supabase
+    // 2. Resolve author profile with automatic identity linking
+    const adminClient = createAdminClient();
+    const queryClient = adminClient || supabase;
+
+    // Trigger self-healing RPC if available
+    try {
+      await supabase.rpc('link_current_user_profile');
+    } catch (_) {}
+
+    let { data: profile } = await queryClient
       .from('profiles')
-      .select('id, full_name, first_name, last_name, role, avatar_url, email')
+      .select('id, full_name, first_name, last_name, role, avatar_url, email, auth_user_id')
       .eq('auth_user_id', user.id)
       .maybeSingle();
 
     if (!profile && user.email) {
-      const { data: profileByEmail } = await supabase
+      const { data: profileByEmail } = await queryClient
         .from('profiles')
-        .select('id, full_name, first_name, last_name, role, avatar_url, email')
+        .select('id, full_name, first_name, last_name, role, avatar_url, email, auth_user_id')
         .eq('email', user.email.toLowerCase())
         .maybeSingle();
-      if (profileByEmail) profile = profileByEmail;
+
+      if (profileByEmail) {
+        profile = profileByEmail;
+        // Self-heal: Link auth_user_id if unlinked
+        if (!profileByEmail.auth_user_id || profileByEmail.auth_user_id !== user.id) {
+          try {
+            await (adminClient || supabase)
+              .from('profiles')
+              .update({ auth_user_id: user.id })
+              .eq('id', profileByEmail.id);
+          } catch (linkErr) {
+            console.warn('Profile auth_user_id self-heal note:', linkErr?.message);
+          }
+        }
+      }
     }
 
     if (!profile) {
-      return NextResponse.json({ error: 'User profile not found. Please re-authenticate.' }, { status: 403 });
+      return NextResponse.json({ 
+        error: 'Officer profile not found. Please re-authenticate or verify your registration with an admin.' 
+      }, { status: 403 });
     }
 
-    // 3. Insert remark into transaction_comments (using clean, flat select to avoid relational embedding failures)
-    const { data: inserted, error: insertError } = await supabase
+    // 3. Insert remark into transaction_comments
+    // Use adminClient if available to avoid RLS desync, otherwise use authenticated user client
+    const insertClient = adminClient || supabase;
+    const { data: inserted, error: insertError } = await insertClient
       .from('transaction_comments')
       .insert([{
         transaction_id: transactionId,
@@ -183,11 +209,19 @@ export async function POST(req, { params }) {
 
     if (insertError) {
       console.error('Error inserting comment:', insertError);
+
+      let userFriendlyMessage = 'Failed to post remark. Please try again.';
+      if (insertError.code === '42501' || insertError.message?.toLowerCase().includes('row-level security')) {
+        userFriendlyMessage = 'Database permission check failed: your login session is not yet linked to an authorized officer profile, or migration 021 must be applied in Supabase.';
+      } else if (insertError.message) {
+        userFriendlyMessage = insertError.message;
+      }
+
       return NextResponse.json({ 
-        error: insertError.message || 'Failed to post remark.',
+        error: userFriendlyMessage,
         code: insertError.code,
         details: insertError.details,
-      }, { status: 500 });
+      }, { status: insertError.code === '42501' ? 403 : 500 });
     }
 
     // 4. Construct normalized comment response directly with verified author profile in memory

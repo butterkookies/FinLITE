@@ -165,15 +165,27 @@ export default function TransactionCommentsDrawer({
 
         {/* Remarks Thread Stream */}
         <div className="flex-1 overflow-y-auto p-4 sm:p-5 space-y-3.5 bg-white dark:bg-[#09090B]">
+          {error && (
+            <div className="p-3.5 rounded-xl border flex items-start justify-between gap-2.5 text-xs bg-rose-500/10 border-rose-500/20 text-rose-700 dark:text-rose-300 animate-in fade-in duration-150">
+              <div className="flex items-start gap-2.5 min-w-0">
+                <AlertCircle className="w-4 h-4 mt-0.5 shrink-0 text-rose-500" />
+                <span className="leading-relaxed select-text">{error}</span>
+              </div>
+              <button
+                type="button"
+                onClick={() => setError(null)}
+                className="text-rose-400 hover:text-rose-600 dark:hover:text-rose-200 shrink-0 p-0.5 transition-colors"
+                title="Dismiss error"
+              >
+                <X className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          )}
+
           {isLoading ? (
             <div className="h-48 flex flex-col items-center justify-center gap-2 text-xs text-zinc-500 dark:text-zinc-400">
               <Loader2 className="w-5 h-5 animate-spin text-emerald-500" />
               <span>Loading remarks thread...</span>
-            </div>
-          ) : error ? (
-            <div className="p-4 rounded-xl border flex items-center gap-2.5 text-xs bg-rose-500/10 border-rose-500/20 text-rose-700 dark:text-rose-300">
-              <AlertCircle className="w-4 h-4 shrink-0" />
-              <span>{error}</span>
             </div>
           ) : comments.length === 0 ? (
             <div className="p-8 text-center rounded-2xl border bg-zinc-50 dark:bg-zinc-900/30 border-zinc-200 dark:border-zinc-800">

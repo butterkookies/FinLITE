@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { createClient } from '@/lib/supabase/server';
+import { createClient, createAdminClient } from '@/lib/supabase/server';
 import { isSuperAdminEmail } from '@/lib/config/admin';
 import { getClientIp } from '@/lib/security/ratelimit';
 
@@ -63,22 +63,43 @@ export async function POST(req) {
           error: 'Email address not yet confirmed. Please verify your email or have the admin confirm your account in Supabase.',
         }, { status: 403 });
       }
+
+      // Check if user was registered via Google OAuth to provide helpful UX guidance
+      const adminClient = createAdminClient();
+      const queryClient = adminClient || supabase;
+
+      const { data: profileCheck } = await queryClient
+        .from('profiles')
+        .select('auth_provider, email')
+        .eq('email', userEmail)
+        .maybeSingle();
+
+      if (profileCheck?.auth_provider === 'google') {
+        return NextResponse.json({
+          error: 'google_only_account',
+          message: 'This account was registered using Google. Please click "Continue with Google" to sign in, or use "Forgot Password" to set a password for email login.',
+          isGoogleOnly: true,
+        }, { status: 401 });
+      }
+
       return NextResponse.json({ error: 'Incorrect username or password.' }, { status: 401 });
     }
 
     const userId = data.user?.id;
+    const adminClient = createAdminClient();
+    const queryClient = adminClient || supabase;
 
     // Check profile approval status (first by auth_user_id, then fallback to email)
-    let { data: profile } = await supabase
+    let { data: profile } = await queryClient
       .from('profiles')
-      .select('id, status, role, first_name, last_name, username')
+      .select('id, status, role, first_name, last_name, username, auth_user_id')
       .eq('auth_user_id', userId)
       .maybeSingle();
 
     if (!profile) {
-      const { data: profileByEmail } = await supabase
+      const { data: profileByEmail } = await queryClient
         .from('profiles')
-        .select('id, status, role, first_name, last_name, username')
+        .select('id, status, role, first_name, last_name, username, auth_user_id')
         .eq('email', userEmail)
         .maybeSingle();
 
@@ -86,7 +107,10 @@ export async function POST(req) {
         profile = profileByEmail;
         // Link auth_user_id to profile for future sub-millisecond lookups
         try {
-          await supabase.from('profiles').update({ auth_user_id: userId }).eq('id', profileByEmail.id);
+          await queryClient
+            .from('profiles')
+            .update({ auth_user_id: userId, updated_at: new Date().toISOString() })
+            .eq('id', profileByEmail.id);
         } catch (_) {}
       }
     }

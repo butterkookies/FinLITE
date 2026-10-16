@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { createClient } from '@/lib/supabase/server';
+import { createClient, createAdminClient } from '@/lib/supabase/server';
 import { isSuperAdminEmail } from '@/lib/config/admin';
 import { getClientIp } from '@/lib/security/ratelimit';
 
@@ -87,12 +87,45 @@ export async function GET(req) {
       return NextResponse.redirect(`${appUrl}/admin`);
     }
 
-    // --- Check if already an approved profile (returning user) ---
-    const { data: existingProfile } = await supabase
+    // --- Check if already an approved profile (returning user by auth_user_id or email) ---
+    const adminClient = createAdminClient();
+    const queryClient = adminClient || supabase;
+
+    let existingProfile = null;
+    const { data: profByAuth } = await queryClient
       .from('profiles')
-      .select('id, status, role, username')
+      .select('id, status, role, username, auth_user_id, email')
       .eq('auth_user_id', user.id)
       .maybeSingle();
+
+    if (profByAuth) {
+      existingProfile = profByAuth;
+    } else if (googleEmail) {
+      // Check fallback by email to detect existing profiles (e.g. from seed data or email signup)
+      const { data: profByEmail } = await queryClient
+        .from('profiles')
+        .select('id, status, role, username, auth_user_id, email')
+        .eq('email', googleEmail)
+        .maybeSingle();
+
+      if (profByEmail) {
+        existingProfile = profByEmail;
+        // Auto-link Google OAuth UID to existing profile row
+        try {
+          await queryClient
+            .from('profiles')
+            .update({ 
+              auth_user_id: user.id,
+              auth_provider: 'google',
+              avatar_url: googleAvatar || undefined,
+              updated_at: new Date().toISOString()
+            })
+            .eq('id', profByEmail.id);
+        } catch (linkErr) {
+          console.warn('OAuth profile link auto-update warning:', linkErr?.message);
+        }
+      }
+    }
 
     if (existingProfile) {
       if (existingProfile.status === 'suspended') {
@@ -102,7 +135,7 @@ export async function GET(req) {
       if (existingProfile.status === 'approved') {
         // Telemetry: Capture AUTH_LOGIN for Google OAuth user
         try {
-          await supabase.from('audit_logs').insert([{
+          await queryClient.from('audit_logs').insert([{
             action: 'AUTH_LOGIN',
             entity_type: 'auth_session',
             entity_id: existingProfile.id,
@@ -126,7 +159,7 @@ export async function GET(req) {
     }
 
     // --- Check if there's already a pending registration request for this Google account ---
-    const { data: existingRequest } = await supabase
+    const { data: existingRequest } = await queryClient
       .from('registration_requests')
       .select('id, status')
       .eq('email', googleEmail)
@@ -134,7 +167,13 @@ export async function GET(req) {
 
     if (existingRequest) {
       if (existingRequest.status === 'approved') {
-        // Approved but profile not linked — edge case, redirect to dashboard
+        // Approved but profile linking check
+        try {
+          await queryClient
+            .from('profiles')
+            .update({ auth_user_id: user.id })
+            .eq('email', googleEmail);
+        } catch (_) {}
         return NextResponse.redirect(`${appUrl}/`);
       }
       // Still pending — redirect to pending page
