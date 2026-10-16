@@ -16,7 +16,11 @@ export async function GET(req, { params }) {
       return NextResponse.json({ error: 'Database service unavailable.' }, { status: 503 });
     }
 
-    const { data: comments, error } = await supabase
+    // 1. Primary attempt: relational join with author profile
+    let comments = null;
+    let queryError = null;
+
+    const { data: joinedComments, error: joinErr } = await supabase
       .from('transaction_comments')
       .select(`
         id,
@@ -37,9 +41,43 @@ export async function GET(req, { params }) {
       .eq('transaction_id', transactionId)
       .order('created_at', { ascending: true });
 
-    if (error) {
-      console.error('Error fetching comments:', error);
-      return NextResponse.json({ error: 'Failed to fetch remarks.' }, { status: 500 });
+    if (!joinErr && Array.isArray(joinedComments)) {
+      comments = joinedComments;
+    } else {
+      queryError = joinErr;
+      console.warn('Relational comments fetch warning, attempting flat select fallback:', joinErr?.message);
+
+      // 2. Resilient Fallback: Flat select + in-memory profile mapping
+      const { data: flatComments, error: flatErr } = await supabase
+        .from('transaction_comments')
+        .select('id, transaction_id, user_id, comment, created_at')
+        .eq('transaction_id', transactionId)
+        .order('created_at', { ascending: true });
+
+      if (flatErr) {
+        console.error('Flat comments query also failed:', flatErr);
+        return NextResponse.json({ 
+          error: flatErr.message || 'Failed to fetch remarks.',
+          code: flatErr.code,
+          details: flatErr.details
+        }, { status: 500 });
+      }
+
+      // Enrich with profiles
+      const userIds = [...new Set((flatComments || []).map((c) => c.user_id).filter(Boolean))];
+      const profileMap = new Map();
+      if (userIds.length > 0) {
+        const { data: profs } = await supabase
+          .from('profiles')
+          .select('id, full_name, first_name, last_name, role, avatar_url, email')
+          .in('id', userIds);
+        (profs || []).forEach((p) => profileMap.set(p.id, p));
+      }
+
+      comments = (flatComments || []).map((c) => ({
+        ...c,
+        profiles: profileMap.get(c.user_id) || null,
+      }));
     }
 
     const normalized = (comments || []).map((c) => ({
@@ -63,7 +101,10 @@ export async function GET(req, { params }) {
     });
   } catch (err) {
     console.error('Transaction comments GET error:', err);
-    return NextResponse.json({ error: 'Server error retrieving remarks.' }, { status: 500 });
+    return NextResponse.json({ 
+      error: err.message || 'Server error retrieving remarks.',
+      stack: process.env.NODE_ENV !== 'production' ? err.stack : undefined
+    }, { status: 500 });
   }
 }
 
@@ -92,7 +133,24 @@ export async function POST(req, { params }) {
       return NextResponse.json({ error: 'Comment text cannot be empty.' }, { status: 400 });
     }
 
-    // Resolve author profile
+    // 1. Verify that the transaction actually exists in the database to prevent foreign key errors
+    const { data: txRecord, error: txCheckErr } = await supabase
+      .from('transactions')
+      .select('id')
+      .eq('id', transactionId)
+      .maybeSingle();
+
+    if (txCheckErr) {
+      console.warn('Transaction existence check warning:', txCheckErr.message);
+    }
+
+    if (!txRecord && !txCheckErr) {
+      return NextResponse.json({ 
+        error: 'Transaction record not found in ledger database. The record may have been rolled over or removed.' 
+      }, { status: 404 });
+    }
+
+    // 2. Resolve author profile
     let { data: profile } = await supabase
       .from('profiles')
       .select('id, full_name, first_name, last_name, role, avatar_url, email')
@@ -112,7 +170,7 @@ export async function POST(req, { params }) {
       return NextResponse.json({ error: 'User profile not found. Please re-authenticate.' }, { status: 403 });
     }
 
-    // Insert remark
+    // 3. Insert remark into transaction_comments (using clean, flat select to avoid relational embedding failures)
     const { data: inserted, error: insertError } = await supabase
       .from('transaction_comments')
       .insert([{
@@ -120,44 +178,34 @@ export async function POST(req, { params }) {
         user_id: profile.id,
         comment: comment.trim(),
       }])
-      .select(`
-        id,
-        transaction_id,
-        user_id,
-        comment,
-        created_at,
-        profiles (
-          id,
-          full_name,
-          first_name,
-          last_name,
-          role,
-          avatar_url,
-          email
-        )
-      `)
+      .select('id, transaction_id, user_id, comment, created_at')
       .single();
 
     if (insertError) {
       console.error('Error inserting comment:', insertError);
-      return NextResponse.json({ error: 'Failed to post remark.' }, { status: 500 });
+      return NextResponse.json({ 
+        error: insertError.message || 'Failed to post remark.',
+        code: insertError.code,
+        details: insertError.details,
+      }, { status: 500 });
     }
 
+    // 4. Construct normalized comment response directly with verified author profile in memory
     const normalized = {
       id: inserted.id,
       transaction_id: inserted.transaction_id,
       user_id: inserted.user_id,
       comment: inserted.comment,
       created_at: inserted.created_at,
-      author_name: inserted.profiles?.full_name || 
-        (inserted.profiles?.first_name ? `${inserted.profiles.first_name} ${inserted.profiles.last_name || ''}`.trim() : null) || 
+      author_name: profile.full_name || 
+        (profile.first_name ? `${profile.first_name} ${profile.last_name || ''}`.trim() : null) || 
         'Officer',
-      author_role: inserted.profiles?.role || 'officer',
-      author_email: inserted.profiles?.email || null,
-      author_avatar: inserted.profiles?.avatar_url || null,
+      author_role: profile.role || 'officer',
+      author_email: profile.email || null,
+      author_avatar: profile.avatar_url || null,
     };
 
-    // Telemetry: record audit event
+    // 5. Telemetry: record audit event
     try {
       await supabase.from('audit_logs').insert([{
         user_id: profile.id,
@@ -179,6 +227,9 @@ export async function POST(req, { params }) {
     });
   } catch (err) {
     console.error('Transaction comments POST error:', err);
-    return NextResponse.json({ error: 'Server error saving remark.' }, { status: 500 });
+    return NextResponse.json({ 
+      error: err.message || 'Server error saving remark.',
+      stack: process.env.NODE_ENV !== 'production' ? err.stack : undefined
+    }, { status: 500 });
   }
 }

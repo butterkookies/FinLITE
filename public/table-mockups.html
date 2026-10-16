@@ -1,0 +1,1044 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FinLITE Table UI/UX Mockup Playground</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #f8fafc;
+      --card-bg: #ffffff;
+      --card-border: #e2e8f0;
+      --text-main: #0f172a;
+      --text-muted: #64748b;
+      --text-subtle: #94a3b8;
+      --row-hover: #f1f5f9;
+      --row-border: #f1f5f9;
+      --accent-green: #10b981;
+      --accent-green-bg: #ecfdf5;
+      --accent-green-text: #047857;
+      --accent-orange: #f97316;
+      --accent-orange-bg: #fff7ed;
+      --accent-orange-text: #c2410c;
+      --accent-blue: #0284c7;
+      --accent-blue-bg: #f0f9ff;
+      --accent-blue-text: #0369a1;
+      --accent-amber: #d97706;
+      --accent-amber-bg: #fffbeb;
+      --accent-amber-text: #b45309;
+      --font-sans: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+    }
+
+    [data-theme="dark"] {
+      --bg: #09090b;
+      --card-bg: #121215;
+      --card-border: #27272a;
+      --text-main: #f4f4f5;
+      --text-muted: #a1a1aa;
+      --text-subtle: #71717a;
+      --row-hover: #18181b;
+      --row-border: #27272a;
+      --accent-green: #34d399;
+      --accent-green-bg: rgba(16, 185, 129, 0.12);
+      --accent-green-text: #6ee7b7;
+      --accent-orange: #fb923c;
+      --accent-orange-bg: rgba(249, 115, 22, 0.12);
+      --accent-orange-text: #fdba74;
+      --accent-blue: #38bdf8;
+      --accent-blue-bg: rgba(2, 132, 199, 0.12);
+      --accent-blue-text: #7dd3fc;
+      --accent-amber: #fbbf24;
+      --accent-amber-bg: rgba(217, 119, 6, 0.12);
+      --accent-amber-text: #fde68a;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: var(--font-sans);
+      background-color: var(--bg);
+      color: var(--text-main);
+      min-height: 100vh;
+      padding: 32px 24px 64px;
+      transition: background-color 0.2s, color 0.2s;
+    }
+
+    .container {
+      max-width: 1540px;
+      margin: 0 auto;
+    }
+
+    /* Top Control Bar */
+    .top-bar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 24px;
+      padding-bottom: 20px;
+      border-bottom: 1px solid var(--card-border);
+    }
+    .brand-title {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .brand-badge {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      padding: 3px 8px;
+      border-radius: 6px;
+      background: var(--accent-green-bg);
+      color: var(--accent-green-text);
+      border: 1px solid var(--accent-green);
+    }
+    h1 {
+      font-size: 22px;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+    }
+    .subtitle {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    .switcher-dock {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--card-bg);
+      padding: 4px;
+      border-radius: 12px;
+      border: 1px solid var(--card-border);
+    }
+    .tab-btn {
+      padding: 8px 16px;
+      font-size: 12px;
+      font-weight: 700;
+      font-family: var(--font-sans);
+      border-radius: 8px;
+      border: none;
+      background: transparent;
+      color: var(--text-muted);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.15s ease;
+    }
+    .tab-btn.active {
+      background: var(--text-main);
+      color: var(--bg);
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+    .theme-toggle-btn {
+      padding: 8px 12px;
+      font-size: 12px;
+      font-weight: 600;
+      font-family: var(--font-sans);
+      border-radius: 8px;
+      border: 1px solid var(--card-border);
+      background: var(--card-bg);
+      color: var(--text-main);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* Option Overview Banner */
+    .option-header {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 14px;
+      padding: 16px 20px;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 20px;
+    }
+    .option-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 6px;
+    }
+    .badge-opt1 { background: #dbeafe; color: #1e40af; }
+    .badge-opt2 { background: #dcfce7; color: #15803d; }
+    .badge-opt3 { background: #fef3c7; color: #b45309; }
+
+    .option-title { font-size: 16px; font-weight: 800; margin-bottom: 4px; }
+    .option-desc { font-size: 13px; color: var(--text-muted); line-height: 1.5; }
+    .option-perks {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 10px;
+    }
+    .perk-tag {
+      font-size: 11px;
+      font-weight: 600;
+      padding: 3px 8px;
+      border-radius: 6px;
+      background: var(--row-hover);
+      color: var(--text-muted);
+    }
+
+    /* Table Container Shell */
+    .table-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+    }
+
+    /* Toolbar Styles */
+    .table-toolbar {
+      padding: 16px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      border-bottom: 1px solid var(--card-border);
+      flex-wrap: wrap;
+    }
+    .search-box {
+      position: relative;
+      flex: 1;
+      max-width: 320px;
+    }
+    .search-input {
+      width: 100%;
+      height: 38px;
+      padding: 0 12px 0 34px;
+      border-radius: 10px;
+      border: 1px solid var(--card-border);
+      background: var(--bg);
+      color: var(--text-main);
+      font-size: 13px;
+      font-family: var(--font-sans);
+    }
+    .search-icon {
+      position: absolute;
+      left: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-subtle);
+      width: 16px;
+      height: 16px;
+    }
+    .filter-pills {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      background: var(--bg);
+      padding: 3px;
+      border-radius: 10px;
+      border: 1px solid var(--card-border);
+    }
+    .pill-btn {
+      padding: 5px 12px;
+      font-size: 12px;
+      font-weight: 600;
+      border-radius: 7px;
+      border: none;
+      background: transparent;
+      color: var(--text-muted);
+      cursor: pointer;
+    }
+    .pill-btn.active {
+      background: var(--accent-green-bg);
+      color: var(--accent-green-text);
+      font-weight: 700;
+    }
+
+    /* Table Grid */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+    }
+    th {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+      padding: 12px 16px;
+      background: var(--bg);
+      border-bottom: 1px solid var(--card-border);
+      white-space: nowrap;
+    }
+    th.right { text-align: right; }
+    td {
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--row-border);
+      font-size: 13px;
+      vertical-align: middle;
+      transition: background-color 0.12s;
+    }
+    tr:last-child td { border-bottom: none; }
+    tbody tr:hover { background-color: var(--row-hover); }
+
+    /* Typography & Alignments */
+    .tx-title { font-weight: 700; color: var(--text-main); display: flex; align-items: center; gap: 8px; }
+    .tx-sub { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+    .tx-icon-inflow { color: var(--accent-green); flex-shrink: 0; }
+    .tx-icon-outflow { color: var(--accent-orange); flex-shrink: 0; }
+    .amount-inflow { font-weight: 800; font-family: var(--font-mono); color: var(--accent-green); text-align: right; }
+    .amount-outflow { font-weight: 800; font-family: var(--font-mono); color: var(--text-main); text-align: right; }
+    .right { text-align: right; }
+    .tabular { font-family: var(--font-mono); font-size: 12.5px; }
+
+    /* Badges & Chips */
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 2px 8px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 600;
+    }
+    .chip-green { background: var(--accent-green-bg); color: var(--accent-green-text); }
+    .chip-blue { background: var(--accent-blue-bg); color: var(--accent-blue-text); }
+    .chip-amber { background: var(--accent-amber-bg); color: var(--accent-amber-text); }
+    .chip-neutral { background: var(--row-hover); color: var(--text-muted); }
+
+    /* User Avatar */
+    .user-dock {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .avatar-circ {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: var(--accent-green-bg);
+      color: var(--accent-green-text);
+      font-size: 10px;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .user-name { font-weight: 600; font-size: 12px; }
+    .user-role { font-size: 10px; color: var(--text-muted); text-transform: uppercase; font-weight: 600; }
+
+    /* Contextual Action Dock on Hover (Option 2) */
+    .hover-action-dock {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 6px;
+    }
+    .action-btn-sm {
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 600;
+      border: 1px solid var(--card-border);
+      background: var(--card-bg);
+      color: var(--text-main);
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      transition: all 0.1s;
+    }
+    .action-btn-sm:hover {
+      background: var(--text-main);
+      color: var(--bg);
+    }
+    .opt2-row .reveal-on-hover {
+      opacity: 0;
+      transform: translateX(4px);
+      transition: all 0.15s ease;
+    }
+    .opt2-row:hover .reveal-on-hover {
+      opacity: 1;
+      transform: translateX(0);
+    }
+    .opt2-row:hover .hide-on-hover {
+      display: none;
+    }
+
+    /* Option 3: Split-View Drawer */
+    .split-layout {
+      display: grid;
+      grid-template-columns: 1fr 380px;
+      gap: 20px;
+      align-items: start;
+    }
+    .drawer-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      padding: 20px;
+      position: sticky;
+      top: 24px;
+    }
+    .drawer-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-bottom: 14px;
+      border-bottom: 1px solid var(--card-border);
+      margin-bottom: 16px;
+    }
+    .drawer-title { font-size: 15px; font-weight: 800; }
+    .receipt-preview-box {
+      width: 100%;
+      height: 180px;
+      border-radius: 12px;
+      background: var(--bg);
+      border: 2px dashed var(--card-border);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      margin-bottom: 16px;
+      color: var(--text-muted);
+      font-size: 12px;
+    }
+    .drawer-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 12px;
+      padding: 8px 0;
+      border-bottom: 1px solid var(--row-border);
+    }
+    .drawer-label { color: var(--text-muted); font-weight: 500; }
+    .drawer-val { font-weight: 700; color: var(--text-main); }
+
+    /* Hide/Show Panels */
+    .mockup-panel { display: none; }
+    .mockup-panel.active { display: block; }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    
+    <!-- Top Bar -->
+    <div class="top-bar">
+      <div>
+        <div class="brand-title">
+          <span class="brand-badge">FinLITE UX Lab</span>
+          <h1>Data Table Design Proposals</h1>
+        </div>
+        <p class="subtitle">Select between 3 industry-grade design architectures built using your live dataset</p>
+      </div>
+
+      <div style="display: flex; align-items: center; gap: 12px;">
+        <div class="switcher-dock">
+          <button class="tab-btn active" onclick="switchTab('opt1')">1. Calm Typographic</button>
+          <button class="tab-btn" onclick="switchTab('opt2')">2. Stripe Hover Dock</button>
+          <button class="tab-btn" onclick="switchTab('opt3')">3. Slide-Over Drawer</button>
+        </div>
+        <button class="theme-toggle-btn" onclick="toggleTheme()">
+          <span id="theme-icon">🌙</span> Dark / Light
+        </button>
+      </div>
+    </div>
+
+    <!-- ============================================================== -->
+    <!-- OPTION 1: CALM TYPOGRAPHIC (ELIMINATING BADGE FATIGUE)          -->
+    <!-- ============================================================== -->
+    <div id="panel-opt1" class="mockup-panel active">
+      
+      <div class="option-header">
+        <div>
+          <span class="option-badge badge-opt1">Proposal 1 · Clean Typographic Hierarchy</span>
+          <div class="option-title">Refactoring UI: Kill the "Badge Soup" & Let Data Breathe</div>
+          <p class="option-desc">
+            Removes the heavy gray container boxes from every single Category, Channel, and Officer name. Replaces them with crisp, quiet typography and subtle micro-dots. Status badges are reserved strictly for critical exceptions like <em>Pending Abono</em>.
+          </p>
+          <div class="option-perks">
+            <span class="perk-tag">✓ 0% Badge Overload</span>
+            <span class="perk-tag">✓ Ultra-Scannable Column Rhythm</span>
+            <span class="perk-tag">✓ Monospaced Tabular Amounts</span>
+            <span class="perk-tag">✓ Compact 48px Row Height</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="table-card">
+        <!-- Toolbar -->
+        <div class="table-toolbar">
+          <div class="search-box">
+            <svg class="search-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+            <input type="text" class="search-input" placeholder="Search transactions, categories..." value="">
+          </div>
+          <div class="filter-pills">
+            <button class="pill-btn active">All Records (7)</button>
+            <button class="pill-btn">Inflows</button>
+            <button class="pill-btn">Outflows</button>
+            <button class="pill-btn">Pending Abono</button>
+          </div>
+          <div style="font-size: 12px; color: var(--text-muted); font-weight: 600;">
+            Showing 7 verified transactions
+          </div>
+        </div>
+
+        <!-- Table -->
+        <table>
+          <thead>
+            <tr>
+              <th style="width: 34%;">Transaction & Event</th>
+              <th style="width: 11%;">Date</th>
+              <th style="width: 9%;">Channel</th>
+              <th style="width: 20%;">Category</th>
+              <th style="width: 12%;" class="right">Amount</th>
+              <th style="width: 14%;">Recorded By</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>
+                <div class="tx-title">
+                  <span class="tx-icon-inflow">↘</span>
+                  <span>Beginning Cash on Hand (Rolled over from AY 2026–2027 • 1st Sem)</span>
+                </div>
+                <div class="tx-sub">Semester Opening Turnover</div>
+              </td>
+              <td class="tabular" style="color: var(--text-muted);">Oct 15, 2026</td>
+              <td>
+                <span style="font-size: 12px; font-weight: 600; color: var(--text-muted); display: flex; align-items: center; gap: 5px;">
+                  <span style="width: 6px; height: 6px; border-radius: 50%; background: var(--accent-green);"></span> Cash
+                </span>
+              </td>
+              <td>
+                <span style="font-size: 12px; color: var(--text-muted); font-weight: 500;">Initial Budget Rollover</span>
+              </td>
+              <td class="amount-inflow">+₱700.00</td>
+              <td>
+                <div class="user-dock">
+                  <div class="avatar-circ">A</div>
+                  <div>
+                    <div class="user-name">Andrei John G.</div>
+                    <div class="user-role">Treasurer</div>
+                  </div>
+                </div>
+              </td>
+            </tr>
+
+            <tr>
+              <td>
+                <div class="tx-title">
+                  <span class="tx-icon-outflow">↗</span>
+                  <span>Declared Cash Shortage (Adviser Approved)</span>
+                </div>
+                <div class="tx-sub">Cash Count Audit</div>
+              </td>
+              <td class="tabular" style="color: var(--text-muted);">Oct 12, 2026</td>
+              <td>
+                <span style="font-size: 12px; font-weight: 600; color: var(--text-muted); display: flex; align-items: center; gap: 5px;">
+                  <span style="width: 6px; height: 6px; border-radius: 50%; background: var(--accent-green);"></span> Cash
+                </span>
+              </td>
+              <td>
+                <span style="font-size: 12px; color: var(--text-muted); font-weight: 500;">Declared Cash Shortage Discrepancy</span>
+              </td>
+              <td class="amount-outflow">-₱100.00</td>
+              <td>
+                <div class="user-dock">
+                  <div class="avatar-circ" style="background: var(--accent-blue-bg); color: var(--accent-blue-text);">A</div>
+                  <div>
+                    <div class="user-name">Andrei John G.</div>
+                    <div class="user-role">Admin</div>
+                  </div>
+                </div>
+              </td>
+            </tr>
+
+            <tr>
+              <td>
+                <div class="tx-title">
+                  <span class="tx-icon-outflow">↗</span>
+                  <span>Test</span>
+                </div>
+                <div class="tx-sub">Test1</div>
+              </td>
+              <td class="tabular" style="color: var(--text-muted);">Oct 7, 2026</td>
+              <td>
+                <span style="font-size: 12px; font-weight: 600; color: var(--text-muted); display: flex; align-items: center; gap: 5px;">
+                  <span style="width: 6px; height: 6px; border-radius: 50%; background: var(--accent-green);"></span> Cash
+                </span>
+              </td>
+              <td>
+                <span style="font-size: 12px; color: var(--text-muted); font-weight: 500;">Supplies & Materials</span>
+              </td>
+              <td class="amount-outflow">-₱3,000.00</td>
+              <td>
+                <span style="font-size: 12px; color: var(--text-subtle); font-style: italic;">System</span>
+              </td>
+            </tr>
+
+            <tr>
+              <td>
+                <div class="tx-title">
+                  <span class="tx-icon-inflow">↘</span>
+                  <span>Test Revert to 800</span>
+                </div>
+                <div class="tx-sub">test</div>
+              </td>
+              <td class="tabular" style="color: var(--text-muted);">Oct 7, 2026</td>
+              <td>
+                <span style="font-size: 12px; font-weight: 600; color: var(--text-muted); display: flex; align-items: center; gap: 5px;">
+                  <span style="width: 6px; height: 6px; border-radius: 50%; background: var(--accent-green);"></span> Cash
+                </span>
+              </td>
+              <td>
+                <span style="font-size: 12px; color: var(--text-muted); font-weight: 500;">Tournament & E-Sports Registration Fees</span>
+              </td>
+              <td class="amount-inflow">+₱3,000.00</td>
+              <td>
+                <span style="font-size: 12px; color: var(--text-subtle); font-style: italic;">System</span>
+              </td>
+            </tr>
+
+            <tr>
+              <td>
+                <div class="tx-title">
+                  <span class="tx-icon-inflow">↘</span>
+                  <span>ID lanyard</span>
+                </div>
+                <div class="tx-sub">Club Weeek</div>
+              </td>
+              <td class="tabular" style="color: var(--text-muted);">Oct 6, 2026</td>
+              <td>
+                <span style="font-size: 12px; font-weight: 600; color: var(--text-muted); display: flex; align-items: center; gap: 5px;">
+                  <span style="width: 6px; height: 6px; border-radius: 50%; background: var(--accent-green);"></span> Cash
+                </span>
+              </td>
+              <td>
+                <span style="font-size: 12px; color: var(--text-muted); font-weight: 500;">Merchandise Sales (Batch Pre-Order)</span>
+              </td>
+              <td class="amount-inflow">+₱100.00</td>
+              <td>
+                <span style="font-size: 12px; color: var(--text-subtle); font-style: italic;">System</span>
+              </td>
+            </tr>
+
+            <tr>
+              <td>
+                <div class="tx-title">
+                  <span class="tx-icon-outflow">↗</span>
+                  <span>Lunch food</span>
+                  <span class="chip chip-green" style="font-size: 10px; margin-left: 6px;">Settled · Sir Harvey</span>
+                </div>
+              </td>
+              <td class="tabular" style="color: var(--text-muted);">Oct 6, 2026</td>
+              <td>
+                <span style="font-size: 12px; font-weight: 600; color: var(--text-muted); display: flex; align-items: center; gap: 5px;">
+                  <span style="width: 6px; height: 6px; border-radius: 50%; background: var(--accent-green);"></span> Cash
+                </span>
+              </td>
+              <td>
+                <span style="font-size: 12px; color: var(--text-muted); font-weight: 500;">Food & Committee Meals</span>
+              </td>
+              <td class="amount-outflow">-₱100.00</td>
+              <td>
+                <span style="font-size: 12px; color: var(--text-subtle); font-style: italic;">System</span>
+              </td>
+            </tr>
+
+            <tr>
+              <td>
+                <div class="tx-title">
+                  <span class="tx-icon-inflow">↘</span>
+                  <span>ID Lanyard</span>
+                </div>
+              </td>
+              <td class="tabular" style="color: var(--text-muted);">Oct 3, 2026</td>
+              <td>
+                <span style="font-size: 12px; font-weight: 600; color: var(--text-muted); display: flex; align-items: center; gap: 5px;">
+                  <span style="width: 6px; height: 6px; border-radius: 50%; background: var(--accent-green);"></span> Cash
+                </span>
+              </td>
+              <td>
+                <span style="font-size: 12px; color: var(--text-muted); font-weight: 500;">Revenue</span>
+              </td>
+              <td class="amount-inflow">+₱700.00</td>
+              <td>
+                <span style="font-size: 12px; color: var(--text-subtle); font-style: italic;">System</span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ============================================================== -->
+    <!-- OPTION 2: STRIPE / LINEAR HOVER DOCK (CONTEXTUAL ACTIONS)       -->
+    <!-- ============================================================== -->
+    <div id="panel-opt2" class="mockup-panel">
+      
+      <div class="option-header">
+        <div>
+          <span class="option-badge badge-opt2">Proposal 2 · Stripe & Linear Calm Grid</span>
+          <div class="option-title">Contextual Hover Actions & Unified Command Bar</div>
+          <p class="option-desc">
+            Instead of permanent button boxes on every row, the table displays clean micro-indicators (e.g. 📎 3 receipts). When you hover over any row, a sleek action dock smoothly slides in, giving you instant access to <em>Attach</em>, <em>View</em>, or <em>Audit</em>.
+          </p>
+          <div class="option-perks">
+            <span class="perk-tag">✓ Calm Default State</span>
+            <span class="perk-tag">✓ Quick Hover Shortcuts</span>
+            <span class="perk-tag">✓ Zero Action Clutter</span>
+            <span class="perk-tag">✓ Unified Single-Deck Search & Action Bar</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="table-card">
+        <!-- Unified Command Toolbar -->
+        <div class="table-toolbar">
+          <div style="display: flex; align-items: center; gap: 12px; flex: 1;">
+            <div class="search-box">
+              <svg class="search-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+              <input type="text" class="search-input" placeholder="Type / to search items, vouchers...">
+            </div>
+            <div class="filter-pills">
+              <button class="pill-btn active">All Records</button>
+              <button class="pill-btn">Inflows</button>
+              <button class="pill-btn">Outflows</button>
+              <button class="pill-btn">Pending Abono</button>
+            </div>
+          </div>
+
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <button class="action-btn-sm" style="padding: 7px 12px;">📊 Audit Trail</button>
+            <button class="action-btn-sm" style="padding: 7px 12px;">📑 Export Report</button>
+            <button class="action-btn-sm" style="background: var(--accent-green); color: white; border: none; padding: 7px 14px;">+ Record Entry</button>
+          </div>
+        </div>
+
+        <!-- Table with Hover Reveal -->
+        <table>
+          <thead>
+            <tr>
+              <th style="width: 32%;">Transaction & Event</th>
+              <th style="width: 10%;">Date</th>
+              <th style="width: 8%;">Channel</th>
+              <th style="width: 18%;">Category</th>
+              <th style="width: 12%;" class="right">Amount</th>
+              <th style="width: 20%;" class="right">Receipts & Hover Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="opt2-row">
+              <td>
+                <div class="tx-title">
+                  <span class="tx-icon-inflow">↘</span>
+                  <span>Beginning Cash on Hand (Rolled over from AY 2026–2027 • 1st Sem)</span>
+                </div>
+                <div class="tx-sub">Semester Opening Turnover</div>
+              </td>
+              <td class="tabular" style="color: var(--text-muted);">Oct 15, 2026</td>
+              <td><span class="chip chip-neutral">Cash</span></td>
+              <td><span style="font-size: 12px; color: var(--text-muted);">Initial Budget Rollover</span></td>
+              <td class="amount-inflow">+₱700.00</td>
+              <td class="right">
+                <span class="hide-on-hover" style="font-size: 11px; color: var(--text-subtle);">No receipt</span>
+                <div class="hover-action-dock reveal-on-hover">
+                  <button class="action-btn-sm">+ Attach</button>
+                  <button class="action-btn-sm">💬 1</button>
+                </div>
+              </td>
+            </tr>
+
+            <tr class="opt2-row">
+              <td>
+                <div class="tx-title">
+                  <span class="tx-icon-outflow">↗</span>
+                  <span>Declared Cash Shortage (Adviser Approved)</span>
+                </div>
+                <div class="tx-sub">Cash Count Audit</div>
+              </td>
+              <td class="tabular" style="color: var(--text-muted);">Oct 12, 2026</td>
+              <td><span class="chip chip-neutral">Cash</span></td>
+              <td><span style="font-size: 12px; color: var(--text-muted);">Declared Cash Shortage Discrepancy</span></td>
+              <td class="amount-outflow">-₱100.00</td>
+              <td class="right">
+                <span class="hide-on-hover chip chip-green" style="font-size: 11px;">📎 1 Receipt</span>
+                <div class="hover-action-dock reveal-on-hover">
+                  <button class="action-btn-sm" style="background: var(--accent-green-bg); color: var(--accent-green-text);">View (1)</button>
+                  <button class="action-btn-sm">+ Add</button>
+                  <button class="action-btn-sm">💬 1</button>
+                </div>
+              </td>
+            </tr>
+
+            <tr class="opt2-row">
+              <td>
+                <div class="tx-title">
+                  <span class="tx-icon-outflow">↗</span>
+                  <span>Test</span>
+                </div>
+                <div class="tx-sub">Test1</div>
+              </td>
+              <td class="tabular" style="color: var(--text-muted);">Oct 7, 2026</td>
+              <td><span class="chip chip-neutral">Cash</span></td>
+              <td><span style="font-size: 12px; color: var(--text-muted);">Supplies & Materials</span></td>
+              <td class="amount-outflow">-₱3,000.00</td>
+              <td class="right">
+                <span class="hide-on-hover chip chip-green" style="font-size: 11px;">📎 2 Receipts</span>
+                <div class="hover-action-dock reveal-on-hover">
+                  <button class="action-btn-sm" style="background: var(--accent-green-bg); color: var(--accent-green-text);">View (2)</button>
+                  <button class="action-btn-sm">+ Add</button>
+                  <button class="action-btn-sm">💬 1</button>
+                </div>
+              </td>
+            </tr>
+
+            <tr class="opt2-row">
+              <td>
+                <div class="tx-title">
+                  <span class="tx-icon-inflow">↘</span>
+                  <span>ID lanyard</span>
+                </div>
+                <div class="tx-sub">Club Weeek</div>
+              </td>
+              <td class="tabular" style="color: var(--text-muted);">Oct 6, 2026</td>
+              <td><span class="chip chip-neutral">Cash</span></td>
+              <td><span style="font-size: 12px; color: var(--text-muted);">Merchandise Sales (Batch Pre-Order)</span></td>
+              <td class="amount-inflow">+₱100.00</td>
+              <td class="right">
+                <span class="hide-on-hover chip chip-green" style="font-size: 11px;">📎 3 Receipts</span>
+                <div class="hover-action-dock reveal-on-hover">
+                  <button class="action-btn-sm" style="background: var(--accent-green-bg); color: var(--accent-green-text);">View (3)</button>
+                  <button class="action-btn-sm">+ Add</button>
+                  <button class="action-btn-sm">💬</button>
+                </div>
+              </td>
+            </tr>
+
+            <tr class="opt2-row">
+              <td>
+                <div class="tx-title">
+                  <span class="tx-icon-outflow">↗</span>
+                  <span>Lunch food</span>
+                  <span class="chip chip-green" style="font-size: 10px; margin-left: 6px;">Settled</span>
+                </div>
+              </td>
+              <td class="tabular" style="color: var(--text-muted);">Oct 6, 2026</td>
+              <td><span class="chip chip-neutral">Cash</span></td>
+              <td><span style="font-size: 12px; color: var(--text-muted);">Food & Committee Meals</span></td>
+              <td class="amount-outflow">-₱100.00</td>
+              <td class="right">
+                <span class="hide-on-hover" style="font-size: 11px; color: var(--text-subtle);">No receipt</span>
+                <div class="hover-action-dock reveal-on-hover">
+                  <button class="action-btn-sm">+ Attach</button>
+                  <button class="action-btn-sm">💬 1</button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ============================================================== -->
+    <!-- OPTION 3: STRIPE SLIDE-OVER INSPECTION DRAWER                   -->
+    <!-- ============================================================== -->
+    <div id="panel-opt3" class="mockup-panel">
+      
+      <div class="option-header">
+        <div>
+          <span class="option-badge badge-opt3">Proposal 3 · Stripe-Style Slide-Over Drawer</span>
+          <div class="option-title">Non-Disruptive Inspection Split View</div>
+          <p class="option-desc">
+            Instead of a pop-up modal covering the screen, clicking any transaction smoothly reveals a <strong>side-inspection drawer</strong>. You can review receipt images, official signatures, and audit notes while maintaining continuous visual context of the table.
+          </p>
+          <div class="option-perks">
+            <span class="perk-tag">✓ Zero Modal Disorientation</span>
+            <span class="perk-tag">✓ Continuous Audit Flow</span>
+            <span class="perk-tag">✓ Live Receipt Carousel Zoom</span>
+            <span class="perk-tag">✓ Arrow-Key Row Navigation</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="split-layout">
+        <!-- Main Table on Left -->
+        <div class="table-card">
+          <div class="table-toolbar">
+            <div style="font-weight: 700; font-size: 13px;">Transactions (Click any row to inspect)</div>
+            <span class="chip chip-green">Live Ledger</span>
+          </div>
+          <table>
+            <thead>
+              <tr>
+                <th style="width: 44%;">Title</th>
+                <th style="width: 20%;">Date</th>
+                <th style="width: 16%;">Category</th>
+                <th style="width: 20%;" class="right">Amount</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr style="background: var(--row-hover); cursor: pointer;" onclick="selectRow('Beginning Cash on Hand', '+₱700.00', 'Oct 15, 2026', 'Initial Budget Rollover', 'Andrei John G. (Treasurer)', '0 Receipts', 'No receipts required for initial semester rollover.')">
+                <td>
+                  <div class="tx-title" style="color: var(--accent-green-text);">
+                    <span>↘</span> Beginning Cash on Hand...
+                  </div>
+                  <div class="tx-sub">Semester Opening Turnover</div>
+                </td>
+                <td class="tabular" style="color: var(--text-muted);">Oct 15, 2026</td>
+                <td><span style="font-size: 11px; color: var(--text-muted);">Rollover</span></td>
+                <td class="amount-inflow">+₱700.00</td>
+              </tr>
+
+              <tr style="cursor: pointer;" onclick="selectRow('Declared Cash Shortage', '-₱100.00', 'Oct 12, 2026', 'Cash Shortage Discrepancy', 'Andrei John G. (Admin)', '1 Receipt Attached', 'Cash reconciliation discrepancy noted by club adviser.')">
+                <td>
+                  <div class="tx-title">
+                    <span class="tx-icon-outflow">↗</span> Declared Cash Shortage
+                  </div>
+                  <div class="tx-sub">Cash Count Audit</div>
+                </td>
+                <td class="tabular" style="color: var(--text-muted);">Oct 12, 2026</td>
+                <td><span style="font-size: 11px; color: var(--text-muted);">Shortage</span></td>
+                <td class="amount-outflow">-₱100.00</td>
+              </tr>
+
+              <tr style="cursor: pointer;" onclick="selectRow('Test (Supplies & Materials)', '-₱3,000.00', 'Oct 7, 2026', 'Supplies & Materials', 'System', '2 Receipts Attached', 'Official receipt for printer inks and bond paper supplies.')">
+                <td>
+                  <div class="tx-title">
+                    <span class="tx-icon-outflow">↗</span> Test
+                  </div>
+                  <div class="tx-sub">Test1</div>
+                </td>
+                <td class="tabular" style="color: var(--text-muted);">Oct 7, 2026</td>
+                <td><span style="font-size: 11px; color: var(--text-muted);">Supplies</span></td>
+                <td class="amount-outflow">-₱3,000.00</td>
+              </tr>
+
+              <tr style="cursor: pointer;" onclick="selectRow('ID Lanyard Merch', '+₱100.00', 'Oct 6, 2026', 'Merchandise Sales', 'System', '3 Receipts Attached', 'Payment received from 2nd year IT student for club lanyard.')">
+                <td>
+                  <div class="tx-title">
+                    <span class="tx-icon-inflow">↘</span> ID lanyard
+                  </div>
+                  <div class="tx-sub">Club Weeek</div>
+                </td>
+                <td class="tabular" style="color: var(--text-muted);">Oct 6, 2026</td>
+                <td><span style="font-size: 11px; color: var(--text-muted);">Merch</span></td>
+                <td class="amount-inflow">+₱100.00</td>
+              </tr>
+
+              <tr style="cursor: pointer;" onclick="selectRow('Lunch food (Abono)', '-₱100.00', 'Oct 6, 2026', 'Food & Committee Meals', 'System', 'Settled Outlay', 'Reimbursed out-of-pocket advance paid to Sir Harvey.')">
+                <td>
+                  <div class="tx-title">
+                    <span class="tx-icon-outflow">↗</span> Lunch food
+                  </div>
+                  <div class="tx-sub">Settled · Sir Harvey</div>
+                </td>
+                <td class="tabular" style="color: var(--text-muted);">Oct 6, 2026</td>
+                <td><span style="font-size: 11px; color: var(--text-muted);">Meals</span></td>
+                <td class="amount-outflow">-₱100.00</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Right Side Slide-Over Drawer -->
+        <div class="drawer-card" id="drawer-panel">
+          <div class="drawer-header">
+            <div>
+              <span class="chip chip-blue" style="font-size: 10px; margin-bottom: 4px;">Transaction Detail</span>
+              <div class="drawer-title" id="d-title">Beginning Cash on Hand</div>
+            </div>
+            <button class="action-btn-sm" style="padding: 4px 8px;" onclick="alert('In production, this opens full document preview.')">↗ Pop out</button>
+          </div>
+
+          <!-- Receipt Preview Box -->
+          <div class="receipt-preview-box">
+            <svg style="width: 28px; height: 28px; color: var(--text-subtle);" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+            <span id="d-receipt-label">No physical receipts attached</span>
+            <button class="action-btn-sm" style="font-size: 11px; margin-top: 4px;">+ Upload Proof</button>
+          </div>
+
+          <!-- Metadata List -->
+          <div class="drawer-row">
+            <span class="drawer-label">Total Amount</span>
+            <span class="drawer-val" id="d-amount" style="font-family: var(--font-mono); font-size: 14px; color: var(--accent-green);">+₱700.00</span>
+          </div>
+          <div class="drawer-row">
+            <span class="drawer-label">Date Recorded</span>
+            <span class="drawer-val" id="d-date">Oct 15, 2026</span>
+          </div>
+          <div class="drawer-row">
+            <span class="drawer-label">Category</span>
+            <span class="drawer-val" id="d-cat">Initial Budget Rollover</span>
+          </div>
+          <div class="drawer-row">
+            <span class="drawer-label">Logged By</span>
+            <span class="drawer-val" id="d-user">Andrei John G. (Treasurer)</span>
+          </div>
+          <div class="drawer-row">
+            <span class="drawer-label">Audit Status</span>
+            <span class="drawer-val" style="color: var(--accent-green-text);">Verified Official</span>
+          </div>
+
+          <!-- Notes -->
+          <div style="margin-top: 14px; font-size: 11px; color: var(--text-muted); line-height: 1.5; background: var(--bg); padding: 10px; border-radius: 8px;">
+            <strong>Remarks:</strong> <span id="d-notes">Official starting balance forwarded from the verified ending cashbox.</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    function switchTab(tabId) {
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.mockup-panel').forEach(p => p.classList.remove('active'));
+      
+      if (tabId === 'opt1') {
+        document.querySelectorAll('.tab-btn')[0].classList.add('active');
+        document.getElementById('panel-opt1').classList.add('active');
+      } else if (tabId === 'opt2') {
+        document.querySelectorAll('.tab-btn')[1].classList.add('active');
+        document.getElementById('panel-opt2').classList.add('active');
+      } else if (tabId === 'opt3') {
+        document.querySelectorAll('.tab-btn')[2].classList.add('active');
+        document.getElementById('panel-opt3').classList.add('active');
+      }
+    }
+
+    function toggleTheme() {
+      const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+      document.documentElement.setAttribute('data-theme', isDark ? 'light' : 'dark');
+      document.getElementById('theme-icon').textContent = isDark ? '🌙' : '☀️';
+    }
+
+    function selectRow(title, amount, date, cat, user, receiptLabel, notes) {
+      document.getElementById('d-title').textContent = title;
+      document.getElementById('d-amount').textContent = amount;
+      document.getElementById('d-amount').style.color = amount.startsWith('+') ? 'var(--accent-green)' : 'var(--text-main)';
+      document.getElementById('d-date').textContent = date;
+      document.getElementById('d-cat').textContent = cat;
+      document.getElementById('d-user').textContent = user;
+      document.getElementById('d-receipt-label').textContent = receiptLabel;
+      document.getElementById('d-notes').textContent = notes;
+    }
+  </script>
+</body>
+</html>

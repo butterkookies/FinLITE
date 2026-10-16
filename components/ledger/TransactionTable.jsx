@@ -475,7 +475,7 @@ export default function TransactionTable({
         <table className="w-full min-w-[960px] 2xl:min-w-full text-left border-collapse table-fixed">
           <thead>
             <tr className="border-b text-[10px] sm:text-[11px] font-bold uppercase tracking-wider border-zinc-200 dark:border-zinc-800 text-zinc-500 dark:text-zinc-400 bg-zinc-50/80 dark:bg-zinc-900/60">
-              <th className="py-3.5 pl-6 pr-3 w-[32%] text-left whitespace-nowrap">
+              <th className="py-3.5 pl-6 pr-3 w-[30%] text-left whitespace-nowrap">
                 <button
                   type="button"
                   onClick={() => handleSort('title')}
@@ -519,7 +519,7 @@ export default function TransactionTable({
                 </div>
               </th>
               <th className="py-3.5 px-3 w-[10%] text-left whitespace-nowrap">Recorded By</th>
-              <th className="py-3.5 pl-3 pr-6 w-[11%] text-right whitespace-nowrap">Receipt &amp; Action</th>
+              <th className="py-3.5 pl-3 pr-6 w-[13%] text-right whitespace-nowrap">Receipts &amp; Actions</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-zinc-200 dark:divide-zinc-800 text-xs">
@@ -584,41 +584,29 @@ export default function TransactionTable({
                   </td>
 
                   {/* Date */}
-                  <td className="py-3.5 px-3 font-medium whitespace-nowrap tabular-nums text-zinc-600 dark:text-zinc-300">
+                  <td className="py-3.5 px-3 font-mono text-xs tabular-nums text-zinc-500 dark:text-zinc-400 whitespace-nowrap">
                     {formatFriendlyDate(tx.transaction_date)}
                   </td>
 
                   {/* Payment Channel */}
                   <td className="py-3.5 px-3 whitespace-nowrap">
-                    <Badge
-                      variant={tx.payment_method === 'CASH' ? 'emerald' : 'sky'}
-                      size="xs"
-                    >
-                      {tx.payment_method === 'CASH' ? (
-                        <>
-                          <Wallet className="w-3 h-3" />
-                          <span>Cash</span>
-                        </>
-                      ) : (
-                        <>
-                          <Smartphone className="w-3 h-3" />
-                          <span>GCash</span>
-                        </>
-                      )}
-                    </Badge>
+                    <div className="inline-flex items-center gap-1.5 text-xs font-semibold text-zinc-700 dark:text-zinc-300">
+                      <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${tx.payment_method === 'CASH' ? 'bg-emerald-500' : 'bg-sky-500'}`} />
+                      <span>{tx.payment_method === 'CASH' ? 'Cash' : 'GCash'}</span>
+                    </div>
                   </td>
 
                   {/* Category */}
                   <td className="py-3.5 px-3 min-w-0" title={tx.category_name || (tx.type === 'INFLOW' ? 'Revenue' : 'Disbursement')}>
-                    <Badge variant="neutral" size="xs" className="truncate max-w-full inline-block" title={tx.category_name || (tx.type === 'INFLOW' ? 'Revenue' : 'Disbursement')}>
+                    <span className="text-xs font-medium text-zinc-600 dark:text-zinc-400 truncate max-w-full block" title={tx.category_name || (tx.type === 'INFLOW' ? 'Revenue' : 'Disbursement')}>
                       {tx.category_name || (tx.type === 'INFLOW' ? 'Revenue' : 'Disbursement')}
-                    </Badge>
+                    </span>
                   </td>
 
                   {/* Amount */}
-                  <td className={`py-3.5 px-3 text-right font-black whitespace-nowrap tabular-nums text-sm ${
+                  <td className={`py-3.5 px-3 text-right font-mono font-bold whitespace-nowrap tabular-nums text-[13px] ${
                     tx.type === 'INFLOW' 
-                      ? 'text-emerald-600 dark:text-emerald-400' 
+                      ? 'text-emerald-600 dark:text-emerald-400 font-extrabold' 
                       : 'text-zinc-950 dark:text-zinc-100'
                   }`}>
                     {tx.type === 'INFLOW' ? '+' : '-'}{formatPHP(tx.amount)}
@@ -649,21 +637,21 @@ export default function TransactionTable({
                             <img 
                               src={loggerAvatar} 
                               alt={loggerName || 'Officer'} 
-                              className="w-6 h-6 rounded-full object-cover shrink-0 border border-zinc-200 dark:border-zinc-700 shadow-2xs" 
+                              className="w-5 h-5 rounded-full object-cover shrink-0 border border-zinc-200 dark:border-zinc-700 shadow-2xs" 
                             />
                           ) : (
-                            <div className="w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold shrink-0 border bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20 shadow-2xs">
+                            <div className="w-5 h-5 rounded-full flex items-center justify-center text-[9px] font-bold shrink-0 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
                               {(loggerName || 'O').charAt(0).toUpperCase()}
                             </div>
                           )}
                           <div className="min-w-0">
-                            <div className="text-xs font-semibold truncate max-w-[130px] text-zinc-950 dark:text-zinc-100" title={loggerName || 'Officer'}>
+                            <div className="text-xs font-semibold truncate max-w-[120px] text-zinc-900 dark:text-zinc-100" title={loggerName || 'Officer'}>
                               {loggerName || 'Officer'}
                             </div>
                             {loggerRole && (
-                              <Badge variant="neutral" size="xs" className="text-[9px] uppercase tracking-wider py-0 px-1 leading-none mt-0.5">
+                              <span className="text-[9px] uppercase tracking-wider text-zinc-400 dark:text-zinc-500 font-semibold block leading-none mt-0.5">
                                 {loggerRole}
-                              </Badge>
+                              </span>
                             )}
                           </div>
                         </div>
@@ -671,87 +659,123 @@ export default function TransactionTable({
                     })()}
                   </td>
 
-                  {/* Receipt Preview & Action */}
-                  <td className="py-3.5 pl-3 pr-6 text-right whitespace-nowrap">
+                  {/* Receipts & Hover Action Dock (Option C: Stripe/Linear Pattern) */}
+                  <td className="relative py-3.5 pl-3 pr-6 text-right whitespace-nowrap">
+                    {/* Resting State: Calm, perfectly aligned indicators */}
+                    <div className="flex items-center justify-end gap-2 transition-opacity duration-150 group-hover:opacity-0 group-focus-within:opacity-0">
+                      {(() => {
+                        const receipts = getTransactionReceipts(tx);
+                        const hasComments = Boolean(commentCounts[tx.id]);
+                        const isPendingAbono = tx.is_reimbursement && tx.status === 'PENDING_REIMBURSEMENT';
+
+                        return (
+                          <>
+                            {isPendingAbono && (
+                              <span className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-amber-600 dark:text-amber-400">
+                                <Clock className="w-3 h-3" />
+                                <span>Pending</span>
+                              </span>
+                            )}
+
+                            {receipts.length > 0 ? (
+                              <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-[11px] font-semibold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+                                <Receipt className="w-3 h-3 shrink-0" />
+                                <span>{receipts.length > 1 ? `${receipts.length} Receipts` : '1 Receipt'}</span>
+                              </span>
+                            ) : (
+                              <span className="text-xs text-zinc-400 dark:text-zinc-600 font-medium">—</span>
+                            )}
+
+                            {hasComments && (
+                              <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-bold bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300">
+                                <MessageSquare className="w-2.5 h-2.5 text-zinc-500" />
+                                <span className="tabular-nums">{commentCounts[tx.id]}</span>
+                              </span>
+                            )}
+                          </>
+                        );
+                      })()}
+                    </div>
+
+                    {/* Action Dock: Smoothly revealed on row hover or keyboard focus */}
                     <div 
-                      className="inline-flex items-center justify-end gap-1.5 shrink-0"
+                      className="opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto group-focus-within:opacity-100 group-focus-within:pointer-events-auto transition-opacity duration-150 absolute right-6 inset-y-0 flex items-center justify-end gap-1.5"
                       onClick={(e) => e.stopPropagation()}
                     >
                       {(() => {
                         const receipts = getTransactionReceipts(tx);
-                        if (receipts.length > 0) {
-                          return (
+                        return (
+                          <>
+                            {receipts.length > 0 && (
+                              <Button
+                                variant="emerald-subtle"
+                                size="xs"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setSelectedReceipt(tx);
+                                  setActivePhotoIndex(0);
+                                }}
+                                leftIcon={<Receipt className="w-3 h-3" />}
+                                title={`View ${receipts.length} attached receipt photo${receipts.length > 1 ? 's' : ''}`}
+                              >
+                                <span>{receipts.length > 1 ? `View (${receipts.length})` : 'View'}</span>
+                              </Button>
+                            )}
+
+                            {isAuthorized && receipts.length < 3 && (
+                              <Button
+                                variant="outline"
+                                size="xs"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setAttachTx(tx);
+                                  setAttachFiles([]);
+                                  setAttachPreviews([]);
+                                  setAttachError(null);
+                                }}
+                                leftIcon={<Plus className="w-3 h-3" />}
+                                title="Attach receipt or proof for this transaction"
+                              >
+                                <span>Attach</span>
+                              </Button>
+                            )}
+
+                            {/* Settle Abono Button */}
+                            {tx.is_reimbursement && tx.status === 'PENDING_REIMBURSEMENT' && canSettleAbono && (
+                              <Button
+                                variant="amber-subtle"
+                                size="xs"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setSettleTx(tx);
+                                  setSettleMethod(tx.payment_method === 'GCASH' ? 'GCASH' : 'CASH');
+                                  setSettleError(null);
+                                }}
+                                leftIcon={<HandCoins className="w-3 h-3" />}
+                                title={`Disburse ${formatPHP(tx.amount)} refund to ${tx.reimbursement_recipient || 'claimant'}`}
+                              >
+                                <span>Settle</span>
+                              </Button>
+                            )}
+
+                            {/* Comments / Remarks Button */}
                             <Button
-                              variant="emerald-subtle"
+                              variant={commentCounts[tx.id] ? "emerald-subtle" : "ghost"}
                               size="xs"
                               onClick={(e) => {
                                 e.stopPropagation();
-                                setSelectedReceipt(tx);
-                                setActivePhotoIndex(0);
+                                setCommentTx(tx);
                               }}
-                              leftIcon={<Receipt className="w-3 h-3" />}
-                              title={`View ${receipts.length} attached receipt photo${receipts.length > 1 ? 's' : ''}`}
+                              leftIcon={<MessageSquare className="w-3 h-3 shrink-0" />}
+                              title={commentCounts[tx.id] ? `${commentCounts[tx.id]} audit remark${commentCounts[tx.id] > 1 ? 's' : ''}` : 'View / Add audit remarks'}
                             >
-                              <span>{receipts.length > 1 ? `Receipts (${receipts.length})` : 'Receipt'}</span>
+                              {commentCounts[tx.id] ? (
+                                <span className="tabular-nums font-bold text-[10px]">{commentCounts[tx.id]}</span>
+                              ) : null}
                             </Button>
-                          );
-                        }
-                        if (isAuthorized) {
-                          return (
-                            <Button
-                              variant="outline"
-                              size="xs"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                setAttachTx(tx);
-                                setAttachFiles([]);
-                                setAttachPreviews([]);
-                                setAttachError(null);
-                              }}
-                              leftIcon={<Plus className="w-3 h-3" />}
-                              title="Attach receipt or proof for this transaction"
-                              className="border-dashed"
-                            >
-                              <span>Attach</span>
-                            </Button>
-                          );
-                        }
-                        return <span className="text-[11px] italic text-zinc-400 dark:text-zinc-500">None</span>;
+                          </>
+                        );
                       })()}
-
-                      {/* Settle Abono Button */}
-                      {tx.is_reimbursement && tx.status === 'PENDING_REIMBURSEMENT' && canSettleAbono && (
-                        <Button
-                          variant="amber-subtle"
-                          size="xs"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setSettleTx(tx);
-                            setSettleMethod(tx.payment_method === 'GCASH' ? 'GCASH' : 'CASH');
-                            setSettleError(null);
-                          }}
-                          leftIcon={<HandCoins className="w-3 h-3" />}
-                          title={`Disburse ${formatPHP(tx.amount)} refund to ${tx.reimbursement_recipient || 'claimant'}`}
-                        >
-                          <span>Settle</span>
-                        </Button>
-                      )}
-
-                      {/* Comments / Remarks Indicator Button */}
-                      <Button
-                        variant={commentCounts[tx.id] ? "emerald-subtle" : "ghost"}
-                        size="xs"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setCommentTx(tx);
-                        }}
-                        leftIcon={<MessageSquare className="w-3 h-3 shrink-0" />}
-                        title={commentCounts[tx.id] ? `${commentCounts[tx.id]} audit remark${commentCounts[tx.id] > 1 ? 's' : ''}` : 'View / Add audit remarks'}
-                      >
-                        {commentCounts[tx.id] ? (
-                          <span className="tabular-nums font-bold text-[10px]">{commentCounts[tx.id]}</span>
-                        ) : null}
-                      </Button>
                     </div>
                   </td>
 
@@ -1487,40 +1511,36 @@ export default function TransactionTable({
             }
           >
             {/* Header */}
-            <div className="flex items-center justify-between gap-2.5 pb-4 mb-4 border-b border-zinc-100 dark:border-zinc-800 shrink-0">
+            <div className="flex items-center justify-between gap-2.5 pb-3 mb-4 border-b border-zinc-100 dark:border-zinc-800 shrink-0">
               <div className="flex items-center gap-2 flex-wrap min-w-0">
                 {tx.type === 'INFLOW' ? (
-                  <Badge variant="emerald">
-                    <ArrowDownRight className="w-3.5 h-3.5" />
+                  <Badge variant="emerald" size="xs">
+                    <ArrowDownRight className="w-3 h-3" />
                     Revenue Inflow
                   </Badge>
                 ) : isAbono ? (
                   isSettled ? (
-                    <Badge variant="emerald">
-                      <CheckCircle2 className="w-3.5 h-3.5" />
+                    <Badge variant="emerald" size="xs">
+                      <CheckCircle2 className="w-3 h-3" />
                       Settled Abono Advance
                     </Badge>
                   ) : (
-                    <Badge variant="amber">
-                      <Clock className="w-3.5 h-3.5" />
+                    <Badge variant="amber" size="xs">
+                      <Clock className="w-3 h-3" />
                       Pending Abono Advance
                     </Badge>
                   )
                 ) : (
-                  <Badge variant="rose">
-                    <ArrowUpRight className="w-3.5 h-3.5" />
+                  <Badge variant="rose" size="xs">
+                    <ArrowUpRight className="w-3 h-3" />
                     Disbursement Outflow
                   </Badge>
                 )}
 
-                <span className="text-xs font-medium tabular-nums text-zinc-500 dark:text-zinc-400">
-                  {formatFriendlyDate(tx.transaction_date)}
-                </span>
-
                 {(tx.academic_year || tx.semester) && (
-                  <Badge variant="neutral" size="xs">
+                  <span className="text-[11px] font-medium text-zinc-400 dark:text-zinc-500">
                     {tx.academic_year || '2025-2026'} · {tx.semester || '2nd Sem'}
-                  </Badge>
+                  </span>
                 )}
               </div>
 
@@ -1530,119 +1550,114 @@ export default function TransactionTable({
                 size="icon-sm"
                 onClick={() => setSelectedTx(null)}
                 aria-label="Close"
+                className="text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200"
               >
                 <X className="w-4 h-4" />
               </Button>
             </div>
 
-            {/* Scrollable Modal Content */}
-            <div className="space-y-4 text-xs">
-              {/* Hero Amount Banner */}
-              <div className="p-4 sm:p-5 rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-zinc-50/70 dark:bg-zinc-900/60 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                <div>
-                  <span className="text-[10px] font-bold uppercase tracking-wider block mb-1 text-zinc-500 dark:text-zinc-400">
-                    {tx.type === 'INFLOW' ? 'Total Inflow Amount' : isAbono ? 'Advance Out-of-Pocket Amount' : 'Disbursement Amount'}
-                  </span>
-                  <span className={`text-2xl sm:text-3xl font-black tracking-tight tabular-nums block ${
-                    tx.type === 'INFLOW' ? 'text-emerald-600 dark:text-emerald-400' : 'text-zinc-900 dark:text-zinc-100'
-                  }`}>
-                    {tx.type === 'INFLOW' ? '+' : '-'}{formatPHP(tx.amount)}
-                  </span>
+            {/* Scrollable Modal Content: Clean Single-Column Flow */}
+            <div className="space-y-5 text-xs">
+              
+              {/* Deck 0: Borderless Financial Statement Hero Header */}
+              <div className="pb-4 border-b border-zinc-100 dark:border-zinc-800">
+                <span className="text-[10px] font-bold uppercase tracking-wider block text-zinc-400 dark:text-zinc-500">
+                  {tx.type === 'INFLOW' ? 'Total Revenue Inflow' : isAbono ? 'Advance Out-of-Pocket Amount' : 'Disbursement Outflow'}
+                </span>
+                
+                <div className={`text-3xl sm:text-4xl font-black font-mono tracking-tight tabular-nums mt-1 ${
+                  tx.type === 'INFLOW' ? 'text-emerald-600 dark:text-emerald-400' : 'text-zinc-950 dark:text-zinc-50'
+                }`}>
+                  {tx.type === 'INFLOW' ? '+' : '-'}{formatPHP(tx.amount)}
                 </div>
 
-                <div className="flex items-center gap-2 flex-wrap">
-                  <Badge variant={tx.payment_method === 'CASH' ? 'emerald' : 'sky'}>
-                    {tx.payment_method === 'CASH' ? (
-                      <>
-                        <Wallet className="w-3.5 h-3.5" />
-                        <span>Cashbox</span>
-                      </>
-                    ) : (
-                      <>
-                        <Smartphone className="w-3.5 h-3.5" />
-                        <span>GCash Wallet</span>
-                      </>
-                    )}
-                  </Badge>
+                <div className="flex items-center gap-2 flex-wrap mt-2.5 text-xs text-zinc-600 dark:text-zinc-400 font-medium">
+                  {/* Date */}
+                  <span className="font-mono tabular-nums">{formatFriendlyDate(tx.transaction_date)}</span>
+                  
+                  <span className="text-zinc-300 dark:text-zinc-700">·</span>
+                  
+                  {/* Channel with micro-dot */}
+                  <span className="inline-flex items-center gap-1.5 font-semibold text-zinc-700 dark:text-zinc-300">
+                    <span className={`w-2 h-2 rounded-full shrink-0 ${tx.payment_method === 'CASH' ? 'bg-emerald-500' : 'bg-sky-500'}`} />
+                    <span>{tx.payment_method === 'CASH' ? 'Cashbox' : 'GCash Wallet'}</span>
+                  </span>
 
-                  <Badge variant="neutral">
+                  <span className="text-zinc-300 dark:text-zinc-700">·</span>
+
+                  {/* Category */}
+                  <span className="text-zinc-700 dark:text-zinc-300 font-semibold">
                     {tx.category_name || (tx.type === 'INFLOW' ? 'Revenue' : 'Disbursement')}
-                  </Badge>
+                  </span>
                 </div>
               </div>
 
-              {/* Details Grid */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
-                {/* Left: Transaction Info */}
-                <div className="p-4 rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-900/40 space-y-3">
-                  <div>
-                    <span className="text-[10px] font-bold uppercase tracking-wider block mb-0.5 text-zinc-500 dark:text-zinc-400">
-                      Title / Name
-                    </span>
-                    <p className="text-sm font-bold break-words text-zinc-900 dark:text-zinc-100">
-                      {tx.title}
-                    </p>
-                  </div>
-
-                  {tx.event_name && (
-                    <div>
-                      <span className="text-[10px] font-bold uppercase tracking-wider block mb-0.5 text-zinc-500 dark:text-zinc-400">
-                        Event / Activity
-                      </span>
-                      <p className="font-semibold text-zinc-800 dark:text-zinc-200">
-                        {tx.event_name}
-                      </p>
-                    </div>
-                  )}
-
-                  <div>
-                    <span className="text-[10px] font-bold uppercase tracking-wider block mb-0.5 text-zinc-500 dark:text-zinc-400">
-                      Description &amp; Notes
-                    </span>
-                    <p className={`leading-relaxed ${
-                      tx.description 
-                        ? 'text-zinc-700 dark:text-zinc-300 font-medium' 
-                        : 'text-zinc-400 dark:text-zinc-500 italic'
-                    }`}>
-                      {tx.description || 'No additional notes recorded for this transaction.'}
-                    </p>
-                  </div>
+              {/* Deck 1: Transaction Story (Full-Width) */}
+              <div className="space-y-3 pb-4 border-b border-zinc-100 dark:border-zinc-800">
+                <div>
+                  <span className="text-[10px] font-bold uppercase tracking-wider block mb-1 text-zinc-400 dark:text-zinc-500">
+                    Transaction Title / Purpose
+                  </span>
+                  <h4 className="text-base font-bold text-zinc-900 dark:text-zinc-100 leading-snug break-words">
+                    {tx.title}
+                  </h4>
                 </div>
 
-                {/* Right: Abono / Accountability */}
-                <div className="p-4 rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-900/40 space-y-3">
-                  {isAbono && (
-                    <div className={`p-3 rounded-xl border ${
-                      isSettled
-                        ? 'bg-emerald-50/60 dark:bg-emerald-950/20 border-emerald-200 dark:border-emerald-900/40'
-                        : 'bg-amber-50/60 dark:bg-amber-950/20 border-amber-200 dark:border-amber-900/40'
-                    }`}>
-                      <span className={`text-[10px] font-bold uppercase tracking-wider block mb-1 ${
-                        isSettled ? 'text-emerald-800 dark:text-emerald-300' : 'text-amber-800 dark:text-amber-300'
-                      }`}>
-                        Personal Advance (Abono)
-                      </span>
-                      <div className="flex items-center justify-between gap-2">
-                        <span className="text-xs font-bold text-zinc-900 dark:text-zinc-100">
-                          Advanced by: {tx.reimbursement_recipient || 'Officer'}
-                        </span>
-                        <Badge variant={isSettled ? 'emerald' : 'amber'} size="xs">
-                          {isSettled ? 'Settled / Reimbursed' : 'Awaiting Payout'}
-                        </Badge>
-                      </div>
-                      <p className={`text-[11px] mt-1.5 leading-snug ${
-                        isSettled ? 'text-emerald-700 dark:text-emerald-400' : 'text-amber-700 dark:text-amber-400'
-                      }`}>
-                        {isSettled
-                          ? 'Funds have been disbursed to the claimant and recognized as a formal ledger outflow.'
-                          : 'Personal funds advanced off-campus. Will be reimbursed once cashbox liquidates.'}
-                      </p>
-                    </div>
-                  )}
-
-                  {/* Recorded By */}
+                {tx.event_name && (
                   <div>
-                    <span className="text-[10px] font-bold uppercase tracking-wider block mb-1.5 text-zinc-500 dark:text-zinc-400">
+                    <span className="text-[10px] font-bold uppercase tracking-wider block mb-0.5 text-zinc-400 dark:text-zinc-500">
+                      Linked Event / Activity
+                    </span>
+                    <p className="font-semibold text-zinc-800 dark:text-zinc-200">
+                      {tx.event_name}
+                    </p>
+                  </div>
+                )}
+
+                <div>
+                  <span className="text-[10px] font-bold uppercase tracking-wider block mb-0.5 text-zinc-400 dark:text-zinc-500">
+                    Description &amp; Remarks
+                  </span>
+                  <p className={`leading-relaxed text-xs ${
+                    tx.description 
+                      ? 'text-zinc-700 dark:text-zinc-300' 
+                      : 'text-zinc-400 dark:text-zinc-500 italic'
+                  }`}>
+                    {tx.description || 'No additional notes recorded for this transaction.'}
+                  </p>
+                </div>
+              </div>
+
+              {/* Deck 2: Accountability & Verification Bar */}
+              <div className="space-y-3 pb-4 border-b border-zinc-100 dark:border-zinc-800">
+                {/* Abono Banner if applicable */}
+                {isAbono && (
+                  <div className={`p-3 rounded-xl border ${
+                    isSettled
+                      ? 'bg-emerald-50/60 dark:bg-emerald-950/20 border-emerald-200/80 dark:border-emerald-900/40 text-emerald-900 dark:text-emerald-200'
+                      : 'bg-amber-50/60 dark:bg-amber-950/20 border-amber-200/80 dark:border-amber-900/40 text-amber-900 dark:text-amber-200'
+                  }`}>
+                    <div className="flex items-center justify-between gap-2">
+                      <div className="flex items-center gap-1.5 font-bold text-xs">
+                        <HandCoins className="w-3.5 h-3.5" />
+                        <span>Personal Advance (Abono) · Advanced by: {tx.reimbursement_recipient || 'Officer'}</span>
+                      </div>
+                      <Badge variant={isSettled ? 'emerald' : 'amber'} size="xs">
+                        {isSettled ? 'Settled / Reimbursed' : 'Awaiting Payout'}
+                      </Badge>
+                    </div>
+                    <p className="text-[11px] mt-1.5 leading-snug opacity-90">
+                      {isSettled
+                        ? 'Funds have been disbursed to the claimant and recognized as a formal ledger outflow.'
+                        : 'Personal funds advanced off-campus. Will be reimbursed once cashbox liquidates.'}
+                    </p>
+                  </div>
+                )}
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {/* Logged by */}
+                  <div>
+                    <span className="text-[10px] font-bold uppercase tracking-wider block mb-1.5 text-zinc-400 dark:text-zinc-500">
                       Recorded By
                     </span>
                     <div className="flex items-center gap-2.5">
@@ -1665,7 +1680,7 @@ export default function TransactionTable({
                           )}
                         </div>
                         {loggerEmail && (
-                          <span className="text-[11px] truncate block text-zinc-500 dark:text-zinc-400">
+                          <span className="text-[11px] truncate block text-zinc-400 dark:text-zinc-500">
                             {loggerEmail}
                           </span>
                         )}
@@ -1673,18 +1688,27 @@ export default function TransactionTable({
                     </div>
                   </div>
 
-                  {/* Record ID */}
-                  <div className="pt-2 border-t border-zinc-200 dark:border-zinc-800 flex items-center justify-between text-[11px]">
-                    <span className="text-zinc-500 dark:text-zinc-400">Transaction ID</span>
-                    <span className="font-mono text-[10px] text-zinc-600 dark:text-zinc-400">
-                      {String(tx.id).slice(0, 18)}...
+                  {/* Audit verification & ID */}
+                  <div>
+                    <span className="text-[10px] font-bold uppercase tracking-wider block mb-1.5 text-zinc-400 dark:text-zinc-500">
+                      Audit Verification
                     </span>
+                    <div className="flex items-center gap-1.5 text-xs font-semibold text-emerald-600 dark:text-emerald-400">
+                      <ShieldCheck className="w-4 h-4 shrink-0" />
+                      <span>Verified Official Ledger Entry</span>
+                    </div>
+                    <div className="mt-1 flex items-center gap-1.5 text-[11px] text-zinc-400 dark:text-zinc-500">
+                      <span>ID:</span>
+                      <span className="font-mono text-[10px]">
+                        {String(tx.id)}
+                      </span>
+                    </div>
                   </div>
                 </div>
               </div>
 
-              {/* Receipts Gallery Section */}
-              <div className="p-4 rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-900/40 space-y-3">
+              {/* Frameless Receipts Gallery Section */}
+              <div className="space-y-3">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <Receipt className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
@@ -1712,15 +1736,15 @@ export default function TransactionTable({
                 </div>
 
                 {txReceipts.length === 0 ? (
-                  <div className="p-6 text-center rounded-xl border border-dashed border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900/30 text-zinc-400 dark:text-zinc-500">
-                    <Receipt className="w-8 h-8 mx-auto mb-2 opacity-50" />
+                  <div className="py-6 px-4 text-center rounded-xl bg-zinc-50/60 dark:bg-zinc-900/40 text-zinc-400 dark:text-zinc-500">
+                    <Receipt className="w-7 h-7 mx-auto mb-1.5 opacity-40" />
                     <p className="font-semibold text-xs">No receipt photo attached to this entry.</p>
-                    <p className="text-[11px] mt-0.5">Physical paper receipt or signed petty cash voucher may be filed offline.</p>
+                    <p className="text-[11px] text-zinc-400 dark:text-zinc-500 mt-0.5">Physical paper receipt or signed petty cash voucher may be filed offline.</p>
                   </div>
                 ) : (
                   <div className="space-y-3">
                     {/* Active Large Preview */}
-                    <div className="relative aspect-4/3 max-h-[340px] rounded-xl overflow-hidden bg-black/80 flex items-center justify-center">
+                    <div className="relative aspect-4/3 max-h-[340px] rounded-xl overflow-hidden bg-zinc-950 border border-zinc-200 dark:border-zinc-800 flex items-center justify-center shadow-xs">
                       {currentPhoto && (
                         <img 
                           src={currentPhoto} 
@@ -1732,7 +1756,7 @@ export default function TransactionTable({
                         href={currentPhoto}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="absolute top-2.5 right-2.5 px-2.5 py-1 rounded-lg bg-black/70 hover:bg-black text-white text-[10px] font-bold flex items-center gap-1 backdrop-blur-xs transition-colors"
+                        className="absolute top-2.5 right-2.5 px-2.5 py-1 rounded-lg bg-black/70 hover:bg-black text-white text-[10px] font-bold flex items-center gap-1 backdrop-blur-xs transition-colors shadow-xs"
                       >
                         <ExternalLink className="w-3 h-3" />
                         <span>Full Resolution</span>
