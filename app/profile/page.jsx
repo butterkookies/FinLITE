@@ -123,12 +123,12 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col font-sans">
+    <div className="flex-1 flex flex-col min-w-0">
       
       {/* Top Header — Matching Global Obsidian Header */}
       <header className="sticky top-0 z-30 bg-[#09090b]/95 backdrop-blur-xl border-b border-zinc-800 transition-colors">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between">
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 pl-12 md:pl-0">
             <Link
               href="/"
               className="flex items-center gap-2 p-1.5 rounded-lg hover:bg-zinc-800 transition-colors text-zinc-400 hover:text-zinc-100"

@@ -32,7 +32,6 @@ import {
   ChevronLeft,
   ChevronRight
 } from 'lucide-react';
-import FloatingSidebar from '@/components/layout/FloatingSidebar';
 import { createClient } from '@/lib/supabase/client';
 import { useTheme } from '@/components/theme/ThemeProvider';
 import { Modal, Button, Badge, Input } from '@/components/ui';
@@ -87,11 +86,6 @@ export default function AdminPage() {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   
-  // Sidebar State (Pin #5)
-  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
-  const [currentUser, setCurrentUser] = useState(null);
-  const [userProfile, setUserProfile] = useState(null);
-
   // Category Filtering & Limit/Pagination State (Pin #3)
   const [roleFilter, setRoleFilter] = useState('all');
   const [statusFilter, setStatusFilter] = useState('all');
@@ -119,41 +113,6 @@ export default function AdminPage() {
   const [auditLogs, setAuditLogs] = useState([]);
   const [auditFilter, setAuditFilter] = useState('all');
   const [isLoadingAudit, setIsLoadingAudit] = useState(false);
-
-  // Load authenticated officer for FloatingSidebar (Pin #5)
-  useEffect(() => {
-    async function loadAuth() {
-      const supabase = createClient();
-      if (!supabase) return;
-      try {
-        const { data: { user } } = await supabase.auth.getUser();
-        if (user) {
-          setCurrentUser(user);
-          const email = user.email?.toLowerCase();
-          const { data: profile } = await supabase
-            .from('profiles')
-            .select('*')
-            .eq('auth_user_id', user.id)
-            .maybeSingle();
-          if (profile) {
-            setUserProfile(profile);
-          } else if (email) {
-            const { data: profileByEmail } = await supabase
-              .from('profiles')
-              .select('*')
-              .eq('email', email)
-              .maybeSingle();
-            if (profileByEmail) {
-              setUserProfile(profileByEmail);
-            }
-          }
-        }
-      } catch (err) {
-        console.error('Failed to load user for sidebar:', err);
-      }
-    }
-    loadAuth();
-  }, []);
 
   // Reset pagination on filter or tab change (Pin #3)
   useEffect(() => {
@@ -524,25 +483,9 @@ export default function AdminPage() {
   };
 
   return (
-    <div className="min-h-screen flex font-sans">
-      
-      {/* 1. Desktop & Mobile Sidebar */}
-      <div className="no-print shrink-0">
-        <FloatingSidebar
-          currentRole="admin"
-          userProfile={userProfile}
-          currentUser={currentUser}
-          activeTab="admin"
-          isCollapsed={isSidebarCollapsed}
-          onToggleCollapse={setIsSidebarCollapsed}
-        />
-      </div>
-
-      {/* 2. Main Content Canvas */}
-      <div className="flex-1 flex flex-col transition-all duration-300 ease-in-out min-w-0">
-        
-        {/* Top Header */}
-        <header className={`sticky top-0 z-30 border-b backdrop-blur-xl transition-colors ${
+    <>
+      {/* Top Header */}
+      <header className={`sticky top-0 z-30 border-b backdrop-blur-xl transition-colors ${
           isLight
             ? 'bg-white/95 border-zinc-200 text-gray-900 shadow-2xs'
             : 'bg-[#09090b]/95 border-zinc-800 text-zinc-100 shadow-xs'
@@ -1636,7 +1579,6 @@ export default function AdminPage() {
         )}
       </Modal>
 
-      </div>
-    </div>
+    </>
   );
 }
