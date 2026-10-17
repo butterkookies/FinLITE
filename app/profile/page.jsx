@@ -123,12 +123,12 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className="flex-1 flex flex-col min-w-0">
+    <div className="min-h-screen flex flex-col font-sans">
       
       {/* Top Header — Matching Global Obsidian Header */}
       <header className="sticky top-0 z-30 bg-[#09090b]/95 backdrop-blur-xl border-b border-zinc-800 transition-colors">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between">
-          <div className="flex items-center gap-3 pl-12 md:pl-0">
+          <div className="flex items-center gap-3">
             <Link
               href="/"
               className="flex items-center gap-2 p-1.5 rounded-lg hover:bg-zinc-800 transition-colors text-zinc-400 hover:text-zinc-100"
@@ -363,6 +363,17 @@ export default function ProfilePage() {
                 <p className="text-[11px] text-white/50 group-hover:text-white/70 transition-colors mt-0.5">Record transactions, cash box, liquidation preview</p>
               </div>
               <ExternalLink className="w-4 h-4 text-emerald-400/60 group-hover:text-emerald-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all shrink-0" />
+            </Link>
+
+            <Link
+              href="/profile/security"
+              className="p-4 rounded-2xl bg-gradient-to-br from-[#0b2f1e]/90 to-[#061d12]/90 hover:from-[#0e3b26] hover:to-[#092617] transition-all flex items-center justify-between group shadow-md"
+            >
+              <div>
+                <p className="text-xs font-bold text-white group-hover:text-emerald-300 transition-colors">Account Security</p>
+                <p className="text-[11px] text-white/50 group-hover:text-white/70 transition-colors mt-0.5">Sign-in methods, password, connect Google</p>
+              </div>
+              <ShieldCheck className="w-4 h-4 text-emerald-400/60 group-hover:text-emerald-300 transition-all shrink-0" strokeWidth={1.75} />
             </Link>
 
             {isAdmin && (

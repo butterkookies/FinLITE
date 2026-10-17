@@ -1,14 +1,17 @@
 'use client';
 import { useState, useEffect, Suspense } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
-import { createClient } from '@/lib/supabase/client';
 import { Eye, EyeOff, Lock, CheckCircle2, AlertCircle, ArrowLeft } from 'lucide-react';
 import { validatePassword } from '@/lib/utils/validation';
 
 function ResetPasswordForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  // One-time token from the emailed link. It is only redeemed when the form is
+  // submitted, so opening the page (or an email scanner prefetching it) never uses it up.
+  const tokenHash = searchParams.get('token_hash') || '';
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPass, setShowPass] = useState(false);
@@ -35,13 +38,15 @@ function ResetPasswordForm() {
     setIsLoading(true);
 
     try {
-      const supabase = createClient();
-      const { error: updateErr } = await supabase.auth.updateUser({
-        password: password,
+      const res = await fetch('/api/auth/reset-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ tokenHash, password }),
       });
+      const data = await res.json().catch(() => ({}));
 
-      if (updateErr) {
-        setError(updateErr.message || 'Failed to update password. Your reset link may have expired.');
+      if (!res.ok) {
+        setError(data.error || 'Failed to update password. Your reset link may have expired.');
       } else {
         setSuccess(true);
         setTimeout(() => {
@@ -78,7 +83,27 @@ function ResetPasswordForm() {
             </div>
           )}
 
-          {success ? (
+          {!tokenHash && !success ? (
+            <div className="text-center py-4 space-y-4">
+              <div className="w-12 h-12 rounded-2xl bg-rose-100 text-rose-700 flex items-center justify-center mx-auto">
+                <AlertCircle className="w-6 h-6" />
+              </div>
+              <div>
+                <h3 className="text-sm font-bold text-gray-950">This reset link is not valid</h3>
+                <p className="text-xs text-gray-600 mt-1.5 leading-relaxed">
+                  The link is missing or incomplete. Request a new password reset email to continue.
+                </p>
+              </div>
+              <div className="pt-2">
+                <Link
+                  href="/forgot-password"
+                  className="w-full h-10 inline-flex items-center justify-center gap-2 bg-emerald-700 hover:bg-emerald-800 text-white rounded-xl text-xs font-semibold transition-all shadow-xs"
+                >
+                  <span>Request a new link</span>
+                </Link>
+              </div>
+            </div>
+          ) : success ? (
             <div className="text-center py-4 space-y-4">
               <div className="w-12 h-12 rounded-2xl bg-emerald-100 text-emerald-700 flex items-center justify-center mx-auto">
                 <CheckCircle2 className="w-6 h-6" />

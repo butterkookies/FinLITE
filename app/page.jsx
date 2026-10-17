@@ -3,13 +3,13 @@ import { useState, useEffect } from 'react';
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import { Plus, Wallet, Calculator, Sparkles, FileText, CreditCard } from 'lucide-react';
+import FloatingSidebar from '@/components/layout/FloatingSidebar';
 import BottomNav from '@/components/layout/BottomNav';
 import StatCards from '@/components/dashboard/StatCards';
 import TransactionTable from '@/components/ledger/TransactionTable';
 import ModuleErrorBoundary from '@/components/common/ModuleErrorBoundary';
 import { createClient } from '@/lib/supabase/client';
 import { isSuperAdminEmail } from '@/lib/config/admin';
-import { DEFAULT_SEMESTERS } from '@/lib/config/semesters';
 import { toCentavos, fromCentavos, denomCodeToCountKey } from '@/lib/utils/currency';
 import { validateTransactionAmount, validateOutflowBalance } from '@/lib/utils/validation';
 import { Card, Badge, Button } from '@/components/ui';
@@ -51,6 +51,11 @@ const AdvancesManagementModal = dynamic(() => import('@/components/debts/Advance
   ssr: false,
   loading: () => null,
 });
+
+const DEFAULT_SEMESTERS = [
+  { id: 'sem-26-27-1', academicYear: '2026-2027', semester: '1st Sem', label: 'AY 2026–2027 • 1st Sem', isActive: true },
+  { id: 'sem-25-26-2', academicYear: '2025-2026', semester: '2nd Sem', label: 'AY 2025–2026 • 2nd Sem', isActive: false },
+];
 
 const DEFAULT_LITE_SIGNATORIES_26_27 = {
   presidentName: 'GERONIMO, ANDREI JOHN P.',
@@ -121,6 +126,8 @@ export default function Dashboard() {
   const [semesters, setSemesters] = useState(DEFAULT_SEMESTERS);
   const [currentSemester, setCurrentSemester] = useState(DEFAULT_SEMESTERS[0]);
   const [isNewSemesterOpen, setIsNewSemesterOpen] = useState(false);
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+  const [activeTab, setActiveTab] = useState('dashboard');
 
   // 3NF Master Catalog States
   const [categories, setCategories] = useState([]);
@@ -138,44 +145,6 @@ export default function Dashboard() {
     } else {
       setGreeting('Good evening');
     }
-  }, []);
-
-  // Listen to modal open triggers dispatched from AppShell or URL
-  useEffect(() => {
-    const handleOpenModal = (e) => {
-      const act = e.detail;
-      if (act === 'record') setIsNewTxOpen(true);
-      else if (act === 'cashbox') setIsDenomOpen(true);
-      else if (act === 'advances') setIsAdvancesOpen(true);
-      else if (act === 'debts') setIsDebtsOpen(true);
-      else if (act === 'ai') setIsAIOpen(true);
-      else if (act === 'audit') setIsAuditOpen(true);
-      else if (act === 'export') handleOpenLiquidationPreview();
-      else if (act === 'new_semester') setIsNewSemesterOpen(true);
-    };
-
-    const handleSemesterChanged = (e) => {
-      if (e.detail) setCurrentSemester(e.detail);
-    };
-
-    window.addEventListener('finlite:open-modal', handleOpenModal);
-    window.addEventListener('finlite:semester-changed', handleSemesterChanged);
-
-    // Check URL query param on load
-    if (typeof window !== 'undefined') {
-      const params = new URLSearchParams(window.location.search);
-      const modalParam = params.get('modal') || params.get('action');
-      if (modalParam) {
-        handleOpenModal({ detail: modalParam });
-        const newUrl = window.location.pathname;
-        window.history.replaceState({}, '', newUrl);
-      }
-    }
-
-    return () => {
-      window.removeEventListener('finlite:open-modal', handleOpenModal);
-      window.removeEventListener('finlite:semester-changed', handleSemesterChanged);
-    };
   }, []);
 
   const supabase = createClient();
@@ -1722,8 +1691,43 @@ export default function Dashboard() {
   };
 
   return (
-    <>
-      {/* Main Content Canvas */}
+    <div className="min-h-screen flex">
+      
+      {/* 1. Left Sidebar Column (Desktop in-flow sticky + Mobile slide-over) */}
+      <div className="no-print shrink-0">
+        <ModuleErrorBoundary moduleName="Navigation Sidebar">
+          <FloatingSidebar
+            currentRole={currentRole}
+            userProfile={userProfile}
+            currentUser={currentUser}
+            currentSemester={currentSemester}
+            semesters={semesters}
+            onSelectSemester={(semId) => {
+              const found = semesters.find((s) => s.id === semId || `${s.academicYear}-${s.semester}` === semId);
+              if (found) {
+                setCurrentSemester(found);
+                if (typeof window !== 'undefined') {
+                  localStorage.setItem('finlite_active_semester_id', found.id);
+                }
+              }
+            }}
+            onOpenNewSemester={() => setIsNewSemesterOpen(true)}
+            onOpenNewTx={() => setIsNewTxOpen(true)}
+            onOpenDenominations={() => setIsDenomOpen(true)}
+            onOpenAdvances={() => setIsAdvancesOpen(true)}
+            onOpenDebts={() => setIsDebtsOpen(true)}
+            onOpenAI={() => setIsAIOpen(true)}
+            onOpenAuditTrail={() => setIsAuditOpen(true)}
+            onExportReport={handleOpenLiquidationPreview}
+            activeTab={activeTab}
+            onSelectTab={setActiveTab}
+            isCollapsed={isSidebarCollapsed}
+            onToggleCollapse={setIsSidebarCollapsed}
+          />
+        </ModuleErrorBoundary>
+      </div>
+
+      {/* 2. Main Content Canvas */}
       <div className="flex-1 flex flex-col transition-all duration-300 ease-in-out min-w-0 p-3 sm:p-6 lg:p-8 pt-16 md:pt-6">
         <main className="max-w-[1550px] w-full mx-auto space-y-5 sm:space-y-6 pb-24 md:pb-8 no-print">
           
@@ -1956,6 +1960,7 @@ export default function Dashboard() {
           />
         </ModuleErrorBoundary>
       </div>
-    </>
+
+    </div>
   );
 }
