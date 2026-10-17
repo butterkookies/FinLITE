@@ -68,7 +68,6 @@ export default function TransactionTable({
   onOpenAuditTrail,
   onOpenDebts,
   cashBalance = 0,
-  gcashBalance = 0,
   currentRole,
   isDbConnected = false
 }) {
@@ -96,7 +95,6 @@ export default function TransactionTable({
   // Settle abono advance modal states
   const [settleTx, setSettleTx] = useState(null);
   const [settleAmount, setSettleAmount] = useState('');
-  const [settleMethod, setSettleMethod] = useState('CASH');
   const [isSubmittingSettle, setIsSubmittingSettle] = useState(false);
   const [settleError, setSettleError] = useState(null);
   const [settleToast, setSettleToast] = useState(null);
@@ -144,11 +142,9 @@ export default function TransactionTable({
       return;
     }
 
-    const isGcash = settleMethod === 'GCASH';
-    const available = Number(isGcash ? gcashBalance : cashBalance) || 0;
+    const available = Number(cashBalance) || 0;
     if (payoutVal > available) {
-      const channelLabel = isGcash ? 'GCash Wallet' : 'Physical Cashbox';
-      setSettleError(`Insufficient ${channelLabel} balance. Available: ${formatPHP(available)}`);
+      setSettleError(`Insufficient Physical Cashbox balance. Available: ${formatPHP(available)}`);
       setIsSubmittingSettle(false);
       return;
     }
@@ -156,7 +152,6 @@ export default function TransactionTable({
     try {
       if (onSettleReimbursement) {
         const res = await onSettleReimbursement(settleTx.id, { 
-          paymentMethod: settleMethod,
           amount: payoutVal 
         });
         if (res && res.error) {
@@ -172,8 +167,7 @@ export default function TransactionTable({
         setSelectedTx((prev) => prev ? { 
           ...prev, 
           status: remainingBal === 0 ? 'REIMBURSED' : 'PENDING_REIMBURSEMENT', 
-          amount: remainingBal === 0 ? payoutVal : remainingBal,
-          payment_method: settleMethod 
+          amount: remainingBal === 0 ? payoutVal : remainingBal
         } : null);
       }
       setSettleTx(null);
@@ -536,7 +530,7 @@ export default function TransactionTable({
                   <SortIndicator field="title" />
                 </button>
               </th>
-              <th className="py-3.5 px-3 w-[9%] text-left whitespace-nowrap">
+              <th className="py-3.5 px-3 w-[10%] text-left whitespace-nowrap">
                 <button
                   type="button"
                   onClick={() => handleSort('date')}
@@ -546,8 +540,7 @@ export default function TransactionTable({
                   <SortIndicator field="date" />
                 </button>
               </th>
-              <th className="py-3.5 px-3 w-[7%] text-left whitespace-nowrap">Channel</th>
-              <th className="py-3.5 px-3 w-[20%] text-left whitespace-nowrap">
+              <th className="py-3.5 px-3 w-[22%] text-left whitespace-nowrap">
                 <button
                   type="button"
                   onClick={() => handleSort('category')}
@@ -576,7 +569,7 @@ export default function TransactionTable({
           <tbody className="divide-y divide-zinc-200 dark:divide-zinc-800 text-xs">
             {paginatedTransactions.length === 0 ? (
               <tr>
-                <td colSpan="7" className="py-16 text-center">
+                <td colSpan="6" className="py-16 text-center">
                   <div className="w-12 h-12 rounded-xl flex items-center justify-center mx-auto mb-3 border bg-zinc-100 dark:bg-zinc-900 text-zinc-500 dark:text-zinc-400 border-zinc-200 dark:border-zinc-800">
                     <Folder className="w-6 h-6" />
                   </div>
@@ -637,14 +630,6 @@ export default function TransactionTable({
                   {/* Date */}
                   <td className="py-3.5 px-3 font-mono text-xs tabular-nums text-zinc-500 dark:text-zinc-400 whitespace-nowrap">
                     {formatFriendlyDate(tx.transaction_date)}
-                  </td>
-
-                  {/* Payment Channel */}
-                  <td className="py-3.5 px-3 whitespace-nowrap">
-                    <div className="inline-flex items-center gap-1.5 text-xs font-semibold text-zinc-700 dark:text-zinc-300">
-                      <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${tx.payment_method === 'CASH' ? 'bg-emerald-500' : 'bg-sky-500'}`} />
-                      <span>{tx.payment_method === 'CASH' ? 'Cash' : 'GCash'}</span>
-                    </div>
                   </td>
 
                   {/* Category */}
@@ -800,7 +785,6 @@ export default function TransactionTable({
                                   e.stopPropagation();
                                   setSettleTx(tx);
                                   setSettleAmount(Number(tx.amount || 0).toString());
-                                  setSettleMethod(tx.payment_method === 'GCASH' ? 'GCASH' : 'CASH');
                                   setSettleError(null);
                                 }}
                                 leftIcon={<HandCoins className="w-3 h-3" />}
@@ -895,11 +879,7 @@ export default function TransactionTable({
                       : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300'
                   }`}
                 >
-                  {tx.payment_method === 'GCASH' ? (
-                    <Smartphone className="w-4 h-4 stroke-[2]" />
-                  ) : (
-                    <Wallet className="w-4 h-4 stroke-[2]" />
-                  )}
+                  <Wallet className="w-4 h-4 stroke-[2]" />
                 </div>
 
                 <div className="min-w-0 flex-1">
@@ -955,7 +935,7 @@ export default function TransactionTable({
                     </span>
                   ) : (
                     <span className="text-[10px] font-medium text-zinc-400">
-                      {tx.payment_method}
+                      Cashbox
                     </span>
                   )}
                 </div>
@@ -1272,9 +1252,6 @@ export default function TransactionTable({
                 </h3>
                 <p className="text-xs text-zinc-600 dark:text-zinc-400 mt-0.5">
                   Amount: <span className="tabular-nums font-bold text-zinc-900 dark:text-zinc-100">{formatPHP(selectedReceipt.amount)}</span>
-                  {selectedReceipt.payment_method && (
-                    <span className="ml-2 text-zinc-400">· via {selectedReceipt.payment_method}</span>
-                  )}
                 </p>
                 {(() => {
                   const loggerName = selectedReceipt.logged_by_name || selectedReceipt.logged_by_profile?.full_name;
@@ -1593,7 +1570,6 @@ export default function TransactionTable({
                       onClick={() => {
                         setSettleTx(tx);
                         setSettleAmount(Number(tx.amount || 0).toString());
-                        setSettleMethod(tx.payment_method === 'GCASH' ? 'GCASH' : 'CASH');
                         setSettleError(null);
                       }}
                     >
@@ -1670,14 +1646,6 @@ export default function TransactionTable({
                   {/* Date */}
                   <span className="font-mono tabular-nums">{formatFriendlyDate(tx.transaction_date)}</span>
                   
-                  <span className="text-zinc-300 dark:text-zinc-700">·</span>
-                  
-                  {/* Channel with micro-dot */}
-                  <span className="inline-flex items-center gap-1.5 font-semibold text-zinc-700 dark:text-zinc-300">
-                    <span className={`w-2 h-2 rounded-full shrink-0 ${tx.payment_method === 'CASH' ? 'bg-emerald-500' : 'bg-sky-500'}`} />
-                    <span>{tx.payment_method === 'CASH' ? 'Cashbox' : 'GCash Wallet'}</span>
-                  </span>
-
                   <span className="text-zinc-300 dark:text-zinc-700">·</span>
 
                   {/* Category */}
@@ -1916,8 +1884,7 @@ export default function TransactionTable({
                   !settleAmount ||
                   parseFloat(settleAmount) <= 0 ||
                   parseFloat(settleAmount) > Number(settleTx.amount) ||
-                  (settleMethod === 'CASH' && cashBalance < parseFloat(settleAmount)) ||
-                  (settleMethod === 'GCASH' && gcashBalance < parseFloat(settleAmount))
+                  cashBalance < parseFloat(settleAmount)
                 }
                 isLoading={isSubmittingSettle}
                 onClick={handleConfirmSettle}
@@ -2011,94 +1978,39 @@ export default function TransactionTable({
               </div>
             </div>
 
-            {/* Payment Channel Selection */}
-            <div className="space-y-2">
-              <label className="block font-bold text-xs text-zinc-800 dark:text-zinc-200">
-                Disburse Payment From Channel:
-              </label>
-              <div className="grid grid-cols-2 gap-2.5">
-                {/* Cashbox Option */}
-                <button
-                  type="button"
-                  onClick={() => {
-                    setSettleMethod('CASH');
-                    setSettleError(null);
-                  }}
-                  className={`p-3 rounded-2xl text-left border transition-all cursor-pointer ${
-                    settleMethod === 'CASH'
-                      ? 'border-emerald-600 bg-emerald-50/90 dark:bg-emerald-950/30 ring-2 ring-emerald-500/20'
-                      : 'border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 hover:bg-zinc-50 dark:hover:bg-zinc-800'
-                  }`}
-                >
-                  <div className="flex items-center justify-between mb-1">
-                    <div className="flex items-center gap-1.5 font-bold text-xs">
-                      <Wallet className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
-                      <span className="text-zinc-900 dark:text-zinc-100">Cashbox</span>
-                    </div>
-                    {settleMethod === 'CASH' && (
-                      <span className="w-4 h-4 rounded-full bg-emerald-600 text-white flex items-center justify-center text-[10px] font-bold">
-                        ✓
-                      </span>
-                    )}
-                  </div>
-                  <p className="text-[11px] text-zinc-500 dark:text-zinc-400">Physical Box</p>
-                  <p className={`text-[11px] font-bold mt-1 tabular-nums ${
-                    cashBalance < (parseFloat(settleAmount) || 0)
-                      ? 'text-rose-600 dark:text-rose-400'
-                      : 'text-emerald-600 dark:text-emerald-400'
-                  }`}>
-                    Avail: {formatPHP(cashBalance)}
-                  </p>
-                </button>
-
-                {/* GCash Option */}
-                <button
-                  type="button"
-                  onClick={() => {
-                    setSettleMethod('GCASH');
-                    setSettleError(null);
-                  }}
-                  className={`p-3 rounded-2xl text-left border transition-all cursor-pointer ${
-                    settleMethod === 'GCASH'
-                      ? 'border-sky-600 bg-sky-50/90 dark:bg-sky-950/30 ring-2 ring-sky-500/20'
-                      : 'border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 hover:bg-zinc-50 dark:hover:bg-zinc-800'
-                  }`}
-                >
-                  <div className="flex items-center justify-between mb-1">
-                    <div className="flex items-center gap-1.5 font-bold text-xs">
-                      <Smartphone className="w-3.5 h-3.5 text-sky-600 dark:text-sky-400" />
-                      <span className="text-zinc-900 dark:text-zinc-100">GCash</span>
-                    </div>
-                    {settleMethod === 'GCASH' && (
-                      <span className="w-4 h-4 rounded-full bg-sky-600 text-white flex items-center justify-center text-[10px] font-bold">
-                        ✓
-                      </span>
-                    )}
-                  </div>
-                  <p className="text-[11px] text-zinc-500 dark:text-zinc-400">Digital Wallet</p>
-                  <p className={`text-[11px] font-bold mt-1 tabular-nums ${
-                    gcashBalance < (parseFloat(settleAmount) || 0)
-                      ? 'text-rose-600 dark:text-rose-400'
-                      : 'text-sky-600 dark:text-sky-400'
-                  }`}>
-                    Avail: {formatPHP(gcashBalance)}
-                  </p>
-                </button>
+            {/* Cashbox Disbursement Channel Info */}
+            <div className="p-3.5 rounded-2xl border border-emerald-500/30 bg-emerald-50/70 dark:bg-emerald-950/20 flex items-center justify-between">
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-xl bg-emerald-600 text-white flex items-center justify-center shrink-0">
+                  <Wallet className="w-4 h-4" />
+                </div>
+                <div>
+                  <p className="text-xs font-bold text-zinc-900 dark:text-zinc-100">Disbursed from Cashbox</p>
+                  <p className="text-[11px] text-zinc-500 dark:text-zinc-400">Physical small metal cashbox (PD's Room)</p>
+                </div>
+              </div>
+              <div className="text-right">
+                <span className="text-[10px] uppercase font-bold text-zinc-400 block">Available Cash</span>
+                <p className={`text-xs font-bold tabular-nums ${
+                  cashBalance < (parseFloat(settleAmount) || 0)
+                    ? 'text-rose-600 dark:text-rose-400'
+                    : 'text-emerald-600 dark:text-emerald-400'
+                }`}>
+                  {formatPHP(cashBalance)}
+                </p>
               </div>
             </div>
 
             {/* Insufficient balance notice */}
             {(() => {
-              const isGcash = settleMethod === 'GCASH';
-              const avail = isGcash ? gcashBalance : cashBalance;
               const req = parseFloat(settleAmount) || 0;
-              if (req > avail) {
+              if (req > cashBalance) {
                 return (
                   <div className="p-3 rounded-xl bg-rose-50 dark:bg-rose-950/30 border border-rose-200 dark:border-rose-900/40 text-rose-800 dark:text-rose-300 text-xs flex items-start gap-2">
                     <AlertTriangle className="w-4 h-4 text-rose-600 shrink-0 mt-0.5" />
                     <div>
-                      <span className="font-bold">Insufficient {isGcash ? 'GCash' : 'Cashbox'} funds.</span>{' '}
-                      Requires {formatPHP(req)} but only {formatPHP(avail)} is available. Please select another channel or replenish funds first.
+                      <span className="font-bold">Insufficient Cashbox funds.</span>{' '}
+                      Requires {formatPHP(req)} but only {formatPHP(cashBalance)} is available in the physical cashbox.
                     </div>
                   </div>
                 );

@@ -1,24 +1,46 @@
 'use client';
 
 import React from 'react';
-import { Clock, Smartphone, Wallet, ArrowDownRight, ArrowUpRight, CreditCard, ChevronRight } from 'lucide-react';
+import { Clock, Wallet, ArrowDownRight, ArrowUpRight, CreditCard, ChevronRight, Scale } from 'lucide-react';
 import { formatPHP } from '@/lib/utils/currency';
 import { Card, Badge } from '@/components/ui';
 
 export default function StatCards({ 
   summary = {}, 
+  latestReconciliation = null,
   onOpenDenominations,
   onOpenAdvances,
   onOpenDebts 
 }) {
   const {
     cash_on_hand = 0,
-    gcash_balance = 0,
     total_inflows = 0,
     total_outflows = 0,
     pending_reimbursements = 0,
     uncollected_debts = 0,
+    net_position: explicitNetPosition,
   } = summary;
+
+  // True Net Position: Cash on Hand minus active Accounts Payable liabilities (Pending Abono)
+  const netPosition = typeof explicitNetPosition === 'number'
+    ? explicitNetPosition 
+    : (Number(cash_on_hand || 0) - Number(pending_reimbursements || 0));
+
+  // Build Cashbox variance / count status subtext
+  let cashboxSubtext = 'Tap to count physical cash';
+  let cashboxVarianceBadge = null;
+  if (latestReconciliation) {
+    const disc = Number(latestReconciliation.discrepancy || 0);
+    if (disc === 0) {
+      cashboxSubtext = 'Counted · Balanced (₱0.00)';
+    } else if (disc < 0) {
+      cashboxSubtext = `Counted · Shortage: ${formatPHP(disc)}`;
+      cashboxVarianceBadge = `Short ${formatPHP(Math.abs(disc))}`;
+    } else {
+      cashboxSubtext = `Counted · Overage: +${formatPHP(disc)}`;
+      cashboxVarianceBadge = `+${formatPHP(disc)}`;
+    }
+  }
 
   return (
     <div className="relative mb-5 sm:mb-6">
@@ -58,7 +80,7 @@ export default function StatCards({
             </div>
             <div className="flex items-center gap-1 shrink-0 ml-auto">
               <Badge className="bg-white/20 text-white border-white/20 backdrop-blur-xs font-semibold whitespace-nowrap text-[9.5px] px-1.5 py-0.5 leading-none" size="xs">
-                Physical
+                {cashboxVarianceBadge || 'Physical'}
               </Badge>
               <ArrowUpRight className="w-3.5 h-3.5 text-white/80 shrink-0 group-hover:text-white transition-colors" />
             </div>
@@ -72,37 +94,37 @@ export default function StatCards({
 
           <div className="text-[10.5px] sm:text-[11px] font-medium mt-1.5 relative z-10 flex items-start gap-1.5 text-emerald-100/90 dark:text-emerald-100/90 min-h-[30px]">
             <span className="w-1.5 h-1.5 rounded-full bg-white shrink-0 mt-1" />
-            <span className="line-clamp-2 leading-snug">Tap to count physical cash</span>
+            <span className="line-clamp-2 leading-snug">{cashboxSubtext}</span>
           </div>
         </Card>
 
-        {/* 2. E-Money / GCash */}
-        <Card className="shrink-0 w-[82vw] max-w-[280px] sm:w-auto snap-center group relative p-3.5 sm:p-4 flex flex-col justify-between overflow-hidden bg-sky-600 dark:bg-sky-700 text-white dark:text-white border-sky-500/80 dark:border-sky-600 shadow-sm hover:bg-sky-700 dark:hover:bg-sky-800 transition-all">
+        {/* 2. True Net Position (Cash on Hand − Pending Abono) */}
+        <Card className="shrink-0 w-[82vw] max-w-[280px] sm:w-auto snap-center group relative p-3.5 sm:p-4 flex flex-col justify-between overflow-hidden bg-indigo-600 dark:bg-indigo-700 text-white dark:text-white border-indigo-500/80 dark:border-indigo-600 shadow-sm hover:bg-indigo-700 dark:hover:bg-indigo-800 transition-all">
           <div className="flex flex-wrap items-center justify-between gap-x-2 gap-y-1 mb-1.5 relative z-10">
             <div className="flex items-center gap-1.5 min-w-0">
               <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-lg flex items-center justify-center shrink-0 bg-white/20 text-white backdrop-blur-xs">
-                <Smartphone className="w-3.5 h-3.5 stroke-[2]" />
+                <Scale className="w-3.5 h-3.5 stroke-[2]" />
               </div>
               <span className="text-[11px] sm:text-xs font-bold uppercase tracking-wider text-white whitespace-nowrap">
-                GCash Wallet
+                Net Position
               </span>
             </div>
             <div className="shrink-0 ml-auto">
               <Badge className="bg-white/20 text-white border-white/20 backdrop-blur-xs font-semibold whitespace-nowrap text-[9.5px] px-1.5 py-0.5 leading-none" size="xs">
-                Electronic
+                Liquid
               </Badge>
             </div>
           </div>
 
           <div className="my-1 relative z-10">
             <p className="text-base sm:text-lg xl:text-xl font-extrabold tracking-tight tabular-nums text-white">
-              {formatPHP(gcash_balance)}
+              {formatPHP(netPosition)}
             </p>
           </div>
 
-          <div className="text-[10.5px] sm:text-[11px] font-medium mt-1.5 relative z-10 flex items-start gap-1.5 text-sky-100/90 dark:text-sky-100/90 min-h-[30px]">
+          <div className="text-[10.5px] sm:text-[11px] font-medium mt-1.5 relative z-10 flex items-start gap-1.5 text-indigo-100/90 dark:text-indigo-100/90 min-h-[30px]">
             <span className="w-1.5 h-1.5 rounded-full bg-white shrink-0 mt-1" />
-            <span className="line-clamp-2 leading-snug">Online collections &amp; dues</span>
+            <span className="line-clamp-2 leading-snug">Cash on hand minus pending abono</span>
           </div>
         </Card>
 

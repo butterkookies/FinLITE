@@ -7,7 +7,7 @@ const QUICK_QUESTIONS = [
   'What is our current physical cash on hand?',
   'Magkano ang kabuuang inflows at outflows ngayong semestre?',
   'Were there any cash shortages or discrepancies declared?',
-  'How much is our remaining balance across Cash and GCash?',
+  'What is our current Net Position (Cash on Hand less Abono)?',
   'Sino ang mga may outstanding receivables o pautang?',
 ];
 
@@ -95,11 +95,14 @@ export default function AIChatDrawer({ isOpen, onClose, summary = {}, transactio
       } else if (lower.includes('inflow') || lower.includes('outflow') || lower.includes('pasok') || lower.includes('labas') || lower.includes('gastos')) {
         fallbackReply = `Ang ating kabuuang Inflows ngayong semestre ay **₱${(summary.total_inflows || 0).toLocaleString('en-PH', { minimumFractionDigits: 2 })}** at ang kabuuang Outflows ay **₱${(summary.total_outflows || 0).toLocaleString('en-PH', { minimumFractionDigits: 2 })}**. Ang ating Net Semester Balance ay **₱${((summary.total_inflows || 0) - (summary.total_outflows || 0)).toLocaleString('en-PH', { minimumFractionDigits: 2 })}**.`;
       } else if (lower.includes('physical cash') || lower.includes('on hand') || lower.includes('cashbox') || lower.includes('cash box') || lower.includes('hawak na pera')) {
-        fallbackReply = `Ang kasalukuyang verified **Physical Cash on Hand** sa ating cashbox ay **₱${(summary.cash_on_hand || 0).toLocaleString('en-PH', { minimumFractionDigits: 2 })}**, habang may **₱${(summary.gcash_balance || 0).toLocaleString('en-PH', { minimumFractionDigits: 2 })}** sa GCash.`;
-      } else if (lower.includes('balance') || lower.includes('remaining') || lower.includes('gcash') || lower.includes('reserve') || lower.includes('vault') || lower.includes('cash')) {
-        fallbackReply = `Ang kasalukuyang verified balance: **Physical Cash on Hand** ay **₱${(summary.cash_on_hand || 0).toLocaleString('en-PH', { minimumFractionDigits: 2 })}** at **GCash** ay **₱${(summary.gcash_balance || 0).toLocaleString('en-PH', { minimumFractionDigits: 2 })}**. Ang kabuuang Net Vault Reserve ay **₱${((summary.cash_on_hand || 0) + (summary.gcash_balance || 0)).toLocaleString('en-PH', { minimumFractionDigits: 2 })}**.`;
+        const netPos = summary.net_position != null ? summary.net_position : (summary.cash_on_hand || 0) - (summary.pending_reimbursements || 0);
+        fallbackReply = `Ang kasalukuyang verified **Physical Cash on Hand** sa ating cashbox ay **₱${(summary.cash_on_hand || 0).toLocaleString('en-PH', { minimumFractionDigits: 2 })}**, na may Net Position na **₱${netPos.toLocaleString('en-PH', { minimumFractionDigits: 2 })}** matapos ibawas ang pending abono.`;
+      } else if (lower.includes('balance') || lower.includes('remaining') || lower.includes('reserve') || lower.includes('vault') || lower.includes('cash') || lower.includes('net position')) {
+        const netPos = summary.net_position != null ? summary.net_position : (summary.cash_on_hand || 0) - (summary.pending_reimbursements || 0);
+        fallbackReply = `Ang kasalukuyang verified balance sa ating physical cashbox: **Physical Cash on Hand** ay **₱${(summary.cash_on_hand || 0).toLocaleString('en-PH', { minimumFractionDigits: 2 })}**, habang ang ating **Net Position** (matapos ibawas ang pending abono na ₱${(summary.pending_reimbursements || 0).toLocaleString('en-PH', { minimumFractionDigits: 2 })}) ay **₱${netPos.toLocaleString('en-PH', { minimumFractionDigits: 2 })}**.`;
       } else {
-        fallbackReply = `Batay sa ating FinLITE ledger: May verified Physical Cash on Hand na **₱${(summary.cash_on_hand || 0).toLocaleString('en-PH', { minimumFractionDigits: 2 })}**, GCash na **₱${(summary.gcash_balance || 0).toLocaleString('en-PH', { minimumFractionDigits: 2 })}**, Inflows na **₱${(summary.total_inflows || 0).toLocaleString('en-PH', { minimumFractionDigits: 2 })}**, at Outflows na **₱${(summary.total_outflows || 0).toLocaleString('en-PH', { minimumFractionDigits: 2 })}**.`;
+        const netPos = summary.net_position != null ? summary.net_position : (summary.cash_on_hand || 0) - (summary.pending_reimbursements || 0);
+        fallbackReply = `Batay sa ating FinLITE ledger: May verified Physical Cash on Hand na **₱${(summary.cash_on_hand || 0).toLocaleString('en-PH', { minimumFractionDigits: 2 })}** sa ating cashbox, Net Position na **₱${netPos.toLocaleString('en-PH', { minimumFractionDigits: 2 })}**, Inflows na **₱${(summary.total_inflows || 0).toLocaleString('en-PH', { minimumFractionDigits: 2 })}**, at Outflows na **₱${(summary.total_outflows || 0).toLocaleString('en-PH', { minimumFractionDigits: 2 })}**.`;
       }
 
       setMessages((prev) => [
@@ -255,7 +258,7 @@ function getContextFromText(str) {
   if (s.includes('receivable') || s.includes('pautang') || s.includes('utang') || s.includes('debt') || s.includes('collectible')) {
     return 'purple';
   }
-  if (s.includes('gcash')) {
+  if (s.includes('net position')) {
     return 'blue';
   }
   if (s.includes('verified') || s.includes('approved') || s.includes('completed')) {
@@ -292,7 +295,7 @@ function FormattedMessage({ content = '' }) {
   const lines = content.split('\n');
 
   const renderInlineTokens = (textLine, defaultContext) => {
-    const tokenRegex = /(\*\*[^*]+\*\*|\*[^*]+\*|₱\s*[\d,]+(?:\.\d{2})?|\b(?:Physical Cash on Hand|Cash on Hand|Net Balance|Net Vault Reserve|Inflows?|Cashbox|Vault|Outflows?|Cash Shortage|Shortages?|Discrepanc(?:y|ies)|Expenses?|Pending Reimbursements?|Pending Advances?|Abono|GCash(?: Account Balance| Account| Balance)?|Receivables?|Collectibles?|Pautang|Utang|Debts?|Verified|Approved)\b)/gi;
+    const tokenRegex = /(\*\*[^*]+\*\*|\*[^*]+\*|₱\s*[\d,]+(?:\.\d{2})?|\b(?:Physical Cash on Hand|Cash on Hand|Net Position|Net Balance|Inflows?|Cashbox|Vault|Outflows?|Cash Shortage|Shortages?|Discrepanc(?:y|ies)|Expenses?|Pending Reimbursements?|Pending Advances?|Abono|Receivables?|Collectibles?|Pautang|Utang|Debts?|Verified|Approved)\b)/gi;
 
     const elements = [];
     let lastIdx = 0;

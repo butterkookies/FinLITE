@@ -49,9 +49,9 @@ FinLITE replaces unorganized paper receipts, informal chat tallies, and tedious 
 <table width="100%">
 <tr>
 <td width="33%" align="center">
-<b>Daily logging & GCash</b>
+<b>Daily Ledger & Cashbox</b>
 <br /><br />
-Rapid inflow, disbursement, and out-of-pocket advance logging with personal GCash withdrawal reconciliation.
+Rapid inflow, disbursement, and out-of-pocket advance (abono) logging with single physical cashbox reconciliation.
 </td>
 <td width="33%" align="center">
 <b>Audit & reconciliation</b>

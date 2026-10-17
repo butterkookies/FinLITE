@@ -226,22 +226,22 @@ assert(validateTransactionAmount('99999.99') === null, "validateTransactionAmoun
 assert(validateTransactionAmount(0.01) === null, "validateTransactionAmount(0.01) accepts minimum positive centavo");
 assert(validateTransactionAmount(1500.50) === null, "validateTransactionAmount(1500.50) accepts typical transaction");
 
-// validateOutflowBalance tests
-assert(validateOutflowBalance({ type: 'INFLOW', paymentMethod: 'CASH', isReimbursement: false, amount: 5000, cashBalance: 100 }) === null,
+// validateOutflowBalance tests (Single physical cashbox model)
+assert(validateOutflowBalance({ type: 'INFLOW', isReimbursement: false, amount: 5000, cashBalance: 100 }) === null,
   "validateOutflowBalance skips INFLOW transactions");
-assert(validateOutflowBalance({ type: 'OUTFLOW', paymentMethod: 'CASH', isReimbursement: true, amount: 5000, cashBalance: 100 }) === null,
+assert(validateOutflowBalance({ type: 'OUTFLOW', isReimbursement: true, amount: 5000, cashBalance: 100 }) === null,
   "validateOutflowBalance skips abono personal advance transactions");
-assert(validateOutflowBalance({ type: 'OUTFLOW', paymentMethod: 'CASH', isReimbursement: false, amount: 500, cashBalance: 1000, gcashBalance: 0 }) === null,
-  "validateOutflowBalance allows valid CASH outflow within cashbox balance");
-assert(validateOutflowBalance({ type: 'OUTFLOW', paymentMethod: 'CASH', isReimbursement: false, amount: 1500, cashBalance: 1000, gcashBalance: 5000 })?.includes('Insufficient Physical Cashbox balance') === true,
-  "validateOutflowBalance rejects CASH outflow exceeding cashbox even if GCash holds funds");
-assert(validateOutflowBalance({ type: 'OUTFLOW', paymentMethod: 'GCASH', isReimbursement: false, amount: 500, cashBalance: 0, gcashBalance: 1000 }) === null,
-  "validateOutflowBalance allows valid GCASH outflow within GCash balance");
-assert(validateOutflowBalance({ type: 'OUTFLOW', paymentMethod: 'GCASH', isReimbursement: false, amount: 1500, cashBalance: 5000, gcashBalance: 1000 })?.includes('Insufficient GCash Wallet balance') === true,
-  "validateOutflowBalance rejects GCASH outflow exceeding GCash balance even if cashbox holds funds");
-assert(validateOutflowBalance({ type: 'OUTFLOW', paymentMethod: 'CASH', isReimbursement: false, amount: 100.01, cashBalance: 100.00 }) !== null,
+assert(validateOutflowBalance({ type: 'OUTFLOW', isReimbursement: false, amount: 500, cashBalance: 1000 }) === null,
+  "validateOutflowBalance allows valid outflow within cashbox balance");
+assert(validateOutflowBalance({ type: 'OUTFLOW', isReimbursement: false, amount: 1500, cashBalance: 1000 })?.includes('Insufficient Physical Cashbox balance') === true,
+  "validateOutflowBalance rejects outflow exceeding cashbox balance");
+assert(validateOutflowBalance({ type: 'OUTFLOW', isReimbursement: false, amount: 0, cashBalance: 100 }) === null,
+  "validateOutflowBalance returns null for zero amount");
+assert(validateOutflowBalance({ type: 'OUTFLOW', isReimbursement: false, amount: 50.00, cashBalance: 49.99 })?.includes('Insufficient Physical Cashbox balance') === true,
+  "validateOutflowBalance rejects 1 centavo deficit against cashbox");
+assert(validateOutflowBalance({ type: 'OUTFLOW', isReimbursement: false, amount: 100.01, cashBalance: 100.00 }) !== null,
   "validateOutflowBalance uses exact centavos to catch 1 centavo overdraft");
-assert(validateOutflowBalance({ type: 'OUTFLOW', paymentMethod: 'CASH', isReimbursement: false, amount: 100.00, cashBalance: 100.00 }) === null,
+assert(validateOutflowBalance({ type: 'OUTFLOW', isReimbursement: false, amount: 100.00, cashBalance: 100.00 }) === null,
   "validateOutflowBalance allows outflow exactly equal to channel balance");
 
 

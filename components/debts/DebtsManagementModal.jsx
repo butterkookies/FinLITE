@@ -10,7 +10,6 @@ import {
   AlertCircle, 
   ArrowRight, 
   Wallet, 
-  Smartphone, 
   X, 
   User, 
   Phone, 
@@ -35,7 +34,6 @@ export default function DebtsManagementModal({
 
   // Payment dialog state
   const [paymentAmount, setPaymentAmount] = useState('');
-  const [paymentMethod, setPaymentMethod] = useState('CASH');
   const [paymentNotes, setPaymentNotes] = useState('');
   const [isSubmittingPayment, setIsSubmittingPayment] = useState(false);
   const [paymentError, setPaymentError] = useState('');
@@ -71,7 +69,6 @@ export default function DebtsManagementModal({
     setSelectedDebtForPayment(debt);
     const remaining = Math.max(0, Number(debt.total_amount || 0) - Number(debt.amount_paid || 0));
     setPaymentAmount(remaining.toString());
-    setPaymentMethod('CASH');
     setPaymentNotes('');
     setPaymentError('');
   };
@@ -97,7 +94,6 @@ export default function DebtsManagementModal({
       const res = await onRecordPayment(selectedDebtForPayment.id, {
         amount: effectivePayment,
         tendered: amountVal,
-        paymentMethod,
         notes: paymentNotes,
       });
 
@@ -410,38 +406,14 @@ export default function DebtsManagementModal({
                     <label className="block text-xs font-semibold mb-1 text-zinc-700 dark:text-zinc-300">
                       Deposit Collected Money To
                     </label>
-                    <div className="grid grid-cols-2 gap-2">
-                      <button
-                        type="button"
-                        onClick={() => setPaymentMethod('CASH')}
-                        className={`p-2.5 rounded-lg border text-left flex items-center gap-2 cursor-pointer transition-all ${
-                          paymentMethod === 'CASH'
-                            ? 'border-emerald-500 bg-emerald-500/10 text-emerald-900 dark:text-emerald-200'
-                            : 'border-zinc-200 dark:border-zinc-800 hover:bg-zinc-100 dark:hover:bg-zinc-800/60'
-                        }`}
-                      >
-                        <Wallet className="w-4 h-4 text-emerald-600" />
+                    <div className="p-3 rounded-xl border border-emerald-500/30 bg-emerald-50/70 dark:bg-emerald-950/20 flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <Wallet className="w-4 h-4 text-emerald-600 shrink-0" />
                         <div>
-                          <p className="text-xs font-bold">Physical Cashbox</p>
-                          <p className="text-[10px] text-zinc-500">Immediate cash on hand</p>
+                          <p className="text-xs font-bold text-zinc-900 dark:text-zinc-100">Physical Cashbox</p>
+                          <p className="text-[10px] text-zinc-500">Immediate cash on hand in PD's Room</p>
                         </div>
-                      </button>
-
-                      <button
-                        type="button"
-                        onClick={() => setPaymentMethod('GCASH')}
-                        className={`p-2.5 rounded-lg border text-left flex items-center gap-2 cursor-pointer transition-all ${
-                          paymentMethod === 'GCASH'
-                            ? 'border-emerald-500 bg-emerald-500/10 text-emerald-900 dark:text-emerald-200'
-                            : 'border-zinc-200 dark:border-zinc-800 hover:bg-zinc-100 dark:hover:bg-zinc-800/60'
-                        }`}
-                      >
-                        <Smartphone className="w-4 h-4 text-emerald-600" />
-                        <div>
-                          <p className="text-xs font-bold">GCash Wallet</p>
-                          <p className="text-[10px] text-zinc-500">Electronic remittance</p>
-                        </div>
-                      </button>
+                      </div>
                     </div>
                   </div>
 
@@ -454,7 +426,7 @@ export default function DebtsManagementModal({
                       type="text"
                       value={paymentNotes}
                       onChange={(e) => setPaymentNotes(e.target.value)}
-                      placeholder="e.g. 1st installment paid via GCash ref #12345"
+                      placeholder="e.g. 1st installment cash handover"
                     />
                   </div>
 

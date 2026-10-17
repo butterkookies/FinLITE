@@ -644,7 +644,6 @@ export default function Dashboard() {
     let inflows_c = 0;
     let outflows_c = 0;
     let cash_c = 0;
-    let gcash_c = 0;
     let pending_reimbursements_c = 0;
 
     txs.forEach((tx) => {
@@ -652,16 +651,14 @@ export default function Dashboard() {
 
       if (tx.type === 'INFLOW') {
         inflows_c += amt_c;
-        if (tx.payment_method === 'CASH') cash_c += amt_c;
-        if (tx.payment_method === 'GCASH') gcash_c += amt_c;
+        cash_c += amt_c;
       } else if (tx.type === 'OUTFLOW') {
         // Pending reimbursements do not deduct cash yet until disbursed
         if (tx.is_reimbursement && tx.status === 'PENDING_REIMBURSEMENT') {
           pending_reimbursements_c += amt_c;
         } else {
           outflows_c += amt_c;
-          if (tx.payment_method === 'CASH') cash_c -= amt_c;
-          if (tx.payment_method === 'GCASH') gcash_c -= amt_c;
+          cash_c -= amt_c;
         }
       }
     });
@@ -682,11 +679,14 @@ export default function Dashboard() {
         }, 0)
       : fromCentavos(pending_reimbursements_c);
 
+    const cash_on_hand = fromCentavos(cash_c);
+    const net_position = cash_on_hand - pending_advances;
+
     return {
       total_inflows: fromCentavos(inflows_c),
       total_outflows: fromCentavos(outflows_c),
-      cash_on_hand: fromCentavos(cash_c),
-      gcash_balance: fromCentavos(gcash_c),
+      cash_on_hand,
+      net_position,
       pending_reimbursements: pending_advances,
       uncollected_debts,
     };
@@ -694,16 +694,14 @@ export default function Dashboard() {
 
   const summary = calculateSummary(activeTransactions, activeDebts, activeAdvances);
 
-  // Manual entry from the New Transaction form: enforce ₱99,999.99 cap and channel balance check.
+  // Manual entry from the New Transaction form: enforce ₱99,999.99 cap and cashbox balance check.
   const handleManualSaveTransaction = async (newTx) => {
     if (validateTransactionAmount(newTx.amount)) return;
     if (validateOutflowBalance({
       type: newTx.type,
-      paymentMethod: newTx.payment_method,
       isReimbursement: newTx.is_reimbursement,
       amount: newTx.amount,
       cashBalance: summary.cash_on_hand,
-      gcashBalance: summary.gcash_balance,
     })) return;
     return handleSaveTransaction(newTx);
   };
@@ -983,7 +981,7 @@ export default function Dashboard() {
   };
 
   // Handler for settling an out-of-pocket advance (abono)
-  const handleSettleReimbursement = async (transactionId, { paymentMethod = 'CASH', amount = null } = {}) => {
+  const handleSettleReimbursement = async (transactionId, { amount = null } = {}) => {
     const isAuthorized = currentRole === 'admin' || currentRole === 'treasurer' || currentRole === 'president' || currentRole === 'adviser';
     if (!isAuthorized) {
       return { success: false, error: 'Unauthorized. Only club officers and advisers can settle abono advances.' };
@@ -1001,14 +999,12 @@ export default function Dashboard() {
       return { success: false, error: 'Disbursement amount must be greater than ₱0.00' };
     }
 
-    // Validate channel balance: ensure disbursing vault has sufficient liquid balance
+    // Validate cashbox balance: ensure cashbox has sufficient liquid balance
     const balanceError = validateOutflowBalance({
       type: 'OUTFLOW',
-      paymentMethod,
       isReimbursement: false,
       amount: payoutAmount,
       cashBalance: summary.cash_on_hand,
-      gcashBalance: summary.gcash_balance,
     });
 
     if (balanceError) {
@@ -1026,7 +1022,6 @@ export default function Dashboard() {
             .from('transactions')
             .update({
               status: 'REIMBURSED',
-              payment_method: paymentMethod,
               updated_at: new Date().toISOString(),
             })
             .eq('id', transactionId);
@@ -1043,7 +1038,6 @@ export default function Dashboard() {
             .update({
               amount: payoutAmount,
               status: 'REIMBURSED',
-              payment_method: paymentMethod,
               updated_at: new Date().toISOString(),
             })
             .eq('id', transactionId);
@@ -1056,7 +1050,6 @@ export default function Dashboard() {
               description: `Remaining balance of ${formatPHP(totalClaim)} advance by ${targetTx.reimbursement_recipient || 'Officer'}`,
               amount: remainingBal,
               type: 'OUTFLOW',
-              payment_method: targetTx.payment_method || 'CASH',
               category_id: targetTx.category_id || null,
               category_name: targetTx.category_name || null,
               semester_id: targetTx.semester_id || null,
@@ -1086,7 +1079,7 @@ export default function Dashboard() {
               disbursed_amount: payoutAmount,
               remaining_balance: remainingBal,
               recipient: targetTx.reimbursement_recipient,
-              payment_method: paymentMethod,
+              disbursement_source: 'CASHBOX',
               settled_by: userProfile?.full_name || currentUser?.email || 'Officer',
             },
           }]);
@@ -1103,7 +1096,6 @@ export default function Dashboard() {
         prev.map((t) => (t.id === transactionId ? {
           ...t,
           status: 'REIMBURSED',
-          payment_method: paymentMethod,
         } : t))
       );
     } else {
@@ -1120,7 +1112,6 @@ export default function Dashboard() {
           ...t,
           amount: payoutAmount,
           status: 'REIMBURSED',
-          payment_method: paymentMethod,
         } : t))
       ]);
     }
@@ -1135,7 +1126,6 @@ export default function Dashboard() {
             id: `disb-${Date.now()}`,
             advance_id: a.id,
             amount: payoutAmount,
-            payment_method: paymentMethod,
             disbursement_date: new Date().toISOString(),
           };
           return {
@@ -1153,7 +1143,7 @@ export default function Dashboard() {
   };
 
   // Handler for disbursing partial or full reimbursement payouts directly from AdvancesManagementModal
-  const handleRecordAdvanceDisbursement = async (advanceId, { amount, paymentMethod = 'CASH', notes = '' }) => {
+  const handleRecordAdvanceDisbursement = async (advanceId, { amount, notes = '' }) => {
     try {
       const isAuthorized = currentRole === 'admin' || currentRole === 'treasurer' || currentRole === 'president' || currentRole === 'adviser';
       if (!isAuthorized) {
@@ -1170,14 +1160,12 @@ export default function Dashboard() {
         return { error: 'Disbursement amount must be greater than ₱0.00' };
       }
 
-      // Validate vault liquidity balance
+      // Validate cashbox liquidity balance
       const balanceError = validateOutflowBalance({
         type: 'OUTFLOW',
-        paymentMethod,
         isReimbursement: false,
         amount: payoutAmount,
         cashBalance: summary.cash_on_hand,
-        gcashBalance: summary.gcash_balance,
       });
 
       if (balanceError) {
@@ -1190,7 +1178,6 @@ export default function Dashboard() {
         description: notes || `Reimbursement payout of ₱${payoutAmount.toFixed(2)} to ${targetAdvance.claimant_name}`,
         amount: payoutAmount,
         type: 'OUTFLOW',
-        payment_method: paymentMethod,
         category_name: targetAdvance.category_name || 'Food & Refreshments',
         event_name: targetAdvance.event_name || null,
         transaction_date: new Date().toISOString().split('T')[0],
@@ -1207,7 +1194,6 @@ export default function Dashboard() {
         id: `disb-${Date.now()}`,
         advance_id: advanceId,
         amount: payoutAmount,
-        payment_method: paymentMethod,
         disbursement_date: new Date().toISOString(),
         notes,
       };
@@ -1240,7 +1226,6 @@ export default function Dashboard() {
           await supabase.from('advance_disbursements').insert([{
             advance_id: advanceId,
             amount: payoutAmount,
-            payment_method: paymentMethod,
             notes,
             disbursed_by: userProfile?.id || null,
           }]);
@@ -1255,7 +1240,6 @@ export default function Dashboard() {
               title: targetAdvance.title,
               amount: payoutAmount,
               claimant: targetAdvance.claimant_name,
-              payment_method: paymentMethod,
               disbursed_by: userProfile?.full_name || currentUser?.email || 'Officer',
             },
           }]);
@@ -1327,7 +1311,7 @@ export default function Dashboard() {
   };
 
   // Handler for collecting payments on uncollected member debts and pre-orders
-  const handleRecordDebtPayment = async (debtId, { amount, tendered, paymentMethod = 'CASH', notes = '' }) => {
+  const handleRecordDebtPayment = async (debtId, { amount, tendered, notes = '' }) => {
     try {
       const targetDebt = debts.find((d) => d.id === debtId);
       if (!targetDebt) return { error: 'Debt record not found.' };
@@ -1338,7 +1322,6 @@ export default function Dashboard() {
         description: notes || `Installment collection of ₱${Number(amount).toFixed(2)} from ${targetDebt.debtor_name}`,
         amount,
         type: 'INFLOW',
-        payment_method: paymentMethod,
         category_name: 'Other Verified Inflow',
         transaction_date: new Date().toISOString().split('T')[0],
         is_reimbursement: false,
@@ -1374,7 +1357,6 @@ export default function Dashboard() {
           await supabase.from('debt_payments').insert([{
             debt_id: debtId,
             amount,
-            payment_method: paymentMethod,
             notes,
             received_by: userProfile?.id || null,
           }]);
@@ -1441,7 +1423,7 @@ export default function Dashboard() {
   };
 
   // Handler for starting a new semester with carry-over rollover balance
-  const handleStartSemester = async ({ academicYear, semester, label, rolloverCash, rolloverGcash, previousTermLabel }) => {
+  const handleStartSemester = async ({ academicYear, semester, label, rolloverCash, previousTermLabel }) => {
     const newSemObj = {
       id: `sem-${academicYear.replace(/[^0-9]/g, '')}-${semester.toLowerCase().replace(/[^a-z0-9]/g, '')}`,
       academicYear,
@@ -1465,7 +1447,6 @@ export default function Dashboard() {
           label: label,
           is_active: true,
           starting_cash_on_hand: parseFloat(rolloverCash) || 0,
-          starting_gcash_balance: parseFloat(rolloverGcash) || 0,
         }], { onConflict: 'academic_year,semester' });
       } catch (semErr) {
         console.warn('Failed to persist semester to Supabase:', semErr);
@@ -1479,23 +1460,6 @@ export default function Dashboard() {
         description: `Official starting balance forwarded from the verified ending cashbox of ${previousTermLabel}`,
         amount: rolloverCash,
         type: 'INFLOW',
-        payment_method: 'CASH',
-        category_name: 'Initial Budget Rollover',
-        transaction_date: new Date().toISOString().split('T')[0],
-        academic_year: academicYear,
-        semester: semester,
-        event_name: 'Semester Opening Turnover',
-        status: 'COMPLETED',
-      });
-    }
-
-    if (rolloverGcash > 0) {
-      await handleSaveTransaction({
-        title: `Beginning GCash Balance (Forwarded from ${previousTermLabel})`,
-        description: `Starting electronic funds forwarded from ${previousTermLabel}`,
-        amount: rolloverGcash,
-        type: 'INFLOW',
-        payment_method: 'GCASH',
         category_name: 'Initial Budget Rollover',
         transaction_date: new Date().toISOString().split('T')[0],
         academic_year: academicYear,
@@ -1809,6 +1773,7 @@ export default function Dashboard() {
           <ModuleErrorBoundary moduleName="Financial Overview">
             <StatCards
               summary={summary}
+              latestReconciliation={latestReconciliation}
               onOpenDenominations={() => setIsDenomOpen(true)}
               onOpenAdvances={() => setIsAdvancesOpen(true)}
               onOpenDebts={() => setIsDebtsOpen(true)}
@@ -1829,7 +1794,6 @@ export default function Dashboard() {
                 onSettleReimbursement={handleSettleReimbursement}
                 onOpenAuditTrail={() => setIsAuditOpen(true)}
                 cashBalance={summary.cash_on_hand}
-                gcashBalance={summary.gcash_balance}
                 currentRole={currentRole}
                 isDbConnected={isDbConnected}
               />
@@ -1877,7 +1841,6 @@ export default function Dashboard() {
             onSave={handleManualSaveTransaction}
             categories={categories}
             cashBalance={summary.cash_on_hand}
-            gcashBalance={summary.gcash_balance}
           />
         </ModuleErrorBoundary>
 
@@ -1908,7 +1871,6 @@ export default function Dashboard() {
             onRecordDisbursement={handleRecordAdvanceDisbursement}
             onCreateAdvance={handleCreateAdvance}
             cashBalance={summary.cash_on_hand}
-            gcashBalance={summary.gcash_balance}
             canManage={canManageFinancials}
           />
         </ModuleErrorBoundary>

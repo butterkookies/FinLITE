@@ -30,7 +30,7 @@ graph TD
     A --> F["5. 1:1 Institutional DOCX Exporter"]:::exp
 
     B --> B1["PDM Google OAuth (@pdm.edu.ph)<br/>Treasurer vs Auditor vs Adviser Roles"]
-    C --> C1["Dual Inflows (Cash & GCash)<br/>Personal Advances Queue (Accounts Payable)"]
+    C --> C1["Single Physical Cashbox Inflows<br/>Personal Advances Queue (Accounts Payable)"]
     D --> D1["₱1,000 to ₱1 Denomination Breakdown<br/>Variance Settlements & Cash Shortage Audit"]
     E --> E1["Deterministic SQL Aggregations<br/>Taglish/English Natural Inquiries"]
     F --> F1["Times New Roman & Borderless Tables<br/>6-Stage Wet-Ink Signatory Chain"]
@@ -203,13 +203,14 @@ Under certified institutional policy, **LITE does not collect mandatory student 
 3. *Booth Rental ("Arkila") & Sales Commission:* Rental fees paid by student sellers leasing table space, alongside agreed sales percentages/commissions collected from commercial concessionaires during Institutional Club Week.
 4. *Carried-Over Surplus Reserves & Certified Opening Liabilities:* Audited net cash surplus and certified unpaid Accounts Payable balances officially transferred from the preceding academic year under the face-value handoff protocol.
 
-These inflows traverse two distinct collection channels:
+These inflows traverse the physical collection channel:
 - **Direct Physical Cash Inflow & Delegation Protocol:** Physical currency collected by the Treasurer or designated Year-Level Representatives and Sub-Committee Chairpersons at event booths. 
   - *Holding Window:* Authorized student representatives are permitted to hold physical collections for a **maximum of 24 to 48 hours** before turning over the full amount to the Treasurer for deposit into the small metal cashbox in the PD's room.
   - *Emergency Supply Deduction Exception:* If an urgent logistical need arises during an active event booth, representatives are permitted to deduct cash directly from unremitted collections, provided an official commercial receipt or signed petty cash slip is immediately submitted for the exact deducted amount upon turnover.
-- **Digital GCash Inflow & Reconciliation Logic:** Student organizations cannot maintain institutional fintech corporate accounts. Digital payments are captured through the personal GCash mobile wallet of the **Treasurer or the on-duty executive officer**.
-  - *Bank / Cash-Out Fee Absorption:* Third-party withdrawal charges (₱15.00 to ₱20.00 per cash-out) incurred when liquidating digital balances into physical banknotes are formally recognized and logged as an official club operating expense line item labeled `"Bank / Cash-Out Fee"`.
-  - *Odd Digital Balances:* Fractional coin amounts that cannot be dispensed by physical automated teller machines or cash-out outlets are formally settled and transferred into the Treasurer's personal account to maintain mathematical parity.
+
+> [!NOTE]
+> **Scope Decision (Retirement of GCash Module in Favor of Strict Physical Cashbox Model)**:  
+> In compliance with institutional financial governance at Pambayang Dalubhasaan ng Marilao, student organizations do not maintain official institutional GCash or online fintech bank accounts. Historical digital payments were merely personal advances (*abono*) executed via personal accounts (e.g. adviser advancing lunch money). To prevent ledger drift, phantom shortage freezes, and commingling of personal and organizational funds, FinLITE retired the digital wallet module in favor of a **Strict Physical Cashbox Model**. All organizational liquid funds reside exclusively in the physical cashbox (kept in the Program Director's Room), and personal out-of-pocket digital advances (*abono*) are tracked strictly as liabilities (Accounts Payable) liquidated and reimbursed exclusively in physical cash.
 
 ### 3.2 Spending Authorization and Out-of-Pocket Personal Advances ("Abono")
 Activity operational budgets (e.g., procurement of decorative craft items, certificate paper, satin sashes, acrylic trophies, guest judge honorarium tokens, and committee refreshments) are governed by strict institutional authorization ceilings:
@@ -350,7 +351,7 @@ flowchart LR
     classDef mod fill:#ecfdf5,stroke:#059669,stroke-width:2px,color:#065f46;
 
     P1["1. Unaudited Personal Abono, Missing Metadata<br/>& Late Receipt Submissions"]:::prob --> M1["Personal Advance Abono Queue,<br/>Claimant Tracking & 7-Day Deadline Engine"]:::mod
-    P2["2. GCash Fund Co-Mingling,<br/>Cash-Out Lag & Unlogged Fees"]:::prob --> M2["Dual-Source Inflow Reconciliation<br/>& Official Bank Fee Subsystem"]:::mod
+    P2["2. Historical Digital Commingling<br/>& Out-of-Pocket Abono"]:::prob --> M2["Strict Cashbox Vault & Abono<br/>Liability Accounts Payable Engine"]:::mod
     P3["3. Ephemeral Slips & Micro-Disbursement<br/>Leakage (Fares, Stalls, Prints)"]:::prob --> M3["Digital Petty Cash Voucher Engine<br/>with Image Attachment Archival"]:::mod
     P4["4. Cashbox Custody in PD's Room &<br/>Stressful Face-Value Turnovers"]:::prob --> M4["Custodial Turnover Engine &<br/>Accounts Payable Carryover Certificate"]:::mod
     P5["5. Latent Discrepancies, Activity Freezes<br/>& Denomination Math Errors"]:::prob --> M5["Interactive Denomination Keypad (₱1,000-₱1)<br/>& Discrepancy Freeze Auditor"]:::mod
@@ -360,7 +361,7 @@ flowchart LR
 | Identified Problem in Business Logic | Root Operational Failure Mode | FinLITE Functional Module & Architectural Capability | Specific Operational Mechanism & Institutional Governance Impact |
 | :--- | :--- | :--- | :--- |
 | **1. Personal Abono Vulnerability & Delayed Reimbursements** | Advisers and officers shoulder urgent out-of-pocket costs but suffer personal loss when paper receipts fade, are lost, or exceed deadlines. | **Personal Advance ("Abono") & Reimbursement Queue Management Module** | • Dedicated Accounts Payable ledger.<br/>• Explicitly tracks both the individual who advanced the money and the authorized claimant.<br/>• ₱1,000.00 spending ceiling warning & 7-day receipt submission cutoff enforcement.<br/>• Partial payout state machine when cashbox liquidity is temporarily insufficient. |
-| **2. Digital Inflow GCash Co-Mingling & Cash-Out Lag** | Digital payments pooled into personal wallets of Treasurer/officer on duty, causing ledger drift and unlogged ₱15–₱20 withdrawal fees. | **Digital Mobile Inflow & GCash Liquidation Reconciliation Module** | • Explicit transaction tagging for GCash tournament entries and upfront merchandise orders.<br/>• Automatic logging of ₱15.00–₱20.00 withdrawal charges as `"Bank / Cash-Out Fee"` operating expense.<br/>• Reconciles cashbox replenishment to eliminate ledger drift; tracks odd coin balance digital settlements. |
+| **2. Digital Commingling & Historical Cash-Out Drift** | Digital payments pooled into personal accounts caused holding lag, unrecorded withdrawal fees, and ledger drift. (Retire GCash module). | **Strict Physical Cashbox & Net Position Ledger Module** | • Eliminates digital wallet tracking; enforces single physical cashbox model in PD's Room.<br/>• Calculates Net Position (`Cash on Hand - Pending Abono`) in real time.<br/>• Personal out-of-pocket digital advances are logged strictly as organizational liabilities reimbursed in cash. |
 | **3. Ephemeral Documentation & Micro-Disbursement Leakage** | Fares (jeepney/tricycle), local craft stalls, and emergency printing lack commercial receipts and rely on loose paper scraps. | **Unified Transaction Ledger & Digital Petty Cash Voucher Engine** | • Standardized input modal capturing non-receipted transit, craft supplies, and emergency printing.<br/>• Digital image attachment of signed handwritten petty cash acknowledgment slips.<br/>• Permanent immutable audit trail in DB with timestamp and officer endorsement. |
 | **4. Physical Cashbox Custodial Vulnerability & Face-Value Turnover Stress** | Funds held in small metal box in PD's room; outgoing team forced to shoulder missing cash at year-end turnover. | **Custodial Turnover & Multi-Year Balance Certification Engine** | • Enforces strict on-campus cashbox boundary and monitors 24–48h representative remittance windows.<br/>• Generates audited Closing Balance Transmittal Certificate.<br/>• Formally certifies legitimate unpaid Abono balances as carried-over Accounts Payable liabilities for the next academic year. |
 | **5. Latent Discrepancies & Post-Hoc Reconciliation Bottlenecks** | Physical cash counts (₱1,000 down to ₱1) are done manually months late; math errors hide variances until final report submission. | **Interactive Denomination Counter & Variance Settlement Audit Engine** | • Digital denomination keypad spanning Philippine banknotes and coins (₱1,000 down to ₱1).<br/>• Instant cross-calculation against theoretical ledger balance.<br/>• Governed discrepancy protocol: triggers visual activity freeze warning on shortages, justifies historical ₱161.00 shortage, and logs cash overages as cashbox emergency buffers. |
@@ -381,10 +382,10 @@ flowchart LR
    - Enforces the **₱1,000.00 prior-approval threshold** and validates submissions against the **7-day post-activity cutoff** to eliminate reporting delays.
    - Supports **partial cash payouts** when cashbox liquidity is insufficient, safeguarding creditor balances without risking cashbox insolvency.
 
-3. **Digital Mobile Inflow (GCash) & Petty Micro-Disbursement Voucher Subsystem:**
-   - Features structured input forms that accommodate both commercial receipts and handwritten petty cash acknowledgment slips for tricycle fares, raw craft supplies, and emergency printing.
-   - Accurately tracks GCash inflows from tournament entry fees, upfront merchandise payments, and booth concession commissions.
-   - Automatically logs ₱15.00–₱20.00 withdrawal fees under `"Bank / Cash-Out Fee"` and accounts for 24–48 hour representative remittance timelines.
+3. **Strict Physical Cashbox Vault & Single Operational Ledger Subsystem:**
+   - Enforces a pure physical cashbox accounting model, aligning with PDM governance prohibiting unverified fintech accounts.
+   - Eliminates ledger drift and phantom shortages by anchoring all organizational funds strictly to physical legal tender stored inside the PD's room.
+   - Features structured input forms accommodating both printed commercial sales invoices and handwritten petty cash slips for tricycle fares, raw craft supplies, and emergency printing.
 
 4. **Physical Denomination Counter & Variance Settlement Audit Engine:**
    - Provides an intuitive, visual currency calculator spanning all legal tender denominations in the Philippines (₱1,000, ₱500, ₱200, ₱100, ₱50, ₱20 bills; ₱20, ₱10, ₱5, ₱1 coins).

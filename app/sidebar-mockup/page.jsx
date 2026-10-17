@@ -348,13 +348,11 @@ export default function SidebarMockupDashboard() {
 
       if (tx.type === 'INCOME') {
         acc.total_inflow += centavos;
-        if (tx.payment_method === 'CASH') acc.cash_on_hand += centavos;
-        if (tx.payment_method === 'GCASH') acc.gcash_balance += centavos;
+        acc.cash_on_hand += centavos;
       } else if (tx.type === 'EXPENSE') {
         if (!isReimbursementClaim) {
           acc.total_outflow += centavos;
-          if (tx.payment_method === 'CASH') acc.cash_on_hand -= centavos;
-          if (tx.payment_method === 'GCASH') acc.gcash_balance -= centavos;
+          acc.cash_on_hand -= centavos;
         } else {
           acc.total_advances += centavos;
         }
@@ -368,19 +366,18 @@ export default function SidebarMockupDashboard() {
       total_inflow: 0,
       total_outflow: 0,
       cash_on_hand: 0,
-      gcash_balance: 0,
       total_advances: 0,
       settled_advances: 0,
     }
   );
 
   summary.cash_on_hand = fromCentavos(summary.cash_on_hand);
-  summary.gcash_balance = fromCentavos(summary.gcash_balance);
   summary.total_inflow = fromCentavos(summary.total_inflow);
   summary.total_outflow = fromCentavos(summary.total_outflow);
   summary.total_advances = fromCentavos(summary.total_advances);
   summary.settled_advances = fromCentavos(summary.settled_advances);
-  summary.net_balance = summary.cash_on_hand + summary.gcash_balance;
+  summary.net_position = summary.cash_on_hand - (summary.total_advances - summary.settled_advances);
+  summary.net_balance = summary.total_inflow - summary.total_outflow;
 
   // Active debts calculation
   const activeDebts = debts.filter((d) => d.status !== 'PAID');
@@ -661,7 +658,6 @@ export default function SidebarMockupDashboard() {
                 onSettleReimbursement={handleSettleReimbursement}
                 onOpenAuditTrail={() => setIsAuditOpen(true)}
                 cashBalance={summary.cash_on_hand}
-                gcashBalance={summary.gcash_balance}
                 currentRole={currentRole}
                 isDbConnected={isDbConnected}
               />
@@ -701,7 +697,6 @@ export default function SidebarMockupDashboard() {
             onSave={handleManualSaveTransaction}
             categories={categories}
             cashBalance={summary.cash_on_hand}
-            gcashBalance={summary.gcash_balance}
           />
         </ModuleErrorBoundary>
 

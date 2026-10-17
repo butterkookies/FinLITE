@@ -26,10 +26,8 @@ export default function NewTransactionModal({
   onSave,
   categories = [],
   cashBalance = 0,
-  gcashBalance = 0,
 }) {
   const [type, setType] = useState('OUTFLOW');
-  const [paymentMethod, setPaymentMethod] = useState('CASH');
   const [title, setTitle] = useState('');
   const [amount, setAmount] = useState('');
   const [amountTouched, setAmountTouched] = useState(false);
@@ -53,21 +51,19 @@ export default function NewTransactionModal({
   const [compressing, setCompressing] = useState(false);
   const [croppingIndex, setCroppingIndex] = useState(null);
 
-  // Amount validation: format/limit first, then per-channel overdraft check
+  // Amount validation: format/limit first, then physical cashbox balance check
   const amountError = validateTransactionAmount(amount);
   const balanceError = amountError
     ? null
     : validateOutflowBalance({
         type,
-        paymentMethod,
         isReimbursement,
         amount,
         cashBalance,
-        gcashBalance,
       });
   const fieldError = (amountTouched && amountError) || balanceError;
   const showOutflowBalance = type === 'OUTFLOW' && !isReimbursement;
-  const availableBalance = paymentMethod === 'GCASH' ? gcashBalance : cashBalance;
+  const availableBalance = cashBalance;
 
   // Sync categoryId with categoryName / type whenever categories or type changes
   useEffect(() => {
@@ -226,7 +222,6 @@ export default function NewTransactionModal({
       title,
       amount: parseFloat(amount),
       type,
-      payment_method: paymentMethod,
       category_id: categoryId,
       category_name: categoryName,
       event_name: eventName,
@@ -306,25 +301,7 @@ export default function NewTransactionModal({
             </Button>
           </div>
 
-          {/* Payment Method Toggle */}
-          <div className="flex items-center gap-2">
-            <span className="text-zinc-500 dark:text-zinc-400 font-medium">Channel:</span>
-            <div className="flex gap-2">
-              {['CASH', 'GCASH'].map((m) => (
-                <Button
-                  key={m}
-                  type="button"
-                  variant={paymentMethod === m ? 'secondary' : 'outline'}
-                  size="sm"
-                  onClick={() => setPaymentMethod(m)}
-                >
-                  {m === 'CASH' ? 'Physical Cashbox' : 'GCash Wallet'}
-                </Button>
-              ))}
-            </div>
-          </div>
-
-          {/* Amount (₱) — max ₱99,999.99, outflows cannot exceed the selected channel's balance */}
+          {/* Amount (₱) — max ₱99,999.99, outflows cannot exceed cashbox balance */}
           <div className={formErrors.amount ? 'animate-field-shake' : ''} key={`amt-${shakeKey}`}>
             <label className="block text-zinc-700 dark:text-zinc-300 font-semibold mb-1">
               Amount (₱) <span className="text-rose-500">*</span>
@@ -364,7 +341,7 @@ export default function NewTransactionModal({
               <p className="text-[11px] text-zinc-400 mt-1">
                 Maximum ₱99,999.99
                 {showOutflowBalance && (
-                  <> · Available in {paymentMethod === 'GCASH' ? 'GCash Wallet' : 'Physical Cashbox'}: {formatPHP(availableBalance)}</>
+                  <> · Available in Cashbox: {formatPHP(availableBalance)}</>
                 )}
               </p>
             )}
@@ -525,7 +502,7 @@ export default function NewTransactionModal({
                 Receipts / Proofs ({receiptFiles.length}/3)
               </label>
               <span className="text-[10px] text-zinc-400">
-                Max 3 images (OR, GCash, delivery/slip)
+                Max 3 images (Official Receipt, Petty Cash Slip, Invoice)
               </span>
             </div>
 

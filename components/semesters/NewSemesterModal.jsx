@@ -29,7 +29,6 @@ export default function NewSemesterModal({
   const [shakeKey, setShakeKey] = useState(0);
 
   const [rolloverCash, setRolloverCash] = useState(true);
-  const [rolloverGcash, setRolloverGcash] = useState(true);
 
   useEffect(() => {
     function handleClickOutside(event) {
@@ -42,7 +41,6 @@ export default function NewSemesterModal({
   }, []);
 
   const endingCash = currentSummary?.cash_on_hand || 0;
-  const endingGcash = currentSummary?.gcash_balance || 0;
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -60,7 +58,6 @@ export default function NewSemesterModal({
       semester: newSemester,
       label: `AY ${newAcademicYear.trim()} • ${newSemester}`,
       rolloverCash: rolloverCash ? endingCash : 0,
-      rolloverGcash: rolloverGcash ? endingGcash : 0,
       previousTermLabel: currentSemester?.label || 'Previous Term',
     });
 
@@ -101,17 +98,14 @@ export default function NewSemesterModal({
               To Be Archived
             </Badge>
           </div>
-          <div className="grid grid-cols-2 gap-3 pt-1">
-            <div className="bg-white dark:bg-[#121214] p-3 rounded-xl border border-zinc-200 dark:border-zinc-800">
-              <span className="text-[10px] text-zinc-500 dark:text-zinc-400 block">Physical Cash in Box</span>
-              <span className="text-base font-bold text-zinc-950 dark:text-zinc-50 mt-0.5 block tabular-nums whitespace-nowrap">
+          <div className="pt-1">
+            <div className="bg-white dark:bg-[#121214] p-3.5 rounded-xl border border-zinc-200 dark:border-zinc-800 flex items-center justify-between">
+              <div>
+                <span className="text-[10px] text-zinc-500 dark:text-zinc-400 block font-semibold uppercase tracking-wider">Physical Cashbox Balance</span>
+                <span className="text-xs text-zinc-400">Locked drawer in Program Director's Room</span>
+              </div>
+              <span className="text-lg font-bold text-zinc-950 dark:text-zinc-50 tabular-nums whitespace-nowrap">
                 {formatPHP(endingCash)}
-              </span>
-            </div>
-            <div className="bg-white dark:bg-[#121214] p-3 rounded-xl border border-zinc-200 dark:border-zinc-800">
-              <span className="text-[10px] text-zinc-500 dark:text-zinc-400 block">GCash Account</span>
-              <span className="text-base font-bold text-zinc-950 dark:text-zinc-50 mt-0.5 block tabular-nums whitespace-nowrap">
-                {formatPHP(endingGcash)}
               </span>
             </div>
           </div>
@@ -211,23 +205,6 @@ export default function NewSemesterModal({
               </span>
               <span className="text-[11px] text-zinc-500 dark:text-zinc-400 block mt-0.5">
                 Awtomatikong magla-log ng Initial Budget Inflow para sa simula ng bagong semester.
-              </span>
-            </div>
-          </label>
-
-          <label className="flex items-start gap-2.5 p-3 bg-zinc-50 dark:bg-zinc-900/40 border border-zinc-200 dark:border-zinc-800 rounded-xl cursor-pointer hover:bg-zinc-100/70 dark:hover:bg-zinc-800/40 transition-colors">
-            <input
-              type="checkbox"
-              checked={rolloverGcash}
-              onChange={(e) => setRolloverGcash(e.target.checked)}
-              className="mt-0.5 rounded text-emerald-600 focus:ring-emerald-500 bg-white dark:bg-zinc-900 border-zinc-300 dark:border-zinc-700"
-            />
-            <div className="text-xs">
-              <span className="font-semibold text-zinc-900 dark:text-zinc-100 block">
-                I-rollover ang GCash Balance ({formatPHP(endingGcash)})
-              </span>
-              <span className="text-[11px] text-zinc-500 dark:text-zinc-400 block mt-0.5">
-                Ililipat ang kasalukuyang digital balance sa panibagong cycle.
               </span>
             </div>
           </label>

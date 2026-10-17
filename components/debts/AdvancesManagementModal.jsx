@@ -27,7 +27,6 @@ export default function AdvancesManagementModal({
   onRecordDisbursement,
   onCreateAdvance,
   cashBalance = 0,
-  gcashBalance = 0,
   canManage = true,
 }) {
   const [activeTab, setActiveTab] = useState('ALL'); // 'ALL' | 'UNPAID' | 'PARTIALLY_REIMBURSED' | 'SETTLED'
@@ -38,7 +37,6 @@ export default function AdvancesManagementModal({
 
   // Disbursement dialog state
   const [disbursementAmount, setDisbursementAmount] = useState('');
-  const [disbursementMethod, setDisbursementMethod] = useState('CASH');
   const [disbursementNotes, setDisbursementNotes] = useState('');
   const [isSubmittingPayout, setIsSubmittingPayout] = useState(false);
   const [payoutError, setPayoutError] = useState('');
@@ -75,7 +73,6 @@ export default function AdvancesManagementModal({
     setSelectedAdvanceForPayout(advance);
     const remaining = Math.max(0, Number(advance.total_amount || 0) - Number(advance.amount_reimbursed || 0));
     setDisbursementAmount(remaining.toString());
-    setDisbursementMethod('CASH');
     setDisbursementNotes('');
     setPayoutError('');
   };
@@ -97,11 +94,10 @@ export default function AdvancesManagementModal({
       return;
     }
 
-    // Vault liquidity validation
-    const available = disbursementMethod === 'GCASH' ? Number(gcashBalance) : Number(cashBalance);
+    // Cashbox liquidity validation
+    const available = Number(cashBalance) || 0;
     if (amountVal > available) {
-      const channelLabel = disbursementMethod === 'GCASH' ? 'GCash Wallet' : 'Physical Cashbox';
-      setPayoutError(`Insufficient ${channelLabel} funds. Available: ${formatPHP(available)}`);
+      setPayoutError(`Insufficient Physical Cashbox funds. Available: ${formatPHP(available)}`);
       return;
     }
 
@@ -111,7 +107,6 @@ export default function AdvancesManagementModal({
     try {
       const res = await onRecordDisbursement(selectedAdvanceForPayout.id, {
         amount: amountVal,
-        paymentMethod: disbursementMethod,
         notes: disbursementNotes.trim(),
       });
 
@@ -360,7 +355,7 @@ export default function AdvancesManagementModal({
                             <div key={d.id || idx} className="text-xs flex items-center justify-between text-zinc-600 dark:text-zinc-400">
                               <span className="flex items-center gap-1">
                                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-                                {d.payment_method === 'GCASH' ? 'GCash' : 'Cashbox'} • {d.disbursement_date?.slice(0, 10) || 'Recent'}
+                                Cashbox • {d.disbursement_date?.slice(0, 10) || 'Recent'}
                                 {d.notes && <span className="text-zinc-400 italic">({d.notes})</span>}
                               </span>
                               <span className="font-bold tabular-nums text-zinc-900 dark:text-zinc-100">
@@ -460,44 +455,22 @@ export default function AdvancesManagementModal({
               </div>
             </div>
 
-            {/* Payment Method / Vault Selection */}
-            <div>
-              <label className="block text-xs font-semibold mb-1 text-zinc-700 dark:text-zinc-300">
-                Disburse From Vault Channel
-              </label>
-              <div className="grid grid-cols-2 gap-2">
-                <button
-                  type="button"
-                  onClick={() => setDisbursementMethod('CASH')}
-                  className={`p-2.5 rounded-lg border text-left flex items-center gap-2 cursor-pointer transition-all ${
-                    disbursementMethod === 'CASH'
-                      ? 'border-emerald-500 bg-emerald-500/10 text-emerald-900 dark:text-emerald-200'
-                      : 'border-zinc-200 dark:border-zinc-800 hover:bg-zinc-50 dark:hover:bg-zinc-800/40'
-                  }`}
-                >
-                  <Wallet className="w-4 h-4 text-emerald-600 shrink-0" />
-                  <div className="min-w-0">
-                    <p className="text-xs font-bold truncate">Physical Cashbox</p>
-                    <p className="text-[10px] text-zinc-500 truncate">Avail: {formatPHP(cashBalance)}</p>
-                  </div>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => setDisbursementMethod('GCASH')}
-                  className={`p-2.5 rounded-lg border text-left flex items-center gap-2 cursor-pointer transition-all ${
-                    disbursementMethod === 'GCASH'
-                      ? 'border-emerald-500 bg-emerald-500/10 text-emerald-900 dark:text-emerald-200'
-                      : 'border-zinc-200 dark:border-zinc-800 hover:bg-zinc-50 dark:hover:bg-zinc-800/40'
-                  }`}
-                >
-                  <Smartphone className="w-4 h-4 text-sky-600 shrink-0" />
-                  <div className="min-w-0">
-                    <p className="text-xs font-bold truncate">GCash Wallet</p>
-                    <p className="text-[10px] text-zinc-500 truncate">Avail: {formatPHP(gcashBalance)}</p>
-                  </div>
-                </button>
+            {/* Vault Channel Info */}
+            <div className="p-3 rounded-xl border border-emerald-500/30 bg-emerald-50/70 dark:bg-emerald-950/20 flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Wallet className="w-4 h-4 text-emerald-600 shrink-0" />
+                <div>
+                  <p className="text-xs font-bold text-zinc-900 dark:text-zinc-100">Physical Cashbox Payout</p>
+                  <p className="text-[10px] text-zinc-500">Program Director's Room Vault</p>
+                </div>
               </div>
+              <p className={`text-xs font-bold tabular-nums ${
+                cashBalance < parseFloat(disbursementAmount || 0)
+                  ? 'text-rose-600 dark:text-rose-400'
+                  : 'text-emerald-600 dark:text-emerald-400'
+              }`}>
+                Avail: {formatPHP(cashBalance)}
+              </p>
             </div>
 
             {/* Optional Notes */}
