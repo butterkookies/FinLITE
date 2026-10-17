@@ -1,7 +1,6 @@
 import './globals.css';
 import TechWaveBackground from '@/components/layout/TechWaveBackground';
 import { ThemeProvider } from '@/components/theme/ThemeProvider';
-import AppShell from '@/components/layout/AppShell';
 
 export const metadata = {
   title: 'FinLITE — Financial Management & Automated Document Generation System',
@@ -57,9 +56,7 @@ export default function RootLayout({ children }) {
 
           {/* Content sits above the background layers */}
           <div className="relative z-10 min-h-screen">
-            <AppShell>
-              {children}
-            </AppShell>
+            {children}
           </div>
         </ThemeProvider>
       </body>

@@ -30,7 +30,10 @@ function LoginForm() {
   const [isLoading, setIsLoading] = useState(false);
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
   const [error, setError] = useState(
-    errorParam === 'oauth_failed' ? 'Google sign-in failed. Please try again.' :
+    errorParam === 'oauth_failed' ? 'Google sign-in failed. If this Gmail is already registered with a password, sign in with your password, then connect Google under Account Security.' :
+    errorParam === 'link_requires_password' ? 'An account with this Gmail already exists with a password. Sign in with your password, then connect Google under Account Security.' :
+    errorParam === 'account_conflict' ? 'This Gmail is already tied to a different sign-in. Please contact your adviser or admin.' :
+    errorParam === 'account_rejected' ? 'Your registration request was not approved. Please contact the admin.' :
     errorParam === 'account_suspended' ? 'Your account has been suspended by an administrator. Please contact your adviser or admin.' :
     errorParam === 'server_error' ? 'A server error occurred. Please try again.' : ''
   );
@@ -52,6 +55,10 @@ function LoginForm() {
       if (!res.ok) {
         if (data.error === 'pending') {
           router.push(`/pending-approval?email=${encodeURIComponent(data.email)}`);
+          return;
+        }
+        if (data.error === 'email_not_verified') {
+          router.push(`/verify-email?status=sent&email=${encodeURIComponent(data.email || email)}`);
           return;
         }
         if (data.error === 'suspended') {

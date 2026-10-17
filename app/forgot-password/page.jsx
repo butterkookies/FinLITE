@@ -2,7 +2,6 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { createClient } from '@/lib/supabase/client';
 import { ArrowLeft, CheckCircle2, AlertCircle, Mail, Send } from 'lucide-react';
 import { validateGmail } from '@/lib/utils/validation';
 
@@ -25,15 +24,17 @@ export default function ForgotPasswordPage() {
     setIsLoading(true);
 
     try {
-      const supabase = createClient();
-      const redirectUrl = `${window.location.origin}/reset-password`;
-
-      const { error: resetErr } = await supabase.auth.resetPasswordForEmail(email.trim().toLowerCase(), {
-        redirectTo: redirectUrl,
+      // Handled by the server so the policy (no reset token for Google-only
+      // accounts, identical response for every address) cannot be bypassed.
+      const res = await fetch('/api/auth/forgot-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: email.trim().toLowerCase() }),
       });
+      const data = await res.json().catch(() => ({}));
 
-      if (resetErr) {
-        setError(resetErr.message || 'Failed to send password reset link. Please verify your email.');
+      if (!res.ok) {
+        setError(data.error || 'Failed to process your request. Please try again.');
       } else {
         setSubmitted(true);
       }
@@ -75,7 +76,7 @@ export default function ForgotPasswordPage() {
               <div>
                 <h3 className="text-sm font-bold text-gray-950">Check your email</h3>
                 <p className="text-xs text-gray-600 mt-1.5 leading-relaxed">
-                  We sent password reset instructions to <strong className="text-gray-900">{email}</strong>. Please check your inbox and spam folder.
+                  If <strong className="text-gray-900">{email}</strong> is registered, we sent instructions to it. Please check your inbox and spam folder.
                 </p>
               </div>
 

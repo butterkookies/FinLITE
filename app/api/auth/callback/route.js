@@ -2,22 +2,42 @@ import { NextResponse } from 'next/server';
 import { createClient, createAdminClient } from '@/lib/supabase/server';
 import { isSuperAdminEmail } from '@/lib/config/admin';
 import { getClientIp } from '@/lib/security/ratelimit';
+import { resolveAppUrl, safeNextPath } from '@/lib/auth/app-url';
+import { getAuthMethods, getSecurityState, patchSecurityState, logAuthEvent } from '@/lib/auth/methods';
+import { evaluateGoogleIdentity, isReplaceableRegistration } from '@/lib/auth/policy';
+import { discardUnverifiedRegistration } from '@/lib/auth/registration';
+import { sendSecurityChangeEmail } from '@/lib/email/auth-mailer';
 
 // GET /api/auth/callback — Supabase OAuth callback handler
-// After Google OAuth, check if user is new (needs profile completion) or returning
+//
+// Identity rules enforced here:
+//   - An account is matched on its Supabase user id (the Google "sub" behind it),
+//     never on email alone.
+//   - A Google identity on an account that has a password is only accepted if
+//     the owner linked it deliberately (see /api/auth/link-google).
+//   - A profile that is already bound to a different auth user is never re-bound.
 export async function GET(req) {
   const url = new URL(req.url);
   const code = url.searchParams.get('code');
-  const next = url.searchParams.get('next') || '/';
+  // Destination after sign-in: explicit ?next=, else the short-lived cookie the
+  // Account Security page sets before an OAuth round trip. Same-site paths only.
+  const cookieNext = req.cookies?.get?.('finlite_next')?.value;
+  const next = safeNextPath(url.searchParams.get('next') || cookieNext, '/');
 
-  // Dynamically resolve application origin from request headers to avoid cross-domain redirect issues (e.g., Render vs Vercel)
-  const forwardedHost = req.headers.get('x-forwarded-host') || req.headers.get('host');
-  const forwardedProto = req.headers.get('x-forwarded-proto') || (url.protocol.replace(':', '') || 'https');
-  const origin = forwardedHost ? `${forwardedProto}://${forwardedHost}` : url.origin;
-  const appUrl = origin || process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+  const appUrl = resolveAppUrl(req);
 
+  // Every redirect clears the one-shot destination cookie.
+  const redirectTo = (target) => {
+    const res = NextResponse.redirect(target);
+    if (cookieNext) res.cookies.set('finlite_next', '', { path: '/', maxAge: 0 });
+    return res;
+  };
+
+  // Supabase redirects here with ?error=... when the auth layer refuses the
+  // sign-in (for example the database guard that blocks silently attaching
+  // Google to a password account).
   if (!code) {
-    return NextResponse.redirect(`${appUrl}/login?error=oauth_failed`);
+    return redirectTo(`${appUrl}/login?error=oauth_failed`);
   }
 
   try {
@@ -28,7 +48,7 @@ export async function GET(req) {
 
     if (sessionError || !sessionData?.user) {
       console.error('OAuth code exchange error:', sessionError);
-      return NextResponse.redirect(`${appUrl}/login?error=oauth_failed`);
+      return redirectTo(`${appUrl}/login?error=oauth_failed`);
     }
 
     const user = sessionData.user;
@@ -36,6 +56,54 @@ export async function GET(req) {
     const googleName = user.user_metadata?.full_name || user.user_metadata?.name || '';
     const googleAvatar = user.user_metadata?.avatar_url || user.user_metadata?.picture || null;
     const clientIp = getClientIp(req);
+
+    const adminClient = createAdminClient();
+    const queryClient = adminClient || supabase;
+
+    // --- GOOGLE IDENTITY GUARD ---
+    // Decide whether the Google identity on this session is legitimate before
+    // anything else happens.
+    const hasGoogleIdentity = (user.identities || []).some((i) => i.provider === 'google');
+    if (hasGoogleIdentity && adminClient) {
+      const methods = await getAuthMethods(adminClient, { userId: user.id });
+      const state = await getSecurityState(adminClient, user.id);
+
+      const verdict = evaluateGoogleIdentity({
+        hasGoogleIdentity,
+        hasPassword: Boolean(methods.has_password),
+        emailConfirmed: Boolean(methods.email_confirmed),
+        googleLinkedAt: state?.google_linked_at,
+        googleLinkUntil: state?.google_link_until,
+      });
+
+      if (verdict === 'blocked') {
+        await logAuthEvent(adminClient, {
+          action: 'AUTH_GOOGLE_LINK_BLOCKED',
+          entityId: user.id,
+          details: { email: googleEmail, ip_address: clientIp },
+        });
+        await supabase.auth.signOut();
+        return redirectTo(`${appUrl}/login?error=link_requires_password`);
+      }
+
+      if (verdict === 'native' && !state?.google_linked_at) {
+        // First sign-in on a passwordless account: Google is its own method.
+        await patchSecurityState(adminClient, user.id, { google_linked_at: new Date().toISOString() });
+      }
+
+      if (verdict === 'link_now') {
+        await patchSecurityState(adminClient, user.id, {
+          google_linked_at: new Date().toISOString(),
+          google_link_until: null,
+        });
+        await logAuthEvent(adminClient, {
+          action: 'AUTH_GOOGLE_LINKED',
+          entityId: user.id,
+          details: { email: googleEmail, ip_address: clientIp, via: 'password_proof' },
+        });
+        sendSecurityChangeEmail({ to: googleEmail, event: 'google_linked', ip: clientIp }).catch(() => {});
+      }
+    }
 
     // --- SUPER ADMIN AUTO-SETUP ---
     // If the logging-in user is one of the designated super admins, auto-promote them to admin
@@ -88,14 +156,11 @@ export async function GET(req) {
         console.warn('Super admin auto-upsert note:', adminErr);
       }
 
-      // Directly route Super Admin into Admin Console
-      return NextResponse.redirect(`${appUrl}/admin`);
+      // Route Super Admin into the Admin Console unless a safe destination was requested
+      return redirectTo(`${appUrl}${next !== '/' ? next : '/admin'}`);
     }
 
-    // --- Check if already an approved profile (returning user by auth_user_id or email) ---
-    const adminClient = createAdminClient();
-    const queryClient = adminClient || supabase;
-
+    // --- Match an existing profile: by auth user id first ---
     let existingProfile = null;
     const { data: profByAuth } = await queryClient
       .from('profiles')
@@ -106,7 +171,9 @@ export async function GET(req) {
     if (profByAuth) {
       existingProfile = profByAuth;
     } else if (googleEmail) {
-      // Check fallback by email to detect existing profiles (e.g. from seed data or email signup)
+      // Email is only a hint. A profile can be claimed by email solely when it
+      // is not bound to any auth user yet (e.g. seed data) and the email is
+      // verified. A profile bound to a different auth user is never re-bound.
       const { data: profByEmail } = await queryClient
         .from('profiles')
         .select('id, status, role, username, auth_user_id, email')
@@ -114,20 +181,36 @@ export async function GET(req) {
         .maybeSingle();
 
       if (profByEmail) {
+        if (profByEmail.auth_user_id && profByEmail.auth_user_id !== user.id) {
+          await logAuthEvent(queryClient, {
+            action: 'AUTH_ACCOUNT_CONFLICT',
+            profileId: profByEmail.id,
+            entityId: profByEmail.id,
+            details: { email: googleEmail, ip_address: clientIp },
+          });
+          await supabase.auth.signOut();
+          return redirectTo(`${appUrl}/login?error=account_conflict`);
+        }
+
+        if (!user.email_confirmed_at) {
+          await supabase.auth.signOut();
+          return redirectTo(`${appUrl}/login?error=oauth_failed`);
+        }
+
         existingProfile = profByEmail;
-        // Auto-link Google OAuth UID to existing profile row
         try {
           await queryClient
             .from('profiles')
-            .update({ 
+            .update({
               auth_user_id: user.id,
               auth_provider: 'google',
               avatar_url: googleAvatar || undefined,
-              updated_at: new Date().toISOString()
+              updated_at: new Date().toISOString(),
             })
-            .eq('id', profByEmail.id);
+            .eq('id', profByEmail.id)
+            .is('auth_user_id', null);
         } catch (linkErr) {
-          console.warn('OAuth profile link auto-update warning:', linkErr?.message);
+          console.warn('OAuth profile claim warning:', linkErr?.message);
         }
       }
     }
@@ -135,7 +218,7 @@ export async function GET(req) {
     if (existingProfile) {
       if (existingProfile.status === 'suspended') {
         await supabase.auth.signOut();
-        return NextResponse.redirect(`${appUrl}/login?error=account_suspended`);
+        return redirectTo(`${appUrl}/login?error=account_suspended`);
       }
       if (existingProfile.status === 'approved') {
         // Telemetry: Capture AUTH_LOGIN for Google OAuth user
@@ -156,51 +239,49 @@ export async function GET(req) {
           console.warn('OAuth login audit telemetry note:', auditErr.message);
         }
 
-        // Approved member — go to dashboard
-        return NextResponse.redirect(`${appUrl}/`);
+        // Approved member: go to the requested page (or the dashboard)
+        return redirectTo(`${appUrl}${next}`);
       }
       // Known but still pending
-      return NextResponse.redirect(`${appUrl}/pending-approval?email=${encodeURIComponent(googleEmail)}`);
+      return redirectTo(`${appUrl}/pending-approval?email=${encodeURIComponent(googleEmail)}`);
     }
 
-    // --- Check if there's already a pending registration request for this Google account ---
-    const { data: existingRequest } = await queryClient
+    // --- Is there already a registration request for this Google account's email? ---
+    let { data: existingRequest } = await queryClient
       .from('registration_requests')
-      .select('id, status')
+      .select('id, status, auth_provider, google_id, email_verified_at')
       .eq('email', googleEmail)
       .maybeSingle();
 
-    if (existingRequest) {
-      if (existingRequest.status === 'approved') {
-        // Approved but profile linking check
-        try {
-          await queryClient
-            .from('profiles')
-            .update({ auth_user_id: user.id })
-            .eq('email', googleEmail);
-        } catch (_) {}
-        return NextResponse.redirect(`${appUrl}/`);
+    // An unverified email/password request never proved it owns this inbox.
+    // The person who just signed in with Google did, so they win.
+    if (existingRequest && isReplaceableRegistration(existingRequest) && adminClient) {
+      if (existingRequest.google_id === user.id) {
+        // Supabase merged the stale signup into this Google user: keep the auth
+        // user, drop only the squatter's request data.
+        await adminClient.from('registration_requests').delete().eq('id', existingRequest.id);
+        existingRequest = null;
+      } else if (await discardUnverifiedRegistration(adminClient, existingRequest)) {
+        existingRequest = null;
       }
-      // Still pending — redirect to pending page
-      return NextResponse.redirect(`${appUrl}/pending-approval?email=${encodeURIComponent(googleEmail)}`);
     }
 
-    // --- New Google user — redirect to complete profile (username required) ---
-    // Pass google user info via query params for pre-filling the form
-    const params = new URLSearchParams({
-      google: '1',
-      email: googleEmail || '',
-      name: googleName || '',
-      avatar: googleAvatar || '',
-      uid: user.id,
-    });
+    if (existingRequest) {
+      if (existingRequest.status === 'rejected') {
+        await supabase.auth.signOut();
+        return redirectTo(`${appUrl}/login?error=account_rejected`);
+      }
+      // Pending or approved-but-unlinked: nothing more the user can do here.
+      return redirectTo(`${appUrl}/pending-approval?email=${encodeURIComponent(googleEmail)}`);
+    }
 
-    // Sign out first so they can't access the app until approved
-    await supabase.auth.signOut();
-
-    return NextResponse.redirect(`${appUrl}/register?${params.toString()}`);
+    // --- New Google user: finish the profile on /register ---
+    // The session is kept (not signed out) so /api/auth/google-register can
+    // read the verified Google identity from it instead of trusting form input.
+    // Without an approved profile the middleware still blocks every app route.
+    return redirectTo(`${appUrl}/register?google=1`);
   } catch (err) {
     console.error('OAuth callback error:', err);
-    return NextResponse.redirect(`${appUrl}/login?error=server_error`);
+    return redirectTo(`${appUrl}/login?error=server_error`);
   }
 }

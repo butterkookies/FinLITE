@@ -32,6 +32,7 @@ import {
   ChevronLeft,
   ChevronRight
 } from 'lucide-react';
+import FloatingSidebar from '@/components/layout/FloatingSidebar';
 import { createClient } from '@/lib/supabase/client';
 import { useTheme } from '@/components/theme/ThemeProvider';
 import { Modal, Button, Badge, Input } from '@/components/ui';
@@ -86,6 +87,11 @@ export default function AdminPage() {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   
+  // Sidebar State (Pin #5)
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+  const [currentUser, setCurrentUser] = useState(null);
+  const [userProfile, setUserProfile] = useState(null);
+
   // Category Filtering & Limit/Pagination State (Pin #3)
   const [roleFilter, setRoleFilter] = useState('all');
   const [statusFilter, setStatusFilter] = useState('all');
@@ -113,6 +119,41 @@ export default function AdminPage() {
   const [auditLogs, setAuditLogs] = useState([]);
   const [auditFilter, setAuditFilter] = useState('all');
   const [isLoadingAudit, setIsLoadingAudit] = useState(false);
+
+  // Load authenticated officer for FloatingSidebar (Pin #5)
+  useEffect(() => {
+    async function loadAuth() {
+      const supabase = createClient();
+      if (!supabase) return;
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+          setCurrentUser(user);
+          const email = user.email?.toLowerCase();
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('*')
+            .eq('auth_user_id', user.id)
+            .maybeSingle();
+          if (profile) {
+            setUserProfile(profile);
+          } else if (email) {
+            const { data: profileByEmail } = await supabase
+              .from('profiles')
+              .select('*')
+              .eq('email', email)
+              .maybeSingle();
+            if (profileByEmail) {
+              setUserProfile(profileByEmail);
+            }
+          }
+        }
+      } catch (err) {
+        console.error('Failed to load user for sidebar:', err);
+      }
+    }
+    loadAuth();
+  }, []);
 
   // Reset pagination on filter or tab change (Pin #3)
   useEffect(() => {
@@ -483,9 +524,25 @@ export default function AdminPage() {
   };
 
   return (
-    <>
-      {/* Top Header */}
-      <header className={`sticky top-0 z-30 border-b backdrop-blur-xl transition-colors ${
+    <div className="min-h-screen flex font-sans">
+      
+      {/* 1. Desktop & Mobile Sidebar */}
+      <div className="no-print shrink-0">
+        <FloatingSidebar
+          currentRole="admin"
+          userProfile={userProfile}
+          currentUser={currentUser}
+          activeTab="admin"
+          isCollapsed={isSidebarCollapsed}
+          onToggleCollapse={setIsSidebarCollapsed}
+        />
+      </div>
+
+      {/* 2. Main Content Canvas */}
+      <div className="flex-1 flex flex-col transition-all duration-300 ease-in-out min-w-0">
+        
+        {/* Top Header */}
+        <header className={`sticky top-0 z-30 border-b backdrop-blur-xl transition-colors ${
           isLight
             ? 'bg-white/95 border-zinc-200 text-gray-900 shadow-2xs'
             : 'bg-[#09090b]/95 border-zinc-800 text-zinc-100 shadow-xs'
@@ -851,6 +908,18 @@ export default function AdminPage() {
                             <span className="px-2 py-0.5 text-[9px] font-bold rounded-md uppercase tracking-wider bg-amber-600 text-white">
                               Pending
                             </span>
+                            <span
+                              title={req.email_verified_at ? 'The applicant confirmed ownership of this inbox.' : 'The applicant has not opened the verification link yet.'}
+                              className={`px-2 py-0.5 text-[9px] font-semibold rounded-md whitespace-nowrap border ${
+                                isLight ? 'bg-white border-black/[0.08]' : 'bg-transparent border-white/[0.1]'
+                              } ${
+                                req.email_verified_at
+                                  ? (isLight ? 'text-emerald-700' : 'text-emerald-300')
+                                  : (isLight ? 'text-rose-700' : 'text-rose-300')
+                              }`}
+                            >
+                              {req.email_verified_at ? 'Email verified' : 'Email not verified'}
+                            </span>
                           </div>
 
                           <div className={`flex flex-wrap items-center gap-x-3 gap-y-0.5 mt-1 text-xs font-medium ${
@@ -904,8 +973,9 @@ export default function AdminPage() {
 
                         <button
                           onClick={() => handleApprove(req.id)}
-                          disabled={isSubmittingAction}
-                          className="px-4 py-2 text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-500 active:bg-emerald-700 rounded-xl transition-all shadow-xs flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
+                          disabled={isSubmittingAction || !req.email_verified_at}
+                          title={!req.email_verified_at ? 'Approval is available once the applicant verifies their email.' : undefined}
+                          className="px-4 py-2 text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-500 active:bg-emerald-700 rounded-xl transition-all shadow-xs flex items-center gap-1.5 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
                         >
                           <CheckCircle2 className="w-3.5 h-3.5" />
                           <span>Approve Access</span>
@@ -1579,6 +1649,7 @@ export default function AdminPage() {
         )}
       </Modal>
 
-    </>
+      </div>
+    </div>
   );
 }
