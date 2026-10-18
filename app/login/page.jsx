@@ -275,11 +275,13 @@ function LoginForm() {
             )}
 
             {/* Google Identity Services Script (forced to English) */}
-            <Script
-              src="https://accounts.google.com/gsi/client?hl=en"
-              strategy="afterInteractive"
-              onLoad={initGoogleIdentity}
-            />
+            {process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID && (
+              <Script
+                src="https://accounts.google.com/gsi/client?hl=en"
+                strategy="afterInteractive"
+                onLoad={initGoogleIdentity}
+              />
+            )}
 
             {/* Google Sign-In */}
             <div className="relative w-full mb-5">
@@ -302,11 +304,12 @@ function LoginForm() {
                 <span>{isGoogleLoading ? 'Signing in...' : 'Continue to FinLITE with Google'}</span>
               </Button>
 
-              {/* Invisible Google GIS overlay that captures the click and launches the Google prompt */}
+              {/* Invisible Google GIS overlay that captures the click and launches the Google prompt only when GIS is active */}
               <div
                 ref={googleBtnRef}
-                className="absolute inset-0 z-10 opacity-[0.0001] overflow-hidden cursor-pointer flex items-center justify-center [&>div]:!w-full [&>div]:!h-full [&_iframe]:!w-full [&_iframe]:!h-full [&_iframe]:!scale-150"
-                style={{ pointerEvents: isGoogleLoading ? 'none' : 'auto' }}
+                className={`absolute inset-0 z-10 opacity-[0.0001] overflow-hidden flex items-center justify-center [&>div]:!w-full [&>div]:!h-full [&_iframe]:!w-full [&_iframe]:!h-full [&_iframe]:!scale-150 ${!isGisReady ? 'pointer-events-none' : 'cursor-pointer'}`}
+                style={{ pointerEvents: isGisReady && !isGoogleLoading ? 'auto' : 'none' }}
+                aria-hidden={!isGisReady}
                 title="Continue to FinLITE with Google"
               />
             </div>
