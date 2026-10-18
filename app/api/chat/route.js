@@ -7,7 +7,7 @@ export async function POST(req) {
     const apiKey = process.env.GEMINI_API_KEY;
 
     const lastMessage = messages[messages.length - 1]?.content || '';
-    const { summary = {}, transactions = [] } = context || {};
+    const { summary = {}, transactions = [], debts = [], advances = [] } = context || {};
 
     // 1. Compute category breakdown from transactions
     const categoryTotals = {};
@@ -40,6 +40,28 @@ export async function POST(req) {
     });
     const relevantTransactions = Array.from(combinedTxMap.values());
 
+    // 3. Format Debts & Receivables Breakdown
+    const activeDebts = debts.filter((d) => d.status !== 'SETTLED' && d.status !== 'CANCELLED');
+    const debtsSummaryText = activeDebts.length > 0
+      ? activeDebts
+          .map((d) => {
+            const rem = Math.max(0, Number(d.total_amount || 0) - Number(d.amount_paid || 0));
+            return `- Debtor: "${d.debtor_name}" | Remaining: ₱${rem.toFixed(2)} (Total: ₱${Number(d.total_amount || 0).toFixed(2)}, Paid: ₱${Number(d.amount_paid || 0).toFixed(2)}) | Title: "${d.title}" | Status: ${d.status}${d.due_date ? ` | Due: ${d.due_date}` : ''}${d.notes ? ` | Notes: ${d.notes}` : ''}`;
+          })
+          .join('\n')
+      : '- None recorded (₱0.00 uncollected)';
+
+    // 4. Format Advances / Abono Breakdown
+    const activeAdvances = advances.filter((a) => a.status !== 'SETTLED' && a.status !== 'CANCELLED');
+    const advancesSummaryText = activeAdvances.length > 0
+      ? activeAdvances
+          .map((a) => {
+            const rem = Math.max(0, Number(a.total_amount || 0) - Number(a.amount_reimbursed || 0));
+            return `- Claimant: "${a.claimant_name}" | Remaining: ₱${rem.toFixed(2)} (Total: ₱${Number(a.total_amount || 0).toFixed(2)}) | Title: "${a.title}" | Status: ${a.status}${a.event_name ? ` | Event: ${a.event_name}` : ''}${a.notes ? ` | Notes: ${a.notes}` : ''}`;
+          })
+          .join('\n')
+      : '- None recorded (₱0.00 pending)';
+
     // Context summary for grounding
     const ledgerContext = `
 Current FinLITE System Ledger Status:
@@ -51,6 +73,12 @@ Current FinLITE System Ledger Status:
 - Pending Reimbursements / Abono Advances: ₱${(summary.pending_reimbursements || 0).toFixed(2)}
 - Uncollected Debts / Receivables: ₱${(summary.uncollected_debts || 0).toFixed(2)}
 (Note: LITE operates strictly on a physical cashbox model in the Program Director's room. There is no official GCash account or digital wallet; personal digital advances like abono are logged as liabilities reimbursed in physical cash.)
+
+Uncollected Debts / Receivables Breakdown (${activeDebts.length} active records):
+${debtsSummaryText}
+
+Pending Advances / Abono Breakdown (${activeAdvances.length} active records):
+${advancesSummaryText}
 
 Category Breakdown:
 ${categorySummaryText || '- None recorded'}
@@ -79,11 +107,11 @@ ${relevantTransactions.map((t) => `- [${t.type}] ${t.title}: ₱${t.amount} [Sta
 
 Operational Standards:
 1. Tone & Language: Professional, courteous, concise, and helpful. Fluently respond in natural Taglish, Filipino, or English matching the user's prompt.
-2. Grounding & Accuracy: Answer STRICTLY using the provided FinLITE System Ledger Status and transaction records below. NEVER guess or hallucinate numbers or transactions. If data is not present, say so honestly.
+2. Grounding & Accuracy: Answer STRICTLY using the provided FinLITE System Ledger Status, Uncollected Debts / Receivables Breakdown, Pending Advances / Abono Breakdown, and transaction records below. NEVER guess or hallucinate numbers or names. When answering about receivables or abono, explicitly include the debtor's or claimant's name and exact amounts from the breakdown.
 3. Response Structure:
-   - Direct Answer: Start with a clear 1-2 sentence direct answer stating the exact verified amounts in Philippine Peso (₱).
+   - Direct Answer: Start with a clear 1-2 sentence direct answer stating the exact verified amounts in Philippine Peso (₱) and specific debtor/claimant names.
    - Breakdown / List: If relevant, provide a clean, readable bullet list using simple hyphens (- ). Keep each point concise.
-   - Context / Advisory: If applicable, add a quick 1-sentence reminder (e.g., remind officers that pending reimbursements are abono awaiting post-activity liquidation, or note physical cash box reconciliation).
+   - Context / Advisory: If applicable, add a quick 1-sentence reminder (e.g., remind officers that pending reimbursements are abono awaiting post-activity liquidation, or collections should be remitted to the physical cash box).
 4. Monetary Format: Always format pesos with ₱ and standard comma grouping (e.g. ₱1,250.00).
 5. Clean Formatting: Do NOT output walls of asterisks, raw unclosed markdown tags, or tables. Use simple bold (**text**) for amounts/key terms and clean bullet points.
 
@@ -113,6 +141,8 @@ ${ledgerContext}`,
         lastMessage,
         summary,
         transactions,
+        debts,
+        advances,
         matchedTx,
       });
     }
@@ -127,22 +157,88 @@ ${ledgerContext}`,
   }
 }
 
-function generateRuleEngineReply({ lastMessage = '', summary = {}, transactions = [], matchedTx = [] }) {
+function generateRuleEngineReply({
+  lastMessage = '',
+  summary = {},
+  transactions = [],
+  debts = [],
+  advances = [],
+  matchedTx = [],
+}) {
   const q = lastMessage.toLowerCase();
 
-  // 1. Reimbursements / Abono
-  if (q.includes('jatulan') || q.includes('abono') || q.includes('reimburse') || q.includes('advance')) {
+  // 1. Specific Debtor or General Receivables / Debts / Pautang
+  const matchedDebtor = debts.find((d) => d.debtor_name && q.includes(d.debtor_name.toLowerCase()));
+  if (
+    matchedDebtor ||
+    q.includes('receivable') ||
+    q.includes('pautang') ||
+    q.includes('utang') ||
+    q.includes('debt') ||
+    q.includes('collectible')
+  ) {
+    const uncollectedDebts = debts.filter((d) => d.status !== 'SETTLED' && d.status !== 'CANCELLED');
+
+    if (matchedDebtor) {
+      const rem = Math.max(0, Number(matchedDebtor.total_amount || 0) - Number(matchedDebtor.amount_paid || 0));
+      return `Ayon sa ating records sa Debts & Receivables, si **${matchedDebtor.debtor_name}** ay mayroong naitalang receivable na nagkakahalagang **₱${rem.toLocaleString('en-PH', { minimumFractionDigits: 2 })}** para sa *${matchedDebtor.title}* (Kabuuang Halaga: ₱${Number(matchedDebtor.total_amount || 0).toLocaleString('en-PH', { minimumFractionDigits: 2 })}, Naibayad: ₱${Number(matchedDebtor.amount_paid || 0).toLocaleString('en-PH', { minimumFractionDigits: 2 })}, Status: ${matchedDebtor.status}).`;
+    }
+
+    if (uncollectedDebts.length > 0) {
+      const totalReceivables = uncollectedDebts.reduce(
+        (sum, d) => sum + Math.max(0, Number(d.total_amount || 0) - Number(d.amount_paid || 0)),
+        0
+      );
+      const list = uncollectedDebts
+        .map((d) => {
+          const rem = Math.max(0, Number(d.total_amount || 0) - Number(d.amount_paid || 0));
+          return `- **${d.debtor_name}**: ₱${rem.toLocaleString('en-PH', { minimumFractionDigits: 2 })} para sa *${d.title}* (Status: ${d.status})`;
+        })
+        .join('\n');
+      return `Batay sa FinLITE System Ledger, mayroong kabuuang **₱${totalReceivables.toLocaleString('en-PH', { minimumFractionDigits: 2 })}** na outstanding receivables:\n\n${list}\n\nMaaari ring buksan ang **Debts & Receivables** module mula sa sidebar para sa buong detalye o upang mag-record ng installment payments.`;
+    }
+
+    return 'Batay sa FinLITE System Ledger, kasalukuyang walang outstanding receivables o uncollected debts (₱0.00) ang LITE.';
+  }
+
+  // 2. Reimbursements / Abono / Advances
+  const matchedClaimant = advances.find((a) => a.claimant_name && q.includes(a.claimant_name.toLowerCase()));
+  if (
+    matchedClaimant ||
+    q.includes('jatulan') ||
+    q.includes('abono') ||
+    q.includes('reimburse') ||
+    q.includes('advance')
+  ) {
+    const pendingAdv = advances.filter((a) => a.status !== 'SETTLED' && a.status !== 'CANCELLED');
+
+    if (matchedClaimant) {
+      const rem = Math.max(0, Number(matchedClaimant.total_amount || 0) - Number(matchedClaimant.amount_reimbursed || 0));
+      return `Ayon sa ating records, mayroong naitalang advance/abono si **${matchedClaimant.claimant_name}** na nagkakahalagang **₱${rem.toLocaleString('en-PH', { minimumFractionDigits: 2 })}** para sa *${matchedClaimant.title}* (Status: ${matchedClaimant.status}). Naghihintay ito ng post-activity liquidation bago i-reimburse mula sa physical cashbox.`;
+    }
+
+    if (pendingAdv.length > 0) {
+      const list = pendingAdv
+        .map((a) => {
+          const rem = Math.max(0, Number(a.total_amount || 0) - Number(a.amount_reimbursed || 0));
+          return `- **${a.claimant_name || 'Officer'}**: ₱${rem.toLocaleString('en-PH', { minimumFractionDigits: 2 })} para sa *${a.title}*`;
+        })
+        .join('\n');
+      return `Ayon sa ating verified database records, may mga sumusunod na pending advance (abono):\n\n${list}\n\nIto ay naghihintay pa ng cash box reimbursement kapag na-liquidate na ang aktibidad.`;
+    }
+
     const reimbursements = transactions.filter((t) => t.is_reimbursement && t.status === 'PENDING_REIMBURSEMENT');
     if (reimbursements.length > 0) {
       const list = reimbursements
-        .map((r) => `**${r.reimbursement_recipient || 'Officer'}** (₱${Number(r.amount).toLocaleString('en-PH', { minimumFractionDigits: 2 })} para sa *${r.title}*)`)
-        .join(', ');
-      return `Ayon sa ating verified database records, may mga nakabinbing advance (abono): ${list}. Ito ay naghihintay pa ng cash box refund kapag na-liquidate na ang event.`;
+        .map((r) => `- **${r.reimbursement_recipient || 'Officer'}**: ₱${Number(r.amount).toLocaleString('en-PH', { minimumFractionDigits: 2 })} para sa *${r.title}*`)
+        .join('\n');
+      return `Ayon sa ating verified database records, may mga nakabinbing advance (abono):\n\n${list}\n\nIto ay naghihintay pa ng cash box refund kapag na-liquidate na ang event.`;
     }
+
     return 'Ayon sa ating verified database records, walang nakatalang pending reimbursement (abono) sa kasalukuyan.';
   }
 
-  // 2. Shortages / Discrepancies
+  // 3. Shortages / Discrepancies
   if (q.includes('shortage') || q.includes('discrepanc') || q.includes('kulang')) {
     const shortages = transactions.filter((t) =>
       (t.category_name && t.category_name.toLowerCase().includes('shortage')) ||
@@ -155,20 +251,6 @@ function generateRuleEngineReply({ lastMessage = '', summary = {}, transactions 
       return `Mayroong naitalang kabuuang **₱${totalShortage.toLocaleString('en-PH', { minimumFractionDigits: 2 })} Cash Shortage** sa ating talaan (${list}) na pormal nang ini-log at dumaan sa beripikasyon.`;
     }
     return 'Walang naitalang cash shortage o discrepancy sa ating kasalukuyang talaan.';
-  }
-
-  // 3. Receivables / Debts / Pautang
-  if (q.includes('receivable') || q.includes('pautang') || q.includes('utang') || q.includes('debt') || q.includes('collectible')) {
-    const receivables = transactions.filter((t) =>
-      (t.category_name && (t.category_name.toLowerCase().includes('receivable') || t.category_name.toLowerCase().includes('pautang') || t.category_name.toLowerCase().includes('utang'))) ||
-      (t.title && (t.title.toLowerCase().includes('receivable') || t.title.toLowerCase().includes('pautang') || t.title.toLowerCase().includes('utang')))
-    );
-    if (receivables.length > 0) {
-      const totalReceivables = receivables.reduce((sum, r) => sum + (Number(r.amount) || 0), 0);
-      const list = receivables.map((r) => `**${r.title}** (₱${Number(r.amount).toLocaleString('en-PH', { minimumFractionDigits: 2 })})`).join(', ');
-      return `May kabuuang **₱${totalReceivables.toLocaleString('en-PH', { minimumFractionDigits: 2 })}** na receivables / collectibles sa ledger: ${list}. Maaari ring buksan ang **Debts & Receivables** module mula sa sidebar para sa kumpletong breakdown.`;
-    }
-    return 'Walang naitalang active receivables o pautang sa kasalukuyang talaan. Maaari ring bisitahin ang **Debts & Receivables** module mula sa sidebar para sa buong detalye.';
   }
 
   // 4. Inflows & Outflows / Totals

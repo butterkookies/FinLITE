@@ -1,6 +1,6 @@
 'use client';
 
-import { Home, FileText, Plus, Wallet, Sparkles } from 'lucide-react';
+import { Home, FileText, Plus, Wallet, Sparkles, Bot } from 'lucide-react';
 
 export default function BottomNav({
   onOpenNewTx,
@@ -76,7 +76,7 @@ export default function BottomNav({
           className="flex flex-col items-center justify-center min-w-[52px] min-h-[48px] rounded-xl transition-all cursor-pointer active:scale-95 text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white"
           title="Open AI Assistant"
         >
-          <Sparkles className="w-5 h-5 stroke-[2] text-amber-500" />
+          <Bot className="w-5 h-5 stroke-[2] text-emerald-600 dark:text-emerald-400" />
           <span className="text-[10px] font-semibold tracking-tight mt-0.5">AI</span>
         </button>
 

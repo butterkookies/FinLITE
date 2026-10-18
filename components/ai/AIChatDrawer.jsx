@@ -11,7 +11,14 @@ const QUICK_QUESTIONS = [
   'Sino ang mga may outstanding receivables o pautang?',
 ];
 
-export default function AIChatDrawer({ isOpen, onClose, summary = {}, transactions = [] }) {
+export default function AIChatDrawer({
+  isOpen,
+  onClose,
+  summary = {},
+  transactions = [],
+  debts = [],
+  advances = [],
+}) {
   const [input, setInput] = useState('');
   const [messages, setMessages] = useState([
     {
@@ -54,7 +61,7 @@ export default function AIChatDrawer({ isOpen, onClose, summary = {}, transactio
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           messages: newMessages,
-          context: { summary, transactions },
+          context: { summary, transactions, debts, advances },
         }),
       });
 
@@ -72,14 +79,25 @@ export default function AIChatDrawer({ isOpen, onClose, summary = {}, transactio
       const lower = text.toLowerCase();
 
       if (lower.includes('jatulan') || lower.includes('abono') || lower.includes('reimburse') || lower.includes('advance')) {
-        const reimbursements = transactions.filter((t) => t.is_reimbursement && t.status === 'PENDING_REIMBURSEMENT');
-        if (reimbursements.length > 0) {
-          const list = reimbursements
-            .map((r) => `**${r.reimbursement_recipient || 'Officer'}** (₱${Number(r.amount).toLocaleString('en-PH', { minimumFractionDigits: 2 })} para sa *${r.title}*)`)
+        const pendingAdv = advances.filter((a) => a.status !== 'SETTLED' && a.status !== 'CANCELLED');
+        if (pendingAdv.length > 0) {
+          const list = pendingAdv
+            .map((a) => {
+              const rem = Math.max(0, Number(a.total_amount || 0) - Number(a.amount_reimbursed || 0));
+              return `**${a.claimant_name || 'Officer'}** (₱${rem.toLocaleString('en-PH', { minimumFractionDigits: 2 })} para sa *${a.title}*)`;
+            })
             .join(', ');
           fallbackReply = `Batay sa ating database, may mga sumusunod na pending advance (abono): ${list}. Hindi pa ito nailalabas mula sa physical cash box.`;
         } else {
-          fallbackReply = 'Batay sa ating database, walang nakatalang pending reimbursement (abono) sa kasalukuyan.';
+          const reimbursements = transactions.filter((t) => t.is_reimbursement && t.status === 'PENDING_REIMBURSEMENT');
+          if (reimbursements.length > 0) {
+            const list = reimbursements
+              .map((r) => `**${r.reimbursement_recipient || 'Officer'}** (₱${Number(r.amount).toLocaleString('en-PH', { minimumFractionDigits: 2 })} para sa *${r.title}*)`)
+              .join(', ');
+            fallbackReply = `Batay sa ating database, may mga sumusunod na pending advance (abono): ${list}. Hindi pa ito nailalabas mula sa physical cash box.`;
+          } else {
+            fallbackReply = 'Batay sa ating database, walang nakatalang pending reimbursement (abono) sa kasalukuyan.';
+          }
         }
       } else if (lower.includes('shortage') || lower.includes('discrepanc') || lower.includes('kulang')) {
         const shortages = transactions.filter((t) => (t.category_name && t.category_name.toLowerCase().includes('shortage')) || (t.title && t.title.toLowerCase().includes('shortage')) || (t.description && t.description.toLowerCase().includes('shortage')));
@@ -90,8 +108,30 @@ export default function AIChatDrawer({ isOpen, onClose, summary = {}, transactio
         } else {
           fallbackReply = 'Walang naitalang cash shortage o discrepancy sa ating kasalukuyang talaan.';
         }
-      } else if (lower.includes('receivable') || lower.includes('pautang') || lower.includes('utang') || lower.includes('debt') || lower.includes('collectible')) {
-        fallbackReply = 'Maaaring buksan ang **Debts & Receivables** module mula sa sidebar upang suriin ang kumpletong breakdown ng mga pautang at collectibles para sa semestreng ito.';
+      } else if (
+        lower.includes('receivable') ||
+        lower.includes('pautang') ||
+        lower.includes('utang') ||
+        lower.includes('debt') ||
+        lower.includes('collectible') ||
+        debts.some((d) => d.debtor_name && lower.includes(d.debtor_name.toLowerCase()))
+      ) {
+        const uncollected = debts.filter((d) => d.status !== 'SETTLED' && d.status !== 'CANCELLED');
+        const specific = uncollected.filter((d) => d.debtor_name && lower.includes(d.debtor_name.toLowerCase()));
+        const targetList = specific.length > 0 ? specific : uncollected;
+
+        if (targetList.length > 0) {
+          const list = targetList
+            .map((d) => {
+              const rem = Math.max(0, Number(d.total_amount || 0) - Number(d.amount_paid || 0));
+              return `**${d.debtor_name}** (₱${rem.toLocaleString('en-PH', { minimumFractionDigits: 2 })} para sa *${d.title}*)`;
+            })
+            .join(', ');
+          const totalRem = targetList.reduce((sum, d) => sum + Math.max(0, Number(d.total_amount || 0) - Number(d.amount_paid || 0)), 0);
+          fallbackReply = `Mayroong naitalang kabuuang **₱${totalRem.toLocaleString('en-PH', { minimumFractionDigits: 2 })}** sa Uncollected Receivables: ${list}. Maaari ring buksan ang **Debts & Receivables** module mula sa sidebar para sa buong detalye.`;
+        } else {
+          fallbackReply = 'Walang naitalang active receivables o pautang sa kasalukuyang talaan.';
+        }
       } else if (lower.includes('inflow') || lower.includes('outflow') || lower.includes('pasok') || lower.includes('labas') || lower.includes('gastos')) {
         fallbackReply = `Ang ating kabuuang Inflows ngayong semestre ay **₱${(summary.total_inflows || 0).toLocaleString('en-PH', { minimumFractionDigits: 2 })}** at ang kabuuang Outflows ay **₱${(summary.total_outflows || 0).toLocaleString('en-PH', { minimumFractionDigits: 2 })}**. Ang ating Net Semester Balance ay **₱${((summary.total_inflows || 0) - (summary.total_outflows || 0)).toLocaleString('en-PH', { minimumFractionDigits: 2 })}**.`;
       } else if (lower.includes('physical cash') || lower.includes('on hand') || lower.includes('cashbox') || lower.includes('cash box') || lower.includes('hawak na pera')) {

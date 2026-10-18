@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
-import { Plus, Wallet, Calculator, Sparkles, FileText, CreditCard } from 'lucide-react';
+import { Plus, Wallet, Calculator, Sparkles, FileText, CreditCard, Bot } from 'lucide-react';
 import BottomNav from '@/components/layout/BottomNav';
 import StatCards from '@/components/dashboard/StatCards';
 import TransactionTable from '@/components/ledger/TransactionTable';
@@ -10,7 +10,7 @@ import ModuleErrorBoundary from '@/components/common/ModuleErrorBoundary';
 import { createClient } from '@/lib/supabase/client';
 import { isSuperAdminEmail } from '@/lib/config/admin';
 import { DEFAULT_SEMESTERS } from '@/lib/config/semesters';
-import { toCentavos, fromCentavos, denomCodeToCountKey } from '@/lib/utils/currency';
+import { toCentavos, fromCentavos, denomCodeToCountKey, formatPHP } from '@/lib/utils/currency';
 import { validateTransactionAmount, validateOutflowBalance } from '@/lib/utils/validation';
 import { Card, Badge, Button } from '@/components/ui';
 
@@ -1757,7 +1757,7 @@ export default function Dashboard() {
                   className="flex flex-col items-center gap-1 p-1 sm:px-2 group cursor-pointer"
                 >
                   <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-lg flex items-center justify-center transition-all border bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20 group-hover:bg-emerald-500/20 active:scale-95">
-                    <Sparkles className="w-4 h-4 stroke-[2]" />
+                    <Bot className="w-4 h-4 stroke-[2]" />
                   </div>
                   <span className="text-[10px] sm:text-[11px] font-medium transition-colors text-zinc-600 dark:text-zinc-300 group-hover:text-emerald-600 dark:group-hover:text-emerald-400">
                     Copilot
@@ -1906,6 +1906,8 @@ export default function Dashboard() {
             onClose={() => setIsAIOpen(false)}
             summary={summary}
             transactions={activeTransactions}
+            debts={activeDebts}
+            advances={activeAdvances}
           />
         </ModuleErrorBoundary>
 

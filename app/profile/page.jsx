@@ -7,7 +7,6 @@ import Image from 'next/image';
 import { createClient } from '@/lib/supabase/client';
 import {
   ArrowLeft,
-  User,
   Mail,
   Phone,
   ShieldCheck,
@@ -20,7 +19,12 @@ import {
   Shield,
   Pencil,
   Camera,
+  Lock,
+  User,
+  KeyRound,
+  FileText
 } from 'lucide-react';
+import { Button, Badge } from '@/components/ui';
 import EditProfileModal from '@/components/profile/EditProfileModal';
 
 export default function ProfilePage() {
@@ -117,266 +121,333 @@ export default function ProfilePage() {
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center p-4">
-        <div className="w-8 h-8 rounded-full border-2 border-emerald-400 border-t-transparent animate-spin" />
+        <div className="w-8 h-8 rounded-full border-2 border-emerald-500 border-t-transparent animate-spin" />
       </div>
     );
   }
 
   return (
-    <div className="flex-1 flex flex-col min-w-0">
+    <div className="flex-1 flex flex-col min-w-0 bg-zinc-50/50 dark:bg-[#09090b] transition-colors">
       
-      {/* Top Header — Matching Global Obsidian Header */}
-      <header className="sticky top-0 z-30 bg-[#09090b]/95 backdrop-blur-xl border-b border-zinc-800 transition-colors">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between">
-          <div className="flex items-center gap-3 pl-12 md:pl-0">
+      {/* Top Header — Cohesive with Navbar & Admin Console */}
+      <header className="sticky top-0 z-30 bg-white/95 dark:bg-[#09090b]/95 backdrop-blur-xl border-b border-zinc-200 dark:border-zinc-800 transition-colors">
+        <div className="max-w-5xl mx-auto px-3 sm:px-6 lg:px-8 h-14 flex items-center justify-between gap-3 min-w-0">
+          
+          {/* Left: Breadcrumbs & Back Nav */}
+          <div className="flex items-center gap-2 sm:gap-3 pl-11 md:pl-0 min-w-0">
             <Link
               href="/"
-              className="flex items-center gap-2 p-1.5 rounded-lg hover:bg-zinc-800 transition-colors text-zinc-400 hover:text-zinc-100"
+              className="p-1.5 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900/60 hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors shrink-0 shadow-2xs"
               title="Return to Dashboard"
             >
-              <ArrowLeft className="w-5 h-5" />
+              <ArrowLeft className="w-4 h-4" />
             </Link>
-            <div className="h-5 w-px bg-zinc-800" />
-            <div>
-              <h1 className="text-sm sm:text-base font-bold text-zinc-100">Account Profile</h1>
-              <p className="text-[10px] text-zinc-400 font-medium">FinLITE Identity &amp; Security Credentials</p>
+
+            <div className="h-4 w-px bg-zinc-200 dark:bg-zinc-800 shrink-0" />
+
+            <div className="flex items-center gap-1.5 min-w-0 text-xs sm:text-sm">
+              <span className="text-zinc-400 dark:text-zinc-500 hidden xs:inline">FinLITE /</span>
+              <span className="font-bold text-zinc-900 dark:text-zinc-100 truncate">Account Profile</span>
             </div>
           </div>
 
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => setIsEditOpen(true)}
-              className="h-8 px-2.5 text-xs font-medium text-zinc-200 bg-zinc-900/60 hover:bg-zinc-900 border border-zinc-800 hover:border-zinc-700 rounded-lg transition-colors flex items-center gap-1.5 cursor-pointer whitespace-nowrap"
-            >
-              <Pencil className="w-3.5 h-3.5 text-emerald-400" />
-              <span>Edit Profile</span>
-            </button>
-
+          {/* Right: Auxiliary Actions */}
+          <div className="flex items-center gap-2 shrink-0">
             {isAdmin && (
-              <Link
-                href="/admin"
-                className="h-8 px-2.5 text-xs font-medium text-amber-300 bg-amber-950/30 hover:bg-amber-950/60 border border-amber-900/40 rounded-lg transition-colors flex items-center gap-1.5 cursor-pointer whitespace-nowrap"
-              >
-                <ShieldCheck className="w-3.5 h-3.5 text-amber-400" />
-                <span className="hidden sm:inline">Admin Console</span>
+              <Link href="/admin">
+                <Button
+                  variant="amber-subtle"
+                  size="sm"
+                  leftIcon={<ShieldCheck className="w-3.5 h-3.5 text-amber-500" />}
+                  className="active:scale-95"
+                >
+                  <span className="hidden sm:inline">Admin Console</span>
+                  <span className="sm:hidden">Admin</span>
+                </Button>
               </Link>
             )}
 
-            <button
+            <Button
+              variant="outline"
+              size="sm"
               onClick={handleSignOut}
-              className="h-9 px-3 text-xs font-semibold text-rose-300 bg-gradient-to-br from-[#280c13] to-[#19060b] hover:from-[#361019] hover:to-[#22080f] active:scale-98 border border-rose-500/30 rounded-xl transition-all shadow-sm flex items-center gap-1.5 cursor-pointer whitespace-nowrap"
+              className="text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/30 border-rose-200/60 dark:border-rose-900/40 active:scale-95"
+              leftIcon={<LogOut className="w-3.5 h-3.5 text-rose-500" />}
             >
-              <LogOut className="w-3.5 h-3.5 text-rose-400" />
-              <span>Sign Out</span>
-            </button>
+              <span className="hidden xs:inline">Sign Out</span>
+            </Button>
           </div>
+
         </div>
       </header>
 
       {/* Main Container */}
-      <main className="max-w-4xl mx-auto px-4 sm:px-6 py-8 w-full flex-1 space-y-6">
+      <main className="max-w-5xl mx-auto px-3 sm:px-6 lg:px-8 py-5 sm:py-8 w-full flex-1 space-y-5 sm:space-y-6 min-w-0">
         
-        {/* Profile Card — Gradient matching Dashboard Hero */}
-        <div className="rounded-3xl bg-gradient-to-br from-[#0a2e1d]/90 via-[#072417]/85 to-[#051b11]/90 backdrop-blur-xl p-6 sm:p-8 shadow-xl relative overflow-hidden transition-all">
-          {/* Ambient corner auras matching Dashboard Hero */}
-          <div className="absolute -top-20 -right-20 w-60 h-60 bg-emerald-400/15 rounded-full blur-3xl pointer-events-none" />
-          <div className="absolute -bottom-20 -left-20 w-60 h-60 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
+        {/* 1. HERO IDENTITY CARD — Clean Adaptive SaaS Canvas */}
+        <div className="rounded-2xl sm:rounded-3xl border border-zinc-200/90 dark:border-zinc-800/90 bg-white dark:bg-[#121214] p-5 sm:p-7 shadow-xs relative overflow-hidden transition-all">
+          
+          {/* Subtle Ambient Accent Aura */}
+          <div className="absolute -top-16 -right-16 w-48 h-48 bg-emerald-500/10 dark:bg-emerald-500/15 rounded-full blur-3xl pointer-events-none" />
+          <div className="absolute -bottom-16 -left-16 w-48 h-48 bg-emerald-600/5 dark:bg-emerald-600/10 rounded-full blur-3xl pointer-events-none" />
 
-          <div className="relative z-10 flex flex-col sm:flex-row items-center sm:items-start gap-6 text-center sm:text-left">
+          <div className="relative z-10 flex flex-col md:flex-row items-center md:items-start justify-between gap-5 sm:gap-6 text-center md:text-left">
             
-            {/* Avatar / Picture */}
-            <div className="relative shrink-0 group">
-              {avatarUrl ? (
-                <div className="w-24 h-24 rounded-3xl overflow-hidden shadow-md relative">
-                  <img
-                    src={avatarUrl}
-                    alt={fullName}
-                    width={96}
-                    height={96}
-                    className="object-cover w-full h-full"
-                    referrerPolicy="no-referrer"
-                    onError={(e) => { e.currentTarget.style.display = 'none'; }}
-                  />
-                </div>
-              ) : (
-                <div className="w-24 h-24 rounded-3xl bg-gradient-to-br from-[#0c3924] to-[#062014] flex items-center justify-center text-emerald-300 text-3xl font-black shadow-inner">
-                  {fullName[0]?.toUpperCase() || 'U'}
-                </div>
-              )}
-              <button
-                type="button"
-                onClick={() => setIsEditOpen(true)}
-                className="absolute -top-1.5 -right-1.5 w-7 h-7 rounded-full bg-[#0c3924] hover:bg-[#124d32] shadow-md flex items-center justify-center text-emerald-300 hover:text-white transition-colors cursor-pointer"
-                title="Change Profile Photo"
-              >
-                <Camera className="w-3.5 h-3.5" />
-              </button>
-              <div className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-[#10b981] border-2 border-[#072417] flex items-center justify-center text-black font-black" title="Verified Account">
-                <CheckCircle2 className="w-3.5 h-3.5" />
-              </div>
-            </div>
-
-            {/* Profile Info */}
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-2 justify-center sm:justify-start flex-wrap mb-1">
-                <h2 className="text-xl sm:text-2xl font-black tracking-tight text-white drop-shadow-sm">
-                  {fullName}
-                </h2>
-                {profile?.username && (
-                  <span className="text-xs font-bold text-emerald-300 bg-emerald-500/15 px-2 py-0.5 rounded-full">
-                    @{profile.username}
-                  </span>
+            {/* Avatar & Photo Trigger */}
+            <div className="flex flex-col sm:flex-row items-center gap-4 sm:gap-5 min-w-0">
+              <div className="relative shrink-0 group">
+                {avatarUrl ? (
+                  <div className="w-20 h-20 sm:w-22 sm:h-22 rounded-2xl overflow-hidden shadow-xs border-2 border-zinc-200 dark:border-zinc-700 relative bg-zinc-100 dark:bg-zinc-800">
+                    <img
+                      src={avatarUrl}
+                      alt={fullName}
+                      width={88}
+                      height={88}
+                      className="object-cover w-full h-full"
+                      referrerPolicy="no-referrer"
+                      onError={(e) => { e.currentTarget.style.display = 'none'; }}
+                    />
+                  </div>
+                ) : (
+                  <div className="w-20 h-20 sm:w-22 sm:h-22 rounded-2xl bg-emerald-600 dark:bg-emerald-700 flex items-center justify-center text-white text-2xl sm:text-3xl font-black shadow-xs">
+                    {fullName[0]?.toUpperCase() || 'U'}
+                  </div>
                 )}
-                <span className="px-2.5 py-0.5 rounded-full text-xs font-bold uppercase tracking-wider bg-[#0d3322] text-emerald-300">
-                  {roleLabelMap[role] || role}
-                </span>
+                
+                {/* Change photo button on hover */}
                 <button
                   type="button"
                   onClick={() => setIsEditOpen(true)}
-                  className="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-300 hover:text-white hover:bg-emerald-500/20 px-2 py-0.5 rounded-full transition-colors cursor-pointer"
-                  title="Edit Profile"
+                  className="absolute -top-1.5 -right-1.5 w-7 h-7 rounded-full bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 shadow-sm flex items-center justify-center text-zinc-600 dark:text-zinc-300 hover:text-emerald-600 dark:hover:text-emerald-400 hover:scale-105 active:scale-95 transition-all cursor-pointer"
+                  title="Change Profile Photo"
                 >
-                  <Pencil className="w-2.5 h-2.5" />
-                  <span>Edit</span>
+                  <Camera className="w-3.5 h-3.5" />
                 </button>
-              </div>
-
-              <p className="text-sm text-white/70 font-medium flex items-center justify-center sm:justify-start gap-1.5 mt-1">
-                <Mail className="w-4 h-4 text-emerald-400 shrink-0" />
-                <span>{email}</span>
-              </p>
-
-              <div className="flex items-center justify-center sm:justify-start gap-2 mt-4 flex-wrap">
-                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-emerald-500/15 text-emerald-300">
-                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
-                  Account Approved &amp; Active
-                </span>
-
-                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-[#0d3020] text-emerald-100/75">
-                  Provider: Google OAuth
-                </span>
-              </div>
-            </div>
-
-          </div>
-        </div>
-
-        {/* Detailed Information Grid — Gradient Matching Dashboard StatCards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          
-          {/* Institutional Affiliation */}
-          <div className="rounded-3xl bg-gradient-to-br from-[#0a2e1d]/90 via-[#072417]/85 to-[#051b11]/90 backdrop-blur-xl p-5 sm:p-6 shadow-xl space-y-3.5 relative overflow-hidden transition-all">
-            <div className="absolute -top-12 -right-12 w-32 h-32 bg-emerald-400/10 rounded-full blur-2xl pointer-events-none" />
-            
-            <div className="flex items-center gap-2.5 text-emerald-400 relative z-10">
-              <div className="w-8 h-8 rounded-xl bg-emerald-500/15 flex items-center justify-center">
-                <Building className="w-4 h-4 text-emerald-400" />
-              </div>
-              <h3 className="text-sm font-bold text-white">Institutional Affiliation</h3>
-            </div>
-            
-            <div className="space-y-2.5 text-xs relative z-10">
-              <div>
-                <p className="text-emerald-100/50 font-medium">Institution</p>
-                <p className="text-white font-bold mt-0.5">Pambayang Dalubhasaan ng Marilao (PDM)</p>
-              </div>
-              <div>
-                <p className="text-emerald-100/50 font-medium">College</p>
-                <p className="text-white font-bold mt-0.5">College of Computer Studies (CCS)</p>
-              </div>
-              <div>
-                <p className="text-emerald-100/50 font-medium">Recognized Organization</p>
-                <p className="text-white font-bold mt-0.5">League of Information Technology Enthusiasts (LITE)</p>
-              </div>
-            </div>
-          </div>
-
-          {/* Contact & Access */}
-          <div className="rounded-3xl bg-gradient-to-br from-[#0a2e1d]/90 via-[#072417]/85 to-[#051b11]/90 backdrop-blur-xl p-5 sm:p-6 shadow-xl space-y-3.5 relative overflow-hidden transition-all">
-            <div className="absolute -top-12 -right-12 w-32 h-32 bg-emerald-400/10 rounded-full blur-2xl pointer-events-none" />
-
-            <div className="flex items-center gap-2.5 text-emerald-400 relative z-10">
-              <div className="w-8 h-8 rounded-xl bg-emerald-500/15 flex items-center justify-center">
-                <Shield className="w-4 h-4 text-emerald-400" />
-              </div>
-              <h3 className="text-sm font-bold text-white">Contact &amp; Access</h3>
-            </div>
-
-            <div className="space-y-2.5 text-xs relative z-10">
-              <div>
-                <p className="text-emerald-100/50 font-medium">Username</p>
-                <div className="flex items-center gap-1.5 mt-0.5">
-                  <p className="text-white font-bold">
-                    {profile?.username ? `@${profile.username}` : <span className="text-white/40 italic font-normal">Not set</span>}
-                  </p>
-                  <button
-                    onClick={() => setIsEditOpen(true)}
-                    className="text-[11px] text-emerald-400 hover:underline font-semibold cursor-pointer"
-                  >
-                    {profile?.username ? 'Change' : '+ Add'}
-                  </button>
+                
+                {/* Verified Account Badge */}
+                <div 
+                  className="absolute -bottom-1.5 -right-1.5 w-6 h-6 rounded-full bg-emerald-600 border-2 border-white dark:border-[#121214] flex items-center justify-center text-white shadow-xs" 
+                  title="Verified Organization Member"
+                >
+                  <CheckCircle2 className="w-3.5 h-3.5" />
                 </div>
               </div>
-              <div>
-                <p className="text-emerald-100/50 font-medium">Contact Number</p>
-                <div className="flex items-center gap-1.5 mt-0.5">
-                  <p className="text-white font-bold tabular-nums">
-                    {profile?.contact_number || <span className="text-white/40 italic font-normal">Not provided</span>}
-                  </p>
-                  <button
-                    onClick={() => setIsEditOpen(true)}
-                    className="text-[11px] text-emerald-400 hover:underline font-semibold cursor-pointer"
-                  >
-                    {profile?.contact_number ? 'Change' : '+ Add number'}
-                  </button>
+
+              {/* Identity & Metadata */}
+              <div className="min-w-0 space-y-1.5">
+                <div className="flex items-center gap-2 justify-center md:justify-start flex-wrap">
+                  <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-zinc-950 dark:text-zinc-100">
+                    {fullName}
+                  </h1>
+                  {profile?.username && (
+                    <span className="text-xs font-semibold px-2 py-0.5 rounded-md bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800/60 font-mono">
+                      @{profile.username}
+                    </span>
+                  )}
+                  <Badge variant={isAdmin ? 'amber' : 'emerald'} size="xs" className="uppercase tracking-wider font-bold">
+                    {roleLabelMap[role] || role}
+                  </Badge>
                 </div>
-              </div>
-              <div>
-                <p className="text-emerald-100/50 font-medium">Financial Role Authority</p>
-                <p className="text-white font-bold capitalize mt-0.5">
-                  {role} {isAdmin ? '(Full System Authority)' : '(Restricted Segregation of Duties)'}
+
+                <p className="text-xs sm:text-sm text-zinc-600 dark:text-zinc-400 font-medium flex items-center justify-center md:justify-start gap-1.5 truncate">
+                  <Mail className="w-3.5 h-3.5 text-zinc-400 shrink-0" />
+                  <span className="truncate">{email}</span>
                 </p>
+
+                <div className="flex items-center justify-center md:justify-start gap-2 pt-1 flex-wrap text-xs">
+                  <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-lg font-medium bg-emerald-50 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-300 border border-emerald-200/60 dark:border-emerald-900/40 text-[11px]">
+                    <CheckCircle2 className="w-3 h-3 text-emerald-600 dark:text-emerald-400" />
+                    <span>Account Active &amp; Verified</span>
+                  </span>
+
+                  <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-lg font-medium bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300 text-[11px]">
+                    <KeyRound className="w-3 h-3 opacity-60" />
+                    <span>Google Workspace OAuth</span>
+                  </span>
+                </div>
               </div>
-              <div>
-                <p className="text-emerald-100/50 font-medium">Account Status</p>
-                <p className="text-emerald-400 font-bold mt-0.5">Approved &amp; Verified</p>
+            </div>
+
+            {/* Single Primary Action: Edit Profile */}
+            <div className="shrink-0 w-full md:w-auto">
+              <Button
+                variant="primary"
+                size="md"
+                onClick={() => setIsEditOpen(true)}
+                leftIcon={<Pencil className="w-3.5 h-3.5" />}
+                className="w-full md:w-auto shadow-xs active:scale-95"
+              >
+                <span>Edit Profile</span>
+              </Button>
+            </div>
+
+          </div>
+        </div>
+
+        {/* 2. BALANCED 2-COLUMN GRID: Academic Affiliation + Contact Credentials */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5">
+          
+          {/* Card A: Institutional Affiliation */}
+          <div className="rounded-2xl sm:rounded-3xl border border-zinc-200/90 dark:border-zinc-800/90 bg-white dark:bg-[#121214] p-5 sm:p-6 shadow-xs flex flex-col justify-between">
+            <div>
+              <div className="flex items-center gap-2.5 pb-3 border-b border-zinc-100 dark:border-zinc-800/80">
+                <div className="w-8 h-8 rounded-xl bg-emerald-50 dark:bg-emerald-950/50 border border-emerald-200/60 dark:border-emerald-800/50 flex items-center justify-center text-emerald-600 dark:text-emerald-400 shrink-0">
+                  <Building className="w-4 h-4" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-bold text-zinc-900 dark:text-zinc-100">Institutional Affiliation</h3>
+                  <p className="text-[11px] text-zinc-500 dark:text-zinc-400">Campus Charter &amp; Academic Unit</p>
+                </div>
               </div>
+
+              <div className="space-y-3.5 pt-4 text-xs">
+                <div>
+                  <p className="text-[11px] font-medium text-zinc-500 dark:text-zinc-400">Higher Education Institution</p>
+                  <p className="font-semibold text-zinc-900 dark:text-zinc-100 mt-0.5">
+                    Pambayang Dalubhasaan ng Marilao (PDM)
+                  </p>
+                </div>
+
+                <div>
+                  <p className="text-[11px] font-medium text-zinc-500 dark:text-zinc-400">College Department</p>
+                  <p className="font-semibold text-zinc-900 dark:text-zinc-100 mt-0.5">
+                    College of Computer Studies (CCS)
+                  </p>
+                </div>
+
+                <div>
+                  <p className="text-[11px] font-medium text-zinc-500 dark:text-zinc-400">Recognized Student Organization</p>
+                  <p className="font-semibold text-zinc-900 dark:text-zinc-100 mt-0.5">
+                    League of Information Technology Enthusiasts (LITE)
+                  </p>
+                </div>
+
+                <div>
+                  <p className="text-[11px] font-medium text-zinc-500 dark:text-zinc-400">Degree Program</p>
+                  <p className="font-semibold text-zinc-900 dark:text-zinc-100 mt-0.5">
+                    Bachelor of Science in Information Technology (BSIT)
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="pt-4 mt-4 border-t border-zinc-100 dark:border-zinc-800/60 flex items-center justify-between text-[11px] text-zinc-500">
+              <span>Campus Jurisdiction</span>
+              <span className="font-semibold text-zinc-800 dark:text-zinc-200">Marilao, Bulacan</span>
+            </div>
+          </div>
+
+          {/* Card B: Contact & Identity Credentials */}
+          <div className="rounded-2xl sm:rounded-3xl border border-zinc-200/90 dark:border-zinc-800/90 bg-white dark:bg-[#121214] p-5 sm:p-6 shadow-xs flex flex-col justify-between">
+            <div>
+              <div className="flex items-center gap-2.5 pb-3 border-b border-zinc-100 dark:border-zinc-800/80">
+                <div className="w-8 h-8 rounded-xl bg-emerald-50 dark:bg-emerald-950/50 border border-emerald-200/60 dark:border-emerald-800/50 flex items-center justify-center text-emerald-600 dark:text-emerald-400 shrink-0">
+                  <Shield className="w-4 h-4" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-bold text-zinc-900 dark:text-zinc-100">Contact &amp; Access</h3>
+                  <p className="text-[11px] text-zinc-500 dark:text-zinc-400">Communication &amp; Financial Governance</p>
+                </div>
+              </div>
+
+              <div className="space-y-3.5 pt-4 text-xs">
+                {/* Username */}
+                <div>
+                  <p className="text-[11px] font-medium text-zinc-500 dark:text-zinc-400">System Username</p>
+                  <div className="flex items-center justify-between mt-0.5">
+                    <p className="font-semibold text-zinc-900 dark:text-zinc-100">
+                      {profile?.username ? `@${profile.username}` : <span className="text-zinc-400 italic font-normal">Not configured</span>}
+                    </p>
+                    <button
+                      type="button"
+                      onClick={() => setIsEditOpen(true)}
+                      className="text-[11px] font-semibold text-emerald-600 dark:text-emerald-400 hover:underline cursor-pointer"
+                    >
+                      {profile?.username ? 'Update' : '+ Add'}
+                    </button>
+                  </div>
+                </div>
+
+                {/* Contact Phone */}
+                <div>
+                  <p className="text-[11px] font-medium text-zinc-500 dark:text-zinc-400">Mobile Contact Number</p>
+                  <div className="flex items-center justify-between mt-0.5">
+                    <p className="font-semibold text-zinc-900 dark:text-zinc-100 font-mono">
+                      {profile?.contact_number || <span className="text-zinc-400 italic font-normal font-sans">Not provided</span>}
+                    </p>
+                    <button
+                      type="button"
+                      onClick={() => setIsEditOpen(true)}
+                      className="text-[11px] font-semibold text-emerald-600 dark:text-emerald-400 hover:underline cursor-pointer"
+                    >
+                      {profile?.contact_number ? 'Update' : '+ Add'}
+                    </button>
+                  </div>
+                </div>
+
+                {/* Role Authority */}
+                <div>
+                  <p className="text-[11px] font-medium text-zinc-500 dark:text-zinc-400">Financial Role Authority</p>
+                  <p className="font-semibold text-zinc-900 dark:text-zinc-100 capitalize mt-0.5">
+                    {roleLabelMap[role] || role} {isAdmin ? '• Full System Authority' : '• Segregated Duties'}
+                  </p>
+                </div>
+
+                {/* Account Status */}
+                <div>
+                  <p className="text-[11px] font-medium text-zinc-500 dark:text-zinc-400">Registration Status</p>
+                  <div className="flex items-center gap-1.5 mt-0.5">
+                    <span className="w-2 h-2 rounded-full bg-emerald-500" />
+                    <p className="font-semibold text-emerald-700 dark:text-emerald-400">Approved &amp; Active</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="pt-4 mt-4 border-t border-zinc-100 dark:border-zinc-800/60 flex items-center justify-between text-[11px] text-zinc-500">
+              <span>Access Control</span>
+              <span className="font-semibold text-zinc-800 dark:text-zinc-200">Supabase RLS Enforced</span>
             </div>
           </div>
 
         </div>
 
-        {/* Quick Navigation Cards — Gradient Matching Dashboard */}
-        <div className="rounded-3xl bg-gradient-to-br from-[#09291a]/90 via-[#072115]/85 to-[#05180f]/90 backdrop-blur-xl p-5 sm:p-6 shadow-xl relative overflow-hidden transition-all">
-          <div className="absolute -top-16 -right-16 w-40 h-40 bg-emerald-400/10 rounded-full blur-2xl pointer-events-none" />
-
-          <h3 className="text-xs font-bold uppercase tracking-wider text-emerald-300/80 mb-3 relative z-10">
-            Available Operations
-          </h3>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 relative z-10">
-            <Link
-              href="/"
-              className="p-4 rounded-2xl bg-gradient-to-br from-[#0b2f1e]/90 to-[#061d12]/90 hover:from-[#0e3b26] hover:to-[#092617] transition-all flex items-center justify-between group shadow-md"
-            >
-              <div>
-                <p className="text-xs font-bold text-white group-hover:text-emerald-300 transition-colors">Main Ledger &amp; Dashboard</p>
-                <p className="text-[11px] text-white/50 group-hover:text-white/70 transition-colors mt-0.5">Record transactions, cash box, liquidation preview</p>
+        {/* 3. SECURITY & SESSION TELEMETRY (Clean Replacement for Redundant Operations Card) */}
+        <div className="rounded-2xl sm:rounded-3xl border border-zinc-200/90 dark:border-zinc-800/90 bg-white dark:bg-[#121214] p-5 sm:p-6 shadow-xs space-y-4">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-zinc-100 dark:border-zinc-800/80">
+            <div className="flex items-center gap-2.5">
+              <div className="w-8 h-8 rounded-xl bg-emerald-50 dark:bg-emerald-950/50 border border-emerald-200/60 dark:border-emerald-800/50 flex items-center justify-center text-emerald-600 dark:text-emerald-400 shrink-0">
+                <ShieldCheck className="w-4 h-4" />
               </div>
-              <ExternalLink className="w-4 h-4 text-emerald-400/60 group-hover:text-emerald-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all shrink-0" />
-            </Link>
+              <div>
+                <h3 className="text-sm font-bold text-zinc-900 dark:text-zinc-100">Security &amp; Session Telemetry</h3>
+                <p className="text-[11px] text-zinc-500 dark:text-zinc-400">Identity Protection &amp; Governance Safeguards</p>
+              </div>
+            </div>
 
-            {isAdmin && (
-              <Link
-                href="/admin"
-                className="p-4 rounded-2xl bg-gradient-to-br from-[#28200a]/90 to-[#181305]/90 hover:from-[#33290d] hover:to-[#201906] transition-all flex items-center justify-between group shadow-md"
-              >
-                <div>
-                  <p className="text-xs font-bold text-white group-hover:text-amber-300 transition-colors">Access Control &amp; Admin</p>
-                  <p className="text-[11px] text-amber-200/50 group-hover:text-amber-200/70 transition-colors mt-0.5">Review and approve new member registration requests</p>
-                </div>
-                <ShieldCheck className="w-4 h-4 text-amber-400 group-hover:scale-110 transition-transform shrink-0" />
-              </Link>
-            )}
+            <Badge variant="emerald" size="xs">
+              TLS 1.3 Encrypted
+            </Badge>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
+            <div className="p-3 rounded-xl bg-zinc-50 dark:bg-zinc-900/50 border border-zinc-100 dark:border-zinc-800/60">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-400">Auth Method</span>
+              <p className="font-semibold text-zinc-900 dark:text-zinc-100 mt-1">OAuth 2.0 via Google</p>
+              <p className="text-[10px] text-zinc-500 mt-0.5">Single Sign-On Verified</p>
+            </div>
+
+            <div className="p-3 rounded-xl bg-zinc-50 dark:bg-zinc-900/50 border border-zinc-100 dark:border-zinc-800/60">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-400">Database Guard</span>
+              <p className="font-semibold text-zinc-900 dark:text-zinc-100 mt-1">PostgreSQL RLS</p>
+              <p className="text-[10px] text-zinc-500 mt-0.5">Strict multi-role policies</p>
+            </div>
+
+            <div className="p-3 rounded-xl bg-zinc-50 dark:bg-zinc-900/50 border border-zinc-100 dark:border-zinc-800/60">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-400">Audit Logging</span>
+              <p className="font-semibold text-zinc-900 dark:text-zinc-100 mt-1">Immutable Trail</p>
+              <p className="text-[10px] text-zinc-500 mt-0.5">All transactions timestamped</p>
+            </div>
           </div>
         </div>
 

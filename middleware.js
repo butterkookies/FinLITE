@@ -63,9 +63,26 @@ export async function middleware(request) {
   );
 
   // Get current session
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  let user = null;
+  try {
+    const {
+      data: { user: authUser },
+      error: authError,
+    } = await supabase.auth.getUser();
+
+    if (!authError && authUser) {
+      user = authUser;
+    } else if (authError) {
+      // Clear stale Supabase auth cookies from response if refresh token is invalid or missing
+      request.cookies.getAll().forEach((cookie) => {
+        if (cookie.name.includes('auth-token') || cookie.name.startsWith('sb-')) {
+          response.cookies.delete(cookie.name);
+        }
+      });
+    }
+  } catch (_e) {
+    user = null;
+  }
 
   const isPublic = isPublicRoute(pathname);
 
@@ -77,7 +94,12 @@ export async function middleware(request) {
       }
       const loginUrl = request.nextUrl.clone();
       loginUrl.pathname = '/login';
-      return NextResponse.redirect(loginUrl);
+      const redirectResponse = NextResponse.redirect(loginUrl);
+      // Copy any deleted/mutated cookies to the redirect response
+      response.cookies.getAll().forEach((cookie) => {
+        redirectResponse.cookies.set(cookie);
+      });
+      return redirectResponse;
     }
     return applyRateLimitHeaders(request, response);
   }

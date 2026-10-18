@@ -300,19 +300,22 @@
 /* Mobile & Tablet Responsive Overrides (< 860px) */
 @media screen and (max-width: 859px) {
   .document-preview-overlay {
-    padding-left: 0.5rem;
-    padding-right: 0.5rem;
+    padding-left: 0.25rem;
+    padding-right: 0.25rem;
+    -webkit-overflow-scrolling: touch;
   }
 
   .document-sheet {
     width: 100% !important;
     max-width: 100% !important;
     min-height: auto !important;
-    padding: 1.25rem 0.85rem !important;
-    margin: 0.75rem auto !important;
+    padding: 1.25rem 0.75rem !important;
+    margin: 0.5rem auto !important;
     border-radius: 0.75rem;
     font-size: 10pt !important;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    overflow-x: auto;
+    box-sizing: border-box;
   }
 
   .document-sheet * {

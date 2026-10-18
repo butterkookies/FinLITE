@@ -11,7 +11,8 @@ import {
   HandCoins, 
   CreditCard, 
   FileSpreadsheet, 
-  Sparkles, 
+  Sparkles,
+  Bot,
   ShieldCheck, 
   Shield, 
   ChevronDown, 
@@ -183,7 +184,7 @@ export default function FloatingSidebar({
     {
       id: 'copilot',
       label: 'AI Copilot',
-      icon: Sparkles,
+      icon: Bot,
       highlight: true,
       action: () => {
         if (typeof onOpenAI === 'function') onOpenAI();
@@ -210,18 +211,19 @@ export default function FloatingSidebar({
 
   return (
     <>
-      {/* Mobile Floating Menu Button (Top Left Pill) */}
-      <div className="md:hidden fixed top-3 left-3 z-50">
-        <button
-          type="button"
-          onClick={() => setIsMobileOpen(true)}
-          className="h-10 px-3 rounded-xl flex items-center gap-2 border bg-white/90 dark:bg-zinc-900/90 border-zinc-200 dark:border-zinc-800 text-zinc-800 dark:text-zinc-200 shadow-md backdrop-blur-md cursor-pointer active:scale-95"
-          aria-label="Open Navigation Sidebar"
-        >
-          <Menu className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
-          <span className="text-xs font-bold">FinLITE</span>
-        </button>
-      </div>
+      {/* Mobile Floating Menu Button: Three lines icon only, borderless, hidden when sidebar is open */}
+      {!isMobileOpen && (
+        <div className="md:hidden fixed top-3 left-3 z-30">
+          <button
+            type="button"
+            onClick={() => setIsMobileOpen(true)}
+            className="w-10 h-10 rounded-xl flex items-center justify-center text-zinc-800 dark:text-zinc-200 hover:text-emerald-600 dark:hover:text-emerald-400 hover:bg-zinc-100/80 dark:hover:bg-zinc-800/80 active:scale-95 transition-all cursor-pointer focus:outline-none"
+            aria-label="Open Navigation Sidebar"
+          >
+            <Menu className="w-5 h-5 text-zinc-800 dark:text-zinc-200" />
+          </button>
+        </div>
+      )}
 
       {/* Mobile Backdrop Overlay */}
       {isMobileOpen && (
@@ -237,7 +239,7 @@ export default function FloatingSidebar({
           border-r border-zinc-200/90 dark:border-zinc-800/90 
           bg-white/95 dark:bg-[#09090b]/95 backdrop-blur-xl
           ${/* Mobile: fixed off-canvas slide-over drawer */ ''}
-          fixed md:sticky top-0 bottom-0 inset-y-0 left-0 z-40 md:z-30 h-screen shrink-0
+          fixed md:sticky top-0 bottom-0 inset-y-0 left-0 z-50 md:z-30 h-[100dvh] max-h-[100dvh] shrink-0
           ${isMobileOpen ? 'translate-x-0 shadow-2xl w-[270px]' : 'max-md:-translate-x-full md:translate-x-0'}
           ${/* Desktop In-Flow Column Width */ ''}
           ${isCollapsed ? 'md:w-[72px]' : 'md:w-[260px]'}
@@ -381,7 +383,7 @@ export default function FloatingSidebar({
         )}
 
         {/* 3. MIDDLE SCROLLABLE NAVIGATION LIST */}
-        <div className="flex-1 overflow-y-auto overflow-x-hidden px-2.5 py-3 space-y-4 no-scrollbar">
+        <div className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden px-2.5 py-3 space-y-4 no-scrollbar">
           
           {/* Group 1: Core Navigation */}
           <div>
@@ -492,7 +494,7 @@ export default function FloatingSidebar({
         </div>
 
         {/* 4. BOTTOM SECTION: Account Settings, Profile, Theme Toggle & Sign Out */}
-        <div className="p-2 border-t border-zinc-100 dark:border-zinc-900 space-y-2 relative" ref={profileMenuRef}>
+        <div className="p-2 pb-[max(0.75rem,env(safe-area-inset-bottom))] border-t border-zinc-100 dark:border-zinc-900 space-y-2 relative shrink-0" ref={profileMenuRef}>
           
           {/* User Profile Mini-Bar */}
           <Link 

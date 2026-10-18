@@ -366,26 +366,25 @@ export default function TransactionTable({
   return (
     <div className="rounded-2xl transition-colors relative overflow-hidden bg-white dark:bg-[#121214] border border-zinc-200/70 dark:border-zinc-800/70 shadow-2xs">
       {/* Table Header Controls */}
-      <div className="p-4 sm:p-5 border-b flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-zinc-200 dark:border-zinc-800 bg-zinc-50/50 dark:bg-[#121214]">
+      <div className="p-3.5 sm:p-5 border-b flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 border-zinc-200 dark:border-zinc-800 bg-zinc-50/50 dark:bg-[#121214]">
         <div className="min-w-0">
-          <div className="flex items-center gap-2.5 flex-wrap">
-            <h2 className="text-xl sm:text-2xl font-black tracking-tight text-zinc-950 dark:text-white">
-              Financial Ledger &amp; Transactions
-            </h2>
-          </div>
-          <p className="text-xs font-medium mt-1 truncate text-zinc-500 dark:text-zinc-400">
+          <h2 className="text-lg sm:text-2xl font-black tracking-tight text-zinc-950 dark:text-white">
+            Financial Ledger &amp; Transactions
+          </h2>
+          <p className="text-xs font-medium mt-0.5 text-zinc-500 dark:text-zinc-400 line-clamp-1">
             Real-time auditable record of organization inflows and disbursements
           </p>
         </div>
 
-        {/* Action Buttons */}
-        <div className="flex flex-wrap sm:flex-nowrap items-center gap-2 w-full sm:w-auto shrink-0 justify-end">
+        {/* Action Buttons: 2-col grid on mobile with full-width primary CTA */}
+        <div className="grid grid-cols-2 sm:flex sm:items-center gap-2 w-full sm:w-auto shrink-0">
           {/* Audit Trail Button (Auditor/Treasurer/President/Adviser/Admin) */}
           {canViewAudit && onOpenAuditTrail && (
             <Button
               variant="outline"
               size="sm"
               onClick={onOpenAuditTrail}
+              className="w-full sm:w-auto justify-center"
               leftIcon={<ShieldCheck className="w-3.5 h-3.5 text-emerald-500 shrink-0" />}
               title="View immutable financial audit trail and governance log"
             >
@@ -398,6 +397,7 @@ export default function TransactionTable({
             variant="secondary"
             size="sm"
             onClick={onExportReport}
+            className={`w-full sm:w-auto justify-center ${!canViewAudit ? 'col-span-2' : ''}`}
             leftIcon={<FileText className="w-3.5 h-3.5 text-emerald-500 shrink-0" />}
             title="Preview 1:1 PDM CCS Formal Word Liquidation Report & Live Edit"
           >
@@ -410,6 +410,7 @@ export default function TransactionTable({
               variant="primary"
               size="sm"
               onClick={onNewTransaction}
+              className="col-span-2 sm:col-auto w-full sm:w-auto justify-center"
               leftIcon={<Plus className="w-3.5 h-3.5 shrink-0 stroke-[2.5]" />}
             >
               <span>Record Transaction</span>
@@ -433,14 +434,15 @@ export default function TransactionTable({
         </div>
 
         {/* Filter Tabs & View Mode Switcher */}
-        <div className="flex flex-wrap items-center justify-between sm:justify-end gap-2 w-full sm:w-auto">
-          <div className="flex overflow-x-auto scrollbar-none items-center gap-1 p-1 rounded-lg border shrink-0 bg-zinc-100 dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between sm:justify-end gap-2 w-full sm:w-auto">
+          {/* Tabs: Full width 5-column grid on mobile (zero horizontal scrolling), flex on desktop */}
+          <div className="grid grid-cols-5 sm:flex sm:overflow-visible items-center gap-1 p-1 rounded-lg border w-full sm:w-auto bg-zinc-100 dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800">
             {[
-              { id: 'ALL', label: 'All Records' },
-              { id: 'INFLOW', label: 'Inflows' },
-              { id: 'OUTFLOW', label: 'Outflows' },
-              { id: 'REIMBURSEMENT', label: 'Pending Abono' },
-              { id: 'RECEIVABLE', label: 'Receivables' },
+              { id: 'ALL', label: 'All', fullLabel: 'All Records' },
+              { id: 'INFLOW', label: 'Inflows', fullLabel: 'Inflows' },
+              { id: 'OUTFLOW', label: 'Outflows', fullLabel: 'Outflows' },
+              { id: 'REIMBURSEMENT', label: 'Abono', fullLabel: 'Pending Abono' },
+              { id: 'RECEIVABLE', label: 'Debts', fullLabel: 'Receivables' },
             ].map((tab) => {
               const isActive = filterType === tab.id;
               return (
@@ -448,20 +450,22 @@ export default function TransactionTable({
                   key={tab.id}
                   type="button"
                   onClick={() => setFilterType(tab.id)}
-                  className={`h-7 px-3 text-xs font-semibold whitespace-nowrap transition-all rounded-md text-center flex items-center justify-center cursor-pointer shrink-0 ${
+                  title={tab.fullLabel}
+                  className={`h-7 px-1.5 sm:px-3 text-[11px] sm:text-xs font-semibold whitespace-nowrap transition-all rounded-md text-center flex items-center justify-center cursor-pointer ${
                     isActive
                       ? 'bg-emerald-600 text-white shadow-xs'
                       : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-200/60 dark:hover:bg-zinc-800'
                   }`}
                 >
-                  {tab.label}
+                  <span className="sm:hidden">{tab.label}</span>
+                  <span className="hidden sm:inline">{tab.fullLabel}</span>
                 </button>
               );
             })}
           </div>
 
-          {/* View Mode Toggle: Spreadsheet vs Slim Cards */}
-          <div className="flex items-center gap-0.5 p-1 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-zinc-100 dark:bg-zinc-900 shrink-0">
+          {/* View Mode Toggle: Spreadsheet vs Slim Cards (Hidden on mobile where Cards are native) */}
+          <div className="hidden sm:flex items-center gap-0.5 p-1 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-zinc-100 dark:bg-zinc-900 shrink-0">
             <button
               type="button"
               onClick={() => setViewMode('table')}
@@ -473,7 +477,7 @@ export default function TransactionTable({
               title="Dense Spreadsheet Table View"
             >
               <Table className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">Spreadsheet</span>
+              <span>Spreadsheet</span>
             </button>
             <button
               type="button"
@@ -486,7 +490,7 @@ export default function TransactionTable({
               title="Mobile Slim Cards View"
             >
               <LayoutList className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">Slim Cards</span>
+              <span>Slim Cards</span>
             </button>
           </div>
         </div>

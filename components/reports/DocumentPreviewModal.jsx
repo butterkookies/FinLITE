@@ -459,32 +459,74 @@ export default function DocumentPreviewModal({ isOpen, onClose, documentData }) 
     <div className="fixed inset-0 z-50 flex flex-col document-preview-overlay overflow-y-auto">
       
       {/* Top Floating Action & Navigation Bar */}
-      <header className="sticky top-0 z-50 bg-zinc-950/95 backdrop-blur border-b border-zinc-800 text-zinc-100 px-3 sm:px-6 py-2.5 sm:py-3 flex flex-wrap items-center justify-between gap-2.5 sm:gap-3 no-print shadow-xl">
-        <div className="flex items-center gap-2 sm:gap-3 min-w-0">
-          <div className="w-8 h-8 rounded-lg bg-emerald-600 flex items-center justify-center font-bold text-white shadow-sm shrink-0">
-            <FileText className="w-4 h-4" />
-          </div>
-          <div className="min-w-0">
-            <div className="flex items-center gap-1.5 sm:gap-2">
-              <span className="text-xs sm:text-sm font-bold tracking-tight truncate">
-                {isProposal ? 'Activity Proposal Preview' : '1:1 Official PDM LITE Preview'}
-              </span>
-              <Badge variant="emerald" size="xs" className="hidden xs:inline-flex">
-                Exact Replicant
-              </Badge>
+      <header className="sticky top-0 z-50 bg-zinc-950/95 backdrop-blur border-b border-zinc-800 text-zinc-100 px-3 sm:px-6 py-2.5 sm:py-3 space-y-2.5 no-print shadow-xl">
+        {/* Row 1: Header Title & Main Action Buttons */}
+        <div className="flex items-center justify-between gap-2 min-w-0">
+          <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+            <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-emerald-600 flex items-center justify-center font-bold text-white shadow-sm shrink-0">
+              <FileText className="w-4 h-4" />
             </div>
-            <p className="text-[10px] sm:text-[11px] text-zinc-400 flex items-center gap-1 truncate">
-              <Edit3 className="w-3 h-3 text-amber-400 shrink-0" />
-              <span className="truncate">In-place editing active: adjust values before export.</span>
-            </p>
+            <div className="min-w-0">
+              <div className="flex items-center gap-1.5 sm:gap-2">
+                <span className="text-xs sm:text-sm font-bold tracking-tight truncate">
+                  {isProposal ? 'Activity Proposal Preview' : '1:1 Official PDM LITE Preview'}
+                </span>
+                <Badge variant="emerald" size="xs" className="hidden xs:inline-flex">
+                  Exact Replicant
+                </Badge>
+              </div>
+              <p className="hidden xs:flex text-[10px] sm:text-[11px] text-zinc-400 items-center gap-1 truncate">
+                <Edit3 className="w-3 h-3 text-amber-400 shrink-0" />
+                <span className="truncate">In-place editing active: adjust values before export.</span>
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => window.print()}
+              className="hidden sm:flex bg-zinc-900 text-zinc-300 border-zinc-800 hover:bg-zinc-800"
+              leftIcon={<Printer className="w-3.5 h-3.5" />}
+              title="Print or Save as PDF"
+            >
+              <span>Print / PDF</span>
+            </Button>
+
+            <Button
+              variant="primary"
+              size="sm"
+              onClick={handleExportDocx}
+              loading={isExporting}
+              leftIcon={<Download className="w-3.5 h-3.5" />}
+              className="active:scale-95 whitespace-nowrap"
+            >
+              {isExporting ? 'Exporting...' : (
+                <>
+                  <span className="hidden xs:inline">Export .docx</span>
+                  <span className="xs:hidden">Export</span>
+                </>
+              )}
+            </Button>
+
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={onClose}
+              className="text-zinc-400 hover:text-white hover:bg-zinc-800 ml-0.5 sm:ml-1"
+              title="Close Preview"
+            >
+              <X className="w-4 h-4" />
+            </Button>
           </div>
         </div>
 
-        {/* Right Actions & Document Tools */}
-        <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 ml-auto shrink-0">
-          {/* Export Scope Radio Buttons */}
-          {!isProposal && (
-            <div className="flex items-center gap-2 bg-zinc-900 border border-zinc-800 rounded-lg px-2.5 py-1 text-xs text-zinc-300 shadow-sm">
+        {/* Row 2: Secondary Document Controls (Horizontally Scrollable Strip on Mobile) */}
+        {!isProposal && (
+          <div className="flex items-center gap-2 overflow-x-auto scrollbar-none py-0.5 w-full text-xs">
+            {/* Export Scope Radio Buttons */}
+            <div className="flex items-center gap-2 bg-zinc-900 border border-zinc-800 rounded-lg px-2.5 py-1 text-xs text-zinc-300 shadow-sm shrink-0">
               <span className="text-zinc-400 font-medium hidden md:inline">Scope:</span>
               <label className="flex items-center gap-1 cursor-pointer hover:text-white" title="Financial Report Only">
                 <input
@@ -495,7 +537,7 @@ export default function DocumentPreviewModal({ isOpen, onClose, documentData }) 
                   onChange={() => setReceiptsMode('NONE')}
                   className="text-emerald-500 focus:ring-emerald-500 h-3 w-3"
                 />
-                <span className="text-[11px]">Financial Only</span>
+                <span className="text-[11px] whitespace-nowrap">Financial Only</span>
               </label>
               <label className="flex items-center gap-1 cursor-pointer hover:text-white" title="Financial Report + Attached Receipts">
                 <input
@@ -506,7 +548,7 @@ export default function DocumentPreviewModal({ isOpen, onClose, documentData }) 
                   onChange={() => setReceiptsMode('APPEND')}
                   className="text-emerald-500 focus:ring-emerald-500 h-3 w-3"
                 />
-                <span className="text-[11px]">+ Receipts</span>
+                <span className="text-[11px] whitespace-nowrap">+ Receipts</span>
               </label>
               <label className="flex items-center gap-1 cursor-pointer hover:text-white" title="Receipts Attachment Only">
                 <input
@@ -517,81 +559,48 @@ export default function DocumentPreviewModal({ isOpen, onClose, documentData }) 
                   onChange={() => setReceiptsMode('STANDALONE')}
                   className="text-emerald-500 focus:ring-emerald-500 h-3 w-3"
                 />
-                <span className="text-[11px]">Receipts Only</span>
+                <span className="text-[11px] whitespace-nowrap">Receipts Only</span>
               </label>
             </div>
-          )}
 
-          {/* CC Routing Toggle */}
-          {!isProposal && (
+            {/* CC Routing Toggle */}
             <Button
               type="button"
               variant={includeCc ? 'primary' : 'outline'}
               size="sm"
               onClick={() => setIncludeCc(!includeCc)}
-              className={includeCc ? '' : 'bg-zinc-900 text-zinc-300 border-zinc-800 hover:bg-zinc-800'}
+              className={`shrink-0 whitespace-nowrap ${includeCc ? '' : 'bg-zinc-900 text-zinc-300 border-zinc-800 hover:bg-zinc-800'}`}
               title="Toggle CC Routing block on Transmittal Letter"
               leftIcon={<span className={`w-2 h-2 rounded-full ${includeCc ? 'bg-white' : 'bg-zinc-500'}`} />}
             >
               CC: {includeCc ? 'Included' : 'Excluded'}
             </Button>
-          )}
 
-          {/* Page Numbering Format Tool */}
-          <div className="flex items-center gap-1 bg-zinc-900 border border-zinc-800 rounded-lg px-2 py-1 text-xs text-zinc-300 shadow-sm">
-            <span className="text-zinc-400 font-medium hidden xs:inline">Footer:</span>
-            <select
-              value={pageNumberStyle}
-              onChange={(e) => setPageNumberStyle(e.target.value)}
-              className="bg-transparent text-white text-xs font-semibold border-none outline-none cursor-pointer pr-1"
-              title="Page numbering style in footer"
-            >
-              <option value="page_x_of_y" className="bg-zinc-900 text-white">Page X of Y</option>
-              <option value="page_x_of_y_no_cover" className="bg-zinc-900 text-white">Page X of Y (Start P2)</option>
-              <option value="simple" className="bg-zinc-900 text-white">Simple (1, 2...)</option>
-              <option value="none" className="bg-zinc-900 text-white">No Page Numbers</option>
-            </select>
+            {/* Page Numbering Format Tool */}
+            <div className="flex items-center gap-1 bg-zinc-900 border border-zinc-800 rounded-lg px-2 py-1 text-xs text-zinc-300 shadow-sm shrink-0">
+              <span className="text-zinc-400 font-medium hidden xs:inline">Footer:</span>
+              <select
+                value={pageNumberStyle}
+                onChange={(e) => setPageNumberStyle(e.target.value)}
+                className="bg-transparent text-white text-xs font-semibold border-none outline-none cursor-pointer pr-1"
+                title="Page numbering style in footer"
+              >
+                <option value="page_x_of_y" className="bg-zinc-900 text-white">Page X of Y</option>
+                <option value="page_x_of_y_no_cover" className="bg-zinc-900 text-white">Page X of Y (Start P2)</option>
+                <option value="simple" className="bg-zinc-900 text-white">Simple (1, 2...)</option>
+                <option value="none" className="bg-zinc-900 text-white">No Page Numbers</option>
+              </select>
+            </div>
           </div>
+        )}
 
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => window.print()}
-            className="hidden xs:flex bg-zinc-900 text-zinc-300 border-zinc-800 hover:bg-zinc-800"
-            leftIcon={<Printer className="w-3.5 h-3.5" />}
-            title="Print or Save as PDF"
-          >
-            <span className="hidden sm:inline">Print / PDF</span>
-          </Button>
-
-          <Button
-            variant="primary"
-            size="sm"
-            onClick={handleExportDocx}
-            loading={isExporting}
-            leftIcon={<Download className="w-3.5 h-3.5" />}
-          >
-            {isExporting ? 'Exporting...' : 'Export .docx'}
-          </Button>
-
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={onClose}
-            className="text-zinc-400 hover:text-white hover:bg-zinc-800 ml-0.5 sm:ml-1"
-            title="Close Preview"
-          >
-            <X className="w-4 h-4" />
-          </Button>
-        </div>
-
-        {/* Signatory Inclusion Matrix Strip */}
+        {/* Row 3: Signatory Inclusion Matrix Strip */}
         {!isProposal && (
-          <div className="w-full flex flex-wrap items-center justify-between gap-2 px-3 py-1.5 bg-zinc-900/90 rounded-xl border border-zinc-800 text-[11px] text-zinc-300 order-last">
+          <div className="w-full flex items-center gap-2 px-3 py-1.5 bg-zinc-900/90 rounded-xl border border-zinc-800 text-[11px] text-zinc-300 overflow-x-auto scrollbar-none">
             <span className="font-semibold text-zinc-400 shrink-0">Signatories:</span>
-            <div className="flex flex-wrap items-center gap-3">
+            <div className="flex items-center gap-3 shrink-0">
               {allSignatoryDefs.map((sig) => (
-                <label key={sig.key} className="flex items-center gap-1.5 cursor-pointer text-zinc-300 hover:text-white select-none">
+                <label key={sig.key} className="flex items-center gap-1.5 cursor-pointer text-zinc-300 hover:text-white select-none whitespace-nowrap">
                   <input
                     type="checkbox"
                     checked={includedSignatories[sig.key]}
@@ -607,14 +616,14 @@ export default function DocumentPreviewModal({ isOpen, onClose, documentData }) 
           </div>
         )}
 
-        {/* Page Selector Tabs */}
+        {/* Row 4: Page Selector Tabs */}
         {!isProposal && (
-          <div className="w-full flex items-center gap-1 bg-zinc-900/90 p-1 rounded-xl border border-zinc-800 text-xs overflow-x-auto scrollbar-none order-last">
+          <div className="w-full flex items-center gap-1 bg-zinc-900/90 p-1 rounded-xl border border-zinc-800 text-xs overflow-x-auto scrollbar-none">
             <Button
               variant={activePage === 0 ? 'primary' : 'ghost'}
               size="sm"
               onClick={() => setActivePage(0)}
-              className="text-xs font-semibold whitespace-nowrap h-7 px-2.5"
+              className="text-xs font-semibold whitespace-nowrap h-7 px-2.5 shrink-0"
             >
               All Pages ({receiptPages.length > 0 && receiptsMode !== 'NONE' ? 4 + receiptPages.length : 4})
             </Button>
@@ -622,7 +631,7 @@ export default function DocumentPreviewModal({ isOpen, onClose, documentData }) 
               variant={activePage === 1 ? 'primary' : 'ghost'}
               size="sm"
               onClick={() => setActivePage(1)}
-              className="text-xs font-semibold whitespace-nowrap h-7 px-2.5"
+              className="text-xs font-semibold whitespace-nowrap h-7 px-2.5 shrink-0"
             >
               Page 1: Transmittal
             </Button>
@@ -630,7 +639,7 @@ export default function DocumentPreviewModal({ isOpen, onClose, documentData }) 
               variant={activePage === 2 ? 'primary' : 'ghost'}
               size="sm"
               onClick={() => setActivePage(2)}
-              className="text-xs font-semibold whitespace-nowrap h-7 px-2.5"
+              className="text-xs font-semibold whitespace-nowrap h-7 px-2.5 shrink-0"
             >
               Page 2: Income
             </Button>
@@ -638,7 +647,7 @@ export default function DocumentPreviewModal({ isOpen, onClose, documentData }) 
               variant={activePage === 3 ? 'primary' : 'ghost'}
               size="sm"
               onClick={() => setActivePage(3)}
-              className="text-xs font-semibold whitespace-nowrap h-7 px-2.5"
+              className="text-xs font-semibold whitespace-nowrap h-7 px-2.5 shrink-0"
             >
               Page 3: Expenses
             </Button>
@@ -646,7 +655,7 @@ export default function DocumentPreviewModal({ isOpen, onClose, documentData }) 
               variant={activePage === 4 ? 'primary' : 'ghost'}
               size="sm"
               onClick={() => setActivePage(4)}
-              className="text-xs font-semibold whitespace-nowrap h-7 px-2.5"
+              className="text-xs font-semibold whitespace-nowrap h-7 px-2.5 shrink-0"
             >
               Page 4: Reconciliation
             </Button>
@@ -655,7 +664,7 @@ export default function DocumentPreviewModal({ isOpen, onClose, documentData }) 
                 variant={activePage === 5 ? 'primary' : 'ghost'}
                 size="sm"
                 onClick={() => setActivePage(5)}
-                className="text-xs font-semibold whitespace-nowrap h-7 px-2.5"
+                className="text-xs font-semibold whitespace-nowrap h-7 px-2.5 shrink-0"
               >
                 Receipts &amp; Proofs ({receiptPages.length} {receiptPages.length === 1 ? 'Sheet' : 'Sheets'})
               </Button>
