@@ -48,6 +48,15 @@ export default function AppShell({ children }) {
     } catch (_) {}
   }, []);
 
+  // Pre-warm key application routes for zero-lag client-side navigation
+  useEffect(() => {
+    if (!isAuthRoute && router?.prefetch) {
+      router.prefetch('/');
+      router.prefetch('/admin');
+      router.prefetch('/profile');
+    }
+  }, [router, isAuthRoute]);
+
   const handleToggleCollapse = (val) => {
     setIsSidebarCollapsed(val);
     try {
@@ -221,7 +230,7 @@ export default function AppShell({ children }) {
       </div>
 
       {/* 2. Main Content Canvas */}
-      <div className="flex-1 flex flex-col min-w-0 transition-all duration-300 ease-in-out">
+      <div className="flex-1 flex flex-col min-w-0">
         {children}
       </div>
     </div>

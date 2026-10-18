@@ -123,26 +123,30 @@ export default function AdminPage() {
   const fetchData = useCallback(async (showRefreshIndicator = false) => {
     if (showRefreshIndicator) setIsRefreshing(true);
     try {
-      const res = await fetch('/api/admin/requests');
-      if (res.status === 401 || res.status === 403) {
+      const [reqRes, usersRes] = await Promise.all([
+        fetch('/api/admin/requests'),
+        fetch('/api/admin/users'),
+      ]);
+
+      if (reqRes.status === 401 || reqRes.status === 403) {
         router.push('/login?error=admin_required');
         return;
       }
 
-      const data = await res.json();
-      if (data.success) {
-        setRequests(data.requests || []);
-        setStats(data.stats || { total: 0, pending: 0, approved: 0, rejected: 0 });
+      if (reqRes.ok) {
+        const data = await reqRes.json();
+        if (data.success) {
+          setRequests(data.requests || []);
+          setStats(data.stats || { total: 0, pending: 0, approved: 0, rejected: 0 });
 
-        const roleMap = {};
-        (data.requests || []).forEach((r) => {
-          roleMap[r.id] = r.requested_role || 'treasurer';
-        });
-        setSelectedRoles(roleMap);
+          const roleMap = {};
+          (data.requests || []).forEach((r) => {
+            roleMap[r.id] = r.requested_role || 'treasurer';
+          });
+          setSelectedRoles(roleMap);
+        }
       }
 
-      // Fetch users
-      const usersRes = await fetch('/api/admin/users');
       if (usersRes.ok) {
         const usersData = await usersRes.json();
         setUsers(usersData.users || []);

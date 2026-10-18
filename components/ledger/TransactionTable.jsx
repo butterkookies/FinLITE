@@ -466,7 +466,7 @@ export default function TransactionTable({
                   type="button"
                   onClick={() => setFilterType(tab.id)}
                   title={tab.fullLabel}
-                  className={`h-7 px-1.5 sm:px-3 text-[11px] sm:text-xs font-semibold whitespace-nowrap transition-all rounded-md text-center flex items-center justify-center cursor-pointer ${
+                  className={`h-7 px-1.5 sm:px-3 text-[11px] sm:text-xs font-semibold whitespace-nowrap transition-colors duration-150 rounded-md text-center flex items-center justify-center cursor-pointer ${
                     isActive
                       ? 'bg-emerald-600 text-white shadow-xs'
                       : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-200/60 dark:hover:bg-zinc-800'
@@ -484,7 +484,7 @@ export default function TransactionTable({
             <button
               type="button"
               onClick={() => setViewMode('table')}
-              className={`h-7 px-2.5 text-xs font-semibold rounded-md flex items-center gap-1.5 transition-all cursor-pointer ${
+              className={`h-7 px-2.5 text-xs font-semibold rounded-md flex items-center gap-1.5 transition-colors duration-150 cursor-pointer ${
                 viewMode === 'table' || (viewMode === 'auto')
                   ? 'bg-white dark:bg-zinc-800 text-zinc-950 dark:text-white shadow-xs'
                   : 'text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100'
@@ -497,7 +497,7 @@ export default function TransactionTable({
             <button
               type="button"
               onClick={() => setViewMode('cards')}
-              className={`h-7 px-2.5 text-xs font-semibold rounded-md flex items-center gap-1.5 transition-all cursor-pointer ${
+              className={`h-7 px-2.5 text-xs font-semibold rounded-md flex items-center gap-1.5 transition-colors duration-150 cursor-pointer ${
                 viewMode === 'cards'
                   ? 'bg-white dark:bg-zinc-800 text-zinc-950 dark:text-white shadow-xs'
                   : 'text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100'
@@ -885,7 +885,7 @@ export default function TransactionTable({
                 setSelectedTx(tx);
                 setActiveTxPhotoIndex(0);
               }}
-              className="p-3 sm:p-3.5 rounded-xl bg-white dark:bg-zinc-900/60 border border-zinc-100 dark:border-zinc-800/80 hover:border-zinc-300 dark:hover:border-zinc-700 cursor-pointer flex items-center justify-between gap-3 transition-all active:scale-[0.99]"
+              className="p-3 sm:p-3.5 rounded-xl bg-white dark:bg-zinc-900/60 border border-zinc-100 dark:border-zinc-800/80 hover:border-zinc-300 dark:hover:border-zinc-700 cursor-pointer flex items-center justify-between gap-3 transition-[background-color,border-color,transform] duration-150 active:scale-[0.99]"
             >
               {/* Left: Icon & Metadata */}
               <div className="flex items-center gap-3 min-w-0 flex-1">
@@ -1178,7 +1178,7 @@ export default function TransactionTable({
                     setPageSize(size);
                     setCurrentPage(1);
                   }}
-                  className={`px-2 py-1 text-[11px] font-semibold rounded-md transition-all cursor-pointer select-none ${
+                  className={`px-2 py-1 text-[11px] font-semibold rounded-md transition-colors duration-150 cursor-pointer select-none ${
                     active
                       ? 'bg-emerald-600 text-white shadow-2xs'
                       : 'hover:bg-zinc-200/60 dark:hover:bg-zinc-800 text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100'
@@ -1197,7 +1197,7 @@ export default function TransactionTable({
                 type="button"
                 disabled={safePage <= 1}
                 onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-                className="p-1.5 rounded-lg border transition-all cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-700 dark:text-zinc-300"
+                className="p-1.5 rounded-lg border transition-colors duration-150 cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-700 dark:text-zinc-300"
                 title="Previous page"
               >
                 <ChevronLeft className="w-4 h-4" />
@@ -1211,7 +1211,7 @@ export default function TransactionTable({
                 type="button"
                 disabled={safePage >= totalPages}
                 onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-                className="p-1.5 rounded-lg border transition-all cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-700 dark:text-zinc-300"
+                className="p-1.5 rounded-lg border transition-colors duration-150 cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-700 dark:text-zinc-300"
                 title="Next page"
               >
                 <ChevronRight className="w-4 h-4" />

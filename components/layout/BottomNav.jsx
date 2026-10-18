@@ -23,7 +23,7 @@ export default function BottomNav({
         <button
           type="button"
           onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-          className="flex flex-col items-center justify-center min-w-[52px] min-h-[48px] rounded-xl transition-all cursor-pointer active:scale-95 text-emerald-700 dark:text-emerald-400 hover:text-emerald-800 dark:hover:text-emerald-300"
+          className="flex flex-col items-center justify-center min-w-[52px] min-h-[48px] rounded-xl transition-[color,transform] duration-150 cursor-pointer active:scale-95 text-emerald-700 dark:text-emerald-400 hover:text-emerald-800 dark:hover:text-emerald-300"
           title="Scroll to Top / Dashboard"
         >
           <Home className="w-5 h-5 stroke-[2.2]" />
@@ -41,7 +41,7 @@ export default function BottomNav({
               if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
             }
           }}
-          className="flex flex-col items-center justify-center min-w-[52px] min-h-[48px] rounded-xl transition-all cursor-pointer active:scale-95 text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white"
+          className="flex flex-col items-center justify-center min-w-[52px] min-h-[48px] rounded-xl transition-[color,transform] duration-150 cursor-pointer active:scale-95 text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white"
           title="Jump to Financial Ledger"
         >
           <FileText className="w-5 h-5 stroke-[2]" />
@@ -62,7 +62,7 @@ export default function BottomNav({
         <button
           type="button"
           onClick={onOpenDenominations}
-          className="flex flex-col items-center justify-center min-w-[52px] min-h-[48px] rounded-xl transition-all cursor-pointer active:scale-95 text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white"
+          className="flex flex-col items-center justify-center min-w-[52px] min-h-[48px] rounded-xl transition-[color,transform] duration-150 cursor-pointer active:scale-95 text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white"
           title="Open Cashbox & Denomination Audit"
         >
           <Wallet className="w-5 h-5 stroke-[2]" />
@@ -73,7 +73,7 @@ export default function BottomNav({
         <button
           type="button"
           onClick={onOpenAI}
-          className="flex flex-col items-center justify-center min-w-[52px] min-h-[48px] rounded-xl transition-all cursor-pointer active:scale-95 text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white"
+          className="flex flex-col items-center justify-center min-w-[52px] min-h-[48px] rounded-xl transition-[color,transform] duration-150 cursor-pointer active:scale-95 text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white"
           title="Open AI Assistant"
         >
           <Bot className="w-5 h-5 stroke-[2] text-emerald-600 dark:text-emerald-400" />

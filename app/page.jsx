@@ -96,35 +96,38 @@ const DEFAULT_LITE_SIGNATORIES_25_26 = {
 
 const DEFAULT_LITE_SIGNATORIES = DEFAULT_LITE_SIGNATORIES_26_27;
 
+// Module-level in-memory cache for instant client-side route transitions
+let dashboardCache = null;
+
 export default function Dashboard() {
-  const [currentUser, setCurrentUser] = useState(null);
-  const [userProfile, setUserProfile] = useState(null);
-  const [currentRole, setCurrentRole] = useState('treasurer');
-  const [transactions, setTransactions] = useState([]);
-  const [isDbConnected, setIsDbConnected] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
+  const [currentUser, setCurrentUser] = useState(dashboardCache?.currentUser || null);
+  const [userProfile, setUserProfile] = useState(dashboardCache?.userProfile || null);
+  const [currentRole, setCurrentRole] = useState(dashboardCache?.currentRole || 'treasurer');
+  const [transactions, setTransactions] = useState(dashboardCache?.transactions || []);
+  const [isDbConnected, setIsDbConnected] = useState(Boolean(dashboardCache));
+  const [isLoading, setIsLoading] = useState(!dashboardCache);
   const [isNewTxOpen, setIsNewTxOpen] = useState(false);
   const [isDenomOpen, setIsDenomOpen] = useState(false);
   const [isAIOpen, setIsAIOpen] = useState(false);
   const [isProposalOpen, setIsProposalOpen] = useState(false);
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   const [isAuditOpen, setIsAuditOpen] = useState(false);
-  const [debts, setDebts] = useState([]);
+  const [debts, setDebts] = useState(dashboardCache?.debts || []);
   const [isDebtsOpen, setIsDebtsOpen] = useState(false);
-  const [advances, setAdvances] = useState([]);
+  const [advances, setAdvances] = useState(dashboardCache?.advances || []);
   const [isAdvancesOpen, setIsAdvancesOpen] = useState(false);
   const [previewData, setPreviewData] = useState(null);
-  const [latestReconciliation, setLatestReconciliation] = useState(null);
+  const [latestReconciliation, setLatestReconciliation] = useState(dashboardCache?.latestReconciliation || null);
   const [semesterSignatories, setSemesterSignatories] = useState(DEFAULT_LITE_SIGNATORIES);
 
   // Multi-Semester State Management
-  const [semesters, setSemesters] = useState(DEFAULT_SEMESTERS);
-  const [currentSemester, setCurrentSemester] = useState(DEFAULT_SEMESTERS[0]);
+  const [semesters, setSemesters] = useState(dashboardCache?.semesters || DEFAULT_SEMESTERS);
+  const [currentSemester, setCurrentSemester] = useState(dashboardCache?.currentSemester || DEFAULT_SEMESTERS[0]);
   const [isNewSemesterOpen, setIsNewSemesterOpen] = useState(false);
 
   // 3NF Master Catalog States
-  const [categories, setCategories] = useState([]);
-  const [denominations, setDenominations] = useState([]);
+  const [categories, setCategories] = useState(dashboardCache?.categories || []);
+  const [denominations, setDenominations] = useState(dashboardCache?.denominations || []);
 
   // Dynamic Time-of-Day Greeting (Good morning / Good afternoon / Good evening)
   const [greeting, setGreeting] = useState('Good day');
@@ -191,12 +194,15 @@ export default function Dashboard() {
         return;
       }
 
-      setIsLoading(true);
+      if (!dashboardCache) {
+        setIsLoading(true);
+      }
+
       try {
-        // 1. Load Current User & Profile
-        const { data: { user } } = await supabase.auth.getUser();
-        if (user) {
-          setCurrentUser(user);
+        // 1. Auth & Profile Promise
+        const authPromise = (async () => {
+          const { data: { user } } = await supabase.auth.getUser();
+          if (!user) return null;
           const email = user.email?.toLowerCase();
           const isSuperAdmin = isSuperAdminEmail(email);
 
@@ -215,70 +221,150 @@ export default function Dashboard() {
             profile = profileByEmail;
           }
 
+          return { user, profile, isSuperAdmin, email };
+        })();
+
+        // 2. Categories Reference Promise
+        const catPromise = supabase
+          .from('categories')
+          .select('*')
+          .order('name');
+
+        // 3. Denominations Reference Promise
+        const denomPromise = supabase
+          .from('denominations')
+          .select('*')
+          .order('display_order');
+
+        // 4. Semesters Reference Promise
+        const semPromise = supabase
+          .from('semesters')
+          .select('*')
+          .order('academic_year', { ascending: false });
+
+        // 5. Transactions with 3NF Joins Promise
+        const txPromise = supabase
+          .from('transactions')
+          .select(`
+            *,
+            categories (id, name, type),
+            semesters (id, academic_year, semester, label),
+            transaction_receipts (id, public_url, sort_order),
+            profiles (id, full_name, role, email, avatar_url)
+          `)
+          .order('transaction_date', { ascending: false });
+
+        // 6. Latest Cash Reconciliation Promise
+        const reconPromise = supabase
+          .from('cash_reconciliations')
+          .select(`
+            *,
+            cash_reconciliation_items (
+              id,
+              denomination_id,
+              quantity,
+              subtotal,
+              denominations (id, code, label, face_value)
+            )
+          `)
+          .order('created_at', { ascending: false })
+          .limit(1)
+          .maybeSingle();
+
+        // 7. Debts & Receivables Promise
+        const debtsPromise = supabase
+          .from('debts_receivables')
+          .select(`
+            *,
+            debt_payments (*)
+          `)
+          .order('created_at', { ascending: false });
+
+        // 8. Advances & Payables Promise
+        const advPromise = supabase
+          .from('advances_payable')
+          .select(`
+            *,
+            advance_disbursements (*)
+          `)
+          .order('created_at', { ascending: false });
+
+        // Execute all 8 database queries simultaneously in parallel
+        const [
+          authRes,
+          catRes,
+          denomRes,
+          semRes,
+          txRes,
+          reconRes,
+          debtsRes,
+          advRes,
+        ] = await Promise.allSettled([
+          authPromise,
+          catPromise,
+          denomPromise,
+          semPromise,
+          txPromise,
+          reconPromise,
+          debtsPromise,
+          advPromise,
+        ]);
+
+        // Process Auth
+        let activeUser = currentUser;
+        let activeProfile = userProfile;
+        let activeRole = currentRole;
+        if (authRes.status === 'fulfilled' && authRes.value) {
+          const { user, profile, isSuperAdmin, email } = authRes.value;
+          activeUser = user;
+          setCurrentUser(user);
+
           if (profile) {
+            activeProfile = profile;
+            activeRole = isSuperAdmin ? 'admin' : (profile.role || 'member');
             setUserProfile(profile);
-            setCurrentRole(isSuperAdmin ? 'admin' : (profile.role || 'member'));
+            setCurrentRole(activeRole);
           } else if (isSuperAdmin) {
-            setUserProfile({
+            activeProfile = {
               email,
               full_name: user.user_metadata?.full_name || 'Andrei John Geronimo',
               role: 'admin',
               status: 'approved',
               avatar_url: user.user_metadata?.avatar_url || user.user_metadata?.picture || null,
-            });
-            setCurrentRole('admin');
+            };
+            activeRole = 'admin';
+            setUserProfile(activeProfile);
+            setCurrentRole(activeRole);
           }
         }
 
-        // 2. Load Categories Reference Table
-        try {
-          const { data: catData, error: catError } = await supabase
-            .from('categories')
-            .select('*')
-            .order('name');
-          if (!catError && catData) {
-            setCategories(catData);
-          }
-        } catch (catErr) {
-          console.warn('Categories reference load notice:', catErr);
+        // Process Categories
+        let activeCategories = categories;
+        if (catRes.status === 'fulfilled' && !catRes.value.error && catRes.value.data) {
+          activeCategories = catRes.value.data;
+          setCategories(activeCategories);
         }
 
-        // 3. Load Denominations Reference Table
-        try {
-          const { data: denomData, error: denomError } = await supabase
-            .from('denominations')
-            .select('*')
-            .order('display_order');
-          if (!denomError && denomData) {
-            setDenominations(denomData);
-          }
-        } catch (denomErr) {
-          console.warn('Denominations reference load notice:', denomErr);
+        // Process Denominations
+        let activeDenominations = denominations;
+        if (denomRes.status === 'fulfilled' && !denomRes.value.error && denomRes.value.data) {
+          activeDenominations = denomRes.value.data;
+          setDenominations(activeDenominations);
         }
 
-        // 4. Load Semesters from Supabase
-        let activeSemestersList = DEFAULT_SEMESTERS;
-        try {
-          const { data: semData, error: semError } = await supabase
-            .from('semesters')
-            .select('*')
-            .order('academic_year', { ascending: false });
-
-          if (!semError && semData && semData.length > 0) {
-            activeSemestersList = semData.map((s) => ({
-              id: s.id,
-              academicYear: s.academic_year,
-              semester: s.semester,
-              label: s.label,
-              isActive: s.is_active,
-            }));
-            setSemesters(activeSemestersList);
-          }
-        } catch (semErr) {
-          console.warn('Semesters load notice:', semErr);
+        // Process Semesters
+        let activeSemestersList = semesters || DEFAULT_SEMESTERS;
+        if (semRes.status === 'fulfilled' && !semRes.value.error && semRes.value.data && semRes.value.data.length > 0) {
+          activeSemestersList = semRes.value.data.map((s) => ({
+            id: s.id,
+            academicYear: s.academic_year,
+            semester: s.semester,
+            label: s.label,
+            isActive: s.is_active,
+          }));
+          setSemesters(activeSemestersList);
         }
 
-        // Determine active semester: localStorage first, then active in DB, then fallback to first entry
         const savedSemId = typeof window !== 'undefined' ? localStorage.getItem('finlite_active_semester_id') : null;
         const matchedSemester = activeSemestersList.find((s) => s.id === savedSemId || `${s.academicYear}-${s.semester}` === savedSemId)
           || activeSemestersList.find((s) => s.isActive)
@@ -288,22 +374,12 @@ export default function Dashboard() {
           setCurrentSemester(matchedSemester);
         }
 
-        // 5. Load Transactions with 3NF Normalized Joins (with creator profile details)
-        try {
-          const { data, error } = await supabase
-            .from('transactions')
-            .select(`
-              *,
-              categories (id, name, type),
-              semesters (id, academic_year, semester, label),
-              transaction_receipts (id, public_url, sort_order),
-              profiles (id, full_name, role, email, avatar_url)
-            `)
-            .order('transaction_date', { ascending: false });
-
+        // Process Transactions
+        let normalized = null;
+        if (txRes.status === 'fulfilled') {
           let rawData = null;
-          if (error) {
-            console.warn('3NF relational select fallback to base select:', error.message);
+          if (txRes.value.error) {
+            console.warn('3NF relational select fallback to base select:', txRes.value.error.message);
             const { data: flatData, error: flatError } = await supabase
               .from('transactions')
               .select('*')
@@ -316,13 +392,13 @@ export default function Dashboard() {
               setIsDbConnected(true);
               rawData = flatData || [];
             }
-          } else if (data) {
+          } else if (txRes.value.data) {
             setIsDbConnected(true);
-            rawData = data;
+            rawData = txRes.value.data;
           }
 
           if (rawData) {
-            let normalized = rawData.map((t) => ({
+            normalized = rawData.map((t) => ({
               ...t,
               category_name: t.categories?.name || t.category_name,
               category_id: t.category_id || t.categories?.id,
@@ -380,149 +456,112 @@ export default function Dashboard() {
 
             setTransactions(normalized);
           }
-        } catch (txFetchErr) {
-          console.warn('Transaction fetch exception:', txFetchErr);
-          setTransactions([]);
         }
 
-        // 6. Load Latest Cash Reconciliation from Supabase (with 3NF items join)
-        try {
-          const { data: reconData, error: reconError } = await supabase
-            .from('cash_reconciliations')
-            .select(`
-              *,
-              cash_reconciliation_items (
-                id,
-                denomination_id,
-                quantity,
-                subtotal,
-                denominations (id, code, label, face_value)
-              )
-            `)
-            .order('created_at', { ascending: false })
-            .limit(1)
-            .maybeSingle();
-
-          if (!reconError && reconData) {
-            // Map child items to denomination keys for backwards compatible UI counters
-            if (Array.isArray(reconData.cash_reconciliation_items) && reconData.cash_reconciliation_items.length > 0) {
-              reconData.cash_reconciliation_items.forEach((item) => {
-                const code = item.denominations?.code;
-                if (code) {
-                  const countKey = denomCodeToCountKey(code);
-                  reconData[countKey] = item.quantity;
-                  reconData[code.toLowerCase()] = item.quantity;
-                }
-              });
-            }
-            setLatestReconciliation(reconData);
-            if (typeof window !== 'undefined') {
-              try { localStorage.setItem('finlite_latest_reconciliation', JSON.stringify(reconData)); } catch (_) {}
-            }
-          } else {
-            const { data: flatRecon } = await supabase
-              .from('cash_reconciliations')
-              .select('*')
-              .order('created_at', { ascending: false })
-              .limit(1)
-              .maybeSingle();
-
-            if (flatRecon) {
-              setLatestReconciliation(flatRecon);
-            } else {
-              const cached = typeof window !== 'undefined' ? localStorage.getItem('finlite_latest_reconciliation') : null;
-              if (cached) {
-                try { setLatestReconciliation(JSON.parse(cached)); } catch (_) {}
+        // Process Cash Reconciliation
+        let activeRecon = latestReconciliation;
+        if (reconRes.status === 'fulfilled' && !reconRes.value.error && reconRes.value.data) {
+          activeRecon = reconRes.value.data;
+          if (Array.isArray(activeRecon.cash_reconciliation_items) && activeRecon.cash_reconciliation_items.length > 0) {
+            activeRecon.cash_reconciliation_items.forEach((item) => {
+              const code = item.denominations?.code;
+              if (code) {
+                const countKey = denomCodeToCountKey(code);
+                activeRecon[countKey] = item.quantity;
+                activeRecon[code.toLowerCase()] = item.quantity;
               }
-            }
+            });
           }
-        } catch (reconErr) {
-          console.warn('Reconciliation fetch note:', reconErr);
+          setLatestReconciliation(activeRecon);
+          if (typeof window !== 'undefined') {
+            try { localStorage.setItem('finlite_latest_reconciliation', JSON.stringify(activeRecon)); } catch (_) {}
+          }
+        } else {
+          const cached = typeof window !== 'undefined' ? localStorage.getItem('finlite_latest_reconciliation') : null;
+          if (cached) {
+            try {
+              activeRecon = JSON.parse(cached);
+              setLatestReconciliation(activeRecon);
+            } catch (_) {}
+          }
         }
 
-        // 7. Load Debts & Receivables (with payment installments join)
-        try {
-          const { data: debtsData, error: debtsError } = await supabase
-            .from('debts_receivables')
-            .select(`
-              *,
-              debt_payments (*)
-            `)
-            .order('created_at', { ascending: false });
-
-          if (!debtsError && debtsData && debtsData.length > 0) {
-            setDebts(debtsData);
-            if (typeof window !== 'undefined') {
-              try { localStorage.setItem('finlite_debts', JSON.stringify(debtsData)); } catch (_) {}
-            }
-          } else {
-            const cachedDebts = typeof window !== 'undefined' ? localStorage.getItem('finlite_debts') : null;
-            if (cachedDebts) {
-              try { setDebts(JSON.parse(cachedDebts)); } catch (_) {}
-            }
+        // Process Debts & Receivables
+        let activeDebtsList = debts;
+        if (debtsRes.status === 'fulfilled' && !debtsRes.value.error && debtsRes.value.data && debtsRes.value.data.length > 0) {
+          activeDebtsList = debtsRes.value.data;
+          setDebts(activeDebtsList);
+          if (typeof window !== 'undefined') {
+            try { localStorage.setItem('finlite_debts', JSON.stringify(activeDebtsList)); } catch (_) {}
           }
-        } catch (debtsErr) {
-          console.warn('Debts fetch note:', debtsErr);
+        } else {
           const cachedDebts = typeof window !== 'undefined' ? localStorage.getItem('finlite_debts') : null;
           if (cachedDebts) {
-            try { setDebts(JSON.parse(cachedDebts)); } catch (_) {}
+            try {
+              activeDebtsList = JSON.parse(cachedDebts);
+              setDebts(activeDebtsList);
+            } catch (_) {}
           }
         }
 
-        // 8. Load Advances & Payables (with installment disbursements join)
-        try {
-          const { data: advData, error: advError } = await supabase
-            .from('advances_payable')
-            .select(`
-              *,
-              advance_disbursements (*)
-            `)
-            .order('created_at', { ascending: false });
-
-          if (!advError && advData && advData.length > 0) {
-            setAdvances(advData);
-            if (typeof window !== 'undefined') {
-              try { localStorage.setItem('finlite_advances', JSON.stringify(advData)); } catch (_) {}
-            }
-          } else {
-            const cachedAdv = typeof window !== 'undefined' ? localStorage.getItem('finlite_advances') : null;
-            if (cachedAdv) {
-              try { setAdvances(JSON.parse(cachedAdv)); } catch (_) {}
-            } else if (normalized && normalized.length > 0) {
-              const mappedFromTx = normalized
-                .filter((t) => t.is_reimbursement)
-                .map((t) => ({
-                  id: t.id,
-                  semester_id: t.semester_id || 'sem-26-27-1',
-                  claimant_name: t.reimbursement_recipient || 'Club Officer',
-                  title: t.title,
-                  category_name: t.category_name,
-                  event_name: t.event_name,
-                  total_amount: Number(t.amount || 0),
-                  amount_reimbursed: t.status === 'REIMBURSED' ? Number(t.amount || 0) : 0,
-                  status: t.status === 'REIMBURSED' ? 'SETTLED' : 'UNPAID',
-                  advance_date: t.transaction_date,
-                  receipt_url: t.receipt_url,
-                  receipt_urls: t.receipt_urls || [],
-                  notes: t.description,
-                  advance_disbursements: t.status === 'REIMBURSED' ? [{
-                    id: `disb-${t.id}`,
-                    advance_id: t.id,
-                    amount: Number(t.amount || 0),
-                    payment_method: t.payment_method || 'CASH',
-                    disbursement_date: t.transaction_date || new Date().toISOString(),
-                  }] : [],
-                }));
-              setAdvances(mappedFromTx);
-            }
+        // Process Advances & Payables
+        let activeAdvList = advances;
+        if (advRes.status === 'fulfilled' && !advRes.value.error && advRes.value.data && advRes.value.data.length > 0) {
+          activeAdvList = advRes.value.data;
+          setAdvances(activeAdvList);
+          if (typeof window !== 'undefined') {
+            try { localStorage.setItem('finlite_advances', JSON.stringify(activeAdvList)); } catch (_) {}
           }
-        } catch (advErr) {
-          console.warn('Advances fetch note:', advErr);
+        } else {
           const cachedAdv = typeof window !== 'undefined' ? localStorage.getItem('finlite_advances') : null;
           if (cachedAdv) {
-            try { setAdvances(JSON.parse(cachedAdv)); } catch (_) {}
+            try {
+              activeAdvList = JSON.parse(cachedAdv);
+              setAdvances(activeAdvList);
+            } catch (_) {}
+          } else if (normalized && normalized.length > 0) {
+            activeAdvList = normalized
+              .filter((t) => t.is_reimbursement)
+              .map((t) => ({
+                id: t.id,
+                semester_id: t.semester_id || 'sem-26-27-1',
+                claimant_name: t.reimbursement_recipient || 'Club Officer',
+                title: t.title,
+                category_name: t.category_name,
+                event_name: t.event_name,
+                total_amount: Number(t.amount || 0),
+                amount_reimbursed: t.status === 'REIMBURSED' ? Number(t.amount || 0) : 0,
+                status: t.status === 'REIMBURSED' ? 'SETTLED' : 'UNPAID',
+                advance_date: t.transaction_date,
+                receipt_url: t.receipt_url,
+                receipt_urls: t.receipt_urls || [],
+                notes: t.description,
+                advance_disbursements: t.status === 'REIMBURSED' ? [{
+                  id: `disb-${t.id}`,
+                  advance_id: t.id,
+                  amount: Number(t.amount || 0),
+                  payment_method: t.payment_method || 'CASH',
+                  disbursement_date: t.transaction_date || new Date().toISOString(),
+                }] : [],
+              }));
+            setAdvances(activeAdvList);
           }
         }
+
+        // Populate in-memory cache for instant route transitions
+        dashboardCache = {
+          currentUser: activeUser,
+          userProfile: activeProfile,
+          currentRole: activeRole,
+          categories: activeCategories,
+          denominations: activeDenominations,
+          semesters: activeSemestersList,
+          currentSemester: matchedSemester,
+          transactions: normalized || transactions,
+          latestReconciliation: activeRecon,
+          debts: activeDebtsList,
+          advances: activeAdvList,
+        };
       } catch (err) {
         console.error('Database connection error:', err);
         setTransactions([]);
@@ -618,7 +657,7 @@ export default function Dashboard() {
     }
 
     loadSignatories();
-  }, [currentSemester?.academicYear, currentSemester?.semester, supabase]);
+  }, [currentSemester?.academicYear, currentSemester?.semester]);
 
   // Filter transactions strictly for the active semester (memoized to prevent cascading re-renders)
   const activeTransactions = useMemo(() => {
@@ -698,7 +737,29 @@ export default function Dashboard() {
     };
   };
 
-  const summary = calculateSummary(activeTransactions, activeDebts, activeAdvances);
+  const summary = useMemo(() => {
+    return calculateSummary(activeTransactions, activeDebts, activeAdvances);
+  }, [activeTransactions, activeDebts, activeAdvances]);
+
+  // Idle preloader for dynamic modals so they open instantly on click
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const preloadModals = () => {
+      import('@/components/ledger/NewTransactionModal');
+      import('@/components/reconciliation/DenominationCounter');
+      import('@/components/debts/DebtsManagementModal');
+      import('@/components/debts/AdvancesManagementModal');
+      import('@/components/ai/AIChatDrawer');
+      import('@/components/audit/AuditTrailDrawer');
+    };
+    if ('requestIdleCallback' in window) {
+      const handle = window.requestIdleCallback(preloadModals, { timeout: 3000 });
+      return () => window.cancelIdleCallback(handle);
+    } else {
+      const timer = setTimeout(preloadModals, 1000);
+      return () => clearTimeout(timer);
+    }
+  }, []);
 
   // Manual entry from the New Transaction form: enforce ₱99,999.99 cap and cashbox balance check.
   const handleManualSaveTransaction = async (newTx) => {
@@ -1685,7 +1746,7 @@ export default function Dashboard() {
   return (
     <>
       {/* Main Content Canvas */}
-      <div className="flex-1 flex flex-col transition-all duration-300 ease-in-out min-w-0 p-3 sm:p-6 lg:p-8 pt-16 md:pt-6">
+      <div className="flex-1 flex flex-col min-w-0 p-3 sm:p-6 lg:p-8 pt-16 md:pt-6">
         <main className="max-w-[1550px] w-full mx-auto space-y-5 sm:space-y-6 pb-24 md:pb-8 no-print">
           
           {/* Modern Minimalist Hero Balance & Action Hub (De-cluttered borderless canvas) */}
@@ -1711,7 +1772,7 @@ export default function Dashboard() {
                   onClick={() => setIsNewTxOpen(true)}
                   className="flex flex-col items-center gap-1 p-1 sm:px-2 group cursor-pointer"
                 >
-                  <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-lg flex items-center justify-center transition-all shadow-xs bg-emerald-600 text-white group-hover:bg-emerald-500 active:scale-95">
+                  <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-lg flex items-center justify-center transition-[background-color,transform] duration-150 shadow-xs bg-emerald-600 text-white group-hover:bg-emerald-500 active:scale-95">
                     <Plus className="w-5 h-5 stroke-[2.5]" />
                   </div>
                   <span className="text-[10px] sm:text-[11px] font-medium transition-colors text-zinc-600 dark:text-zinc-300 group-hover:text-emerald-600 dark:group-hover:text-emerald-400">
@@ -1725,7 +1786,7 @@ export default function Dashboard() {
                   onClick={() => setIsDenomOpen(true)}
                   className="flex flex-col items-center gap-1 p-1 sm:px-2 group cursor-pointer"
                 >
-                  <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-lg flex items-center justify-center transition-all border bg-white dark:bg-zinc-900 text-zinc-700 dark:text-zinc-300 border-zinc-200 dark:border-zinc-800 group-hover:border-emerald-500/40 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 active:scale-95">
+                  <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-lg flex items-center justify-center transition-[background-color,border-color,color,transform] duration-150 border bg-white dark:bg-zinc-900 text-zinc-700 dark:text-zinc-300 border-zinc-200 dark:border-zinc-800 group-hover:border-emerald-500/40 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 active:scale-95">
                     <Wallet className="w-4 h-4 stroke-[2]" />
                   </div>
                   <span className="text-[10px] sm:text-[11px] font-medium transition-colors text-zinc-600 dark:text-zinc-300 group-hover:text-emerald-600 dark:group-hover:text-emerald-400">
@@ -1739,7 +1800,7 @@ export default function Dashboard() {
                   onClick={handleOpenLiquidationPreview}
                   className="flex flex-col items-center gap-1 p-1 sm:px-2 group cursor-pointer"
                 >
-                  <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-lg flex items-center justify-center transition-all border bg-white dark:bg-zinc-900 text-zinc-700 dark:text-zinc-300 border-zinc-200 dark:border-zinc-800 group-hover:border-emerald-500/40 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 active:scale-95">
+                  <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-lg flex items-center justify-center transition-[background-color,border-color,color,transform] duration-150 border bg-white dark:bg-zinc-900 text-zinc-700 dark:text-zinc-300 border-zinc-200 dark:border-zinc-800 group-hover:border-emerald-500/40 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 active:scale-95">
                     <FileText className="w-4 h-4 stroke-[2]" />
                   </div>
                   <span className="text-[10px] sm:text-[11px] font-medium transition-colors text-zinc-600 dark:text-zinc-300 group-hover:text-emerald-600 dark:group-hover:text-emerald-400">
@@ -1753,7 +1814,7 @@ export default function Dashboard() {
                   onClick={() => setIsAIOpen(true)}
                   className="flex flex-col items-center gap-1 p-1 sm:px-2 group cursor-pointer"
                 >
-                  <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-lg flex items-center justify-center transition-all border bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20 group-hover:bg-emerald-500/20 active:scale-95">
+                  <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-lg flex items-center justify-center transition-[background-color,border-color,color,transform] duration-150 border bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20 group-hover:bg-emerald-500/20 active:scale-95">
                     <Bot className="w-4 h-4 stroke-[2]" />
                   </div>
                   <span className="text-[10px] sm:text-[11px] font-medium transition-colors text-zinc-600 dark:text-zinc-300 group-hover:text-emerald-600 dark:group-hover:text-emerald-400">
@@ -1819,58 +1880,68 @@ export default function Dashboard() {
         }}
       />
 
-      {/* Modals & Slide-overs */}
+      {/* Modals & Slide-overs (Conditionally mounted to eliminate reconciliation of inactive DOM trees) */}
       <div className="no-print">
-        <ModuleErrorBoundary moduleName="Semester Management">
-          <NewSemesterModal
-            isOpen={isNewSemesterOpen}
-            onClose={() => setIsNewSemesterOpen(false)}
-            currentSemester={currentSemester}
-            currentSummary={summary}
-            onStartSemester={handleStartSemester}
-          />
-        </ModuleErrorBoundary>
+        {isNewSemesterOpen && (
+          <ModuleErrorBoundary moduleName="Semester Management">
+            <NewSemesterModal
+              isOpen={isNewSemesterOpen}
+              onClose={() => setIsNewSemesterOpen(false)}
+              currentSemester={currentSemester}
+              currentSummary={summary}
+              onStartSemester={handleStartSemester}
+            />
+          </ModuleErrorBoundary>
+        )}
 
-        <ModuleErrorBoundary moduleName="Transaction Entry">
-          <NewTransactionModal
-            isOpen={isNewTxOpen}
-            onClose={() => setIsNewTxOpen(false)}
-            onSave={handleManualSaveTransaction}
-            categories={categories}
-            cashBalance={summary.cash_on_hand}
-          />
-        </ModuleErrorBoundary>
+        {isNewTxOpen && (
+          <ModuleErrorBoundary moduleName="Transaction Entry">
+            <NewTransactionModal
+              isOpen={isNewTxOpen}
+              onClose={() => setIsNewTxOpen(false)}
+              onSave={handleManualSaveTransaction}
+              categories={categories}
+              cashBalance={summary.cash_on_hand}
+            />
+          </ModuleErrorBoundary>
+        )}
 
-        <ModuleErrorBoundary moduleName="Proposal Generator">
-          <NewProposalModal
-            isOpen={isProposalOpen}
-            onClose={() => setIsProposalOpen(false)}
-            onOpenPreview={handleOpenProposalPreview}
-          />
-        </ModuleErrorBoundary>
+        {isProposalOpen && (
+          <ModuleErrorBoundary moduleName="Proposal Generator">
+            <NewProposalModal
+              isOpen={isProposalOpen}
+              onClose={() => setIsProposalOpen(false)}
+              onOpenPreview={handleOpenProposalPreview}
+            />
+          </ModuleErrorBoundary>
+        )}
 
-        <ModuleErrorBoundary moduleName="Debts & Receivables Management">
-          <DebtsManagementModal
-            isOpen={isDebtsOpen}
-            onClose={() => setIsDebtsOpen(false)}
-            debts={activeDebts}
-            onRecordPayment={handleRecordDebtPayment}
-            onCreateDebt={handleCreateDebt}
-            canManage={canManageFinancials}
-          />
-        </ModuleErrorBoundary>
+        {isDebtsOpen && (
+          <ModuleErrorBoundary moduleName="Debts & Receivables Management">
+            <DebtsManagementModal
+              isOpen={isDebtsOpen}
+              onClose={() => setIsDebtsOpen(false)}
+              debts={activeDebts}
+              onRecordPayment={handleRecordDebtPayment}
+              onCreateDebt={handleCreateDebt}
+              canManage={canManageFinancials}
+            />
+          </ModuleErrorBoundary>
+        )}
 
-        <ModuleErrorBoundary moduleName="Advances Abono Settlement">
-          <AdvancesManagementModal
-            isOpen={isAdvancesOpen}
-            onClose={() => setIsAdvancesOpen(false)}
-            advances={activeAdvances}
-            onRecordDisbursement={handleRecordAdvanceDisbursement}
-            onCreateAdvance={handleCreateAdvance}
-            cashBalance={summary.cash_on_hand}
-            canManage={canManageFinancials}
-          />
-        </ModuleErrorBoundary>
+        {isAdvancesOpen && (
+          <ModuleErrorBoundary moduleName="Advances Abono Settlement">
+            <AdvancesManagementModal
+              isOpen={isAdvancesOpen}
+              onClose={() => setIsAdvancesOpen(false)}
+              advances={activeAdvances}
+              onRecordDisbursement={handleRecordAdvanceDisbursement}
+              onCreateAdvance={handleCreateAdvance}
+              cashBalance={summary.cash_on_hand}
+              canManage={canManageFinancials}
+            />
+          </ModuleErrorBoundary>
+        )}
       </div>
 
       <ModuleErrorBoundary moduleName="Document Preview">
@@ -1884,38 +1955,44 @@ export default function Dashboard() {
       </ModuleErrorBoundary>
 
       <div className="no-print">
-        <ModuleErrorBoundary moduleName="Cash Reconciliation">
-          <DenominationCounter
-            isOpen={isDenomOpen}
-            onClose={() => setIsDenomOpen(false)}
-            ledgerCashBalance={summary.cash_on_hand}
-            onDeclareShortage={handleDeclareShortage}
-            onSaveCount={handleSaveAuditCount}
-            currentRole={currentRole}
-            latestReconciliation={latestReconciliation}
-            denominations={denominations}
-          />
-        </ModuleErrorBoundary>
+        {isDenomOpen && (
+          <ModuleErrorBoundary moduleName="Cash Reconciliation">
+            <DenominationCounter
+              isOpen={isDenomOpen}
+              onClose={() => setIsDenomOpen(false)}
+              ledgerCashBalance={summary.cash_on_hand}
+              onDeclareShortage={handleDeclareShortage}
+              onSaveCount={handleSaveAuditCount}
+              currentRole={currentRole}
+              latestReconciliation={latestReconciliation}
+              denominations={denominations}
+            />
+          </ModuleErrorBoundary>
+        )}
 
-        <ModuleErrorBoundary moduleName="AI Co-Pilot">
-          <AIChatDrawer
-            isOpen={isAIOpen}
-            onClose={() => setIsAIOpen(false)}
-            summary={summary}
-            transactions={activeTransactions}
-            debts={activeDebts}
-            advances={activeAdvances}
-          />
-        </ModuleErrorBoundary>
+        {isAIOpen && (
+          <ModuleErrorBoundary moduleName="AI Co-Pilot">
+            <AIChatDrawer
+              isOpen={isAIOpen}
+              onClose={() => setIsAIOpen(false)}
+              summary={summary}
+              transactions={activeTransactions}
+              debts={activeDebts}
+              advances={activeAdvances}
+            />
+          </ModuleErrorBoundary>
+        )}
 
-        <ModuleErrorBoundary moduleName="Financial Audit Trail">
-          <AuditTrailDrawer
-            isOpen={isAuditOpen}
-            onClose={() => setIsAuditOpen(false)}
-            supabase={supabase}
-            currentRole={currentRole}
-          />
-        </ModuleErrorBoundary>
+        {isAuditOpen && (
+          <ModuleErrorBoundary moduleName="Financial Audit Trail">
+            <AuditTrailDrawer
+              isOpen={isAuditOpen}
+              onClose={() => setIsAuditOpen(false)}
+              supabase={supabase}
+              currentRole={currentRole}
+            />
+          </ModuleErrorBoundary>
+        )}
       </div>
     </>
   );

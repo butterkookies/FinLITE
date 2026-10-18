@@ -321,7 +321,7 @@ export default function NewProposalModal({ isOpen, onClose, onOpenPreview }) {
             <button
               type="button"
               onClick={handleProceedToPreview}
-              className="h-10 flex items-center justify-center gap-1.5 px-4 text-xs font-semibold text-white bg-emerald-700 hover:bg-emerald-800 active:bg-emerald-900 rounded-xl shadow-xs transition-all cursor-pointer whitespace-nowrap flex-1 sm:flex-initial"
+              className="h-10 flex items-center justify-center gap-1.5 px-4 text-xs font-semibold text-white bg-emerald-700 hover:bg-emerald-800 active:bg-emerald-900 rounded-xl shadow-xs transition-colors duration-150 cursor-pointer whitespace-nowrap flex-1 sm:flex-initial"
             >
               <span>Preview & Edit Proposal</span>
               <ArrowRight className="w-3.5 h-3.5" />

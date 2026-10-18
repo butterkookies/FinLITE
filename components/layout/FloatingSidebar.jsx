@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, startTransition } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter, usePathname } from 'next/navigation';
@@ -125,7 +125,9 @@ export default function FloatingSidebar({
       action: () => {
         handleSelectTab('dashboard');
         if (pathname !== '/') {
-          router.push('/');
+          startTransition(() => {
+            router.push('/');
+          });
         } else {
           window.scrollTo({ top: 0, behavior: 'smooth' });
         }
@@ -138,7 +140,9 @@ export default function FloatingSidebar({
       action: () => {
         handleSelectTab('ledger');
         if (pathname !== '/') {
-          router.push('/#financial-ledger');
+          startTransition(() => {
+            router.push('/#financial-ledger');
+          });
         } else {
           const el = document.getElementById('financial-ledger');
           if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -217,7 +221,7 @@ export default function FloatingSidebar({
           <button
             type="button"
             onClick={() => setIsMobileOpen(true)}
-            className="w-10 h-10 rounded-xl flex items-center justify-center text-zinc-800 dark:text-zinc-200 hover:text-emerald-600 dark:hover:text-emerald-400 hover:bg-zinc-100/80 dark:hover:bg-zinc-800/80 active:scale-95 transition-all cursor-pointer focus:outline-none"
+            className="w-10 h-10 rounded-xl flex items-center justify-center text-zinc-800 dark:text-zinc-200 hover:text-emerald-600 dark:hover:text-emerald-400 hover:bg-zinc-100/80 dark:hover:bg-zinc-800/80 active:scale-95 transition-[background-color,color,transform] duration-150 cursor-pointer focus:outline-none"
             aria-label="Open Navigation Sidebar"
           >
             <Menu className="w-5 h-5 text-zinc-800 dark:text-zinc-200" />
@@ -404,15 +408,20 @@ export default function FloatingSidebar({
                       item.action();
                       setIsMobileOpen(false);
                     }}
+                    onMouseEnter={() => {
+                      if (pathname !== '/' && (item.id === 'dashboard' || item.id === 'ledger') && router?.prefetch) {
+                        router.prefetch('/');
+                      }
+                    }}
                     title={isCollapsed && !isMobileOpen ? item.label : undefined}
-                    className={`w-full flex items-center gap-2.5 rounded-xl transition-all cursor-pointer group text-xs font-medium
+                    className={`w-full flex items-center gap-2.5 rounded-xl transition-colors duration-150 cursor-pointer group text-xs font-medium
                       ${isCollapsed && !isMobileOpen ? 'justify-center p-2.5' : 'px-3 py-2'}
                       ${isActive 
                         ? 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 font-semibold shadow-xs' 
                         : 'text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-900 hover:text-zinc-900 dark:hover:text-zinc-100'}
                     `}
                   >
-                    <Icon className={`w-4 h-4 shrink-0 transition-transform group-hover:scale-110 ${isActive ? 'text-emerald-700 dark:text-emerald-400' : 'text-zinc-600 dark:text-zinc-400'}`} />
+                    <Icon className={`w-4 h-4 shrink-0 transition-transform duration-150 group-hover:scale-110 ${isActive ? 'text-emerald-700 dark:text-emerald-400' : 'text-zinc-600 dark:text-zinc-400'}`} />
                     {(!isCollapsed || isMobileOpen) && (
                       <span className="truncate flex-1 text-left">{item.label}</span>
                     )}
@@ -444,14 +453,14 @@ export default function FloatingSidebar({
                       key={item.id}
                       href={item.href}
                       title={isCollapsed && !isMobileOpen ? item.label : undefined}
-                      className={`w-full flex items-center gap-2.5 rounded-xl transition-all cursor-pointer group text-xs font-medium
+                      className={`w-full flex items-center gap-2.5 rounded-xl transition-colors duration-150 cursor-pointer group text-xs font-medium
                         ${isCollapsed && !isMobileOpen ? 'justify-center p-2.5' : 'px-3 py-2'}
                         ${isLinkActive
                           ? 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 font-semibold shadow-xs'
                           : 'text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-900 hover:text-zinc-900 dark:hover:text-zinc-100'}
                       `}
                     >
-                      <Icon className={`w-4 h-4 shrink-0 transition-transform group-hover:scale-110 ${isLinkActive ? 'text-emerald-700 dark:text-emerald-400' : 'text-zinc-600 dark:text-zinc-400'}`} />
+                      <Icon className={`w-4 h-4 shrink-0 transition-transform duration-150 group-hover:scale-110 ${isLinkActive ? 'text-emerald-700 dark:text-emerald-400' : 'text-zinc-600 dark:text-zinc-400'}`} />
                       {(!isCollapsed || isMobileOpen) && (
                         <div className="flex items-center justify-between flex-1 min-w-0">
                           <span className="truncate">{item.label}</span>
@@ -471,7 +480,7 @@ export default function FloatingSidebar({
                       setIsMobileOpen(false);
                     }}
                     title={isCollapsed && !isMobileOpen ? item.label : undefined}
-                    className={`w-full flex items-center gap-2.5 rounded-xl transition-all cursor-pointer group text-xs font-medium
+                    className={`w-full flex items-center gap-2.5 rounded-xl transition-colors duration-150 cursor-pointer group text-xs font-medium
                       ${isCollapsed && !isMobileOpen ? 'justify-center p-2.5' : 'px-3 py-2'}
                       ${item.highlight
                         ? 'text-amber-600 dark:text-amber-400 hover:bg-amber-500/10'

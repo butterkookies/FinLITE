@@ -399,6 +399,7 @@ export default function SidebarMockupDashboard() {
     setTransactions((prev) => [optimisticTx, ...prev]);
 
     if (supabase) {
+      try {
         const payload = {
           title: newTx.title,
           description: newTx.description || null,

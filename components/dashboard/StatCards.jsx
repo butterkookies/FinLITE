@@ -52,7 +52,7 @@ export default function StatCards({
           onClick={onOpenDenominations}
           role="button"
           tabIndex={0}
-          className="group relative p-3 sm:p-3.5 cursor-pointer flex flex-col justify-between overflow-hidden bg-emerald-600 dark:bg-emerald-700 text-white border-emerald-500/80 dark:border-emerald-600 shadow-xs hover:bg-emerald-700 dark:hover:bg-emerald-800 active:scale-[0.99] transition-all rounded-xl sm:rounded-2xl min-h-[110px] sm:min-h-[118px]"
+          className="group relative p-3 sm:p-3.5 cursor-pointer flex flex-col justify-between overflow-hidden bg-emerald-600 dark:bg-emerald-700 text-white border-emerald-500/80 dark:border-emerald-600 shadow-xs hover:bg-emerald-700 dark:hover:bg-emerald-800 active:scale-[0.99] transition-[background-color,border-color,transform] duration-150 rounded-xl sm:rounded-2xl min-h-[110px] sm:min-h-[118px]"
         >
           <div className="flex items-center justify-between gap-1 mb-1 relative z-10">
             <div className="flex items-center gap-1.5 min-w-0">
@@ -84,7 +84,7 @@ export default function StatCards({
         </Card>
 
         {/* 2. True Net Position (Cash on Hand − Pending Abono) */}
-        <Card className="group relative p-3 sm:p-3.5 flex flex-col justify-between overflow-hidden bg-indigo-600 dark:bg-indigo-700 text-white border-indigo-500/80 dark:border-indigo-600 shadow-xs hover:bg-indigo-700 dark:hover:bg-indigo-800 transition-all rounded-xl sm:rounded-2xl min-h-[110px] sm:min-h-[118px]">
+        <Card className="group relative p-3 sm:p-3.5 flex flex-col justify-between overflow-hidden bg-indigo-600 dark:bg-indigo-700 text-white border-indigo-500/80 dark:border-indigo-600 shadow-xs hover:bg-indigo-700 dark:hover:bg-indigo-800 transition-[background-color,border-color] duration-150 rounded-xl sm:rounded-2xl min-h-[110px] sm:min-h-[118px]">
           <div className="flex items-center justify-between gap-1 mb-1 relative z-10">
             <div className="flex items-center gap-1.5 min-w-0">
               <div className="w-6 h-6 rounded-md flex items-center justify-center shrink-0 bg-white/20 text-white backdrop-blur-xs">
@@ -118,7 +118,7 @@ export default function StatCards({
           onClick={onOpenDebts}
           role="button"
           tabIndex={0}
-          className="group relative p-3 sm:p-3.5 cursor-pointer flex flex-col justify-between overflow-hidden bg-rose-600 dark:bg-rose-700 text-white border-rose-500/80 dark:border-rose-600 shadow-xs hover:bg-rose-700 dark:hover:bg-rose-800 active:scale-[0.99] transition-all rounded-xl sm:rounded-2xl min-h-[110px] sm:min-h-[118px]"
+          className="group relative p-3 sm:p-3.5 cursor-pointer flex flex-col justify-between overflow-hidden bg-rose-600 dark:bg-rose-700 text-white border-rose-500/80 dark:border-rose-600 shadow-xs hover:bg-rose-700 dark:hover:bg-rose-800 active:scale-[0.99] transition-[background-color,border-color,transform] duration-150 rounded-xl sm:rounded-2xl min-h-[110px] sm:min-h-[118px]"
         >
           <div className="flex items-center justify-between gap-1 mb-1 relative z-10">
             <div className="flex items-center gap-1.5 min-w-0">
@@ -150,7 +150,7 @@ export default function StatCards({
         </Card>
 
         {/* 4. Total Inflows */}
-        <Card className="group relative p-3 sm:p-3.5 flex flex-col justify-between overflow-hidden bg-teal-600 dark:bg-teal-700 text-white border-teal-500/80 dark:border-teal-600 shadow-xs hover:bg-teal-700 dark:hover:bg-teal-800 transition-all rounded-xl sm:rounded-2xl min-h-[110px] sm:min-h-[118px]">
+        <Card className="group relative p-3 sm:p-3.5 flex flex-col justify-between overflow-hidden bg-teal-600 dark:bg-teal-700 text-white border-teal-500/80 dark:border-teal-600 shadow-xs hover:bg-teal-700 dark:hover:bg-teal-800 transition-[background-color,border-color] duration-150 rounded-xl sm:rounded-2xl min-h-[110px] sm:min-h-[118px]">
           <div className="flex items-center justify-between gap-1 mb-1 relative z-10">
             <div className="flex items-center gap-1.5 min-w-0">
               <div className="w-6 h-6 rounded-md flex items-center justify-center shrink-0 bg-white/20 text-white backdrop-blur-xs">
@@ -180,7 +180,7 @@ export default function StatCards({
         </Card>
 
         {/* 5. Total Outflows */}
-        <Card className="group relative p-3 sm:p-3.5 flex flex-col justify-between overflow-hidden bg-orange-600 dark:bg-orange-700 text-white border-orange-500/80 dark:border-orange-600 shadow-xs hover:bg-orange-700 dark:hover:bg-orange-800 transition-all rounded-xl sm:rounded-2xl min-h-[110px] sm:min-h-[118px]">
+        <Card className="group relative p-3 sm:p-3.5 flex flex-col justify-between overflow-hidden bg-orange-600 dark:bg-orange-700 text-white border-orange-500/80 dark:border-orange-600 shadow-xs hover:bg-orange-700 dark:hover:bg-orange-800 transition-[background-color,border-color] duration-150 rounded-xl sm:rounded-2xl min-h-[110px] sm:min-h-[118px]">
           <div className="flex items-center justify-between gap-1 mb-1 relative z-10">
             <div className="flex items-center gap-1.5 min-w-0">
               <div className="w-6 h-6 rounded-md flex items-center justify-center shrink-0 bg-white/20 text-white backdrop-blur-xs">
@@ -214,7 +214,7 @@ export default function StatCards({
           onClick={onOpenAdvances}
           role="button"
           tabIndex={0}
-          className="group relative p-3 sm:p-3.5 cursor-pointer flex flex-col justify-between overflow-hidden bg-amber-600 dark:bg-amber-700 text-white border-amber-500/80 dark:border-amber-600 shadow-xs hover:bg-amber-700 dark:hover:bg-amber-800 active:scale-[0.99] transition-all rounded-xl sm:rounded-2xl min-h-[110px] sm:min-h-[118px]"
+          className="group relative p-3 sm:p-3.5 cursor-pointer flex flex-col justify-between overflow-hidden bg-amber-600 dark:bg-amber-700 text-white border-amber-500/80 dark:border-amber-600 shadow-xs hover:bg-amber-700 dark:hover:bg-amber-800 active:scale-[0.99] transition-[background-color,border-color,transform] duration-150 rounded-xl sm:rounded-2xl min-h-[110px] sm:min-h-[118px]"
         >
           <div className="flex items-center justify-between gap-1 mb-1 relative z-10">
             <div className="flex items-center gap-1.5 min-w-0">

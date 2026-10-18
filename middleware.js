@@ -62,6 +62,26 @@ export async function middleware(request) {
     }
   );
 
+  const allCookies = request.cookies.getAll();
+  const hasAuthCookie = allCookies.some(
+    (c) => c.name.includes('auth-token') || c.name.startsWith('sb-')
+  );
+
+  const isPublic = isPublicRoute(pathname);
+
+  // Fast path: if no auth cookies exist at all, skip remote Supabase network call
+  if (!hasAuthCookie) {
+    if (!isPublic) {
+      if (pathname.startsWith('/api/')) {
+        return applyRateLimitHeaders(request, NextResponse.json({ error: 'Authentication required.' }, { status: 401 }));
+      }
+      const loginUrl = request.nextUrl.clone();
+      loginUrl.pathname = '/login';
+      return NextResponse.redirect(loginUrl);
+    }
+    return applyRateLimitHeaders(request, response);
+  }
+
   // Get current session
   let user = null;
   try {
@@ -83,8 +103,6 @@ export async function middleware(request) {
   } catch (_e) {
     user = null;
   }
-
-  const isPublic = isPublicRoute(pathname);
 
   // Not logged in → redirect to /login (except public routes)
   if (!user) {
@@ -132,7 +150,19 @@ export async function middleware(request) {
     let status = user.app_metadata?.status;
     let role = user.app_metadata?.role;
 
-    // 2. Fallback path: Query database only if token metadata is not yet populated
+    // 2. Cookie cache path: Check short-lived cached security context (0ms DB query)
+    if (!status || !role) {
+      const cachedCtx = request.cookies.get('finlite_sec_ctx')?.value;
+      if (cachedCtx && cachedCtx.startsWith(`${user.id}:`)) {
+        const parts = cachedCtx.split(':');
+        if (parts.length === 3) {
+          status = parts[1];
+          role = parts[2];
+        }
+      }
+    }
+
+    // 3. Fallback path: Query database only if token metadata and cache are absent
     if (!status || !role) {
       const { data: profile } = await supabase
         .from('profiles')
@@ -143,6 +173,14 @@ export async function middleware(request) {
       if (profile) {
         status = profile.status;
         role = profile.role;
+
+        // Cache for 5 minutes to avoid redundant DB roundtrips on every page navigation
+        response.cookies.set('finlite_sec_ctx', `${user.id}:${status}:${role}`, {
+          httpOnly: true,
+          sameSite: 'lax',
+          maxAge: 300,
+          path: '/',
+        });
       }
     }
 

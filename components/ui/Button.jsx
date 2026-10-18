@@ -58,7 +58,7 @@ const Button = forwardRef(function Button(
       type={type}
       disabled={disabled || isButtonLoading}
       className={cn(
-        'inline-flex items-center justify-center font-medium transition-all select-none cursor-pointer max-w-full touch-manipulation active:scale-[0.98]',
+        'inline-flex items-center justify-center font-medium transition-[color,background-color,border-color,opacity,transform] duration-150 select-none cursor-pointer max-w-full touch-manipulation active:scale-[0.98]',
         'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-1',
         'disabled:opacity-50 disabled:pointer-events-none disabled:cursor-not-allowed',
         variantClass,

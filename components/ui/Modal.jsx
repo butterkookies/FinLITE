@@ -55,7 +55,7 @@ export default function Modal({
     >
       <div
         className={cn(
-          'w-full rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-[#121214] text-zinc-950 dark:text-zinc-100 shadow-2xl transition-all overflow-hidden flex flex-col max-h-[90vh] animate-in zoom-in-95 duration-150',
+          'w-full rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-[#121214] text-zinc-950 dark:text-zinc-100 shadow-2xl overflow-hidden flex flex-col max-h-[90vh] animate-in zoom-in-95 duration-150',
           resolvedMaxWidth,
           className
         )}
