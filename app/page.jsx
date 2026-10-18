@@ -1,5 +1,5 @@
 'use client';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import { Plus, Wallet, Calculator, Sparkles, FileText, CreditCard, Bot } from 'lucide-react';
@@ -620,24 +620,30 @@ export default function Dashboard() {
     loadSignatories();
   }, [currentSemester?.academicYear, currentSemester?.semester, supabase]);
 
-  // Filter transactions strictly for the active semester
-  const activeTransactions = transactions.filter((tx) => {
-    const txAY = tx.academic_year || '2025-2026';
-    const txSem = tx.semester || '2nd Sem';
-    return txAY === currentSemester.academicYear && txSem === currentSemester.semester;
-  });
+  // Filter transactions strictly for the active semester (memoized to prevent cascading re-renders)
+  const activeTransactions = useMemo(() => {
+    return transactions.filter((tx) => {
+      const txAY = tx.academic_year || '2025-2026';
+      const txSem = tx.semester || '2nd Sem';
+      return txAY === currentSemester?.academicYear && txSem === currentSemester?.semester;
+    });
+  }, [transactions, currentSemester?.academicYear, currentSemester?.semester]);
 
   // Filter active debts for the current semester
-  const activeDebts = debts.filter((d) => {
-    if (!d.semester_id) return true;
-    return d.semester_id === currentSemester?.id || d.semester_id === `${currentSemester?.academicYear}-${currentSemester?.semester}`;
-  });
+  const activeDebts = useMemo(() => {
+    return debts.filter((d) => {
+      if (!d.semester_id) return true;
+      return d.semester_id === currentSemester?.id || d.semester_id === `${currentSemester?.academicYear}-${currentSemester?.semester}`;
+    });
+  }, [debts, currentSemester?.id, currentSemester?.academicYear, currentSemester?.semester]);
 
   // Filter active advances for the current semester
-  const activeAdvances = advances.filter((a) => {
-    if (!a.semester_id) return true;
-    return a.semester_id === currentSemester?.id || a.semester_id === `${currentSemester?.academicYear}-${currentSemester?.semester}`;
-  });
+  const activeAdvances = useMemo(() => {
+    return advances.filter((a) => {
+      if (!a.semester_id) return true;
+      return a.semester_id === currentSemester?.id || a.semester_id === `${currentSemester?.academicYear}-${currentSemester?.semester}`;
+    });
+  }, [advances, currentSemester?.id, currentSemester?.academicYear, currentSemester?.semester]);
 
   // Recalculate summary totals atomically with precision centavo math
   const calculateSummary = (txs, debtsList = [], advancesList = []) => {

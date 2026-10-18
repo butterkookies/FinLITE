@@ -1,5 +1,5 @@
 'use client';
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, useRef } from 'react';
 import { 
   ArrowDownRight, 
   ArrowUpRight, 
@@ -106,19 +106,34 @@ export default function TransactionTable({
   // Transaction Comments & Audit Remarks drawer state
   const [commentTx, setCommentTx] = useState(null);
   const [commentCounts, setCommentCounts] = useState({});
+  const lastFetchedTxIdsRef = useRef('');
 
   useEffect(() => {
+    // Fingerprint current transactions to avoid re-fetching on no-op renders
+    const txFingerprint = Array.isArray(transactions)
+      ? transactions.map((t) => `${t.id}-${t.updated_at || t.created_at || ''}`).join(',')
+      : '';
+    if (lastFetchedTxIdsRef.current === txFingerprint) return;
+
     let isMounted = true;
-    fetch('/api/transactions/comments-count')
-      .then((res) => res.json())
-      .then((data) => {
-        if (isMounted && data.success && data.counts) {
-          setCommentCounts(data.counts);
-        }
-      })
-      .catch(() => {});
+    const controller = new AbortController();
+
+    const timer = setTimeout(() => {
+      fetch('/api/transactions/comments-count', { signal: controller.signal })
+        .then((res) => res.json())
+        .then((data) => {
+          if (isMounted && data.success && data.counts) {
+            lastFetchedTxIdsRef.current = txFingerprint;
+            setCommentCounts(data.counts);
+          }
+        })
+        .catch(() => {});
+    }, 200);
+
     return () => {
       isMounted = false;
+      clearTimeout(timer);
+      controller.abort();
     };
   }, [transactions]);
 
