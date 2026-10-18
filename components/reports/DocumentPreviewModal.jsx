@@ -1,5 +1,5 @@
 'use client';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Download, Printer, X, FileText, Edit3 } from 'lucide-react';
 import './DocumentPreview.css';
 import { Button, Badge } from '@/components/ui';
@@ -14,6 +14,40 @@ function OfficialHeaderBanner() {
         className="pdm-banner-image"
       />
     </div>
+  );
+}
+
+// Exact PC View Signatory Input: auto-wraps and dynamically adjusts height so full text is 100% visible with zero truncation
+function AutoResizeSignatory({ value, onChange, className = '', isRole = false, placeholder = '' }) {
+  const text = value || '';
+  const textareaRef = useRef(null);
+
+  useEffect(() => {
+    if (textareaRef.current) {
+      textareaRef.current.style.height = 'auto';
+      textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`;
+    }
+  }, [text]);
+
+  const handleChange = (e) => {
+    onChange(e);
+    if (textareaRef.current) {
+      textareaRef.current.style.height = 'auto';
+      textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`;
+    }
+  };
+
+  return (
+    <textarea
+      ref={textareaRef}
+      rows={1}
+      value={text}
+      onChange={handleChange}
+      className={`pdm-input ${className} resize-none overflow-hidden block w-full max-w-full leading-tight`}
+      placeholder={placeholder}
+      title="Click to edit"
+      spellCheck={false}
+    />
   );
 }
 
@@ -625,7 +659,8 @@ export default function DocumentPreviewModal({ isOpen, onClose, documentData }) 
               onClick={() => setActivePage(0)}
               className="text-xs font-semibold whitespace-nowrap h-7 px-2.5 shrink-0"
             >
-              All Pages ({receiptPages.length > 0 && receiptsMode !== 'NONE' ? 4 + receiptPages.length : 4})
+              <span className="hidden sm:inline">All Pages</span>
+              <span className="sm:hidden">All</span> ({receiptPages.length > 0 && receiptsMode !== 'NONE' ? 4 + receiptPages.length : 4})
             </Button>
             <Button
               variant={activePage === 1 ? 'primary' : 'ghost'}
@@ -633,7 +668,8 @@ export default function DocumentPreviewModal({ isOpen, onClose, documentData }) 
               onClick={() => setActivePage(1)}
               className="text-xs font-semibold whitespace-nowrap h-7 px-2.5 shrink-0"
             >
-              Page 1: Transmittal
+              <span className="hidden sm:inline">Page 1: Transmittal</span>
+              <span className="sm:hidden">P1: Transmittal</span>
             </Button>
             <Button
               variant={activePage === 2 ? 'primary' : 'ghost'}
@@ -641,7 +677,8 @@ export default function DocumentPreviewModal({ isOpen, onClose, documentData }) 
               onClick={() => setActivePage(2)}
               className="text-xs font-semibold whitespace-nowrap h-7 px-2.5 shrink-0"
             >
-              Page 2: Income
+              <span className="hidden sm:inline">Page 2: Income</span>
+              <span className="sm:hidden">P2: Income</span>
             </Button>
             <Button
               variant={activePage === 3 ? 'primary' : 'ghost'}
@@ -649,7 +686,8 @@ export default function DocumentPreviewModal({ isOpen, onClose, documentData }) 
               onClick={() => setActivePage(3)}
               className="text-xs font-semibold whitespace-nowrap h-7 px-2.5 shrink-0"
             >
-              Page 3: Expenses
+              <span className="hidden sm:inline">Page 3: Expenses</span>
+              <span className="sm:hidden">P3: Expenses</span>
             </Button>
             <Button
               variant={activePage === 4 ? 'primary' : 'ghost'}
@@ -657,7 +695,8 @@ export default function DocumentPreviewModal({ isOpen, onClose, documentData }) 
               onClick={() => setActivePage(4)}
               className="text-xs font-semibold whitespace-nowrap h-7 px-2.5 shrink-0"
             >
-              Page 4: Reconciliation
+              <span className="hidden sm:inline">Page 4: Reconciliation</span>
+              <span className="sm:hidden">P4: Reconciliation</span>
             </Button>
             {receiptPages.length > 0 && (
               <Button
@@ -666,7 +705,8 @@ export default function DocumentPreviewModal({ isOpen, onClose, documentData }) 
                 onClick={() => setActivePage(5)}
                 className="text-xs font-semibold whitespace-nowrap h-7 px-2.5 shrink-0"
               >
-                Receipts &amp; Proofs ({receiptPages.length} {receiptPages.length === 1 ? 'Sheet' : 'Sheets'})
+                <span className="hidden sm:inline">Receipts &amp; Proofs</span>
+                <span className="sm:hidden">Receipts</span> ({receiptPages.length})
               </Button>
             )}
           </div>
@@ -674,7 +714,7 @@ export default function DocumentPreviewModal({ isOpen, onClose, documentData }) 
       </header>
 
       {/* Main Multi-Sheet Container */}
-      <main className="flex-1 p-2 sm:p-6 lg:p-8 flex flex-col items-center gap-4 sm:gap-8 w-full">
+      <main className="flex-1 p-2 sm:p-6 lg:p-8 flex flex-col items-center gap-4 sm:gap-8 w-full max-w-full overflow-x-hidden">
 
         {/* ========================================================================= */}
         {/* PROPOSAL VIEW                                                             */}
@@ -770,7 +810,7 @@ export default function DocumentPreviewModal({ isOpen, onClose, documentData }) 
             </div>
 
             {/* Table 1: Prepared & Endorsed by (Student Officers - Dynamic Columns) */}
-            <table className="sig-table mb-4">
+            <table className="sig-table sig-table-4col mb-4">
               <thead>
                 <tr>
                   <th colSpan={Math.max(activeOfficers.length, 1)} className="sig-section-header">Prepared &amp; Endorsed by:</th>
@@ -798,17 +838,16 @@ export default function DocumentPreviewModal({ isOpen, onClose, documentData }) 
                             <span>Include</span>
                           </label>
                           <div className="sig-space" />
-                          <input
-                            type="text"
+                          <AutoResizeSignatory
                             value={signatories[off.nameKey]}
                             onChange={(e) => handleUpdateSignatory(off.nameKey, e.target.value)}
-                            className="pdm-input sig-name"
+                            className="sig-name font-semibold"
                           />
-                          <input
-                            type="text"
+                          <AutoResizeSignatory
                             value={signatories[off.roleKey]}
                             onChange={(e) => handleUpdateSignatory(off.roleKey, e.target.value)}
-                            className="pdm-input sig-role"
+                            className="sig-role"
+                            isRole
                           />
                         </div>
                       </td>
@@ -819,7 +858,7 @@ export default function DocumentPreviewModal({ isOpen, onClose, documentData }) 
             </table>
 
             {/* Table 2: Recommending & Final Approval (Administrators - 2 Columns) */}
-            <table className="sig-table mb-4">
+            <table className="sig-table sig-table-2col mb-4">
               <thead>
                 <tr>
                   <th colSpan="2" className="sig-section-header">Recommending Approval:</th>
@@ -847,17 +886,16 @@ export default function DocumentPreviewModal({ isOpen, onClose, documentData }) 
                             <span>Include</span>
                           </label>
                           <div className="sig-space" />
-                          <input
-                            type="text"
+                          <AutoResizeSignatory
                             value={signatories[adm.nameKey]}
                             onChange={(e) => handleUpdateSignatory(adm.nameKey, e.target.value)}
-                            className="pdm-input sig-name"
+                            className="sig-name font-semibold"
                           />
-                          <input
-                            type="text"
+                          <AutoResizeSignatory
                             value={signatories[adm.roleKey]}
                             onChange={(e) => handleUpdateSignatory(adm.roleKey, e.target.value)}
-                            className="pdm-input sig-role"
+                            className="sig-role"
+                            isRole
                           />
                         </div>
                       </td>
@@ -918,7 +956,7 @@ export default function DocumentPreviewModal({ isOpen, onClose, documentData }) 
                 type="text"
                 value={salutation}
                 onChange={(e) => setSalutation(e.target.value)}
-                className="pdm-input w-64"
+                className="pdm-input w-full max-w-xs"
                 title="Click to edit salutation"
               />
             </div>
@@ -930,14 +968,18 @@ export default function DocumentPreviewModal({ isOpen, onClose, documentData }) 
                 type="text"
                 value={semester}
                 onChange={(e) => setSemester(e.target.value)}
-                className="pdm-input inline-block w-28 text-center"
+                className="pdm-input inline-block text-center font-semibold"
+                style={{ width: `${Math.max((semester || '').length + 1, 10)}ch` }}
+                title="Click to edit semester"
               />{' '}
               Academic Year{' '}
               <input
                 type="text"
                 value={academicYear}
                 onChange={(e) => setAcademicYear(e.target.value)}
-                className="pdm-input inline-block w-24 text-center"
+                className="pdm-input inline-block text-center font-semibold"
+                style={{ width: `${Math.max((academicYear || '').length + 1, 9)}ch` }}
+                title="Click to edit academic year"
               />.
             </div>
 
@@ -950,7 +992,7 @@ export default function DocumentPreviewModal({ isOpen, onClose, documentData }) 
             {/* Signatories Block (Table-Based) */}
             <div className="mt-8">
               {/* Table 1: Prepared by (Student Officers - Dynamic Columns) */}
-              <table className="sig-table mb-4">
+              <table className="sig-table sig-table-4col mb-4">
                 <thead>
                   <tr>
                     <th colSpan={Math.max(activeOfficers.length, 1)} className="sig-section-header">Prepared by:</th>
@@ -978,17 +1020,16 @@ export default function DocumentPreviewModal({ isOpen, onClose, documentData }) 
                               <span>Include</span>
                             </label>
                             <div className="sig-space" />
-                            <input
-                              type="text"
+                            <AutoResizeSignatory
                               value={signatories[off.nameKey]}
                               onChange={(e) => handleUpdateSignatory(off.nameKey, e.target.value)}
-                              className="pdm-input sig-name"
+                              className="sig-name font-semibold"
                             />
-                            <input
-                              type="text"
+                            <AutoResizeSignatory
                               value={signatories[off.roleKey]}
                               onChange={(e) => handleUpdateSignatory(off.roleKey, e.target.value)}
-                              className="pdm-input sig-role"
+                              className="sig-role"
+                              isRole
                             />
                           </div>
                         </td>
@@ -999,7 +1040,7 @@ export default function DocumentPreviewModal({ isOpen, onClose, documentData }) 
               </table>
 
               {/* Table 2: Approved by (Advisers - 2 Columns) */}
-              <table className="sig-table mb-4">
+              <table className="sig-table sig-table-2col mb-4">
                 <thead>
                   <tr>
                     <th colSpan={2} className="sig-section-header">Approved by:</th>
@@ -1027,17 +1068,16 @@ export default function DocumentPreviewModal({ isOpen, onClose, documentData }) 
                               <span>Include</span>
                             </label>
                             <div className="sig-space" />
-                            <input
-                              type="text"
+                            <AutoResizeSignatory
                               value={signatories[adv.nameKey]}
                               onChange={(e) => handleUpdateSignatory(adv.nameKey, e.target.value)}
-                              className="pdm-input sig-name w-72"
+                              className="sig-name font-semibold"
                             />
-                            <input
-                              type="text"
+                            <AutoResizeSignatory
                               value={signatories[adv.roleKey]}
                               onChange={(e) => handleUpdateSignatory(adv.roleKey, e.target.value)}
-                              className="pdm-input sig-role w-72"
+                              className="sig-role"
+                              isRole
                             />
                           </div>
                         </td>
@@ -1051,7 +1091,7 @@ export default function DocumentPreviewModal({ isOpen, onClose, documentData }) 
               </table>
 
               {/* Table 3: Noted by (Administrators - 2 Max Columns) */}
-              <table className="sig-table">
+              <table className="sig-table sig-table-2col">
                 <thead>
                   <tr>
                     <th colSpan="2" className="sig-section-header">Noted by:</th>
@@ -1079,17 +1119,16 @@ export default function DocumentPreviewModal({ isOpen, onClose, documentData }) 
                               <span>Include</span>
                             </label>
                             <div className="sig-space" />
-                            <input
-                              type="text"
+                            <AutoResizeSignatory
                               value={signatories[adm.nameKey]}
                               onChange={(e) => handleUpdateSignatory(adm.nameKey, e.target.value)}
-                              className="pdm-input sig-name"
+                              className="sig-name font-semibold"
                             />
-                            <input
-                              type="text"
+                            <AutoResizeSignatory
                               value={signatories[adm.roleKey]}
                               onChange={(e) => handleUpdateSignatory(adm.roleKey, e.target.value)}
-                              className="pdm-input sig-role"
+                              className="sig-role"
+                              isRole
                             />
                           </div>
                         </td>
@@ -1120,7 +1159,7 @@ export default function DocumentPreviewModal({ isOpen, onClose, documentData }) 
                         type="text"
                         value={rec}
                         onChange={(e) => handleUpdateCcRecipient(rIdx, e.target.value)}
-                        className="pdm-input w-64"
+                        className="pdm-input w-full max-w-sm"
                         placeholder="cc: Recipient Department"
                       />
                       <button
@@ -1159,7 +1198,7 @@ export default function DocumentPreviewModal({ isOpen, onClose, documentData }) 
                   type="text"
                   value={periodDesc}
                   onChange={(e) => setPeriodDesc(e.target.value)}
-                  className="pdm-input text-center font-bold"
+                  className="pdm-input text-center font-bold w-full max-w-md mx-auto block"
                   title="Click to edit period description"
                 />
               </div>
@@ -1390,7 +1429,7 @@ export default function DocumentPreviewModal({ isOpen, onClose, documentData }) 
             {/* Signatories Block (Dynamic Left-Aligned Table Columns) */}
             <div className="mt-12">
               {/* Table 1: Prepared by (Student Officers - Dynamic Columns) */}
-              <table className="sig-table mb-4">
+              <table className="sig-table sig-table-4col mb-4">
                 <thead>
                   <tr>
                     <th colSpan={Math.max(activeOfficers.length, 1)} className="sig-section-header">Prepared by:</th>
@@ -1418,17 +1457,16 @@ export default function DocumentPreviewModal({ isOpen, onClose, documentData }) 
                               <span>Include</span>
                             </label>
                             <div className="sig-space" />
-                            <input
-                              type="text"
+                            <AutoResizeSignatory
                               value={signatories[off.nameKey]}
                               onChange={(e) => handleUpdateSignatory(off.nameKey, e.target.value)}
-                              className="pdm-input sig-name"
+                              className="sig-name font-semibold"
                             />
-                            <input
-                              type="text"
+                            <AutoResizeSignatory
                               value={signatories[off.roleKey]}
                               onChange={(e) => handleUpdateSignatory(off.roleKey, e.target.value)}
-                              className="pdm-input sig-role"
+                              className="sig-role"
+                              isRole
                             />
                           </div>
                         </td>
@@ -1439,7 +1477,7 @@ export default function DocumentPreviewModal({ isOpen, onClose, documentData }) 
               </table>
 
               {/* Table 2: Approved by (Advisers - 2 Columns) */}
-              <table className="sig-table mb-4">
+              <table className="sig-table sig-table-2col mb-4">
                 <thead>
                   <tr>
                     <th colSpan={2} className="sig-section-header">Approved by:</th>
@@ -1467,17 +1505,16 @@ export default function DocumentPreviewModal({ isOpen, onClose, documentData }) 
                               <span>Include</span>
                             </label>
                             <div className="sig-space" />
-                            <input
-                              type="text"
+                            <AutoResizeSignatory
                               value={signatories[adv.nameKey]}
                               onChange={(e) => handleUpdateSignatory(adv.nameKey, e.target.value)}
-                              className="pdm-input sig-name w-72"
+                              className="sig-name font-semibold"
                             />
-                            <input
-                              type="text"
+                            <AutoResizeSignatory
                               value={signatories[adv.roleKey]}
                               onChange={(e) => handleUpdateSignatory(adv.roleKey, e.target.value)}
-                              className="pdm-input sig-role w-72"
+                              className="sig-role"
+                              isRole
                             />
                           </div>
                         </td>
@@ -1491,7 +1528,7 @@ export default function DocumentPreviewModal({ isOpen, onClose, documentData }) 
               </table>
 
               {/* Table 3: Noted by (Administrators - 2 Max Columns) */}
-              <table className="sig-table">
+              <table className="sig-table sig-table-2col">
                 <thead>
                   <tr>
                     <th colSpan="2" className="sig-section-header">Noted by:</th>
@@ -1519,17 +1556,16 @@ export default function DocumentPreviewModal({ isOpen, onClose, documentData }) 
                               <span>Include</span>
                             </label>
                             <div className="sig-space" />
-                            <input
-                              type="text"
+                            <AutoResizeSignatory
                               value={signatories[adm.nameKey]}
                               onChange={(e) => handleUpdateSignatory(adm.nameKey, e.target.value)}
-                              className="pdm-input sig-name"
+                              className="sig-name font-semibold"
                             />
-                            <input
-                              type="text"
+                            <AutoResizeSignatory
                               value={signatories[adm.roleKey]}
                               onChange={(e) => handleUpdateSignatory(adm.roleKey, e.target.value)}
-                              className="pdm-input sig-role"
+                              className="sig-role"
+                              isRole
                             />
                           </div>
                         </td>

@@ -145,8 +145,8 @@
 .transmittal-body {
   font-size: 11pt !important;
   text-indent: 0.5in;
-  text-align: justify;
-  line-height: 1.35;
+  text-align: left;
+  line-height: 1.45;
   margin-bottom: 28pt;
 }
 
@@ -237,6 +237,8 @@
   border-radius: 2px;
   transition: all 0.15s ease;
   width: 100%;
+  box-sizing: border-box;
+  resize: none;
 }
 
 .pdm-input:hover {
@@ -298,87 +300,223 @@
 }
 
 /* Mobile & Tablet Responsive Overrides (< 860px) */
+/* STRICT REQUIREMENT: Preserve authentic 8.5" x 11" PC View size so full text is visible without cutoffs */
 @media screen and (max-width: 859px) {
   .document-preview-overlay {
-    padding-left: 0.25rem;
-    padding-right: 0.25rem;
-    -webkit-overflow-scrolling: touch;
+    padding-left: 0;
+    padding-right: 0;
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch !important;
   }
 
   .document-sheet {
     width: 100% !important;
     max-width: 100% !important;
+    min-width: 0 !important;
     min-height: auto !important;
-    padding: 1.25rem 0.75rem !important;
-    margin: 0.5rem auto !important;
-    border-radius: 0.75rem;
+    padding: 1.0rem 0.75rem 2.0rem 0.75rem !important;
+    margin: 0.5rem auto 1.0rem auto !important;
     font-size: 10pt !important;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
-    overflow-x: auto;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.35);
     box-sizing: border-box;
+    position: relative;
+    border-radius: 4px;
+    background-color: #ffffff;
+    overflow: visible;
   }
 
   .document-sheet * {
-    font-size: 10pt !important;
+    font-size: 10pt;
+  }
+
+  /* Page Footer (Bottom Right aligned) */
+  .sheet-page-footer {
+    position: absolute !important;
+    bottom: 0.5rem !important;
+    right: 0.75rem !important;
+    font-size: 8.5pt !important;
+    color: #555555 !important;
+    user-select: none;
+    letter-spacing: 0.2px;
   }
 
   .pdm-banner-container {
-    margin-bottom: 12pt;
+    margin-bottom: 12pt !important;
   }
 
   .pdm-banner-frame {
-    padding: 3px 6px;
+    padding: 3px 6px !important;
   }
 
   .pdm-banner-logo {
-    width: 36px;
-    height: 36px;
+    width: clamp(32px, 8.5vw, 50px) !important;
+    height: clamp(32px, 8.5vw, 50px) !important;
   }
 
   .pdm-banner-school {
-    font-size: 10pt !important;
+    font-size: clamp(8pt, 2.5vw, 11.5pt) !important;
+    line-height: 1.2 !important;
+    margin-bottom: 1px !important;
+  }
+
+  .pdm-banner-green-bar {
+    padding: 2px 4px !important;
   }
 
   .pdm-banner-club {
-    font-size: 8.5pt !important;
+    font-size: clamp(7pt, 2.2vw, 10pt) !important;
+    line-height: 1.15 !important;
   }
 
   .pdm-banner-course {
-    font-size: 7.5pt !important;
+    font-size: clamp(6pt, 1.8vw, 8.5pt) !important;
+    line-height: 1.15 !important;
   }
 
   .transmittal-date,
   .transmittal-recipient,
   .transmittal-salutation {
-    margin-bottom: 12pt;
+    margin-bottom: 12pt !important;
+    font-size: 10pt !important;
+    line-height: 1.35 !important;
   }
 
   .transmittal-body {
-    text-indent: 0.25in;
-    margin-bottom: 16pt;
+    font-size: 10pt !important;
+    text-indent: 1.5rem !important;
+    text-align: justify !important;
+    line-height: 1.45 !important;
+    margin-bottom: 16pt !important;
+    word-break: normal !important;
+  }
+
+  .transmittal-body .pdm-input {
+    font-size: 10pt !important;
   }
 
   .transmittal-closing {
-    margin-bottom: 16pt;
+    font-size: 10pt !important;
+    line-height: 1.3 !important;
+    margin-bottom: 16pt !important;
+  }
+
+  /* Signatories Table (Auto-adjusting columns & font sizes for complete text visibility) */
+  .sig-table {
+    width: 100% !important;
+    table-layout: fixed !important;
+    margin-top: 4pt !important;
+    margin-bottom: 12pt !important;
+    border-collapse: collapse !important;
+  }
+
+  .sig-section-header {
+    font-size: 10pt !important;
+    padding-bottom: 8pt !important;
+    font-weight: bold;
+    text-align: left;
+  }
+
+  .sig-cell {
+    padding-right: 3px !important;
+    padding-left: 1px !important;
+    box-sizing: border-box;
+    min-width: 0;
+    vertical-align: top;
+  }
+
+  .sig-space {
+    height: 12pt !important;
+  }
+
+  /* 4-column signature row: Student Officers (Auto-adjusts size & wraps so zero characters are cut off) */
+  .sig-table-4col .sig-name {
+    font-size: clamp(6.5pt, 1.85vw, 9pt) !important;
+    line-height: 1.15 !important;
+    white-space: normal !important;
+    word-break: break-word !important;
+    overflow-wrap: break-word !important;
+    text-align: left !important;
+    display: block !important;
+  }
+
+  .sig-table-4col .sig-role {
+    font-size: clamp(6pt, 1.65vw, 8.5pt) !important;
+    line-height: 1.1 !important;
+    margin-top: 1px !important;
+    white-space: normal !important;
+    word-break: break-word !important;
+    overflow-wrap: break-word !important;
+    text-align: left !important;
+    display: block !important;
+    color: #1a1a1a !important;
+  }
+
+  .sig-table-4col .pdm-input {
+    font-size: clamp(6.5pt, 1.85vw, 9pt) !important;
+    padding: 0 !important;
+    white-space: normal !important;
+    word-break: break-word !important;
+    overflow-wrap: break-word !important;
+    line-height: 1.15 !important;
+  }
+
+  /* 2-column signature row: Advisers and Administrators */
+  .sig-table-2col .sig-name {
+    font-size: 9.5pt !important;
+    line-height: 1.2 !important;
+    white-space: normal !important;
+    word-break: break-word !important;
+  }
+
+  .sig-table-2col .sig-role {
+    font-size: 9pt !important;
+    line-height: 1.15 !important;
+    margin-top: 1px !important;
+    white-space: normal !important;
+    word-break: break-word !important;
+  }
+
+  .sig-table-2col .pdm-input {
+    font-size: 9.5pt !important;
+    padding: 0 !important;
+    white-space: normal !important;
+    word-break: break-word !important;
   }
 
   .sig-row-3col {
     grid-template-columns: 1fr;
-    gap: 12px;
-    margin-top: 12pt;
-    margin-bottom: 14pt;
+    gap: 8px;
+    margin-top: 8pt;
+    margin-bottom: 10pt;
   }
 
   .sig-row-2col {
     grid-template-columns: 1fr;
-    gap: 12px;
-    margin-top: 12pt;
-    margin-bottom: 14pt;
+    gap: 8px;
+    margin-top: 8pt;
+    margin-bottom: 10pt;
+  }
+
+  .fin-table {
+    font-size: 8.5pt !important;
+    width: 100% !important;
+  }
+
+  .fin-table td,
+  .fin-table th {
+    font-size: 8.5pt !important;
+    padding: 2pt 1pt !important;
+  }
+
+  .fin-table .pdm-input {
+    font-size: 8.5pt !important;
+    padding: 0 !important;
   }
 
   .fin-table td.amount {
     width: auto;
-    min-width: 75px;
+    min-width: 65px;
   }
 }
 
