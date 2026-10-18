@@ -2,6 +2,8 @@ import { NextResponse } from 'next/server';
 import { createClient, createAdminClient } from '@/lib/supabase/server';
 import { isSuperAdminEmail } from '@/lib/config/admin';
 import { getClientIp } from '@/lib/security/ratelimit';
+import { isEmailVerified } from '@/lib/security/otp';
+import { getResubmission } from '@/lib/security/resubmissions';
 
 // POST /api/auth/login
 export async function POST(req) {
@@ -10,7 +12,7 @@ export async function POST(req) {
     const identifier = (username || email || '').trim().toLowerCase();
 
     if (!identifier || !password) {
-      return NextResponse.json({ error: 'Username and password are required.' }, { status: 400 });
+      return NextResponse.json({ error: 'Gmail address and password are required.' }, { status: 400 });
     }
 
     const supabase = await createClient();
@@ -32,12 +34,25 @@ export async function POST(req) {
         // Also check pending registration_requests
         const { data: requestRecord } = await supabase
           .from('registration_requests')
-          .select('email, status')
+          .select('email, status, email_verified_at')
           .eq('username', identifier)
           .maybeSingle();
 
         if (requestRecord) {
           if (requestRecord.status === 'pending') {
+            const isVerified = Boolean(
+              requestRecord.email_verified_at ||
+              isEmailVerified(requestRecord.email)
+            );
+
+            if (!isVerified) {
+              return NextResponse.json({
+                error: 'unverified_email',
+                message: 'Your Gmail address has not been verified yet. Please enter the 6-digit verification code sent to your inbox.',
+                email: requestRecord.email,
+                verifyUrl: `/register?verify=true&email=${encodeURIComponent(requestRecord.email)}`,
+              }, { status: 403 });
+            }
             return NextResponse.json({
               error: 'pending',
               message: 'Your registration is pending admin approval.',
@@ -46,7 +61,7 @@ export async function POST(req) {
           }
           userEmail = requestRecord.email;
         } else {
-          return NextResponse.json({ error: 'No account found with this username.' }, { status: 404 });
+          return NextResponse.json({ error: 'No account found with this Gmail address.' }, { status: 404 });
         }
       }
     }
@@ -58,16 +73,79 @@ export async function POST(req) {
     });
 
     if (error) {
-      if (error.message?.toLowerCase().includes('email not confirmed')) {
+      const adminClient = createAdminClient();
+      const queryClient = adminClient || supabase;
+
+      // Check if this email belongs to a resubmitted request or registration request
+      const resub = getResubmission(userEmail);
+      if (resub) {
+        if (resub.email_verified) {
+          return NextResponse.json({
+            error: 'pending',
+            message: 'Your registration is pending admin approval.',
+            email: userEmail,
+          }, { status: 403 });
+        }
         return NextResponse.json({
-          error: 'Email address not yet confirmed. Please verify your email or have the admin confirm your account in Supabase.',
+          error: 'unverified_email',
+          message: 'Your Gmail address has not been verified yet. Please enter the 6-digit verification code sent to your inbox.',
+          email: userEmail,
+          verifyUrl: `/register?verify=true&email=${encodeURIComponent(userEmail)}`,
+        }, { status: 403 });
+      }
+
+      const { data: regReq } = await queryClient
+        .from('registration_requests')
+        .select('id, email, email_verified_at, status')
+        .eq('email', userEmail)
+        .maybeSingle();
+
+      if (regReq && regReq.status === 'pending') {
+        const isVerified = Boolean(
+          regReq.email_verified_at ||
+          isEmailVerified(userEmail)
+        );
+
+        if (!isVerified) {
+          return NextResponse.json({
+            error: 'unverified_email',
+            message: 'Your Gmail address has not been verified yet. Please enter the 6-digit verification code sent to your inbox.',
+            email: userEmail,
+            verifyUrl: `/register?verify=true&email=${encodeURIComponent(userEmail)}`,
+          }, { status: 403 });
+        }
+
+        return NextResponse.json({
+          error: 'pending',
+          message: 'Your registration is pending admin approval.',
+          email: userEmail,
+        }, { status: 403 });
+      }
+
+      if (regReq && regReq.status === 'rejected') {
+        return NextResponse.json({
+          error: 'rejected',
+          message: 'Your registration request was not approved. Please contact an administrator.',
+        }, { status: 403 });
+      }
+
+      if (error.message?.toLowerCase().includes('email not confirmed')) {
+        if (isEmailVerified(userEmail)) {
+          return NextResponse.json({
+            error: 'pending',
+            message: 'Your registration is pending admin approval.',
+            email: userEmail,
+          }, { status: 403 });
+        }
+        return NextResponse.json({
+          error: 'unverified_email',
+          message: 'Your Gmail address has not been verified yet. Please enter the 6-digit verification code sent to your inbox.',
+          email: userEmail,
+          verifyUrl: `/register?verify=true&email=${encodeURIComponent(userEmail)}`,
         }, { status: 403 });
       }
 
       // Check if user was registered via Google OAuth to provide helpful UX guidance
-      const adminClient = createAdminClient();
-      const queryClient = adminClient || supabase;
-
       const { data: profileCheck } = await queryClient
         .from('profiles')
         .select('auth_provider, email')
@@ -82,7 +160,7 @@ export async function POST(req) {
         }, { status: 401 });
       }
 
-      return NextResponse.json({ error: 'Incorrect username or password.' }, { status: 401 });
+      return NextResponse.json({ error: 'Incorrect Gmail address or password.' }, { status: 401 });
     }
 
     const userId = data.user?.id;
@@ -158,16 +236,48 @@ export async function POST(req) {
     }
 
     if (!profile) {
+      const resub = getResubmission(userEmail);
+      if (resub) {
+        await supabase.auth.signOut();
+        if (resub.email_verified) {
+          return NextResponse.json({
+            error: 'pending',
+            message: 'Your registration is pending admin approval.',
+            email: userEmail,
+          }, { status: 403 });
+        }
+        return NextResponse.json({
+          error: 'unverified_email',
+          message: 'Your Gmail address has not been verified yet. Please enter the 6-digit verification code sent to your inbox.',
+          email: userEmail,
+          verifyUrl: `/register?verify=true&email=${encodeURIComponent(userEmail)}`,
+        }, { status: 403 });
+      }
+
       // Check if there's a pending registration request
       const { data: request } = await supabase
         .from('registration_requests')
-        .select('id, status')
+        .select('id, status, email_verified_at')
         .eq('email', userEmail)
         .maybeSingle();
 
       await supabase.auth.signOut();
 
       if (request?.status === 'pending') {
+        const isVerified = Boolean(
+          request.email_verified_at ||
+          isEmailVerified(userEmail)
+        );
+
+        if (!isVerified) {
+          return NextResponse.json({
+            error: 'unverified_email',
+            message: 'Your Gmail address has not been verified yet. Please enter the 6-digit verification code sent to your inbox.',
+            email: userEmail,
+            verifyUrl: `/register?verify=true&email=${encodeURIComponent(userEmail)}`,
+          }, { status: 403 });
+        }
+
         return NextResponse.json({
           error: 'pending',
           message: 'Your registration is pending admin approval.',
@@ -197,6 +307,24 @@ export async function POST(req) {
     }
 
     if (profile.status === 'rejected') {
+      const resub = getResubmission(userEmail);
+      if (resub) {
+        await supabase.auth.signOut();
+        if (resub.email_verified) {
+          return NextResponse.json({
+            error: 'pending',
+            message: 'Your registration is pending admin approval.',
+            email: userEmail,
+          }, { status: 403 });
+        }
+        return NextResponse.json({
+          error: 'unverified_email',
+          message: 'Your Gmail address has not been verified yet. Please enter the 6-digit verification code sent to your inbox.',
+          email: userEmail,
+          verifyUrl: `/register?verify=true&email=${encodeURIComponent(userEmail)}`,
+        }, { status: 403 });
+      }
+
       await supabase.auth.signOut();
       return NextResponse.json({
         error: 'rejected',

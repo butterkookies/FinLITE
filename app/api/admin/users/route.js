@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { verifyAdmin } from '@/lib/auth/admin-check';
 import { isSuperAdminEmail } from '@/lib/config/admin';
 import { createAdminClient } from '@/lib/supabase/server';
+import { sendAccountStatusChangedEmail } from '@/lib/email/mailer';
 
 const VALID_ROLES = ['treasurer', 'auditor', 'president', 'adviser', 'admin'];
 
@@ -187,6 +188,32 @@ export async function PATCH(req) {
       }
     }
 
+    // Dispatch email notifications to the affected user via Gmail SMTP
+    if (existingUser?.email) {
+      if (updates.role && updates.role !== existingUser.role) {
+        sendAccountStatusChangedEmail({
+          to: existingUser.email,
+          name: existingUser.full_name || 'Officer',
+          changeType: 'ROLE_CHANGED',
+          details: {
+            previousRole: existingUser.role,
+            newRole: updates.role,
+          },
+        }).catch((err) => console.warn('Role change email notification warning:', err));
+      }
+
+      if (updates.status && updates.status !== existingUser.status) {
+        sendAccountStatusChangedEmail({
+          to: existingUser.email,
+          name: existingUser.full_name || 'Officer',
+          changeType: 'STATUS_CHANGED',
+          details: {
+            newStatus: updates.status,
+          },
+        }).catch((err) => console.warn('Status change email notification warning:', err));
+      }
+    }
+
     const message = updates.status && updates.role
       ? `User updated: role is now ${updates.role.toUpperCase()} and status is ${updates.status.toUpperCase()}.`
       : updates.status
@@ -198,6 +225,7 @@ export async function PATCH(req) {
       message,
       user: updated,
     });
+
   } catch (err) {
     console.error('Admin users PATCH error:', err);
     return NextResponse.json({ error: 'Server error updating user.' }, { status: 500 });

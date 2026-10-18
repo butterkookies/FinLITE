@@ -185,7 +185,7 @@ export async function GET(req) {
       return NextResponse.redirect(`${appUrl}/pending-approval?email=${encodeURIComponent(googleEmail)}`);
     }
 
-    // --- New Google user — redirect to complete profile (username required) ---
+    // --- New Google user — redirect to complete profile registration ---
     // Pass google user info via query params for pre-filling the form
     const params = new URLSearchParams({
       google: '1',

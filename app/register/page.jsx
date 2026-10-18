@@ -2,7 +2,7 @@
 import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
-import { Eye, EyeOff, UserPlus, AlertCircle, CheckCircle2, Info } from 'lucide-react';
+import { Eye, EyeOff, UserPlus, AlertCircle, CheckCircle2, Info, Mail, RefreshCw, ArrowLeft } from 'lucide-react';
 import { validateGmail, validatePassword, validateContactNumber } from '@/lib/utils/validation';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -49,6 +49,53 @@ function RegisterForm() {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
 
+  // OTP Verification states
+  const [verifyingEmail, setVerifyingEmail] = useState(false);
+  const [registeredEmail, setRegisteredEmail] = useState('');
+  const [otpCode, setOtpCode] = useState('');
+  const [isVerifyingOtp, setIsVerifyingOtp] = useState(false);
+  const [otpError, setOtpError] = useState('');
+  const [resendCooldown, setResendCooldown] = useState(0);
+  const [resendMessage, setResendMessage] = useState('');
+
+  // Resend cooldown timer countdown
+  useEffect(() => {
+    if (resendCooldown <= 0) return;
+    const timer = setInterval(() => {
+      setResendCooldown((prev) => (prev > 0 ? prev - 1 : 0));
+    }, 1000);
+    return () => clearInterval(timer);
+  }, [resendCooldown]);
+
+  // Restore verification state if user closed tab or arrived via email link
+  useEffect(() => {
+    const verifyParam = searchParams.get('verify');
+    const emailParam = searchParams.get('email');
+    const codeParam = searchParams.get('code');
+
+    if (verifyParam === 'true' && emailParam) {
+      const cleanEmail = emailParam.trim().toLowerCase();
+      setRegisteredEmail(cleanEmail);
+      setVerifyingEmail(true);
+      try {
+        localStorage.setItem('finlite_pending_verify_email', cleanEmail);
+      } catch (_) {}
+
+      if (codeParam) {
+        setOtpCode(codeParam.trim());
+      }
+      return;
+    }
+
+    try {
+      const cached = localStorage.getItem('finlite_pending_verify_email');
+      if (cached) {
+        setRegisteredEmail(cached);
+        setVerifyingEmail(true);
+      }
+    } catch (_) {}
+  }, [searchParams]);
+
   // Live field validation states
   const [emailTouched, setEmailTouched] = useState(false);
   const [contactTouched, setContactTouched] = useState(false);
@@ -61,7 +108,65 @@ function RegisterForm() {
   const passwordsMatch = form.password && form.confirmPassword && form.password === form.confirmPassword;
   const passwordMismatch = form.confirmPassword && form.password !== form.confirmPassword;
 
+  const handleVerifyOtp = async (e) => {
+    e.preventDefault();
+    setOtpError('');
+    if (!registeredEmail?.trim()) {
+      setOtpError('Please specify your registered Gmail address.');
+      return;
+    }
+    if (!otpCode.trim() || otpCode.trim().length !== 6) {
+      setOtpError('Please enter the 6-digit verification code.');
+      return;
+    }
+    setIsVerifyingOtp(true);
+    try {
+      const res = await fetch('/api/auth/verify-registration-otp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: registeredEmail.trim().toLowerCase(), code: otpCode.trim() }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setOtpError(data.error || 'Verification failed. Please check the code.');
+        return;
+      }
+      try {
+        localStorage.removeItem('finlite_pending_verify_email');
+      } catch (_) {}
+      setVerifyingEmail(false);
+      setSuccess(true);
+    } catch {
+      setOtpError('Network error verifying code. Please try again.');
+    } finally {
+      setIsVerifyingOtp(false);
+    }
+  };
+
+  const handleResendOtp = async () => {
+    if (resendCooldown > 0) return;
+    setOtpError('');
+    setResendMessage('');
+    try {
+      const res = await fetch('/api/auth/resend-registration-otp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: registeredEmail }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setOtpError(data.error || 'Failed to resend code.');
+        return;
+      }
+      setResendCooldown(data.cooldownSeconds || 60);
+      setResendMessage('A fresh 6-digit code has been dispatched to your Gmail.');
+    } catch {
+      setOtpError('Network error resending code.');
+    }
+  };
+
   const handleSubmit = async (e) => {
+
     e.preventDefault();
     setError('');
 
@@ -124,6 +229,17 @@ function RegisterForm() {
         return;
       }
 
+      if (data.requireOtp) {
+        const cleanEmail = form.email.trim().toLowerCase();
+        setRegisteredEmail(cleanEmail);
+        try {
+          localStorage.setItem('finlite_pending_verify_email', cleanEmail);
+        } catch (_) {}
+        setVerifyingEmail(true);
+        setResendCooldown(60);
+        return;
+      }
+
       setSuccess(true);
     } catch {
       setError('Network error. Please check your connection and try again.');
@@ -152,6 +268,129 @@ function RegisterForm() {
     }
   };
 
+  if (verifyingEmail) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[#f8faf9] px-4 py-10">
+        <div className="w-full max-w-md">
+          {/* Logo & Header */}
+          <div className="text-center mb-8">
+            <div className="inline-flex items-center justify-center w-14 h-14 mb-3">
+              <Image src="/assets/lite-logo.png" alt="LITE" width={48} height={48} className="object-contain" priority />
+            </div>
+            <h1 className="text-2xl font-bold text-gray-950 tracking-tight">Verify your Gmail</h1>
+            {registeredEmail ? (
+              <p className="text-xs text-gray-500 mt-1">
+                We sent a 6-digit verification code to <strong className="text-gray-900">{registeredEmail}</strong>
+              </p>
+            ) : (
+              <p className="text-xs text-gray-500 mt-1">
+                Enter your registered Gmail address and the 6-digit code from your inbox.
+              </p>
+            )}
+          </div>
+
+          <div className="bg-white rounded-2xl shadow-xs border border-black/[0.08] p-7">
+            {otpError && (
+              <div className="flex items-start gap-2.5 bg-rose-50 border border-rose-200 text-rose-700 rounded-xl px-4 py-3 mb-5 text-xs font-medium">
+                <AlertCircle className="w-4 h-4 mt-0.5 shrink-0 text-rose-600" />
+                <span>{otpError}</span>
+              </div>
+            )}
+
+            {resendMessage && (
+              <div className="flex items-start gap-2.5 bg-emerald-50 border border-emerald-200 text-emerald-700 rounded-xl px-4 py-3 mb-5 text-xs font-medium">
+                <CheckCircle2 className="w-4 h-4 mt-0.5 shrink-0 text-emerald-600" />
+                <span>{resendMessage}</span>
+              </div>
+            )}
+
+            <form onSubmit={handleVerifyOtp} className="space-y-4">
+              {!registeredEmail && (
+                <div>
+                  <label className="block text-xs font-semibold text-gray-700 mb-1.5">
+                    Your Registered Gmail
+                  </label>
+                  <input
+                    type="email"
+                    value={registeredEmail}
+                    onChange={(e) => setRegisteredEmail(e.target.value)}
+                    placeholder="name.pdm@gmail.com"
+                    className="w-full h-11 px-3.5 text-xs bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:border-emerald-600 outline-none text-gray-950 font-medium"
+                    required
+                  />
+                </div>
+              )}
+
+              <div>
+                <label className="block text-xs font-semibold text-gray-700 mb-2 text-center">
+                  Enter 6-Digit Verification Code
+                </label>
+                <input
+                  type="text"
+                  maxLength={6}
+                  value={otpCode}
+                  onChange={(e) => setOtpCode(e.target.value.replace(/[^0-9]/g, ''))}
+                  placeholder="••••••"
+                  className="w-full h-14 text-center text-3xl font-mono font-bold tracking-[8px] bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:border-emerald-600 focus:ring-2 focus:ring-emerald-600/20 outline-none transition-all text-gray-950"
+                  autoFocus
+                  required
+                />
+                <p className="text-[11px] text-gray-400 text-center mt-2">
+                  Code expires in 10 minutes. Please check your inbox and spam folder.
+                </p>
+              </div>
+
+              <button
+                type="submit"
+                disabled={isVerifyingOtp || otpCode.length !== 6 || !registeredEmail}
+                className="w-full h-11 bg-emerald-700 hover:bg-emerald-800 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-xl text-xs font-semibold transition-all shadow-xs flex items-center justify-center gap-2 cursor-pointer mt-4"
+              >
+                {isVerifyingOtp ? (
+                  <>
+                    <RefreshCw className="w-4 h-4 animate-spin" />
+                    <span>Verifying Code...</span>
+                  </>
+                ) : (
+                  <>
+                    <CheckCircle2 className="w-4 h-4" />
+                    <span>Verify & Submit Application</span>
+                  </>
+                )}
+              </button>
+            </form>
+
+            <div className="mt-6 pt-5 border-t border-gray-100 flex items-center justify-between text-xs text-gray-500">
+              <button
+                type="button"
+                onClick={handleResendOtp}
+                disabled={resendCooldown > 0 || !registeredEmail}
+                className="font-semibold text-emerald-700 hover:text-emerald-800 disabled:text-gray-400 disabled:cursor-not-allowed transition-colors"
+              >
+                {resendCooldown > 0 ? `Resend code in ${resendCooldown}s` : 'Resend code'}
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  try {
+                    localStorage.removeItem('finlite_pending_verify_email');
+                  } catch (_) {}
+                  setVerifyingEmail(false);
+                  setOtpCode('');
+                  setOtpError('');
+                }}
+                className="inline-flex items-center gap-1 text-gray-500 hover:text-gray-700 transition-colors"
+              >
+                <ArrowLeft className="w-3.5 h-3.5" />
+                <span>Change Email / Back</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   if (success) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[#f8faf9] px-4">
@@ -159,17 +398,17 @@ function RegisterForm() {
           <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-emerald-100 mb-5">
             <CheckCircle2 className="w-8 h-8 text-emerald-600" />
           </div>
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">Request Submitted!</h2>
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">Email Verified & Request Submitted!</h2>
           <p className="text-gray-500 text-sm mb-6 leading-relaxed">
-            Your registration request has been submitted and is now pending admin approval.
-            You will be notified once an administrator reviews your account.
+            Your Gmail address has been verified. Your registration request is now in the admin review queue.
+            You will be notified once an administrator approves your account.
           </p>
           <div className="bg-amber-50 border border-amber-100 rounded-xl px-5 py-4 text-sm text-amber-800 text-left mb-6">
             <p className="font-semibold mb-1">What happens next?</p>
             <ul className="space-y-1 list-disc list-inside text-amber-700">
               <li>Your request is reviewed by the LITE admin or adviser</li>
               <li>Once approved, you can sign in to FinLITE</li>
-              <li>You may be contacted via your registered Gmail</li>
+              <li>You will receive an approval confirmation email</li>
             </ul>
           </div>
           <Link
@@ -182,6 +421,7 @@ function RegisterForm() {
       </div>
     );
   }
+
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-[#f8faf9] px-4 py-10">

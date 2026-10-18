@@ -14,8 +14,8 @@ function PendingContent() {
       <div className="w-full max-w-md text-center">
 
         {/* Logo */}
-        <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-emerald-600 shadow-lg mb-6">
-          <Image src="/assets/lite-logo.png" alt="LITE" width={36} height={36} className="rounded-lg" />
+        <div className="inline-flex items-center justify-center w-14 h-14 mb-4">
+          <Image src="/assets/lite-logo.png" alt="LITE" width={48} height={48} className="object-contain" priority />
         </div>
 
         {/* Pending Icon */}

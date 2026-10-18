@@ -873,12 +873,35 @@ export default function Dashboard() {
               semester: optimisticTx.semester
             } : t))
           );
+
+          // Asynchronously notify other active officers via Gmail SMTP (non-blocking)
+          try {
+            const authorEmail = userProfile?.email || currentUser?.email;
+            const authorName = userProfile?.full_name || currentUser?.user_metadata?.full_name || 'Officer';
+            fetch('/api/notifications/transaction', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                authorId: userProfile?.id || currentUser?.id,
+                authorEmail,
+                authorName,
+                actionType: data.type === 'INFLOW' ? 'Cash Inflow' : (data.is_reimbursement ? 'Abono Reimbursement' : 'Cash Disbursement'),
+                amount: data.amount,
+                title: data.title,
+                category: data.category_name || newTx.category_name,
+                eventName: data.event_name || newTx.event_name,
+                reimbursementRecipient: data.reimbursement_recipient || newTx.reimbursement_recipient,
+                date: data.transaction_date,
+              }),
+            }).catch((err) => console.warn('Transaction notification trigger notice:', err));
+          } catch (_) {}
         }
       } catch (err) {
         console.error('Failed to save transaction to database:', err);
       }
     }
   };
+
 
   // Handler for attaching additional receipts to an existing transaction (Post-Entry)
   const handleAttachReceipt = async (transactionId, newReceiptFiles) => {
@@ -1297,6 +1320,28 @@ export default function Dashboard() {
 
           if (!error && data) {
             setAdvances((prev) => prev.map((a) => (a.id === tempId ? { ...data, advance_disbursements: [] } : a)));
+
+            // Asynchronously notify other active officers via Gmail SMTP
+            try {
+              const authorEmail = userProfile?.email || currentUser?.email;
+              const authorName = userProfile?.full_name || currentUser?.user_metadata?.full_name || 'Officer';
+              fetch('/api/notifications/transaction', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  authorId: userProfile?.id || currentUser?.id,
+                  authorEmail,
+                  authorName,
+                  actionType: 'Personal Advance (Abono)',
+                  amount: newAdv.total_amount,
+                  title: newAdv.title,
+                  category: newAdv.category_name || 'Out-of-Pocket Expense',
+                  eventName: newAdv.event_name,
+                  reimbursementRecipient: newAdv.claimant_name,
+                  date: newAdv.advance_date,
+                }),
+              }).catch((err) => console.warn('Advance notification trigger notice:', err));
+            } catch (_) {}
           }
         } catch (dbErr) {
           console.warn('Persisting advance to Supabase skipped:', dbErr);
@@ -1304,6 +1349,7 @@ export default function Dashboard() {
       }
 
       return { success: true };
+
     } catch (err) {
       console.error('Create advance error:', err);
       return { error: err?.message || 'Failed to create advance record' };

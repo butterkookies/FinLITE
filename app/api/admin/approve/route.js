@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
 import { verifyAdmin } from '@/lib/auth/admin-check';
 import { createAdminClient } from '@/lib/supabase/server';
+import { sendAccountStatusChangedEmail } from '@/lib/email/mailer';
+import { clearResubmission } from '@/lib/security/resubmissions';
 
 const VALID_ROLES = ['treasurer', 'auditor', 'president', 'adviser', 'admin'];
 
@@ -134,6 +136,17 @@ export async function POST(req) {
       }
     }
 
+    // Dispatch approval welcome email to user via Gmail SMTP
+    if (request.email) {
+      clearResubmission(request.email);
+      sendAccountStatusChangedEmail({
+        to: request.email,
+        name: fullName || 'Officer',
+        changeType: 'APPROVED',
+        details: { role: normalizedRole },
+      }).catch((emailErr) => console.warn('Approval email notification warning:', emailErr));
+    }
+
     return NextResponse.json({
       success: true,
       message: `Registration approved successfully for ${fullName} with role '${normalizedRole}'.`,
@@ -143,6 +156,7 @@ export async function POST(req) {
         role: normalizedRole,
       }
     });
+
   } catch (err) {
     console.error('Approve API error:', err);
     return NextResponse.json({ error: 'Server error processing approval.' }, { status: 500 });

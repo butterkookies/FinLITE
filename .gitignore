@@ -43,3 +43,5 @@ graphify-out/2026-09-16/
 # Supabase CLI temp
 supabase/.temp/
 
+# Security runtime fallbacks
+lib/security/.*.json

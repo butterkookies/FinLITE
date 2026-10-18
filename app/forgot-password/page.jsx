@@ -25,15 +25,16 @@ export default function ForgotPasswordPage() {
     setIsLoading(true);
 
     try {
-      const supabase = createClient();
-      const redirectUrl = `${window.location.origin}/reset-password`;
-
-      const { error: resetErr } = await supabase.auth.resetPasswordForEmail(email.trim().toLowerCase(), {
-        redirectTo: redirectUrl,
+      const res = await fetch('/api/auth/forgot-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: email.trim().toLowerCase() }),
       });
 
-      if (resetErr) {
-        setError(resetErr.message || 'Failed to send password reset link. Please verify your email.');
+      const data = await res.json();
+
+      if (!res.ok) {
+        setError(data.error || 'Failed to send password recovery code. Please check your email.');
       } else {
         setSubmitted(true);
       }
@@ -75,14 +76,21 @@ export default function ForgotPasswordPage() {
               <div>
                 <h3 className="text-sm font-bold text-gray-950">Check your email</h3>
                 <p className="text-xs text-gray-600 mt-1.5 leading-relaxed">
-                  We sent password reset instructions to <strong className="text-gray-900">{email}</strong>. Please check your inbox and spam folder.
+                  We sent recovery instructions and your 6-digit code to <strong className="text-gray-900">{email}</strong>.
+                  You can click the 1-click link in your email, or enter the 6-digit code directly below:
                 </p>
               </div>
 
-              <div className="pt-2">
+              <div className="pt-2 flex flex-col gap-2">
+                <Link
+                  href={`/reset-password?email=${encodeURIComponent(email)}`}
+                  className="w-full h-10 inline-flex items-center justify-center gap-2 bg-emerald-700 hover:bg-emerald-800 text-white rounded-xl text-xs font-semibold transition-all shadow-xs"
+                >
+                  <span>Enter 6-Digit Code & Reset Password</span>
+                </Link>
                 <Link
                   href="/login"
-                  className="w-full h-10 inline-flex items-center justify-center gap-2 bg-emerald-700 hover:bg-emerald-800 text-white rounded-xl text-xs font-semibold transition-all shadow-xs"
+                  className="w-full h-9 inline-flex items-center justify-center gap-2 text-gray-500 hover:text-gray-700 text-xs font-medium transition-colors"
                 >
                   <ArrowLeft className="w-3.5 h-3.5" />
                   <span>Return to Sign In</span>
@@ -90,6 +98,7 @@ export default function ForgotPasswordPage() {
               </div>
             </div>
           ) : (
+
             <form onSubmit={handleResetRequest} className="space-y-4">
               <div>
                 <label className="block text-xs font-semibold text-gray-700 mb-1.5">Registered Gmail Address</label>

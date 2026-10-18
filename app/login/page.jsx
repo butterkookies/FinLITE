@@ -50,6 +50,10 @@ function LoginForm() {
       const data = await res.json();
 
       if (!res.ok) {
+        if (data.error === 'unverified_email') {
+          router.push(data.verifyUrl || `/register?verify=true&email=${encodeURIComponent(data.email)}`);
+          return;
+        }
         if (data.error === 'pending') {
           router.push(`/pending-approval?email=${encodeURIComponent(data.email)}`);
           return;

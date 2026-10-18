@@ -1,14 +1,21 @@
 'use client';
 import { useState, useEffect, Suspense } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
 import { createClient } from '@/lib/supabase/client';
-import { Eye, EyeOff, Lock, CheckCircle2, AlertCircle, ArrowLeft } from 'lucide-react';
-import { validatePassword } from '@/lib/utils/validation';
+import { Eye, EyeOff, Lock, CheckCircle2, AlertCircle, ArrowLeft, KeyRound } from 'lucide-react';
+import { validatePassword, validateGmail } from '@/lib/utils/validation';
 
 function ResetPasswordForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+
+  const urlEmail = searchParams.get('email') || '';
+  const urlCode = searchParams.get('code') || '';
+
+  const [email, setEmail] = useState(urlEmail);
+  const [code, setCode] = useState(urlCode);
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPass, setShowPass] = useState(false);
@@ -17,9 +24,25 @@ function ResetPasswordForm() {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
 
+  useEffect(() => {
+    if (urlEmail && !email) setEmail(urlEmail);
+    if (urlCode && !code) setCode(urlCode);
+  }, [urlEmail, urlCode]);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
+
+    const emailErr = validateGmail(email);
+    if (emailErr) {
+      setError(emailErr);
+      return;
+    }
+
+    if (!code.trim() || code.trim().length !== 6) {
+      setError('Please provide the 6-digit recovery code sent to your Gmail.');
+      return;
+    }
 
     const passErr = validatePassword(password);
     if (passErr) {
@@ -35,19 +58,33 @@ function ResetPasswordForm() {
     setIsLoading(true);
 
     try {
-      const supabase = createClient();
-      const { error: updateErr } = await supabase.auth.updateUser({
-        password: password,
+      // 1. Try our dedicated Gmail OTP reset route
+      const res = await fetch('/api/auth/reset-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: email.trim().toLowerCase(),
+          code: code.trim(),
+          newPassword: password,
+        }),
       });
 
-      if (updateErr) {
-        setError(updateErr.message || 'Failed to update password. Your reset link may have expired.');
-      } else {
-        setSuccess(true);
-        setTimeout(() => {
-          router.push('/login?reset=success');
-        }, 2000);
+      const data = await res.json();
+
+      if (!res.ok) {
+        // Fallback: If user clicked a direct Supabase magic recovery link, try supabase auth updateUser
+        const supabase = createClient();
+        const { error: updateErr } = await supabase.auth.updateUser({ password });
+        if (updateErr) {
+          setError(data.error || updateErr.message || 'Failed to update password. Code may have expired.');
+          return;
+        }
       }
+
+      setSuccess(true);
+      setTimeout(() => {
+        router.push('/login?reset=success');
+      }, 2500);
     } catch {
       setError('An unexpected error occurred. Please try again.');
     } finally {
@@ -65,7 +102,7 @@ function ResetPasswordForm() {
             <Image src="/assets/lite-logo.png" alt="LITE" width={48} height={48} className="object-contain" priority />
           </div>
           <h1 className="text-2xl font-bold text-gray-950 tracking-tight">Set new password</h1>
-          <p className="text-xs text-gray-500 mt-1">Please enter and confirm your new secure password</p>
+          <p className="text-xs text-gray-500 mt-1">Enter your recovery code and choose a secure new password</p>
         </div>
 
         {/* Card */}
@@ -86,7 +123,7 @@ function ResetPasswordForm() {
               <div>
                 <h3 className="text-sm font-bold text-gray-950">Password Updated!</h3>
                 <p className="text-xs text-gray-600 mt-1 leading-relaxed">
-                  Your new password is now active. Redirecting to sign in...
+                  Your new password is now active. A security confirmation email has been dispatched to your Gmail. Redirecting to sign in...
                 </p>
               </div>
               <div className="pt-2">
@@ -101,6 +138,35 @@ function ResetPasswordForm() {
             </div>
           ) : (
             <form onSubmit={handleSubmit} className="space-y-4">
+              <div>
+                <label className="block text-xs font-semibold text-gray-700 mb-1.5">Registered Gmail Address</label>
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="your.name@gmail.com"
+                  required
+                  className="w-full h-10 px-3.5 rounded-xl border border-black/[0.08] text-xs text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 transition-all select-text"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-gray-700 mb-1.5">6-Digit Recovery Code</label>
+                <div className="relative">
+                  <input
+                    type="text"
+                    maxLength={6}
+                    value={code}
+                    onChange={(e) => setCode(e.target.value.replace(/[^0-9]/g, ''))}
+                    placeholder="••••••"
+                    required
+                    className="w-full h-11 px-3.5 pl-10 rounded-xl border border-black/[0.08] text-sm font-mono font-bold tracking-[4px] text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 transition-all select-text"
+                  />
+                  <KeyRound className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                </div>
+                <p className="text-[11px] text-gray-400 mt-1">Check your Gmail inbox for your 6-digit code.</p>
+              </div>
+
               <div>
                 <label className="block text-xs font-semibold text-gray-700 mb-1.5">New Password</label>
                 <div className="relative">
@@ -149,7 +215,7 @@ function ResetPasswordForm() {
 
               <button
                 type="submit"
-                disabled={isLoading || !password || !confirmPassword}
+                disabled={isLoading || !email || !code || !password || !confirmPassword}
                 className="w-full h-11 flex items-center justify-center gap-2 bg-emerald-700 hover:bg-emerald-800 active:bg-emerald-900 text-white rounded-xl text-xs font-semibold transition-all shadow-xs disabled:opacity-50 mt-1 cursor-pointer"
               >
                 {isLoading ? (
@@ -160,10 +226,10 @@ function ResetPasswordForm() {
                 <span>{isLoading ? 'Updating Password...' : 'Save New Password'}</span>
               </button>
 
-              <div className="pt-2 text-center">
+              <div className="text-center pt-2">
                 <Link
                   href="/login"
-                  className="inline-flex items-center gap-1.5 text-xs font-semibold text-gray-500 hover:text-gray-800 transition-colors"
+                  className="inline-flex items-center gap-1.5 text-xs text-gray-500 hover:text-gray-800 transition-colors"
                 >
                   <ArrowLeft className="w-3.5 h-3.5" />
                   <span>Back to Sign In</span>
@@ -173,11 +239,6 @@ function ResetPasswordForm() {
           )}
 
         </div>
-
-        <p className="text-center text-xs text-gray-400 mt-6">
-          Pambayang Dalubhasaan ng Marilao — LITE
-        </p>
-
       </div>
     </div>
   );
@@ -185,7 +246,13 @@ function ResetPasswordForm() {
 
 export default function ResetPasswordPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><div className="w-8 h-8 border-2 border-emerald-600 border-t-transparent rounded-full animate-spin" /></div>}>
+    <Suspense
+      fallback={
+        <div className="min-h-screen flex items-center justify-center bg-[#f8faf9]">
+          <div className="w-8 h-8 border-2 border-emerald-600 border-t-transparent rounded-full animate-spin" />
+        </div>
+      }
+    >
       <ResetPasswordForm />
     </Suspense>
   );
