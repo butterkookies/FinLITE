@@ -1,8 +1,16 @@
 import { NextResponse } from 'next/server';
-import { createClient, createAdminClient } from '@/lib/supabase/server';
+import { createAdminClient } from '@/lib/supabase/server';
 import { validateGmail, validatePassword, validateContactNumber } from '@/lib/utils/validation';
-import { sendAdminRegistrationNotification } from '@/lib/email/mailer';
+import { resolveAppUrl } from '@/lib/auth/app-url';
+import { getAuthMethods } from '@/lib/auth/methods';
+import { discardUnverifiedRegistration, createVerificationLink } from '@/lib/auth/registration';
+import { sendVerificationEmail } from '@/lib/email/auth-mailer';
 
+// POST /api/auth/register
+//
+// Creates an UNVERIFIED account and emails a verification link. The admin is
+// only notified (and the request only becomes approvable) once the applicant
+// proves they own the inbox by opening that link.
 export async function POST(req) {
   try {
     const { firstName, lastName, username, email, contactNumber, password } = await req.json();
@@ -31,24 +39,37 @@ export async function POST(req) {
     const fallbackUsername = cleanEmail.split('@')[0].replace(/[^a-zA-Z0-9_]/g, '') + '_' + Math.random().toString(36).substring(2, 6);
     const finalUsername = (username?.trim() || fallbackUsername).toLowerCase();
 
+    // Email verification needs the service-role client (to mint the one-time
+    // link). There is deliberately no unverified fallback.
     const adminClient = createAdminClient();
-    const queryClient = adminClient || (await createClient());
+    if (!adminClient) {
+      console.error('Registration unavailable: SUPABASE_SERVICE_ROLE_KEY is not configured.');
+      return NextResponse.json(
+        { error: 'Registration is temporarily unavailable. Please contact the administrator.' },
+        { status: 503 }
+      );
+    }
 
-    // --- Check for duplicate email in registration_requests ---
-    const { data: existing } = await queryClient
+    // --- Existing registration request for this email? ---
+    const { data: existing } = await adminClient
       .from('registration_requests')
-      .select('id, status, email')
+      .select('id, status, email, auth_provider, google_id, email_verified_at')
       .eq('email', cleanEmail)
       .maybeSingle();
 
     if (existing) {
-      return NextResponse.json({
-        error: 'This Gmail address already has a pending or approved registration.',
-      }, { status: 409 });
+      // An unverified email registration never proved it owns the inbox, so it
+      // must not lock the real owner out. Anything verified or approved stays.
+      const discarded = await discardUnverifiedRegistration(adminClient, existing);
+      if (!discarded) {
+        return NextResponse.json({
+          error: 'This Gmail address already has a pending or approved registration.',
+        }, { status: 409 });
+      }
     }
 
     // --- Also check approved profiles ---
-    const { data: profileExists } = await queryClient
+    const { data: profileExists } = await adminClient
       .from('profiles')
       .select('id')
       .eq('email', cleanEmail)
@@ -58,83 +79,47 @@ export async function POST(req) {
       return NextResponse.json({ error: 'An account with this Gmail address already exists.' }, { status: 409 });
     }
 
-    // --- Provision Supabase Auth User ---
-    let authUserId = null;
-    const supabase = await createClient();
+    // --- Provision the auth user, email NOT confirmed ---
+    const createPayload = {
+      email: cleanEmail,
+      password,
+      email_confirm: false,
+      user_metadata: {
+        first_name: firstName.trim(),
+        last_name: lastName.trim(),
+        full_name: `${firstName.trim()} ${lastName.trim()}`,
+        username: finalUsername,
+      },
+      app_metadata: {
+        status: 'pending',
+        role: 'treasurer',
+      },
+    };
 
-    if (adminClient) {
-      const { data: adminUser, error: adminErr } = await adminClient.auth.admin.createUser({
-        email: cleanEmail,
-        password: password,
-        email_confirm: true,
-        user_metadata: {
-          first_name: firstName.trim(),
-          last_name: lastName.trim(),
-          full_name: `${firstName.trim()} ${lastName.trim()}`,
-          username: finalUsername,
-        },
-        app_metadata: {
-          status: 'pending',
-          role: 'treasurer',
-        },
-      });
+    let { data: adminUser, error: adminErr } = await adminClient.auth.admin.createUser(createPayload);
 
-      if (adminErr) {
-        if (adminErr.message?.toLowerCase().includes('already registered')) {
-          return NextResponse.json({ error: 'This Gmail address is already registered in the system.' }, { status: 409 });
-        }
-        console.warn('Admin createUser failed, falling back to signUp:', adminErr.message);
-      } else if (adminUser?.user) {
-        authUserId = adminUser.user.id;
+    if (adminErr?.message?.toLowerCase().includes('already')) {
+      // A leftover unverified auth user (e.g. a half-finished earlier attempt)
+      // may exist without a request row. Clear it only if it is unverified.
+      const leftover = await getAuthMethods(adminClient, { email: cleanEmail });
+      if (leftover.found && !leftover.email_confirmed) {
+        await adminClient.auth.admin.deleteUser(leftover.user_id);
+        ({ data: adminUser, error: adminErr } = await adminClient.auth.admin.createUser(createPayload));
       }
     }
 
-    if (!authUserId) {
-      const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
-        email: cleanEmail,
-        password: password,
-        options: {
-          data: {
-            first_name: firstName.trim(),
-            last_name: lastName.trim(),
-            full_name: `${firstName.trim()} ${lastName.trim()}`,
-            username: finalUsername,
-          },
-        },
-      });
-
-      if (signUpError) {
-        if (signUpError.message?.toLowerCase().includes('already registered')) {
-          return NextResponse.json({ error: 'This Gmail address is already registered in the system.' }, { status: 409 });
-        }
-        console.error('Supabase signUp error:', signUpError);
-        return NextResponse.json({ error: signUpError.message }, { status: 400 });
+    if (adminErr || !adminUser?.user) {
+      if (adminErr?.message?.toLowerCase().includes('already')) {
+        return NextResponse.json({ error: 'This Gmail address is already registered in the system.' }, { status: 409 });
       }
-
-      if (signUpData?.user) {
-        authUserId = signUpData.user.id;
-      }
-
-      // Guarantee email confirmation, password hash sync, and real auth.users UUID via SECURITY DEFINER RPC
-      try {
-        const { data: realAuthUid, error: rpcErr } = await supabase.rpc('sync_auth_user_credentials', {
-          p_email: cleanEmail,
-          p_password: password,
-          p_first_name: firstName.trim(),
-          p_last_name: lastName.trim(),
-          p_username: finalUsername,
-        });
-        if (!rpcErr && realAuthUid) {
-          authUserId = realAuthUid;
-        }
-      } catch (rpcEx) {
-        console.warn('sync_auth_user_credentials RPC notice:', rpcEx?.message);
-      }
+      console.error('Admin createUser failed:', adminErr?.message);
+      return NextResponse.json({ error: 'Failed to create your account. Please try again.' }, { status: 500 });
     }
 
-    // --- Insert into registration_requests ---
-    const insertClient = adminClient || supabase;
-    const { data: request, error: insertError } = await insertClient
+    const authUserId = adminUser.user.id;
+
+    // --- Insert into registration_requests (verification pending) ---
+    const { data: request, error: insertError } = await adminClient
       .from('registration_requests')
       .insert({
         first_name: firstName.trim(),
@@ -143,13 +128,16 @@ export async function POST(req) {
         email: cleanEmail,
         contact_number: contactNumber?.trim() || null,
         auth_provider: 'email',
-        google_id: authUserId, // Store the auth.users UUID for linking on approval
+        google_id: authUserId, // auth.users UUID, used to link the profile on approval
         status: 'pending',
+        email_verified_at: null,
       })
       .select()
       .single();
 
     if (insertError) {
+      // Do not leave an orphaned unverified auth user behind.
+      await adminClient.auth.admin.deleteUser(authUserId).catch(() => {});
       if (insertError.code === '23505' || insertError.message?.toLowerCase().includes('duplicate') || insertError.message?.toLowerCase().includes('unique')) {
         return NextResponse.json({
           error: 'This Gmail address or username already has a registered or pending account.',
@@ -159,18 +147,26 @@ export async function POST(req) {
       return NextResponse.json({ error: 'Failed to submit registration. Please try again.' }, { status: 500 });
     }
 
-    // Send email notification to admins asynchronously
-    sendAdminRegistrationNotification({
-      applicantName: `${firstName.trim()} ${lastName.trim()}`,
-      email: cleanEmail,
-      username: finalUsername,
-      contactNumber: contactNumber?.trim() || null,
-      authProvider: 'email',
-    }).catch((emailErr) => console.warn('Admin notification email warning:', emailErr));
+    // --- Send the verification email ---
+    const verifyUrl = await createVerificationLink(adminClient, cleanEmail, resolveAppUrl(req));
+    let emailSent = false;
+    if (verifyUrl) {
+      const result = await sendVerificationEmail({
+        to: cleanEmail,
+        name: firstName.trim(),
+        verifyUrl,
+      });
+      emailSent = result.success;
+    }
 
     return NextResponse.json({
       success: true,
-      message: 'Registration submitted. Please wait for admin approval.',
+      requiresVerification: true,
+      emailSent,
+      email: cleanEmail,
+      message: emailSent
+        ? 'Check your inbox to verify your email. An administrator reviews your request after that.'
+        : 'Your request was saved, but we could not send the verification email. Use "Resend verification email" on the next page.',
       requestId: request.id,
     });
   } catch (err) {

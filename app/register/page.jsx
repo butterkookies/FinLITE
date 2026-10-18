@@ -22,26 +22,47 @@ function RegisterForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  // Google OAuth pre-fill params
-  const isGoogleFlow = searchParams.get('google') === '1';
-  const googleEmail = searchParams.get('email') || '';
-  const googleName = searchParams.get('name') || '';
-  const googleUid = searchParams.get('uid') || '';
-  const googleAvatar = searchParams.get('avatar') || '';
-
-  // Parse pre-filled first/last name from Google
-  const nameParts = googleName.trim().split(' ');
-  const preFirstName = nameParts[0] || '';
-  const preLastName = nameParts.slice(1).join(' ') || '';
+  // Google OAuth flow. The verified Google identity (email, name) is read from
+  // the signed-in session on the server, never from the URL, so it cannot be spoofed.
+  const wantsGoogleFlow = searchParams.get('google') === '1';
+  const [googleIdentity, setGoogleIdentity] = useState(null);
+  const isGoogleFlow = wantsGoogleFlow && Boolean(googleIdentity);
+  const googleEmail = googleIdentity?.email || '';
 
   const [form, setForm] = useState({
-    firstName: preFirstName,
-    lastName: preLastName,
-    email: googleEmail,
+    firstName: '',
+    lastName: '',
+    email: '',
     contactNumber: '',
     password: '',
     confirmPassword: '',
   });
+
+  useEffect(() => {
+    if (!wantsGoogleFlow) return;
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await fetch('/api/auth/google-register');
+        if (!res.ok) throw new Error('no session');
+        const data = await res.json();
+        if (cancelled) return;
+        const parts = (data.name || '').trim().split(' ');
+        setGoogleIdentity(data);
+        setForm((prev) => ({
+          ...prev,
+          firstName: parts[0] || '',
+          lastName: parts.slice(1).join(' ') || '',
+          email: data.email || '',
+        }));
+      } catch {
+        if (!cancelled) {
+          setError('Your Google sign-in expired. Please continue with Google again.');
+        }
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [wantsGoogleFlow]);
   const [showPass, setShowPass] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -107,8 +128,9 @@ function RegisterForm() {
     try {
       // If Google OAuth flow, call different endpoint (no password needed)
       const endpoint = isGoogleFlow ? '/api/auth/google-register' : '/api/auth/register';
+      // Google flow sends no identity fields: the server takes them from the session.
       const payload = isGoogleFlow
-        ? { firstName: form.firstName, lastName: form.lastName, email: form.email, contactNumber: form.contactNumber, googleUid, avatarUrl: googleAvatar }
+        ? { firstName: form.firstName, lastName: form.lastName, contactNumber: form.contactNumber }
         : { firstName: form.firstName, lastName: form.lastName, email: form.email, contactNumber: form.contactNumber, password: form.password };
 
       const res = await fetch(endpoint, {
@@ -121,6 +143,12 @@ function RegisterForm() {
 
       if (!res.ok) {
         setError(data.error || 'Registration failed. Please try again.');
+        return;
+      }
+
+      if (!isGoogleFlow) {
+        // Email registrations must verify their inbox before an admin sees the request.
+        router.push(`/verify-email?status=sent&email=${encodeURIComponent(data.email || form.email.trim().toLowerCase())}${data.emailSent === false ? '&sendfailed=1' : ''}`);
         return;
       }
 

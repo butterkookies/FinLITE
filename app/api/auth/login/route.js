@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { createClient, createAdminClient } from '@/lib/supabase/server';
 import { isSuperAdminEmail } from '@/lib/config/admin';
 import { getClientIp } from '@/lib/security/ratelimit';
+import { getAuthMethods } from '@/lib/auth/methods';
 
 // POST /api/auth/login
 export async function POST(req) {
@@ -59,27 +60,32 @@ export async function POST(req) {
 
     if (error) {
       if (error.message?.toLowerCase().includes('email not confirmed')) {
+        // Supabase only reports this after the password was correct, so it does
+        // not reveal anything to someone guessing passwords.
         return NextResponse.json({
-          error: 'Email address not yet confirmed. Please verify your email or have the admin confirm your account in Supabase.',
+          error: 'email_not_verified',
+          message: 'Please verify your email first. Check your inbox for the verification link, or request a new one.',
+          email: userEmail,
         }, { status: 403 });
       }
 
-      // Check if user was registered via Google OAuth to provide helpful UX guidance
+      // If the account has no password at all (Google sign-in), say so instead of
+      // a misleading "incorrect password". The auth schema is the source of truth;
+      // profiles.auth_provider only records how the account was first created.
       const adminClient = createAdminClient();
-      const queryClient = adminClient || supabase;
-
-      const { data: profileCheck } = await queryClient
-        .from('profiles')
-        .select('auth_provider, email')
-        .eq('email', userEmail)
-        .maybeSingle();
-
-      if (profileCheck?.auth_provider === 'google') {
-        return NextResponse.json({
-          error: 'google_only_account',
-          message: 'This account was registered using Google. Please click "Continue with Google" to sign in, or use "Forgot Password" to set a password for email login.',
-          isGoogleOnly: true,
-        }, { status: 401 });
+      if (adminClient) {
+        try {
+          const methods = await getAuthMethods(adminClient, { email: userEmail });
+          if (methods.found && !methods.has_password) {
+            return NextResponse.json({
+              error: 'google_only_account',
+              message: 'This account signs in with Google. Click \"Continue with Google\". If you want a password too, sign in with Google first and add one under Account Security.',
+              isGoogleOnly: true,
+            }, { status: 401 });
+          }
+        } catch (lookupErr) {
+          console.warn('Login auth-method lookup note:', lookupErr?.message);
+        }
       }
 
       return NextResponse.json({ error: 'Incorrect username or password.' }, { status: 401 });

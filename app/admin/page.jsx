@@ -852,6 +852,18 @@ export default function AdminPage() {
                             <span className="px-2 py-0.5 text-[9px] font-bold rounded-md uppercase tracking-wider bg-amber-600 text-white">
                               Pending
                             </span>
+                            <span
+                              title={req.email_verified_at ? 'The applicant confirmed ownership of this inbox.' : 'The applicant has not opened the verification link yet.'}
+                              className={`px-2 py-0.5 text-[9px] font-semibold rounded-md whitespace-nowrap border ${
+                                isLight ? 'bg-white border-black/[0.08]' : 'bg-transparent border-white/[0.1]'
+                              } ${
+                                req.email_verified_at
+                                  ? (isLight ? 'text-emerald-700' : 'text-emerald-300')
+                                  : (isLight ? 'text-rose-700' : 'text-rose-300')
+                              }`}
+                            >
+                              {req.email_verified_at ? 'Email verified' : 'Email not verified'}
+                            </span>
                           </div>
 
                           <div className={`flex flex-wrap items-center gap-x-3 gap-y-0.5 mt-1 text-xs font-medium ${
@@ -905,8 +917,9 @@ export default function AdminPage() {
 
                         <button
                           onClick={() => handleApprove(req.id)}
-                          disabled={isSubmittingAction}
-                          className="flex-1 sm:flex-initial justify-center px-3.5 sm:px-4 py-2 text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-500 active:bg-emerald-700 rounded-xl transition-all shadow-xs flex items-center gap-1.5 cursor-pointer disabled:opacity-50 text-center active:scale-95"
+                          disabled={isSubmittingAction || !req.email_verified_at}
+                          title={!req.email_verified_at ? 'Approval is available once the applicant verifies their email.' : undefined}
+                          className="flex-1 sm:flex-initial justify-center px-3.5 sm:px-4 py-2 text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-500 active:bg-emerald-700 rounded-xl transition-all shadow-xs flex items-center gap-1.5 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed text-center active:scale-95"
                         >
                           <CheckCircle2 className="w-3.5 h-3.5 shrink-0" />
                           <span className="whitespace-nowrap">Approve Access</span>

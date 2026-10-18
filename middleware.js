@@ -4,7 +4,7 @@ import { isSuperAdminEmail } from '@/lib/config/admin';
 import { checkRateLimit, applyRateLimitHeaders } from '@/lib/security/ratelimit';
 
 // Routes that are always public (no auth required)
-const PUBLIC_ROUTES = ['/login', '/register', '/pending-approval', '/forgot-password', '/reset-password', '/api/auth'];
+const PUBLIC_ROUTES = ['/login', '/register', '/pending-approval', '/verify-email', '/forgot-password', '/reset-password', '/api/auth'];
 
 function isPublicRoute(pathname) {
   return PUBLIC_ROUTES.some((r) => pathname === r || pathname.startsWith(r + '/'));
@@ -104,13 +104,21 @@ export async function middleware(request) {
     return applyRateLimitHeaders(request, response);
   }
 
-  const isSuperAdmin = isSuperAdminEmail(user.email);
+  // Super admin status requires a VERIFIED email: an unverified signup that merely
+  // claims a super-admin address must never inherit the bypass.
+  const isSuperAdmin = isSuperAdminEmail(user.email) && Boolean(user.email_confirmed_at);
 
-  // Logged in but on login/register → redirect
+  // Logged in but on login/register → redirect approved members to the app.
+  // A signed-in user who is NOT approved yet (a new Google user finishing their
+  // registration form) must be able to stay on /register.
   if (isPublic && (pathname === '/login' || pathname === '/register')) {
-    const dashUrl = request.nextUrl.clone();
-    dashUrl.pathname = isSuperAdmin ? '/admin' : '/';
-    return NextResponse.redirect(dashUrl);
+    const approved = isSuperAdmin || user.app_metadata?.status === 'approved';
+    if (approved) {
+      const dashUrl = request.nextUrl.clone();
+      dashUrl.pathname = isSuperAdmin ? '/admin' : '/';
+      return NextResponse.redirect(dashUrl);
+    }
+    return applyRateLimitHeaders(request, response);
   }
 
   // Super Admin: Full bypass on all routes (cannot be locked into pending-approval)

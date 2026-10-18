@@ -425,9 +425,18 @@ export default function ProfilePage() {
               </div>
             </div>
 
-            <Badge variant="emerald" size="xs">
-              TLS 1.3 Encrypted
-            </Badge>
+            <div className="flex items-center gap-2">
+              <Link
+                href="/profile/security"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 text-xs font-semibold border border-emerald-500/30 transition-all shadow-xs"
+              >
+                <KeyRound className="w-3.5 h-3.5" />
+                <span>Account Security</span>
+              </Link>
+              <Badge variant="emerald" size="xs">
+                TLS 1.3 Encrypted
+              </Badge>
+            </div>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">

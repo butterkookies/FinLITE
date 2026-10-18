@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { verifyAdmin } from '@/lib/auth/admin-check';
 import { createAdminClient } from '@/lib/supabase/server';
+import { getAuthMethods } from '@/lib/auth/methods';
 
 const VALID_ROLES = ['treasurer', 'auditor', 'president', 'adviser', 'admin'];
 
@@ -34,6 +35,28 @@ export async function POST(req) {
 
     if (fetchErr || !request) {
       return NextResponse.json({ error: 'Registration request not found.' }, { status: 404 });
+    }
+
+    // 1.1 An email/password applicant must have proven they own the inbox.
+    // Admins can verify a person, but not an inbox, so this is checked here.
+    if ((request.auth_provider || 'email') === 'email') {
+      let verified = Boolean(request.email_verified_at);
+      const guardClient = createAdminClient();
+      if (verified && guardClient && request.google_id) {
+        // Cross-check the auth schema so a stale flag can never approve an unverified account.
+        try {
+          const methods = await getAuthMethods(guardClient, { userId: request.google_id });
+          verified = Boolean(methods.found && methods.email_confirmed);
+        } catch (lookupErr) {
+          console.warn('Approve: email verification lookup note:', lookupErr?.message);
+        }
+      }
+      if (!verified) {
+        return NextResponse.json(
+          { error: 'This applicant has not verified their email address yet. Ask them to open the verification link we sent, or reject the request.' },
+          { status: 409 }
+        );
+      }
     }
 
     const now = new Date().toISOString();
@@ -112,12 +135,13 @@ export async function POST(req) {
       }
     }
 
-    // 4. Update Supabase Auth app_metadata & confirm email
+    // 4. Update Supabase Auth app_metadata (role and status)
     const adminClient = createAdminClient();
     if (adminClient && request.google_id) {
       try {
+        // Approval sets role/status only. It never confirms an email: that
+        // can only happen when the owner clicks the verification link.
         await adminClient.auth.admin.updateUserById(request.google_id, {
-          email_confirm: true,
           app_metadata: {
             role: normalizedRole,
             status: 'approved',

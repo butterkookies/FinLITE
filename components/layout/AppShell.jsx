@@ -14,6 +14,7 @@ const AUTH_ROUTES = [
   '/forgot-password',
   '/reset-password',
   '/pending-approval',
+  '/verify-email',
   '/sidebar-mockup'
 ];
 
