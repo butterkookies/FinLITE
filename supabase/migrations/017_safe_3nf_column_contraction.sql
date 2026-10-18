@@ -74,14 +74,22 @@ ALTER TABLE public.transactions
   ALTER COLUMN category_id SET NOT NULL;
 
 -- ------------------------------------------------------------------------------
+-- 2.5 Drop Legacy Backward-Compatibility Triggers & Functions
+-- ------------------------------------------------------------------------------
+DROP TRIGGER IF EXISTS trg_sync_transaction_receipts_from_array ON public.transactions;
+DROP TRIGGER IF EXISTS trg_sync_transactions_3nf ON public.transactions;
+DROP FUNCTION IF EXISTS public.fn_sync_transaction_receipts_from_array();
+DROP FUNCTION IF EXISTS public.fn_sync_transactions_3nf();
+
+-- ------------------------------------------------------------------------------
 -- 3. Safely Drop Redundant Denormalized Columns from transactions
 -- ------------------------------------------------------------------------------
 ALTER TABLE public.transactions
-  DROP COLUMN IF EXISTS category_name,
-  DROP COLUMN IF EXISTS academic_year,
-  DROP COLUMN IF EXISTS semester,
-  DROP COLUMN IF EXISTS receipt_url,
-  DROP COLUMN IF EXISTS receipt_urls;
+  DROP COLUMN IF EXISTS category_name CASCADE,
+  DROP COLUMN IF EXISTS academic_year CASCADE,
+  DROP COLUMN IF EXISTS semester CASCADE,
+  DROP COLUMN IF EXISTS receipt_url CASCADE,
+  DROP COLUMN IF EXISTS receipt_urls CASCADE;
 
 -- ------------------------------------------------------------------------------
 -- 4. Safely Drop Repeating Denomination Columns from cash_reconciliations

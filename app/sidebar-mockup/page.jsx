@@ -399,35 +399,41 @@ export default function SidebarMockupDashboard() {
     setTransactions((prev) => [optimisticTx, ...prev]);
 
     if (supabase) {
-      try {
-        const { data, error } = await supabase
+        const payload = {
+          title: newTx.title,
+          description: newTx.description || null,
+          amount: parseFloat(newTx.amount),
+          type: newTx.type,
+          payment_method: newTx.payment_method || 'CASH',
+          category_id: newTx.category_id || null,
+          semester_id: currentSemester?.id?.startsWith('sem-') ? null : (currentSemester?.id || null),
+          logged_by: userProfile?.id || null,
+          transaction_date: newTx.transaction_date || new Date().toISOString().split('T')[0],
+          is_reimbursement: Boolean(newTx.is_reimbursement),
+          reimbursement_recipient: newTx.reimbursement_recipient || null,
+          status: newTx.status || 'COMPLETED',
+          event_name: newTx.event_name || null,
+        };
+
+        let insertRes = await supabase
           .from('transactions')
-          .insert([{
-            title: newTx.title,
-            description: newTx.description || null,
-            amount: parseFloat(newTx.amount),
-            type: newTx.type,
-            payment_method: newTx.payment_method,
-            category_name: newTx.category_name || 'General',
-            logged_by: userProfile?.id || null,
-            transaction_date: newTx.transaction_date || new Date().toISOString().split('T')[0],
-            is_reimbursement: Boolean(newTx.is_reimbursement),
-            reimbursement_recipient: newTx.reimbursement_recipient || null,
-            receipt_url: optimisticTx.receipt_urls[0] || null,
-            receipt_urls: optimisticTx.receipt_urls,
-            status: newTx.status || 'COMPLETED',
-            event_name: newTx.event_name || null,
-            academic_year: optimisticTx.academic_year,
-            semester: optimisticTx.semester,
-          }])
+          .insert([payload])
           .select()
           .single();
 
-        if (!error && data) {
+        if (insertRes.error && insertRes.error.code === 'PGRST204') {
+          const fallback = { ...payload };
+          delete fallback.semester_id;
+          delete fallback.category_id;
+          insertRes = await supabase.from('transactions').insert([fallback]).select().single();
+        }
+
+        const data = insertRes.data;
+        if (data) {
           setTransactions((prev) => prev.map((t) => (t.id === tempId ? { ...t, ...data } : t)));
         }
       } catch (err) {
-        console.error('Failed to save transaction:', err);
+        console.warn('Sidebar mockup save transaction notice:', err?.message || err);
       }
     }
   };

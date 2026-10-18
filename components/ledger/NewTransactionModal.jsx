@@ -222,6 +222,7 @@ export default function NewTransactionModal({
       title,
       amount: parseFloat(amount),
       type,
+      payment_method: 'CASH',
       category_id: categoryId,
       category_name: categoryName,
       event_name: eventName,

@@ -1,6 +1,7 @@
 'use client';
-import { useState, Suspense } from 'react';
+import { useState, useEffect, useRef, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import Script from 'next/script';
 import { createClient } from '@/lib/supabase/client';
 import { Eye, EyeOff, LogIn, AlertCircle, CheckCircle2 } from 'lucide-react';
 import Link from 'next/link';
@@ -29,6 +30,8 @@ function LoginForm() {
   const [showPass, setShowPass] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
+  const [isGisReady, setIsGisReady] = useState(false);
+  const googleBtnRef = useRef(null);
   const [error, setError] = useState(
     errorParam === 'oauth_failed' ? 'Google sign-in failed. If this Gmail is already registered with a password, sign in with your password, then connect Google under Account Security.' :
     errorParam === 'link_requires_password' ? 'An account with this Gmail already exists with a password. Sign in with your password, then connect Google under Account Security.' :
@@ -37,6 +40,99 @@ function LoginForm() {
     errorParam === 'account_suspended' ? 'Your account has been suspended by an administrator. Please contact your adviser or admin.' :
     errorParam === 'server_error' ? 'A server error occurred. Please try again.' : ''
   );
+
+  const handleGoogleCredentialResponse = async (response) => {
+    if (!response?.credential) {
+      setError('Google sign-in did not return a valid credential.');
+      return;
+    }
+
+    setIsGoogleLoading(true);
+    setError('');
+
+    try {
+      const supabase = createClient();
+      if (!supabase) {
+        throw new Error('Supabase client not initialized');
+      }
+
+      // 1. Authenticate with Supabase via Google ID Token
+      const { error: idTokenError } = await supabase.auth.signInWithIdToken({
+        provider: 'google',
+        token: response.credential,
+      });
+
+      if (idTokenError) {
+        console.error('Supabase signInWithIdToken error:', idTokenError);
+        setError(idTokenError.message || 'Google sign-in failed. Please try again.');
+        setIsGoogleLoading(false);
+        return;
+      }
+
+      // 2. Finalize session, profile permissions & audit logging
+      const sessionRes = await fetch('/api/auth/google-session', {
+        method: 'POST',
+      });
+      const sessionData = await sessionRes.json();
+
+      if (!sessionRes.ok || sessionData.error) {
+        if (sessionData.error === 'suspended') {
+          setError('Your account has been suspended by an administrator. Please contact your adviser or admin.');
+        } else if (sessionData.error === 'rejected') {
+          setError('Your registration request was not approved. Please contact the admin.');
+        } else if (sessionData.error === 'account_conflict') {
+          setError('This Gmail is already tied to a different sign-in.');
+        } else {
+          setError(sessionData.message || 'Login verification failed.');
+        }
+        setIsGoogleLoading(false);
+        return;
+      }
+
+      // 3. Navigate to destination
+      window.location.href = sessionData.redirect || '/';
+    } catch (err) {
+      console.error('Google ID token login error:', err);
+      setError('Google sign-in failed. Please try again.');
+      setIsGoogleLoading(false);
+    }
+  };
+
+  const initGoogleIdentity = () => {
+    const clientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
+    if (typeof window === 'undefined' || !window.google?.accounts?.id || !clientId) return;
+
+    try {
+      window.google.accounts.id.initialize({
+        client_id: clientId,
+        callback: handleGoogleCredentialResponse,
+        auto_select: false,
+        cancel_on_tap_outside: true,
+      });
+
+      if (googleBtnRef.current) {
+        googleBtnRef.current.innerHTML = '';
+        window.google.accounts.id.renderButton(googleBtnRef.current, {
+          theme: 'filled_black',
+          size: 'large',
+          type: 'standard',
+          text: 'continue_with',
+          shape: 'rectangular',
+          logo_alignment: 'left',
+          width: 380,
+        });
+        setIsGisReady(true);
+      }
+    } catch (err) {
+      console.warn('Google Identity initialization notice:', err);
+    }
+  };
+
+  useEffect(() => {
+    if (window.google?.accounts?.id) {
+      initGoogleIdentity();
+    }
+  }, []);
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -178,24 +274,42 @@ function LoginForm() {
               </div>
             )}
 
-            {/* Google OAuth Button */}
-            <Button
-              type="button"
-              variant="outline"
-              size="lg"
-              onClick={handleGoogleLogin}
-              disabled={isGoogleLoading || isLoading}
-              className="w-full mb-5 bg-[#121214] border-zinc-800 hover:bg-zinc-800/60 text-white font-semibold"
-              leftIcon={
-                isGoogleLoading ? (
-                  <div className="w-4 h-4 border-2 border-emerald-300 border-t-white rounded-full animate-spin" />
-                ) : (
-                  <GoogleIcon />
-                )
-              }
-            >
-              <span>{isGoogleLoading ? 'Redirecting...' : 'Continue to FinLITE with Google'}</span>
-            </Button>
+            {/* Google Identity Services Script (forced to English) */}
+            <Script
+              src="https://accounts.google.com/gsi/client?hl=en"
+              strategy="afterInteractive"
+              onLoad={initGoogleIdentity}
+            />
+
+            {/* Google Sign-In */}
+            <div className="relative w-full mb-5">
+              {/* Always-visible custom FinLITE button (Zero flicker, always English, perfect theme match) */}
+              <Button
+                type="button"
+                variant="outline"
+                size="lg"
+                onClick={handleGoogleLogin}
+                disabled={isGoogleLoading || isLoading}
+                className="w-full bg-[#121214] border-zinc-800 hover:bg-zinc-800/60 text-white font-semibold select-none"
+                leftIcon={
+                  isGoogleLoading ? (
+                    <div className="w-4 h-4 border-2 border-emerald-300 border-t-white rounded-full animate-spin" />
+                  ) : (
+                    <GoogleIcon />
+                  )
+                }
+              >
+                <span>{isGoogleLoading ? 'Signing in...' : 'Continue to FinLITE with Google'}</span>
+              </Button>
+
+              {/* Invisible Google GIS overlay that captures the click and launches the Google prompt */}
+              <div
+                ref={googleBtnRef}
+                className="absolute inset-0 z-10 opacity-[0.0001] overflow-hidden cursor-pointer flex items-center justify-center [&>div]:!w-full [&>div]:!h-full [&_iframe]:!w-full [&_iframe]:!h-full [&_iframe]:!scale-150"
+                style={{ pointerEvents: isGoogleLoading ? 'none' : 'auto' }}
+                title="Continue to FinLITE with Google"
+              />
+            </div>
 
             {/* Divider */}
             <div className="flex items-center gap-3 mb-5">

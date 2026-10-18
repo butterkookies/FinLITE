@@ -123,6 +123,8 @@ CREATE POLICY "Allow officers to insert advance_disbursements"
   );
 
 -- 5. Safe Backfill from existing transactions with is_reimbursement = true
+--    Uses only columns that survive migrations 013/017 (category name via join,
+--    receipts via transaction_receipts) so a fresh replay does not fail.
 INSERT INTO public.advances_payable (
   id, semester_id, claimant_name, title, category_id, category_name, event_name,
   total_amount, amount_reimbursed, status, advance_date, receipt_url, receipt_urls, notes, created_at
@@ -133,16 +135,17 @@ SELECT
   COALESCE(t.reimbursement_recipient, 'Club Officer'),
   t.title,
   t.category_id,
-  t.category_name,
+  c.name,
   t.event_name,
   t.amount,
   CASE WHEN t.status = 'REIMBURSED' THEN t.amount ELSE 0.00 END,
   CASE WHEN t.status = 'REIMBURSED' THEN 'SETTLED'::advance_status ELSE 'UNPAID'::advance_status END,
   t.transaction_date,
-  t.receipt_url,
-  COALESCE(t.receipt_urls, ARRAY[]::TEXT[]),
+  (SELECT tr.public_url FROM public.transaction_receipts tr WHERE tr.transaction_id = t.id ORDER BY tr.sort_order LIMIT 1),
+  COALESCE((SELECT array_agg(tr.public_url ORDER BY tr.sort_order) FROM public.transaction_receipts tr WHERE tr.transaction_id = t.id), ARRAY[]::TEXT[]),
   t.description,
   t.created_at
 FROM public.transactions t
+LEFT JOIN public.categories c ON c.id = t.category_id
 WHERE t.is_reimbursement = TRUE
 ON CONFLICT (id) DO NOTHING;
