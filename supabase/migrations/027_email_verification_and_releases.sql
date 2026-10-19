@@ -24,27 +24,12 @@ CREATE INDEX IF NOT EXISTS idx_email_verification_otps_lookup
 -- Enable RLS
 ALTER TABLE public.email_verification_otps ENABLE ROW LEVEL SECURITY;
 
--- Allow anon and authenticated clients to insert OTP records via API routes
+-- Security Hardening: Ensure zero public policies exist on email_verification_otps.
+-- Anonymous and authenticated browser clients are completely denied direct table access.
+-- Only server-side operations using service_role (which bypasses RLS) can create, query, and update OTPs.
 DROP POLICY IF EXISTS "Allow public insert email_verification_otps" ON public.email_verification_otps;
-CREATE POLICY "Allow public insert email_verification_otps"
-  ON public.email_verification_otps FOR INSERT
-  TO anon, authenticated
-  WITH CHECK (true);
-
--- Allow anon and authenticated clients to select OTP records for verification
 DROP POLICY IF EXISTS "Allow public select email_verification_otps" ON public.email_verification_otps;
-CREATE POLICY "Allow public select email_verification_otps"
-  ON public.email_verification_otps FOR SELECT
-  TO anon, authenticated
-  USING (true);
-
--- Allow updating (marking as used)
 DROP POLICY IF EXISTS "Allow public update email_verification_otps" ON public.email_verification_otps;
-CREATE POLICY "Allow public update email_verification_otps"
-  ON public.email_verification_otps FOR UPDATE
-  TO anon, authenticated
-  USING (true)
-  WITH CHECK (true);
 
 -- 2. Extend registration_requests table with email_verified flag
 ALTER TABLE public.registration_requests
@@ -64,19 +49,27 @@ CREATE TABLE IF NOT EXISTS public.app_releases (
 
 ALTER TABLE public.app_releases ENABLE ROW LEVEL SECURITY;
 
--- Allow anyone authenticated to read releases
+-- Allow anyone authenticated or anon to read releases
 DROP POLICY IF EXISTS "Allow authenticated read app_releases" ON public.app_releases;
-CREATE POLICY "Allow authenticated read app_releases"
+CREATE POLICY "Allow public read app_releases"
   ON public.app_releases FOR SELECT
   TO authenticated, anon
   USING (true);
 
--- Allow insert/update for admins or server operations
+-- Allow insert and update strictly for administrators (service_role bypasses RLS)
 DROP POLICY IF EXISTS "Allow insert app_releases" ON public.app_releases;
-CREATE POLICY "Allow insert app_releases"
+DROP POLICY IF EXISTS "Allow admin insert app_releases" ON public.app_releases;
+CREATE POLICY "Allow admin insert app_releases"
   ON public.app_releases FOR INSERT
-  TO authenticated, anon
-  WITH CHECK (true);
+  TO authenticated
+  WITH CHECK (public.is_admin());
+
+DROP POLICY IF EXISTS "Allow admin update app_releases" ON public.app_releases;
+CREATE POLICY "Allow admin update app_releases"
+  ON public.app_releases FOR UPDATE
+  TO authenticated
+  USING (public.is_admin())
+  WITH CHECK (public.is_admin());
 
 -- 4. RPC Function: Verify Password Reset OTP and update auth.users password
 CREATE OR REPLACE FUNCTION public.reset_user_password_with_otp(
@@ -136,4 +129,8 @@ BEGIN
 END;
 $$;
 
-GRANT EXECUTE ON FUNCTION public.reset_user_password_with_otp(TEXT, TEXT, TEXT) TO anon, authenticated;
+-- Security Hardening: Revoke execution from PUBLIC, anon, and authenticated.
+-- Only server-side service_role callers can invoke password reset via OTP.
+REVOKE EXECUTE ON FUNCTION public.reset_user_password_with_otp(TEXT, TEXT, TEXT) FROM PUBLIC;
+REVOKE EXECUTE ON FUNCTION public.reset_user_password_with_otp(TEXT, TEXT, TEXT) FROM anon, authenticated;
+GRANT EXECUTE ON FUNCTION public.reset_user_password_with_otp(TEXT, TEXT, TEXT) TO service_role;

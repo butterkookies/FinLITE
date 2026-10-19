@@ -1,19 +1,80 @@
 import { NextResponse } from 'next/server';
 import { createClient, createAdminClient } from '@/lib/supabase/server';
+import { verifyAdmin } from '@/lib/auth/admin-check';
 import { LATEST_RELEASE } from '@/lib/config/releases';
 import { sendSystemUpdateBroadcastEmail } from '@/lib/email/mailer';
 
 // In-memory set to prevent multiple redundant broadcasts in same server process
 const broadcastedVersionsInMemory = new Set();
 
-export async function POST(req) {
+/**
+ * GET /api/system/check-release
+ * Safe endpoint allowing clients to inspect the current active release info and broadcast status.
+ */
+export async function GET() {
   try {
     const adminClient = createAdminClient();
     const supabase = adminClient || (await createClient());
 
+    let isBroadcasted = broadcastedVersionsInMemory.has(LATEST_RELEASE.version);
+    let broadcastedAt = null;
+
+    if (supabase) {
+      try {
+        const { data: existingRelease } = await supabase
+          .from('app_releases')
+          .select('version, broadcasted_at')
+          .eq('version', LATEST_RELEASE.version)
+          .maybeSingle();
+
+        if (existingRelease) {
+          isBroadcasted = true;
+          broadcastedAt = existingRelease.broadcasted_at;
+          broadcastedVersionsInMemory.add(LATEST_RELEASE.version);
+        }
+      } catch (_) {
+        // app_releases table might not exist yet
+      }
+    }
+
+    return NextResponse.json({
+      success: true,
+      release: {
+        version: LATEST_RELEASE.version,
+        title: LATEST_RELEASE.title,
+        releaseNotes: LATEST_RELEASE.releaseNotes,
+      },
+      broadcasted: isBroadcasted,
+      broadcastedAt,
+    });
+  } catch (err) {
+    console.error('System release info GET error:', err);
+    return NextResponse.json({
+      success: true,
+      release: LATEST_RELEASE,
+      broadcasted: false,
+    });
+  }
+}
+
+/**
+ * POST /api/system/check-release
+ * Protected endpoint strictly restricted to administrators for triggering system-wide release broadcasts.
+ */
+export async function POST(req) {
+  try {
+    // 1. Enforce admin privileges
+    const auth = await verifyAdmin();
+    if (!auth.authorized) {
+      return NextResponse.json({ error: auth.error }, { status: auth.status || 403 });
+    }
+
+    const adminClient = createAdminClient();
+    const supabase = adminClient || auth.supabase || (await createClient());
+
     const { version = LATEST_RELEASE.version, force = false } = await req.json().catch(() => ({}));
 
-    // 1. Check if already broadcasted in memory
+    // 2. Check if already broadcasted in memory
     if (!force && broadcastedVersionsInMemory.has(version)) {
       return NextResponse.json({
         success: true,
@@ -22,7 +83,7 @@ export async function POST(req) {
       });
     }
 
-    // 2. Check database app_releases table if available
+    // 3. Check database app_releases table if available
     try {
       const { data: existingRelease } = await supabase
         .from('app_releases')
@@ -42,7 +103,7 @@ export async function POST(req) {
       // app_releases table might not exist yet, fallback to memory
     }
 
-    // 3. Fetch all approved officers with email
+    // 4. Fetch all approved officers with email
     const { data: profiles, error } = await supabase
       .from('profiles')
       .select('email, status')
@@ -67,7 +128,7 @@ export async function POST(req) {
       });
     }
 
-    // 4. Dispatch release broadcast email
+    // 5. Dispatch release broadcast email
     const result = await sendSystemUpdateBroadcastEmail({
       version,
       title: LATEST_RELEASE.title,
@@ -75,15 +136,27 @@ export async function POST(req) {
       recipients: uniqueRecipients,
     });
 
-    // 5. Mark version as broadcasted
+    // 6. Mark version as broadcasted
     broadcastedVersionsInMemory.add(version);
 
     try {
-      await supabase.from('app_releases').insert([{
+      let broadcasterProfileId = auth.profile?.id || null;
+      if (!broadcasterProfileId && auth.user?.id) {
+        const { data: p } = await supabase
+          .from('profiles')
+          .select('id')
+          .or(`auth_user_id.eq.${auth.user.id},email.eq.${(auth.user.email || '').trim().toLowerCase()}`)
+          .maybeSingle();
+        broadcasterProfileId = p?.id || null;
+      }
+
+      await supabase.from('app_releases').upsert([{
         version,
         title: LATEST_RELEASE.title,
         release_notes: LATEST_RELEASE.releaseNotes,
-      }]);
+        broadcasted_at: new Date().toISOString(),
+        broadcasted_by: broadcasterProfileId,
+      }], { onConflict: 'version' });
     } catch (_) {
       // Non-fatal
     }

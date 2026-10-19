@@ -1,10 +1,51 @@
 import { NextResponse } from 'next/server';
 import { createClient, createAdminClient } from '@/lib/supabase/server';
+import { isSuperAdminEmail } from '@/lib/config/admin';
 import { sendTransactionNotificationEmail } from '@/lib/email/mailer';
 
 export async function POST(req) {
   try {
-    const body = await req.json();
+    const userClient = await createClient();
+    if (!userClient) {
+      return NextResponse.json({ error: 'Database service unavailable.' }, { status: 503 });
+    }
+
+    const { data: { user }, error: authError } = await userClient.auth.getUser();
+    if (authError || !user) {
+      return NextResponse.json({ error: 'Unauthorized: valid officer session required.' }, { status: 401 });
+    }
+
+    const adminClient = createAdminClient();
+    const db = adminClient || userClient;
+
+    // Verify requesting user is an active approved officer
+    let callerProfile = null;
+    const { data: profileByAuth } = await db
+      .from('profiles')
+      .select('id, auth_user_id, email, full_name, first_name, last_name, role, status')
+      .eq('auth_user_id', user.id)
+      .maybeSingle();
+
+    callerProfile = profileByAuth;
+
+    if (!callerProfile && user.email) {
+      const { data: profileByEmail } = await db
+        .from('profiles')
+        .select('id, auth_user_id, email, full_name, first_name, last_name, role, status')
+        .eq('email', user.email.trim().toLowerCase())
+        .maybeSingle();
+
+      if (profileByEmail) {
+        callerProfile = profileByEmail;
+      }
+    }
+
+    const isSuperAdmin = isSuperAdminEmail(user.email);
+    if (!isSuperAdmin && (!callerProfile || callerProfile.status !== 'approved')) {
+      return NextResponse.json({ error: 'Forbidden: only approved officers can trigger notifications.' }, { status: 403 });
+    }
+
+    const body = await req.json().catch(() => ({}));
     const {
       authorId,
       authorEmail,
@@ -18,11 +59,13 @@ export async function POST(req) {
       date = null,
     } = body;
 
-    const adminClient = createAdminClient();
-    const supabase = adminClient || (await createClient());
+    const effectiveAuthorEmail = (callerProfile?.email || user.email || authorEmail || '').trim().toLowerCase();
+    const profileFullName = callerProfile?.full_name?.trim() || `${callerProfile?.first_name || ''} ${callerProfile?.last_name || ''}`.trim();
+    const effectiveAuthorName = profileFullName || authorName || effectiveAuthorEmail.split('@')[0] || 'Officer';
+    const effectiveAuthorId = callerProfile?.id || authorId || user.id;
 
     // Fetch all active approved officers from profiles
-    const { data: officers, error } = await supabase
+    const { data: officers, error } = await db
       .from('profiles')
       .select('id, auth_user_id, email, status')
       .eq('status', 'approved');
@@ -31,7 +74,7 @@ export async function POST(req) {
 
     // Fallback if RLS limited profiles query
     if (officerList.length === 0) {
-      const { data: reqOfficers } = await supabase
+      const { data: reqOfficers } = await db
         .from('registration_requests')
         .select('id, email, status')
         .eq('status', 'approved');
@@ -44,16 +87,13 @@ export async function POST(req) {
       return NextResponse.json({ success: true, count: 0, message: 'No other active officers found.' });
     }
 
-    const cleanAuthorEmail = authorEmail ? authorEmail.trim().toLowerCase() : '';
-
     // Filter: all active officers EXCEPT the author who performed the action
     const recipients = officerList
-
       .filter((u) => {
         if (!u.email) return false;
         const uEmail = u.email.trim().toLowerCase();
-        if (cleanAuthorEmail && uEmail === cleanAuthorEmail) return false;
-        if (authorId && (u.id === authorId || u.auth_user_id === authorId)) return false;
+        if (effectiveAuthorEmail && uEmail === effectiveAuthorEmail) return false;
+        if (effectiveAuthorId && (u.id === effectiveAuthorId || u.auth_user_id === effectiveAuthorId)) return false;
         return true;
       })
       .map((u) => u.email.trim().toLowerCase());
@@ -66,8 +106,8 @@ export async function POST(req) {
 
     // Dispatch notification via Gmail SMTP in background
     sendTransactionNotificationEmail({
-      authorName: authorName || cleanAuthorEmail.split('@')[0] || 'Officer',
-      authorEmail: cleanAuthorEmail || 'System',
+      authorName: effectiveAuthorName,
+      authorEmail: effectiveAuthorEmail || 'System',
       actionType,
       amount: Number(amount) || 0,
       title,
