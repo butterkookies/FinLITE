@@ -204,17 +204,20 @@ export default function TransactionCommentsDrawer({
                 {/* Author Metadata Header */}
                 <div className="flex items-center justify-between gap-2 mb-2">
                   <div className="flex items-center gap-2 min-w-0">
-                    {c.author_avatar ? (
-                      <img 
-                        src={c.author_avatar} 
-                        alt={c.author_name} 
-                        className="w-5 h-5 rounded-full object-cover shrink-0 border border-zinc-200 dark:border-zinc-700" 
-                      />
-                    ) : (
-                      <div className="w-5 h-5 rounded-full flex items-center justify-center text-[9px] font-bold shrink-0 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
-                        {(c.author_name || 'U').charAt(0).toUpperCase()}
-                      </div>
-                    )}
+                    <div className="relative w-5 h-5 rounded-full overflow-hidden shrink-0 border border-zinc-200 dark:border-zinc-700 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center text-[9px] font-bold">
+                      <span>{(c.author_name || 'U').charAt(0).toUpperCase()}</span>
+                      {c.author_avatar && (
+                        <img 
+                          src={c.author_avatar} 
+                          alt={c.author_name} 
+                          referrerPolicy="no-referrer"
+                          className="absolute inset-0 w-full h-full object-cover" 
+                          onError={(e) => {
+                            e.currentTarget.style.display = 'none';
+                          }}
+                        />
+                      )}
+                    </div>
                     <span className="text-xs font-bold truncate text-zinc-900 dark:text-zinc-100">{c.author_name}</span>
                     <Badge variant={getRoleBadgeVariant(c.author_role)} size="xs">
                       {c.author_role || 'Officer'}

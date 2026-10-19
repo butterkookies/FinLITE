@@ -196,23 +196,20 @@ export default function ProfilePage() {
             {/* Avatar & Photo Trigger */}
             <div className="flex flex-col sm:flex-row items-center gap-4 sm:gap-5 min-w-0">
               <div className="relative shrink-0 group">
-                {avatarUrl ? (
-                  <div className="w-20 h-20 sm:w-22 sm:h-22 rounded-2xl overflow-hidden shadow-xs border-2 border-zinc-200 dark:border-zinc-700 relative bg-zinc-100 dark:bg-zinc-800">
+                <div className="w-20 h-20 sm:w-22 sm:h-22 rounded-2xl overflow-hidden shadow-xs border-2 border-zinc-200 dark:border-zinc-700 relative bg-emerald-600 dark:bg-emerald-700 flex items-center justify-center text-white text-2xl sm:text-3xl font-black">
+                  <span>{fullName[0]?.toUpperCase() || 'U'}</span>
+                  {avatarUrl && (
                     <img
                       src={avatarUrl}
                       alt={fullName}
                       width={88}
                       height={88}
-                      className="object-cover w-full h-full"
+                      className="absolute inset-0 object-cover w-full h-full"
                       referrerPolicy="no-referrer"
                       onError={(e) => { e.currentTarget.style.display = 'none'; }}
                     />
-                  </div>
-                ) : (
-                  <div className="w-20 h-20 sm:w-22 sm:h-22 rounded-2xl bg-emerald-600 dark:bg-emerald-700 flex items-center justify-center text-white text-2xl sm:text-3xl font-black shadow-xs">
-                    {fullName[0]?.toUpperCase() || 'U'}
-                  </div>
-                )}
+                  )}
+                </div>
                 
                 {/* Change photo button on hover */}
                 <button

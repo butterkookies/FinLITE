@@ -238,23 +238,20 @@ export default function Navbar({
               className="h-8 flex items-center gap-2 px-2 rounded-lg transition-colors cursor-pointer focus:outline-none focus:ring-1 focus:ring-emerald-500/40 border bg-zinc-100/80 hover:bg-zinc-200/80 dark:bg-zinc-900/60 dark:hover:bg-zinc-900 border-zinc-200 dark:border-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-700 text-zinc-800 dark:text-zinc-100"
               title="View Account Profile"
             >
-              {avatarUrl ? (
-                <div className="w-5 h-5 rounded-full overflow-hidden ring-1 ring-emerald-500/40 relative shrink-0">
+              <div className="w-5 h-5 rounded-full overflow-hidden ring-1 ring-emerald-500/40 bg-emerald-600 flex items-center justify-center text-white text-[10px] font-bold relative shrink-0">
+                <span>{initial}</span>
+                {avatarUrl && (
                   <img
                     src={avatarUrl}
                     alt={fullName}
                     width={20}
                     height={20}
-                    className="object-cover w-full h-full"
+                    className="absolute inset-0 object-cover w-full h-full"
                     referrerPolicy="no-referrer"
                     onError={(e) => { e.currentTarget.style.display = 'none'; }}
                   />
-                </div>
-              ) : (
-                <div className="w-5 h-5 rounded-full bg-emerald-600 flex items-center justify-center text-white text-[10px] font-bold shrink-0">
-                  {initial}
-                </div>
-              )}
+                )}
+              </div>
 
               <div className="hidden md:flex flex-col text-left">
                 <span className="text-xs font-semibold leading-tight truncate max-w-[110px] text-zinc-900 dark:text-zinc-100">
@@ -274,23 +271,20 @@ export default function Navbar({
                 {/* User Header Info */}
                 <div className="px-3 py-2.5 border-b border-zinc-100 dark:border-zinc-800">
                   <div className="flex items-center gap-2.5">
-                    {avatarUrl ? (
-                      <div className="w-9 h-9 rounded-lg overflow-hidden border border-zinc-200 dark:border-zinc-700 relative shrink-0">
+                    <div className="w-9 h-9 rounded-lg overflow-hidden border border-zinc-200 dark:border-zinc-700 bg-emerald-500/20 text-emerald-600 dark:text-emerald-300 flex items-center justify-center font-bold text-xs relative shrink-0">
+                      <span>{initial}</span>
+                      {avatarUrl && (
                         <img
                           src={avatarUrl}
                           alt={fullName}
                           width={36}
                           height={36}
-                          className="object-cover w-full h-full"
+                          className="absolute inset-0 object-cover w-full h-full"
                           referrerPolicy="no-referrer"
                           onError={(e) => { e.currentTarget.style.display = 'none'; }}
                         />
-                      </div>
-                    ) : (
-                      <div className="w-9 h-9 rounded-lg flex items-center justify-center font-bold text-xs shrink-0 bg-emerald-500/20 text-emerald-600 dark:text-emerald-300">
-                        {initial}
-                      </div>
-                    )}
+                      )}
+                    </div>
                     <div className="min-w-0">
                       <p className="text-xs font-bold truncate text-zinc-900 dark:text-zinc-100">{fullName}</p>
                       <p className="text-[10px] truncate text-zinc-500 dark:text-zinc-400">{email}</p>

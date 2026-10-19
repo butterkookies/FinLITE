@@ -521,17 +521,20 @@ export default function FloatingSidebar({
           >
             {/* Avatar */}
             <div className="relative shrink-0">
-              {avatarUrl ? (
-                <img 
-                  src={avatarUrl} 
-                  alt={fullName} 
-                  className="w-8 h-8 rounded-lg object-cover ring-1 ring-zinc-200 dark:ring-zinc-800"
-                />
-              ) : (
-                <div className="w-8 h-8 rounded-lg bg-emerald-600 text-white font-bold text-xs flex items-center justify-center">
-                  {initial}
-                </div>
-              )}
+              <div className="w-8 h-8 rounded-lg bg-emerald-600 text-white font-bold text-xs flex items-center justify-center overflow-hidden relative ring-1 ring-zinc-200 dark:ring-zinc-800">
+                <span>{initial}</span>
+                {avatarUrl && (
+                  <img 
+                    src={avatarUrl} 
+                    alt={fullName}
+                    referrerPolicy="no-referrer"
+                    className="absolute inset-0 w-full h-full object-cover"
+                    onError={(e) => {
+                      e.currentTarget.style.display = 'none';
+                    }}
+                  />
+                )}
+              </div>
               <span className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-emerald-500 border-2 border-white dark:border-zinc-950 rounded-full" />
             </div>
 

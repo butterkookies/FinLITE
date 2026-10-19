@@ -48,6 +48,7 @@ export async function POST(req) {
               role: 'admin',
               status: 'approved',
               auth_provider: 'google',
+              avatar_url: googleAvatar || undefined,
               approved_at: new Date().toISOString(),
             },
             { onConflict: 'email' }
