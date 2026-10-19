@@ -6,6 +6,16 @@ import { AlertCircle, RefreshCw } from 'lucide-react';
 export default function GlobalErrorPage({ error, reset }) {
   useEffect(() => {
     console.error('Next.js Page Error Caught:', error);
+    // If chunk loading failed (e.g. after server recompile or stale webpack cache), auto-reload once to refresh chunks
+    const isChunkError = error?.message?.includes('Loading chunk') || error?.name === 'ChunkLoadError' || error?.message?.includes('chunk');
+    if (isChunkError && typeof window !== 'undefined') {
+      const lastReload = sessionStorage.getItem('finlite_last_chunk_reload');
+      const now = Date.now();
+      if (!lastReload || now - Number(lastReload) > 8000) {
+        sessionStorage.setItem('finlite_last_chunk_reload', String(now));
+        window.location.reload();
+      }
+    }
   }, [error]);
 
   return (
@@ -24,7 +34,13 @@ export default function GlobalErrorPage({ error, reset }) {
         </div>
         <div className="pt-2 flex items-center justify-center gap-2">
           <button
-            onClick={() => reset()}
+            onClick={() => {
+              if (typeof window !== 'undefined') {
+                window.location.reload();
+              } else {
+                reset();
+              }
+            }}
             className="h-10 px-5 bg-emerald-700 hover:bg-emerald-800 active:bg-emerald-900 text-white rounded-xl text-xs font-semibold shadow-xs transition-all flex items-center gap-1.5 cursor-pointer"
           >
             <RefreshCw className="w-3.5 h-3.5" />

@@ -239,11 +239,6 @@ export default function ProfilePage() {
                   <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-zinc-950 dark:text-zinc-100">
                     {fullName}
                   </h1>
-                  {profile?.username && (
-                    <span className="text-xs font-semibold px-2 py-0.5 rounded-md bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800/60 font-mono">
-                      @{profile.username}
-                    </span>
-                  )}
                   <Badge variant={isAdmin ? 'amber' : 'emerald'} size="xs" className="uppercase tracking-wider font-bold">
                     {roleLabelMap[role] || role}
                   </Badge>
@@ -351,22 +346,6 @@ export default function ProfilePage() {
               </div>
 
               <div className="space-y-3.5 pt-4 text-xs">
-                {/* Username */}
-                <div>
-                  <p className="text-[11px] font-medium text-zinc-500 dark:text-zinc-400">System Username</p>
-                  <div className="flex items-center justify-between mt-0.5">
-                    <p className="font-semibold text-zinc-900 dark:text-zinc-100">
-                      {profile?.username ? `@${profile.username}` : <span className="text-zinc-400 italic font-normal">Not configured</span>}
-                    </p>
-                    <button
-                      type="button"
-                      onClick={() => setIsEditOpen(true)}
-                      className="text-[11px] font-semibold text-emerald-600 dark:text-emerald-400 hover:underline cursor-pointer"
-                    >
-                      {profile?.username ? 'Update' : '+ Add'}
-                    </button>
-                  </div>
-                </div>
 
                 {/* Contact Phone */}
                 <div>

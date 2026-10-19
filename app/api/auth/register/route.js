@@ -58,24 +58,29 @@ export async function POST(req) {
       .maybeSingle();
 
     if (existing) {
-      // An unverified email registration never proved it owns the inbox, so it
-      // must not lock the real owner out. Anything verified or approved stays.
-      const discarded = await discardUnverifiedRegistration(adminClient, existing);
-      if (!discarded) {
-        return NextResponse.json({
-          error: 'This Gmail address already has a pending or approved registration.',
-        }, { status: 409 });
+      if (existing.status === 'rejected') {
+        // Declined applicant is re-registering: clean up the old rejected record so they can submit fresh
+        await adminClient.from('registration_requests').delete().eq('id', existing.id);
+      } else {
+        // An unverified email registration never proved it owns the inbox, so it
+        // must not lock the real owner out. Anything verified or approved stays.
+        const discarded = await discardUnverifiedRegistration(adminClient, existing);
+        if (!discarded) {
+          return NextResponse.json({
+            error: 'This Gmail address already has a pending or approved registration.',
+          }, { status: 409 });
+        }
       }
     }
 
     // --- Also check approved profiles ---
     const { data: profileExists } = await adminClient
       .from('profiles')
-      .select('id')
+      .select('id, status')
       .eq('email', cleanEmail)
       .maybeSingle();
 
-    if (profileExists) {
+    if (profileExists && profileExists.status !== 'rejected') {
       return NextResponse.json({ error: 'An account with this Gmail address already exists.' }, { status: 409 });
     }
 
@@ -99,12 +104,18 @@ export async function POST(req) {
     let { data: adminUser, error: adminErr } = await adminClient.auth.admin.createUser(createPayload);
 
     if (adminErr?.message?.toLowerCase().includes('already')) {
-      // A leftover unverified auth user (e.g. a half-finished earlier attempt)
-      // may exist without a request row. Clear it only if it is unverified.
+      // A leftover unverified or previously rejected auth user may exist.
+      // Clear it if it is unverified or was rejected.
       const leftover = await getAuthMethods(adminClient, { email: cleanEmail });
-      if (leftover.found && !leftover.email_confirmed) {
-        await adminClient.auth.admin.deleteUser(leftover.user_id);
-        ({ data: adminUser, error: adminErr } = await adminClient.auth.admin.createUser(createPayload));
+      if (leftover.found) {
+        const { data: oldProfile } = await adminClient.from('profiles').select('status').eq('id', leftover.user_id).maybeSingle();
+        if (!leftover.email_confirmed || oldProfile?.status === 'rejected') {
+          if (oldProfile?.status === 'rejected') {
+            await adminClient.from('profiles').delete().eq('id', leftover.user_id);
+          }
+          await adminClient.auth.admin.deleteUser(leftover.user_id);
+          ({ data: adminUser, error: adminErr } = await adminClient.auth.admin.createUser(createPayload));
+        }
       }
     }
 

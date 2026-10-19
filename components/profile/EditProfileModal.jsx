@@ -12,7 +12,7 @@ import {
   AlertCircle 
 } from 'lucide-react';
 import { compressReceiptImage } from '@/lib/utils/compression';
-import { validateContactNumber, validateUsername } from '@/lib/utils/validation';
+import { validateContactNumber } from '@/lib/utils/validation';
 import { createClient } from '@/lib/supabase/client';
 import { Modal, Button, Badge, Input } from '@/components/ui';
 
@@ -25,7 +25,6 @@ export default function EditProfileModal({
 }) {
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
-  const [username, setUsername] = useState('');
   const [contactNumber, setContactNumber] = useState('');
   const [avatarUrl, setAvatarUrl] = useState('');
   const [avatarFile, setAvatarFile] = useState(null);
@@ -38,7 +37,6 @@ export default function EditProfileModal({
   const fileInputRef = useRef(null);
   const firstNameInputRef = useRef(null);
   const lastNameInputRef = useRef(null);
-  const usernameInputRef = useRef(null);
   const contactInputRef = useRef(null);
   const [formErrors, setFormErrors] = useState({});
   const [shakeKey, setShakeKey] = useState(0);
@@ -66,7 +64,6 @@ export default function EditProfileModal({
         setLastName(user?.user_metadata?.last_name || '');
       }
 
-      setUsername(profile?.username || '');
       setContactNumber(profile?.contact_number || '');
       
       const currentAvatar = profile?.avatar_url || user?.user_metadata?.avatar_url || user?.user_metadata?.picture || '';
@@ -117,12 +114,6 @@ export default function EditProfileModal({
         nextErrors.contactNumber = contactErr;
       }
     }
-    if (username && username.trim()) {
-      const userErr = validateUsername(username.trim());
-      if (userErr) {
-        nextErrors.username = userErr;
-      }
-    }
 
     if (Object.keys(nextErrors).length > 0) {
       setFormErrors(nextErrors);
@@ -133,8 +124,6 @@ export default function EditProfileModal({
         lastNameInputRef.current.focus();
       } else if (nextErrors.contactNumber && contactInputRef.current) {
         contactInputRef.current.focus();
-      } else if (nextErrors.username && usernameInputRef.current) {
-        usernameInputRef.current.focus();
       }
       return;
     }
@@ -189,7 +178,6 @@ export default function EditProfileModal({
         first_name: firstName.trim(),
         last_name: lastName.trim(),
         full_name: `${firstName.trim()} ${lastName.trim()}`.trim(),
-        username: username.trim() || null,
         contact_number: contactNumber.trim() || null,
         avatar_url: finalAvatarUrl || null,
       };
@@ -353,35 +341,6 @@ export default function EditProfileModal({
               </p>
             )}
           </div>
-        </div>
-
-        {/* Username */}
-        <div className={formErrors.username ? 'animate-field-shake' : ''} key={`un-${shakeKey}`}>
-          <div className="flex items-center justify-between mb-1">
-            <label className="block text-zinc-700 dark:text-zinc-300 font-semibold">
-              Username Handle
-            </label>
-            <span className="text-[10px] text-zinc-400">Optional (letters, numbers, underscores)</span>
-          </div>
-          <Input
-            ref={usernameInputRef}
-            type="text"
-            leftIcon={<span className="text-xs font-semibold">@</span>}
-            placeholder="e.g. andreijohn"
-            value={username}
-            onChange={(e) => {
-              setUsername(e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, ''));
-              if (formErrors.username) setFormErrors((prev) => ({ ...prev, username: null }));
-            }}
-            aria-invalid={Boolean(formErrors.username)}
-            className={formErrors.username ? 'border-rose-500 focus:border-rose-500 focus:ring-rose-500/20' : ''}
-          />
-          {formErrors.username && (
-            <p className="text-xs font-semibold text-rose-600 dark:text-rose-400 mt-1.5 flex items-center gap-1.5 animate-in fade-in duration-150">
-              <AlertCircle className="w-3.5 h-3.5 shrink-0 text-rose-600 dark:text-rose-400" />
-              <span>{formErrors.username}</span>
-            </p>
-          )}
         </div>
 
         {/* Contact Number */}

@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { verifyAdmin } from '@/lib/auth/admin-check';
+import { sendAccountStatusChangedEmail } from '@/lib/email/mailer';
 
 // POST /api/admin/reject
 export async function POST(req) {
@@ -51,6 +52,16 @@ export async function POST(req) {
       .from('profiles')
       .update({ status: 'rejected' })
       .eq('email', request.email);
+
+    // Dispatch rejection notification email to applicant
+    if (request.email) {
+      sendAccountStatusChangedEmail({
+        to: request.email,
+        name: `${request.first_name || ''} ${request.last_name || ''}`.trim() || 'Applicant',
+        changeType: 'REJECTED',
+        details: { reason: rejectionReason },
+      }).catch((emailErr) => console.warn('Rejection email notification warning:', emailErr));
+    }
 
     return NextResponse.json({
       success: true,

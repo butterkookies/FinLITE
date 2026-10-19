@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { verifyAdmin } from '@/lib/auth/admin-check';
 import { createAdminClient } from '@/lib/supabase/server';
 import { getAuthMethods } from '@/lib/auth/methods';
+import { sendAccountStatusChangedEmail } from '@/lib/email/mailer';
 
 const VALID_ROLES = ['treasurer', 'auditor', 'president', 'adviser', 'admin'];
 
@@ -156,6 +157,16 @@ export async function POST(req) {
       } catch (rpcErr) {
         console.warn('confirm_user_on_approval RPC note:', rpcErr?.message);
       }
+    }
+
+    // Dispatch approval welcome email to user via Gmail SMTP
+    if (request.email) {
+      sendAccountStatusChangedEmail({
+        to: request.email,
+        name: fullName || 'Officer',
+        changeType: 'APPROVED',
+        details: { role: normalizedRole },
+      }).catch((emailErr) => console.warn('Approval email notification warning:', emailErr));
     }
 
     return NextResponse.json({

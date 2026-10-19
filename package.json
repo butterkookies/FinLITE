@@ -8,6 +8,7 @@
     "build": "next build",
     "start": "next start",
     "test": "node scripts/test_auth_hardening.mjs && node scripts/run_all_tests.mjs",
+    "release:broadcast": "node scripts/broadcast_release.mjs",
     "video": "remotion preview src/motion/Root.tsx",
     "video:render": "remotion render src/motion/Root.tsx FinLiteReveal out/finlite-reveal.mp4"
   },
