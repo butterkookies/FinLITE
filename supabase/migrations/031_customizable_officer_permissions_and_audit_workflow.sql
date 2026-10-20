@@ -1,28 +1,20 @@
 -- ==============================================================================
 -- FinLITE Database Migration 031: Customizable Officer Permissions & Audit Workflow
 -- 
--- 1. Adds 'PENDING_AUDIT' to transaction_status enum.
+-- 1. Adds 'PENDING_AUDIT' to transaction_status enum (committed separately).
 -- 2. Adds 'permissions' JSONB column to public.profiles.
 -- 3. Seeds sensible default permissions based on current roles.
 -- 4. Creates database helper public.has_permission().
 -- 5. Updates transactions RLS policies to recognize granular permissions.
 -- ==============================================================================
 
-BEGIN;
+-- 1. Extend transaction_status enum with 'PENDING_AUDIT'
+-- Note: PostgreSQL requires enum additions to be committed before the new value
+-- can be used in table defaults, constraints, or queries.
+ALTER TYPE transaction_status ADD VALUE IF NOT EXISTS 'PENDING_AUDIT' BEFORE 'COMPLETED';
+COMMIT;
 
--- 1. Extend transaction_status enum with 'PENDING_AUDIT' if not exists
-DO $$
-BEGIN
-  IF NOT EXISTS (
-    SELECT 1 FROM pg_enum 
-    WHERE enumtypid = 'transaction_status'::regtype 
-      AND enumlabel = 'PENDING_AUDIT'
-  ) THEN
-    ALTER TYPE transaction_status ADD VALUE 'PENDING_AUDIT' BEFORE 'COMPLETED';
-  END IF;
-EXCEPTION
-  WHEN duplicate_object THEN null;
-END $$;
+BEGIN;
 
 -- 2. Add permissions JSONB column to profiles
 ALTER TABLE public.profiles 
