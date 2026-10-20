@@ -44,7 +44,7 @@ export async function GET(req) {
     } else if (filter === 'financial') {
       query = query.in('entity_type', ['transactions', 'cash_reconciliations', 'shortages_abono', 'reports', 'categories', 'transaction_comments']);
     } else if (filter === 'governance') {
-      query = query.or('action.eq.ROLE_UPDATE,action.eq.STATUS_UPDATE,action.eq.ACCOUNT_DELETED,action.eq.USER_APPROVED,action.eq.USER_REJECTED,entity_type.eq.profiles,entity_type.eq.registration_requests,entity_type.eq.semesters');
+      query = query.or('action.eq.ROLE_UPDATE,action.eq.STATUS_UPDATE,action.eq.ACCOUNT_DELETED,action.eq.USER_APPROVED,action.eq.USER_REJECTED,action.eq.ROSTER_UPDATE,action.eq.ROSTER_CLONE,entity_type.eq.profiles,entity_type.eq.registration_requests,entity_type.eq.semesters,entity_type.eq.semester_signatories');
     }
 
     const { data: logs, error } = await query;

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import {
@@ -30,7 +30,13 @@ import {
   AlertOctagon,
   Loader2,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  Save,
+  Copy,
+  Check,
+  Award,
+  Building,
+  RotateCcw
 } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import { useTheme } from '@/components/theme/ThemeProvider';
@@ -64,6 +70,9 @@ const getActionTagClass = (action) => {
     case 'STATUS_UPDATE':
     case 'ROLE_UPDATE':
       return 'bg-amber-600 text-white';
+    case 'ROSTER_UPDATE':
+    case 'ROSTER_CLONE':
+      return 'bg-purple-600 text-white';
     case 'USER_APPROVED':
       return 'bg-teal-600 text-white';
     case 'TRANSACTION_CREATE':
@@ -113,6 +122,19 @@ export default function AdminPage() {
   const [auditLogs, setAuditLogs] = useState([]);
   const [auditFilter, setAuditFilter] = useState('all');
   const [isLoadingAudit, setIsLoadingAudit] = useState(false);
+
+  // Signatory Roster State
+  const [rosterSemesters, setRosterSemesters] = useState([]);
+  const [selectedTerm, setSelectedTerm] = useState({ academic_year: '', semester: '' });
+  const [signatoriesList, setSignatoriesList] = useState([]);
+  const [templateDefaults, setTemplateDefaults] = useState([]);
+  const [isRosterLoading, setIsRosterLoading] = useState(false);
+  const [isRosterSaving, setIsRosterSaving] = useState(false);
+  const [hasRosterChanges, setHasRosterChanges] = useState(false);
+  const [isCloneModalOpen, setIsCloneModalOpen] = useState(false);
+  const [cloneSourceTerm, setCloneSourceTerm] = useState({ academic_year: '', semester: '' });
+  const [isCloning, setIsCloning] = useState(false);
+  const rosterFetchedRef = useRef(false);
 
   // Reset pagination on filter or tab change (Pin #3)
   useEffect(() => {
@@ -178,6 +200,32 @@ export default function AdminPage() {
     }
   }, []);
 
+  // Fetch Roster Signatories
+  const fetchRosterData = useCallback(async (ay, sem) => {
+    setIsRosterLoading(true);
+    try {
+      const q = (ay && sem) ? `?academic_year=${encodeURIComponent(ay)}&semester=${encodeURIComponent(sem)}` : '';
+      const res = await fetch(`/api/admin/signatories${q}`);
+      if (res.ok) {
+        const data = await res.json();
+        if (data.success) {
+          setRosterSemesters(data.semesters || []);
+          setSelectedTerm({ academic_year: data.academic_year, semester: data.semester });
+          setSignatoriesList(data.signatories || []);
+          setTemplateDefaults(data.template || []);
+          setHasRosterChanges(false);
+        }
+      } else {
+        const errJson = await res.json().catch(() => null);
+        console.error('Failed to load roster signatories:', errJson?.error || res.status);
+      }
+    } catch (err) {
+      console.error('Error fetching roster data:', err);
+    } finally {
+      setIsRosterLoading(false);
+    }
+  }, []);
+
   useEffect(() => {
     fetchData();
   }, [fetchData]);
@@ -185,8 +233,144 @@ export default function AdminPage() {
   useEffect(() => {
     if (activeTab === 'audit') {
       fetchAuditLogs(auditFilter);
+    } else if (activeTab === 'roster') {
+      if (!rosterFetchedRef.current) {
+        rosterFetchedRef.current = true;
+        fetchRosterData();
+      }
     }
-  }, [activeTab, auditFilter, fetchAuditLogs]);
+  }, [activeTab, auditFilter, fetchAuditLogs, fetchRosterData]);
+
+  // Signatory Field Change
+  const handleSignatoryChange = (roleKey, field, value) => {
+    setSignatoriesList((prev) =>
+      prev.map((s) => {
+        if (s.role_key === roleKey) {
+          return {
+            ...s,
+            [field]: field === 'name' ? value.toUpperCase() : value,
+          };
+        }
+        return s;
+      })
+    );
+    setHasRosterChanges(true);
+  };
+
+  // Toggle Signatory Active State
+  const handleToggleSignatoryActive = (roleKey) => {
+    setSignatoriesList((prev) =>
+      prev.map((s) => {
+        if (s.role_key === roleKey) {
+          return { ...s, is_active: !s.is_active };
+        }
+        return s;
+      })
+    );
+    setHasRosterChanges(true);
+  };
+
+  // Initialize from Standard 8-Tier Template
+  const handleInitializeFromTemplate = () => {
+    if (!templateDefaults || templateDefaults.length === 0) return;
+    const initialList = templateDefaults.map((t) => {
+      const existing = signatoriesList.find((s) => s.role_key === t.role_key);
+      return {
+        academic_year: selectedTerm.academic_year,
+        semester: selectedTerm.semester,
+        role_key: t.role_key,
+        name: existing?.name || t.default_name || '',
+        position_title: existing?.position_title || t.position_title,
+        category: t.category,
+        sort_order: t.sort_order,
+        is_active: existing ? existing.is_active : true,
+      };
+    });
+    setSignatoriesList(initialList);
+    setHasRosterChanges(true);
+    setFeedback({
+      type: 'success',
+      text: 'Standard 8-tier signatory template populated. Click "Save Roster" to commit.',
+    });
+  };
+
+  // Save Roster
+  const handleSaveRoster = async () => {
+    if (!selectedTerm.academic_year || !selectedTerm.semester) return;
+    setIsRosterSaving(true);
+    setFeedback(null);
+    try {
+      const res = await fetch('/api/admin/signatories', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          academic_year: selectedTerm.academic_year,
+          semester: selectedTerm.semester,
+          signatories: signatoriesList,
+        }),
+      });
+
+      const data = await res.json();
+      if (res.ok && data.success) {
+        setFeedback({
+          type: 'success',
+          text: data.message || 'Signatories saved successfully.',
+        });
+        setHasRosterChanges(false);
+        fetchRosterData(selectedTerm.academic_year, selectedTerm.semester);
+      } else {
+        setFeedback({
+          type: 'error',
+          text: data.error || 'Failed to save signatories.',
+        });
+      }
+    } catch (err) {
+      console.error('Error saving roster:', err);
+      setFeedback({ type: 'error', text: 'An unexpected error occurred while saving.' });
+    } finally {
+      setIsRosterSaving(false);
+    }
+  };
+
+  // Clone Roster from source term
+  const handleCloneRoster = async () => {
+    if (!cloneSourceTerm.academic_year || !cloneSourceTerm.semester) return;
+    setIsCloning(true);
+    setFeedback(null);
+    try {
+      const res = await fetch('/api/admin/signatories/clone', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          from_academic_year: cloneSourceTerm.academic_year,
+          from_semester: cloneSourceTerm.semester,
+          to_academic_year: selectedTerm.academic_year,
+          to_semester: selectedTerm.semester,
+        }),
+      });
+
+      const data = await res.json();
+      if (res.ok && data.success) {
+        setIsCloneModalOpen(false);
+        setFeedback({
+          type: 'success',
+          text: data.message || 'Signatories cloned successfully.',
+        });
+        setHasRosterChanges(false);
+        fetchRosterData(selectedTerm.academic_year, selectedTerm.semester);
+      } else {
+        setFeedback({
+          type: 'error',
+          text: data.error || 'Failed to clone signatories.',
+        });
+      }
+    } catch (err) {
+      console.error('Error cloning roster:', err);
+      setFeedback({ type: 'error', text: 'Failed to clone signatories.' });
+    } finally {
+      setIsCloning(false);
+    }
+  };
 
   // Handle Approve Request
   const handleApprove = async (requestId) => {
@@ -489,10 +673,10 @@ export default function AdminPage() {
   return (
     <>
       {/* Top Header */}
-      <header className={`sticky top-0 z-30 border-b backdrop-blur-xl transition-colors ${
+      <header className={`sticky top-0 z-30 backdrop-blur-xl transition-colors ${
           isLight
-            ? 'bg-white/95 border-zinc-200 text-gray-900 shadow-2xs'
-            : 'bg-[#09090b]/95 border-zinc-800 text-zinc-100 shadow-xs'
+            ? 'bg-white/95 text-gray-900'
+            : 'bg-[#09090b]/95 text-zinc-100'
         }`}>
           <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 h-14 sm:h-16 flex items-center justify-between gap-2 min-w-0">
             
@@ -538,6 +722,7 @@ export default function AdminPage() {
               onClick={() => {
                 fetchData(true);
                 if (activeTab === 'audit') fetchAuditLogs(auditFilter);
+                if (activeTab === 'roster') fetchRosterData(selectedTerm.academic_year, selectedTerm.semester);
               }}
               disabled={isRefreshing}
               className={`h-8 sm:h-9 px-2 sm:px-3 text-xs font-medium rounded-lg border transition-colors flex items-center gap-1.5 cursor-pointer disabled:opacity-50 active:scale-95 ${
@@ -598,168 +783,198 @@ export default function AdminPage() {
         )}
 
         {/* Tab Navigation & Search Bar */}
-        <div className={`p-4 rounded-2xl mb-6 border transition-all ${
-          isLight
-            ? 'bg-white border-black/[0.08] shadow-2xs'
-            : 'bg-[#121214] border-zinc-800'
-        }`}>
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-            
-            {/* Tab Selector Pills */}
-            <div className={`flex items-center p-1 rounded-xl gap-1 overflow-x-auto border ${
-              isLight ? 'bg-gray-100/80 border-black/[0.06]' : 'bg-zinc-900 border-zinc-800'
-            }`}>
-              {/* Pending Tab */}
-              <button
-                onClick={() => setActiveTab('pending')}
-                className={`px-3 py-1.5 text-xs rounded-lg transition-all flex items-center gap-1.5 cursor-pointer whitespace-nowrap ${
-                  activeTab === 'pending'
-                    ? isLight ? 'bg-white text-gray-900 font-bold shadow-2xs' : 'bg-emerald-500 text-black font-bold'
-                    : isLight ? 'text-gray-600 hover:text-gray-900 font-medium' : 'text-white/60 hover:text-white font-medium'
-                }`}
-              >
-                <span>Pending Approvals</span>
-                <span className={`px-1.5 py-0.2 rounded-full text-[10px] font-bold ${
-                  activeTab === 'pending'
+        <div className="mb-6 space-y-3.5">
+          {/* Tab Selector Pills - Scaled, Full-Width, No Side Swipe */}
+          <div className={`w-full flex items-center p-1 rounded-xl border gap-1 ${
+            isLight ? 'bg-gray-100/80 border-black/[0.06]' : 'bg-zinc-900 border-zinc-800'
+          }`}>
+            {/* Pending Tab */}
+            <button
+              onClick={() => setActiveTab('pending')}
+              className={`flex-1 min-w-0 px-2 sm:px-3 py-1.5 text-xs rounded-lg transition-all flex items-center justify-center gap-1.5 cursor-pointer text-center ${
+                activeTab === 'pending'
+                  ? isLight ? 'bg-white text-gray-900 font-bold shadow-2xs' : 'bg-emerald-500 text-black font-bold'
+                  : isLight ? 'text-gray-600 hover:text-gray-900 font-medium' : 'text-white/60 hover:text-white font-medium'
+              }`}
+              title="Pending Approvals"
+            >
+              <span className="truncate hidden sm:inline">Pending Approvals</span>
+              <span className="truncate sm:hidden">Pending</span>
+              <span className={`px-1.5 py-0.2 rounded-full text-[10px] font-bold shrink-0 ${
+                activeTab === 'pending'
+                  ? isLight ? 'bg-emerald-100 text-emerald-900' : 'bg-black/20 text-black'
+                  : isLight ? 'bg-gray-200 text-gray-700' : 'bg-white/10 text-white/70'
+              }`}>
+                {stats.pending || 0}
+              </span>
+            </button>
+
+            {/* Users Tab */}
+            <button
+              onClick={() => setActiveTab('users')}
+              className={`flex-1 min-w-0 px-2 sm:px-3 py-1.5 text-xs rounded-lg transition-all flex items-center justify-center gap-1.5 cursor-pointer text-center ${
+                activeTab === 'users'
+                  ? isLight ? 'bg-white text-gray-900 font-bold shadow-2xs' : 'bg-emerald-500 text-black font-bold'
+                  : isLight ? 'text-gray-600 hover:text-gray-900 font-medium' : 'text-white/60 hover:text-white font-medium'
+              }`}
+              title="Active Officers"
+            >
+              <span className="truncate hidden sm:inline">Active Officers</span>
+              <span className="truncate sm:hidden">Officers</span>
+              <span className={`px-1.5 py-0.2 rounded-full text-[10px] font-bold shrink-0 ${
+                activeTab === 'users'
+                  ? isLight ? 'bg-emerald-100 text-emerald-900' : 'bg-black/20 text-black'
+                  : isLight ? 'bg-gray-200 text-gray-700' : 'bg-white/10 text-white/70'
+              }`}>
+                {users.length}
+              </span>
+            </button>
+
+            {/* Signatory Roster Tab */}
+            <button
+              onClick={() => setActiveTab('roster')}
+              className={`flex-1 min-w-0 px-2 sm:px-3 py-1.5 text-xs rounded-lg transition-all flex items-center justify-center gap-1.5 cursor-pointer text-center ${
+                activeTab === 'roster'
+                  ? isLight ? 'bg-white text-gray-900 font-bold shadow-2xs' : 'bg-emerald-500 text-black font-bold'
+                  : isLight ? 'text-gray-600 hover:text-gray-900 font-medium' : 'text-white/60 hover:text-white font-medium'
+              }`}
+              title="Signatory Roster"
+            >
+              <FileSpreadsheet className="w-3.5 h-3.5 shrink-0 hidden md:block" />
+              <span className="truncate hidden sm:inline">Signatory Roster</span>
+              <span className="truncate sm:hidden">Roster</span>
+              {signatoriesList.length > 0 && (
+                <span className={`px-1.5 py-0.2 rounded-full text-[10px] font-bold shrink-0 ${
+                  activeTab === 'roster'
                     ? isLight ? 'bg-emerald-100 text-emerald-900' : 'bg-black/20 text-black'
                     : isLight ? 'bg-gray-200 text-gray-700' : 'bg-white/10 text-white/70'
                 }`}>
-                  {stats.pending || 0}
+                  {signatoriesList.filter(s => s.is_active).length}
                 </span>
-              </button>
-
-              {/* Users Tab */}
-              <button
-                onClick={() => setActiveTab('users')}
-                className={`px-3 py-1.5 text-xs rounded-lg transition-all flex items-center gap-1.5 cursor-pointer whitespace-nowrap ${
-                  activeTab === 'users'
-                    ? isLight ? 'bg-white text-gray-900 font-bold shadow-2xs' : 'bg-emerald-500 text-black font-bold'
-                    : isLight ? 'text-gray-600 hover:text-gray-900 font-medium' : 'text-white/60 hover:text-white font-medium'
-                }`}
-              >
-                <span>Active Officers</span>
-                <span className={`px-1.5 py-0.2 rounded-full text-[10px] font-bold ${
-                  activeTab === 'users'
-                    ? isLight ? 'bg-emerald-100 text-emerald-900' : 'bg-black/20 text-black'
-                    : isLight ? 'bg-gray-200 text-gray-700' : 'bg-white/10 text-white/70'
-                }`}>
-                  {users.length}
-                </span>
-              </button>
-
-              {/* Activity & Access Logs Tab */}
-              <button
-                onClick={() => setActiveTab('audit')}
-                className={`px-3 py-1.5 text-xs rounded-lg transition-all flex items-center gap-1.5 cursor-pointer whitespace-nowrap ${
-                  activeTab === 'audit'
-                    ? isLight ? 'bg-white text-gray-900 font-bold shadow-2xs' : 'bg-emerald-500 text-black font-bold'
-                    : isLight ? 'text-gray-600 hover:text-gray-900 font-medium' : 'text-white/60 hover:text-white font-medium'
-                }`}
-              >
-                <Activity className="w-3.5 h-3.5" />
-                <span>Activity &amp; Access Logs</span>
-              </button>
-
-              {/* Approved Log Tab */}
-              <button
-                onClick={() => setActiveTab('approved')}
-                className={`px-3 py-1.5 text-xs rounded-lg transition-all flex items-center gap-1.5 cursor-pointer whitespace-nowrap ${
-                  activeTab === 'approved'
-                    ? isLight ? 'bg-white text-gray-900 font-bold shadow-2xs' : 'bg-emerald-500 text-black font-bold'
-                    : isLight ? 'text-gray-600 hover:text-gray-900 font-medium' : 'text-white/60 hover:text-white font-medium'
-                }`}
-              >
-                <span>Approved</span>
-                <span className={`px-1.5 py-0.2 rounded-full text-[10px] font-bold ${
-                  activeTab === 'approved'
-                    ? isLight ? 'bg-emerald-100 text-emerald-900' : 'bg-black/20 text-black'
-                    : isLight ? 'bg-gray-200 text-gray-700' : 'bg-white/10 text-white/70'
-                }`}>
-                  {stats.approved}
-                </span>
-              </button>
-
-              {/* Declined Log Tab */}
-              <button
-                onClick={() => setActiveTab('rejected')}
-                className={`px-3 py-1.5 text-xs rounded-lg transition-all flex items-center gap-1.5 cursor-pointer whitespace-nowrap ${
-                  activeTab === 'rejected'
-                    ? isLight ? 'bg-white text-gray-900 font-bold shadow-2xs' : 'bg-emerald-500 text-black font-bold'
-                    : isLight ? 'text-gray-600 hover:text-gray-900 font-medium' : 'text-white/60 hover:text-white font-medium'
-                }`}
-              >
-                <span>Declined</span>
-                <span className={`px-1.5 py-0.2 rounded-full text-[10px] font-bold ${
-                  activeTab === 'rejected'
-                    ? isLight ? 'bg-emerald-100 text-emerald-900' : 'bg-black/20 text-black'
-                    : isLight ? 'bg-gray-200 text-gray-700' : 'bg-white/10 text-white/70'
-                }`}>
-                  {stats.rejected}
-                </span>
-              </button>
-            </div>
-
-            {/* Controls: Filtering, Limit & Search (Pin #3) */}
-            <div className="flex items-center gap-2 flex-wrap">
-              {/* Category-specific filters for Users tab */}
-              {activeTab === 'users' && (
-                <>
-                  <select
-                    value={roleFilter}
-                    onChange={(e) => setRoleFilter(e.target.value)}
-                    className={`text-xs font-semibold rounded-xl px-2.5 py-2 cursor-pointer border ${
-                      isLight
-                        ? 'bg-gray-50 border-black/[0.08] text-gray-800'
-                        : 'bg-[#121214] border-zinc-800 text-zinc-200'
-                    }`}
-                    title="Filter by Role"
-                  >
-                    <option value="all">All Roles</option>
-                    {ROLE_OPTIONS.map((opt) => (
-                      <option key={opt.value} value={opt.value} className={isLight ? 'bg-white text-gray-900' : 'bg-[#121214] text-zinc-100'}>
-                        {opt.label}
-                      </option>
-                    ))}
-                  </select>
-
-                  <select
-                    value={statusFilter}
-                    onChange={(e) => setStatusFilter(e.target.value)}
-                    className={`text-xs font-semibold rounded-xl px-2.5 py-2 cursor-pointer border ${
-                      isLight
-                        ? 'bg-gray-50 border-black/[0.08] text-gray-800'
-                        : 'bg-[#121214] border-zinc-800 text-zinc-200'
-                    }`}
-                    title="Filter by Account Status"
-                  >
-                    <option value="all">All Status</option>
-                    <option value="active">Active Only</option>
-                    <option value="suspended">Suspended Only</option>
-                  </select>
-                </>
               )}
+            </button>
 
-              {/* Rows per page selector */}
-              <div className="flex items-center gap-1.5">
-                <select
-                  value={pageSize}
-                  onChange={(e) => setPageSize(Number(e.target.value))}
-                  className={`text-xs font-semibold rounded-xl px-2.5 py-2 cursor-pointer border ${
-                    isLight
-                      ? 'bg-gray-50 border-black/[0.08] text-gray-800'
-                      : 'bg-[#121214] border-zinc-800 text-zinc-200'
-                  }`}
-                  title="Rows per page limit"
-                >
-                  <option value={10}>10 rows</option>
-                  <option value={25}>25 rows</option>
-                  <option value={50}>50 rows</option>
-                  <option value={100}>100 rows</option>
-                </select>
+            {/* Activity & Access Logs Tab */}
+            <button
+              onClick={() => setActiveTab('audit')}
+              className={`flex-1 min-w-0 px-2 sm:px-3 py-1.5 text-xs rounded-lg transition-all flex items-center justify-center gap-1.5 cursor-pointer text-center ${
+                activeTab === 'audit'
+                  ? isLight ? 'bg-white text-gray-900 font-bold shadow-2xs' : 'bg-emerald-500 text-black font-bold'
+                  : isLight ? 'text-gray-600 hover:text-gray-900 font-medium' : 'text-white/60 hover:text-white font-medium'
+              }`}
+              title="Activity & Access Logs"
+            >
+              <Activity className="w-3.5 h-3.5 shrink-0 hidden md:block" />
+              <span className="truncate hidden xl:inline">Activity &amp; Access Logs</span>
+              <span className="truncate hidden sm:inline xl:hidden">Activity Logs</span>
+              <span className="truncate sm:hidden">Logs</span>
+            </button>
+
+            {/* Approved Log Tab */}
+            <button
+              onClick={() => setActiveTab('approved')}
+              className={`flex-1 min-w-0 px-2 sm:px-3 py-1.5 text-xs rounded-lg transition-all flex items-center justify-center gap-1.5 cursor-pointer text-center ${
+                activeTab === 'approved'
+                  ? isLight ? 'bg-white text-gray-900 font-bold shadow-2xs' : 'bg-emerald-500 text-black font-bold'
+                  : isLight ? 'text-gray-600 hover:text-gray-900 font-medium' : 'text-white/60 hover:text-white font-medium'
+              }`}
+              title="Approved Requests"
+            >
+              <span className="truncate">Approved</span>
+              <span className={`px-1.5 py-0.2 rounded-full text-[10px] font-bold shrink-0 ${
+                activeTab === 'approved'
+                  ? isLight ? 'bg-emerald-100 text-emerald-900' : 'bg-black/20 text-black'
+                  : isLight ? 'bg-gray-200 text-gray-700' : 'bg-white/10 text-white/70'
+              }`}>
+                {stats.approved}
+              </span>
+            </button>
+
+            {/* Declined Log Tab */}
+            <button
+              onClick={() => setActiveTab('rejected')}
+              className={`flex-1 min-w-0 px-2 sm:px-3 py-1.5 text-xs rounded-lg transition-all flex items-center justify-center gap-1.5 cursor-pointer text-center ${
+                activeTab === 'rejected'
+                  ? isLight ? 'bg-white text-gray-900 font-bold shadow-2xs' : 'bg-emerald-500 text-black font-bold'
+                  : isLight ? 'text-gray-600 hover:text-gray-900 font-medium' : 'text-white/60 hover:text-white font-medium'
+              }`}
+              title="Declined Requests"
+            >
+              <span className="truncate">Declined</span>
+              <span className={`px-1.5 py-0.2 rounded-full text-[10px] font-bold shrink-0 ${
+                activeTab === 'rejected'
+                  ? isLight ? 'bg-emerald-100 text-emerald-900' : 'bg-black/20 text-black'
+                  : isLight ? 'bg-gray-200 text-gray-700' : 'bg-white/10 text-white/70'
+              }`}>
+                {stats.rejected}
+              </span>
+            </button>
+          </div>
+
+          {/* Controls: Filtering, Limit & Search */}
+          {activeTab !== 'roster' && (
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              {/* Category-specific filters for Users tab & Page Size */}
+              <div className="flex items-center gap-2 flex-wrap">
+                {activeTab === 'users' && (
+                  <>
+                    <select
+                      value={roleFilter}
+                      onChange={(e) => setRoleFilter(e.target.value)}
+                      className={`text-xs font-semibold rounded-xl px-2.5 py-2 cursor-pointer border ${
+                        isLight
+                          ? 'bg-white border-black/[0.08] text-gray-800 shadow-2xs'
+                          : 'bg-[#121214] border-zinc-800 text-zinc-200'
+                      }`}
+                      title="Filter by Role"
+                    >
+                      <option value="all">All Roles</option>
+                      {ROLE_OPTIONS.map((opt) => (
+                        <option key={opt.value} value={opt.value} className={isLight ? 'bg-white text-gray-900' : 'bg-[#121214] text-zinc-100'}>
+                          {opt.label}
+                        </option>
+                      ))}
+                    </select>
+
+                    <select
+                      value={statusFilter}
+                      onChange={(e) => setStatusFilter(e.target.value)}
+                      className={`text-xs font-semibold rounded-xl px-2.5 py-2 cursor-pointer border ${
+                        isLight
+                          ? 'bg-white border-black/[0.08] text-gray-800 shadow-2xs'
+                          : 'bg-[#121214] border-zinc-800 text-zinc-200'
+                      }`}
+                      title="Filter by Account Status"
+                    >
+                      <option value="all">All Status</option>
+                      <option value="active">Active Only</option>
+                      <option value="suspended">Suspended Only</option>
+                    </select>
+                  </>
+                )}
+
+                {/* Rows per page selector */}
+                <div className="flex items-center gap-1.5">
+                  <select
+                    value={pageSize}
+                    onChange={(e) => setPageSize(Number(e.target.value))}
+                    className={`text-xs font-semibold rounded-xl px-2.5 py-2 cursor-pointer border ${
+                      isLight
+                        ? 'bg-white border-black/[0.08] text-gray-800 shadow-2xs'
+                        : 'bg-[#121214] border-zinc-800 text-zinc-200'
+                    }`}
+                    title="Rows per page limit"
+                  >
+                    <option value={10}>10 rows</option>
+                    <option value={25}>25 rows</option>
+                    <option value={50}>50 rows</option>
+                    <option value={100}>100 rows</option>
+                  </select>
+                </div>
               </div>
 
               {/* Search Input */}
-              <div className="relative min-w-[200px] flex-1 sm:flex-initial">
+              <div className="relative min-w-[220px] sm:w-80">
                 <Search className={`w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none ${
                   isLight ? 'text-gray-400' : 'text-zinc-500'
                 }`} />
@@ -770,14 +985,13 @@ export default function AdminPage() {
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className={`w-full text-xs rounded-xl pl-9 pr-3.5 py-2 transition-all select-text border focus:outline-none focus:ring-1 ${
                     isLight
-                      ? 'bg-gray-50 border-black/[0.08] text-gray-900 placeholder:text-gray-400 focus:bg-white focus:border-emerald-600 focus:ring-emerald-500/20'
+                      ? 'bg-white border-black/[0.08] text-gray-900 placeholder:text-gray-400 shadow-2xs focus:border-emerald-600 focus:ring-emerald-500/20'
                       : 'bg-[#121214] border-zinc-800 text-white placeholder:text-zinc-500 focus:border-emerald-400 focus:ring-emerald-500/30'
                   }`}
                 />
               </div>
             </div>
-
-          </div>
+          )}
         </div>
 
         {/* Tab 1: Pending Approvals View */}
@@ -949,9 +1163,6 @@ export default function AdminPage() {
             }`}>
               <div>
                 <h3 className="text-sm font-bold">Authorized Accounts &amp; Access Controls</h3>
-                <p className={`text-xs ${isLight ? 'text-gray-500' : 'text-zinc-400'}`}>
-                  Manage status (Active vs Suspended), role assignments, and safe account lifecycle
-                </p>
               </div>
               <div className="flex items-center gap-2">
                 <span className={`text-xs font-semibold px-2.5 py-1 rounded-lg ${
@@ -1431,6 +1642,320 @@ export default function AdminPage() {
           </div>
         )}
 
+        {/* Tab 6: Signatory Roster Management */}
+        {activeTab === 'roster' && (
+          <div className="space-y-6">
+            {/* Roster Controls & Term Selector Card */}
+            <div className={`p-5 rounded-2xl border flex flex-col md:flex-row md:items-center justify-between gap-4 transition-all ${
+              isLight ? 'bg-white border-black/[0.08] shadow-2xs' : 'bg-[#121214] border-zinc-800'
+            }`}>
+              <div className="flex flex-col sm:flex-row sm:items-center gap-3 flex-wrap">
+                <div className="flex items-center gap-2">
+                  <span className="text-xs font-bold text-zinc-500 dark:text-zinc-400">Target Term:</span>
+                  <select
+                    value={`${selectedTerm.academic_year}|${selectedTerm.semester}`}
+                    onChange={(e) => {
+                      const [ay, sem] = e.target.value.split('|');
+                      setSelectedTerm({ academic_year: ay, semester: sem });
+                      fetchRosterData(ay, sem);
+                    }}
+                    disabled={isRosterLoading || isRosterSaving}
+                    className={`text-xs font-bold rounded-xl px-3 py-2 cursor-pointer border ${
+                      isLight
+                        ? 'bg-gray-50 border-black/[0.08] text-gray-900 focus:bg-white'
+                        : 'bg-zinc-900 border-zinc-800 text-zinc-100 focus:border-emerald-500'
+                    }`}
+                  >
+                    {rosterSemesters.map((s) => (
+                      <option key={s.id || `${s.academic_year}-${s.semester}`} value={`${s.academic_year}|${s.semester}`}>
+                        {s.label || `AY ${s.academic_year} • ${s.semester}`} {s.is_active ? ' (Active)' : ''}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                {hasRosterChanges && (
+                  <span className={`text-[11px] font-bold px-2.5 py-1 rounded-full flex items-center gap-1.5 ${
+                    isLight ? 'bg-amber-100 text-amber-900' : 'bg-amber-500/20 text-amber-300'
+                  }`}>
+                    <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />
+                    Unsaved Changes
+                  </span>
+                )}
+              </div>
+
+              <div className="flex items-center gap-2 flex-wrap">
+                {/* Clone from Term */}
+                <Button
+                  type="button"
+                  variant="secondary"
+                  size="sm"
+                  onClick={() => {
+                    const other = rosterSemesters.find(
+                      (s) => !(s.academic_year === selectedTerm.academic_year && s.semester === selectedTerm.semester)
+                    );
+                    if (other) {
+                      setCloneSourceTerm({ academic_year: other.academic_year, semester: other.semester });
+                    }
+                    setIsCloneModalOpen(true);
+                  }}
+                  disabled={isRosterLoading || isRosterSaving || rosterSemesters.length < 2}
+                  className="flex items-center gap-1.5 text-xs font-semibold"
+                >
+                  <Copy className="w-3.5 h-3.5" />
+                  <span>Clone from Term</span>
+                </Button>
+
+                {/* Reload */}
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => fetchRosterData(selectedTerm.academic_year, selectedTerm.semester)}
+                  disabled={isRosterLoading || isRosterSaving}
+                  className="flex items-center gap-1 text-xs"
+                  title="Reload from database"
+                >
+                  <RotateCcw className={`w-3.5 h-3.5 ${isRosterLoading ? 'animate-spin' : ''}`} />
+                  <span>Reload</span>
+                </Button>
+
+                {/* Save Roster Button */}
+                <Button
+                  type="button"
+                  variant="primary"
+                  size="sm"
+                  onClick={handleSaveRoster}
+                  loading={isRosterSaving}
+                  disabled={isRosterLoading || isRosterSaving || signatoriesList.length === 0}
+                  className="flex items-center gap-1.5 text-xs font-bold"
+                >
+                  <Save className="w-3.5 h-3.5" />
+                  <span>Save Roster</span>
+                </Button>
+              </div>
+            </div>
+
+            {/* Empty State */}
+            {signatoriesList.length === 0 && !isRosterLoading && (
+              <div className={`p-10 rounded-2xl border text-center ${
+                isLight ? 'bg-white border-black/[0.08]' : 'bg-[#121214] border-zinc-800'
+              }`}>
+                <div className="w-12 h-12 rounded-2xl mx-auto mb-3 flex items-center justify-center bg-emerald-500/10 text-emerald-500">
+                  <FileSpreadsheet className="w-6 h-6" />
+                </div>
+                <h4 className="text-base font-bold mb-1">No Signatories Configured</h4>
+                <p className={`text-xs max-w-md mx-auto mb-5 ${isLight ? 'text-gray-500' : 'text-zinc-400'}`}>
+                  No official signatories have been saved for {selectedTerm.academic_year} {selectedTerm.semester} yet. Initialize the standard 8-tier PDM institutional template or copy from another term.
+                </p>
+                <div className="flex items-center justify-center gap-3 flex-wrap">
+                  <Button
+                    type="button"
+                    variant="primary"
+                    size="sm"
+                    onClick={handleInitializeFromTemplate}
+                    className="text-xs font-bold flex items-center gap-1.5"
+                  >
+                    <Check className="w-3.5 h-3.5" />
+                    <span>Initialize Standard 8-Tier Roster</span>
+                  </Button>
+                  {rosterSemesters.length > 1 && (
+                    <Button
+                      type="button"
+                      variant="secondary"
+                      size="sm"
+                      onClick={() => setIsCloneModalOpen(true)}
+                      className="text-xs font-semibold flex items-center gap-1.5"
+                    >
+                      <Copy className="w-3.5 h-3.5" />
+                      <span>Clone from Another Term</span>
+                    </Button>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* Loading Indicator */}
+            {isRosterLoading && (
+              <div className={`p-12 rounded-2xl border text-center ${
+                isLight ? 'bg-white border-black/[0.08]' : 'bg-[#121214] border-zinc-800'
+              }`}>
+                <Loader2 className="w-6 h-6 animate-spin mx-auto text-emerald-500 mb-2" />
+                <p className="text-xs font-semibold text-zinc-500">Loading semester signatories...</p>
+              </div>
+            )}
+
+            {/* Roster Categories */}
+            {signatoriesList.length > 0 && !isRosterLoading && (
+              <div className="space-y-6">
+                {[
+                  {
+                    category: 'OFFICER',
+                    title: 'Executive Board Signatories (LITE Officers)',
+                    subtitle: 'Prepared by (Treasurer), Reviewed by (Auditor), Noted by (President & Vice President)',
+                    icon: Users,
+                    color: 'emerald',
+                  },
+                  {
+                    category: 'ADVISER',
+                    title: 'Faculty Club Advisers',
+                    subtitle: 'Dual joint endorsement (Adviser 1 & 2) required for official liquidation and event proposals',
+                    icon: Award,
+                    color: 'indigo',
+                  },
+                  {
+                    category: 'ADMIN',
+                    title: 'College Leadership Signatories',
+                    subtitle: 'BSIT Departmental clearance (Program Director) and College of Computer Studies Dean approval',
+                    icon: Building,
+                    color: 'purple',
+                  },
+                ].map((group) => {
+                  const items = signatoriesList.filter((s) => s.category === group.category);
+                  if (items.length === 0) return null;
+                  const GroupIcon = group.icon;
+
+                  return (
+                    <div
+                      key={group.category}
+                      className={`rounded-2xl overflow-hidden border ${
+                        isLight ? 'bg-white border-black/[0.08]' : 'bg-[#121214] border-zinc-800'
+                      }`}
+                    >
+                      <div className={`p-4 border-b flex items-center justify-between ${
+                        isLight ? 'border-black/[0.06] bg-gray-50/70' : 'border-zinc-800 bg-zinc-900/60'
+                      }`}>
+                        <div className="flex items-center gap-3">
+                          <div className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 ${
+                            group.color === 'emerald'
+                              ? isLight ? 'bg-emerald-100 text-emerald-800' : 'bg-emerald-500/20 text-emerald-300'
+                              : group.color === 'indigo'
+                              ? isLight ? 'bg-indigo-100 text-indigo-800' : 'bg-indigo-500/20 text-indigo-300'
+                              : isLight ? 'bg-purple-100 text-purple-800' : 'bg-purple-500/20 text-purple-300'
+                          }`}>
+                            <GroupIcon className="w-4 h-4" />
+                          </div>
+                          <div>
+                            <h3 className="text-sm font-bold">{group.title}</h3>
+                            <p className={`text-xs ${isLight ? 'text-gray-500' : 'text-zinc-400'}`}>
+                              {group.subtitle}
+                            </p>
+                          </div>
+                        </div>
+
+                        <span className={`text-[11px] font-bold px-2.5 py-0.5 rounded-lg ${
+                          isLight ? 'bg-gray-200/80 text-gray-700' : 'bg-white/10 text-zinc-300'
+                        }`}>
+                          {items.length} Positions
+                        </span>
+                      </div>
+
+                      {/* Header for table grid on desktop */}
+                      <div className="hidden lg:grid grid-cols-12 px-5 py-2.5 text-[10px] font-bold uppercase tracking-wider text-zinc-500 dark:text-zinc-400 bg-zinc-50/70 dark:bg-zinc-900/40 border-b border-black/[0.06] dark:border-zinc-800">
+                        <div className="col-span-3">Role Identifier</div>
+                        <div className="col-span-4">Full Name (Official Credentials)</div>
+                        <div className="col-span-3">Institutional Position Title</div>
+                        <div className="col-span-2 text-right">Routing Status</div>
+                      </div>
+
+                      {/* Rows */}
+                      <div className={`divide-y ${isLight ? 'divide-black/[0.06]' : 'divide-white/[0.06]'}`}>
+                        {items.map((sig) => {
+                          const isInactive = !sig.is_active;
+
+                          return (
+                            <div
+                              key={sig.role_key}
+                              className={`p-4 lg:px-5 lg:py-3.5 flex flex-col lg:grid lg:grid-cols-12 items-start lg:items-center gap-3 lg:gap-4 transition-colors ${
+                                isLight ? 'hover:bg-gray-50/80' : 'hover:bg-white/[0.02]'
+                              } ${isInactive ? (isLight ? 'opacity-50 bg-gray-50/40' : 'opacity-40 bg-zinc-900/20') : ''}`}
+                            >
+                              {/* Role Key Badge (col-span-3) */}
+                              <div className="col-span-3 flex items-center gap-2 w-full">
+                                <span className="font-mono text-[11px] font-bold px-2.5 py-1 rounded-md uppercase bg-zinc-100 dark:bg-zinc-800 text-zinc-800 dark:text-zinc-200 border border-zinc-200 dark:border-zinc-700">
+                                  {sig.role_key}
+                                </span>
+                                <span className="text-[10px] font-medium text-zinc-400">
+                                  #{sig.sort_order}
+                                </span>
+                              </div>
+
+                              {/* Full Name Input (col-span-4) */}
+                              <div className="col-span-4 w-full">
+                                <label className="lg:hidden block text-[10px] font-bold text-zinc-400 uppercase mb-1">
+                                  Full Name
+                                </label>
+                                <input
+                                  type="text"
+                                  value={sig.name || ''}
+                                  onChange={(e) => handleSignatoryChange(sig.role_key, 'name', e.target.value)}
+                                  placeholder="e.g. LASTNAME, FIRSTNAME M.I."
+                                  className={`w-full text-xs font-bold rounded-xl px-3 py-2 border select-text transition-all focus:outline-none focus:ring-1 ${
+                                    isLight
+                                      ? 'bg-white border-zinc-300 text-zinc-900 focus:border-emerald-600 focus:ring-emerald-500/20'
+                                      : 'bg-zinc-900 border-zinc-700 text-zinc-100 focus:border-emerald-500 focus:ring-emerald-500/30'
+                                  }`}
+                                />
+                              </div>
+
+                              {/* Position Title Input (col-span-3) */}
+                              <div className="col-span-3 w-full">
+                                <label className="lg:hidden block text-[10px] font-bold text-zinc-400 uppercase mb-1">
+                                  Institutional Title
+                                </label>
+                                <input
+                                  type="text"
+                                  value={sig.position_title || ''}
+                                  onChange={(e) => handleSignatoryChange(sig.role_key, 'position_title', e.target.value)}
+                                  placeholder="e.g. LITE President"
+                                  className={`w-full text-xs font-medium rounded-xl px-3 py-2 border select-text transition-all focus:outline-none focus:ring-1 ${
+                                    isLight
+                                      ? 'bg-white border-zinc-300 text-zinc-900 focus:border-emerald-600 focus:ring-emerald-500/20'
+                                      : 'bg-zinc-900 border-zinc-700 text-zinc-100 focus:border-emerald-500 focus:ring-emerald-500/30'
+                                  }`}
+                                />
+                              </div>
+
+                              {/* Active Toggle Switch (col-span-2) */}
+                              <div className="col-span-2 flex items-center justify-between lg:justify-end gap-2 w-full">
+                                <span className="lg:hidden text-xs font-semibold text-zinc-500">
+                                  Routing:
+                                </span>
+                                <button
+                                  type="button"
+                                  onClick={() => handleToggleSignatoryActive(sig.role_key)}
+                                  className={`px-3 py-1 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
+                                    sig.is_active
+                                      ? isLight
+                                        ? 'bg-emerald-100 text-emerald-800 hover:bg-emerald-200'
+                                        : 'bg-emerald-500/20 text-emerald-300 hover:bg-emerald-500/30'
+                                      : isLight
+                                      ? 'bg-gray-100 text-gray-500 hover:bg-gray-200'
+                                      : 'bg-zinc-800 text-zinc-500 hover:bg-zinc-700'
+                                  }`}
+                                >
+                                  {sig.is_active ? (
+                                    <>
+                                      <Check className="w-3 h-3" />
+                                      <span>Active</span>
+                                    </>
+                                  ) : (
+                                    <span>Excluded</span>
+                                  )}
+                                </button>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        )}
+
       </main>
 
       {/* Safe Account Deletion Modal (Financial Ledger Dependency Check) */}
@@ -1595,6 +2120,91 @@ export default function AdminPage() {
             </div>
           </div>
         )}
+      </Modal>
+
+      {/* Clone Signatories Across Semesters Modal */}
+      <Modal
+        isOpen={isCloneModalOpen}
+        onClose={() => setIsCloneModalOpen(false)}
+        title={
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 border bg-indigo-500/10 border-indigo-500/20 text-indigo-600 dark:text-indigo-400">
+              <Copy className="w-5 h-5" />
+            </div>
+            <div>
+              <h3 className="text-base font-bold text-zinc-950 dark:text-zinc-50">Clone Signatories</h3>
+              <p className="text-xs text-zinc-500 dark:text-zinc-400">
+                Copy existing leadership cohort into target term
+              </p>
+            </div>
+          </div>
+        }
+        maxWidth="md"
+      >
+        <div className="p-6">
+          <p className="text-xs mb-4 font-medium text-zinc-600 dark:text-zinc-400">
+            Select the source semester whose signatories you want to replicate into <strong className="text-zinc-900 dark:text-zinc-100">{selectedTerm.academic_year} {selectedTerm.semester}</strong>.
+          </p>
+
+          <div className="space-y-4 mb-5">
+            <div>
+              <label className="block text-xs font-bold text-zinc-500 dark:text-zinc-400 mb-1.5">
+                Copy From (Source Semester):
+              </label>
+              <select
+                value={`${cloneSourceTerm.academic_year}|${cloneSourceTerm.semester}`}
+                onChange={(e) => {
+                  const [ay, sem] = e.target.value.split('|');
+                  setCloneSourceTerm({ academic_year: ay, semester: sem });
+                }}
+                className={`w-full text-xs font-bold rounded-xl px-3 py-2.5 border ${
+                  isLight
+                    ? 'bg-gray-50 border-zinc-200 text-gray-900'
+                    : 'bg-zinc-900 border-zinc-800 text-zinc-100'
+                }`}
+              >
+                {rosterSemesters
+                  .filter((s) => !(s.academic_year === selectedTerm.academic_year && s.semester === selectedTerm.semester))
+                  .map((s) => (
+                    <option key={s.id || `${s.academic_year}-${s.semester}`} value={`${s.academic_year}|${s.semester}`}>
+                      {s.label || `AY ${s.academic_year} • ${s.semester}`}
+                    </option>
+                  ))}
+              </select>
+            </div>
+
+            <div className={`p-3 rounded-xl border text-xs ${
+              isLight ? 'bg-amber-50/60 border-amber-200 text-amber-900' : 'bg-amber-950/20 border-amber-800/40 text-amber-300'
+            }`}>
+              <div className="flex items-center gap-1.5 font-bold mb-1">
+                <AlertTriangle className="w-3.5 h-3.5" />
+                <span>Notice</span>
+              </div>
+              Cloning will overwrite the signatories for {selectedTerm.academic_year} {selectedTerm.semester} with the source cohort. This action is recorded in audit logs.
+            </div>
+          </div>
+
+          <div className="flex items-center justify-end gap-2.5">
+            <Button
+              type="button"
+              variant="ghost"
+              onClick={() => setIsCloneModalOpen(false)}
+            >
+              Cancel
+            </Button>
+            <Button
+              type="button"
+              variant="primary"
+              onClick={handleCloneRoster}
+              loading={isCloning}
+              disabled={isCloning || !cloneSourceTerm.academic_year}
+              className="flex items-center gap-1.5"
+            >
+              <Copy className="w-3.5 h-3.5" />
+              <span>Clone Signatories</span>
+            </Button>
+          </div>
+        </div>
       </Modal>
 
     </>
