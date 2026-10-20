@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { createClient, createAdminClient } from '@/lib/supabase/server';
 import { isSuperAdminEmail } from '@/lib/config/admin';
 import { getClientIp } from '@/lib/security/ratelimit';
+import { hasPermission, ACTION_KEYS } from '@/lib/auth/permissions';
 
 // POST /api/transactions — Create a transaction directly in the ledger
 export async function POST(req) {
@@ -30,7 +31,7 @@ export async function POST(req) {
     let profile = null;
     const { data: profByAuth } = await queryClient
       .from('profiles')
-      .select('id, status, role, full_name, email')
+      .select('id, status, role, full_name, email, permissions')
       .eq('auth_user_id', user.id)
       .maybeSingle();
 
@@ -39,7 +40,7 @@ export async function POST(req) {
     } else if (email) {
       const { data: profByEmail } = await queryClient
         .from('profiles')
-        .select('id, status, role, full_name, email')
+        .select('id, status, role, full_name, email, permissions')
         .eq('email', email)
         .maybeSingle();
       profile = profByEmail;
@@ -66,6 +67,23 @@ export async function POST(req) {
       event_name,
       receipt_urls = [],
     } = body;
+
+    // Granular action permission check
+    const isTxInflow = type === 'INFLOW';
+    const isTxAbono = Boolean(is_reimbursement);
+
+    let requiredAction = ACTION_KEYS.RECORD_OUTFLOW;
+    if (isTxInflow) {
+      requiredAction = ACTION_KEYS.RECORD_INFLOW;
+    } else if (isTxAbono) {
+      requiredAction = ACTION_KEYS.RECORD_ABONO;
+    }
+
+    if (!isSuperAdmin && !hasPermission(profile, requiredAction, email)) {
+      return NextResponse.json({
+        error: `Forbidden: You do not have permission to ${isTxInflow ? 'record inflows' : isTxAbono ? 'record abono/reimbursements' : 'record outflows'}.`,
+      }, { status: 403 });
+    }
 
     if (!title || typeof title !== 'string' || !title.trim()) {
       return NextResponse.json({ error: 'Transaction title is required.' }, { status: 400 });
@@ -121,7 +139,7 @@ export async function POST(req) {
       transaction_date: transaction_date || new Date().toISOString().split('T')[0],
       is_reimbursement: Boolean(is_reimbursement),
       reimbursement_recipient: is_reimbursement ? (reimbursement_recipient?.trim() || null) : null,
-      status: status || (is_reimbursement ? 'PENDING_REIMBURSEMENT' : 'COMPLETED'),
+      status: status || 'PENDING_AUDIT',
       event_name: event_name?.trim() || null,
     };
 

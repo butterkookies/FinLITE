@@ -3,6 +3,7 @@ import { verifyAdmin } from '@/lib/auth/admin-check';
 import { isSuperAdminEmail } from '@/lib/config/admin';
 import { createAdminClient } from '@/lib/supabase/server';
 import { sendAccountStatusChangedEmail } from '@/lib/email/mailer';
+import { ACTION_KEYS } from '@/lib/auth/permissions';
 
 const VALID_ROLES = ['treasurer', 'auditor', 'president', 'adviser', 'admin'];
 
@@ -52,7 +53,7 @@ export async function GET(req) {
     // List all users
     const { data: users, error } = await supabase
       .from('profiles')
-      .select('id, auth_user_id, full_name, first_name, last_name, email, role, status, contact_number, auth_provider, avatar_url, created_at, approved_at')
+      .select('id, auth_user_id, full_name, first_name, last_name, email, role, status, contact_number, auth_provider, avatar_url, permissions, created_at, approved_at')
       .order('created_at', { ascending: false });
 
     if (error) {
@@ -79,14 +80,14 @@ export async function PATCH(req) {
     }
 
     const body = await req.json();
-    const { userId, role, status } = body;
+    const { userId, role, status, permissions } = body;
 
     if (!userId) {
       return NextResponse.json({ error: 'User ID is required.' }, { status: 400 });
     }
 
-    if (!role && !status) {
-      return NextResponse.json({ error: 'Either new role or status must be specified.' }, { status: 400 });
+    if (!role && !status && permissions === undefined) {
+      return NextResponse.json({ error: 'Either new role, status, or permissions must be specified.' }, { status: 400 });
     }
 
     const supabase = auth.supabase;
@@ -160,6 +161,27 @@ export async function PATCH(req) {
       });
     }
 
+    // Granular permissions update validation & sanitization
+    if (permissions !== undefined && permissions !== null && typeof permissions === 'object') {
+      const sanitizedPermissions = {};
+      const validKeys = Object.values(ACTION_KEYS);
+      for (const key of validKeys) {
+        if (typeof permissions[key] === 'boolean') {
+          sanitizedPermissions[key] = permissions[key];
+        }
+      }
+      updates.permissions = sanitizedPermissions;
+      auditActions.push({
+        action: 'PERMISSIONS_UPDATE',
+        entity_type: 'profiles',
+        entity_id: userId,
+        details: {
+          target_email: existingUser.email,
+          permissions: sanitizedPermissions,
+        },
+      });
+    }
+
     // Apply updates
     const { data: updated, error: updateErr } = await supabase
       .from('profiles')
@@ -214,11 +236,16 @@ export async function PATCH(req) {
       }
     }
 
-    const message = updates.status && updates.role
-      ? `User updated: role is now ${updates.role.toUpperCase()} and status is ${updates.status.toUpperCase()}.`
-      : updates.status
-      ? `User status successfully updated to ${updates.status === 'approved' ? 'ACTIVE' : 'SUSPENDED'}.`
-      : `User role successfully updated to ${updates.role.toUpperCase()}.`;
+    let message = 'User details successfully updated.';
+    if (updates.permissions && !updates.role && !updates.status) {
+      message = 'User permissions successfully updated.';
+    } else if (updates.status && updates.role) {
+      message = `User updated: role is now ${updates.role.toUpperCase()} and status is ${updates.status.toUpperCase()}.`;
+    } else if (updates.status) {
+      message = `User status successfully updated to ${updates.status === 'approved' ? 'ACTIVE' : 'SUSPENDED'}.`;
+    } else if (updates.role) {
+      message = `User role successfully updated to ${updates.role.toUpperCase()}.`;
+    }
 
     return NextResponse.json({
       success: true,

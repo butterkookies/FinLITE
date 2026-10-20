@@ -26,7 +26,13 @@ export default function NewTransactionModal({
   onSave,
   categories = [],
   cashBalance = 0,
+  transactionToEdit = null,
+  userPermissions = null,
 }) {
+  const canInflow = userPermissions ? Boolean(userPermissions.record_inflow) : true;
+  const canOutflow = userPermissions ? Boolean(userPermissions.record_outflow) : true;
+  const canAbono = userPermissions ? Boolean(userPermissions.record_abono) : true;
+
   const [type, setType] = useState('OUTFLOW');
   const [title, setTitle] = useState('');
   const [amount, setAmount] = useState('');
@@ -82,22 +88,38 @@ export default function NewTransactionModal({
     }
   }, [type, categories]);
 
-  // Reset fields when opening modal
+  // Populate fields when opening modal (either blank or pre-filled for editing)
   useEffect(() => {
     if (isOpen) {
-      setTitle('');
-      setAmount('');
+      if (transactionToEdit) {
+        setTitle(transactionToEdit.title || '');
+        setAmount(transactionToEdit.amount !== undefined ? transactionToEdit.amount.toString() : '');
+        setType(transactionToEdit.type || (canOutflow ? 'OUTFLOW' : 'INFLOW'));
+        setCategoryName(transactionToEdit.category_name || transactionToEdit.categories?.name || 'Supplies & Materials');
+        setCategoryId(transactionToEdit.category_id || null);
+        setEventName(transactionToEdit.event_name || '');
+        setIsReimbursement(Boolean(transactionToEdit.is_reimbursement));
+        setRecipient(transactionToEdit.reimbursement_recipient || '');
+        const existingReceipts = transactionToEdit.transaction_receipts?.map((r) => r.public_url || r.file_url) ||
+          (transactionToEdit.receipt_url ? [transactionToEdit.receipt_url] : []);
+        setPreviewUrls(existingReceipts);
+        setReceiptFiles([]);
+      } else {
+        setType(canOutflow ? 'OUTFLOW' : 'INFLOW');
+        setTitle('');
+        setAmount('');
+        setEventName('');
+        setIsReimbursement(false);
+        setRecipient('');
+        setReceiptFiles([]);
+        setPreviewUrls([]);
+      }
       setAmountTouched(false);
       setFormErrors({});
       setShakeKey(0);
-      setEventName('');
-      setIsReimbursement(false);
-      setRecipient('');
-      setReceiptFiles([]);
-      setPreviewUrls([]);
       setCroppingIndex(null);
     }
-  }, [isOpen]);
+  }, [isOpen, transactionToEdit, canOutflow]);
 
   useEffect(() => {
     function handleClickOutside(event) {
@@ -219,21 +241,22 @@ export default function NewTransactionModal({
     }
 
     onSave({
-      title,
+      ...(transactionToEdit ? { id: transactionToEdit.id } : {}),
+      title: title.trim(),
       amount: parseFloat(amount),
       type,
       payment_method: 'CASH',
       category_id: categoryId,
       category_name: categoryName,
-      event_name: eventName,
+      event_name: eventName ? eventName.trim() : null,
       is_reimbursement: isReimbursement,
-      reimbursement_recipient: isReimbursement ? recipient : null,
+      reimbursement_recipient: isReimbursement ? recipient.trim() : null,
       receipt_url: previewUrls[0] || null,
       receipt_urls: previewUrls,
       receiptFile: receiptFiles[0] || null,
       receiptFiles: receiptFiles,
-      transaction_date: new Date().toISOString().split('T')[0],
-      status: isReimbursement ? 'PENDING_REIMBURSEMENT' : 'COMPLETED',
+      transaction_date: transactionToEdit?.transaction_date || new Date().toISOString().split('T')[0],
+      status: transactionToEdit?.status === 'FLAGGED' ? 'PENDING_AUDIT' : (transactionToEdit?.status || 'PENDING_AUDIT'),
     });
 
     onClose();
@@ -248,8 +271,16 @@ export default function NewTransactionModal({
         isOpen={isOpen}
         onClose={onClose}
         maxWidth="md"
-        title="Record Transaction"
-        description="Log an authorized inflow or disbursement"
+        title={
+          transactionToEdit
+            ? (transactionToEdit.status === 'FLAGGED' ? 'Revise Flagged Transaction' : 'Edit Transaction Details')
+            : 'Record Transaction'
+        }
+        description={
+          transactionToEdit
+            ? 'Update transaction details and replace or attach proof'
+            : 'Log an authorized inflow or disbursement'
+        }
         footer={
           <>
             <Button
@@ -266,7 +297,9 @@ export default function NewTransactionModal({
               variant="primary"
               size="sm"
             >
-              Save Record
+              {transactionToEdit
+                ? (transactionToEdit.status === 'FLAGGED' ? 'Resubmit for Audit' : 'Update Record')
+                : 'Save Record'}
             </Button>
           </>
         }
@@ -278,25 +311,27 @@ export default function NewTransactionModal({
           <div className="grid grid-cols-2 gap-2 bg-zinc-100 dark:bg-zinc-900 p-1 rounded-2xl border border-zinc-200 dark:border-zinc-800">
             <Button
               type="button"
+              disabled={!canInflow && !transactionToEdit}
               variant={type === 'INFLOW' ? 'primary' : 'ghost'}
               size="md"
               onClick={() => {
                 setType('INFLOW');
                 setCategoryName('Tournament & E-Sports Registration Fees');
               }}
-              className={type === 'INFLOW' ? 'bg-emerald-600 dark:bg-emerald-600 text-white' : 'text-zinc-600 dark:text-zinc-400'}
+              className={`${type === 'INFLOW' ? 'bg-emerald-600 dark:bg-emerald-600 text-white' : 'text-zinc-600 dark:text-zinc-400'} disabled:opacity-40 disabled:cursor-not-allowed`}
             >
               + Inflow (Income)
             </Button>
             <Button
               type="button"
+              disabled={!canOutflow && !transactionToEdit}
               variant={type === 'OUTFLOW' ? 'amber-subtle' : 'ghost'}
               size="md"
               onClick={() => {
                 setType('OUTFLOW');
                 setCategoryName('Supplies & Materials');
               }}
-              className={type === 'OUTFLOW' ? 'bg-amber-600 text-white hover:bg-amber-700' : 'text-zinc-600 dark:text-zinc-400'}
+              className={`${type === 'OUTFLOW' ? 'bg-amber-600 text-white hover:bg-amber-700' : 'text-zinc-600 dark:text-zinc-400'} disabled:opacity-40 disabled:cursor-not-allowed`}
             >
               - Outflow
             </Button>

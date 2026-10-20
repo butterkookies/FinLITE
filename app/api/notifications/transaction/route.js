@@ -1,7 +1,8 @@
 import { NextResponse } from 'next/server';
 import { createClient, createAdminClient } from '@/lib/supabase/server';
 import { isSuperAdminEmail } from '@/lib/config/admin';
-import { sendTransactionNotificationEmail } from '@/lib/email/mailer';
+import { sendTransactionNotificationEmail, sendAuditRequestEmail } from '@/lib/email/mailer';
+import { hasPermission, ACTION_KEYS } from '@/lib/auth/permissions';
 
 export async function POST(req) {
   try {
@@ -47,6 +48,7 @@ export async function POST(req) {
 
     const body = await req.json().catch(() => ({}));
     const {
+      transactionId,
       authorId,
       authorEmail,
       authorName,
@@ -56,6 +58,7 @@ export async function POST(req) {
       category = null,
       eventName = null,
       reimbursementRecipient = null,
+      receiptUrl = null,
       date = null,
     } = body;
 
@@ -64,10 +67,10 @@ export async function POST(req) {
     const effectiveAuthorName = profileFullName || authorName || effectiveAuthorEmail.split('@')[0] || 'Officer';
     const effectiveAuthorId = callerProfile?.id || authorId || user.id;
 
-    // Fetch all active approved officers from profiles
+    // Fetch all active approved officers with their permissions and role
     const { data: officers, error } = await db
       .from('profiles')
-      .select('id, auth_user_id, email, status')
+      .select('id, auth_user_id, email, status, role, permissions')
       .eq('status', 'approved');
 
     let officerList = officers || [];
@@ -76,7 +79,7 @@ export async function POST(req) {
     if (officerList.length === 0) {
       const { data: reqOfficers } = await db
         .from('registration_requests')
-        .select('id, email, status')
+        .select('id, email, status, role, permissions')
         .eq('status', 'approved');
       if (reqOfficers && reqOfficers.length > 0) {
         officerList = reqOfficers;
@@ -87,41 +90,72 @@ export async function POST(req) {
       return NextResponse.json({ success: true, count: 0, message: 'No other active officers found.' });
     }
 
-    // Filter: all active officers EXCEPT the author who performed the action
-    const recipients = officerList
-      .filter((u) => {
-        if (!u.email) return false;
-        const uEmail = u.email.trim().toLowerCase();
-        if (effectiveAuthorEmail && uEmail === effectiveAuthorEmail) return false;
-        if (effectiveAuthorId && (u.id === effectiveAuthorId || u.auth_user_id === effectiveAuthorId)) return false;
-        return true;
-      })
+    // Filter out author
+    const otherOfficers = officerList.filter((u) => {
+      if (!u.email) return false;
+      const uEmail = u.email.trim().toLowerCase();
+      if (effectiveAuthorEmail && uEmail === effectiveAuthorEmail) return false;
+      if (effectiveAuthorId && (u.id === effectiveAuthorId || u.auth_user_id === effectiveAuthorId)) return false;
+      return true;
+    });
+
+    // 1. Separate auditors (officers with audit_approve capability)
+    const auditorRecipients = otherOfficers
+      .filter((u) => hasPermission(u, ACTION_KEYS.AUDIT_APPROVE, u.email))
       .map((u) => u.email.trim().toLowerCase());
 
-    const uniqueRecipients = Array.from(new Set(recipients));
+    const uniqueAuditors = Array.from(new Set(auditorRecipients));
 
-    if (uniqueRecipients.length === 0) {
-      return NextResponse.json({ success: true, count: 0, message: 'No other recipients to notify.' });
+    // 2. All other officers for standard ledger broadcast
+    const generalRecipients = otherOfficers
+      .filter((u) => !uniqueAuditors.includes(u.email.trim().toLowerCase()))
+      .map((u) => u.email.trim().toLowerCase());
+
+    const uniqueGeneral = Array.from(new Set(generalRecipients));
+
+    // Dispatch institutional audit request email to Auditors
+    if (uniqueAuditors.length > 0 && transactionId) {
+      sendAuditRequestEmail({
+        transaction: {
+          id: transactionId,
+          title,
+          amount: Number(amount) || 0,
+          type: actionType.includes('INFLOW') ? 'INFLOW' : 'OUTFLOW',
+          category_name: category,
+          event_name: eventName,
+          reimbursement_recipient: reimbursementRecipient,
+          is_reimbursement: Boolean(reimbursementRecipient),
+          receipt_url: receiptUrl,
+          transaction_date: date || new Date().toISOString().split('T')[0],
+        },
+        authorName: effectiveAuthorName,
+        authorEmail: effectiveAuthorEmail,
+        authorRole: callerProfile?.role || 'Officer',
+        recipients: uniqueAuditors,
+      }).catch((mailErr) => console.warn('[Audit Request Mailer] Email dispatch error:', mailErr));
     }
 
-    // Dispatch notification via Gmail SMTP in background
-    sendTransactionNotificationEmail({
-      authorName: effectiveAuthorName,
-      authorEmail: effectiveAuthorEmail || 'System',
-      actionType,
-      amount: Number(amount) || 0,
-      title,
-      category,
-      eventName,
-      reimbursementRecipient,
-      date: date || new Date().toISOString().split('T')[0],
-      recipients: uniqueRecipients,
-    }).catch((mailErr) => console.warn('[Transaction Notification] Email dispatch error:', mailErr));
+    // Dispatch standard notification to other officers
+    if (uniqueGeneral.length > 0) {
+      sendTransactionNotificationEmail({
+        authorName: effectiveAuthorName,
+        authorEmail: effectiveAuthorEmail || 'System',
+        actionType,
+        amount: Number(amount) || 0,
+        title,
+        category,
+        eventName,
+        reimbursementRecipient,
+        date: date || new Date().toISOString().split('T')[0],
+        recipients: uniqueGeneral,
+      }).catch((mailErr) => console.warn('[General Ledger Mailer] Email dispatch error:', mailErr));
+    }
 
     return NextResponse.json({
       success: true,
-      count: uniqueRecipients.length,
-      message: `Notification queued for ${uniqueRecipients.length} officer(s).`,
+      auditorCount: uniqueAuditors.length,
+      generalCount: uniqueGeneral.length,
+      message: `Audit notification dispatched to ${uniqueAuditors.length} auditor(s) and broadcast to ${uniqueGeneral.length} officer(s).`,
     });
   } catch (err) {
     console.error('Transaction notification route error:', err);

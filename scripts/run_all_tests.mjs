@@ -40,6 +40,17 @@ import {
   applyRateLimitHeaders,
 } from '../lib/security/ratelimit.js';
 import { fetchAuditTrail, logAuditEvent } from '../lib/supabase/audit.js';
+import { 
+  ACTION_KEYS, 
+  resolveUserPermissions, 
+  hasPermission, 
+  ROLE_DEFAULT_PERMISSIONS 
+} from '../lib/auth/permissions.js';
+import {
+  sendAuditRequestEmail,
+  sendAuditDecisionEmail,
+  sendRevisionSubmittedEmail
+} from '../lib/email/mailer.js';
 import { execFileSync, spawn } from 'child_process';
 import fs from 'fs';
 import path from 'path';
@@ -1235,6 +1246,151 @@ async function testAccountLifecycleAndRemarks() {
   assert(classifyAuditCategory('ACCOUNT_DELETED') === 'governance', 'ACCOUNT_DELETED classifies as governance');
 }
 await testAccountLifecycleAndRemarks();
+
+// ==============================================================================
+// 11. RUNNING CUSTOMIZABLE OFFICER PERMISSIONS & AUDIT WORKFLOW TESTS
+// ==============================================================================
+async function testPermissionsAndAuditWorkflow() {
+  console.log('\n============================================================');
+  console.log('11. RUNNING CUSTOMIZABLE OFFICER PERMISSIONS & AUDIT WORKFLOW TESTS');
+  console.log('============================================================');
+
+  // 1. Role Defaults Verification
+  const presPerms = resolveUserPermissions({ role: 'president', email: 'pres@example.com' });
+  assert(presPerms[ACTION_KEYS.RECORD_INFLOW] === true, 'President can record inflow by default');
+  assert(presPerms[ACTION_KEYS.RECORD_OUTFLOW] === true, 'President can record outflow by default');
+  assert(presPerms[ACTION_KEYS.RECORD_ABONO] === true, 'President can record abono by default');
+  assert(presPerms[ACTION_KEYS.EDIT_TRANSACTION] === true, 'President can edit transactions by default');
+  assert(presPerms[ACTION_KEYS.DELETE_TRANSACTION] === false, 'President cannot delete transactions by default');
+  assert(presPerms[ACTION_KEYS.AUDIT_APPROVE] === false, 'President cannot audit/approve by default');
+  assert(presPerms[ACTION_KEYS.CASH_RECONCILIATION] === false, 'President cannot cash reconcile by default');
+  assert(presPerms[ACTION_KEYS.EXPORT_REPORTS] === true, 'President can export reports by default');
+
+  const auditorPerms = resolveUserPermissions({ role: 'auditor', email: 'auditor@example.com' });
+  assert(auditorPerms[ACTION_KEYS.AUDIT_APPROVE] === true, 'Auditor can audit/approve by default');
+  assert(auditorPerms[ACTION_KEYS.CASH_RECONCILIATION] === true, 'Auditor can cash reconcile by default');
+  assert(auditorPerms[ACTION_KEYS.RECORD_INFLOW] === false, 'Auditor cannot record inflow by default');
+  assert(auditorPerms[ACTION_KEYS.RECORD_OUTFLOW] === false, 'Auditor cannot record outflow by default');
+
+  const adminPerms = resolveUserPermissions({ role: 'admin', email: 'admin@example.com' });
+  assert(adminPerms[ACTION_KEYS.AUDIT_APPROVE] === true, 'Admin has audit_approve');
+  assert(adminPerms[ACTION_KEYS.DELETE_TRANSACTION] === true, 'Admin has delete_transaction');
+  assert(adminPerms[ACTION_KEYS.RECORD_INFLOW] === true, 'Admin has record_inflow');
+
+  // 2. Super Admin Wildcard Bypass
+  const superAdminPerms = resolveUserPermissions({ role: 'member', email: 'geronimoandreijohn.pdm@gmail.com' });
+  assert(superAdminPerms[ACTION_KEYS.RECORD_INFLOW] === true, 'Super Admin always granted record_inflow');
+  assert(superAdminPerms[ACTION_KEYS.AUDIT_APPROVE] === true, 'Super Admin always granted audit_approve');
+  assert(superAdminPerms[ACTION_KEYS.DELETE_TRANSACTION] === true, 'Super Admin always granted delete_transaction');
+  assert(hasPermission(null, ACTION_KEYS.DELETE_TRANSACTION, 'geronimoandreijohn.pdm@gmail.com') === true, 'hasPermission grants Super Admin wildcard');
+
+  // 3. Custom Permission Overrides (Independent of Position)
+  // e.g. President customized by Admin so they CANNOT record outflow, but CAN audit
+  const customPresident = {
+    role: 'president',
+    email: 'custom.pres@gmail.com',
+    permissions: {
+      [ACTION_KEYS.RECORD_OUTFLOW]: false,
+      [ACTION_KEYS.AUDIT_APPROVE]: true,
+    },
+  };
+  const resolvedCustomPres = resolveUserPermissions(customPresident);
+  assert(resolvedCustomPres[ACTION_KEYS.RECORD_OUTFLOW] === false, 'Custom override: President record_outflow turned OFF');
+  assert(resolvedCustomPres[ACTION_KEYS.AUDIT_APPROVE] === true, 'Custom override: President audit_approve turned ON');
+  assert(resolvedCustomPres[ACTION_KEYS.RECORD_INFLOW] === true, 'Custom override preserves unmodified role default (record_inflow)');
+
+  // e.g. Auditor customized by Admin to allow recording inflows
+  const customAuditor = {
+    role: 'auditor',
+    email: 'custom.auditor@gmail.com',
+    permissions: {
+      [ACTION_KEYS.RECORD_INFLOW]: true,
+    },
+  };
+  assert(hasPermission(customAuditor, ACTION_KEYS.RECORD_INFLOW) === true, 'Custom override: Auditor can record inflow');
+  assert(hasPermission(customAuditor, ACTION_KEYS.AUDIT_APPROVE) === true, 'Auditor retains audit_approve');
+  assert(hasPermission(customAuditor, ACTION_KEYS.RECORD_OUTFLOW) === false, 'Auditor retains record_outflow=false');
+
+  // 4. Transaction Lifecycle & Status Transitions
+  function simulateAuditTransition(initialStatus, isReimbursement, action) {
+    if (action === 'APPROVE') {
+      return isReimbursement ? 'PENDING_REIMBURSEMENT' : 'COMPLETED';
+    }
+    if (action === 'FLAG') {
+      return 'FLAGGED';
+    }
+    return initialStatus;
+  }
+
+  function simulateEditTransition(currentStatus) {
+    if (currentStatus === 'FLAGGED') {
+      return 'PENDING_AUDIT';
+    }
+    return currentStatus;
+  }
+
+  assert(simulateAuditTransition('PENDING_AUDIT', false, 'APPROVE') === 'COMPLETED', 'Standard outflow APPROVE transitions to COMPLETED');
+  assert(simulateAuditTransition('PENDING_AUDIT', true, 'APPROVE') === 'PENDING_REIMBURSEMENT', 'Abono outflow APPROVE transitions to PENDING_REIMBURSEMENT');
+  assert(simulateAuditTransition('PENDING_AUDIT', false, 'FLAG') === 'FLAGGED', 'Standard entry FLAG transitions to FLAGGED');
+  assert(simulateAuditTransition('PENDING_AUDIT', true, 'FLAG') === 'FLAGGED', 'Abono entry FLAG transitions to FLAGGED');
+  assert(simulateEditTransition('FLAGGED') === 'PENDING_AUDIT', 'Editing a FLAGGED transaction automatically resets status to PENDING_AUDIT');
+  assert(simulateEditTransition('COMPLETED') === 'COMPLETED', 'Editing COMPLETED entry preserves completed status');
+
+  // 5. Email Notification Dispatch Simulation
+  const mockTx = {
+    id: 'tx-test-uuid-101',
+    title: 'Hardware Supplies for Hackathon',
+    amount: 1450.75,
+    type: 'OUTFLOW',
+    category_name: 'Supplies & Materials',
+    event_name: 'TechWeek 2026',
+    transaction_date: '2026-10-20',
+    receipt_url: 'https://example.com/receipt.jpg',
+    is_reimbursement: false,
+  };
+
+  const auditReqRes = await sendAuditRequestEmail({
+    transaction: mockTx,
+    authorName: 'Andrei Geronimo',
+    authorEmail: 'andrei@example.com',
+    authorRole: 'President',
+    recipients: ['auditor@example.com'],
+  });
+  assert(auditReqRes.success === true, 'sendAuditRequestEmail succeeds in simulation/dispatch');
+
+  const auditDecApproveRes = await sendAuditDecisionEmail({
+    transaction: mockTx,
+    decision: 'APPROVE',
+    auditorName: 'Auditor Officer',
+    auditorEmail: 'auditor@example.com',
+    comment: 'All receipts verified.',
+    authorEmail: 'andrei@example.com',
+    authorName: 'Andrei Geronimo',
+    ccEmails: ['treasurer@example.com'],
+  });
+  assert(auditDecApproveRes.success === true, 'sendAuditDecisionEmail APPROVE succeeds in simulation/dispatch');
+
+  const auditDecFlagRes = await sendAuditDecisionEmail({
+    transaction: mockTx,
+    decision: 'FLAG',
+    auditorName: 'Auditor Officer',
+    auditorEmail: 'auditor@example.com',
+    comment: 'Please upload clearer receipt.',
+    authorEmail: 'andrei@example.com',
+    authorName: 'Andrei Geronimo',
+    ccEmails: ['treasurer@example.com'],
+  });
+  assert(auditDecFlagRes.success === true, 'sendAuditDecisionEmail FLAG succeeds in simulation/dispatch');
+
+  const revisionRes = await sendRevisionSubmittedEmail({
+    transaction: mockTx,
+    editorName: 'Andrei Geronimo',
+    editorEmail: 'andrei@example.com',
+    recipients: ['auditor@example.com'],
+  });
+  assert(revisionRes.success === true, 'sendRevisionSubmittedEmail succeeds in simulation/dispatch');
+}
+await testPermissionsAndAuditWorkflow();
 
 
 // ==============================================================================

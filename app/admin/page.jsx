@@ -42,6 +42,8 @@ import { createClient } from '@/lib/supabase/client';
 import { useTheme } from '@/components/theme/ThemeProvider';
 import { Modal, Button, Badge, Input } from '@/components/ui';
 import UserAvatar from '@/components/common/UserAvatar';
+import UserPermissionsModal from '@/components/admin/UserPermissionsModal';
+import { resolveUserPermissions, ACTION_KEYS } from '@/lib/auth/permissions';
 
 const ROLE_OPTIONS = [
   { value: 'treasurer', label: 'Treasurer', desc: 'Disbursements & Collections' },
@@ -118,6 +120,9 @@ export default function AdminPage() {
   const [isCheckingDeps, setIsCheckingDeps] = useState(false);
   const [userDeps, setUserDeps] = useState(null); // { canDelete: boolean, transactionCount: number, breakdown: {} }
   const [isDeletingUser, setIsDeletingUser] = useState(false);
+
+  // User Permissions Modal State
+  const [permissionUser, setPermissionUser] = useState(null);
 
   // Telemetry: Activity & Access Logs State
   const [auditLogs, setAuditLogs] = useState([]);
@@ -1236,24 +1241,64 @@ export default function AdminPage() {
                           </div>
                         </div>
 
-                        {/* Column 2: Role Assignment (col-span-3) */}
-                        <div className="col-span-3 flex items-center gap-2 w-full">
-                          <select
-                            disabled={isPrimarySuperAdmin}
-                            value={user.role}
-                            onChange={(e) => handleUpdateUserRole(user.id, e.target.value)}
-                            className={`text-xs font-semibold rounded-xl px-2.5 py-1.5 cursor-pointer focus:outline-none focus:ring-1 border disabled:opacity-50 disabled:cursor-not-allowed w-full max-w-[170px] ${
-                              isLight
-                                ? 'bg-white border-zinc-200 text-gray-900 focus:ring-emerald-500/20'
-                                : 'bg-zinc-900 border-zinc-800 text-zinc-100 focus:ring-emerald-500/30'
-                            }`}
-                          >
-                            {ROLE_OPTIONS.map((opt) => (
-                              <option key={opt.value} value={opt.value} className={isLight ? 'bg-white text-gray-900' : 'bg-[#121214] text-zinc-100'}>
-                                {opt.label}
-                              </option>
-                            ))}
-                          </select>
+                        {/* Column 2: Role Assignment & Custom Permissions (col-span-3) */}
+                        <div className="col-span-3 flex flex-col gap-1.5 w-full">
+                          <div className="flex items-center gap-2">
+                            <select
+                              disabled={isPrimarySuperAdmin}
+                              value={user.role}
+                              onChange={(e) => handleUpdateUserRole(user.id, e.target.value)}
+                              className={`text-xs font-semibold rounded-xl px-2.5 py-1.5 cursor-pointer focus:outline-none focus:ring-1 border disabled:opacity-50 disabled:cursor-not-allowed w-full max-w-[140px] ${
+                                isLight
+                                  ? 'bg-white border-zinc-200 text-gray-900 focus:ring-emerald-500/20'
+                                  : 'bg-zinc-900 border-zinc-800 text-zinc-100 focus:ring-emerald-500/30'
+                              }`}
+                            >
+                              {ROLE_OPTIONS.map((opt) => (
+                                <option key={opt.value} value={opt.value} className={isLight ? 'bg-white text-gray-900' : 'bg-[#121214] text-zinc-100'}>
+                                  {opt.label}
+                                </option>
+                              ))}
+                            </select>
+
+                            <button
+                              type="button"
+                              onClick={() => setPermissionUser(user)}
+                              className={`px-2.5 py-1.5 text-xs font-bold rounded-xl border flex items-center gap-1 transition-all cursor-pointer active:scale-95 shrink-0 ${
+                                isLight
+                                  ? 'bg-emerald-50 hover:bg-emerald-100 border-emerald-200 text-emerald-800'
+                                  : 'bg-emerald-500/10 hover:bg-emerald-500/20 border-emerald-500/30 text-emerald-300'
+                              }`}
+                              title="Customize specific actions this officer can perform"
+                            >
+                              <ShieldCheck className="w-3.5 h-3.5 text-emerald-500" />
+                              <span className="hidden sm:inline">Actions</span>
+                            </button>
+                          </div>
+
+                          {/* Quick capability tags */}
+                          {(() => {
+                            const perms = resolveUserPermissions(user, user.email);
+                            return (
+                              <div className="flex items-center gap-1 flex-wrap">
+                                {perms[ACTION_KEYS.RECORD_INFLOW] && (
+                                  <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded ${isLight ? 'bg-emerald-100 text-emerald-900' : 'bg-emerald-500/20 text-emerald-300'}`}>Inflow</span>
+                                )}
+                                {perms[ACTION_KEYS.RECORD_OUTFLOW] && (
+                                  <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded ${isLight ? 'bg-rose-100 text-rose-900' : 'bg-rose-500/20 text-rose-300'}`}>Outflow</span>
+                                )}
+                                {perms[ACTION_KEYS.AUDIT_APPROVE] && (
+                                  <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded ${isLight ? 'bg-teal-100 text-teal-900' : 'bg-teal-500/20 text-teal-300'}`}>Audit</span>
+                                )}
+                                {perms[ACTION_KEYS.CASH_RECONCILIATION] && (
+                                  <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded ${isLight ? 'bg-indigo-100 text-indigo-900' : 'bg-indigo-500/20 text-indigo-300'}`}>Recon</span>
+                                )}
+                                {perms[ACTION_KEYS.EDIT_TRANSACTION] && (
+                                  <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded ${isLight ? 'bg-blue-100 text-blue-900' : 'bg-blue-500/20 text-blue-300'}`}>Edit</span>
+                                )}
+                              </div>
+                            );
+                          })()}
                         </div>
 
                         {/* Column 3: Status Badge (col-span-2 text-center) */}
@@ -2210,6 +2255,18 @@ export default function AdminPage() {
           </div>
         </div>
       </Modal>
+
+      {/* User Permissions & Fine-Grained Action Customization Modal */}
+      <UserPermissionsModal
+        isOpen={Boolean(permissionUser)}
+        onClose={() => setPermissionUser(null)}
+        user={permissionUser}
+        onSaved={(updatedUser) => {
+          setUsers((prev) =>
+            prev.map((u) => (u.id === updatedUser.id ? { ...u, ...updatedUser } : u))
+          );
+        }}
+      />
 
     </>
   );

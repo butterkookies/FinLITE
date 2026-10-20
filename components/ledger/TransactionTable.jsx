@@ -31,7 +31,9 @@ import {
   MessageSquare,
   Table,
   LayoutList,
-  CreditCard
+  CreditCard,
+  Edit2,
+  Trash2
 } from 'lucide-react';
 import { formatPHP } from '@/lib/utils/currency';
 import { compressReceiptImage } from '@/lib/utils/compression';
@@ -70,9 +72,29 @@ export default function TransactionTable({
   onOpenDebts,
   cashBalance = 0,
   currentRole,
-  isDbConnected = false
+  isDbConnected = false,
+  userPermissions = null,
+  onAuditTransaction = null,
+  onEditTransaction = null,
+  onDeleteTransaction = null,
 }) {
   const canViewAudit = ['admin', 'auditor', 'treasurer', 'president', 'adviser'].includes(currentRole);
+
+  const canRecord = userPermissions
+    ? Boolean(userPermissions.record_inflow || userPermissions.record_outflow || userPermissions.record_abono)
+    : (currentRole === 'admin' || currentRole === 'treasurer' || currentRole === 'auditor' || currentRole === 'president');
+
+  const canEdit = userPermissions
+    ? Boolean(userPermissions.edit_transaction)
+    : (currentRole === 'admin' || currentRole === 'treasurer' || currentRole === 'president');
+
+  const canAudit = userPermissions
+    ? Boolean(userPermissions.audit_approve)
+    : (currentRole === 'admin' || currentRole === 'auditor');
+
+  const canExport = userPermissions
+    ? Boolean(userPermissions.export_reports)
+    : true;
   const [filterType, setFilterType] = useState('ALL');
   const [searchQuery, setSearchQuery] = useState('');
   const [viewMode, setViewMode] = useState('auto'); // 'auto' (table on desktop, cards on mobile) | 'table' | 'cards'
@@ -409,19 +431,21 @@ export default function TransactionTable({
           )}
 
           {/* Review & Export Report Button */}
-          <Button
-            variant="secondary"
-            size="sm"
-            onClick={onExportReport}
-            className={`w-full sm:w-auto justify-center ${!canViewAudit ? 'col-span-2' : ''}`}
-            leftIcon={<FileText className="w-3.5 h-3.5 text-emerald-500 shrink-0" />}
-            title="Preview 1:1 PDM CCS Formal Word Liquidation Report & Live Edit"
-          >
-            <span>Preview Report</span>
-          </Button>
+          {canExport && (
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={onExportReport}
+              className={`w-full sm:w-auto justify-center ${!canViewAudit ? 'col-span-2' : ''}`}
+              leftIcon={<FileText className="w-3.5 h-3.5 text-emerald-500 shrink-0" />}
+              title="Preview 1:1 PDM CCS Formal Word Liquidation Report & Live Edit"
+            >
+              <span>Preview Report</span>
+            </Button>
+          )}
 
-          {/* New Transaction Button (Admin/Treasurer/Auditor) */}
-          {(currentRole === 'admin' || currentRole === 'treasurer' || currentRole === 'auditor') && (
+          {/* New Transaction Button (Permissions-driven) */}
+          {canRecord && (
             <Button
               variant="primary"
               size="sm"
@@ -625,8 +649,23 @@ export default function TransactionTable({
                         {tx.event_name}
                       </span>
                     )}
-                    {tx.is_reimbursement && (
-                      <div className="flex items-center gap-1.5 flex-wrap mt-1">
+                    {/* Status Badges */}
+                    <div className="flex items-center gap-1.5 flex-wrap mt-1">
+                      {tx.status === 'PENDING_AUDIT' && (
+                        <Badge variant="amber" size="xs">
+                          <Clock className="w-2.5 h-2.5 shrink-0" />
+                          <span>Pending Audit</span>
+                        </Badge>
+                      )}
+
+                      {tx.status === 'FLAGGED' && (
+                        <Badge variant="rose" size="xs">
+                          <AlertTriangle className="w-2.5 h-2.5 shrink-0" />
+                          <span>Revision Needed</span>
+                        </Badge>
+                      )}
+
+                      {tx.is_reimbursement && (
                         <Badge 
                           variant={tx.status === 'REIMBURSED' ? 'emerald' : 'amber'} 
                           size="xs"
@@ -639,12 +678,12 @@ export default function TransactionTable({
                           ) : (
                             <>
                               <Clock className="w-2.5 h-2.5 shrink-0" />
-                              <span className="truncate max-w-[150px]">Advance by: {tx.reimbursement_recipient || 'Officer'}</span>
+                              <span className="truncate max-w-[150px]">Advance: {tx.reimbursement_recipient || 'Officer'}</span>
                             </>
                           )}
                         </Badge>
-                      </div>
-                    )}
+                      )}
+                    </div>
                   </td>
 
                   {/* Date */}
@@ -812,6 +851,38 @@ export default function TransactionTable({
                               </Button>
                             )}
 
+                            {/* Auditor Review Button */}
+                            {canAudit && (
+                              <Button
+                                variant={tx.status === 'PENDING_AUDIT' ? 'amber-subtle' : tx.status === 'FLAGGED' ? 'rose-subtle' : 'outline'}
+                                size="xs"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  if (onAuditTransaction) onAuditTransaction(tx);
+                                }}
+                                leftIcon={<ShieldCheck className="w-3 h-3" />}
+                                title="Audit & verify this transaction"
+                              >
+                                <span>Audit</span>
+                              </Button>
+                            )}
+
+                            {/* Edit / Revise Button */}
+                            {canEdit && (
+                              <Button
+                                variant={tx.status === 'FLAGGED' ? 'rose-subtle' : 'outline'}
+                                size="xs"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  if (onEditTransaction) onEditTransaction(tx);
+                                }}
+                                leftIcon={<Edit2 className="w-3 h-3" />}
+                                title={tx.status === 'FLAGGED' ? 'Revise and resubmit flagged transaction' : 'Edit transaction details'}
+                              >
+                                <span>{tx.status === 'FLAGGED' ? 'Revise' : 'Edit'}</span>
+                              </Button>
+                            )}
+
                             {/* Comments / Remarks Button */}
                             <Button
                               variant={commentCounts[tx.id] ? "emerald-subtle" : "ghost"}
@@ -947,7 +1018,15 @@ export default function TransactionTable({
                     </span>
                   )}
 
-                  {isAbonoPending ? (
+                  {tx.status === 'PENDING_AUDIT' ? (
+                    <span className="text-[10px] font-bold text-amber-600 dark:text-amber-400 bg-amber-500/10 px-1.5 py-0.5 rounded">
+                      Pending Audit
+                    </span>
+                  ) : tx.status === 'FLAGGED' ? (
+                    <span className="text-[10px] font-bold text-rose-600 dark:text-rose-400 bg-rose-500/10 px-1.5 py-0.5 rounded">
+                      Revision Needed
+                    </span>
+                  ) : isAbonoPending ? (
                     <span className="text-[10px] font-bold text-amber-600 dark:text-amber-400 bg-amber-500/10 px-1.5 py-0.5 rounded">
                       Pending Abono
                     </span>
@@ -1582,6 +1661,38 @@ export default function TransactionTable({
                 </Button>
 
                 <div className="flex items-center gap-2">
+                  {canEdit && (
+                    <Button
+                      type="button"
+                      variant={tx.status === 'FLAGGED' ? 'rose-subtle' : 'secondary'}
+                      size="sm"
+                      onClick={() => {
+                        const target = tx;
+                        setSelectedTx(null);
+                        if (onEditTransaction) onEditTransaction(target);
+                      }}
+                      leftIcon={<Edit2 className="w-3.5 h-3.5" />}
+                    >
+                      <span>{tx.status === 'FLAGGED' ? 'Revise Transaction' : 'Edit Details'}</span>
+                    </Button>
+                  )}
+
+                  {canAudit && (
+                    <Button
+                      type="button"
+                      variant="primary"
+                      size="sm"
+                      onClick={() => {
+                        const target = tx;
+                        setSelectedTx(null);
+                        if (onAuditTransaction) onAuditTransaction(target);
+                      }}
+                      leftIcon={<ShieldCheck className="w-3.5 h-3.5" />}
+                    >
+                      <span>Audit &amp; Verify</span>
+                    </Button>
+                  )}
+
                   {isPendingAbono && canSettleAbono && (
                     <Button
                       type="button"
@@ -1778,9 +1889,23 @@ export default function TransactionTable({
                     <span className="text-[10px] font-bold uppercase tracking-wider block mb-1.5 text-zinc-400 dark:text-zinc-500">
                       Audit Verification
                     </span>
-                    <div className="flex items-center gap-1.5 text-xs font-semibold text-emerald-600 dark:text-emerald-400">
-                      <ShieldCheck className="w-4 h-4 shrink-0" />
-                      <span>Verified Official Ledger Entry</span>
+                    <div className="flex items-center gap-1.5 text-xs font-semibold">
+                      {tx.status === 'PENDING_AUDIT' ? (
+                        <span className="text-amber-600 dark:text-amber-400 flex items-center gap-1">
+                          <Clock className="w-4 h-4 shrink-0" />
+                          <span>Awaiting Audit Verification</span>
+                        </span>
+                      ) : tx.status === 'FLAGGED' ? (
+                        <span className="text-rose-600 dark:text-rose-400 flex items-center gap-1">
+                          <AlertTriangle className="w-4 h-4 shrink-0" />
+                          <span>Revision Requested by Auditor</span>
+                        </span>
+                      ) : (
+                        <span className="text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
+                          <ShieldCheck className="w-4 h-4 shrink-0" />
+                          <span>Verified Official Ledger Entry</span>
+                        </span>
+                      )}
                     </div>
                     <div className="mt-1 flex items-center gap-1.5 text-[11px] text-zinc-400 dark:text-zinc-500">
                       <span>ID:</span>

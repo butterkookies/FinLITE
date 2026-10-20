@@ -13,9 +13,14 @@ import { DEFAULT_SEMESTERS } from '@/lib/config/semesters';
 import { toCentavos, fromCentavos, denomCodeToCountKey, formatPHP } from '@/lib/utils/currency';
 import { validateTransactionAmount, validateOutflowBalance } from '@/lib/utils/validation';
 import { Card, Badge, Button } from '@/components/ui';
+import { resolveUserPermissions, hasPermission, ACTION_KEYS } from '@/lib/auth/permissions';
 
 // Dynamically split heavy modals out of the initial critical client bundle
 const NewTransactionModal = dynamic(() => import('@/components/ledger/NewTransactionModal'), {
+  ssr: false,
+  loading: () => null,
+});
+const AuditReviewModal = dynamic(() => import('@/components/audit/AuditReviewModal'), {
   ssr: false,
   loading: () => null,
 });
@@ -107,6 +112,8 @@ export default function Dashboard() {
   const [isDbConnected, setIsDbConnected] = useState(Boolean(dashboardCache));
   const [isLoading, setIsLoading] = useState(!dashboardCache);
   const [isNewTxOpen, setIsNewTxOpen] = useState(false);
+  const [editingTx, setEditingTx] = useState(null);
+  const [auditModalTx, setAuditModalTx] = useState(null);
   const [isDenomOpen, setIsDenomOpen] = useState(false);
   const [isAIOpen, setIsAIOpen] = useState(false);
   const [isProposalOpen, setIsProposalOpen] = useState(false);
@@ -181,9 +188,57 @@ export default function Dashboard() {
     };
   }, []);
 
+  // Handle Deep-Links from Audit & Revision Emails (?auditTx=id, ?editTx=id)
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      const auditTxId = params.get('auditTx');
+      const editTxId = params.get('editTx');
+
+      if (auditTxId) {
+        const found = transactions.find((t) => t.id === auditTxId);
+        if (found) {
+          setAuditModalTx(found);
+        } else {
+          fetch(`/api/transactions/${auditTxId}`)
+            .then((r) => r.json())
+            .then((d) => {
+              if (d.transaction) setAuditModalTx(d.transaction);
+            })
+            .catch(() => {});
+        }
+      } else if (editTxId) {
+        const found = transactions.find((t) => t.id === editTxId);
+        if (found) {
+          setEditingTx(found);
+          setIsNewTxOpen(true);
+        } else {
+          fetch(`/api/transactions/${editTxId}`)
+            .then((r) => r.json())
+            .then((d) => {
+              if (d.transaction) {
+                setEditingTx(d.transaction);
+                setIsNewTxOpen(true);
+              }
+            })
+            .catch(() => {});
+        }
+      }
+    }
+  }, [transactions]);
+
   const supabase = createClient();
   const isSuperAdmin = isSuperAdminEmail(currentUser?.email || userProfile?.email);
-  const canManageFinancials = currentRole === 'treasurer' || currentRole === 'president' || currentRole === 'admin' || isSuperAdmin;
+
+  const userPermissions = useMemo(() => {
+    return resolveUserPermissions(userProfile, currentUser?.email);
+  }, [userProfile, currentUser]);
+
+  const canManageFinancials = isSuperAdmin ||
+    Boolean(userPermissions[ACTION_KEYS.RECORD_INFLOW]) ||
+    Boolean(userPermissions[ACTION_KEYS.RECORD_OUTFLOW]) ||
+    Boolean(userPermissions[ACTION_KEYS.AUDIT_APPROVE]) ||
+    currentRole === 'treasurer' || currentRole === 'president' || currentRole === 'admin';
 
   // Load user profile, semesters, categories, denominations & transactions from Supabase on mount
   useEffect(() => {
@@ -778,6 +833,43 @@ export default function Dashboard() {
   };
 
   const handleSaveTransaction = async (newTx) => {
+    // 1. Edit existing transaction branch
+    if (newTx.id) {
+      try {
+        const res = await fetch(`/api/transactions/${newTx.id}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            title: newTx.title,
+            description: newTx.description,
+            amount: newTx.amount,
+            type: newTx.type,
+            category_id: newTx.category_id,
+            semester_id: newTx.semester_id,
+            transaction_date: newTx.transaction_date,
+            is_reimbursement: newTx.is_reimbursement,
+            reimbursement_recipient: newTx.reimbursement_recipient,
+            event_name: newTx.event_name,
+            receipt_urls: newTx.receipt_urls,
+          }),
+        });
+
+        const data = await res.json();
+        if (res.ok && data.success && data.transaction) {
+          setTransactions((prev) =>
+            prev.map((t) => (t.id === newTx.id ? { ...t, ...data.transaction } : t))
+          );
+        } else {
+          alert(`Failed to update transaction: ${data.error || 'Server error'}`);
+        }
+      } catch (err) {
+        console.error('Update transaction error:', err);
+      }
+      setEditingTx(null);
+      return;
+    }
+
+    // 2. Create new transaction branch
     const tempId = `tx-${Date.now()}`;
     const optimisticReceiptUrls = Array.isArray(newTx.receipt_urls) && newTx.receipt_urls.length > 0
       ? newTx.receipt_urls
@@ -999,6 +1091,26 @@ export default function Dashboard() {
               semester: optimisticTx.semester
             } : t))
           );
+
+          // Dispatch audit request notification to Auditor(s)
+          fetch('/api/notifications/transaction', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              transactionId: data.id,
+              authorId: userProfile?.id || currentUser?.id,
+              authorName: userProfile?.full_name || currentUser?.user_metadata?.full_name || 'Officer',
+              authorEmail: currentUser?.email || userProfile?.email,
+              actionType: newTx.type === 'INFLOW' ? 'INFLOW' : 'OUTFLOW',
+              amount: newTx.amount,
+              title: newTx.title,
+              category: newTx.category_name,
+              eventName: newTx.event_name,
+              reimbursementRecipient: newTx.reimbursement_recipient,
+              receiptUrl: uploadedReceiptUrls[0] || null,
+              date: newTx.transaction_date,
+            }),
+          }).catch((nErr) => console.warn('Transaction notification trigger notice:', nErr?.message));
         }
       } catch (err) {
         console.warn('Failed to save transaction to database notice:', err?.message || err);
@@ -1884,7 +1996,10 @@ export default function Dashboard() {
                 transactions={activeTransactions}
                 debts={activeDebts}
                 onOpenDebts={() => setIsDebtsOpen(true)}
-                onNewTransaction={() => setIsNewTxOpen(true)}
+                onNewTransaction={() => {
+                  setEditingTx(null);
+                  setIsNewTxOpen(true);
+                }}
                 onExportReport={handleOpenLiquidationPreview}
                 onNewProposal={() => setIsProposalOpen(true)}
                 onAttachReceipt={handleAttachReceipt}
@@ -1893,6 +2008,12 @@ export default function Dashboard() {
                 cashBalance={summary.cash_on_hand}
                 currentRole={currentRole}
                 isDbConnected={isDbConnected}
+                userPermissions={userPermissions}
+                onAuditTransaction={(tx) => setAuditModalTx(tx)}
+                onEditTransaction={(tx) => {
+                  setEditingTx(tx);
+                  setIsNewTxOpen(true);
+                }}
               />
             </ModuleErrorBoundary>
           </div>
@@ -1937,10 +2058,31 @@ export default function Dashboard() {
           <ModuleErrorBoundary moduleName="Transaction Entry">
             <NewTransactionModal
               isOpen={isNewTxOpen}
-              onClose={() => setIsNewTxOpen(false)}
+              onClose={() => {
+                setIsNewTxOpen(false);
+                setEditingTx(null);
+              }}
               onSave={handleManualSaveTransaction}
               categories={categories}
               cashBalance={summary.cash_on_hand}
+              transactionToEdit={editingTx}
+              userPermissions={userPermissions}
+            />
+          </ModuleErrorBoundary>
+        )}
+
+        {auditModalTx && (
+          <ModuleErrorBoundary moduleName="Transaction Audit Verification">
+            <AuditReviewModal
+              isOpen={Boolean(auditModalTx)}
+              onClose={() => setAuditModalTx(null)}
+              transaction={auditModalTx}
+              currentOfficer={userProfile}
+              onAudited={(updatedTx) => {
+                setTransactions((prev) =>
+                  prev.map((t) => (t.id === updatedTx.id ? { ...t, ...updatedTx } : t))
+                );
+              }}
             />
           </ModuleErrorBoundary>
         )}
