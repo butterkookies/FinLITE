@@ -91,7 +91,7 @@ export async function POST(req) {
     let existingProfile = null;
     const { data: profByAuth } = await queryClient
       .from('profiles')
-      .select('id, status, role, username, auth_user_id, email')
+      .select('id, status, role, auth_user_id, email')
       .eq('auth_user_id', user.id)
       .maybeSingle();
 
@@ -100,7 +100,7 @@ export async function POST(req) {
     } else if (googleEmail) {
       const { data: profByEmail } = await queryClient
         .from('profiles')
-        .select('id, status, role, username, auth_user_id, email')
+        .select('id, status, role, auth_user_id, email')
         .eq('email', googleEmail)
         .maybeSingle();
 

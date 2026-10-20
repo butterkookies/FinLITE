@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { createClient, createAdminClient } from '@/lib/supabase/server';
-import { validateContactNumber, validateUsername } from '@/lib/utils/validation';
+import { validateContactNumber } from '@/lib/utils/validation';
 import { isSuperAdminEmail } from '@/lib/config/admin';
 
 export async function GET() {
@@ -61,21 +61,13 @@ export async function PATCH(req) {
     }
 
     const body = await req.json();
-    const { first_name, last_name, full_name, username, contact_number, avatar_url } = body;
+    const { first_name, last_name, full_name, contact_number, avatar_url } = body;
 
     // Validate contact number if provided
     if (contact_number !== undefined && contact_number !== null && contact_number.trim() !== '') {
       const contactError = validateContactNumber(contact_number);
       if (contactError) {
         return NextResponse.json({ error: contactError }, { status: 400 });
-      }
-    }
-
-    // Validate username if provided
-    if (username !== undefined && username !== null && username.trim() !== '') {
-      const usernameError = validateUsername(username);
-      if (usernameError) {
-        return NextResponse.json({ error: usernameError }, { status: 400 });
       }
     }
 
@@ -122,7 +114,6 @@ export async function PATCH(req) {
     if (trimmedFirst !== undefined) updatePayload.first_name = trimmedFirst;
     if (trimmedLast !== undefined) updatePayload.last_name = trimmedLast;
     if (computedFullName !== undefined) updatePayload.full_name = computedFullName;
-    if (username !== undefined) updatePayload.username = username?.trim() || null;
     if (contact_number !== undefined) updatePayload.contact_number = contact_number?.trim() || null;
     if (avatar_url !== undefined) updatePayload.avatar_url = avatar_url?.trim() || null;
 
@@ -162,7 +153,6 @@ export async function PATCH(req) {
         full_name: computedFullName || user.user_metadata?.full_name || 'FinLITE Member',
         first_name: trimmedFirst || null,
         last_name: trimmedLast || null,
-        username: username?.trim() || null,
         contact_number: contact_number?.trim() || null,
         avatar_url: avatar_url?.trim() || user.user_metadata?.avatar_url || null,
         role: isSuperAdmin ? 'admin' : 'member',

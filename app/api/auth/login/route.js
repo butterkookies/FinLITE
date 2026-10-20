@@ -7,50 +7,20 @@ import { getAuthMethods } from '@/lib/auth/methods';
 // POST /api/auth/login
 export async function POST(req) {
   try {
-    const { username, email, password } = await req.json();
-    const identifier = (username || email || '').trim().toLowerCase();
+    const { email, username, password } = await req.json();
+    const userEmail = (email || username || '').trim().toLowerCase();
 
-    if (!identifier || !password) {
-      return NextResponse.json({ error: 'Username and password are required.' }, { status: 400 });
+    if (!userEmail || !password) {
+      return NextResponse.json({ error: 'Email and password are required.' }, { status: 400 });
+    }
+
+    if (!userEmail.includes('@')) {
+      return NextResponse.json({ error: 'Please enter a valid Gmail address.' }, { status: 400 });
     }
 
     const supabase = await createClient();
 
-    // 1. Resolve email from username if identifier is not an email
-    let userEmail = identifier;
-
-    if (!identifier.includes('@')) {
-      // Find email by username from profiles first
-      const { data: profileRecord } = await supabase
-        .from('profiles')
-        .select('email, status')
-        .eq('username', identifier)
-        .maybeSingle();
-
-      if (profileRecord?.email) {
-        userEmail = profileRecord.email;
-      } else {
-        // Also check pending registration_requests
-        const { data: requestRecord } = await supabase
-          .from('registration_requests')
-          .select('email, status')
-          .eq('username', identifier)
-          .maybeSingle();
-
-        if (requestRecord) {
-          if (requestRecord.status === 'pending') {
-            return NextResponse.json({
-              error: 'pending',
-              message: 'Your registration is pending admin approval.',
-              email: requestRecord.email,
-            }, { status: 403 });
-          }
-          userEmail = requestRecord.email;
-        } else {
-          return NextResponse.json({ error: 'No account found with this username.' }, { status: 404 });
-        }
-      }
-    }
+   
 
     // 2. Attempt sign-in with resolved email + password
     const { data, error } = await supabase.auth.signInWithPassword({
@@ -88,7 +58,7 @@ export async function POST(req) {
         }
       }
 
-      return NextResponse.json({ error: 'Incorrect username or password.' }, { status: 401 });
+      return NextResponse.json({ error: 'Incorrect email or password.' }, { status: 401 });
     }
 
     const userId = data.user?.id;
@@ -98,14 +68,14 @@ export async function POST(req) {
     // Check profile approval status (first by auth_user_id, then fallback to email)
     let { data: profile } = await queryClient
       .from('profiles')
-      .select('id, status, role, first_name, last_name, username, auth_user_id')
+      .select('id, status, role, first_name, last_name, auth_user_id')
       .eq('auth_user_id', userId)
       .maybeSingle();
 
     if (!profile) {
       const { data: profileByEmail } = await queryClient
         .from('profiles')
-        .select('id, status, role, first_name, last_name, username, auth_user_id')
+        .select('id, status, role, first_name, last_name, auth_user_id')
         .eq('email', userEmail)
         .maybeSingle();
 
@@ -157,7 +127,7 @@ export async function POST(req) {
         user: {
           id: profile?.id || userId,
           name: profile ? `${profile.first_name || ''} ${profile.last_name || ''}`.trim() : 'Andrei Geronimo',
-          username: profile?.username || 'andrei_admin',
+          email: userEmail,
           role: 'admin',
         },
       });
@@ -234,7 +204,7 @@ export async function POST(req) {
       user: {
         id: profile.id,
         name: `${profile.first_name} ${profile.last_name}`.trim(),
-        username: profile.username,
+        email: userEmail,
         role: profile.role,
       },
     });

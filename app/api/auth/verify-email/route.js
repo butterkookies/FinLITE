@@ -41,7 +41,7 @@ export async function GET(req) {
       .eq('google_id', user.id)
       .eq('auth_provider', 'email')
       .is('email_verified_at', null)
-      .select('first_name, last_name, username, email, contact_number')
+      .select('first_name, last_name, email, contact_number')
       .maybeSingle();
 
     await logAuthEvent(adminClient, {
@@ -55,7 +55,6 @@ export async function GET(req) {
       sendAdminRegistrationNotification({
         applicantName: `${request.first_name} ${request.last_name}`.trim(),
         email: request.email,
-        username: request.username,
         contactNumber: request.contact_number,
         authProvider: 'email',
       }).catch((e) => console.warn('Admin notification email warning:', e?.message));

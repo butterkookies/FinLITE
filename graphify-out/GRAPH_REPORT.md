@@ -1,16 +1,16 @@
-# Graph Report - FinLITE  (2026-10-16)
+# Graph Report - FinLITE  (2026-10-19)
 
 ## Corpus Check
-- 128 files · ~207,018 words
+- 152 files · ~232,971 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 719 nodes · 895 edges · 74 communities (59 shown, 15 thin omitted)
-- Extraction: 90% EXTRACTED · 10% INFERRED · 0% AMBIGUOUS · INFERRED: 93 edges (avg confidence: 0.83)
+- 948 nodes · 1187 edges · 95 communities (77 shown, 18 thin omitted)
+- Extraction: 86% EXTRACTED · 14% INFERRED · 0% AMBIGUOUS · INFERRED: 166 edges (avg confidence: 0.82)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `65f646c0`
+- Built from commit: `a3d8cedd`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -36,6 +36,7 @@
 - [[_COMMUNITY_AI Query Interface (UI)|AI Query Interface (UI)]]
 - [[_COMMUNITY_Community 20|Community 20]]
 - [[_COMMUNITY_Community 22|Community 22]]
+- [[_COMMUNITY_Community 23|Community 23]]
 - [[_COMMUNITY_Community 24|Community 24]]
 - [[_COMMUNITY_Community 26|Community 26]]
 - [[_COMMUNITY_Community 28|Community 28]]
@@ -43,6 +44,7 @@
 - [[_COMMUNITY_Community 33|Community 33]]
 - [[_COMMUNITY_Community 37|Community 37]]
 - [[_COMMUNITY_Community 39|Community 39]]
+- [[_COMMUNITY_Community 40|Community 40]]
 - [[_COMMUNITY_Community 48|Community 48]]
 - [[_COMMUNITY_Community 49|Community 49]]
 - [[_COMMUNITY_Community 50|Community 50]]
@@ -55,23 +57,39 @@
 - [[_COMMUNITY_Community 57|Community 57]]
 - [[_COMMUNITY_Community 58|Community 58]]
 - [[_COMMUNITY_Community 59|Community 59]]
+- [[_COMMUNITY_Community 60|Community 60]]
 - [[_COMMUNITY_Community 61|Community 61]]
 - [[_COMMUNITY_Community 62|Community 62]]
+- [[_COMMUNITY_Community 63|Community 63]]
 - [[_COMMUNITY_Community 64|Community 64]]
 - [[_COMMUNITY_Community 65|Community 65]]
+- [[_COMMUNITY_Community 66|Community 66]]
 - [[_COMMUNITY_Community 68|Community 68]]
+- [[_COMMUNITY_Community 78|Community 78]]
+- [[_COMMUNITY_Community 79|Community 79]]
+- [[_COMMUNITY_Community 80|Community 80]]
+- [[_COMMUNITY_Community 81|Community 81]]
+- [[_COMMUNITY_Community 82|Community 82]]
+- [[_COMMUNITY_Community 83|Community 83]]
+- [[_COMMUNITY_Community 84|Community 84]]
+- [[_COMMUNITY_Community 85|Community 85]]
+- [[_COMMUNITY_Community 86|Community 86]]
+- [[_COMMUNITY_Community 87|Community 87]]
+- [[_COMMUNITY_Community 89|Community 89]]
+- [[_COMMUNITY_Community 91|Community 91]]
+- [[_COMMUNITY_Community 92|Community 92]]
 
 ## God Nodes (most connected - your core abstractions)
 1. `FinLITE Technology Stack Decision Guide` - 19 edges
-2. `FinLITE Technology Stack Decision & Guidelines` - 18 edges
-3. `formatPHP()` - 17 edges
-4. `isSuperAdminEmail()` - 16 edges
-5. `compilerOptions` - 14 edges
-6. `2. The 12 Iron Rules (Strict Negative Constraints)` - 13 edges
-7. `Detailed options` - 12 edges
-8. `checkRateLimit()` - 10 edges
-9. `createAdminClient()` - 10 edges
-10. `verifyAdmin()` - 9 edges
+2. `createAdminClient()` - 18 edges
+3. `FinLITE Technology Stack Decision & Guidelines` - 18 edges
+4. `FinLITE Technology Stack Decision & Guidelines` - 18 edges
+5. `isSuperAdminEmail()` - 17 edges
+6. `formatPHP()` - 17 edges
+7. `compilerOptions` - 14 edges
+8. `GET()` - 14 edges
+9. `getClientIp()` - 13 edges
+10. `2. The 12 Iron Rules (Strict Negative Constraints)` - 13 edges
 
 ## Surprising Connections (you probably didn't know these)
 - `temp_check exportFormattedDocx` --semantically_similar_to--> `index.html exportFormattedDocx`  [INFERRED] [semantically similar]
@@ -80,16 +98,16 @@
   index.html → export_report_engine.py
 - `temp_check renderDocxPreview` --semantically_similar_to--> `index.html renderDocxPreview`  [INFERRED] [semantically similar]
   temp_check.js → index.html
-- `index.html renderDocxPreview` --references--> `PDM_LOGO_BASE64`  [INFERRED]
-  index.html → logos.js
-- `index.html exportFormattedDocx` --references--> `PDM_LOGO_BASE64`  [INFERRED]
-  index.html → logos.js
+- `Dashboard()` --calls--> `isSuperAdminEmail()`  [INFERRED]
+  app/page.jsx → lib/config/admin.js
+- `POST()` --calls--> `createRecoveryLink()`  [INFERRED]
+  app/api/auth/forgot-password/route.js → lib/auth/registration.js
 
-## Communities (74 total, 15 thin omitted)
+## Communities (95 total, 18 thin omitted)
 
 ### Community 0 - "Web App UI & State"
-Cohesion: 0.05
-Nodes (45): createTransporter(), sendAdminRegistrationNotification(), POST(), RegisterForm(), POST(), assert(), balancedVar, c (+37 more)
+Cohesion: 0.07
+Nodes (25): balancedVar, c, cashBalance, cents, docxJobs, docxStart, env, envContent (+17 more)
 
 ### Community 1 - "Financial Report Templates & Exports"
 Cohesion: 0.05
@@ -124,12 +142,12 @@ Cohesion: 0.11
 Nodes (17): compilerOptions, allowJs, baseUrl, isolatedModules, jsx, lib, module, moduleResolution (+9 more)
 
 ### Community 9 - "Project Context & RTK Rules"
-Cohesion: 0.18
-Nodes (8): GET(), verifyAdmin(), POST(), GET(), DELETE(), GET(), PATCH(), VALID_ROLES
+Cohesion: 0.17
+Nodes (11): GET(), verifyAdmin(), isSuperAdminEmail(), resolveEffectiveRole(), POST(), GET(), testAccountLifecycleAndRemarks(), DELETE() (+3 more)
 
 ### Community 11 - "Denomination Counter & Reconciliation"
-Cohesion: 0.06
-Nodes (33): config, isPublicRoute(), middleware(), PUBLIC_ROUTES, POST(), testRateLimiting(), afterReset, allowed (+25 more)
+Cohesion: 0.07
+Nodes (31): config, isPublicRoute(), middleware(), PUBLIC_ROUTES, testRateLimiting(), afterReset, allowed, blockA (+23 more)
 
 ### Community 12 - "Table Inspection Utility"
 Cohesion: 0.20
@@ -152,8 +170,8 @@ Cohesion: 0.40
 Nodes (4): 1.1 Project Context, Proposed Solution, Statement of the Problem, The Current Manual Process (Crucial for your DFD)
 
 ### Community 19 - "AI Query Interface (UI)"
-Cohesion: 0.14
-Nodes (13): AdvancesManagementModal, AIChatDrawer, AuditTrailDrawer, DebtsManagementModal, DEFAULT_LITE_SIGNATORIES_25_26, DEFAULT_LITE_SIGNATORIES_26_27, DEFAULT_SEMESTERS, DenominationCounter (+5 more)
+Cohesion: 0.13
+Nodes (14): AdvancesManagementModal, AIChatDrawer, AuditTrailDrawer, Dashboard(), DebtsManagementModal, DEFAULT_LITE_SIGNATORIES_25_26, DEFAULT_LITE_SIGNATORIES_26_27, DEFAULT_SEMESTERS (+6 more)
 
 ### Community 20 - "Community 20"
 Cohesion: 0.14
@@ -168,16 +186,20 @@ Cohesion: 0.06
 Nodes (32): 1. Executive Design Philosophy, 1. Primary Buttons, 2. Secondary / Neutral Buttons, 2. The 12 Iron Rules (Strict Negative Constraints), 3. Design Tokens & Color System, 3. Financial Transaction Status Indicators (Anti-Pastel Tag), 4. Custom Popover Dropdowns (Replacing Browser `<select>`), 4. Typography Scale & Tabular Rules (+24 more)
 
 ### Community 37 - "Community 37"
-Cohesion: 0.12
-Nodes (9): POST(), VALID_ROLES, GET(), POST(), POST(), GET(), PATCH(), createAdminClient() (+1 more)
+Cohesion: 0.18
+Nodes (6): POST(), VALID_ROLES, POST(), GET(), PATCH(), createAdminClient()
+
+### Community 40 - "Community 40"
+Cohesion: 0.05
+Nodes (40): 10. React 19 + Express 5 + MongoDB, 1. Next.js 16 + Supabase PostgreSQL/Auth/Storage + AI SDK 6, 2. Laravel 13 + Inertia + Vue 3 + PostgreSQL, 3. Django 6 + HTMX + PostgreSQL, 4. React 19 + Vite 8 + FastAPI + PostgreSQL, 5. React 19 + Vite 8 + Express 5 + Prisma 7 + PostgreSQL, 6. Nuxt 4 + Supabase PostgreSQL/Auth/Storage, 7. ASP.NET Core 10 LTS + Blazor + EF Core + PostgreSQL (+32 more)
 
 ### Community 54 - "Community 54"
 Cohesion: 0.12
 Nodes (18): Badge(), badgeSizes, badgeVariants, Button, buttonSizes, buttonVariants, Card, CardContent (+10 more)
 
 ### Community 55 - "Community 55"
-Cohesion: 0.12
-Nodes (20): StatCards(), AdvancesManagementModal(), DebtsManagementModal(), NewTransactionModal(), ReceiptCropModal, TransactionCommentsDrawer(), formatFriendlyDate(), TransactionTable() (+12 more)
+Cohesion: 0.19
+Nodes (8): StatCards(), AdvancesManagementModal(), DebtsManagementModal(), TransactionCommentsDrawer(), formatFriendlyDate(), TransactionTable(), NewSemesterModal(), formatPHP()
 
 ### Community 56 - "Community 56"
 Cohesion: 0.21
@@ -195,37 +217,93 @@ Nodes (8): BorderGlow(), buildGlowVars(), buildGradientVars(), COLOR_MAP, GRADIE
 Cohesion: 0.17
 Nodes (10): BASE_DIR, fallbackBuffer, img1Path, img2Path, img3Path, img4Path, img5Path, SCRIPT_PATH (+2 more)
 
+### Community 60 - "Community 60"
+Cohesion: 0.06
+Nodes (32): 1. Executive Design Philosophy, 1. Primary Buttons, 2. Secondary / Neutral Buttons, 2. The 12 Iron Rules (Strict Negative Constraints), 3. Design Tokens & Color System, 3. Financial Transaction Status Indicators (Anti-Pastel Tag), 4. Custom Popover Dropdowns (Replacing Browser `<select>`), 4. Typography Scale & Tabular Rules (+24 more)
+
 ### Community 61 - "Community 61"
 Cohesion: 0.29
 Nodes (7): anonClient, env, envContent, idx, report(), runSecurityAudit(), trimmed
 
 ### Community 62 - "Community 62"
-Cohesion: 0.43
-Nodes (6): Dashboard(), getSuperAdminEmails(), isSuperAdminEmail(), resolveEffectiveRole(), SUPER_ADMIN_EMAILS, testAccountLifecycleAndRemarks()
+Cohesion: 0.06
+Nodes (30): 1.1 Conceptual Foundation & The "Financial Assistant" Paradigm, 1.2 Core Architectural Capabilities & Modular Subsystems, 1. NEW SYSTEM OVERVIEW, 2.1 The Host Institution: Pambayang Dalubhasaan ng Marilao (PDM), 2.2 The Target Student Organization: League of Information Technology Enthusiasts (LITE), 2.3 Governance Structure and Committee Ecosystem, 2.4 Operational Setting, Venue Constraints, and Custodial Protocols, 2. BACKGROUND OF THE ORGANIZATION (+22 more)
+
+### Community 63 - "Community 63"
+Cohesion: 0.15
+Nodes (15): createStatelessClient(), getAuthMethods(), getSecurityState(), logAuthEvent(), patchSecurityState(), verifyPasswordOnly(), isReplaceableRegistration(), discardUnverifiedRegistration() (+7 more)
 
 ### Community 65 - "Community 65"
-Cohesion: 0.60
-Nodes (3): OFFICIAL_INFLOW_CATEGORIES, OFFICIAL_OUTFLOW_CATEGORIES, admins
+Cohesion: 0.25
+Nodes (7): getSuperAdminEmails(), SUPER_ADMIN_EMAILS, OFFICIAL_INFLOW_CATEGORIES, OFFICIAL_OUTFLOW_CATEGORIES, createTransporter(), sendAdminRegistrationNotification(), admins
+
+### Community 66 - "Community 66"
+Cohesion: 0.11
+Nodes (18): 1. Global & Architectural Directives, 2. End-to-End System Journey Checklist (Login to Report Generation), 3.1. Figure 3: Context Diagram of FinLITE System (Page 16), 3.2. Figure 4: Diagram 0 of FinLITE System (Page 18), 3. Specific Updates Required for Chapter 2 Diagrams, 4. Current System Limitations, Pending Features & Technical Debt, FinLITE Academic Paper Revision Master Checklist, Phase 10: Grounded Gemini AI Financial Co-Pilot (+10 more)
+
+### Community 78 - "Community 78"
+Cohesion: 0.16
+Nodes (9): createRecoveryLink(), createVerificationLink(), RegisterForm(), POST(), GENERIC, POST(), testAuthValidation(), validateContactNumber() (+1 more)
+
+### Community 79 - "Community 79"
+Cohesion: 0.17
+Nodes (10): resolveAppUrl(), safeNextPath(), decideForgotPasswordAction(), evaluateGoogleIdentity(), passwordChangeRequirements(), base, future, now (+2 more)
+
+### Community 80 - "Community 80"
+Cohesion: 0.15
+Nodes (12): code:text (Good day, Ma'am Kimberly and Ma'am Krizia!), Form Description / Executive Overview (Developer Pitch):, Form Guide & Template for Google Forms Deployment, Form Title:, GOOGLE FORM SETUP DETAILS, LITE Club Adviser Financial Operations & System Rules Questionnaire, SECTION 1: Personal Advances ("Abono") & Reimbursement Governance, SECTION 2: Physical Cashbox Custody & Event Logistics (+4 more)
+
+### Community 81 - "Community 81"
+Cohesion: 0.38
+Nodes (9): DenominationCounter(), EMPTY_DENOMINATIONS, runTests(), calculatePhysicalTotal(), calculateVariance(), denomCodeToCountKey(), DENOMINATION_VALUES, fromCentavos() (+1 more)
+
+### Community 82 - "Community 82"
+Cohesion: 0.36
+Nodes (9): deliverEmail(), escapeHtml(), renderEmail(), sendGoogleOnlyNoticeEmail(), sendPasswordResetEmail(), sendSecurityChangeEmail(), sendVerificationEmail(), GENERIC (+1 more)
+
+### Community 83 - "Community 83"
+Cohesion: 0.20
+Nodes (9): 1. RAW QUESTIONNAIRE RESPONSES, 2. DERIVED INSTITUTIONAL POLICIES FOR FINLITE SYSTEM ARCHITECTURE, LITE Club Adviser Assessment Snapshot: Ms. Krizia Mae Genovia, SECTION 1: Personal Advances ("Abono") & Reimbursement Governance, SECTION 2: Physical Cashbox Custody & Event Logistics, SECTION 3: Digital Payments (GCash) & Fee Handling, SECTION 4: Merchandise, Dues, and Discrepancy Policies, SECTION 5: Approval Governance, Revisions & Annual Turnover (+1 more)
+
+### Community 84 - "Community 84"
+Cohesion: 0.22
+Nodes (8): 1. Specifications & Architecture (`specs/`), 2. Design System & UI/UX Guidelines (`design/`), 3. Research & Stakeholder Discovery (`research/`), 4. Architecture & Process Flow Diagrams (Root `docs/`), 5. Archive & Historical Documents (`archive/`), code:text (docs/), Directory Structure, FinLITE Documentation
+
+### Community 85 - "Community 85"
+Cohesion: 0.29
+Nodes (6): NewTransactionModal(), ReceiptCropModal, sanitizeAmountInput(), validateOutflowBalance(), validateTransactionAmount(), validateUsername()
+
+### Community 86 - "Community 86"
+Cohesion: 0.29
+Nodes (4): POST(), POST(), POST(), getClientIp()
+
+### Community 87 - "Community 87"
+Cohesion: 0.47
+Nodes (6): assert(), skip(), testAuthConcurrency(), testDatabase(), testDocxSingle(), testRoutes()
+
+### Community 89 - "Community 89"
+Cohesion: 0.67
+Nodes (3): testAuditTrail(), fetchAuditTrail(), logAuditEvent()
 
 ## Knowledge Gaps
-- **288 isolated node(s):** `target`, `lib`, `allowJs`, `skipLibCheck`, `strict` (+283 more)
+- **407 isolated node(s):** `target`, `lib`, `allowJs`, `skipLibCheck`, `strict` (+402 more)
   These have ≤1 connection - possible missing edges or undocumented components.
-- **15 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **18 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
+- **Why does `isSuperAdminEmail()` connect `Project Context & RTK Rules` to `Web App UI & State`, `Community 65`, `Community 37`, `Denomination Counter & Reconciliation`, `Community 78`, `AI Query Interface (UI)`, `Community 86`, `Community 57`, `Community 63`?**
+  _High betweenness centrality (0.026) - this node is a cross-community bridge._
 - **Why does `cn()` connect `Community 54` to `Community 20`?**
-  _High betweenness centrality (0.035) - this node is a cross-community bridge._
-- **Why does `isSuperAdminEmail()` connect `Community 62` to `Web App UI & State`, `Community 37`, `Project Context & RTK Rules`, `Denomination Counter & Reconciliation`, `Community 57`?**
-  _High betweenness centrality (0.035) - this node is a cross-community bridge._
-- **Why does `formatPHP()` connect `Community 55` to `Web App UI & State`?**
-  _High betweenness centrality (0.014) - this node is a cross-community bridge._
-- **Are the 11 inferred relationships involving `formatPHP()` (e.g. with `StatCards()` and `AdvancesManagementModal()`) actually correct?**
-  _`formatPHP()` has 11 INFERRED edges - model-reasoned connections that need verification._
-- **Are the 10 inferred relationships involving `isSuperAdminEmail()` (e.g. with `middleware()` and `Dashboard()`) actually correct?**
-  _`isSuperAdminEmail()` has 10 INFERRED edges - model-reasoned connections that need verification._
+  _High betweenness centrality (0.025) - this node is a cross-community bridge._
+- **Why does `getClientIp()` connect `Community 86` to `Web App UI & State`, `Community 82`, `Denomination Counter & Reconciliation`, `Community 63`?**
+  _High betweenness centrality (0.013) - this node is a cross-community bridge._
+- **Are the 17 inferred relationships involving `createAdminClient()` (e.g. with `POST()` and `DELETE()`) actually correct?**
+  _`createAdminClient()` has 17 INFERRED edges - model-reasoned connections that need verification._
+- **Are the 11 inferred relationships involving `isSuperAdminEmail()` (e.g. with `middleware()` and `Dashboard()`) actually correct?**
+  _`isSuperAdminEmail()` has 11 INFERRED edges - model-reasoned connections that need verification._
 - **What connects `target`, `lib`, `allowJs` to the rest of the system?**
-  _294 weakly-connected nodes found - possible documentation gaps or missing edges._
+  _413 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `Web App UI & State` be split into smaller, more focused modules?**
-  _Cohesion score 0.050505050505050504 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.07142857142857142 - nodes in this community are weakly interconnected._

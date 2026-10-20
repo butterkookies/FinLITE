@@ -85,6 +85,35 @@ const DEFAULT_LITE_SIGNATORIES_26_27 = {
   adviser2: 'MS. KRIZIA MAE GENOVIA',
   adviserName: 'MS. KIMBERLY DAWN JATULAN',
   adviserRole: 'LITE Club Advisers',
+  directorName: 'JOVYLYN ORTIZ-CESAR, MBA, MSIT',
+  directorRole: 'Program Director, BSIT',
+  deanName: 'DR. EMRAIDA MARIE M. MANUCOM',
+  deanRole: 'Dean, College of Computer Studies',
+};
+
+const DEFAULT_LITE_SIGNATORIES_25_26 = {
+  presidentName: 'MALBAROSA, EMANUEL',
+  presidentRole: 'LITE President',
+  vicePresidentName: '',
+  vicePresidentRole: '',
+  treasurerName: 'GERONIMO, ANDREI JOHN P.',
+  treasurerRole: 'LITE Treasurer',
+  auditorName: 'CABANAG, ROSE MARIELLE P.',
+  auditorRole: 'LITE Auditor',
+  preparedBy: 'GERONIMO, ANDREI JOHN P.',
+  preparedRole: 'LITE Treasurer',
+  reviewedBy: 'CABANAG, ROSE MARIELLE P.',
+  reviewedRole: 'LITE Auditor',
+  notedBy: 'MALBAROSA, EMANUEL',
+  notedRole: 'LITE President',
+  adviser1: 'MS. KIMBERLY DAWN JATULAN',
+  adviser2: 'MR. FLORANTE PANGILINAN',
+  adviserName: 'MS. KIMBERLY DAWN JATULAN',
+  adviserRole: 'LITE Club Advisers',
+  directorName: 'JOVYLYN ORTIZ-CESAR, MBA, MSIT',
+  directorRole: 'Program Director, BSIT',
+  deanName: 'DR. EMRAIDA MARIE M. MANUCOM',
+  deanRole: 'Dean, College of Computer Studies',
 };
 
 export default function SidebarMockupDashboard() {
@@ -329,6 +358,71 @@ export default function SidebarMockupDashboard() {
 
     loadData();
   }, []);
+
+  // Load official semester signatories from Supabase whenever active semester changes
+  useEffect(() => {
+    async function loadSignatories() {
+      const supabase = createClient();
+      if (!supabase || !currentSemester?.academicYear || !currentSemester?.semester) return;
+      try {
+        const { data, error } = await supabase
+          .from('semester_signatories')
+          .select('*')
+          .eq('academic_year', currentSemester.academicYear)
+          .eq('semester', currentSemester.semester)
+          .eq('is_active', true)
+          .order('sort_order', { ascending: true });
+
+        const termDefault = currentSemester.academicYear === '2025-2026' 
+          ? DEFAULT_LITE_SIGNATORIES_25_26 
+          : DEFAULT_LITE_SIGNATORIES_26_27;
+
+        if (!error && data && data.length > 0) {
+          const sigMap = { ...termDefault };
+          data.forEach((row) => {
+            if (row.role_key === 'president') {
+              sigMap.notedBy = row.name;
+              sigMap.notedRole = row.position_title;
+              sigMap.presidentName = row.name;
+              sigMap.presidentRole = row.position_title;
+            } else if (row.role_key === 'vice_president' || row.role_key === 'vp') {
+              sigMap.vicePresidentName = row.name;
+              sigMap.vicePresidentRole = row.position_title;
+            } else if (row.role_key === 'treasurer') {
+              sigMap.preparedBy = row.name;
+              sigMap.preparedRole = row.position_title;
+              sigMap.treasurerName = row.name;
+              sigMap.treasurerRole = row.position_title;
+            } else if (row.role_key === 'auditor') {
+              sigMap.reviewedBy = row.name;
+              sigMap.reviewedRole = row.position_title;
+              sigMap.auditorName = row.name;
+              sigMap.auditorRole = row.position_title;
+            } else if (row.role_key === 'adviser1' || row.role_key === 'adviser') {
+              sigMap.adviser1 = row.name;
+              sigMap.adviserName = row.name;
+              sigMap.adviserRole = row.position_title;
+            } else if (row.role_key === 'adviser2') {
+              sigMap.adviser2 = row.name;
+            } else if (row.role_key === 'director') {
+              sigMap.directorName = row.name;
+              sigMap.directorRole = row.position_title;
+            } else if (row.role_key === 'dean') {
+              sigMap.deanName = row.name;
+              sigMap.deanRole = row.position_title;
+            }
+          });
+          setSemesterSignatories(sigMap);
+        } else {
+          setSemesterSignatories(termDefault);
+        }
+      } catch (err) {
+        console.warn('sidebar-mockup semester_signatories query notice:', err);
+      }
+    }
+
+    loadSignatories();
+  }, [currentSemester?.academicYear, currentSemester?.semester]);
 
   // Filter transactions to current selected semester
   const activeTransactions = transactions.filter((t) => {

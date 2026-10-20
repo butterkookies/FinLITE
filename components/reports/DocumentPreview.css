@@ -2,21 +2,53 @@
 /* STRICT SPECIFICATION: Calibri 11pt constantly and consistently */
 
 .document-preview-overlay {
-  background-color: #262626; /* Dark slate canvas matching Word multi-page viewer */
+  background-color: #121214; /* Deep slate obsidian canvas for high-contrast paper view */
+  overflow: hidden;
+  height: 100vh;
+  height: 100dvh;
+}
+
+/* Viewport for pan, zoom, and continuous/paged document viewing */
+.document-preview-viewport {
+  flex: 1;
+  width: 100%;
+  overflow-x: auto;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 1.25rem 0.5rem 6.5rem 0.5rem;
+  position: relative;
+  touch-action: pan-x pan-y;
+}
+
+/* Proportional Scaler Wrapper maintaining exact Letter 8.5" x 11" aspect ratio across all devices */
+.sheet-scaler-wrapper {
+  position: relative;
+  margin: 0.75rem auto;
+  flex-shrink: 0;
+  transition: width 0.15s cubic-bezier(0.16, 1, 0.3, 1), height 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.sheet-scale-target {
+  transform-origin: top left;
+  width: 816px;
+  will-change: transform;
 }
 
 /* Individual 8.5" x 11" Paper Sheet (Exact Word Margins: Top 1.0", Left 1.0", Right 1.0", Bottom 0.75") */
 .document-sheet {
-  width: 8.5in;
-  min-height: 11in;
-  padding: 1.0in 1.0in 0.75in 1.0in;
-  margin: 1.5rem auto;
+  width: 816px; /* 8.5in at 96 DPI */
+  min-height: 1056px; /* 11in at 96 DPI */
+  padding: 96px 96px 72px 96px; /* 1.0in 1.0in 0.75in 1.0in */
+  margin: 0 auto;
   background-color: #ffffff;
   color: #000000;
   font-family: Calibri, 'Segoe UI', Arial, sans-serif !important;
   font-size: 11pt !important;
   line-height: 1.25;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
+  box-shadow: 0 16px 36px -8px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.08);
   box-sizing: border-box;
   position: relative;
   page-break-after: always;
@@ -213,7 +245,7 @@
 
 .sig-name {
   font-size: 11pt !important;
-  font-weight: normal;
+  font-weight: bold !important;
   text-transform: uppercase;
   display: block;
 }
@@ -297,89 +329,51 @@
   font-weight: bold;
 }
 
-/* Mobile & Tablet Responsive Overrides (< 860px) */
-@media screen and (max-width: 859px) {
-  .document-preview-overlay {
-    padding-left: 0.25rem;
-    padding-right: 0.25rem;
-    -webkit-overflow-scrolling: touch;
-  }
+/* Settings Drawer & Slide-over Panel */
+.preview-drawer-backdrop {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.65);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  z-index: 60;
+  animation: previewFadeIn 0.2s ease-out;
+}
 
-  .document-sheet {
-    width: 100% !important;
-    max-width: 100% !important;
-    min-height: auto !important;
-    padding: 1.25rem 0.75rem !important;
-    margin: 0.5rem auto !important;
-    border-radius: 0.75rem;
-    font-size: 10pt !important;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
-    overflow-x: auto;
-    box-sizing: border-box;
-  }
+.preview-drawer-panel {
+  position: fixed;
+  z-index: 70;
+  background-color: #18181b;
+  border-color: #27272a;
+  box-shadow: -10px 0 35px rgba(0, 0, 0, 0.7);
+  display: flex;
+  flex-direction: column;
+}
 
-  .document-sheet * {
-    font-size: 10pt !important;
-  }
+/* Floating Docked Navigation & Zoom Bar */
+.preview-docked-toolbar {
+  position: fixed;
+  bottom: 1rem;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 50;
+  box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(255, 255, 255, 0.1);
+  transition: transform 0.2s ease, opacity 0.2s ease;
+}
 
-  .pdm-banner-container {
-    margin-bottom: 12pt;
-  }
+@keyframes previewFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
 
-  .pdm-banner-frame {
-    padding: 3px 6px;
-  }
+@keyframes previewSlideInRight {
+  from { transform: translateX(100%); }
+  to { transform: translateX(0); }
+}
 
-  .pdm-banner-logo {
-    width: 36px;
-    height: 36px;
-  }
-
-  .pdm-banner-school {
-    font-size: 10pt !important;
-  }
-
-  .pdm-banner-club {
-    font-size: 8.5pt !important;
-  }
-
-  .pdm-banner-course {
-    font-size: 7.5pt !important;
-  }
-
-  .transmittal-date,
-  .transmittal-recipient,
-  .transmittal-salutation {
-    margin-bottom: 12pt;
-  }
-
-  .transmittal-body {
-    text-indent: 0.25in;
-    margin-bottom: 16pt;
-  }
-
-  .transmittal-closing {
-    margin-bottom: 16pt;
-  }
-
-  .sig-row-3col {
-    grid-template-columns: 1fr;
-    gap: 12px;
-    margin-top: 12pt;
-    margin-bottom: 14pt;
-  }
-
-  .sig-row-2col {
-    grid-template-columns: 1fr;
-    gap: 12px;
-    margin-top: 12pt;
-    margin-bottom: 14pt;
-  }
-
-  .fin-table td.amount {
-    width: auto;
-    min-width: 75px;
-  }
+@keyframes previewSlideInBottom {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
 }
 
 /* Standard Print Page Dimensions & Rules */
@@ -388,7 +382,7 @@
   margin: 0;
 }
 
-/* Print Overrides */
+/* Print Overrides - 100% Vector Fidelity with ZERO transforms */
 @media print {
   *, *::before, *::after {
     -webkit-print-color-adjust: exact !important;
@@ -409,6 +403,28 @@
     min-height: auto !important;
     inset: auto !important;
     z-index: auto !important;
+  }
+
+  .document-preview-viewport {
+    padding: 0 !important;
+    margin: 0 !important;
+    overflow: visible !important;
+    display: block !important;
+  }
+
+  .sheet-scaler-wrapper {
+    width: 8.5in !important;
+    height: auto !important;
+    margin: 0 !important;
+    box-shadow: none !important;
+    display: block !important;
+  }
+
+  .sheet-scale-target {
+    transform: none !important;
+    width: 8.5in !important;
+    height: auto !important;
+    display: block !important;
   }
 
   .document-sheet {

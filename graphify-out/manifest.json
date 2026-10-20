@@ -35,13 +35,13 @@
     "semantic_hash": ""
   },
   "C:\\Users\\user\\Documents\\ANDREI_FILES\\PDM_FILES\\3RD YEAR\\1st sem\\IT31-SAD\\FinLITE\\next.config.mjs": {
-    "mtime": 1790684537.2346258,
-    "ast_hash": "68e04dacd2004500b71ffefb9079e6b0",
-    "semantic_hash": "68e04dacd2004500b71ffefb9079e6b0"
+    "mtime": 1792336138.4806535,
+    "ast_hash": "60ec4c842b3246235bc8f8d5feaad365",
+    "semantic_hash": ""
   },
   "C:\\Users\\user\\Documents\\ANDREI_FILES\\PDM_FILES\\3RD YEAR\\1st sem\\IT31-SAD\\FinLITE\\package.json": {
-    "mtime": 1791945235.2366552,
-    "ast_hash": "6fbbfa83a1ec28c50c428f30cad4bc2d",
+    "mtime": 1792336138.4811823,
+    "ast_hash": "d4c5fcdfc4c51db7c2014ea8a277cae5",
     "semantic_hash": ""
   },
   "C:\\Users\\user\\Documents\\ANDREI_FILES\\PDM_FILES\\3RD YEAR\\1st sem\\IT31-SAD\\FinLITE\\postcss.config.mjs": {
@@ -50,18 +50,18 @@
     "semantic_hash": "1cf44d2e5dab994abff0a38fa6692ea0"
   },
   "C:\\Users\\user\\Documents\\ANDREI_FILES\\PDM_FILES\\3RD YEAR\\1st sem\\IT31-SAD\\FinLITE\\app\\layout.jsx": {
-    "mtime": 1792152655.8727853,
-    "ast_hash": "3fb412fe03f96bc71e63be356fca740e",
+    "mtime": 1792188544.8417165,
+    "ast_hash": "98a3b3aaffc9ab7f4018df2ba4868a3a",
     "semantic_hash": ""
   },
   "C:\\Users\\user\\Documents\\ANDREI_FILES\\PDM_FILES\\3RD YEAR\\1st sem\\IT31-SAD\\FinLITE\\app\\page.jsx": {
-    "mtime": 1792162833.5372999,
-    "ast_hash": "58aafb5c67627a7eb9a5c084db77d0d9",
+    "mtime": 1792336138.429765,
+    "ast_hash": "9a1a904d0c3bd411cc4a0509e7e90d7d",
     "semantic_hash": ""
   },
   "C:\\Users\\user\\Documents\\ANDREI_FILES\\PDM_FILES\\3RD YEAR\\1st sem\\IT31-SAD\\FinLITE\\app\\api\\chat\\route.js": {
-    "mtime": 1791469144.5870042,
-    "ast_hash": "1f329145d8b82c9820f216b7b98e7b0c",
+    "mtime": 1792336138.4257653,
+    "ast_hash": "1f8fb53fcf10ecb87eab69486cc3c621",
     "semantic_hash": ""
   },
   "C:\\Users\\user\\Documents\\ANDREI_FILES\\PDM_FILES\\3RD YEAR\\1st sem\\IT31-SAD\\FinLITE\\app\\api\\reports\\docx\\route.js": {
@@ -70,39 +70,39 @@
     "semantic_hash": ""
   },
   "C:\\Users\\user\\Documents\\ANDREI_FILES\\PDM_FILES\\3RD YEAR\\1st sem\\IT31-SAD\\FinLITE\\components\\ai\\AIChatDrawer.jsx": {
-    "mtime": 1792163437.6431408,
-    "ast_hash": "bf2fd876af92faca0da9ccf371553a22",
+    "mtime": 1792336138.437766,
+    "ast_hash": "9bcf566bc605a934cdfccf1ede71887f",
     "semantic_hash": ""
   },
   "C:\\Users\\user\\Documents\\ANDREI_FILES\\PDM_FILES\\3RD YEAR\\1st sem\\IT31-SAD\\FinLITE\\components\\dashboard\\StatCards.jsx": {
-    "mtime": 1792075861.7927818,
-    "ast_hash": "075584a27b0dba735289fec1d80f10e7",
+    "mtime": 1792336138.4387655,
+    "ast_hash": "fcd6bc89ef9e03d7d7ce588b114a97c9",
     "semantic_hash": ""
   },
   "C:\\Users\\user\\Documents\\ANDREI_FILES\\PDM_FILES\\3RD YEAR\\1st sem\\IT31-SAD\\FinLITE\\components\\layout\\Navbar.jsx": {
-    "mtime": 1792074599.7945235,
-    "ast_hash": "4a175b2bec34caca6005b1bc4b623bb9",
+    "mtime": 1792167241.0758438,
+    "ast_hash": "f87ef18d605ca8a86d7a2b29b6ed22d6",
     "semantic_hash": ""
   },
   "C:\\Users\\user\\Documents\\ANDREI_FILES\\PDM_FILES\\3RD YEAR\\1st sem\\IT31-SAD\\FinLITE\\components\\ledger\\NewTransactionModal.jsx": {
-    "mtime": 1792065492.183767,
-    "ast_hash": "a46f1a22b39d8c1708b5224414e6d191",
+    "mtime": 1792336138.4417653,
+    "ast_hash": "8e0a8e2a7f6039656888e0b750af6756",
     "semantic_hash": ""
   },
   "C:\\Users\\user\\Documents\\ANDREI_FILES\\PDM_FILES\\3RD YEAR\\1st sem\\IT31-SAD\\FinLITE\\components\\ledger\\TransactionTable.jsx": {
-    "mtime": 1792160375.493135,
-    "ast_hash": "19f3e0838d802290ebef7dc9f7a852b1",
+    "mtime": 1792336138.4437654,
+    "ast_hash": "6b1bb06eb50b568110c85d78244fdf13",
     "semantic_hash": ""
   },
   "C:\\Users\\user\\Documents\\ANDREI_FILES\\PDM_FILES\\3RD YEAR\\1st sem\\IT31-SAD\\FinLITE\\components\\reconciliation\\DenominationCounter.jsx": {
-    "mtime": 1792141795.6070867,
+    "mtime": 1792167241.082186,
     "ast_hash": "040241a3f14ae97b17cb7d0f789aebe8",
     "semantic_hash": ""
   },
   "C:\\Users\\user\\Documents\\ANDREI_FILES\\PDM_FILES\\3RD YEAR\\1st sem\\IT31-SAD\\FinLITE\\lib\\supabase\\client.js": {
-    "mtime": 1791703784.3900704,
-    "ast_hash": "aef125592e767b29d2b9740a1dd9cad2",
-    "semantic_hash": "aef125592e767b29d2b9740a1dd9cad2"
+    "mtime": 1792336138.4796007,
+    "ast_hash": "6b70c60509789548cd42a3f9788096cb",
+    "semantic_hash": ""
   },
   "C:\\Users\\user\\Documents\\ANDREI_FILES\\PDM_FILES\\3RD YEAR\\1st sem\\IT31-SAD\\FinLITE\\lib\\supabase\\server.js": {
     "mtime": 1791703784.3910718,
@@ -149,35 +149,15 @@
     "ast_hash": "06ad9d978f761b472153f30c6eba4c1f",
     "semantic_hash": "06ad9d978f761b472153f30c6eba4c1f"
   },
-  "C:\\Users\\user\\Documents\\ANDREI_FILES\\PDM_FILES\\3RD YEAR\\1st sem\\IT31-SAD\\FinLITE\\Project Context.md": {
-    "mtime": 1790242032.098126,
-    "ast_hash": "acd0fa7e405cf49f467445dab3b0f0c4",
-    "semantic_hash": "acd0fa7e405cf49f467445dab3b0f0c4"
-  },
   "C:\\Users\\user\\Documents\\ANDREI_FILES\\PDM_FILES\\3RD YEAR\\1st sem\\IT31-SAD\\FinLITE\\README.md": {
-    "mtime": 1790242032.098126,
-    "ast_hash": "d3655e25d4096e4376d47574a5f8d238",
-    "semantic_hash": "d3655e25d4096e4376d47574a5f8d238"
-  },
-  "C:\\Users\\user\\Documents\\ANDREI_FILES\\PDM_FILES\\3RD YEAR\\1st sem\\IT31-SAD\\FinLITE\\techstack-options.md": {
-    "mtime": 1790242032.1529558,
-    "ast_hash": "b7cc3857df969639ec60781f4ef02184",
-    "semantic_hash": "b7cc3857df969639ec60781f4ef02184"
-  },
-  "C:\\Users\\user\\Documents\\ANDREI_FILES\\PDM_FILES\\3RD YEAR\\1st sem\\IT31-SAD\\FinLITE\\docs\\ADVISER_QUESTIONNAIRE.md": {
-    "mtime": 1790242032.111439,
-    "ast_hash": "cb22803c8c15733e10826f548905ce62",
-    "semantic_hash": "cb22803c8c15733e10826f548905ce62"
+    "mtime": 1792215935.8184364,
+    "ast_hash": "391719630b76f35c3dbb83e891d2423c",
+    "semantic_hash": ""
   },
   "C:\\Users\\user\\Documents\\ANDREI_FILES\\PDM_FILES\\3RD YEAR\\1st sem\\IT31-SAD\\FinLITE\\graphify-out\\converted\\Project Context_752a6544.md": {
     "mtime": 1789547120.661019,
     "ast_hash": "c3d2a26b88edc54fb8b68737f0b31dea",
     "semantic_hash": ""
-  },
-  "C:\\Users\\user\\Documents\\ANDREI_FILES\\PDM_FILES\\3RD YEAR\\1st sem\\IT31-SAD\\FinLITE\\docs\\PROJECT_CONTEXT.md": {
-    "mtime": 1790242032.1144385,
-    "ast_hash": "5e282b6a18975266dbd879dc6475e813",
-    "semantic_hash": "5e282b6a18975266dbd879dc6475e813"
   },
   "C:\\Users\\user\\Documents\\ANDREI_FILES\\PDM_FILES\\3RD YEAR\\1st sem\\IT31-SAD\\FinLITE\\graphify-out\\converted\\FinLITE-Exported-Report_f5bbbc7c.md": {
     "mtime": 1789547120.7151916,
@@ -210,24 +190,19 @@
     "semantic_hash": "69bf72bfd0b9b5bf08ca4a990f0ed3f0"
   },
   "C:\\Users\\user\\Documents\\ANDREI_FILES\\PDM_FILES\\3RD YEAR\\1st sem\\IT31-SAD\\FinLITE\\components\\proposals\\NewProposalModal.jsx": {
-    "mtime": 1791992369.3736362,
-    "ast_hash": "86f5c1f031c97404bba32ad4838cb57b",
+    "mtime": 1792336138.4447646,
+    "ast_hash": "ea6121c2637c7c98cfca2522ccc906eb",
     "semantic_hash": ""
   },
   "C:\\Users\\user\\Documents\\ANDREI_FILES\\PDM_FILES\\3RD YEAR\\1st sem\\IT31-SAD\\FinLITE\\components\\reports\\DocumentPreviewModal.jsx": {
-    "mtime": 1792066278.6449578,
-    "ast_hash": "7ef9c8e417801747d1d280983b73bbaa",
+    "mtime": 1792398901.493106,
+    "ast_hash": "cd7ad3bfdf94aefe9ec85032fe1a6bf1",
     "semantic_hash": ""
   },
   "C:\\Users\\user\\Documents\\ANDREI_FILES\\PDM_FILES\\3RD YEAR\\1st sem\\IT31-SAD\\FinLITE\\components\\semesters\\NewSemesterModal.jsx": {
-    "mtime": 1792066019.0892272,
-    "ast_hash": "43609caf9c4236862e96ddefc1daf94d",
+    "mtime": 1792215160.766704,
+    "ast_hash": "9a7f7cda85ce0c0e1ea316005f131463",
     "semantic_hash": ""
-  },
-  "C:\\Users\\user\\Documents\\ANDREI_FILES\\PDM_FILES\\3RD YEAR\\1st sem\\IT31-SAD\\FinLITE\\docs\\CREATE_GFORM_SCRIPT.js": {
-    "mtime": 1790242032.1124437,
-    "ast_hash": "d5e742d0e40c55ddaff40329760ca924",
-    "semantic_hash": "d5e742d0e40c55ddaff40329760ca924"
   },
   "C:\\Users\\user\\Documents\\ANDREI_FILES\\PDM_FILES\\3RD YEAR\\1st sem\\IT31-SAD\\FinLITE\\plugins\\figjam-dfd-generator\\code.js": {
     "mtime": 1790242032.1359496,
@@ -248,11 +223,6 @@
     "mtime": 1791012631.0549262,
     "ast_hash": "d362b27001cbb4ab0c503851848cd31b",
     "semantic_hash": ""
-  },
-  "C:\\Users\\user\\Documents\\ANDREI_FILES\\PDM_FILES\\3RD YEAR\\1st sem\\IT31-SAD\\FinLITE\\docs\\KRIZIA_MAE_GENOVIA_RESPONSES.md": {
-    "mtime": 1790242032.1144385,
-    "ast_hash": "ff03e3f8787411d8cb8a61a3d197fbf6",
-    "semantic_hash": "ff03e3f8787411d8cb8a61a3d197fbf6"
   },
   "C:\\Users\\user\\Documents\\ANDREI_FILES\\PDM_FILES\\3RD YEAR\\1st sem\\IT31-SAD\\FinLITE\\docs\\context_diagram.png": {
     "mtime": 1790242032.1164384,
@@ -305,18 +275,18 @@
     "semantic_hash": "5a041034f793c1318344f95d5bd28cdf"
   },
   "C:\\Users\\user\\Documents\\ANDREI_FILES\\PDM_FILES\\3RD YEAR\\1st sem\\IT31-SAD\\FinLITE\\middleware.js": {
-    "mtime": 1791726421.3574915,
-    "ast_hash": "dd098def29e6e150e9311e65436da0e7",
+    "mtime": 1792336138.480126,
+    "ast_hash": "aa6835f42a396be9ea42998fe4ad2784",
     "semantic_hash": ""
   },
   "C:\\Users\\user\\Documents\\ANDREI_FILES\\PDM_FILES\\3RD YEAR\\1st sem\\IT31-SAD\\FinLITE\\app\\admin\\page.jsx": {
-    "mtime": 1792162449.917827,
-    "ast_hash": "4bbc12d1fb574136ec8dfcfbd8e0f635",
+    "mtime": 1792336138.4110668,
+    "ast_hash": "d55fd061b6983f80ff39cdb71d216f3c",
     "semantic_hash": ""
   },
   "C:\\Users\\user\\Documents\\ANDREI_FILES\\PDM_FILES\\3RD YEAR\\1st sem\\IT31-SAD\\FinLITE\\app\\api\\admin\\approve\\route.js": {
-    "mtime": 1791945235.2056599,
-    "ast_hash": "a18631f491b38855dddc5b7cdb4788b3",
+    "mtime": 1792336138.4121177,
+    "ast_hash": "58e93e3941a97b4856b438c92b75691c",
     "semantic_hash": ""
   },
   "C:\\Users\\user\\Documents\\ANDREI_FILES\\PDM_FILES\\3RD YEAR\\1st sem\\IT31-SAD\\FinLITE\\app\\api\\admin\\reject\\route.js": {
@@ -335,28 +305,28 @@
     "semantic_hash": ""
   },
   "C:\\Users\\user\\Documents\\ANDREI_FILES\\PDM_FILES\\3RD YEAR\\1st sem\\IT31-SAD\\FinLITE\\app\\api\\auth\\callback\\route.js": {
-    "mtime": 1792145551.5626454,
-    "ast_hash": "4d1bd6204a7cc8dd4872b35fb8963ef1",
+    "mtime": 1792336138.4131732,
+    "ast_hash": "bf945db25e25da868e198107dacbb29e",
     "semantic_hash": ""
   },
   "C:\\Users\\user\\Documents\\ANDREI_FILES\\PDM_FILES\\3RD YEAR\\1st sem\\IT31-SAD\\FinLITE\\app\\api\\auth\\google-register\\route.js": {
-    "mtime": 1791014453.6789145,
-    "ast_hash": "f39b8780f83142f28a741e5412d80b44",
+    "mtime": 1792336138.4147575,
+    "ast_hash": "cc0d69af854790e26351a05d6b0b8ffd",
     "semantic_hash": ""
   },
   "C:\\Users\\user\\Documents\\ANDREI_FILES\\PDM_FILES\\3RD YEAR\\1st sem\\IT31-SAD\\FinLITE\\app\\api\\auth\\login\\route.js": {
-    "mtime": 1792145581.3251536,
-    "ast_hash": "1a2b6facd53651b6bb9cea26e014ee44",
+    "mtime": 1792336138.4177628,
+    "ast_hash": "44a8cbe035c48332ee2debb284c9f9b0",
     "semantic_hash": ""
   },
   "C:\\Users\\user\\Documents\\ANDREI_FILES\\PDM_FILES\\3RD YEAR\\1st sem\\IT31-SAD\\FinLITE\\app\\api\\auth\\register\\route.js": {
-    "mtime": 1791945235.2072592,
-    "ast_hash": "92a9462faebf37c0414ebcd5d4dfa782",
+    "mtime": 1792336138.4197648,
+    "ast_hash": "461fdc3e16ae9ba420728d5bf2595942",
     "semantic_hash": ""
   },
   "C:\\Users\\user\\Documents\\ANDREI_FILES\\PDM_FILES\\3RD YEAR\\1st sem\\IT31-SAD\\FinLITE\\app\\login\\page.jsx": {
-    "mtime": 1792145593.9558823,
-    "ast_hash": "84c436280412f81376462a6237a5193b",
+    "mtime": 1792336819.6915517,
+    "ast_hash": "3b438184505925740ed397d02c953075",
     "semantic_hash": ""
   },
   "C:\\Users\\user\\Documents\\ANDREI_FILES\\PDM_FILES\\3RD YEAR\\1st sem\\IT31-SAD\\FinLITE\\app\\pending-approval\\page.jsx": {
@@ -365,13 +335,13 @@
     "semantic_hash": "6287e07e46b71faa5e4bb875c604c05d"
   },
   "C:\\Users\\user\\Documents\\ANDREI_FILES\\PDM_FILES\\3RD YEAR\\1st sem\\IT31-SAD\\FinLITE\\app\\profile\\page.jsx": {
-    "mtime": 1792060626.038373,
-    "ast_hash": "832898b524f7d49ede3b89c720426105",
+    "mtime": 1792336138.4307647,
+    "ast_hash": "8abe355657df433c68477e06fc26a334",
     "semantic_hash": ""
   },
   "C:\\Users\\user\\Documents\\ANDREI_FILES\\PDM_FILES\\3RD YEAR\\1st sem\\IT31-SAD\\FinLITE\\app\\register\\page.jsx": {
-    "mtime": 1792046590.0553188,
-    "ast_hash": "1d2c3645909cd1b7456c5cfd0bd71b61",
+    "mtime": 1792336138.4327655,
+    "ast_hash": "032093d9de34933bbd76e251894c46f8",
     "semantic_hash": ""
   },
   "C:\\Users\\user\\Documents\\ANDREI_FILES\\PDM_FILES\\3RD YEAR\\1st sem\\IT31-SAD\\FinLITE\\lib\\auth\\admin-check.js": {
@@ -385,8 +355,8 @@
     "semantic_hash": ""
   },
   "C:\\Users\\user\\Documents\\ANDREI_FILES\\PDM_FILES\\3RD YEAR\\1st sem\\IT31-SAD\\FinLITE\\lib\\utils\\validation.js": {
-    "mtime": 1791721517.5278475,
-    "ast_hash": "9b988872887e049d6f4cf0dc569f1ba2",
+    "mtime": 1792215746.7292373,
+    "ast_hash": "6bb513e345cacffbeb83c08f2dd6fdc1",
     "semantic_hash": ""
   },
   "C:\\Users\\user\\Documents\\ANDREI_FILES\\PDM_FILES\\3RD YEAR\\1st sem\\IT31-SAD\\FinLITE\\scripts\\export_report_engine.py": {
@@ -395,8 +365,8 @@
     "semantic_hash": ""
   },
   "C:\\Users\\user\\Documents\\ANDREI_FILES\\PDM_FILES\\3RD YEAR\\1st sem\\IT31-SAD\\FinLITE\\scripts\\run_all_tests.mjs": {
-    "mtime": 1792046590.0598352,
-    "ast_hash": "2b596c7feff7ed32710cfd66b9dd5a4e",
+    "mtime": 1792215690.820438,
+    "ast_hash": "a44b1cd8f13614560f5c99aaee4cf92b",
     "semantic_hash": ""
   },
   "C:\\Users\\user\\Documents\\ANDREI_FILES\\PDM_FILES\\3RD YEAR\\1st sem\\IT31-SAD\\FinLITE\\supabase\\migrations\\005_auth_registration.sql": {
@@ -445,27 +415,27 @@
     "semantic_hash": ""
   },
   "C:\\Users\\user\\Documents\\ANDREI_FILES\\PDM_FILES\\3RD YEAR\\1st sem\\IT31-SAD\\FinLITE\\app\\api\\transactions\\[id]\\comments\\route.js": {
-    "mtime": 1792145522.4223633,
-    "ast_hash": "57ccd5403c17d93aa158eaf7c55a737e",
+    "mtime": 1792167241.05875,
+    "ast_hash": "a4756b5c5af79b6923ba584b742dec7c",
     "semantic_hash": ""
   },
   "C:\\Users\\user\\Documents\\ANDREI_FILES\\PDM_FILES\\3RD YEAR\\1st sem\\IT31-SAD\\FinLITE\\app\\forgot-password\\page.jsx": {
-    "mtime": 1791014472.6601758,
-    "ast_hash": "9c3cc904fa022b5cb02cc6300ff816fc",
+    "mtime": 1792336138.427765,
+    "ast_hash": "66f6fcb2e4780b13dd7669627b29fca7",
     "semantic_hash": ""
   },
   "C:\\Users\\user\\Documents\\ANDREI_FILES\\PDM_FILES\\3RD YEAR\\1st sem\\IT31-SAD\\FinLITE\\app\\reset-password\\page.jsx": {
-    "mtime": 1791014480.444196,
-    "ast_hash": "1cc1f4269399502f413bbf69d0c19c16",
+    "mtime": 1792336138.4347653,
+    "ast_hash": "3a7bc6e427b13c3f4cd31583a178e48a",
     "semantic_hash": ""
   },
   "C:\\Users\\user\\Documents\\ANDREI_FILES\\PDM_FILES\\3RD YEAR\\1st sem\\IT31-SAD\\FinLITE\\app\\sidebar-mockup\\page.jsx": {
-    "mtime": 1792160403.33927,
-    "ast_hash": "854e392b5572c58cb71276ed7067df88",
+    "mtime": 1792336138.435764,
+    "ast_hash": "922c906893e0298c52bef1e33cbb74ab",
     "semantic_hash": ""
   },
   "C:\\Users\\user\\Documents\\ANDREI_FILES\\PDM_FILES\\3RD YEAR\\1st sem\\IT31-SAD\\FinLITE\\components\\audit\\AuditTrailDrawer.jsx": {
-    "mtime": 1792065757.7613287,
+    "mtime": 1792167241.067269,
     "ast_hash": "6d92c270a06771d61914d6026b17afc6",
     "semantic_hash": ""
   },
@@ -475,43 +445,43 @@
     "semantic_hash": ""
   },
   "C:\\Users\\user\\Documents\\ANDREI_FILES\\PDM_FILES\\3RD YEAR\\1st sem\\IT31-SAD\\FinLITE\\components\\common\\ReceiptCropModal.jsx": {
-    "mtime": 1792066193.9622366,
-    "ast_hash": "28ba5da957f042918e515394da20d683",
+    "mtime": 1792167241.0682669,
+    "ast_hash": "4f9ed582efdbc70b5e5b625df0efed64",
     "semantic_hash": ""
   },
   "C:\\Users\\user\\Documents\\ANDREI_FILES\\PDM_FILES\\3RD YEAR\\1st sem\\IT31-SAD\\FinLITE\\components\\debts\\AdvancesManagementModal.jsx": {
-    "mtime": 1792148925.9199462,
-    "ast_hash": "5fd41a876a51416f4734406c3369d344",
+    "mtime": 1792215222.2934144,
+    "ast_hash": "13669c35316c1552c26d45ea72ea43a2",
     "semantic_hash": ""
   },
   "C:\\Users\\user\\Documents\\ANDREI_FILES\\PDM_FILES\\3RD YEAR\\1st sem\\IT31-SAD\\FinLITE\\components\\debts\\DebtsManagementModal.jsx": {
-    "mtime": 1792070657.4461465,
-    "ast_hash": "6a0b92c8957eb2a8d7e492b577c2a413",
+    "mtime": 1792215304.8005874,
+    "ast_hash": "9f1119a6178d489a126fd816fb033c48",
     "semantic_hash": ""
   },
   "C:\\Users\\user\\Documents\\ANDREI_FILES\\PDM_FILES\\3RD YEAR\\1st sem\\IT31-SAD\\FinLITE\\components\\layout\\BottomNav.jsx": {
-    "mtime": 1792067375.0078118,
-    "ast_hash": "296c397e8a704e0e5b381eebc3c5b298",
+    "mtime": 1792336138.440764,
+    "ast_hash": "7fe1032b0a548e5eee8f07cb3735fe1f",
     "semantic_hash": ""
   },
   "C:\\Users\\user\\Documents\\ANDREI_FILES\\PDM_FILES\\3RD YEAR\\1st sem\\IT31-SAD\\FinLITE\\components\\layout\\FloatingSidebar.jsx": {
-    "mtime": 1792162088.3669188,
-    "ast_hash": "859ea864480cdfa04d91a161a8ae0d6d",
+    "mtime": 1792336138.4417653,
+    "ast_hash": "dac94e2478951a25d7ab3cf1da6e3ad0",
     "semantic_hash": ""
   },
   "C:\\Users\\user\\Documents\\ANDREI_FILES\\PDM_FILES\\3RD YEAR\\1st sem\\IT31-SAD\\FinLITE\\components\\layout\\TechWaveBackground.jsx": {
-    "mtime": 1792067351.370555,
+    "mtime": 1792167241.0768464,
     "ast_hash": "056e8a900906eca7513abcf69eff92d1",
     "semantic_hash": ""
   },
   "C:\\Users\\user\\Documents\\ANDREI_FILES\\PDM_FILES\\3RD YEAR\\1st sem\\IT31-SAD\\FinLITE\\components\\ledger\\TransactionCommentsDrawer.jsx": {
-    "mtime": 1792145614.0660975,
+    "mtime": 1792167241.0784984,
     "ast_hash": "9af4b9a1272e1cb7c45a01f38864a3ac",
     "semantic_hash": ""
   },
   "C:\\Users\\user\\Documents\\ANDREI_FILES\\PDM_FILES\\3RD YEAR\\1st sem\\IT31-SAD\\FinLITE\\components\\profile\\EditProfileModal.jsx": {
-    "mtime": 1792066070.6510956,
-    "ast_hash": "70b57ba8b3b3590b86981cd6435ccf21",
+    "mtime": 1792167241.081112,
+    "ast_hash": "1f4e986aeb37b211bd5cfe3ff011f26d",
     "semantic_hash": ""
   },
   "C:\\Users\\user\\Documents\\ANDREI_FILES\\PDM_FILES\\3RD YEAR\\1st sem\\IT31-SAD\\FinLITE\\components\\theme\\ThemeProvider.jsx": {
@@ -520,13 +490,13 @@
     "semantic_hash": ""
   },
   "C:\\Users\\user\\Documents\\ANDREI_FILES\\PDM_FILES\\3RD YEAR\\1st sem\\IT31-SAD\\FinLITE\\components\\theme\\ThemeToggle.jsx": {
-    "mtime": 1792067534.3311088,
-    "ast_hash": "8c0c160fb943ce22b356955868e74ba2",
+    "mtime": 1792336138.4477663,
+    "ast_hash": "affb6446eec95146600cd9ddad66940d",
     "semantic_hash": ""
   },
   "C:\\Users\\user\\Documents\\ANDREI_FILES\\PDM_FILES\\3RD YEAR\\1st sem\\IT31-SAD\\FinLITE\\components\\ui\\Badge.jsx": {
-    "mtime": 1792075342.3305297,
-    "ast_hash": "4eeabf002dd101939ed17ca5a4caec1a",
+    "mtime": 1792167241.0858624,
+    "ast_hash": "6b5ccbe29d2653729cea5610cf57b63e",
     "semantic_hash": ""
   },
   "C:\\Users\\user\\Documents\\ANDREI_FILES\\PDM_FILES\\3RD YEAR\\1st sem\\IT31-SAD\\FinLITE\\components\\ui\\BorderGlow.jsx": {
@@ -535,48 +505,48 @@
     "semantic_hash": ""
   },
   "C:\\Users\\user\\Documents\\ANDREI_FILES\\PDM_FILES\\3RD YEAR\\1st sem\\IT31-SAD\\FinLITE\\components\\ui\\Button.jsx": {
-    "mtime": 1792068678.6576648,
-    "ast_hash": "105639828e27dd00941eba42e7ba330e",
+    "mtime": 1792336138.4487653,
+    "ast_hash": "a1877a04ea4e442fe1a225470b1b25a8",
     "semantic_hash": ""
   },
   "C:\\Users\\user\\Documents\\ANDREI_FILES\\PDM_FILES\\3RD YEAR\\1st sem\\IT31-SAD\\FinLITE\\components\\ui\\Card.jsx": {
-    "mtime": 1792061234.7493227,
-    "ast_hash": "69d444ae8127846dec7ce9bc4a21fb50",
+    "mtime": 1792167241.0880263,
+    "ast_hash": "1e237acc4e049d53f25ee2121ff28758",
     "semantic_hash": ""
   },
   "C:\\Users\\user\\Documents\\ANDREI_FILES\\PDM_FILES\\3RD YEAR\\1st sem\\IT31-SAD\\FinLITE\\components\\ui\\EmptyState.jsx": {
-    "mtime": 1792061274.5888693,
-    "ast_hash": "f75e6ee5c4a3900dbe8e537b30bcebb6",
+    "mtime": 1792167241.0885637,
+    "ast_hash": "ae3a590804eb61a948144745365bcf73",
     "semantic_hash": ""
   },
   "C:\\Users\\user\\Documents\\ANDREI_FILES\\PDM_FILES\\3RD YEAR\\1st sem\\IT31-SAD\\FinLITE\\components\\ui\\index.js": {
-    "mtime": 1792061284.2991986,
-    "ast_hash": "0f670be3dff04e526aa28074dc2d59ae",
+    "mtime": 1792167241.0922775,
+    "ast_hash": "8c2d2549e4854992bcfefc6cbcf302fc",
     "semantic_hash": ""
   },
   "C:\\Users\\user\\Documents\\ANDREI_FILES\\PDM_FILES\\3RD YEAR\\1st sem\\IT31-SAD\\FinLITE\\components\\ui\\Input.jsx": {
-    "mtime": 1792061243.2027702,
-    "ast_hash": "ab690a76a306fc94a1b34f9fa966b445",
+    "mtime": 1792167241.0896316,
+    "ast_hash": "243c2b4f291cb0e4d32a16363cbae5ca",
     "semantic_hash": ""
   },
   "C:\\Users\\user\\Documents\\ANDREI_FILES\\PDM_FILES\\3RD YEAR\\1st sem\\IT31-SAD\\FinLITE\\components\\ui\\Modal.jsx": {
-    "mtime": 1792061252.8961134,
-    "ast_hash": "08ab3f864eb618b80e9627efdf03c24b",
+    "mtime": 1792336138.4497643,
+    "ast_hash": "1adbb9f65f5f58c0bc2097e65085d9ce",
     "semantic_hash": ""
   },
   "C:\\Users\\user\\Documents\\ANDREI_FILES\\PDM_FILES\\3RD YEAR\\1st sem\\IT31-SAD\\FinLITE\\components\\ui\\Skeleton.jsx": {
-    "mtime": 1792061279.4215336,
-    "ast_hash": "25ec9bdace57494d160bd5c9796b181d",
+    "mtime": 1792167241.090691,
+    "ast_hash": "4c4597ddf85b3445056b3dd4256d740e",
     "semantic_hash": ""
   },
   "C:\\Users\\user\\Documents\\ANDREI_FILES\\PDM_FILES\\3RD YEAR\\1st sem\\IT31-SAD\\FinLITE\\components\\ui\\StatCard.jsx": {
-    "mtime": 1792061266.9278388,
-    "ast_hash": "18f6577a58d5c78fd3ad7684a78b5ccd",
+    "mtime": 1792167241.0917444,
+    "ast_hash": "f08f01539d5a48cdb2badae1725f5cf9",
     "semantic_hash": ""
   },
   "C:\\Users\\user\\Documents\\ANDREI_FILES\\PDM_FILES\\3RD YEAR\\1st sem\\IT31-SAD\\FinLITE\\lib\\utils.js": {
-    "mtime": 1792061199.5142505,
-    "ast_hash": "da47742b6ab7a19bec481b4b69c22012",
+    "mtime": 1792167241.1060085,
+    "ast_hash": "a58249d2d7f0e28bf7eb051db12a39e1",
     "semantic_hash": ""
   },
   "C:\\Users\\user\\Documents\\ANDREI_FILES\\PDM_FILES\\3RD YEAR\\1st sem\\IT31-SAD\\FinLITE\\lib\\config\\categories.js": {
@@ -585,8 +555,8 @@
     "semantic_hash": ""
   },
   "C:\\Users\\user\\Documents\\ANDREI_FILES\\PDM_FILES\\3RD YEAR\\1st sem\\IT31-SAD\\FinLITE\\lib\\email\\mailer.js": {
-    "mtime": 1791014412.3369095,
-    "ast_hash": "0e266c5a2968c908fc37840b107f6ecc",
+    "mtime": 1792336138.479074,
+    "ast_hash": "889b940d8b505c21e4fc00dcd12ddf19",
     "semantic_hash": ""
   },
   "C:\\Users\\user\\Documents\\ANDREI_FILES\\PDM_FILES\\3RD YEAR\\1st sem\\IT31-SAD\\FinLITE\\lib\\security\\ratelimit.js": {
@@ -600,8 +570,8 @@
     "semantic_hash": ""
   },
   "C:\\Users\\user\\Documents\\ANDREI_FILES\\PDM_FILES\\3RD YEAR\\1st sem\\IT31-SAD\\FinLITE\\lib\\utils\\cn.js": {
-    "mtime": 1792061194.2621126,
-    "ast_hash": "47a3a492921308088349b6b975231c84",
+    "mtime": 1792167241.107008,
+    "ast_hash": "db4544a8d084e3a7b8537582538f8912",
     "semantic_hash": ""
   },
   "C:\\Users\\user\\Documents\\ANDREI_FILES\\PDM_FILES\\3RD YEAR\\1st sem\\IT31-SAD\\FinLITE\\scripts\\test_categories_and_admin.mjs": {
@@ -690,8 +660,8 @@
     "semantic_hash": ""
   },
   "C:\\Users\\user\\Documents\\ANDREI_FILES\\PDM_FILES\\3RD YEAR\\1st sem\\IT31-SAD\\FinLITE\\supabase\\migrations\\013_3nf_normalization_contract.sql": {
-    "mtime": 1791705071.9438899,
-    "ast_hash": "61b69802203cf2358137ba1b924fb052",
+    "mtime": 1792336138.483189,
+    "ast_hash": "aeb00884dac7b297539578fab1ad0fd3",
     "semantic_hash": ""
   },
   "C:\\Users\\user\\Documents\\ANDREI_FILES\\PDM_FILES\\3RD YEAR\\1st sem\\IT31-SAD\\FinLITE\\supabase\\migrations\\014_semester_signatories.sql": {
@@ -710,8 +680,8 @@
     "semantic_hash": ""
   },
   "C:\\Users\\user\\Documents\\ANDREI_FILES\\PDM_FILES\\3RD YEAR\\1st sem\\IT31-SAD\\FinLITE\\supabase\\migrations\\017_safe_3nf_column_contraction.sql": {
-    "mtime": 1791992369.3828616,
-    "ast_hash": "39d967be086b30ecc7901fafddd46a2b",
+    "mtime": 1792336138.4841895,
+    "ast_hash": "994e185571627585ff81a33ef74f00d8",
     "semantic_hash": ""
   },
   "C:\\Users\\user\\Documents\\ANDREI_FILES\\PDM_FILES\\3RD YEAR\\1st sem\\IT31-SAD\\FinLITE\\supabase\\migrations\\018_transaction_comments.sql": {
@@ -725,23 +695,18 @@
     "semantic_hash": ""
   },
   "C:\\Users\\user\\Documents\\ANDREI_FILES\\PDM_FILES\\3RD YEAR\\1st sem\\IT31-SAD\\FinLITE\\supabase\\migrations\\020_debts_and_receivables.sql": {
-    "mtime": 1792070597.5598457,
-    "ast_hash": "7a3faa39f617bde1f947c317cb1e9238",
+    "mtime": 1792167241.1090076,
+    "ast_hash": "479842b863e858cb91775c56ccf1077e",
     "semantic_hash": ""
   },
   "C:\\Users\\user\\Documents\\ANDREI_FILES\\PDM_FILES\\3RD YEAR\\1st sem\\IT31-SAD\\FinLITE\\supabase\\migrations\\021_auth_identity_sync_and_comments_resilience.sql": {
-    "mtime": 1792145492.5821116,
-    "ast_hash": "03e0227b4e5d4f599f6425cd77b4a31d",
+    "mtime": 1792167241.1100123,
+    "ast_hash": "ff0ea0ca3d1065dd986ea836d97f2f89",
     "semantic_hash": ""
   },
   "C:\\Users\\user\\Documents\\ANDREI_FILES\\PDM_FILES\\3RD YEAR\\1st sem\\IT31-SAD\\FinLITE\\supabase\\migrations\\022_advances_payable.sql": {
-    "mtime": 1792149710.1343944,
-    "ast_hash": "4853b4e151f3cf628de522d2872dd958",
-    "semantic_hash": ""
-  },
-  "C:\\Users\\user\\Documents\\ANDREI_FILES\\PDM_FILES\\3RD YEAR\\1st sem\\IT31-SAD\\FinLITE\\presentation.html": {
-    "mtime": 1791945235.2376952,
-    "ast_hash": "593c9c82e8ae89ace37598bad28a3663",
+    "mtime": 1792336138.485189,
+    "ast_hash": "9083daa636f2a09895c417401effd922",
     "semantic_hash": ""
   },
   "C:\\Users\\user\\Documents\\ANDREI_FILES\\PDM_FILES\\3RD YEAR\\1st sem\\IT31-SAD\\FinLITE\\.agents\\rules\\UI_UX_DESIGN.md": {
@@ -749,24 +714,19 @@
     "ast_hash": "0cdb77658fa16eea38cd38320693f646",
     "semantic_hash": ""
   },
-  "C:\\Users\\user\\Documents\\ANDREI_FILES\\PDM_FILES\\3RD YEAR\\1st sem\\IT31-SAD\\FinLITE\\docs\\DESIGN_GUIDELINES.md": {
-    "mtime": 1790694189.889833,
-    "ast_hash": "cfa36668ec09e55d3796e00f12a9928c",
-    "semantic_hash": ""
-  },
   "C:\\Users\\user\\Documents\\ANDREI_FILES\\PDM_FILES\\3RD YEAR\\1st sem\\IT31-SAD\\FinLITE\\exports\\design-system-showcase.html": {
-    "mtime": 1792059390.163237,
-    "ast_hash": "610f8c00e4365a2bd406a0e1e96e7c42",
+    "mtime": 1792167241.093322,
+    "ast_hash": "6278b1c438a558cae0f058d64b563a54",
     "semantic_hash": ""
   },
   "C:\\Users\\user\\Documents\\ANDREI_FILES\\PDM_FILES\\3RD YEAR\\1st sem\\IT31-SAD\\FinLITE\\public\\presentation.html": {
-    "mtime": 1791945235.238221,
-    "ast_hash": "593c9c82e8ae89ace37598bad28a3663",
+    "mtime": 1792216000.5822635,
+    "ast_hash": "c57ec5f4e0f1c730a0f0a55ba5229490",
     "semantic_hash": ""
   },
   "C:\\Users\\user\\Documents\\ANDREI_FILES\\PDM_FILES\\3RD YEAR\\1st sem\\IT31-SAD\\FinLITE\\public\\table-mockups.html": {
-    "mtime": 1792077522.2747734,
-    "ast_hash": "557964daebf811d058b53ad206926464",
+    "mtime": 1792167241.1080096,
+    "ast_hash": "d318ab70cc4704974c00eb33b1e6f356",
     "semantic_hash": ""
   },
   "C:\\Users\\user\\Documents\\ANDREI_FILES\\PDM_FILES\\3RD YEAR\\1st sem\\IT31-SAD\\FinLITE\\wireframes\\admin.html": {
@@ -819,9 +779,174 @@
     "ast_hash": "479e236ca593e78d6b1b6f93136a6059",
     "semantic_hash": ""
   },
-  "C:\\Users\\user\\Documents\\ANDREI_FILES\\PDM_FILES\\3RD YEAR\\1st sem\\IT31-SAD\\FinLITE\\components\\dev\\DevPinInspector.jsx": {
-    "mtime": 1792152622.4522429,
-    "ast_hash": "b36453eea0c21c59c5f8d9274279ab33",
+  "C:\\Users\\user\\Documents\\ANDREI_FILES\\PDM_FILES\\3RD YEAR\\1st sem\\IT31-SAD\\FinLITE\\app\\api\\auth\\forgot-password\\route.js": {
+    "mtime": 1792336138.41423,
+    "ast_hash": "fb958075836655467b763a3444876dc6",
+    "semantic_hash": ""
+  },
+  "C:\\Users\\user\\Documents\\ANDREI_FILES\\PDM_FILES\\3RD YEAR\\1st sem\\IT31-SAD\\FinLITE\\app\\api\\auth\\google-session\\route.js": {
+    "mtime": 1792336138.4157634,
+    "ast_hash": "26974eee7f44ab8a855e29fddb1f3c17",
+    "semantic_hash": ""
+  },
+  "C:\\Users\\user\\Documents\\ANDREI_FILES\\PDM_FILES\\3RD YEAR\\1st sem\\IT31-SAD\\FinLITE\\app\\api\\auth\\link-google\\route.js": {
+    "mtime": 1792336138.4167655,
+    "ast_hash": "5e2ff4ba3bb14ef4b145e0fc0c7ca76b",
+    "semantic_hash": ""
+  },
+  "C:\\Users\\user\\Documents\\ANDREI_FILES\\PDM_FILES\\3RD YEAR\\1st sem\\IT31-SAD\\FinLITE\\app\\api\\auth\\password\\route.js": {
+    "mtime": 1792336138.4187636,
+    "ast_hash": "a5462854d7dcbfca197785f71cd5bbc8",
+    "semantic_hash": ""
+  },
+  "C:\\Users\\user\\Documents\\ANDREI_FILES\\PDM_FILES\\3RD YEAR\\1st sem\\IT31-SAD\\FinLITE\\app\\api\\auth\\resend-verification\\route.js": {
+    "mtime": 1792336138.4207635,
+    "ast_hash": "3d95f372d0091215d75f99c6b0cf1b1e",
+    "semantic_hash": ""
+  },
+  "C:\\Users\\user\\Documents\\ANDREI_FILES\\PDM_FILES\\3RD YEAR\\1st sem\\IT31-SAD\\FinLITE\\app\\api\\auth\\reset-password\\route.js": {
+    "mtime": 1792336138.422763,
+    "ast_hash": "96294d4ac05260082c5db068024bcab0",
+    "semantic_hash": ""
+  },
+  "C:\\Users\\user\\Documents\\ANDREI_FILES\\PDM_FILES\\3RD YEAR\\1st sem\\IT31-SAD\\FinLITE\\app\\api\\auth\\security\\route.js": {
+    "mtime": 1792336138.423765,
+    "ast_hash": "999cc108524bba5f678135203bf65976",
+    "semantic_hash": ""
+  },
+  "C:\\Users\\user\\Documents\\ANDREI_FILES\\PDM_FILES\\3RD YEAR\\1st sem\\IT31-SAD\\FinLITE\\app\\api\\auth\\verify-email\\route.js": {
+    "mtime": 1792336138.4247637,
+    "ast_hash": "bea1c3aff00695836f875c5d333f138c",
+    "semantic_hash": ""
+  },
+  "C:\\Users\\user\\Documents\\ANDREI_FILES\\PDM_FILES\\3RD YEAR\\1st sem\\IT31-SAD\\FinLITE\\app\\profile\\security\\page.jsx": {
+    "mtime": 1792336138.4317641,
+    "ast_hash": "405671b660b7e72b335e2cf67a843b86",
+    "semantic_hash": ""
+  },
+  "C:\\Users\\user\\Documents\\ANDREI_FILES\\PDM_FILES\\3RD YEAR\\1st sem\\IT31-SAD\\FinLITE\\app\\verify-email\\page.jsx": {
+    "mtime": 1792336138.4367645,
+    "ast_hash": "73cefd977ad4ea8089433175623b80ac",
+    "semantic_hash": ""
+  },
+  "C:\\Users\\user\\Documents\\ANDREI_FILES\\PDM_FILES\\3RD YEAR\\1st sem\\IT31-SAD\\FinLITE\\components\\layout\\AppShell.jsx": {
+    "mtime": 1792336138.4397662,
+    "ast_hash": "b1895f9b079494ef13db71cfce55bea8",
+    "semantic_hash": ""
+  },
+  "C:\\Users\\user\\Documents\\ANDREI_FILES\\PDM_FILES\\3RD YEAR\\1st sem\\IT31-SAD\\FinLITE\\docs\\research\\CREATE_GFORM_SCRIPT.js": {
+    "mtime": 1792336138.4600756,
+    "ast_hash": "d5e742d0e40c55ddaff40329760ca924",
+    "semantic_hash": ""
+  },
+  "C:\\Users\\user\\Documents\\ANDREI_FILES\\PDM_FILES\\3RD YEAR\\1st sem\\IT31-SAD\\FinLITE\\lib\\auth\\app-url.js": {
+    "mtime": 1792336138.4748466,
+    "ast_hash": "045d2feec74d3474410e8bfcc84a85d0",
+    "semantic_hash": ""
+  },
+  "C:\\Users\\user\\Documents\\ANDREI_FILES\\PDM_FILES\\3RD YEAR\\1st sem\\IT31-SAD\\FinLITE\\lib\\auth\\methods.js": {
+    "mtime": 1792336138.4759083,
+    "ast_hash": "dc08361d611a2bc67f08524400df539c",
+    "semantic_hash": ""
+  },
+  "C:\\Users\\user\\Documents\\ANDREI_FILES\\PDM_FILES\\3RD YEAR\\1st sem\\IT31-SAD\\FinLITE\\lib\\auth\\policy.js": {
+    "mtime": 1792336138.4764364,
+    "ast_hash": "9f690dac94c1ee006fca5b881779a54e",
+    "semantic_hash": ""
+  },
+  "C:\\Users\\user\\Documents\\ANDREI_FILES\\PDM_FILES\\3RD YEAR\\1st sem\\IT31-SAD\\FinLITE\\lib\\auth\\registration.js": {
+    "mtime": 1792336138.4774919,
+    "ast_hash": "58ec06241c84bf9620b577a229495899",
+    "semantic_hash": ""
+  },
+  "C:\\Users\\user\\Documents\\ANDREI_FILES\\PDM_FILES\\3RD YEAR\\1st sem\\IT31-SAD\\FinLITE\\lib\\config\\semesters.js": {
+    "mtime": 1792188502.7042382,
+    "ast_hash": "1336e7ace81105e29e6061e1a0067a88",
+    "semantic_hash": ""
+  },
+  "C:\\Users\\user\\Documents\\ANDREI_FILES\\PDM_FILES\\3RD YEAR\\1st sem\\IT31-SAD\\FinLITE\\lib\\email\\auth-mailer.js": {
+    "mtime": 1792336138.478016,
+    "ast_hash": "9f379ec3787e8bfd2076baff6a49644b",
+    "semantic_hash": ""
+  },
+  "C:\\Users\\user\\Documents\\ANDREI_FILES\\PDM_FILES\\3RD YEAR\\1st sem\\IT31-SAD\\FinLITE\\scripts\\test_auth_hardening.mjs": {
+    "mtime": 1792336138.4821897,
+    "ast_hash": "6f02585a036d4bd5779e760892b8bda9",
+    "semantic_hash": ""
+  },
+  "C:\\Users\\user\\Documents\\ANDREI_FILES\\PDM_FILES\\3RD YEAR\\1st sem\\IT31-SAD\\FinLITE\\supabase\\migrations\\023_retire_gcash_single_cashbox.sql": {
+    "mtime": 1792336138.4861884,
+    "ast_hash": "61fbf2e2f9bc87bcb6c1c9540e18a04b",
+    "semantic_hash": ""
+  },
+  "C:\\Users\\user\\Documents\\ANDREI_FILES\\PDM_FILES\\3RD YEAR\\1st sem\\IT31-SAD\\FinLITE\\supabase\\migrations\\024_auth_account_hardening.sql": {
+    "mtime": 1792336138.4861884,
+    "ast_hash": "44eb3b3b1ebaa1b6cc716b781dd4f336",
+    "semantic_hash": ""
+  },
+  "C:\\Users\\user\\Documents\\ANDREI_FILES\\PDM_FILES\\3RD YEAR\\1st sem\\IT31-SAD\\FinLITE\\supabase\\migrations\\025_schema_reconciliation_and_ledger_integrity.sql": {
+    "mtime": 1792336138.487189,
+    "ast_hash": "cf4ff463992f11f8c70f99943f941efb",
+    "semantic_hash": ""
+  },
+  "C:\\Users\\user\\Documents\\ANDREI_FILES\\PDM_FILES\\3RD YEAR\\1st sem\\IT31-SAD\\FinLITE\\supabase\\retired\\013_3nf_normalization_contract.sql": {
+    "mtime": 1792336138.4891906,
+    "ast_hash": "3b39113d0242947ea794d47edf00a017",
+    "semantic_hash": ""
+  },
+  "C:\\Users\\user\\Documents\\ANDREI_FILES\\PDM_FILES\\3RD YEAR\\1st sem\\IT31-SAD\\FinLITE\\supabase\\retired\\023_retire_gcash_single_cashbox.sql": {
+    "mtime": 1792336138.4891906,
+    "ast_hash": "47b50c0c18cac6dfad96732d9c9a1a16",
+    "semantic_hash": ""
+  },
+  "C:\\Users\\user\\Documents\\ANDREI_FILES\\PDM_FILES\\3RD YEAR\\1st sem\\IT31-SAD\\FinLITE\\docs\\README.md": {
+    "mtime": 1792336138.4497643,
+    "ast_hash": "396b05c4d04052a17ae3bf4281e662ec",
+    "semantic_hash": ""
+  },
+  "C:\\Users\\user\\Documents\\ANDREI_FILES\\PDM_FILES\\3RD YEAR\\1st sem\\IT31-SAD\\FinLITE\\docs\\archive\\Project Context.md": {
+    "mtime": 1792336138.455763,
+    "ast_hash": "0cb43a4741d2e3ed29c1c6808ead5b10",
+    "semantic_hash": ""
+  },
+  "C:\\Users\\user\\Documents\\ANDREI_FILES\\PDM_FILES\\3RD YEAR\\1st sem\\IT31-SAD\\FinLITE\\docs\\design\\DESIGN_GUIDELINES.md": {
+    "mtime": 1792336138.4567645,
+    "ast_hash": "5f761ed0b863a2a8e7cc74128b2d049f",
+    "semantic_hash": ""
+  },
+  "C:\\Users\\user\\Documents\\ANDREI_FILES\\PDM_FILES\\3RD YEAR\\1st sem\\IT31-SAD\\FinLITE\\docs\\research\\ADVISER_QUESTIONNAIRE.md": {
+    "mtime": 1792336138.4585624,
+    "ast_hash": "cb22803c8c15733e10826f548905ce62",
+    "semantic_hash": ""
+  },
+  "C:\\Users\\user\\Documents\\ANDREI_FILES\\PDM_FILES\\3RD YEAR\\1st sem\\IT31-SAD\\FinLITE\\docs\\research\\KRIZIA_MAE_GENOVIA_RESPONSES.md": {
+    "mtime": 1792336138.461668,
+    "ast_hash": "ff03e3f8787411d8cb8a61a3d197fbf6",
+    "semantic_hash": ""
+  },
+  "C:\\Users\\user\\Documents\\ANDREI_FILES\\PDM_FILES\\3RD YEAR\\1st sem\\IT31-SAD\\FinLITE\\docs\\specs\\PAPER_REVISIONS_CHECKLIST.md": {
+    "mtime": 1792336138.4669077,
+    "ast_hash": "dddc974dd6de0b1f99e9f68c9ea2e972",
+    "semantic_hash": ""
+  },
+  "C:\\Users\\user\\Documents\\ANDREI_FILES\\PDM_FILES\\3RD YEAR\\1st sem\\IT31-SAD\\FinLITE\\docs\\specs\\presentation.html": {
+    "mtime": 1792336138.4727273,
+    "ast_hash": "c57ec5f4e0f1c730a0f0a55ba5229490",
+    "semantic_hash": ""
+  },
+  "C:\\Users\\user\\Documents\\ANDREI_FILES\\PDM_FILES\\3RD YEAR\\1st sem\\IT31-SAD\\FinLITE\\docs\\specs\\PROJECT_CONTEXT.md": {
+    "mtime": 1792336138.4695725,
+    "ast_hash": "d2be1343ab2e50efe6c410b9eae8e1de",
+    "semantic_hash": ""
+  },
+  "C:\\Users\\user\\Documents\\ANDREI_FILES\\PDM_FILES\\3RD YEAR\\1st sem\\IT31-SAD\\FinLITE\\docs\\specs\\techstack-options.md": {
+    "mtime": 1792336138.4737828,
+    "ast_hash": "b7cc3857df969639ec60781f4ef02184",
+    "semantic_hash": ""
+  },
+  "C:\\Users\\user\\Documents\\ANDREI_FILES\\PDM_FILES\\3RD YEAR\\1st sem\\IT31-SAD\\FinLITE\\docs\\specs\\FinLITE_Document_Main.pdf": {
+    "mtime": 1792336138.4663787,
+    "ast_hash": "f7cfb6ccd34374cfee1377db883434fc",
     "semantic_hash": ""
   }
 }

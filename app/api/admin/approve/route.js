@@ -84,7 +84,6 @@ export async function POST(req) {
       full_name: fullName,
       first_name: request.first_name,
       last_name: request.last_name,
-      username: request.username,
       email: request.email,
       contact_number: request.contact_number,
       role: normalizedRole,

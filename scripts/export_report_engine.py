@@ -2,6 +2,7 @@ import os
 import sys
 import json
 import copy
+from datetime import datetime
 import docx
 from docx.shared import Pt, Inches
 from docx.oxml import parse_xml, OxmlElement
@@ -10,6 +11,15 @@ from docx.oxml.ns import nsdecls, qn
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DEFAULT_TEMPLATE = os.path.join(BASE_DIR, 'templates', 'LITE-Financial-Report-Universal-Template.docx')
 DEFAULT_OUTPUT = os.path.join(BASE_DIR, 'exports', 'FinLITE-Exported-Report.docx')
+
+def get_current_academic_calendar():
+    """Dynamically determine current academic year and semester based on current date."""
+    now = datetime.now()
+    transmittal_date = now.strftime('%B %d, %Y')
+    start_year = now.year if now.month >= 8 else now.year - 1
+    academic_year = f"{start_year}–{start_year + 1}"
+    semester = "1st SEMESTER" if (8 <= now.month <= 12 or now.month == 1) else "2nd SEMESTER"
+    return transmittal_date, semester, academic_year
 
 def ensure_invisible_table_borders(tbl):
     """Ensure all borders on the table are nil (invisible) so no box gridlines appear."""
@@ -71,7 +81,18 @@ def replace_text_in_paragraph(p, search, replace):
         p.text = new_text
 
 def replace_placeholders(doc, config):
+    default_td, default_sem, default_ay = get_current_academic_calendar()
+    sem = config.get('{{SEMESTER}}') or default_sem
+    ay = config.get('{{ACADEMIC_YEAR}}') or default_ay
     for p in doc.paragraphs:
+        if "This is to respectfully submit the attached" in p.text:
+            p.text = f'This is to respectfully submit the attached “LITE Financial Report” for the {sem} Academic Year {ay}.'
+            if p.runs:
+                for r in p.runs:
+                    r.font.name = 'Calibri'
+                    r.font.size = Pt(11)
+            continue
+
         for tag, val in config.items():
             if tag in p.text:
                 replace_text_in_paragraph(p, tag, val)
@@ -134,7 +155,7 @@ def setup_footer(section, style="page_x_of_y"):
 
 def create_borderless_signatory_table(doc, signatories_list, num_cols):
     """
-    Build structured multi-column borderless table for signatories.
+    Build structured multi-column borderless table for student officers.
     Guarantees exact column widths, zero tab wrapping misalignment, and Calibri 11pt.
     Guards against division by zero if num_cols <= 0.
     """
@@ -157,24 +178,11 @@ def create_borderless_signatory_table(doc, signatories_list, num_cols):
         tcMar = parse_xml(r'<w:tcMar %s><w:top w:w="0" w:type="dxa"/><w:bottom w:w="0" w:type="dxa"/><w:left w:w="0" w:type="dxa"/><w:right w:w="120" w:type="dxa"/></w:tcMar>' % nsdecls('w'))
         tcPr.append(tcMar)
         
-        if sig.get('heading'):
-            p_head = cell.paragraphs[0]
-            p_head.paragraph_format.space_before = Pt(8)
-            p_head.paragraph_format.space_after = Pt(24)
-            p_head.paragraph_format.line_spacing = 1.0
-            r_head = p_head.add_run(sig['heading'])
-            r_head.font.name = 'Calibri'
-            r_head.font.size = Pt(11)
-
-            p_name = cell.add_paragraph()
-            p_name.paragraph_format.space_before = Pt(0)
-            p_name.paragraph_format.space_after = Pt(1)
-            p_name.paragraph_format.line_spacing = 1.0
-        else:
-            p_name = cell.paragraphs[0]
-            p_name.paragraph_format.space_before = Pt(16)
-            p_name.paragraph_format.space_after = Pt(1)
-            p_name.paragraph_format.line_spacing = 1.0
+        # Consistent space for signature above officer name
+        p_name = cell.paragraphs[0]
+        p_name.paragraph_format.space_before = Pt(24)
+        p_name.paragraph_format.space_after = Pt(1)
+        p_name.paragraph_format.line_spacing = 1.0
 
         if sig.get('name'):
             r_name = p_name.add_run(sig['name'])
@@ -197,6 +205,85 @@ def create_borderless_signatory_table(doc, signatories_list, num_cols):
         empty_cell = row.cells[empty_idx]
         empty_cell.width = col_width
             
+    tbl_elm = table._element
+    tbl_elm.getparent().remove(tbl_elm)
+    return tbl_elm
+
+def create_borderless_noted_table(doc, advisers, admins):
+    """
+    Build unified 2-column borderless table for institutional oversight:
+    Row 0: Club Advisers
+    Row 1: Academic Administration (Program Director, Dean)
+    """
+    has_advisers = bool(advisers)
+    has_admins = bool(admins)
+    if not has_advisers and not has_admins:
+        return None
+
+    num_rows = (1 if has_advisers else 0) + (1 if has_admins else 0)
+    table = doc.add_table(rows=num_rows, cols=2)
+    ensure_invisible_table_borders(table)
+    col_width = Inches(3.25)
+    for col in table.columns:
+        col.width = col_width
+
+    curr_row_idx = 0
+
+    if has_advisers:
+        row = table.rows[curr_row_idx]
+        for col_idx in range(2):
+            cell = row.cells[col_idx]
+            cell.width = col_width
+            tcPr = cell._element.get_or_add_tcPr()
+            tcMar = parse_xml(r'<w:tcMar %s><w:top w:w="0" w:type="dxa"/><w:bottom w:w="0" w:type="dxa"/><w:left w:w="0" w:type="dxa"/><w:right w:w="120" w:type="dxa"/></w:tcMar>' % nsdecls('w'))
+            tcPr.append(tcMar)
+            if col_idx < len(advisers):
+                sig = advisers[col_idx]
+                p_name = cell.paragraphs[0]
+                p_name.paragraph_format.space_before = Pt(24)
+                p_name.paragraph_format.space_after = Pt(1)
+                p_name.paragraph_format.line_spacing = 1.0
+                r_name = p_name.add_run(sig.get('name', ''))
+                r_name.font.name = 'Calibri'
+                r_name.font.size = Pt(11)
+                r_name.bold = True
+
+                p_role = cell.add_paragraph()
+                p_role.paragraph_format.space_before = Pt(0)
+                p_role.paragraph_format.space_after = Pt(4)
+                p_role.paragraph_format.line_spacing = 1.0
+                r_role = p_role.add_run(sig.get('role', ''))
+                r_role.font.name = 'Calibri'
+                r_role.font.size = Pt(11)
+        curr_row_idx += 1
+
+    if has_admins:
+        row = table.rows[curr_row_idx]
+        for col_idx in range(2):
+            cell = row.cells[col_idx]
+            cell.width = col_width
+            tcPr = cell._element.get_or_add_tcPr()
+            tcMar = parse_xml(r'<w:tcMar %s><w:top w:w="0" w:type="dxa"/><w:bottom w:w="0" w:type="dxa"/><w:left w:w="0" w:type="dxa"/><w:right w:w="120" w:type="dxa"/></w:tcMar>' % nsdecls('w'))
+            tcPr.append(tcMar)
+            if col_idx < len(admins):
+                sig = admins[col_idx]
+                p_name = cell.paragraphs[0]
+                p_name.paragraph_format.space_before = Pt(20 if has_advisers else 24)
+                p_name.paragraph_format.space_after = Pt(1)
+                p_name.paragraph_format.line_spacing = 1.0
+                r_name = p_name.add_run(sig.get('name', ''))
+                r_name.font.name = 'Calibri'
+                r_name.font.size = Pt(11)
+                r_name.bold = True
+
+                p_role = cell.add_paragraph()
+                p_role.paragraph_format.space_before = Pt(0)
+                p_role.paragraph_format.space_after = Pt(4)
+                p_role.paragraph_format.line_spacing = 1.0
+                r_role = p_role.add_run(sig.get('role', ''))
+                r_role.font.name = 'Calibri'
+                r_role.font.size = Pt(11)
+
     tbl_elm = table._element
     tbl_elm.getparent().remove(tbl_elm)
     return tbl_elm
@@ -393,12 +480,13 @@ def populate_report(data, template_path=DEFAULT_TEMPLATE, output_path=DEFAULT_OU
         return default
 
     # Transmittal & Meta
-    transmittal_date = get_val('transmittal_date', 'transmittalDate', default='April 29, 2026')
+    default_transmittal_date, default_sem, default_ay = get_current_academic_calendar()
+    transmittal_date = get_val('transmittal_date', 'transmittalDate', default=default_transmittal_date)
     coordinator_name = get_val('coordinator_name', 'coordinatorName', default='Ms. Ligaya H. Estrella')
     coordinator_role = get_val('coordinator_role', 'coordinatorRole', default='Co-curricular Affairs Coordinator')
     coordinator_salutation = get_val('coordinator_salutation', 'coordinatorSalutation', default='Mrs. Estrella')
-    semester = get_val('semester', default='2nd SEMESTER')
-    academic_year = get_val('academic_year', 'academicYear', default='2025–2026')
+    semester = get_val('semester', default=default_sem)
+    academic_year = get_val('academic_year', 'academicYear', default=default_ay)
     period_desc = get_val('period_desc', 'periodDesc', 'eventName', 'activityTitle', default='Financial Operations')
     final_as_of = get_val('final_as_of', 'finalAsOf', default=f"As of {transmittal_date}")
 
@@ -492,6 +580,11 @@ def populate_report(data, template_path=DEFAULT_TEMPLATE, output_path=DEFAULT_OU
     # -------------------------------------------------------------
     tbl0 = doc.tables[0]
     ensure_invisible_table_borders(tbl0)
+    tbl0.rows[0].cells[0].text = 'INITIAL BUDGET / BEGINNING BALANCE (Carried over from prior semester)'
+    for r in tbl0.rows[0].cells[0].paragraphs[0].runs:
+        r.font.name = 'Calibri'
+        r.font.size = Pt(11)
+        r.bold = True
     tbl0.rows[1].cells[4].text = f"P{initial_budget:,.2f}"
 
     # -------------------------------------------------------------
@@ -607,57 +700,74 @@ def populate_report(data, template_path=DEFAULT_TEMPLATE, output_path=DEFAULT_OU
     inc = data.get('included_signatories') or data.get('includedSignatories') or {}
     officers = []
     if inc.get('treasurer', True) and tres_name:
-        officers.append({'heading': 'Prepared by:', 'name': tres_name, 'role': tres_role})
+        officers.append({'name': tres_name, 'role': tres_role})
     if inc.get('auditor', True) and aud_name:
-        officers.append({'heading': 'Audited by:', 'name': aud_name, 'role': aud_role})
+        officers.append({'name': aud_name, 'role': aud_role})
     if inc.get('vice_president', inc.get('vicePresident', bool(vp_name))) and vp_name:
-        officers.append({'heading': 'Noted by:', 'name': vp_name, 'role': vp_role})
+        officers.append({'name': vp_name, 'role': vp_role})
     if inc.get('president', True) and pres_name:
-        officers.append({'heading': 'Noted by:', 'name': pres_name, 'role': pres_role})
+        officers.append({'name': pres_name, 'role': pres_role})
 
     advisers = []
     if inc.get('adviser1', inc.get('adviser', True)) and adv1_name:
-        advisers.append({'heading': 'Approved by:', 'name': adv1_name, 'role': adv1_role})
+        advisers.append({'name': adv1_name, 'role': adv1_role})
     if inc.get('adviser2', True) and adv2_name and adv2_name != adv1_name:
-        advisers.append({'heading': 'Approved by:', 'name': adv2_name, 'role': adv2_role})
+        advisers.append({'name': adv2_name, 'role': adv2_role})
 
     admins = []
     if inc.get('director', True) and dir_name:
-        admins.append({'heading': 'Noted by:', 'name': dir_name, 'role': dir_role})
+        admins.append({'name': dir_name, 'role': dir_role})
     if inc.get('dean', True) and dean_name:
-        admins.append({'heading': 'Approved by:', 'name': dean_name, 'role': dean_role})
+        admins.append({'name': dean_name, 'role': dean_role})
 
     last_p1_note_tbl = None
 
+    # Single "Prepared by:" section for all student officers
     prep_nodes = [p for p in doc.paragraphs if p.text.strip() == 'Prepared by:']
     for idx, p in enumerate(prep_nodes):
         if len(officers) > 0:
+            p.text = 'Prepared by:'
+            p.paragraph_format.space_before = Pt(14)
+            p.paragraph_format.space_after = Pt(2)
+            p.paragraph_format.line_spacing = 1.0
+            if p.runs:
+                p.runs[0].font.name = 'Calibri'
+                p.runs[0].font.size = Pt(11)
+                p.runs[0].bold = True
             tbl = create_borderless_signatory_table(doc, officers, min(max(len(officers), 3), 4))
             if tbl is not None:
                 p._element.addnext(tbl)
-                if idx == 0 and last_p1_note_tbl is None:
-                    last_p1_note_tbl = tbl
-        p._element.getparent().remove(p._element)
+        else:
+            p._element.getparent().remove(p._element)
 
+    # Completely remove "Approved by:" headers anywhere in the report
     appr_nodes = [p for p in doc.paragraphs if p.text.strip() == 'Approved by:']
-    for idx, p in enumerate(appr_nodes):
-        if len(advisers) > 0:
-            tbl = create_borderless_signatory_table(doc, advisers, 2)
-            if tbl is not None:
-                p._element.addnext(tbl)
-                if idx == 0 and last_p1_note_tbl is None:
-                    last_p1_note_tbl = tbl
-        p._element.getparent().remove(p._element)
+    for p in appr_nodes:
+        try:
+            p._element.getparent().remove(p._element)
+        except Exception:
+            pass
 
+    # Single "Noted by:" section covering Club Advisers down to Program Director and Dean
+    noted_signatories = advisers + admins
     note_nodes = [p for p in doc.paragraphs if p.text.strip() == 'Noted by:']
     for idx, p in enumerate(note_nodes):
-        if len(admins) > 0:
-            tbl = create_borderless_signatory_table(doc, admins, 2)
+        if len(noted_signatories) > 0:
+            p.text = 'Noted by:'
+            p.paragraph_format.space_before = Pt(16)
+            p.paragraph_format.space_after = Pt(2)
+            p.paragraph_format.line_spacing = 1.0
+            if p.runs:
+                p.runs[0].font.name = 'Calibri'
+                p.runs[0].font.size = Pt(11)
+                p.runs[0].bold = True
+            tbl = create_borderless_noted_table(doc, advisers, admins)
             if tbl is not None:
                 p._element.addnext(tbl)
                 if idx == 0:
                     last_p1_note_tbl = tbl
-        p._element.getparent().remove(p._element)
+        else:
+            p._element.getparent().remove(p._element)
 
     # Remove old template placeholder paragraphs for signatories
     body = doc._element.body
@@ -702,16 +812,63 @@ def populate_report(data, template_path=DEFAULT_TEMPLATE, output_path=DEFAULT_OU
     # -------------------------------------------------------------
     # 9. SECTION FLOW & PAGE BREAKS (PAGE 2 -> PAGE 3 -> PAGE 4)
     # -------------------------------------------------------------
-    # Insert explicit page break before Expenses table
+    # Remove empty spacer paragraphs between Table 1 and Table 2 (Expenses)
+    in_gap = False
+    for el in list(body):
+        if el is tbl1._element:
+            in_gap = True
+            continue
+        if el is tbl_exp._element:
+            in_gap = False
+            break
+        if in_gap and el.tag.endswith('p'):
+            p = docx.text.paragraph.Paragraph(el, doc)
+            if not p.text.strip():
+                body.remove(el)
+
     tbl_exp_p = parse_xml(r'<w:p %s><w:r><w:br w:type="page"/></w:r></w:p>' % nsdecls('w'))
     tbl_exp._element.addprevious(tbl_exp_p)
 
-    # Insert explicit page break before Final Summary & Signatories
+    # Remove empty spacer paragraphs between Table 2 (Expenses) and Final As Of Date
+    final_p = None
     for p in doc.paragraphs:
         if final_as_of in p.text:
-            p_break = parse_xml(r'<w:p %s><w:r><w:br w:type="page"/></w:r></w:p>' % nsdecls('w'))
-            p._element.addprevious(p_break)
+            final_p = p
             break
+
+    if final_p is not None:
+        in_gap = False
+        for el in list(body):
+            if el is tbl_exp._element:
+                in_gap = True
+                continue
+            if el is final_p._element:
+                in_gap = False
+                break
+            if in_gap and el.tag.endswith('p'):
+                p = docx.text.paragraph.Paragraph(el, doc)
+                if not p.text.strip():
+                    body.remove(el)
+
+        p_break = parse_xml(r'<w:p %s><w:r><w:br w:type="page"/></w:r></w:p>' % nsdecls('w'))
+        final_p._element.addprevious(p_break)
+
+    # Clean consecutive/excessive empty paragraphs across the entire body
+    prev_empty = False
+    for el in list(body):
+        if el.tag.endswith('p'):
+            p = docx.text.paragraph.Paragraph(el, doc)
+            has_br = any('w:br' in r._r.xml for r in p.runs)
+            is_empty = not p.text.strip() and not has_br
+            if is_empty:
+                if prev_empty:
+                    body.remove(el)
+                else:
+                    prev_empty = True
+            else:
+                prev_empty = False
+        else:
+            prev_empty = False
 
     # -------------------------------------------------------------
     # 10. STRICT CALIBRI 11PT ENFORCEMENT & BORDERLESS TABLE STYLING
@@ -736,10 +893,11 @@ if __name__ == '__main__':
             data = json.load(f)
         populate_report(data, output_path=output_file)
     else:
+        cur_td, cur_sem, cur_ay = get_current_academic_calendar()
         sample = {
-            'transmittal_date': 'September 29, 2026',
-            'semester': '2nd SEMESTER',
-            'academic_year': '2025–2026',
+            'transmittal_date': cur_td,
+            'semester': cur_sem,
+            'academic_year': cur_ay,
             'period_desc': 'Club week',
             'include_cc': False,
             'page_number_style': 'page_x_of_y',

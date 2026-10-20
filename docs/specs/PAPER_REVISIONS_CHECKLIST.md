@@ -197,15 +197,14 @@
 - [ ] **4.1. Live External Email Delivery (Pending Live Infrastructure):**
   - **Current Status:** Currently there is no live external way to dispatch emails. While email templates and transporter code exist in `lib/email/mailer.js`, SMTP/Resend credentials are not live in production; email dispatches (admin registration alerts, password resets) are simulated and logged to the developer console.
   - **To-Do / Paper Note:** Document that live email delivery pipeline is queued for subsequent infrastructure rollout.
-- [ ] **4.2. Dynamic Semester Roster Management (Missing Admin UI):**
-  - **Current Status:** The system currently does not have an in-app interface/modal to dynamically update officer and adviser rosters for each semester. Current signatories are loaded from predefined configuration dictionaries in code (`DEFAULT_LITE_SIGNATORIES_26_27`, etc.) rather than a dynamic management screen.
-  - **To-Do / Paper Note:** Document the requirement for an administrative semester roster management UI to assign and re-order officer roles dynamically per semester.
+- [x] **4.2. Dynamic Semester Roster Management (Admin UI & API Implementation):**
+  - **Current Status:** Implemented! Added the **Signatory Roster** tab in `app/admin/page.jsx` backed by `/api/admin/signatories` and `/api/admin/signatories/clone`. Administrators can dynamically select academic terms, configure names and titles for Executive Officers, Club Advisers, and College Administration, toggle routing inclusion, clone between terms, and persist directly to `semester_signatories` with audit logs (`ROSTER_UPDATE`, `ROSTER_CLONE`).
 - [ ] **4.3. Document Preview Viewport Scaling on Mobile Devices:**
   - **Current Status:** On smartphone screens, the document preview canvas (`DocumentPreviewModal.jsx` / `DocumentPreview.css`) stretches horizontally and does not scale down proportionally, breaking the realistic 1:1 paper aspect ratio.
   - **To-Do / Paper Note:** Needs a responsive viewport transform scaling fix (e.g., CSS `transform: scale()` or zoom fit container) to preserve authentic document proportions on mobile viewports.
-- [ ] **4.4. Signatory Roster Ordering & Name Formatting Standardization:**
-  - **Current Status:** The order of signatories and naming format (`LASTNAME, FIRSTNAME M.I.` vs Title Case) requires clean standardization across both the in-browser preview and the generated `.docx` file.
-  - **To-Do / Paper Note:** Standardize the sequential hierarchy:
+- [x] **4.4. Signatory Roster Ordering & Name Formatting Standardization:**
+  - **Current Status:** Standardized across database migrations (`014_semester_signatories.sql`, `026_seed_admin_signatories.sql`), the Admin Roster interface, and downstream report generators (`app/page.jsx`, `DocumentPreviewModal.jsx`, `app/api/reports/docx/route.js`).
+  - **Standardized Hierarchy:**
     1. Prepared by: Treasurer (`CABANAG, ROSE MARIELLE P.`)
     2. Audited by: Auditor (`SARA, RISHAME P.`)
     3. Noted by: Vice President (`BAJAMUNDE, JHELLIAM T.`) & President (`GERONIMO, ANDREI JOHN P.`)

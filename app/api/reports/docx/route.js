@@ -117,11 +117,12 @@ export async function POST(req) {
   try {
     const body = await req.json();
 
-    // Dynamically calculate current Academic Year (August starts the new AY in PH universities)
+    // Dynamically calculate current Academic Year & Semester (August starts the new AY in PH universities)
     const now = new Date();
     const currentYear = now.getFullYear();
     const startYear = now.getMonth() >= 7 ? currentYear : currentYear - 1;
     const defaultAcademicYear = `${startYear}–${startYear + 1}`;
+    const defaultSemester = (now.getMonth() >= 7 || now.getMonth() === 0) ? '1st SEMESTER' : '2nd SEMESTER';
     const defaultTargetDate = `Academic Year ${defaultAcademicYear}`;
 
     const {
@@ -369,16 +370,15 @@ export async function POST(req) {
       const deanName = (signatories.deanName || signatories.dean_name || '').toUpperCase();
       const deanRole = signatories.deanRole || signatories.dean_role || 'Dean, College of Computer Studies';
 
-      function buildDynamicTable(sigs, maxCols, defaultHeading = '') {
+      function buildOfficerTable(sigs, maxCols) {
         if (maxCols <= 0 || !sigs || sigs.length === 0) return null;
         const colPct = Math.floor(100 / maxCols);
-        const cells = sigs.slice(0, maxCols).map((sig, idx) => {
-          const heading = (sig.heading !== undefined ? sig.heading : (idx === 0 ? defaultHeading : '')) + '\n\n\n';
+        const cells = sigs.slice(0, maxCols).map((sig) => {
           return new TableCell({
             borders: borderNone,
             width: { size: colPct, type: WidthType.PERCENTAGE },
             children: [
-              new Paragraph({ children: [new TextRun({ text: heading, font: 'Calibri' })] }),
+              new Paragraph({ children: [new TextRun({ text: '\n\n\n', font: 'Calibri' })] }),
               new Paragraph({ children: [new TextRun({ text: sig.name, bold: true, font: 'Calibri' })] }),
               new Paragraph({ children: [new TextRun({ text: sig.role, italics: true, font: 'Calibri' })] }),
             ],
@@ -400,60 +400,112 @@ export async function POST(req) {
         });
       }
 
-      // Table 1 (Officers):
-      const activeOfficers = [];
-      if (incFilter.treasurer && treasName) activeOfficers.push({ heading: 'Prepared by:', name: treasName, role: treasRole });
-      if (incFilter.auditor && audName) activeOfficers.push({ heading: 'Audited by:', name: audName, role: audRole });
-      if ((incFilter.vicePresident ?? incFilter.vice_president) && vpName) activeOfficers.push({ heading: 'Noted by:', name: vpName, role: vpRole });
-      if (incFilter.president && presName) activeOfficers.push({ heading: 'Noted by:', name: presName, role: presRole });
+      function buildNotedTable(advisersList, adminsList) {
+        const hasAdvisers = advisersList && advisersList.length > 0;
+        const hasAdmins = adminsList && adminsList.length > 0;
+        if (!hasAdvisers && !hasAdmins) return null;
 
-      // Table 2 (Advisers):
+        const tableRows = [];
+
+        if (hasAdvisers) {
+          const cells = [0, 1].map((colIdx) => {
+            const sig = advisersList[colIdx];
+            if (sig) {
+              return new TableCell({
+                borders: borderNone,
+                width: { size: 50, type: WidthType.PERCENTAGE },
+                children: [
+                  new Paragraph({ children: [new TextRun({ text: '\n\n\n', font: 'Calibri' })] }),
+                  new Paragraph({ children: [new TextRun({ text: sig.name, bold: true, font: 'Calibri' })] }),
+                  new Paragraph({ children: [new TextRun({ text: sig.role, italics: true, font: 'Calibri' })] }),
+                ],
+              });
+            }
+            return new TableCell({
+              borders: borderNone,
+              width: { size: 50, type: WidthType.PERCENTAGE },
+              children: [new Paragraph({ text: '' })],
+            });
+          });
+          tableRows.push(new TableRow({ children: cells }));
+        }
+
+        if (hasAdmins) {
+          const cells = [0, 1].map((colIdx) => {
+            const sig = adminsList[colIdx];
+            if (sig) {
+              return new TableCell({
+                borders: borderNone,
+                width: { size: 50, type: WidthType.PERCENTAGE },
+                children: [
+                  new Paragraph({ children: [new TextRun({ text: hasAdvisers ? '\n\n' : '\n\n\n', font: 'Calibri' })] }),
+                  new Paragraph({ children: [new TextRun({ text: sig.name, bold: true, font: 'Calibri' })] }),
+                  new Paragraph({ children: [new TextRun({ text: sig.role, italics: true, font: 'Calibri' })] }),
+                ],
+              });
+            }
+            return new TableCell({
+              borders: borderNone,
+              width: { size: 50, type: WidthType.PERCENTAGE },
+              children: [new Paragraph({ text: '' })],
+            });
+          });
+          tableRows.push(new TableRow({ children: cells }));
+        }
+
+        return new Table({
+          width: { size: 100, type: WidthType.PERCENTAGE },
+          rows: tableRows,
+        });
+      }
+
+      // Active Officers (under single "Prepared by:")
+      const activeOfficers = [];
+      if (incFilter.treasurer && treasName) activeOfficers.push({ name: treasName, role: treasRole });
+      if (incFilter.auditor && audName) activeOfficers.push({ name: audName, role: audRole });
+      if ((incFilter.vicePresident ?? incFilter.vice_president) && vpName) activeOfficers.push({ name: vpName, role: vpRole });
+      if (incFilter.president && presName) activeOfficers.push({ name: presName, role: presRole });
+
+      // Active Advisers
       const activeAdvisers = [];
       if ((incFilter.adviser1 ?? incFilter.adviser) && adv1Name) {
-        activeAdvisers.push({ heading: 'Approved by:', name: adv1Name, role: adv1Role });
+        activeAdvisers.push({ name: adv1Name, role: adv1Role });
       }
       if ((incFilter.adviser2 ?? incFilter.adviser) && adv2Name && adv2Name !== adv1Name) {
-        activeAdvisers.push({ heading: 'Approved by:', name: adv2Name, role: adv2Role });
+        activeAdvisers.push({ name: adv2Name, role: adv2Role });
       }
 
-      // Table 3 (Administration):
+      // Active Administration
       const activeAdmins = [];
-      if (incFilter.director && dirName) activeAdmins.push({ heading: 'Noted by:', name: dirName, role: dirRole });
-      if (incFilter.dean && deanName) activeAdmins.push({ heading: 'Approved by:', name: deanName, role: deanRole });
+      if (incFilter.director && dirName) activeAdmins.push({ name: dirName, role: dirRole });
+      if (incFilter.dean && deanName) activeAdmins.push({ name: deanName, role: deanRole });
 
-      if (docType === 'PROPOSAL') {
-        const tables = [];
+      const tables = [];
+
+      // 1. Single "Prepared by:" block for student officers
+      if (activeOfficers.length > 0) {
+        tables.push(new Paragraph({
+          children: [new TextRun({ text: 'Prepared by:', bold: true, font: 'Calibri' })],
+          spacing: { before: 200, after: 60 },
+        }));
         const maxOfficerCols = Math.min(Math.max(activeOfficers.length, 3), 4);
-        const tblOfficers = buildDynamicTable(activeOfficers, maxOfficerCols);
+        const tblOfficers = buildOfficerTable(activeOfficers, maxOfficerCols);
         if (tblOfficers) {
           tables.push(tblOfficers);
-          tables.push(new Paragraph({ text: '' }));
+          tables.push(new Paragraph({ text: '', spacing: { before: 80, after: 80 } }));
         }
-        const tblAdmin = buildDynamicTable(activeAdmins, 2);
-        if (tblAdmin) {
-          tables.push(tblAdmin);
+      }
+
+      // 2. Single "Noted by:" block spanning Advisers down to Program Director and Dean
+      if (activeAdvisers.length > 0 || activeAdmins.length > 0) {
+        tables.push(new Paragraph({
+          children: [new TextRun({ text: 'Noted by:', bold: true, font: 'Calibri' })],
+          spacing: { before: 200, after: 60 },
+        }));
+        const tblNoted = buildNotedTable(activeAdvisers, activeAdmins);
+        if (tblNoted) {
+          tables.push(tblNoted);
         }
-        return tables;
-      }
-
-      // LIQUIDATION
-      const tables = [];
-      const maxOfficerCols = Math.min(Math.max(activeOfficers.length, 3), 4);
-      const tblOfficers = buildDynamicTable(activeOfficers, maxOfficerCols);
-      if (tblOfficers) {
-        tables.push(tblOfficers);
-        tables.push(new Paragraph({ text: '' }));
-      }
-
-      const tblAdvisers = buildDynamicTable(activeAdvisers, 2);
-      if (tblAdvisers) {
-        tables.push(tblAdvisers);
-        tables.push(new Paragraph({ text: '' }));
-      }
-
-      const tblAdmins = buildDynamicTable(activeAdmins, 2);
-      if (tblAdmins) {
-        tables.push(tblAdmins);
       }
 
       return tables;
@@ -550,7 +602,7 @@ export async function POST(req) {
     if (receiptsMode === 'STANDALONE') {
       sectionChildren = [
         ...pdmHeader,
-        ...createReceiptSheetsSection(receipts, body.academicYear || defaultAcademicYear, body.semester || '2nd SEMESTER'),
+        ...createReceiptSheetsSection(receipts, body.academicYear || defaultAcademicYear, body.semester || defaultSemester),
       ];
     } else if (type === 'PROPOSAL') {
       // Build Proposal Items Table
@@ -947,7 +999,7 @@ export async function POST(req) {
 
       // Attached receipts if requested
       if (receiptsMode === 'APPEND' && receipts && receipts.length > 0) {
-        sectionChildren.push(...createReceiptSheetsSection(receipts, body.academicYear || defaultAcademicYear, body.semester || '2nd SEMESTER'));
+        sectionChildren.push(...createReceiptSheetsSection(receipts, body.academicYear || defaultAcademicYear, body.semester || defaultSemester));
       }
     }
 

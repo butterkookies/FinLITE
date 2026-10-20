@@ -1,8 +1,71 @@
 'use client';
-import { useState, useEffect } from 'react';
-import { Download, Printer, X, FileText, Edit3 } from 'lucide-react';
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
+import {
+  Download,
+  Printer,
+  X,
+  FileText,
+  Edit3,
+  ZoomIn,
+  ZoomOut,
+  Maximize2,
+  Sliders,
+  ChevronLeft,
+  ChevronRight,
+  ChevronDown,
+  Layers,
+  Check,
+  Plus,
+  Trash2,
+  FileSpreadsheet,
+} from 'lucide-react';
 import './DocumentPreview.css';
 import { Button, Badge } from '@/components/ui';
+
+// Proportional Scaled Sheet Wrapper maintaining exact Letter 8.5" x 11" dimensions
+function ScaledSheet({ scale, children, className = '' }) {
+  const contentRef = useRef(null);
+  const [contentHeight, setContentHeight] = useState(1056);
+
+  useEffect(() => {
+    if (!contentRef.current) return;
+    const updateH = () => {
+      if (contentRef.current) {
+        const measured = contentRef.current.offsetHeight || 1056;
+        setContentHeight(Math.max(1056, measured));
+      }
+    };
+    updateH();
+
+    if (typeof ResizeObserver !== 'undefined') {
+      const ro = new ResizeObserver(() => updateH());
+      ro.observe(contentRef.current);
+      return () => ro.disconnect();
+    }
+  }, []);
+
+  return (
+    <div
+      className={`sheet-scaler-wrapper ${className}`}
+      style={{
+        width: `${Math.round(816 * scale)}px`,
+        height: `${Math.round(contentHeight * scale)}px`,
+      }}
+    >
+      <div
+        ref={contentRef}
+        className="sheet-scale-target"
+        style={{
+          transform: `scale(${scale})`,
+          transformOrigin: 'top left',
+          width: '816px',
+        }}
+      >
+        {children}
+      </div>
+    </div>
+  );
+}
 
 // Header Banner replicating PDM CCS & LITE official template banner with authentic graphic
 function OfficialHeaderBanner() {
@@ -17,11 +80,18 @@ function OfficialHeaderBanner() {
   );
 }
 
-export default function DocumentPreviewModal({ isOpen, onClose, documentData }) {
-  const isProposal = documentData?.type === 'PROPOSAL';
+export default function DocumentPreviewModal({ isOpen, onClose, documentData, data }) {
+  const activeDocData = documentData || data;
+  const isProposal = activeDocData?.type === 'PROPOSAL';
 
-  // Navigation tab for pages (0 = All Pages, 1 = Page 1, 2 = Page 2, 3 = Page 3, 4 = Page 4)
-  const [activePage, setActivePage] = useState(0);
+  // Proportional Scaling, Viewport & View Mode state
+  const viewportRef = useRef(null);
+  const [zoomScale, setZoomScale] = useState(1);
+  const [zoomMode, setZoomMode] = useState('fit-width'); // 'fit-width' | 'fit-page' | 'custom'
+  const [viewMode, setViewMode] = useState('single'); // 'single' | 'continuous'
+  const [activePage, setActivePage] = useState(1); // 1-indexed for single page, or 0 for all
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [isPageSelectorOpen, setIsPageSelectorOpen] = useState(false);
 
   // Editable Transmittal Metadata
   const [transmittalDate, setTransmittalDate] = useState(
@@ -29,9 +99,17 @@ export default function DocumentPreviewModal({ isOpen, onClose, documentData }) 
   );
   const [coordinatorName, setCoordinatorName] = useState('Ms. Ligaya H. Estrella');
   const [coordinatorRole, setCoordinatorRole] = useState('Co-curricular Affairs Coordinator');
-  const [salutation, setSalutation] = useState('Dear Mrs. Estrella,');
-  const [semester, setSemester] = useState('2nd SEMESTER');
-  const [academicYear, setAcademicYear] = useState('2025–2026');
+  const [salutation, setSalutation] = useState('Dear Ms. Estrella,');
+  const [semester, setSemester] = useState(() => {
+    const m = new Date().getMonth();
+    return (m >= 7 || m === 0) ? '1st SEMESTER' : '2nd SEMESTER';
+  });
+  const [academicYear, setAcademicYear] = useState(() => {
+    const now = new Date();
+    const curY = now.getFullYear();
+    const sYear = now.getMonth() >= 7 ? curY : curY - 1;
+    return `${sYear}–${sYear + 1}`;
+  });
   const [periodDesc, setPeriodDesc] = useState('Financial Operations');
   const [finalAsOf, setFinalAsOf] = useState(
     `As of ${new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}`
@@ -93,27 +171,30 @@ export default function DocumentPreviewModal({ isOpen, onClose, documentData }) 
 
   const [isExporting, setIsExporting] = useState(false);
 
-  // Sync state strictly with incoming real documentData
+  // Sync state strictly with incoming real activeDocData
   useEffect(() => {
-    if (documentData) {
-      if (documentData.transmittalDate) {
-        setTransmittalDate(documentData.transmittalDate);
-        setFinalAsOf(`As of ${documentData.transmittalDate}`);
+    if (activeDocData) {
+      if (activeDocData.transmittalDate) {
+        setTransmittalDate(activeDocData.transmittalDate);
+        setFinalAsOf(`As of ${activeDocData.transmittalDate}`);
       }
-      if (documentData.eventName) setPeriodDesc(documentData.eventName);
-      else if (documentData.activityTitle) setPeriodDesc(documentData.activityTitle);
+      if (activeDocData.eventName) setPeriodDesc(activeDocData.eventName);
+      else if (activeDocData.activityTitle) setPeriodDesc(activeDocData.activityTitle);
 
-      if (documentData.semester) {
-        const semClean = documentData.semester.toUpperCase().includes('SEM') 
-          ? documentData.semester.toUpperCase().replace('SEM', 'SEMESTER')
-          : documentData.semester.toUpperCase();
+      if (activeDocData.semester) {
+        const sem = String(activeDocData.semester).trim();
+        let semClean = sem.toUpperCase();
+        if (/1st|first/i.test(sem)) semClean = '1st SEMESTER';
+        else if (/2nd|second/i.test(sem)) semClean = '2nd SEMESTER';
+        else if (/midyear|summer/i.test(sem)) semClean = 'SUMMER / MIDYEAR';
+        else semClean = semClean.replace(/\bSEM\b/i, 'SEMESTER');
         setSemester(semClean);
       }
-      if (documentData.academicYear) setAcademicYear(documentData.academicYear);
+      if (activeDocData.academicYear) setAcademicYear(activeDocData.academicYear);
       
       // Sync real signatories if provided
-      if (documentData.signatories) {
-        const sigs = documentData.signatories;
+      if (activeDocData.signatories) {
+        const sigs = activeDocData.signatories;
         const pName = (sigs.notedBy || sigs.presidentName || '').toUpperCase();
         const pRole = (sigs.notedRole || sigs.presidentRole || 'LITE PRESIDENT').toUpperCase();
         const vpName = (sigs.vicePresidentName || sigs.vice_president || '').toUpperCase();
@@ -163,7 +244,7 @@ export default function DocumentPreviewModal({ isOpen, onClose, documentData }) 
         }));
       }
 
-      const txs = documentData.transactions || [];
+      const txs = activeDocData.transactions || [];
 
       // 1. Auto-detect rollover beginning balance
       const rolloverTxs = txs.filter(t => 
@@ -200,7 +281,7 @@ export default function DocumentPreviewModal({ isOpen, onClose, documentData }) 
         }));
       setExpenseRows(realOutflows);
     }
-  }, [documentData]);
+  }, [activeDocData]);
 
   // Derived Calculations from Real Ledger Data
   const totalInflows = inflowRows.reduce((sum, item) => sum + (Number(item.amount) || 0), 0);
@@ -252,7 +333,7 @@ export default function DocumentPreviewModal({ isOpen, onClose, documentData }) 
 
   // Flatten receipt vouchers from active transactions
   const receiptItems = [];
-  (documentData?.transactions || []).forEach((tx) => {
+  (activeDocData?.transactions || []).forEach((tx) => {
     const urls = Array.isArray(tx.receipt_urls) && tx.receipt_urls.length > 0
       ? tx.receipt_urls
       : (tx.receipt_url ? [tx.receipt_url] : []);
@@ -294,20 +375,69 @@ export default function DocumentPreviewModal({ isOpen, onClose, documentData }) 
     return `Page ${pageNum} of ${total}`;
   };
 
-  // Signatory matrix metadata
+  // Structured Page Navigation list with authentic titles
+  const availablePages = useMemo(() => {
+    if (isProposal) {
+      return [{ id: 1, label: 'Activity & Business Proposal', short: 'Proposal' }];
+    }
+    if (receiptsMode === 'STANDALONE') {
+      if (receiptPages.length === 0) {
+        return [{ id: 1, label: 'Receipts & Proofs (Empty)', short: 'Receipts' }];
+      }
+      return receiptPages.map((_, idx) => ({
+        id: idx + 1,
+        label: `Receipt Sheet ${idx + 1} of ${receiptPages.length}`,
+        short: `Receipts ${idx + 1}/${receiptPages.length}`,
+        receiptIndex: idx,
+      }));
+    }
+
+    const pages = [
+      { id: 1, label: 'Page 1: Transmittal Letter', short: 'P1: Transmittal' },
+      { id: 2, label: 'Page 2: Income & Collections', short: 'P2: Income' },
+      { id: 3, label: 'Page 3: Expenses & Disbursements', short: 'P3: Expenses' },
+      { id: 4, label: 'Page 4: Reconciliation & Certification', short: 'P4: Reconciliation' },
+    ];
+
+    if (receiptsMode === 'APPEND') {
+      if (receiptPages.length === 0) {
+        pages.push({
+          id: 5,
+          label: 'Receipts & Proofs (No Attachments)',
+          short: 'Receipts',
+          receiptIndex: -1,
+        });
+      } else {
+        receiptPages.forEach((_, idx) => {
+          pages.push({
+            id: 5 + idx,
+            label: `Receipts Sheet ${idx + 1} of ${receiptPages.length}`,
+            short: `Receipts ${idx + 1}/${receiptPages.length}`,
+            receiptIndex: idx,
+          });
+        });
+      }
+    }
+
+    return pages;
+  }, [isProposal, receiptsMode, receiptPages]);
+
+  const activeSignatoryCount = Object.values(includedSignatories).filter(Boolean).length;
+
+  // Signatory matrix metadata: Officers grouped under single "Prepared by:", faculty & administration under single "Noted by:"
   const studentOfficers = [
     { key: 'treasurer', label: 'Treasurer', nameKey: 'treasurerName', roleKey: 'treasurerRole', heading: 'Prepared by:' },
-    { key: 'auditor', label: 'Auditor', nameKey: 'auditorName', roleKey: 'auditorRole', heading: 'Audited by:' },
-    { key: 'vicePresident', label: 'Vice President', nameKey: 'vicePresidentName', roleKey: 'vicePresidentRole', heading: 'Noted by:' },
-    { key: 'president', label: 'President', nameKey: 'presidentName', roleKey: 'presidentRole', heading: 'Noted by:' },
+    { key: 'auditor', label: 'Auditor', nameKey: 'auditorName', roleKey: 'auditorRole', heading: 'Prepared by:' },
+    { key: 'vicePresident', label: 'Vice President', nameKey: 'vicePresidentName', roleKey: 'vicePresidentRole', heading: 'Prepared by:' },
+    { key: 'president', label: 'President', nameKey: 'presidentName', roleKey: 'presidentRole', heading: 'Prepared by:' },
   ];
   const adviserOfficers = [
-    { key: 'adviser1', label: 'Club Adviser 1', nameKey: 'adviser1Name', roleKey: 'adviser1Role', heading: 'Approved by:' },
-    { key: 'adviser2', label: 'Club Adviser 2', nameKey: 'adviser2Name', roleKey: 'adviser2Role', heading: 'Approved by:' },
+    { key: 'adviser1', label: 'Club Adviser 1', nameKey: 'adviser1Name', roleKey: 'adviser1Role', heading: 'Noted by:' },
+    { key: 'adviser2', label: 'Club Adviser 2', nameKey: 'adviser2Name', roleKey: 'adviser2Role', heading: 'Noted by:' },
   ];
   const adminOfficers = [
     { key: 'director', label: 'Program Director', nameKey: 'directorName', roleKey: 'directorRole', heading: 'Noted by:' },
-    { key: 'dean', label: 'Dean', nameKey: 'deanName', roleKey: 'deanRole', heading: 'Approved by:' },
+    { key: 'dean', label: 'Dean', nameKey: 'deanName', roleKey: 'deanRole', heading: 'Noted by:' },
   ];
   const allSignatoryDefs = [...studentOfficers, ...adviserOfficers, ...adminOfficers];
 
@@ -413,7 +543,7 @@ export default function DocumentPreviewModal({ isOpen, onClose, documentData }) 
           total_outflows: totalExpenses,
           cash_on_hand: cashOnHand,
         },
-        items: documentData.items || [],
+        items: activeDocData.items || [],
         transactions: allExportTransactions,
         include_cc: includeCc,
         cc_recipients: ccRecipients,
@@ -452,55 +582,259 @@ export default function DocumentPreviewModal({ isOpen, onClose, documentData }) 
     }
   };
 
+  // Proportional Scaling Calculators
+  const getFitWidthScale = useCallback(() => {
+    if (typeof window === 'undefined') return 1;
+    const viewportWidth = viewportRef.current?.clientWidth || window.innerWidth;
+    const padding = window.innerWidth < 640 ? 16 : 48;
+    const availWidth = Math.max(280, viewportWidth - padding);
+    const scale = availWidth / 816;
+    return Number(Math.min(1.25, Math.max(0.25, scale)).toFixed(2));
+  }, []);
+
+  const getFitPageScale = useCallback(() => {
+    if (typeof window === 'undefined') return 1;
+    const viewportWidth = viewportRef.current?.clientWidth || window.innerWidth;
+    const viewportHeight = viewportRef.current?.clientHeight || window.innerHeight;
+    const padW = window.innerWidth < 640 ? 16 : 48;
+    const padH = 160; // Top header + bottom docked toolbar + margins
+    const availW = Math.max(280, viewportWidth - padW);
+    const availH = Math.max(350, viewportHeight - padH);
+    const scaleW = availW / 816;
+    const scaleH = availH / 1056;
+    return Number(Math.min(1.2, Math.max(0.25, Math.min(scaleW, scaleH))).toFixed(2));
+  }, []);
+
+  // Zoom Actions
+  const handleZoomIn = () => {
+    setZoomMode('custom');
+    setZoomScale((prev) => Math.min(2.0, Number((prev + 0.15).toFixed(2))));
+  };
+
+  const handleZoomOut = () => {
+    setZoomMode('custom');
+    setZoomScale((prev) => Math.max(0.25, Number((prev - 0.15).toFixed(2))));
+  };
+
+  const handleZoomFitWidth = () => {
+    setZoomMode('fit-width');
+    setZoomScale(getFitWidthScale());
+  };
+
+  const handleZoomFitPage = () => {
+    setZoomMode('fit-page');
+    setZoomScale(getFitPageScale());
+  };
+
+  const handleZoom100 = () => {
+    setZoomMode('custom');
+    setZoomScale(1.0);
+  };
+
+  // Device Smart Defaults & Resize Observation
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const handleInitScale = () => {
+      const isMobile = window.innerWidth < 768;
+      if (isMobile) {
+        setViewMode('single');
+        setActivePage(1);
+        setZoomMode('fit-width');
+        setZoomScale(getFitWidthScale());
+      } else {
+        setViewMode('continuous');
+        setActivePage(0);
+        const fit = getFitWidthScale();
+        if (fit < 1) {
+          setZoomScale(fit);
+          setZoomMode('fit-width');
+        } else {
+          setZoomScale(1);
+          setZoomMode('custom');
+        }
+      }
+    };
+
+    handleInitScale();
+
+    const handleResize = () => {
+      if (zoomMode === 'fit-width') {
+        setZoomScale(getFitWidthScale());
+      } else if (zoomMode === 'fit-page') {
+        setZoomScale(getFitPageScale());
+      }
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, [isOpen, getFitWidthScale, getFitPageScale]);
+
+  // Page Indexing & Navigation
+  const currentPageIndex = availablePages.findIndex((p) => p.id === activePage) !== -1
+    ? availablePages.findIndex((p) => p.id === activePage)
+    : 0;
+
+  const handlePrevPage = () => {
+    if (currentPageIndex > 0) {
+      setActivePage(availablePages[currentPageIndex - 1].id);
+    }
+  };
+
+  const handleNextPage = () => {
+    if (currentPageIndex < availablePages.length - 1) {
+      setActivePage(availablePages[currentPageIndex + 1].id);
+    }
+  };
+
+  // Keyboard Shortcuts
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleKeyDown = (e) => {
+      if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'SELECT') return;
+
+      if (e.key === 'Escape') {
+        if (isSettingsOpen) setIsSettingsOpen(false);
+        else if (isPageSelectorOpen) setIsPageSelectorOpen(false);
+        else onClose?.();
+      } else if (e.key === 'ArrowLeft' || e.key === 'PageUp') {
+        e.preventDefault();
+        handlePrevPage();
+      } else if (e.key === 'ArrowRight' || e.key === 'PageDown') {
+        e.preventDefault();
+        handleNextPage();
+      } else if (e.key === '=' || e.key === '+') {
+        e.preventDefault();
+        handleZoomIn();
+      } else if (e.key === '-' || e.key === '_') {
+        e.preventDefault();
+        handleZoomOut();
+      } else if (e.key === '0') {
+        e.preventDefault();
+        handleZoomFitWidth();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, isSettingsOpen, isPageSelectorOpen, activePage, availablePages, currentPageIndex]);
+
+  // Touch Swipe Gesture on Mobile
+  const touchStartX = useRef(null);
+  const touchStartY = useRef(null);
+
+  const handleTouchStart = (e) => {
+    if (e.touches.length === 1) {
+      touchStartX.current = e.touches[0].clientX;
+      touchStartY.current = e.touches[0].clientY;
+    }
+  };
+
+  const handleTouchEnd = (e) => {
+    if (!touchStartX.current || !touchStartY.current || viewMode !== 'single') return;
+    const touchEndX = e.changedTouches[0].clientX;
+    const touchEndY = e.changedTouches[0].clientY;
+    const diffX = touchEndX - touchStartX.current;
+    const diffY = touchEndY - touchStartY.current;
+
+    if (Math.abs(diffX) > 60 && Math.abs(diffX) > Math.abs(diffY) * 1.5) {
+      if (diffX < 0) {
+        handleNextPage();
+      } else {
+        handlePrevPage();
+      }
+    }
+    touchStartX.current = null;
+    touchStartY.current = null;
+  };
+
   // Safe early return after all hooks
-  if (!isOpen || !documentData) return null;
+  if (!isOpen || !activeDocData) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex flex-col document-preview-overlay overflow-y-auto">
+    <div className="fixed inset-0 z-50 flex flex-col document-preview-overlay">
       
-      {/* Top Floating Action & Navigation Bar */}
-      <header className="sticky top-0 z-50 bg-zinc-950/95 backdrop-blur border-b border-zinc-800 text-zinc-100 px-3 sm:px-6 py-2.5 sm:py-3 space-y-2.5 no-print shadow-xl">
-        {/* Row 1: Header Title & Main Action Buttons */}
+      {/* Top Floating Action & Navigation Bar (Streamlined 1-Row) */}
+      <header className="sticky top-0 z-40 bg-zinc-950/95 backdrop-blur-md border-b border-zinc-800 text-zinc-100 px-3 sm:px-6 py-2 sm:py-2.5 no-print shadow-xl">
         <div className="flex items-center justify-between gap-2 min-w-0">
+          {/* Left: Branding & Status */}
           <div className="flex items-center gap-2 sm:gap-3 min-w-0">
             <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-emerald-600 flex items-center justify-center font-bold text-white shadow-sm shrink-0">
               <FileText className="w-4 h-4" />
             </div>
             <div className="min-w-0">
               <div className="flex items-center gap-1.5 sm:gap-2">
-                <span className="text-xs sm:text-sm font-bold tracking-tight truncate">
+                <span className="text-xs sm:text-sm font-bold tracking-tight truncate text-white">
                   {isProposal ? 'Activity Proposal Preview' : '1:1 Official PDM LITE Preview'}
                 </span>
                 <Badge variant="emerald" size="xs" className="hidden xs:inline-flex">
-                  Exact Replicant
+                  Letter 8.5" × 11"
                 </Badge>
               </div>
-              <p className="hidden xs:flex text-[10px] sm:text-[11px] text-zinc-400 items-center gap-1 truncate">
-                <Edit3 className="w-3 h-3 text-amber-400 shrink-0" />
-                <span className="truncate">In-place editing active: adjust values before export.</span>
-              </p>
+              <div className="flex items-center gap-2 text-[10px] sm:text-[11px] text-zinc-400 truncate">
+                <span className="flex items-center gap-1 text-amber-400">
+                  <Edit3 className="w-3 h-3 shrink-0" />
+                  <span className="hidden sm:inline">In-place editing active</span>
+                </span>
+                <span className="hidden md:inline text-zinc-600">•</span>
+                <span className="hidden md:inline text-zinc-400">
+                  {viewMode === 'single'
+                    ? (availablePages[currentPageIndex]?.label || `Page ${activePage}`)
+                    : `Continuous View (${availablePages.length} Pages)`}
+                </span>
+              </div>
             </div>
           </div>
 
+          {/* Right: Actions */}
           <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
+            {/* View Mode Toggle (Continuous vs Single) on Desktop */}
+            <button
+              onClick={() => setViewMode(viewMode === 'single' ? 'continuous' : 'single')}
+              className="hidden lg:flex items-center gap-1.5 bg-zinc-900 hover:bg-zinc-800 text-zinc-300 hover:text-white px-2.5 py-1.5 rounded-lg border border-zinc-800 text-xs font-medium transition-colors"
+              title={viewMode === 'single' ? 'Switch to Continuous Scroll' : 'Switch to Single Page View'}
+            >
+              <Layers className="w-3.5 h-3.5 text-emerald-400" />
+              <span>{viewMode === 'single' ? 'Single Page' : 'All Pages'}</span>
+            </button>
+
+            {/* Document Options Drawer Trigger */}
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setIsSettingsOpen(true)}
+              className="bg-zinc-900 text-zinc-200 border-zinc-800 hover:bg-zinc-800 text-xs px-2.5 sm:px-3 h-8 shadow-sm"
+              leftIcon={<Sliders className="w-3.5 h-3.5 text-emerald-400" />}
+              title="Open Document Settings & Metadata"
+            >
+              <span>Options</span>
+              {activeSignatoryCount > 0 && (
+                <span className="ml-1 bg-emerald-950 text-emerald-300 border border-emerald-800 text-[10px] font-bold px-1.5 py-0.2 rounded-full hidden sm:inline">
+                  {activeSignatoryCount} sigs
+                </span>
+              )}
+            </Button>
+
+            {/* Print / Save as PDF */}
             <Button
               variant="outline"
               size="sm"
               onClick={() => window.print()}
-              className="hidden sm:flex bg-zinc-900 text-zinc-300 border-zinc-800 hover:bg-zinc-800"
+              className="hidden sm:flex bg-zinc-900 text-zinc-300 border-zinc-800 hover:bg-zinc-800 text-xs px-2.5 sm:px-3 h-8 shadow-sm"
               leftIcon={<Printer className="w-3.5 h-3.5" />}
               title="Print or Save as PDF"
             >
               <span>Print / PDF</span>
             </Button>
 
+            {/* Export DOCX */}
             <Button
               variant="primary"
               size="sm"
               onClick={handleExportDocx}
               loading={isExporting}
               leftIcon={<Download className="w-3.5 h-3.5" />}
-              className="active:scale-95 whitespace-nowrap"
+              className="active:scale-95 whitespace-nowrap text-xs px-2.5 sm:px-3.5 h-8 font-semibold shadow-md"
             >
               {isExporting ? 'Exporting...' : (
                 <>
@@ -510,184 +844,41 @@ export default function DocumentPreviewModal({ isOpen, onClose, documentData }) 
               )}
             </Button>
 
+            {/* Close Modal */}
             <Button
               variant="ghost"
               size="icon"
               onClick={onClose}
-              className="text-zinc-400 hover:text-white hover:bg-zinc-800 ml-0.5 sm:ml-1"
-              title="Close Preview"
+              className="text-zinc-400 hover:text-white hover:bg-zinc-800 w-8 h-8 ml-0.5"
+              title="Close Preview (Esc)"
             >
               <X className="w-4 h-4" />
             </Button>
           </div>
         </div>
-
-        {/* Row 2: Secondary Document Controls (Horizontally Scrollable Strip on Mobile) */}
-        {!isProposal && (
-          <div className="flex items-center gap-2 overflow-x-auto scrollbar-none py-0.5 w-full text-xs">
-            {/* Export Scope Radio Buttons */}
-            <div className="flex items-center gap-2 bg-zinc-900 border border-zinc-800 rounded-lg px-2.5 py-1 text-xs text-zinc-300 shadow-sm shrink-0">
-              <span className="text-zinc-400 font-medium hidden md:inline">Scope:</span>
-              <label className="flex items-center gap-1 cursor-pointer hover:text-white" title="Financial Report Only">
-                <input
-                  type="radio"
-                  name="receiptsMode"
-                  value="NONE"
-                  checked={receiptsMode === 'NONE'}
-                  onChange={() => setReceiptsMode('NONE')}
-                  className="text-emerald-500 focus:ring-emerald-500 h-3 w-3"
-                />
-                <span className="text-[11px] whitespace-nowrap">Financial Only</span>
-              </label>
-              <label className="flex items-center gap-1 cursor-pointer hover:text-white" title="Financial Report + Attached Receipts">
-                <input
-                  type="radio"
-                  name="receiptsMode"
-                  value="APPEND"
-                  checked={receiptsMode === 'APPEND'}
-                  onChange={() => setReceiptsMode('APPEND')}
-                  className="text-emerald-500 focus:ring-emerald-500 h-3 w-3"
-                />
-                <span className="text-[11px] whitespace-nowrap">+ Receipts</span>
-              </label>
-              <label className="flex items-center gap-1 cursor-pointer hover:text-white" title="Receipts Attachment Only">
-                <input
-                  type="radio"
-                  name="receiptsMode"
-                  value="STANDALONE"
-                  checked={receiptsMode === 'STANDALONE'}
-                  onChange={() => setReceiptsMode('STANDALONE')}
-                  className="text-emerald-500 focus:ring-emerald-500 h-3 w-3"
-                />
-                <span className="text-[11px] whitespace-nowrap">Receipts Only</span>
-              </label>
-            </div>
-
-            {/* CC Routing Toggle */}
-            <Button
-              type="button"
-              variant={includeCc ? 'primary' : 'outline'}
-              size="sm"
-              onClick={() => setIncludeCc(!includeCc)}
-              className={`shrink-0 whitespace-nowrap ${includeCc ? '' : 'bg-zinc-900 text-zinc-300 border-zinc-800 hover:bg-zinc-800'}`}
-              title="Toggle CC Routing block on Transmittal Letter"
-              leftIcon={<span className={`w-2 h-2 rounded-full ${includeCc ? 'bg-white' : 'bg-zinc-500'}`} />}
-            >
-              CC: {includeCc ? 'Included' : 'Excluded'}
-            </Button>
-
-            {/* Page Numbering Format Tool */}
-            <div className="flex items-center gap-1 bg-zinc-900 border border-zinc-800 rounded-lg px-2 py-1 text-xs text-zinc-300 shadow-sm shrink-0">
-              <span className="text-zinc-400 font-medium hidden xs:inline">Footer:</span>
-              <select
-                value={pageNumberStyle}
-                onChange={(e) => setPageNumberStyle(e.target.value)}
-                className="bg-transparent text-white text-xs font-semibold border-none outline-none cursor-pointer pr-1"
-                title="Page numbering style in footer"
-              >
-                <option value="page_x_of_y" className="bg-zinc-900 text-white">Page X of Y</option>
-                <option value="page_x_of_y_no_cover" className="bg-zinc-900 text-white">Page X of Y (Start P2)</option>
-                <option value="simple" className="bg-zinc-900 text-white">Simple (1, 2...)</option>
-                <option value="none" className="bg-zinc-900 text-white">No Page Numbers</option>
-              </select>
-            </div>
-          </div>
-        )}
-
-        {/* Row 3: Signatory Inclusion Matrix Strip */}
-        {!isProposal && (
-          <div className="w-full flex items-center gap-2 px-3 py-1.5 bg-zinc-900/90 rounded-xl border border-zinc-800 text-[11px] text-zinc-300 overflow-x-auto scrollbar-none">
-            <span className="font-semibold text-zinc-400 shrink-0">Signatories:</span>
-            <div className="flex items-center gap-3 shrink-0">
-              {allSignatoryDefs.map((sig) => (
-                <label key={sig.key} className="flex items-center gap-1.5 cursor-pointer text-zinc-300 hover:text-white select-none whitespace-nowrap">
-                  <input
-                    type="checkbox"
-                    checked={includedSignatories[sig.key]}
-                    onChange={() => toggleSignatory(sig.key)}
-                    className="rounded text-emerald-500 focus:ring-emerald-500 w-3.5 h-3.5 cursor-pointer bg-zinc-800 border-zinc-700"
-                  />
-                  <span className={includedSignatories[sig.key] ? 'font-medium text-emerald-400' : 'text-zinc-500 line-through'}>
-                    {sig.label}
-                  </span>
-                </label>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Row 4: Page Selector Tabs */}
-        {!isProposal && (
-          <div className="w-full flex items-center gap-1 bg-zinc-900/90 p-1 rounded-xl border border-zinc-800 text-xs overflow-x-auto scrollbar-none">
-            <Button
-              variant={activePage === 0 ? 'primary' : 'ghost'}
-              size="sm"
-              onClick={() => setActivePage(0)}
-              className="text-xs font-semibold whitespace-nowrap h-7 px-2.5 shrink-0"
-            >
-              All Pages ({receiptPages.length > 0 && receiptsMode !== 'NONE' ? 4 + receiptPages.length : 4})
-            </Button>
-            <Button
-              variant={activePage === 1 ? 'primary' : 'ghost'}
-              size="sm"
-              onClick={() => setActivePage(1)}
-              className="text-xs font-semibold whitespace-nowrap h-7 px-2.5 shrink-0"
-            >
-              Page 1: Transmittal
-            </Button>
-            <Button
-              variant={activePage === 2 ? 'primary' : 'ghost'}
-              size="sm"
-              onClick={() => setActivePage(2)}
-              className="text-xs font-semibold whitespace-nowrap h-7 px-2.5 shrink-0"
-            >
-              Page 2: Income
-            </Button>
-            <Button
-              variant={activePage === 3 ? 'primary' : 'ghost'}
-              size="sm"
-              onClick={() => setActivePage(3)}
-              className="text-xs font-semibold whitespace-nowrap h-7 px-2.5 shrink-0"
-            >
-              Page 3: Expenses
-            </Button>
-            <Button
-              variant={activePage === 4 ? 'primary' : 'ghost'}
-              size="sm"
-              onClick={() => setActivePage(4)}
-              className="text-xs font-semibold whitespace-nowrap h-7 px-2.5 shrink-0"
-            >
-              Page 4: Reconciliation
-            </Button>
-            {receiptPages.length > 0 && (
-              <Button
-                variant={activePage === 5 ? 'primary' : 'ghost'}
-                size="sm"
-                onClick={() => setActivePage(5)}
-                className="text-xs font-semibold whitespace-nowrap h-7 px-2.5 shrink-0"
-              >
-                Receipts &amp; Proofs ({receiptPages.length} {receiptPages.length === 1 ? 'Sheet' : 'Sheets'})
-              </Button>
-            )}
-          </div>
-        )}
       </header>
 
-      {/* Main Multi-Sheet Container */}
-      <main className="flex-1 p-2 sm:p-6 lg:p-8 flex flex-col items-center gap-4 sm:gap-8 w-full">
+      {/* Main Multi-Sheet Viewport with Smooth Scaling and Touch Handling */}
+      <main
+        ref={viewportRef}
+        className="document-preview-viewport"
+        onTouchStart={handleTouchStart}
+        onTouchEnd={handleTouchEnd}
+      >
 
         {/* ========================================================================= */}
         {/* PROPOSAL VIEW                                                             */}
         {/* ========================================================================= */}
         {isProposal ? (
-          <article className="document-sheet">
+          <ScaledSheet scale={zoomScale}>
+            <article className="document-sheet">
             <OfficialHeaderBanner />
             <div className="text-center my-6">
               <h1 className="text-base font-black tracking-wider uppercase underline underline-offset-4 text-gray-900">
                 ACTIVITY &amp; BUSINESS PROPOSAL
               </h1>
               <p className="text-xs font-bold text-gray-800 uppercase mt-1">
-                {documentData.activityTitle || periodDesc} &bull; {documentData.targetDate || academicYear}
+                {activeDocData.activityTitle || periodDesc} &bull; {activeDocData.targetDate || academicYear}
               </p>
             </div>
 
@@ -695,19 +886,19 @@ export default function DocumentPreviewModal({ isOpen, onClose, documentData }) 
             <div className="grid grid-cols-2 gap-y-2 text-xs mb-6 border-b border-gray-200 pb-4">
               <div>
                 <span className="font-bold text-gray-800">Date Prepared: </span>
-                <span>{documentData.datePrepared || transmittalDate}</span>
+                <span>{activeDocData.datePrepared || transmittalDate}</span>
               </div>
               <div>
                 <span className="font-bold text-gray-800">Proponent Committee: </span>
-                <span>{documentData.proponentCommittee || 'League of Information Technology Enthusiasts (LITE)'}</span>
+                <span>{activeDocData.proponentCommittee || 'League of Information Technology Enthusiasts (LITE)'}</span>
               </div>
               <div>
                 <span className="font-bold text-gray-800">Target Schedule: </span>
-                <span>{documentData.targetDate || 'October 14–16, 2026'}</span>
+                <span>{activeDocData.targetDate || 'October 14–16, 2026'}</span>
               </div>
               <div>
                 <span className="font-bold text-gray-800">Target Venue: </span>
-                <span>{documentData.venue || 'PDM Quadrangle'}</span>
+                <span>{activeDocData.venue || 'PDM Quadrangle'}</span>
               </div>
             </div>
 
@@ -716,7 +907,7 @@ export default function DocumentPreviewModal({ isOpen, onClose, documentData }) 
               I. ACTIVITY OBJECTIVES &amp; RATIONALE
             </div>
             <p className="text-xs text-gray-800 whitespace-pre-line mb-6">
-              {documentData.objectives || '1. Promote student engagement.\n2. Generate operating funds for upcoming academic workshops.'}
+              {activeDocData.objectives || '1. Promote student engagement.\n2. Generate operating funds for upcoming academic workshops.'}
             </p>
 
             {/* SECTION II: CONCESSION BUDGET SCHEDULE */}
@@ -735,7 +926,7 @@ export default function DocumentPreviewModal({ isOpen, onClose, documentData }) 
                 </tr>
               </thead>
               <tbody>
-                {(documentData.items || []).map((item, idx) => {
+                {(activeDocData.items || []).map((item, idx) => {
                   const gross = (item.sellingPrice || 0) * (item.projectedUnits || 0);
                   const profit = gross - ((item.unitCost || 0) * (item.projectedUnits || 0));
                   return (
@@ -751,17 +942,17 @@ export default function DocumentPreviewModal({ isOpen, onClose, documentData }) 
                 })}
                 <tr className="border-t-2 border-b-2 border-black font-bold">
                   <td className="py-2">TOTALS &amp; RETURN FORECAST</td>
-                  <td className="text-right py-2">₱{Number(documentData.totalCapital || 0).toLocaleString('en-PH', { minimumFractionDigits: 2 })}</td>
+                  <td className="text-right py-2">₱{Number(activeDocData.totalCapital || 0).toLocaleString('en-PH', { minimumFractionDigits: 2 })}</td>
                   <td className="text-right py-2 text-gray-400">—</td>
                   <td className="text-center py-2 text-gray-400">—</td>
-                  <td className="text-right py-2">₱{Number(documentData.totalRevenue || 0).toLocaleString('en-PH', { minimumFractionDigits: 2 })}</td>
-                  <td className="text-right py-2 font-bold text-emerald-800">₱{Number(documentData.netProfit || 0).toLocaleString('en-PH', { minimumFractionDigits: 2 })}</td>
+                  <td className="text-right py-2">₱{Number(activeDocData.totalRevenue || 0).toLocaleString('en-PH', { minimumFractionDigits: 2 })}</td>
+                  <td className="text-right py-2 font-bold text-emerald-800">₱{Number(activeDocData.netProfit || 0).toLocaleString('en-PH', { minimumFractionDigits: 2 })}</td>
                 </tr>
               </tbody>
             </table>
 
             <p className="text-[11px] italic text-gray-600 mb-6">
-              * Projected Return on Investment (ROI): <strong>{documentData.marginPercent || 0}%</strong> assuming 100% concession sell-through.
+              * Projected Return on Investment (ROI): <strong>{activeDocData.marginPercent || 0}%</strong> assuming 100% concession sell-through.
             </p>
 
             {/* SECTION III: INSTITUTIONAL APPROVAL ROUTING */}
@@ -818,54 +1009,93 @@ export default function DocumentPreviewModal({ isOpen, onClose, documentData }) 
               </tbody>
             </table>
 
-            {/* Table 2: Recommending & Final Approval (Administrators - 2 Columns) */}
+            {/* Table 2: Noted by (Advisers & Administrators - 2 Columns) */}
             <table className="sig-table mb-4">
               <thead>
                 <tr>
-                  <th colSpan="2" className="sig-section-header">Recommending Approval:</th>
+                  <th colSpan="2" className="sig-section-header">Noted by:</th>
                 </tr>
               </thead>
               <tbody>
-                {activeAdmins.length === 0 ? (
+                {activeAdvisers.length === 0 && activeAdmins.length === 0 ? (
                   <tr>
                     <td colSpan="2" className="text-gray-400 italic text-[11px] py-2">
-                      (No administrators selected in signature block)
+                      (No advisers or administrators selected in signature block)
                     </td>
                   </tr>
                 ) : (
-                  <tr>
-                    {activeAdmins.map((adm) => (
-                      <td key={adm.key} style={{ width: '50%', maxWidth: '3.25in' }}>
-                        <div className="sig-cell">
-                          <label className="flex items-center gap-1.5 mb-1 cursor-pointer no-print text-[10px] text-gray-500 font-medium select-none">
-                            <input
-                              type="checkbox"
-                              checked={includedSignatories[adm.key]}
-                              onChange={() => toggleSignatory(adm.key)}
-                              className="rounded text-emerald-600 focus:ring-emerald-500 w-3 h-3 cursor-pointer"
-                            />
-                            <span>Include</span>
-                          </label>
-                          <div className="sig-space" />
-                          <input
-                            type="text"
-                            value={signatories[adm.nameKey]}
-                            onChange={(e) => handleUpdateSignatory(adm.nameKey, e.target.value)}
-                            className="pdm-input sig-name"
-                          />
-                          <input
-                            type="text"
-                            value={signatories[adm.roleKey]}
-                            onChange={(e) => handleUpdateSignatory(adm.roleKey, e.target.value)}
-                            className="pdm-input sig-role"
-                          />
-                        </div>
-                      </td>
-                    ))}
-                    {activeAdmins.length < 2 && (
-                      <td style={{ width: `${(2 - activeAdmins.length) * 50}%` }} />
+                  <>
+                    {activeAdvisers.length > 0 && (
+                      <tr>
+                        {activeAdvisers.map((adv) => (
+                          <td key={adv.key} style={{ width: '50%', maxWidth: '3.25in' }}>
+                            <div className="sig-cell">
+                              <label className="flex items-center gap-1.5 mb-1 cursor-pointer no-print text-[10px] text-gray-500 font-medium select-none">
+                                <input
+                                  type="checkbox"
+                                  checked={includedSignatories[adv.key]}
+                                  onChange={() => toggleSignatory(adv.key)}
+                                  className="rounded text-emerald-600 focus:ring-emerald-500 w-3 h-3 cursor-pointer"
+                                />
+                                <span>Include</span>
+                              </label>
+                              <div className="sig-space" />
+                              <input
+                                type="text"
+                                value={signatories[adv.nameKey]}
+                                onChange={(e) => handleUpdateSignatory(adv.nameKey, e.target.value)}
+                                className="pdm-input sig-name w-72"
+                              />
+                              <input
+                                type="text"
+                                value={signatories[adv.roleKey]}
+                                onChange={(e) => handleUpdateSignatory(adv.roleKey, e.target.value)}
+                                className="pdm-input sig-role w-72"
+                              />
+                            </div>
+                          </td>
+                        ))}
+                        {activeAdvisers.length < 2 && (
+                          <td style={{ width: `${(2 - activeAdvisers.length) * 50}%` }} />
+                        )}
+                      </tr>
                     )}
-                  </tr>
+                    {activeAdmins.length > 0 && (
+                      <tr>
+                        {activeAdmins.map((adm) => (
+                          <td key={adm.key} style={{ width: '50%', maxWidth: '3.25in', paddingTop: activeAdvisers.length > 0 ? '16pt' : '0' }}>
+                            <div className="sig-cell">
+                              <label className="flex items-center gap-1.5 mb-1 cursor-pointer no-print text-[10px] text-gray-500 font-medium select-none">
+                                <input
+                                  type="checkbox"
+                                  checked={includedSignatories[adm.key]}
+                                  onChange={() => toggleSignatory(adm.key)}
+                                  className="rounded text-emerald-600 focus:ring-emerald-500 w-3 h-3 cursor-pointer"
+                                />
+                                <span>Include</span>
+                              </label>
+                              <div className="sig-space" />
+                              <input
+                                type="text"
+                                value={signatories[adm.nameKey]}
+                                onChange={(e) => handleUpdateSignatory(adm.nameKey, e.target.value)}
+                                className="pdm-input sig-name"
+                              />
+                              <input
+                                type="text"
+                                value={signatories[adm.roleKey]}
+                                onChange={(e) => handleUpdateSignatory(adm.roleKey, e.target.value)}
+                                className="pdm-input sig-role"
+                              />
+                            </div>
+                          </td>
+                        ))}
+                        {activeAdmins.length < 2 && (
+                          <td style={{ width: `${(2 - activeAdmins.length) * 50}%` }} />
+                        )}
+                      </tr>
+                    )}
+                  </>
                 )}
               </tbody>
             </table>
@@ -873,12 +1103,14 @@ export default function DocumentPreviewModal({ isOpen, onClose, documentData }) 
               <div className="sheet-page-footer">{getPageFooterText(1, 1)}</div>
             )}
           </article>
-        ) : (
-          <>
-            {/* ========================================================================= */}
-            {/* PAGE 1: TRANSMITTAL LETTER (Screenshot 1)                                 */}
-            {/* ========================================================================= */}
-            {(activePage === 0 || activePage === 1) && receiptsMode !== 'STANDALONE' && (
+        </ScaledSheet>
+      ) : (
+        <>
+          {/* ========================================================================= */}
+          {/* PAGE 1: TRANSMITTAL LETTER (Screenshot 1)                                 */}
+          {/* ========================================================================= */}
+          {(viewMode === 'continuous' || activePage === 1) && receiptsMode !== 'STANDALONE' && (
+            <ScaledSheet scale={zoomScale}>
               <article className="document-sheet">
                 <OfficialHeaderBanner />
 
@@ -998,59 +1230,7 @@ export default function DocumentPreviewModal({ isOpen, onClose, documentData }) 
                 </tbody>
               </table>
 
-              {/* Table 2: Approved by (Advisers - 2 Columns) */}
-              <table className="sig-table mb-4">
-                <thead>
-                  <tr>
-                    <th colSpan={2} className="sig-section-header">Approved by:</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {activeAdvisers.length === 0 ? (
-                    <tr>
-                      <td colSpan="2" className="text-gray-400 italic text-[11px] py-2">
-                        (No advisers selected in signature block)
-                      </td>
-                    </tr>
-                  ) : (
-                    <tr>
-                      {activeAdvisers.map((adv) => (
-                        <td key={adv.key} style={{ width: '50%', maxWidth: '3.25in' }}>
-                          <div className="sig-cell">
-                            <label className="flex items-center gap-1.5 mb-1 cursor-pointer no-print text-[10px] text-gray-500 font-medium select-none">
-                              <input
-                                type="checkbox"
-                                checked={includedSignatories[adv.key]}
-                                onChange={() => toggleSignatory(adv.key)}
-                                className="rounded text-emerald-600 focus:ring-emerald-500 w-3 h-3 cursor-pointer"
-                              />
-                              <span>Include</span>
-                            </label>
-                            <div className="sig-space" />
-                            <input
-                              type="text"
-                              value={signatories[adv.nameKey]}
-                              onChange={(e) => handleUpdateSignatory(adv.nameKey, e.target.value)}
-                              className="pdm-input sig-name w-72"
-                            />
-                            <input
-                              type="text"
-                              value={signatories[adv.roleKey]}
-                              onChange={(e) => handleUpdateSignatory(adv.roleKey, e.target.value)}
-                              className="pdm-input sig-role w-72"
-                            />
-                          </div>
-                        </td>
-                      ))}
-                      {activeAdvisers.length < 2 && (
-                        <td style={{ width: `${(2 - activeAdvisers.length) * 50}%` }} />
-                      )}
-                    </tr>
-                  )}
-                </tbody>
-              </table>
-
-              {/* Table 3: Noted by (Administrators - 2 Max Columns) */}
+              {/* Table 2: Noted by (Club Advisers down to Program Director & Dean - 2 Columns) */}
               <table className="sig-table">
                 <thead>
                   <tr>
@@ -1058,46 +1238,85 @@ export default function DocumentPreviewModal({ isOpen, onClose, documentData }) 
                   </tr>
                 </thead>
                 <tbody>
-                  {activeAdmins.length === 0 ? (
+                  {activeAdvisers.length === 0 && activeAdmins.length === 0 ? (
                     <tr>
                       <td colSpan="2" className="text-gray-400 italic text-[11px] py-2">
-                        (No administrators selected in signature block)
+                        (No advisers or administrators selected in signature block)
                       </td>
                     </tr>
                   ) : (
-                    <tr>
-                      {activeAdmins.map((adm) => (
-                        <td key={adm.key} style={{ width: '50%', maxWidth: '3.25in' }}>
-                          <div className="sig-cell">
-                            <label className="flex items-center gap-1.5 mb-1 cursor-pointer no-print text-[10px] text-gray-500 font-medium select-none">
-                              <input
-                                type="checkbox"
-                                checked={includedSignatories[adm.key]}
-                                onChange={() => toggleSignatory(adm.key)}
-                                className="rounded text-emerald-600 focus:ring-emerald-500 w-3 h-3 cursor-pointer"
-                              />
-                              <span>Include</span>
-                            </label>
-                            <div className="sig-space" />
-                            <input
-                              type="text"
-                              value={signatories[adm.nameKey]}
-                              onChange={(e) => handleUpdateSignatory(adm.nameKey, e.target.value)}
-                              className="pdm-input sig-name"
-                            />
-                            <input
-                              type="text"
-                              value={signatories[adm.roleKey]}
-                              onChange={(e) => handleUpdateSignatory(adm.roleKey, e.target.value)}
-                              className="pdm-input sig-role"
-                            />
-                          </div>
-                        </td>
-                      ))}
-                      {activeAdmins.length < 2 && (
-                        <td style={{ width: `${(2 - activeAdmins.length) * 50}%` }} />
+                    <>
+                      {activeAdvisers.length > 0 && (
+                        <tr>
+                          {activeAdvisers.map((adv) => (
+                            <td key={adv.key} style={{ width: '50%', maxWidth: '3.25in' }}>
+                              <div className="sig-cell">
+                                <label className="flex items-center gap-1.5 mb-1 cursor-pointer no-print text-[10px] text-gray-500 font-medium select-none">
+                                  <input
+                                    type="checkbox"
+                                    checked={includedSignatories[adv.key]}
+                                    onChange={() => toggleSignatory(adv.key)}
+                                    className="rounded text-emerald-600 focus:ring-emerald-500 w-3 h-3 cursor-pointer"
+                                  />
+                                  <span>Include</span>
+                                </label>
+                                <div className="sig-space" />
+                                <input
+                                  type="text"
+                                  value={signatories[adv.nameKey]}
+                                  onChange={(e) => handleUpdateSignatory(adv.nameKey, e.target.value)}
+                                  className="pdm-input sig-name w-72"
+                                />
+                                <input
+                                  type="text"
+                                  value={signatories[adv.roleKey]}
+                                  onChange={(e) => handleUpdateSignatory(adv.roleKey, e.target.value)}
+                                  className="pdm-input sig-role w-72"
+                                />
+                              </div>
+                            </td>
+                          ))}
+                          {activeAdvisers.length < 2 && (
+                            <td style={{ width: `${(2 - activeAdvisers.length) * 50}%` }} />
+                          )}
+                        </tr>
                       )}
-                    </tr>
+                      {activeAdmins.length > 0 && (
+                        <tr>
+                          {activeAdmins.map((adm) => (
+                            <td key={adm.key} style={{ width: '50%', maxWidth: '3.25in', paddingTop: activeAdvisers.length > 0 ? '16pt' : '0' }}>
+                              <div className="sig-cell">
+                                <label className="flex items-center gap-1.5 mb-1 cursor-pointer no-print text-[10px] text-gray-500 font-medium select-none">
+                                  <input
+                                    type="checkbox"
+                                    checked={includedSignatories[adm.key]}
+                                    onChange={() => toggleSignatory(adm.key)}
+                                    className="rounded text-emerald-600 focus:ring-emerald-500 w-3 h-3 cursor-pointer"
+                                  />
+                                  <span>Include</span>
+                                </label>
+                                <div className="sig-space" />
+                                <input
+                                  type="text"
+                                  value={signatories[adm.nameKey]}
+                                  onChange={(e) => handleUpdateSignatory(adm.nameKey, e.target.value)}
+                                  className="pdm-input sig-name"
+                                />
+                                <input
+                                  type="text"
+                                  value={signatories[adm.roleKey]}
+                                  onChange={(e) => handleUpdateSignatory(adm.roleKey, e.target.value)}
+                                  className="pdm-input sig-role"
+                                />
+                              </div>
+                            </td>
+                          ))}
+                          {activeAdmins.length < 2 && (
+                            <td style={{ width: `${(2 - activeAdmins.length) * 50}%` }} />
+                          )}
+                        </tr>
+                      )}
+                    </>
                   )}
                 </tbody>
               </table>
@@ -1140,12 +1359,14 @@ export default function DocumentPreviewModal({ isOpen, onClose, documentData }) 
               <div className="sheet-page-footer">{getPageFooterText(1)}</div>
             )}
           </article>
-        )}
+        </ScaledSheet>
+      )}
 
-        {/* ========================================================================= */}
-        {/* PAGE 2: INCOME SCHEDULE (Screenshot 2)                                   */}
-        {/* ========================================================================= */}
-        {(activePage === 0 || activePage === 2) && receiptsMode !== 'STANDALONE' && (
+      {/* ========================================================================= */}
+      {/* PAGE 2: INCOME SCHEDULE (Screenshot 2)                                   */}
+      {/* ========================================================================= */}
+      {(viewMode === 'continuous' || activePage === 2) && receiptsMode !== 'STANDALONE' && (
+        <ScaledSheet scale={zoomScale}>
           <article className="document-sheet">
             <OfficialHeaderBanner />
 
@@ -1262,12 +1483,14 @@ export default function DocumentPreviewModal({ isOpen, onClose, documentData }) 
               <div className="sheet-page-footer">{getPageFooterText(2)}</div>
             )}
           </article>
-        )}
+        </ScaledSheet>
+      )}
 
-        {/* ========================================================================= */}
-        {/* PAGE 3: MISCELLANEOUS EXPENSES                                           */}
-        {/* ========================================================================= */}
-        {(activePage === 0 || activePage === 3) && receiptsMode !== 'STANDALONE' && (
+      {/* ========================================================================= */}
+      {/* PAGE 3: MISCELLANEOUS EXPENSES                                           */}
+      {/* ========================================================================= */}
+      {(viewMode === 'continuous' || activePage === 3) && receiptsMode !== 'STANDALONE' && (
+        <ScaledSheet scale={zoomScale}>
           <article className="document-sheet">
             <OfficialHeaderBanner />
 
@@ -1342,12 +1565,14 @@ export default function DocumentPreviewModal({ isOpen, onClose, documentData }) 
               <div className="sheet-page-footer">{getPageFooterText(3)}</div>
             )}
           </article>
-        )}
+        </ScaledSheet>
+      )}
 
-        {/* ========================================================================= */}
-        {/* PAGE 4: SUMMARY RECONCILIATION & SIGNATORIES (Screenshot 3 Right)        */}
-        {/* ========================================================================= */}
-        {(activePage === 0 || activePage === 4) && receiptsMode !== 'STANDALONE' && (
+      {/* ========================================================================= */}
+      {/* PAGE 4: SUMMARY RECONCILIATION & SIGNATORIES (Screenshot 3 Right)        */}
+      {/* ========================================================================= */}
+      {(viewMode === 'continuous' || activePage === 4) && receiptsMode !== 'STANDALONE' && (
+        <ScaledSheet scale={zoomScale}>
           <article className="document-sheet">
             <OfficialHeaderBanner />
 
@@ -1438,59 +1663,7 @@ export default function DocumentPreviewModal({ isOpen, onClose, documentData }) 
                 </tbody>
               </table>
 
-              {/* Table 2: Approved by (Advisers - 2 Columns) */}
-              <table className="sig-table mb-4">
-                <thead>
-                  <tr>
-                    <th colSpan={2} className="sig-section-header">Approved by:</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {activeAdvisers.length === 0 ? (
-                    <tr>
-                      <td colSpan="2" className="text-gray-400 italic text-[11px] py-2">
-                        (No advisers selected in signature block)
-                      </td>
-                    </tr>
-                  ) : (
-                    <tr>
-                      {activeAdvisers.map((adv) => (
-                        <td key={adv.key} style={{ width: '50%', maxWidth: '3.25in' }}>
-                          <div className="sig-cell">
-                            <label className="flex items-center gap-1.5 mb-1 cursor-pointer no-print text-[10px] text-gray-500 font-medium select-none">
-                              <input
-                                type="checkbox"
-                                checked={includedSignatories[adv.key]}
-                                onChange={() => toggleSignatory(adv.key)}
-                                className="rounded text-emerald-600 focus:ring-emerald-500 w-3 h-3 cursor-pointer"
-                              />
-                              <span>Include</span>
-                            </label>
-                            <div className="sig-space" />
-                            <input
-                              type="text"
-                              value={signatories[adv.nameKey]}
-                              onChange={(e) => handleUpdateSignatory(adv.nameKey, e.target.value)}
-                              className="pdm-input sig-name w-72"
-                            />
-                            <input
-                              type="text"
-                              value={signatories[adv.roleKey]}
-                              onChange={(e) => handleUpdateSignatory(adv.roleKey, e.target.value)}
-                              className="pdm-input sig-role w-72"
-                            />
-                          </div>
-                        </td>
-                      ))}
-                      {activeAdvisers.length < 2 && (
-                        <td style={{ width: `${(2 - activeAdvisers.length) * 50}%` }} />
-                      )}
-                    </tr>
-                  )}
-                </tbody>
-              </table>
-
-              {/* Table 3: Noted by (Administrators - 2 Max Columns) */}
+              {/* Table 2: Noted by (Club Advisers down to Program Director & Dean - 2 Columns) */}
               <table className="sig-table">
                 <thead>
                   <tr>
@@ -1498,46 +1671,85 @@ export default function DocumentPreviewModal({ isOpen, onClose, documentData }) 
                   </tr>
                 </thead>
                 <tbody>
-                  {activeAdmins.length === 0 ? (
+                  {activeAdvisers.length === 0 && activeAdmins.length === 0 ? (
                     <tr>
                       <td colSpan="2" className="text-gray-400 italic text-[11px] py-2">
-                        (No administrators selected in signature block)
+                        (No advisers or administrators selected in signature block)
                       </td>
                     </tr>
                   ) : (
-                    <tr>
-                      {activeAdmins.map((adm) => (
-                        <td key={adm.key} style={{ width: '50%', maxWidth: '3.25in' }}>
-                          <div className="sig-cell">
-                            <label className="flex items-center gap-1.5 mb-1 cursor-pointer no-print text-[10px] text-gray-500 font-medium select-none">
-                              <input
-                                type="checkbox"
-                                checked={includedSignatories[adm.key]}
-                                onChange={() => toggleSignatory(adm.key)}
-                                className="rounded text-emerald-600 focus:ring-emerald-500 w-3 h-3 cursor-pointer"
-                              />
-                              <span>Include</span>
-                            </label>
-                            <div className="sig-space" />
-                            <input
-                              type="text"
-                              value={signatories[adm.nameKey]}
-                              onChange={(e) => handleUpdateSignatory(adm.nameKey, e.target.value)}
-                              className="pdm-input sig-name"
-                            />
-                            <input
-                              type="text"
-                              value={signatories[adm.roleKey]}
-                              onChange={(e) => handleUpdateSignatory(adm.roleKey, e.target.value)}
-                              className="pdm-input sig-role"
-                            />
-                          </div>
-                        </td>
-                      ))}
-                      {activeAdmins.length < 2 && (
-                        <td style={{ width: `${(2 - activeAdmins.length) * 50}%` }} />
+                    <>
+                      {activeAdvisers.length > 0 && (
+                        <tr>
+                          {activeAdvisers.map((adv) => (
+                            <td key={adv.key} style={{ width: '50%', maxWidth: '3.25in' }}>
+                              <div className="sig-cell">
+                                <label className="flex items-center gap-1.5 mb-1 cursor-pointer no-print text-[10px] text-gray-500 font-medium select-none">
+                                  <input
+                                    type="checkbox"
+                                    checked={includedSignatories[adv.key]}
+                                    onChange={() => toggleSignatory(adv.key)}
+                                    className="rounded text-emerald-600 focus:ring-emerald-500 w-3 h-3 cursor-pointer"
+                                  />
+                                  <span>Include</span>
+                                </label>
+                                <div className="sig-space" />
+                                <input
+                                  type="text"
+                                  value={signatories[adv.nameKey]}
+                                  onChange={(e) => handleUpdateSignatory(adv.nameKey, e.target.value)}
+                                  className="pdm-input sig-name w-72"
+                                />
+                                <input
+                                  type="text"
+                                  value={signatories[adv.roleKey]}
+                                  onChange={(e) => handleUpdateSignatory(adv.roleKey, e.target.value)}
+                                  className="pdm-input sig-role w-72"
+                                />
+                              </div>
+                            </td>
+                          ))}
+                          {activeAdvisers.length < 2 && (
+                            <td style={{ width: `${(2 - activeAdvisers.length) * 50}%` }} />
+                          )}
+                        </tr>
                       )}
-                    </tr>
+                      {activeAdmins.length > 0 && (
+                        <tr>
+                          {activeAdmins.map((adm) => (
+                            <td key={adm.key} style={{ width: '50%', maxWidth: '3.25in', paddingTop: activeAdvisers.length > 0 ? '16pt' : '0' }}>
+                              <div className="sig-cell">
+                                <label className="flex items-center gap-1.5 mb-1 cursor-pointer no-print text-[10px] text-gray-500 font-medium select-none">
+                                  <input
+                                    type="checkbox"
+                                    checked={includedSignatories[adm.key]}
+                                    onChange={() => toggleSignatory(adm.key)}
+                                    className="rounded text-emerald-600 focus:ring-emerald-500 w-3 h-3 cursor-pointer"
+                                  />
+                                  <span>Include</span>
+                                </label>
+                                <div className="sig-space" />
+                                <input
+                                  type="text"
+                                  value={signatories[adm.nameKey]}
+                                  onChange={(e) => handleUpdateSignatory(adm.nameKey, e.target.value)}
+                                  className="pdm-input sig-name"
+                                />
+                                <input
+                                  type="text"
+                                  value={signatories[adm.roleKey]}
+                                  onChange={(e) => handleUpdateSignatory(adm.roleKey, e.target.value)}
+                                  className="pdm-input sig-role"
+                                />
+                              </div>
+                            </td>
+                          ))}
+                          {activeAdmins.length < 2 && (
+                            <td style={{ width: `${(2 - activeAdmins.length) * 50}%` }} />
+                          )}
+                        </tr>
+                      )}
+                    </>
                   )}
                 </tbody>
               </table>
@@ -1546,21 +1758,27 @@ export default function DocumentPreviewModal({ isOpen, onClose, documentData }) 
               <div className="sheet-page-footer">{getPageFooterText(4)}</div>
             )}
           </article>
-        )}
+        </ScaledSheet>
+      )}
 
-        {/* ========================================================================= */}
-        {/* RECEIPTS & PROOFS OF DISBURSEMENT (PAGES 5+)                              */}
-        {/* Rendered when All Pages is selected, or Receipts Tab (5), or STANDALONE  */}
-        {/* ========================================================================= */}
-        {!isProposal && (activePage === 0 || activePage === 5 || receiptsMode === 'STANDALONE') && (receiptsMode !== 'NONE') && (
-          receiptPages.length > 0 ? (
-            receiptPages.map((pageReceipts, pageIdx) => {
-              const currentSheetNum = pageIdx + 1;
-              const totalReceiptSheets = receiptPages.length;
-              const currentDocPage = receiptsMode === 'STANDALONE' ? currentSheetNum : 4 + currentSheetNum;
-              const displayTotalPages = totalReportPages;
+      {/* ========================================================================= */}
+      {/* RECEIPTS & PROOFS OF DISBURSEMENT (PAGES 5+)                              */}
+      {/* ========================================================================= */}
+      {!isProposal && receiptsMode !== 'NONE' && (
+        receiptPages.length > 0 ? (
+          receiptPages.map((pageReceipts, pageIdx) => {
+            const receiptPageId = receiptsMode === 'STANDALONE' ? pageIdx + 1 : 5 + pageIdx;
+            if (viewMode !== 'continuous' && activePage !== receiptPageId) {
+              return null;
+            }
 
-              return (
+            const currentSheetNum = pageIdx + 1;
+            const totalReceiptSheets = receiptPages.length;
+            const currentDocPage = receiptsMode === 'STANDALONE' ? currentSheetNum : 4 + currentSheetNum;
+            const displayTotalPages = totalReportPages;
+
+            return (
+              <ScaledSheet key={`receipt-sheet-${pageIdx}`} scale={zoomScale}>
                 <article key={`receipt-sheet-${pageIdx}`} className="document-sheet">
                   <OfficialHeaderBanner />
 
@@ -1628,30 +1846,545 @@ export default function DocumentPreviewModal({ isOpen, onClose, documentData }) 
                     </div>
                   )}
                 </article>
-              );
-            })
-          ) : (activePage === 5 ? (
-            <article className="document-sheet flex flex-col justify-between">
-              <OfficialHeaderBanner />
-              <div className="text-center py-24 my-auto">
-                <div className="w-12 h-12 rounded-2xl bg-gray-100 text-gray-400 flex items-center justify-center mx-auto mb-3">
-                  <FileText className="w-6 h-6" />
+              </ScaledSheet>
+            );
+          })
+        ) : (
+          (viewMode === 'continuous' || (receiptsMode === 'STANDALONE' && activePage === 1) || (receiptsMode === 'APPEND' && activePage === 5)) ? (
+            <ScaledSheet scale={zoomScale}>
+              <article className="document-sheet flex flex-col justify-between">
+                <OfficialHeaderBanner />
+                <div className="text-center py-24 my-auto">
+                  <div className="w-12 h-12 rounded-2xl bg-gray-100 text-gray-400 flex items-center justify-center mx-auto mb-3">
+                    <FileText className="w-6 h-6" />
+                  </div>
+                  <h4 className="text-sm font-bold text-gray-800">No Receipt Attachments</h4>
+                  <p className="text-xs text-gray-500 mt-1 max-w-sm mx-auto">
+                    No disbursement records with attached vouchers were found for {semester} {academicYear}.
+                  </p>
                 </div>
-                <h4 className="text-sm font-bold text-gray-800">No Receipt Attachments</h4>
-                <p className="text-xs text-gray-500 mt-1 max-w-sm mx-auto">
-                  No disbursement records with attached vouchers were found for {semester} {academicYear}.
-                </p>
-              </div>
-              {getPageFooterText(1, 1) && (
-                <div className="sheet-page-footer">{getPageFooterText(1, 1)}</div>
-              )}
-            </article>
-          ) : null)
-        )}
-          </>
-        )}
+                {getPageFooterText(1, 1) && (
+                  <div className="sheet-page-footer">{getPageFooterText(1, 1)}</div>
+                )}
+              </article>
+            </ScaledSheet>
+          ) : null
+        )
+      )}
+        </>
+      )}
 
       </main>
+
+      {/* Floating Docked Navigation & Zoom Bar */}
+      <div className="preview-docked-toolbar no-print flex items-center gap-1.5 sm:gap-2.5 bg-zinc-950/90 backdrop-blur-md border border-zinc-800 text-zinc-100 rounded-full px-3 py-1.5 sm:py-2 text-xs shadow-2xl">
+        {/* Page Navigation */}
+        <div className="flex items-center gap-0.5 sm:gap-1">
+          <button
+            onClick={handlePrevPage}
+            disabled={viewMode === 'continuous' || currentPageIndex <= 0}
+            className="p-1 rounded-full hover:bg-zinc-800 disabled:opacity-30 disabled:pointer-events-none text-zinc-300 hover:text-white transition-colors"
+            title="Previous Page (Left Arrow)"
+          >
+            <ChevronLeft className="w-4 h-4" />
+          </button>
+
+          <div className="relative">
+            <button
+              onClick={() => setIsPageSelectorOpen(!isPageSelectorOpen)}
+              className="px-2 py-0.5 rounded-md hover:bg-zinc-800 font-medium text-xs text-zinc-200 flex items-center gap-1 transition-colors"
+              title="Jump to Page"
+            >
+              <span>
+                {viewMode === 'continuous'
+                  ? `All (${availablePages.length})`
+                  : `${currentPageIndex + 1} / ${availablePages.length}`}
+              </span>
+              <ChevronDown className="w-3 h-3 text-zinc-400" />
+            </button>
+
+            {/* Page Selector Popover */}
+            {isPageSelectorOpen && (
+              <>
+                <div className="fixed inset-0 z-40" onClick={() => setIsPageSelectorOpen(false)} />
+                <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 z-50 w-64 bg-zinc-900 border border-zinc-800 rounded-xl shadow-2xl p-1.5 space-y-1">
+                  <div className="px-2 py-1 text-[11px] font-semibold text-zinc-400 uppercase tracking-wider">
+                    Jump to Page
+                  </div>
+                  {availablePages.map((page, idx) => (
+                    <button
+                      key={page.id}
+                      onClick={() => {
+                        setActivePage(page.id);
+                        setViewMode('single');
+                        setIsPageSelectorOpen(false);
+                      }}
+                      className={`w-full text-left px-2.5 py-1.5 rounded-lg text-xs flex items-center justify-between transition-colors ${
+                        activePage === page.id && viewMode === 'single'
+                          ? 'bg-emerald-600/20 text-emerald-300 font-semibold border border-emerald-500/30'
+                          : 'text-zinc-300 hover:bg-zinc-800 hover:text-white'
+                      }`}
+                    >
+                      <span className="truncate">{page.label}</span>
+                      {activePage === page.id && viewMode === 'single' && (
+                        <Check className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+                      )}
+                    </button>
+                  ))}
+                  <div className="border-t border-zinc-800 pt-1 mt-1">
+                    <button
+                      onClick={() => {
+                        setViewMode('continuous');
+                        setIsPageSelectorOpen(false);
+                      }}
+                      className={`w-full text-left px-2.5 py-1.5 rounded-lg text-xs flex items-center justify-between transition-colors ${
+                        viewMode === 'continuous'
+                          ? 'bg-emerald-600/20 text-emerald-300 font-semibold border border-emerald-500/30'
+                          : 'text-zinc-300 hover:bg-zinc-800 hover:text-white'
+                      }`}
+                    >
+                      <span>View All Pages (Continuous)</span>
+                      {viewMode === 'continuous' && (
+                        <Check className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+                      )}
+                    </button>
+                  </div>
+                </div>
+              </>
+            )}
+          </div>
+
+          <button
+            onClick={handleNextPage}
+            disabled={viewMode === 'continuous' || currentPageIndex >= availablePages.length - 1}
+            className="p-1 rounded-full hover:bg-zinc-800 disabled:opacity-30 disabled:pointer-events-none text-zinc-300 hover:text-white transition-colors"
+            title="Next Page (Right Arrow)"
+          >
+            <ChevronRight className="w-4 h-4" />
+          </button>
+        </div>
+
+        <div className="w-px h-4 bg-zinc-800" />
+
+        {/* Mode Toggle Button */}
+        <button
+          onClick={() => setViewMode(viewMode === 'single' ? 'continuous' : 'single')}
+          className="px-2 py-1 rounded-full hover:bg-zinc-800 text-zinc-300 hover:text-white font-medium text-[11px] flex items-center gap-1 transition-colors"
+          title={viewMode === 'single' ? 'Switch to Continuous Scroll' : 'Switch to Single Page View'}
+        >
+          <Layers className="w-3.5 h-3.5 text-emerald-400" />
+          <span className="hidden xs:inline">{viewMode === 'single' ? 'Single' : 'All'}</span>
+        </button>
+
+        <div className="w-px h-4 bg-zinc-800" />
+
+        {/* Zoom Controls */}
+        <div className="flex items-center gap-0.5 sm:gap-1">
+          <button
+            onClick={handleZoomOut}
+            className="p-1 rounded-full hover:bg-zinc-800 text-zinc-300 hover:text-white transition-colors"
+            title="Zoom Out (-)"
+          >
+            <ZoomOut className="w-3.5 h-3.5" />
+          </button>
+
+          <button
+            onClick={() => {
+              if (zoomMode === 'fit-width') {
+                handleZoom100();
+              } else {
+                handleZoomFitWidth();
+              }
+            }}
+            className="px-1.5 sm:px-2 py-0.5 rounded hover:bg-zinc-800 text-[11px] font-mono font-semibold text-zinc-200 transition-colors"
+            title="Click to toggle between Fit Width and 100%"
+          >
+            {Math.round(zoomScale * 100)}%
+            {zoomMode === 'fit-width' && <span className="text-[9px] text-emerald-400 ml-1 hidden xs:inline">Fit</span>}
+          </button>
+
+          <button
+            onClick={handleZoomIn}
+            className="p-1 rounded-full hover:bg-zinc-800 text-zinc-300 hover:text-white transition-colors"
+            title="Zoom In (+)"
+          >
+            <ZoomIn className="w-3.5 h-3.5" />
+          </button>
+
+          <button
+            onClick={handleZoomFitWidth}
+            className={`p-1 rounded-full hover:bg-zinc-800 transition-colors hidden sm:flex ${
+              zoomMode === 'fit-width' ? 'text-emerald-400' : 'text-zinc-400 hover:text-white'
+            }`}
+            title="Fit to Width"
+          >
+            <Maximize2 className="w-3.5 h-3.5" />
+          </button>
+        </div>
+      </div>
+
+      {/* Settings Drawer (Right slide-over on Desktop, Bottom sheet on Mobile) */}
+      {isSettingsOpen && (
+        <>
+          <div
+            className="preview-drawer-backdrop no-print"
+            onClick={() => setIsSettingsOpen(false)}
+          />
+          <aside className="preview-drawer-panel no-print fixed right-0 top-0 bottom-0 w-full sm:w-[420px] lg:w-[460px] bg-zinc-950 text-zinc-100 border-l border-zinc-800 shadow-2xl flex flex-col z-50 overflow-hidden">
+            {/* Drawer Header */}
+            <div className="flex items-center justify-between px-5 py-4 border-b border-zinc-800 bg-zinc-900/50">
+              <div>
+                <h3 className="font-bold text-sm sm:text-base flex items-center gap-2 text-white">
+                  <Sliders className="w-4 h-4 text-emerald-400" />
+                  Report Settings &amp; Metadata
+                </h3>
+                <p className="text-xs text-zinc-400 mt-0.5">
+                  Institutional template adjustments and scope
+                </p>
+              </div>
+              <button
+                onClick={() => setIsSettingsOpen(false)}
+                className="p-1.5 rounded-lg text-zinc-400 hover:text-white hover:bg-zinc-800 transition-colors"
+                title="Close Settings (Esc)"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Drawer Scrollable Content */}
+            <div className="flex-1 overflow-y-auto p-5 space-y-6 text-xs">
+              {/* Section 1: Quick Metadata Editor (Mobile friendly) */}
+              <div className="space-y-3 bg-zinc-900/60 p-3.5 rounded-xl border border-zinc-800/80">
+                <div className="font-semibold text-zinc-200 text-xs uppercase tracking-wider flex items-center gap-1.5">
+                  <FileSpreadsheet className="w-3.5 h-3.5 text-emerald-400" />
+                  Document Metadata
+                </div>
+
+                <div className="space-y-2.5">
+                  <div>
+                    <label className="text-[11px] font-medium text-zinc-400 block mb-1">
+                      Transmittal Date
+                    </label>
+                    <input
+                      type="text"
+                      value={transmittalDate}
+                      onChange={(e) => {
+                        setTransmittalDate(e.target.value);
+                        setFinalAsOf(`As of ${e.target.value}`);
+                      }}
+                      className="w-full bg-zinc-950 border border-zinc-800 rounded-lg px-3 py-1.5 text-xs text-white focus:outline-none focus:border-emerald-500"
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-2">
+                    <div>
+                      <label className="text-[11px] font-medium text-zinc-400 block mb-1">
+                        Semester
+                      </label>
+                      <select
+                        value={semester}
+                        onChange={(e) => setSemester(e.target.value)}
+                        className="w-full bg-zinc-950 border border-zinc-800 rounded-lg px-2.5 py-1.5 text-xs text-white focus:outline-none focus:border-emerald-500"
+                      >
+                        <option value="1st SEMESTER">1st SEMESTER</option>
+                        <option value="2nd SEMESTER">2nd SEMESTER</option>
+                        <option value="SUMMER SEMESTER">SUMMER SEMESTER</option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="text-[11px] font-medium text-zinc-400 block mb-1">
+                        Academic Year
+                      </label>
+                      <input
+                        type="text"
+                        value={academicYear}
+                        onChange={(e) => setAcademicYear(e.target.value)}
+                        className="w-full bg-zinc-950 border border-zinc-800 rounded-lg px-3 py-1.5 text-xs text-white focus:outline-none focus:border-emerald-500"
+                        placeholder="e.g. 2026–2027"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="text-[11px] font-medium text-zinc-400 block mb-1">
+                      Event / Operation Title
+                    </label>
+                    <input
+                      type="text"
+                      value={periodDesc}
+                      onChange={(e) => setPeriodDesc(e.target.value)}
+                      className="w-full bg-zinc-950 border border-zinc-800 rounded-lg px-3 py-1.5 text-xs text-white focus:outline-none focus:border-emerald-500"
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-2">
+                    <div>
+                      <label className="text-[11px] font-medium text-zinc-400 block mb-1">
+                        Coordinator Name
+                      </label>
+                      <input
+                        type="text"
+                        value={coordinatorName}
+                        onChange={(e) => setCoordinatorName(e.target.value)}
+                        className="w-full bg-zinc-950 border border-zinc-800 rounded-lg px-3 py-1.5 text-xs text-white focus:outline-none focus:border-emerald-500"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="text-[11px] font-medium text-zinc-400 block mb-1">
+                        Salutation
+                      </label>
+                      <input
+                        type="text"
+                        value={salutation}
+                        onChange={(e) => setSalutation(e.target.value)}
+                        className="w-full bg-zinc-950 border border-zinc-800 rounded-lg px-3 py-1.5 text-xs text-white focus:outline-none focus:border-emerald-500"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="text-[11px] font-medium text-zinc-400 block mb-1">
+                      Beginning Balance / Rollover Fund (₱)
+                    </label>
+                    <input
+                      type="number"
+                      step="0.01"
+                      value={initialBudget}
+                      onChange={(e) => setInitialBudget(parseFloat(e.target.value) || 0)}
+                      className="w-full bg-zinc-950 border border-zinc-800 rounded-lg px-3 py-1.5 text-xs text-white focus:outline-none focus:border-emerald-500"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Section 2: Export Scope */}
+              {!isProposal && (
+                <div className="space-y-2 bg-zinc-900/60 p-3.5 rounded-xl border border-zinc-800/80">
+                  <div className="font-semibold text-zinc-200 text-xs uppercase tracking-wider">
+                    Document Export Scope
+                  </div>
+                  <div className="space-y-1.5">
+                    <label className="flex items-center gap-2 p-2 rounded-lg bg-zinc-950/60 border border-zinc-800/60 cursor-pointer hover:border-zinc-700">
+                      <input
+                        type="radio"
+                        name="receiptsModeDrawer"
+                        value="NONE"
+                        checked={receiptsMode === 'NONE'}
+                        onChange={() => setReceiptsMode('NONE')}
+                        className="text-emerald-500 focus:ring-emerald-500"
+                      />
+                      <div className="flex-1">
+                        <div className="text-xs font-semibold text-zinc-200">Financial Report Only</div>
+                        <div className="text-[10px] text-zinc-400">Pages 1–4 (Transmittal, Income, Expenses, Reconciliation)</div>
+                      </div>
+                    </label>
+
+                    <label className="flex items-center gap-2 p-2 rounded-lg bg-zinc-950/60 border border-zinc-800/60 cursor-pointer hover:border-zinc-700">
+                      <input
+                        type="radio"
+                        name="receiptsModeDrawer"
+                        value="APPEND"
+                        checked={receiptsMode === 'APPEND'}
+                        onChange={() => setReceiptsMode('APPEND')}
+                        className="text-emerald-500 focus:ring-emerald-500"
+                      />
+                      <div className="flex-1">
+                        <div className="text-xs font-semibold text-zinc-200">Financial Report + Attached Receipts</div>
+                        <div className="text-[10px] text-zinc-400">Full complete packet with attached 4-up receipt sheets</div>
+                      </div>
+                    </label>
+
+                    <label className="flex items-center gap-2 p-2 rounded-lg bg-zinc-950/60 border border-zinc-800/60 cursor-pointer hover:border-zinc-700">
+                      <input
+                        type="radio"
+                        name="receiptsModeDrawer"
+                        value="STANDALONE"
+                        checked={receiptsMode === 'STANDALONE'}
+                        onChange={() => setReceiptsMode('STANDALONE')}
+                        className="text-emerald-500 focus:ring-emerald-500"
+                      />
+                      <div className="flex-1">
+                        <div className="text-xs font-semibold text-zinc-200">Receipts Attachment Only</div>
+                        <div className="text-[10px] text-zinc-400">Export standalone receipt voucher pages without financial sheets</div>
+                      </div>
+                    </label>
+                  </div>
+                </div>
+              )}
+
+              {/* Section 3: CC Routing & Page Numbering */}
+              {!isProposal && (
+                <div className="space-y-3 bg-zinc-900/60 p-3.5 rounded-xl border border-zinc-800/80">
+                  <div className="font-semibold text-zinc-200 text-xs uppercase tracking-wider">
+                    Routing &amp; Formatting
+                  </div>
+
+                  {/* CC Routing */}
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <label className="text-xs font-medium text-zinc-300">
+                        Include CC Routing Block
+                      </label>
+                      <input
+                        type="checkbox"
+                        checked={includeCc}
+                        onChange={(e) => setIncludeCc(e.target.checked)}
+                        className="rounded text-emerald-500 focus:ring-emerald-500 w-4 h-4 cursor-pointer bg-zinc-800 border-zinc-700"
+                      />
+                    </div>
+
+                    {includeCc && (
+                      <div className="space-y-1.5 pl-2 border-l-2 border-emerald-500/40">
+                        {ccRecipients.map((rec, idx) => (
+                          <div key={idx} className="flex items-center gap-1.5">
+                            <input
+                              type="text"
+                              value={rec}
+                              onChange={(e) => handleUpdateCcRecipient(idx, e.target.value)}
+                              className="flex-1 bg-zinc-950 border border-zinc-800 rounded px-2 py-1 text-xs text-white"
+                            />
+                            <button
+                              onClick={() => handleRemoveCcRecipient(idx)}
+                              className="text-red-400 hover:text-red-300 p-1 rounded hover:bg-zinc-800"
+                              title="Remove Recipient"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
+                        ))}
+                        <button
+                          onClick={handleAddCcRecipient}
+                          className="text-[11px] text-emerald-400 hover:text-emerald-300 flex items-center gap-1 font-semibold pt-1"
+                        >
+                          <Plus className="w-3 h-3" /> Add CC Recipient
+                        </button>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Footer Style */}
+                  <div>
+                    <label className="text-[11px] font-medium text-zinc-400 block mb-1">
+                      Footer Page Number Style
+                    </label>
+                    <select
+                      value={pageNumberStyle}
+                      onChange={(e) => setPageNumberStyle(e.target.value)}
+                      className="w-full bg-zinc-950 border border-zinc-800 rounded-lg px-2.5 py-1.5 text-xs text-white focus:outline-none focus:border-emerald-500"
+                    >
+                      <option value="page_x_of_y">Page X of Y (Default)</option>
+                      <option value="page_x_of_y_no_cover">Page X of Y (Start on Page 2)</option>
+                      <option value="simple">Simple (1, 2, 3...)</option>
+                      <option value="none">No Page Numbers</option>
+                    </select>
+                  </div>
+                </div>
+              )}
+
+              {/* Section 4: Signatories Matrix */}
+              {!isProposal && (
+                <div className="space-y-3 bg-zinc-900/60 p-3.5 rounded-xl border border-zinc-800/80">
+                  <div className="flex items-center justify-between">
+                    <span className="font-semibold text-zinc-200 text-xs uppercase tracking-wider">
+                      Signatories Matrix
+                    </span>
+                    <span className="text-[10px] text-zinc-400">
+                      {activeSignatoryCount} of {allSignatoryDefs.length} included
+                    </span>
+                  </div>
+
+                  <div className="space-y-2">
+                    {allSignatoryDefs.map((sig) => (
+                      <div
+                        key={sig.key}
+                        className={`p-2 rounded-lg border transition-colors ${
+                          includedSignatories[sig.key]
+                            ? 'bg-zinc-950/80 border-emerald-500/30'
+                            : 'bg-zinc-950/30 border-zinc-800/40 opacity-70'
+                        }`}
+                      >
+                        <div className="flex items-center justify-between mb-1.5">
+                          <label className="flex items-center gap-2 cursor-pointer">
+                            <input
+                              type="checkbox"
+                              checked={includedSignatories[sig.key]}
+                              onChange={() => toggleSignatory(sig.key)}
+                              className="rounded text-emerald-500 focus:ring-emerald-500 w-3.5 h-3.5 cursor-pointer bg-zinc-800 border-zinc-700"
+                            />
+                            <span className={`text-xs font-semibold ${includedSignatories[sig.key] ? 'text-emerald-300' : 'text-zinc-400'}`}>
+                              {sig.label}
+                            </span>
+                          </label>
+                          <span className="text-[10px] text-zinc-500 uppercase">{sig.heading}</span>
+                        </div>
+
+                        {includedSignatories[sig.key] && (
+                          <div className="grid grid-cols-2 gap-1.5 pt-1 border-t border-zinc-900">
+                            <input
+                              type="text"
+                              value={signatories[sig.nameKey] || ''}
+                              onChange={(e) => handleUpdateSignatory(sig.nameKey, e.target.value)}
+                              placeholder="Name"
+                              className="bg-zinc-900 border border-zinc-800 rounded px-2 py-0.5 text-[11px] text-white"
+                            />
+                            <input
+                              type="text"
+                              value={signatories[sig.roleKey] || ''}
+                              onChange={(e) => handleUpdateSignatory(sig.roleKey, e.target.value)}
+                              placeholder="Role / Title"
+                              className="bg-zinc-900 border border-zinc-800 rounded px-2 py-0.5 text-[11px] text-zinc-300"
+                            />
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Section 5: Mobile Quick Action Buttons */}
+              <div className="space-y-2 pt-2 border-t border-zinc-800 sm:hidden">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => window.print()}
+                  className="w-full bg-zinc-900 text-zinc-300 border-zinc-800 hover:bg-zinc-800 justify-center"
+                  leftIcon={<Printer className="w-4 h-4" />}
+                >
+                  Print or Save as PDF
+                </Button>
+                <Button
+                  variant="primary"
+                  size="sm"
+                  onClick={handleExportDocx}
+                  loading={isExporting}
+                  leftIcon={<Download className="w-4 h-4" />}
+                  className="w-full justify-center"
+                >
+                  Export .docx Report
+                </Button>
+              </div>
+            </div>
+
+            {/* Drawer Footer */}
+            <div className="p-4 border-t border-zinc-800 bg-zinc-900/50 flex items-center justify-between">
+              <span className="text-[11px] text-zinc-400">
+                Changes take effect instantly
+              </span>
+              <Button
+                variant="primary"
+                size="sm"
+                onClick={() => setIsSettingsOpen(false)}
+              >
+                Done
+              </Button>
+            </div>
+          </aside>
+        </>
+      )}
+
     </div>
   );
 }
