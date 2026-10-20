@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { createClient, createAdminClient } from '@/lib/supabase/server';
 import { isSuperAdminEmail } from '@/lib/config/admin';
 import { sendTransactionNotificationEmail, sendAuditRequestEmail } from '@/lib/email/mailer';
-import { hasPermission, ACTION_KEYS } from '@/lib/auth/permissions';
+import { hasPermission, resolveUserPermissions, ACTION_KEYS } from '@/lib/auth/permissions';
 
 export async function POST(req) {
   try {
@@ -68,21 +68,36 @@ export async function POST(req) {
     const effectiveAuthorId = callerProfile?.id || authorId || user.id;
 
     // Fetch all active approved officers with their permissions and role
-    const { data: officers, error } = await db
+    let { data: officers, error } = await db
       .from('profiles')
       .select('id, auth_user_id, email, status, role, permissions')
       .eq('status', 'approved');
 
-    let officerList = officers || [];
+    if (error && (error.code === '42703' || error.message?.includes('permissions'))) {
+      const fallback = await db
+        .from('profiles')
+        .select('id, auth_user_id, email, status, role')
+        .eq('status', 'approved');
+      officers = fallback.data;
+    }
 
-    // Fallback if RLS limited profiles query
+    let officerList = (officers || []).map((u) => ({
+      ...u,
+      permissions: resolveUserPermissions(u, u.email),
+    }));
+
+    // Fallback if RLS or schema limited profiles query
     if (officerList.length === 0) {
       const { data: reqOfficers } = await db
         .from('registration_requests')
-        .select('id, email, status, role, permissions')
+        .select('id, email, status, requested_role')
         .eq('status', 'approved');
       if (reqOfficers && reqOfficers.length > 0) {
-        officerList = reqOfficers;
+        officerList = reqOfficers.map((r) => ({
+          ...r,
+          role: r.requested_role,
+          permissions: resolveUserPermissions(r, r.email),
+        }));
       }
     }
 

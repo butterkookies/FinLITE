@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { createClient, createAdminClient } from '@/lib/supabase/server';
 import { isSuperAdminEmail } from '@/lib/config/admin';
 import { getClientIp } from '@/lib/security/ratelimit';
-import { hasPermission, ACTION_KEYS } from '@/lib/auth/permissions';
+import { hasPermission, fetchProfileWithPermissions, ACTION_KEYS } from '@/lib/auth/permissions';
 
 // POST /api/transactions — Create a transaction directly in the ledger
 export async function POST(req) {
@@ -28,23 +28,7 @@ export async function POST(req) {
     const email = user.email?.toLowerCase();
     const isSuperAdmin = isSuperAdminEmail(email);
 
-    let profile = null;
-    const { data: profByAuth } = await queryClient
-      .from('profiles')
-      .select('id, status, role, full_name, email, permissions')
-      .eq('auth_user_id', user.id)
-      .maybeSingle();
-
-    if (profByAuth) {
-      profile = profByAuth;
-    } else if (email) {
-      const { data: profByEmail } = await queryClient
-        .from('profiles')
-        .select('id, status, role, full_name, email, permissions')
-        .eq('email', email)
-        .maybeSingle();
-      profile = profByEmail;
-    }
+    const profile = await fetchProfileWithPermissions(queryClient, { userId: user.id, email });
 
     const isApproved = isSuperAdmin || profile?.status === 'approved' || user.app_metadata?.status === 'approved';
     if (!isApproved) {

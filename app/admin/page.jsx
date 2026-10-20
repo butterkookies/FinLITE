@@ -178,6 +178,9 @@ export default function AdminPage() {
       if (usersRes.ok) {
         const usersData = await usersRes.json();
         setUsers(usersData.users || []);
+      } else {
+        const usersErr = await usersRes.json().catch(() => null);
+        console.error('Failed to load users:', usersRes.status, usersErr);
       }
     } catch (err) {
       console.error('Failed to load admin data:', err);

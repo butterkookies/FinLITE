@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { createClient, createAdminClient } from '@/lib/supabase/server';
 import { isSuperAdminEmail } from '@/lib/config/admin';
-import { hasPermission, ACTION_KEYS } from '@/lib/auth/permissions';
+import { hasPermission, fetchProfileWithPermissions, ACTION_KEYS } from '@/lib/auth/permissions';
 import { sendAuditDecisionEmail } from '@/lib/email/mailer';
 import { getClientIp } from '@/lib/security/ratelimit';
 
@@ -36,23 +36,7 @@ export async function POST(req, { params }) {
     const email = user.email?.toLowerCase();
     const isSuperAdmin = isSuperAdminEmail(email);
 
-    let callerProfile = null;
-    const { data: profByAuth } = await db
-      .from('profiles')
-      .select('id, auth_user_id, role, permissions, status, full_name, email')
-      .eq('auth_user_id', user.id)
-      .maybeSingle();
-
-    if (profByAuth) {
-      callerProfile = profByAuth;
-    } else if (email) {
-      const { data: profByEmail } = await db
-        .from('profiles')
-        .select('id, auth_user_id, role, permissions, status, full_name, email')
-        .eq('email', email)
-        .maybeSingle();
-      callerProfile = profByEmail;
-    }
+    const callerProfile = await fetchProfileWithPermissions(db, { userId: user.id, email });
 
     const canAudit = isSuperAdmin || hasPermission(callerProfile, ACTION_KEYS.AUDIT_APPROVE, email);
     if (!canAudit) {

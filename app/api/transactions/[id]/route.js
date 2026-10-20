@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { createClient, createAdminClient } from '@/lib/supabase/server';
 import { isSuperAdminEmail } from '@/lib/config/admin';
-import { hasPermission, ACTION_KEYS } from '@/lib/auth/permissions';
+import { hasPermission, fetchProfileWithPermissions, resolveUserPermissions, ACTION_KEYS } from '@/lib/auth/permissions';
 import { sendRevisionSubmittedEmail } from '@/lib/email/mailer';
 import { getClientIp } from '@/lib/security/ratelimit';
 
@@ -76,23 +76,7 @@ export async function PATCH(req, { params }) {
     const email = user.email?.toLowerCase();
     const isSuperAdmin = isSuperAdminEmail(email);
 
-    let callerProfile = null;
-    const { data: profByAuth } = await db
-      .from('profiles')
-      .select('id, auth_user_id, role, permissions, status, full_name, email')
-      .eq('auth_user_id', user.id)
-      .maybeSingle();
-
-    if (profByAuth) {
-      callerProfile = profByAuth;
-    } else if (email) {
-      const { data: profByEmail } = await db
-        .from('profiles')
-        .select('id, auth_user_id, role, permissions, status, full_name, email')
-        .eq('email', email)
-        .maybeSingle();
-      callerProfile = profByEmail;
-    }
+    const callerProfile = await fetchProfileWithPermissions(db, { userId: user.id, email });
 
     const canEdit = isSuperAdmin || hasPermission(callerProfile, ACTION_KEYS.EDIT_TRANSACTION, email);
     if (!canEdit) {
@@ -217,10 +201,18 @@ export async function PATCH(req, { params }) {
     // If transaction was previously FLAGGED and is now resubmitted, notify all officers with audit permission
     if (wasFlagged) {
       try {
-        const { data: auditors } = await db
+        let { data: auditors, error: audErr } = await db
           .from('profiles')
           .select('id, email, permissions, role, status')
           .eq('status', 'approved');
+
+        if (audErr && (audErr.code === '42703' || audErr.message?.includes('permissions'))) {
+          const fallback = await db
+            .from('profiles')
+            .select('id, email, role, status')
+            .eq('status', 'approved');
+          auditors = fallback.data;
+        }
 
         const auditorEmails = (auditors || [])
           .filter((a) => {
@@ -287,23 +279,7 @@ export async function DELETE(req, { params }) {
     const email = user.email?.toLowerCase();
     const isSuperAdmin = isSuperAdminEmail(email);
 
-    let callerProfile = null;
-    const { data: profByAuth } = await db
-      .from('profiles')
-      .select('id, auth_user_id, role, permissions, status, full_name, email')
-      .eq('auth_user_id', user.id)
-      .maybeSingle();
-
-    if (profByAuth) {
-      callerProfile = profByAuth;
-    } else if (email) {
-      const { data: profByEmail } = await db
-        .from('profiles')
-        .select('id, auth_user_id, role, permissions, status, full_name, email')
-        .eq('email', email)
-        .maybeSingle();
-      callerProfile = profByEmail;
-    }
+    const callerProfile = await fetchProfileWithPermissions(db, { userId: user.id, email });
 
     const canDelete = isSuperAdmin || hasPermission(callerProfile, ACTION_KEYS.DELETE_TRANSACTION, email);
     if (!canDelete) {

@@ -3,7 +3,7 @@ import { verifyAdmin } from '@/lib/auth/admin-check';
 import { isSuperAdminEmail } from '@/lib/config/admin';
 import { createAdminClient } from '@/lib/supabase/server';
 import { sendAccountStatusChangedEmail } from '@/lib/email/mailer';
-import { ACTION_KEYS } from '@/lib/auth/permissions';
+import { ACTION_KEYS, resolveUserPermissions } from '@/lib/auth/permissions';
 
 const VALID_ROLES = ['treasurer', 'auditor', 'president', 'adviser', 'admin'];
 
@@ -50,20 +50,38 @@ export async function GET(req) {
       });
     }
 
-    // List all users
-    const { data: users, error } = await supabase
+    // List all users with graceful fallback if permissions column does not exist yet (migration 031 pending)
+    const adminClient = createAdminClient();
+    const db = adminClient || supabase;
+
+    let { data: users, error } = await db
       .from('profiles')
       .select('id, auth_user_id, full_name, first_name, last_name, email, role, status, contact_number, auth_provider, avatar_url, permissions, created_at, approved_at')
       .order('created_at', { ascending: false });
+
+    if (error && (error.code === '42703' || error.message?.includes('permissions'))) {
+      const fallback = await db
+        .from('profiles')
+        .select('id, auth_user_id, full_name, first_name, last_name, email, role, status, contact_number, auth_provider, avatar_url, created_at, approved_at')
+        .order('created_at', { ascending: false });
+
+      users = fallback.data;
+      error = fallback.error;
+    }
 
     if (error) {
       console.error('Error fetching users:', error);
       return NextResponse.json({ error: 'Failed to retrieve users.' }, { status: 500 });
     }
 
+    const resolvedUsers = (users || []).map((u) => ({
+      ...u,
+      permissions: resolveUserPermissions(u, u.email),
+    }));
+
     return NextResponse.json({
       success: true,
-      users: users || [],
+      users: resolvedUsers,
     });
   } catch (err) {
     console.error('Admin users API error:', err);
@@ -91,9 +109,11 @@ export async function PATCH(req) {
     }
 
     const supabase = auth.supabase;
+    const adminClient = createAdminClient();
+    const db = adminClient || supabase;
 
     // Fetch existing profile to enforce Super Admin Immutable Lock
-    const { data: existingUser, error: fetchErr } = await supabase
+    const { data: existingUser, error: fetchErr } = await db
       .from('profiles')
       .select('id, email, role, status, full_name')
       .eq('id', userId)
@@ -183,12 +203,33 @@ export async function PATCH(req) {
     }
 
     // Apply updates
-    const { data: updated, error: updateErr } = await supabase
+    let { data: updated, error: updateErr } = await db
       .from('profiles')
       .update(updates)
       .eq('id', userId)
       .select()
       .single();
+
+    // If update failed because permissions column does not exist yet in DB
+    if (updateErr && (updateErr.code === '42703' || updateErr.message?.includes('permissions'))) {
+      if (updates.permissions && !updates.role && !updates.status) {
+        return NextResponse.json({
+          error: "Database column 'permissions' does not exist yet. Please run migration 031_customizable_officer_permissions_and_audit_workflow.sql in your Supabase SQL Editor.",
+          needsMigration: true,
+        }, { status: 400 });
+      } else {
+        const fallbackUpdates = { ...updates };
+        delete fallbackUpdates.permissions;
+        const retry = await db
+          .from('profiles')
+          .update(fallbackUpdates)
+          .eq('id', userId)
+          .select()
+          .single();
+        updated = retry.data;
+        updateErr = retry.error;
+      }
+    }
 
     if (updateErr) {
       console.error('Error updating user:', updateErr);
@@ -280,9 +321,11 @@ export async function DELETE(req) {
     }
 
     const supabase = auth.supabase;
+    const adminClient = createAdminClient();
+    const db = adminClient || supabase;
 
     // Fetch target user profile
-    const { data: targetUser, error: fetchErr } = await supabase
+    const { data: targetUser, error: fetchErr } = await db
       .from('profiles')
       .select('id, auth_user_id, email, full_name, role')
       .eq('id', userId)
@@ -327,7 +370,7 @@ export async function DELETE(req) {
 
     // 3. Safe Account Removal (0 transactions)
     // Delete profile record
-    const { error: deleteProfileErr } = await supabase
+    const { error: deleteProfileErr } = await db
       .from('profiles')
       .delete()
       .eq('id', userId);
@@ -340,7 +383,6 @@ export async function DELETE(req) {
     // Delete from auth.users if auth_user_id exists
     if (targetUser.auth_user_id) {
       try {
-        const adminClient = createAdminClient();
         if (adminClient) {
           await adminClient.auth.admin.deleteUser(targetUser.auth_user_id);
         }
@@ -351,7 +393,7 @@ export async function DELETE(req) {
 
     // Clean up corresponding registration_requests
     try {
-      await supabase
+      await db
         .from('registration_requests')
         .delete()
         .eq('email', targetUser.email);
@@ -359,7 +401,7 @@ export async function DELETE(req) {
 
     // Record deletion event in audit_logs
     try {
-      await supabase.from('audit_logs').insert([{
+      await db.from('audit_logs').insert([{
         user_id: auth.user.id,
         action: 'ACCOUNT_DELETED',
         entity_type: 'profiles',
