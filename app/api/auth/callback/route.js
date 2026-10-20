@@ -7,6 +7,7 @@ import { getAuthMethods, getSecurityState, patchSecurityState, logAuthEvent } fr
 import { evaluateGoogleIdentity, isReplaceableRegistration } from '@/lib/auth/policy';
 import { discardUnverifiedRegistration } from '@/lib/auth/registration';
 import { sendSecurityChangeEmail } from '@/lib/email/auth-mailer';
+import { isCustomUploadedAvatar } from '@/lib/utils/avatar';
 
 // GET /api/auth/callback — Supabase OAuth callback handler
 //
@@ -113,6 +114,16 @@ export async function GET(req) {
       const lastName = nameParts.slice(1).join(' ') || 'Geronimo';
 
       try {
+        const { data: existingAdmin } = await supabase
+          .from('profiles')
+          .select('avatar_url')
+          .eq('email', googleEmail)
+          .maybeSingle();
+
+        const adminAvatar = isCustomUploadedAvatar(existingAdmin?.avatar_url)
+          ? existingAdmin.avatar_url
+          : (googleAvatar || existingAdmin?.avatar_url || null);
+
         const { data: adminProf } = await supabase
           .from('profiles')
           .upsert({
@@ -124,6 +135,7 @@ export async function GET(req) {
             role: 'admin',
             status: 'approved',
             auth_provider: 'google',
+            avatar_url: adminAvatar,
             approved_at: new Date().toISOString(),
           }, { onConflict: 'email' })
           .select('id')
@@ -164,12 +176,27 @@ export async function GET(req) {
     let existingProfile = null;
     const { data: profByAuth } = await queryClient
       .from('profiles')
-      .select('id, status, role, auth_user_id, email')
+      .select('id, status, role, auth_user_id, email, avatar_url')
       .eq('auth_user_id', user.id)
       .maybeSingle();
 
     if (profByAuth) {
       existingProfile = profByAuth;
+      // Auto-sync Google photo into profile if user has not uploaded a custom avatar
+      if (googleAvatar && !isCustomUploadedAvatar(existingProfile.avatar_url) && existingProfile.avatar_url !== googleAvatar) {
+        try {
+          await queryClient
+            .from('profiles')
+            .update({
+              avatar_url: googleAvatar,
+              updated_at: new Date().toISOString(),
+            })
+            .eq('id', existingProfile.id);
+          existingProfile.avatar_url = googleAvatar;
+        } catch (syncErr) {
+          console.warn('Google avatar sync note:', syncErr?.message);
+        }
+      }
     } else if (googleEmail) {
       // Email is only a hint. A profile can be claimed by email solely when it
       // is not bound to any auth user yet (e.g. seed data) and the email is
@@ -242,7 +269,8 @@ export async function GET(req) {
         // Approved member: go to the requested page (or the dashboard)
         return redirectTo(`${appUrl}${next}`);
       }
-      // Known but still pending
+      // Known but still pending: sign out so no unauthorized session is left active
+      await supabase.auth.signOut();
       return redirectTo(`${appUrl}/pending-approval?email=${encodeURIComponent(googleEmail)}`);
     }
 
@@ -271,7 +299,11 @@ export async function GET(req) {
         await supabase.auth.signOut();
         return redirectTo(`${appUrl}/login?error=account_rejected`);
       }
-      // Pending or approved-but-unlinked: nothing more the user can do here.
+      if (existingRequest.status === 'approved') {
+        return redirectTo(`${appUrl}${next}`);
+      }
+      // Pending: sign out so no unauthorized session is left active
+      await supabase.auth.signOut();
       return redirectTo(`${appUrl}/pending-approval?email=${encodeURIComponent(googleEmail)}`);
     }
 

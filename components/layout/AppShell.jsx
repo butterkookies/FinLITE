@@ -98,7 +98,18 @@ export default function AppShell({ children }) {
           if (profileByEmail) profile = profileByEmail;
         }
 
+        const googleAvatar = user.user_metadata?.avatar_url || user.user_metadata?.picture || null;
         if (mounted && profile) {
+          // Auto-sync Google photo into profile if user has no avatar set
+          if (!profile.avatar_url && googleAvatar) {
+            profile.avatar_url = googleAvatar;
+            supabase
+              .from('profiles')
+              .update({ avatar_url: googleAvatar, updated_at: new Date().toISOString() })
+              .eq('id', profile.id)
+              .then(() => {})
+              .catch(() => {});
+          }
           setUserProfile(profile);
           const rawRole = profile.role || user.user_metadata?.role || 'member';
           const effectiveRole = resolveEffectiveRole(email, rawRole);

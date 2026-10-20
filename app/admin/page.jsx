@@ -41,6 +41,7 @@ import {
 import { createClient } from '@/lib/supabase/client';
 import { useTheme } from '@/components/theme/ThemeProvider';
 import { Modal, Button, Badge, Input } from '@/components/ui';
+import UserAvatar from '@/components/common/UserAvatar';
 
 const ROLE_OPTIONS = [
   { value: 'treasurer', label: 'Treasurer', desc: 'Disbursements & Collections' },
@@ -1050,12 +1051,15 @@ export default function AdminPage() {
                     >
                       {/* Left: Applicant Identity (col-span-5) */}
                       <div className="col-span-5 flex items-start gap-3.5 min-w-0 w-full">
-                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center font-bold text-sm shrink-0 ${
-                          isLight ? 'bg-emerald-100 text-emerald-800' : 'bg-emerald-500/20 text-emerald-300'
-                        }`}>
-                          {req.first_name?.[0]?.toUpperCase() || 'U'}
-                          {req.last_name?.[0]?.toUpperCase() || ''}
-                        </div>
+                        <UserAvatar
+                          src={req.avatar_url}
+                          name={`${req.first_name || ''} ${req.last_name || ''}`.trim()}
+                          email={req.email}
+                          size="md-10"
+                          rounded="xl"
+                          alt={`${req.first_name || ''} ${req.last_name || ''}`.trim()}
+                          className="shrink-0 shadow-2xs"
+                        />
 
                         <div className="min-w-0 flex-1">
                           <div className="flex items-center gap-2 flex-wrap">
@@ -1200,15 +1204,15 @@ export default function AdminPage() {
                       >
                         {/* Column 1: Identity (col-span-5) */}
                         <div className="col-span-5 flex items-center gap-3 min-w-0 w-full">
-                          <div className={`w-10 h-10 rounded-xl flex items-center justify-center font-bold text-sm shrink-0 ${
-                            isPrimarySuperAdmin
-                              ? isLight ? 'bg-purple-100 text-purple-900' : 'bg-purple-500/20 text-purple-300'
-                              : isSuspended
-                              ? isLight ? 'bg-amber-100 text-amber-900' : 'bg-amber-500/20 text-amber-300'
-                              : isLight ? 'bg-emerald-100 text-emerald-800' : 'bg-emerald-500/20 text-emerald-300'
-                          }`}>
-                            {user.first_name?.[0] || user.full_name?.[0] || 'U'}
-                          </div>
+                          <UserAvatar
+                            src={user.avatar_url}
+                            name={user.full_name || `${user.first_name || ''} ${user.last_name || ''}`.trim()}
+                            email={user.email}
+                            size="md-10"
+                            rounded="xl"
+                            alt={user.full_name || 'Officer'}
+                            className="shrink-0 shadow-2xs"
+                          />
                           <div className="min-w-0 flex-1">
                             <div className="flex items-center gap-2 flex-wrap">
                               <span className="text-sm font-bold truncate">

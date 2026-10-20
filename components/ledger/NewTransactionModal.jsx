@@ -298,7 +298,7 @@ export default function NewTransactionModal({
               }}
               className={type === 'OUTFLOW' ? 'bg-amber-600 text-white hover:bg-amber-700' : 'text-zinc-600 dark:text-zinc-400'}
             >
-              - Outflow (Disbursement)
+              - Outflow
             </Button>
           </div>
 

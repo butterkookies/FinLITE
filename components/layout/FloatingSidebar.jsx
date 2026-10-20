@@ -31,6 +31,8 @@ import { createClient } from '@/lib/supabase/client';
 import { useTheme } from '@/components/theme/ThemeProvider';
 import ThemeToggle from '@/components/theme/ThemeToggle';
 import { Badge } from '@/components/ui';
+import UserAvatar from '@/components/common/UserAvatar';
+import { isSuperAdminEmail } from '@/lib/config/admin';
 
 export default function FloatingSidebar({
   currentRole = 'member',
@@ -85,7 +87,8 @@ export default function FloatingSidebar({
 
   // Privileges
   const email = userProfile?.email || currentUser?.email || '';
-  const isAdmin = currentRole === 'admin' || email.toLowerCase() === 'geronimoandreijohn.pdm@gmail.com';
+  const isSuperAdmin = isSuperAdminEmail(email);
+  const isAdmin = currentRole === 'admin' || isSuperAdmin;
   const isOfficer = isAdmin || ['treasurer', 'president', 'auditor', 'adviser'].includes(currentRole);
 
   const fullName = userProfile?.full_name || currentUser?.user_metadata?.full_name || 'FinLITE Member';
@@ -202,7 +205,7 @@ export default function FloatingSidebar({
         if (typeof onOpenAuditTrail === 'function') onOpenAuditTrail();
       },
     },
-    ...(isOfficer ? [
+    ...(isAdmin ? [
       {
         id: 'admin',
         label: 'Admin Console',
@@ -521,17 +524,15 @@ export default function FloatingSidebar({
           >
             {/* Avatar */}
             <div className="relative shrink-0">
-              {avatarUrl ? (
-                <img 
-                  src={avatarUrl} 
-                  alt={fullName} 
-                  className="w-8 h-8 rounded-lg object-cover ring-1 ring-zinc-200 dark:ring-zinc-800"
-                />
-              ) : (
-                <div className="w-8 h-8 rounded-lg bg-emerald-600 text-white font-bold text-xs flex items-center justify-center">
-                  {initial}
-                </div>
-              )}
+              <UserAvatar
+                src={avatarUrl}
+                name={fullName}
+                email={email}
+                size="base"
+                rounded="lg"
+                alt={fullName}
+                className="ring-1 ring-zinc-200 dark:ring-zinc-800"
+              />
               <span className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-emerald-500 border-2 border-white dark:border-zinc-950 rounded-full" />
             </div>
 

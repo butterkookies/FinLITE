@@ -15,6 +15,7 @@ import { compressReceiptImage } from '@/lib/utils/compression';
 import { validateContactNumber } from '@/lib/utils/validation';
 import { createClient } from '@/lib/supabase/client';
 import { Modal, Button, Badge, Input } from '@/components/ui';
+import UserAvatar from '@/components/common/UserAvatar';
 
 export default function EditProfileModal({ 
   isOpen, 
@@ -229,20 +230,15 @@ export default function EditProfileModal({
         {/* Avatar Photo Section */}
         <div className="flex items-center gap-4 p-3.5 bg-zinc-50 dark:bg-zinc-900/40 rounded-2xl border border-zinc-200 dark:border-zinc-800">
           <div className="relative shrink-0">
-            <div className="w-16 h-16 rounded-2xl overflow-hidden bg-zinc-200 dark:bg-zinc-800 border border-zinc-300 dark:border-zinc-700 relative shadow-xs flex items-center justify-center">
-              {avatarPreview ? (
-                <img 
-                  src={avatarPreview} 
-                  alt="Avatar preview" 
-                  className="w-full h-full object-cover" 
-                  onError={(e) => { e.currentTarget.style.display = 'none'; }}
-                />
-              ) : (
-                <span className="text-xl font-bold text-zinc-700 dark:text-zinc-300">
-                  {firstName?.[0]?.toUpperCase() || 'U'}
-                </span>
-              )}
-            </div>
+            <UserAvatar
+              src={avatarPreview}
+              name={`${firstName} ${lastName}`.trim()}
+              email={email}
+              size="lg"
+              rounded="2xl"
+              alt="Avatar preview"
+              className="border border-zinc-300 dark:border-zinc-700 shadow-xs"
+            />
             <button
               type="button"
               onClick={() => fileInputRef.current?.click()}
@@ -268,19 +264,23 @@ export default function EditProfileModal({
               >
                 {isCompressing ? 'Compressing...' : 'Upload Photo'}
               </Button>
-              {avatarPreview && avatarPreview !== (user?.user_metadata?.avatar_url || '') && (
-                <button
-                  type="button"
-                  onClick={() => {
-                    setAvatarFile(null);
-                    setAvatarPreview(user?.user_metadata?.avatar_url || '');
-                    setAvatarUrl(user?.user_metadata?.avatar_url || '');
-                  }}
-                  className="h-7 px-2 text-rose-600 hover:text-rose-700 dark:text-rose-400 text-[11px] font-medium cursor-pointer"
-                >
-                  Reset
-                </button>
-              )}
+              {(() => {
+                const googlePhoto = user?.user_metadata?.avatar_url || user?.user_metadata?.picture || '';
+                if (!avatarPreview || avatarPreview === googlePhoto) return null;
+                return (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setAvatarFile(null);
+                      setAvatarPreview(googlePhoto);
+                      setAvatarUrl(googlePhoto);
+                    }}
+                    className="h-7 px-2 text-rose-600 hover:text-rose-700 dark:text-rose-400 text-[11px] font-medium cursor-pointer"
+                  >
+                    Reset to Google Photo
+                  </button>
+                );
+              })()}
             </div>
             <input
               ref={fileInputRef}

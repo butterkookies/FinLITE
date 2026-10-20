@@ -4,10 +4,20 @@ import { useSearchParams } from 'next/navigation';
 import { Clock, Mail, ShieldCheck } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
+import { useEffect } from 'react';
+import { createClient } from '@/lib/supabase/client';
 
 function PendingContent() {
   const searchParams = useSearchParams();
   const email = searchParams.get('email') || '';
+
+  // Clear any dangling auth session so user is strictly unauthenticated on this page
+  useEffect(() => {
+    try {
+      const supabase = createClient();
+      if (supabase) supabase.auth.signOut().catch(() => {});
+    } catch (_) {}
+  }, []);
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-[#f8faf9] px-4 py-10">
@@ -72,6 +82,12 @@ function PendingContent() {
 
         <Link
           href="/login"
+          onClick={async () => {
+            try {
+              const supabase = createClient();
+              if (supabase) await supabase.auth.signOut();
+            } catch (_) {}
+          }}
           className="inline-flex items-center gap-2 px-5 py-2.5 border border-gray-200 text-gray-700 text-sm font-medium rounded-xl hover:bg-gray-50 transition-all"
         >
           Back to Login

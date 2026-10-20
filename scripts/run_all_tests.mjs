@@ -547,6 +547,18 @@ async function testAuthValidation() {
     }),
   });
   assert(resBadEmail.status === 401 || resBadEmail.status === 404, `Non-existent account rejected with 401/404 (got ${resBadEmail.status})`);
+
+  // Forgot Password Test: Non-existent Gmail account rejected with 404 "Email does not exist."
+  const resBadForgot = await fetch(`${BASE_URL}/api/auth/forgot-password`, {
+    method: 'POST',
+    headers: getAuthHeaders(),
+    body: JSON.stringify({
+      email: 'nonexistent.user.9999@gmail.com',
+    }),
+  });
+  assert(resBadForgot.status === 404, `Non-existent account in forgot password rejected with 404 (got ${resBadForgot.status})`);
+  const dataBadForgot = await resBadForgot.json();
+  assert(dataBadForgot.error?.toLowerCase().includes('not exist'), `Forgot password error mentions not exist (got: "${dataBadForgot.error}")`);
 }
 await testAuthValidation();
 

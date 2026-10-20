@@ -15,6 +15,7 @@ import {
 import { formatPHP } from '@/lib/utils/currency';
 import { formatFriendlyDate } from '@/components/ledger/TransactionTable';
 import { Button, Badge } from '@/components/ui';
+import UserAvatar from '@/components/common/UserAvatar';
 
 export default function TransactionCommentsDrawer({
   isOpen,
@@ -104,13 +105,6 @@ export default function TransactionCommentsDrawer({
     }
   };
 
-  const handleKeyDown = (e) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      handlePostComment();
-    }
-  };
-
   if (!isOpen || !transaction) return null;
 
   const getRoleBadgeVariant = (role) => {
@@ -129,7 +123,7 @@ export default function TransactionCommentsDrawer({
         className="w-full max-w-md h-full flex flex-col shadow-2xl border-l transition-all animate-in slide-in-from-right duration-200 bg-white dark:bg-[#121214] border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-zinc-100"
       >
         {/* Drawer Header */}
-        <div className="p-4 sm:p-5 border-b flex items-start justify-between gap-3 shrink-0 border-zinc-200 dark:border-zinc-800 bg-zinc-50/70 dark:bg-zinc-900/40">
+        <div className="p-4 sm:p-5 border-b flex items-start justify-between gap-3 shrink-0 border-zinc-200 dark:border-zinc-800 bg-white dark:bg-[#121214]">
           <div className="min-w-0">
             <div className="flex items-center gap-2">
               <div className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
@@ -204,17 +198,15 @@ export default function TransactionCommentsDrawer({
                 {/* Author Metadata Header */}
                 <div className="flex items-center justify-between gap-2 mb-2">
                   <div className="flex items-center gap-2 min-w-0">
-                    {c.author_avatar ? (
-                      <img 
-                        src={c.author_avatar} 
-                        alt={c.author_name} 
-                        className="w-5 h-5 rounded-full object-cover shrink-0 border border-zinc-200 dark:border-zinc-700" 
-                      />
-                    ) : (
-                      <div className="w-5 h-5 rounded-full flex items-center justify-center text-[9px] font-bold shrink-0 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
-                        {(c.author_name || 'U').charAt(0).toUpperCase()}
-                      </div>
-                    )}
+                    <UserAvatar
+                      src={c.author_avatar}
+                      name={c.author_name || 'Officer'}
+                      email=""
+                      size="xs"
+                      rounded="full"
+                      alt={c.author_name || 'Officer'}
+                      className="border border-zinc-200 dark:border-zinc-700"
+                    />
                     <span className="text-xs font-bold truncate text-zinc-900 dark:text-zinc-100">{c.author_name}</span>
                     <Badge variant={getRoleBadgeVariant(c.author_role)} size="xs">
                       {c.author_role || 'Officer'}
@@ -236,40 +228,33 @@ export default function TransactionCommentsDrawer({
           <div ref={commentsEndRef} />
         </div>
 
-        {/* Minimal Remark Input Box */}
-        <div className="p-3 sm:p-4 border-t shrink-0 border-zinc-200 dark:border-zinc-800 bg-zinc-50/80 dark:bg-zinc-900/40">
-          <form onSubmit={handlePostComment} className="flex items-end gap-2">
-            <div className="flex-1 relative">
-              <textarea
-                value={newComment}
-                onChange={(e) => setNewComment(e.target.value)}
-                onKeyDown={handleKeyDown}
-                placeholder="Write an auditor remark or instruction... (Enter to post)"
-                rows={2}
-                disabled={isSubmitting}
-                className="w-full text-xs rounded-xl p-2.5 transition-all resize-none border focus:outline-none focus:ring-1 select-text bg-white dark:bg-[#121214] border-zinc-200 dark:border-zinc-700 text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 dark:placeholder:text-zinc-500 focus:border-emerald-500 focus:ring-emerald-500/20"
-              />
-            </div>
-
+        {/* Comment Input Bar */}
+        <div className="p-3 sm:p-4 border-t shrink-0 border-zinc-200 dark:border-zinc-800 bg-white dark:bg-[#121214]">
+          <form onSubmit={handlePostComment} className="flex items-center gap-2">
+            <input
+              type="text"
+              value={newComment}
+              onChange={(e) => setNewComment(e.target.value)}
+              placeholder="Add an audit remark or note..."
+              disabled={isSubmitting}
+              className="flex-1 h-10 px-3.5 text-xs rounded-xl border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-900/60 text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 dark:placeholder:text-zinc-500 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500/20 transition-all select-text"
+            />
             <Button
               type="submit"
               variant="primary"
               size="sm"
               disabled={isSubmitting || !newComment.trim()}
-              className="h-10 px-3.5 shrink-0"
-              title="Post Remark (Enter)"
+              className="h-10 px-4 shrink-0 font-medium active:scale-95 flex items-center justify-center gap-1.5"
+              title="Post Remark"
             >
               {isSubmitting ? (
-                <Loader2 className="w-4 h-4 animate-spin" />
+                <Loader2 className="w-3.5 h-3.5 animate-spin" />
               ) : (
                 <Send className="w-3.5 h-3.5" />
               )}
-              <span className="hidden sm:inline">Post</span>
+              <span>Post</span>
             </Button>
           </form>
-          <p className="text-[10px] mt-1.5 text-center text-zinc-400 dark:text-zinc-500">
-            Audit remarks are timestamped and preserved for institutional accountability.
-          </p>
         </div>
       </div>
     </div>

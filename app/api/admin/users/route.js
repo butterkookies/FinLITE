@@ -52,7 +52,7 @@ export async function GET(req) {
     // List all users
     const { data: users, error } = await supabase
       .from('profiles')
-      .select('id, auth_user_id, full_name, first_name, last_name, email, role, status, contact_number, auth_provider, created_at, approved_at')
+      .select('id, auth_user_id, full_name, first_name, last_name, email, role, status, contact_number, auth_provider, avatar_url, created_at, approved_at')
       .order('created_at', { ascending: false });
 
     if (error) {

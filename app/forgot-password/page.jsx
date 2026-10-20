@@ -25,7 +25,7 @@ export default function ForgotPasswordPage() {
 
     try {
       // Handled by the server so the policy (no reset token for Google-only
-      // accounts, identical response for every address) cannot be bypassed.
+      // accounts, verification that account exists) cannot be bypassed.
       const res = await fetch('/api/auth/forgot-password', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -76,7 +76,7 @@ export default function ForgotPasswordPage() {
               <div>
                 <h3 className="text-sm font-bold text-gray-950">Check your email</h3>
                 <p className="text-xs text-gray-600 mt-1.5 leading-relaxed">
-                  If <strong className="text-gray-900">{email}</strong> is registered, we sent instructions to it. Please check your inbox and spam folder.
+                  We sent recovery instructions to <strong className="text-gray-900">{email}</strong>. Please check your inbox and spam folder.
                 </p>
               </div>
 

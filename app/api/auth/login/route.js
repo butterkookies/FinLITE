@@ -20,7 +20,7 @@ export async function POST(req) {
 
     const supabase = await createClient();
 
-   
+
 
     // 2. Attempt sign-in with resolved email + password
     const { data, error } = await supabase.auth.signInWithPassword({
@@ -68,14 +68,14 @@ export async function POST(req) {
     // Check profile approval status (first by auth_user_id, then fallback to email)
     let { data: profile } = await queryClient
       .from('profiles')
-      .select('id, status, role, first_name, last_name, auth_user_id')
+      .select('id, status, role, first_name, last_name, auth_user_id, email')
       .eq('auth_user_id', userId)
       .maybeSingle();
 
     if (!profile) {
       const { data: profileByEmail } = await queryClient
         .from('profiles')
-        .select('id, status, role, first_name, last_name, auth_user_id')
+      .select('id, status, role, first_name, last_name, auth_user_id, email')
         .eq('email', userEmail)
         .maybeSingle();
 

@@ -320,6 +320,10 @@ export default function Dashboard() {
           setCurrentUser(user);
 
           if (profile) {
+            const googleAvatar = user.user_metadata?.avatar_url || user.user_metadata?.picture || null;
+            if (!profile.avatar_url && googleAvatar) {
+              profile.avatar_url = googleAvatar;
+            }
             activeProfile = profile;
             activeRole = isSuperAdmin ? 'admin' : (profile.role || 'member');
             setUserProfile(profile);
@@ -789,7 +793,7 @@ export default function Dashboard() {
       logged_by: userProfile?.id || currentUser?.id || null,
       logged_by_name: userProfile?.full_name || currentUser?.user_metadata?.full_name || 'Officer',
       logged_by_role: currentRole || userProfile?.role || 'treasurer',
-      logged_by_avatar_url: userProfile?.avatar_url || currentUser?.user_metadata?.avatar_url || null,
+      logged_by_avatar_url: userProfile?.avatar_url || currentUser?.user_metadata?.avatar_url || currentUser?.user_metadata?.picture || null,
     };
     setTransactions((prev) => [optimisticTx, ...prev]);
 
@@ -892,42 +896,77 @@ export default function Dashboard() {
           }
         });
 
-        let insertRes = await supabase
-          .from('transactions')
-          .insert([payload])
-          .select()
-          .single();
+        let data = null;
+        let error = null;
 
-        // Graceful fallback if semester_id column is missing in legacy remote DB
-        if (insertRes.error && (insertRes.error.message?.includes('semester_id') || insertRes.error.code === 'PGRST204')) {
-          const fallbackPayload = { ...payload };
-          delete fallbackPayload.semester_id;
-          insertRes = await supabase
-            .from('transactions')
-            .insert([fallbackPayload])
-            .select()
-            .single();
-        }
-
-        // Graceful fallback if payment_method column was dropped in remote DB (migration 023 single-cashbox)
-        if (insertRes.error && (insertRes.error.message?.includes('payment_method') || insertRes.error.code === 'PGRST204')) {
-          const fallbackPayload = { ...payload };
-          delete fallbackPayload.payment_method;
-          if (insertRes.error.message?.includes('semester_id')) {
-            delete fallbackPayload.semester_id;
+        // 1. Primary: Use server-side API route /api/transactions (bypasses role RLS for all approved officers)
+        try {
+          const apiRes = await fetch('/api/transactions', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              ...payload,
+              category_name: newTx.category_name,
+              receipt_urls: uploadedReceiptUrls,
+              receipt_url: uploadedReceiptUrls[0] || null,
+            }),
+          });
+          const apiResult = await apiRes.json();
+          if (apiRes.ok && apiResult.success && apiResult.transaction) {
+            data = apiResult.transaction;
+          } else if (apiResult.error) {
+            error = { message: apiResult.error };
           }
-          insertRes = await supabase
-            .from('transactions')
-            .insert([fallbackPayload])
-            .select()
-            .single();
+        } catch (apiErr) {
+          console.warn('/api/transactions request error, trying direct fallback:', apiErr?.message);
         }
 
-        const data = insertRes.data;
-        const error = insertRes.error;
+        // 2. Fallback: Direct client insert if API was not reached
+        if (!data) {
+          let insertRes = await supabase
+            .from('transactions')
+            .insert([payload])
+            .select()
+            .single();
+
+          // Graceful fallback if semester_id column is missing in legacy remote DB
+          if (insertRes.error && (insertRes.error.message?.includes('semester_id') || insertRes.error.code === 'PGRST204')) {
+            const fallbackPayload = { ...payload };
+            delete fallbackPayload.semester_id;
+            insertRes = await supabase
+              .from('transactions')
+              .insert([fallbackPayload])
+              .select()
+              .single();
+          }
+
+          // Graceful fallback if payment_method column was dropped in remote DB (migration 023 single-cashbox)
+          if (insertRes.error && (insertRes.error.message?.includes('payment_method') || insertRes.error.code === 'PGRST204')) {
+            const fallbackPayload = { ...payload };
+            delete fallbackPayload.payment_method;
+            if (insertRes.error.message?.includes('semester_id')) {
+              delete fallbackPayload.semester_id;
+            }
+            insertRes = await supabase
+              .from('transactions')
+              .insert([fallbackPayload])
+              .select()
+              .single();
+          }
+
+          if (insertRes.data) {
+            data = insertRes.data;
+            error = null;
+          } else if (insertRes.error) {
+            error = insertRes.error;
+          }
+        }
 
         if (error) {
-          console.warn('Supabase transaction insert notice:', error?.message || error?.details || JSON.stringify(error) || error);
+          console.error('Supabase transaction insert notice:', error?.message || error?.details || JSON.stringify(error) || error);
+          // Roll back optimistic transaction so the user doesn't see a transaction that vanishes on refresh
+          setTransactions((prev) => prev.filter((t) => t.id !== tempId));
+          alert(`Failed to save transaction: ${error.message || 'Permission denied or network issue'}. Please try again.`);
         } else if (data) {
           // If receipts were uploaded, insert normalized child records in transaction_receipts
           if (uploadedReceiptUrls.length > 0) {
@@ -950,7 +989,7 @@ export default function Dashboard() {
               ...data,
               logged_by_name: userProfile?.full_name || null,
               logged_by_role: currentRole || userProfile?.role || null,
-              logged_by_avatar_url: userProfile?.avatar_url || null,
+              logged_by_avatar_url: userProfile?.avatar_url || currentUser?.user_metadata?.avatar_url || currentUser?.user_metadata?.picture || null,
               category_id: data.category_id || resolvedCategoryId,
               category_name: data.category_name || newTx.category_name,
               semester_id: data.semester_id || resolvedSemesterId,
@@ -1283,7 +1322,7 @@ export default function Dashboard() {
         semester: currentSemester?.semester,
         logged_by_name: userProfile?.full_name || null,
         logged_by_role: currentRole || userProfile?.role || null,
-        logged_by_avatar_url: userProfile?.avatar_url || null,
+        logged_by_avatar_url: userProfile?.avatar_url || currentUser?.user_metadata?.avatar_url || currentUser?.user_metadata?.picture || null,
       },
       ...prev.filter((t) => t.id !== tx.id),
     ]);

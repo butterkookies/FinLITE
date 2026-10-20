@@ -8,19 +8,12 @@ import { createRecoveryLink } from '@/lib/auth/registration';
 import { sendPasswordResetEmail, sendGoogleOnlyNoticeEmail } from '@/lib/email/auth-mailer';
 import { getClientIp, rateLimiter } from '@/lib/security/ratelimit';
 
-// Identical for every outcome so the endpoint cannot be used to discover which
-// emails are registered, or how they sign in.
-const GENERIC = {
-  success: true,
-  message: 'If that email is registered, we sent instructions to it.',
-};
-
 // POST /api/auth/forgot-password { email }
 //
 // Policy:
-//   - account with a password  -> one-time reset link
-//   - Google-only account      -> NO token is created; the email says to use Google
-//   - unknown / unverified     -> nothing is sent
+//   - Account exists in database with password -> one-time reset link
+//   - Account exists as Google-only -> notify to sign in with Google
+//   - Account does not exist in user database -> return 404 "Email does not exist."
 export async function POST(req) {
   try {
     const { email } = await req.json();
@@ -34,25 +27,103 @@ export async function POST(req) {
     // Per-address throttle on top of the per-IP limit: 3 emails / 15 minutes.
     const gate = rateLimiter.check(`forgot:${cleanEmail}`, 3, 15 * 60 * 1000);
     if (!gate.allowed) {
-      // Same shape as success: do not reveal that this address is being throttled.
-      return NextResponse.json(GENERIC);
+      return NextResponse.json(
+        { error: 'Too many recovery attempts. Please wait a few minutes before trying again.' },
+        { status: 429 }
+      );
     }
 
     const adminClient = createAdminClient();
     if (!adminClient) {
       console.error('forgot-password: SUPABASE_SERVICE_ROLE_KEY is not configured.');
-      return NextResponse.json(GENERIC);
+      return NextResponse.json(
+        { error: 'Server configuration error. Please try again later.' },
+        { status: 500 }
+      );
     }
 
-    const methods = await getAuthMethods(adminClient, { email: cleanEmail });
+    // 1. Verify if user exists in the actual user database (profiles)
+    const { data: profile } = await adminClient
+      .from('profiles')
+      .select('id, email, status, auth_user_id')
+      .ilike('email', cleanEmail)
+      .maybeSingle();
+
+    if (!profile) {
+      // Check if there is an unapproved / pending registration request
+      const { data: request } = await adminClient
+        .from('registration_requests')
+        .select('id, status')
+        .ilike('email', cleanEmail)
+        .maybeSingle();
+
+      if (request?.status === 'pending') {
+        return NextResponse.json(
+          { error: 'Your account registration is still pending administrator approval.' },
+          { status: 403 }
+        );
+      }
+
+      return NextResponse.json(
+        { error: 'Email does not exist.' },
+        { status: 404 }
+      );
+    }
+
+    // 2. Check profile status
+    if (profile.status === 'suspended') {
+      return NextResponse.json(
+        { error: 'This account has been suspended by an administrator. Please contact your adviser or admin.' },
+        { status: 403 }
+      );
+    }
+
+    if (profile.status === 'pending') {
+      return NextResponse.json(
+        { error: 'Your account registration is still pending administrator approval.' },
+        { status: 403 }
+      );
+    }
+
+    if (profile.status === 'rejected') {
+      return NextResponse.json(
+        { error: 'Your registration request was not approved. Please contact the admin.' },
+        { status: 403 }
+      );
+    }
+
+    // 3. Lookup auth methods
+    const methods = await getAuthMethods(adminClient, {
+      userId: profile.auth_user_id,
+      email: cleanEmail,
+    });
+
+    if (!methods?.found) {
+      return NextResponse.json(
+        { error: 'Email does not exist.' },
+        { status: 404 }
+      );
+    }
+
+    if (!methods.email_confirmed) {
+      return NextResponse.json(
+        { error: 'Please verify your email address first before resetting your password.' },
+        { status: 403 }
+      );
+    }
+
     const action = decideForgotPasswordAction(methods);
     const appUrl = resolveAppUrl(req);
 
     if (action === 'send_reset') {
       const resetUrl = await createRecoveryLink(adminClient, cleanEmail, appUrl);
-      if (resetUrl) {
-        await sendPasswordResetEmail({ to: cleanEmail, resetUrl });
+      if (!resetUrl) {
+        return NextResponse.json(
+          { error: 'Failed to generate password recovery link. Please try again.' },
+          { status: 500 }
+        );
       }
+      await sendPasswordResetEmail({ to: cleanEmail, resetUrl });
     } else if (action === 'send_google_notice') {
       await sendGoogleOnlyNoticeEmail({ to: cleanEmail, signInUrl: `${appUrl}/login` });
       await logAuthEvent(adminClient, {
@@ -62,9 +133,15 @@ export async function POST(req) {
       });
     }
 
-    return NextResponse.json(GENERIC);
+    return NextResponse.json({
+      success: true,
+      message: 'Password recovery instructions have been sent to your email.',
+    });
   } catch (err) {
     console.error('forgot-password error:', err);
-    return NextResponse.json(GENERIC);
+    return NextResponse.json(
+      { error: 'Failed to process your request. Please try again later.' },
+      { status: 500 }
+    );
   }
 }

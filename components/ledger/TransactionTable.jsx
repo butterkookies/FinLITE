@@ -37,6 +37,7 @@ import { formatPHP } from '@/lib/utils/currency';
 import { compressReceiptImage } from '@/lib/utils/compression';
 import { Button, Badge, Input, Card, Modal } from '@/components/ui';
 import TransactionCommentsDrawer from '@/components/ledger/TransactionCommentsDrawer';
+import UserAvatar from '@/components/common/UserAvatar';
 
 export function formatFriendlyDate(dateStr) {
   if (!dateStr) return '—';
@@ -688,17 +689,15 @@ export default function TransactionTable({
                           className="flex items-center gap-2" 
                           title={loggerEmail ? `${loggerName || 'Officer'} (${loggerEmail})` : (loggerName || 'Officer')}
                         >
-                          {loggerAvatar ? (
-                            <img 
-                              src={loggerAvatar} 
-                              alt={loggerName || 'Officer'} 
-                              className="w-5 h-5 rounded-full object-cover shrink-0 border border-zinc-200 dark:border-zinc-700 shadow-2xs" 
-                            />
-                          ) : (
-                            <div className="w-5 h-5 rounded-full flex items-center justify-center text-[9px] font-bold shrink-0 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
-                              {(loggerName || 'O').charAt(0).toUpperCase()}
-                            </div>
-                          )}
+                          <UserAvatar
+                            src={loggerAvatar}
+                            name={loggerName || 'Officer'}
+                            email={loggerEmail || ''}
+                            size="xs"
+                            rounded="full"
+                            alt={loggerName || 'Officer'}
+                            className="border border-zinc-200 dark:border-zinc-700 shadow-2xs"
+                          />
                           <div className="min-w-0">
                             <div className="text-xs font-semibold truncate max-w-[120px] text-zinc-900 dark:text-zinc-100" title={loggerName || 'Officer'}>
                               {loggerName || 'Officer'}
@@ -1279,13 +1278,15 @@ export default function TransactionTable({
                   if (!loggerName && !loggerRole && !selectedReceipt.logged_by) return null;
                   return (
                     <div className="flex items-center gap-1.5 text-[11px] text-zinc-600 dark:text-zinc-400 mt-1.5 pt-1.5 border-t border-zinc-200 dark:border-zinc-800">
-                      {loggerAvatar ? (
-                        <img src={loggerAvatar} alt="" className="w-4 h-4 rounded-full object-cover shrink-0 border border-zinc-200 dark:border-zinc-700" />
-                      ) : (
-                        <span className="w-4 h-4 rounded-full bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 flex items-center justify-center text-[9px] font-bold shrink-0">
-                          {(loggerName || 'O').charAt(0).toUpperCase()}
-                        </span>
-                      )}
+                      <UserAvatar
+                        src={loggerAvatar}
+                        name={loggerName || 'Officer'}
+                        email=""
+                        size="xs"
+                        rounded="full"
+                        alt=""
+                        className="w-4 h-4 text-[8px] border border-zinc-200 dark:border-zinc-700"
+                      />
                       <span className="text-zinc-400 font-medium">Recorded by:</span>
                       <span className="font-semibold text-zinc-900 dark:text-zinc-100">{loggerName || 'Officer'}</span>
                       {loggerRole && (
@@ -1743,13 +1744,15 @@ export default function TransactionTable({
                       Recorded By
                     </span>
                     <div className="flex items-center gap-2.5">
-                      {loggerAvatar ? (
-                        <img src={loggerAvatar} alt="" className="w-8 h-8 rounded-full object-cover shrink-0 border border-zinc-200 dark:border-zinc-700" />
-                      ) : (
-                        <div className="w-8 h-8 rounded-full bg-emerald-100 dark:bg-emerald-950/80 text-emerald-800 dark:text-emerald-300 flex items-center justify-center font-bold text-xs shrink-0">
-                          {(loggerName || 'O').charAt(0).toUpperCase()}
-                        </div>
-                      )}
+                      <UserAvatar
+                        src={loggerAvatar}
+                        name={loggerName || 'Officer'}
+                        email=""
+                        size="base"
+                        rounded="full"
+                        alt=""
+                        className="border border-zinc-200 dark:border-zinc-700"
+                      />
                       <div className="min-w-0">
                         <div className="flex items-center gap-1.5">
                           <span className="font-bold truncate text-xs text-zinc-900 dark:text-zinc-100">

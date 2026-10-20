@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { createClient, createAdminClient } from '@/lib/supabase/server';
 import { isSuperAdminEmail } from '@/lib/config/admin';
 import { getClientIp } from '@/lib/security/ratelimit';
+import { isCustomUploadedAvatar } from '@/lib/utils/avatar';
 
 // POST /api/auth/google-session
 // Called after client-side signInWithIdToken to finalize profile routing,
@@ -36,6 +37,16 @@ export async function POST(req) {
       const lastName = nameParts.slice(1).join(' ') || 'Geronimo';
 
       try {
+        const { data: existingAdmin } = await queryClient
+          .from('profiles')
+          .select('avatar_url')
+          .eq('email', googleEmail)
+          .maybeSingle();
+
+        const adminAvatar = isCustomUploadedAvatar(existingAdmin?.avatar_url)
+          ? existingAdmin.avatar_url
+          : (googleAvatar || existingAdmin?.avatar_url || null);
+
         const { data: adminProf } = await queryClient
           .from('profiles')
           .upsert(
@@ -48,6 +59,7 @@ export async function POST(req) {
               role: 'admin',
               status: 'approved',
               auth_provider: 'google',
+              avatar_url: adminAvatar,
               approved_at: new Date().toISOString(),
             },
             { onConflict: 'email' }
@@ -91,12 +103,27 @@ export async function POST(req) {
     let existingProfile = null;
     const { data: profByAuth } = await queryClient
       .from('profiles')
-      .select('id, status, role, auth_user_id, email')
+      .select('id, status, role, auth_user_id, email, avatar_url')
       .eq('auth_user_id', user.id)
       .maybeSingle();
 
     if (profByAuth) {
       existingProfile = profByAuth;
+      // Auto-sync Google photo into profile if user has not uploaded a custom avatar
+      if (googleAvatar && !isCustomUploadedAvatar(existingProfile.avatar_url) && existingProfile.avatar_url !== googleAvatar) {
+        try {
+          await queryClient
+            .from('profiles')
+            .update({
+              avatar_url: googleAvatar,
+              updated_at: new Date().toISOString(),
+            })
+            .eq('id', existingProfile.id);
+          existingProfile.avatar_url = googleAvatar;
+        } catch (syncErr) {
+          console.warn('Google session avatar sync note:', syncErr?.message);
+        }
+      }
     } else if (googleEmail) {
       const { data: profByEmail } = await queryClient
         .from('profiles')
@@ -163,7 +190,8 @@ export async function POST(req) {
         return NextResponse.json({ success: true, redirect: '/' });
       }
 
-      // Pending
+      // Pending: sign out
+      await supabase.auth.signOut();
       return NextResponse.json({
         success: true,
         redirect: `/pending-approval?email=${encodeURIComponent(googleEmail)}`,
@@ -185,6 +213,13 @@ export async function POST(req) {
           { status: 403 }
         );
       }
+      if (existingRequest.status === 'approved') {
+        return NextResponse.json({
+          success: true,
+          redirect: '/',
+        });
+      }
+      await supabase.auth.signOut();
       return NextResponse.json({
         success: true,
         redirect: `/pending-approval?email=${encodeURIComponent(googleEmail)}`,
