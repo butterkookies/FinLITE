@@ -123,9 +123,17 @@ export async function POST(req) {
           { status: 500 }
         );
       }
-      await sendPasswordResetEmail({ to: cleanEmail, resetUrl });
+      const mailRes = await sendPasswordResetEmail({ to: cleanEmail, resetUrl });
+      if (!mailRes?.success && mailRes?.error) {
+        const msg = mailRes.error?.message || (typeof mailRes.error === 'string' ? mailRes.error : JSON.stringify(mailRes.error));
+        return NextResponse.json({ error: `Email delivery error: ${msg}` }, { status: 502 });
+      }
     } else if (action === 'send_google_notice') {
-      await sendGoogleOnlyNoticeEmail({ to: cleanEmail, signInUrl: `${appUrl}/login` });
+      const noticeRes = await sendGoogleOnlyNoticeEmail({ to: cleanEmail, signInUrl: `${appUrl}/login` });
+      if (!noticeRes?.success && noticeRes?.error) {
+        const msg = noticeRes.error?.message || (typeof noticeRes.error === 'string' ? noticeRes.error : JSON.stringify(noticeRes.error));
+        return NextResponse.json({ error: `Email delivery error: ${msg}` }, { status: 502 });
+      }
       await logAuthEvent(adminClient, {
         action: 'AUTH_RESET_BLOCKED_NO_PASSWORD',
         entityId: methods.user_id,
