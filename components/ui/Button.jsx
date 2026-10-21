@@ -8,9 +8,9 @@ export const buttonVariants = {
   primary:
     'bg-emerald-600 text-white hover:bg-emerald-500 active:bg-emerald-700 shadow-xs focus-visible:ring-emerald-500/50',
   secondary:
-    'bg-zinc-100 text-zinc-900 hover:bg-zinc-200/80 dark:bg-zinc-850 dark:text-zinc-100 dark:hover:bg-zinc-800 ring-1 ring-black/[0.04] dark:ring-white/[0.06] shadow-xs focus-visible:ring-zinc-400',
+    'bg-zinc-100 text-zinc-900 hover:bg-zinc-200/80 dark:bg-zinc-800 dark:text-zinc-100 dark:hover:bg-zinc-700 ring-1 ring-black/[0.04] dark:ring-white/[0.06] shadow-xs focus-visible:ring-zinc-400',
   outline:
-    'bg-zinc-100/70 text-zinc-700 dark:bg-zinc-850/70 dark:text-zinc-200 hover:bg-zinc-200/80 dark:hover:bg-zinc-800 focus-visible:ring-zinc-400',
+    'bg-zinc-100/70 text-zinc-700 hover:bg-zinc-200/80 dark:bg-zinc-800/60 dark:text-zinc-200 dark:hover:bg-zinc-700 ring-1 ring-black/[0.04] dark:ring-white/[0.06] focus-visible:ring-zinc-400',
   ghost:
     'text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-800/60 focus-visible:ring-zinc-400',
   destructive:

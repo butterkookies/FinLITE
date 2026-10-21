@@ -20,7 +20,7 @@ export default function StatCard({
   const iconAccentClasses = {
     emerald:
       'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20',
-    zinc: 'bg-zinc-100 text-zinc-800 dark:bg-zinc-900 text-zinc-200 border-zinc-200 dark:border-zinc-800',
+    zinc: 'bg-zinc-100 text-zinc-800 dark:bg-zinc-900 dark:text-zinc-200 border-zinc-200 dark:border-zinc-800',
     amber:
       'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20',
     rose: 'bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/20',
