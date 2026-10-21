@@ -1490,12 +1490,81 @@ export default function Dashboard() {
       // Persisted record: atomic server-side RPC (ledger OUTFLOW + installment + balance).
       // Auditing is handled by the trg_audit_advance_disbursements trigger.
       if (supabase && isPersistedId(advanceId)) {
-        const { data: updatedAdvance, error } = await supabase.rpc('record_advance_disbursement', {
+        let updatedAdvance = null;
+        const { data: rpcAdv, error: rpcError } = await supabase.rpc('record_advance_disbursement', {
           p_advance_id: advanceId,
           p_amount: payoutAmount,
           p_notes: notes || null,
         });
-        if (error) return { error: error.message || 'Failed to record advance disbursement' };
+
+        if (!rpcError && rpcAdv) {
+          updatedAdvance = rpcAdv;
+        } else {
+          const isSchemaCacheError = rpcError?.code === 'PGRST202' ||
+            rpcError?.message?.includes('schema cache') ||
+            rpcError?.message?.includes('record_advance_disbursement');
+
+          if (!isSchemaCacheError) {
+            return { error: rpcError?.message || 'Failed to record advance disbursement' };
+          }
+
+          console.warn('record_advance_disbursement RPC missing in schema cache; executing resilient fallback:', rpcError?.message);
+
+          const outflowCategory = (targetAdvance.category_id && categories.find((c) => c.id === targetAdvance.category_id)) ||
+            categories.find((c) => c.type === 'OUTFLOW' && c.name?.toLowerCase().includes('abono')) ||
+            categories.find((c) => c.type === 'OUTFLOW') || null;
+
+          const { data: newTx, error: txError } = await supabase
+            .from('transactions')
+            .insert({
+              title: `Abono Reimbursement: ${targetAdvance.title} (${targetAdvance.claimant_name})`,
+              description: notes || `Reimbursement payout of ₱${payoutAmount.toFixed(2)} to ${targetAdvance.claimant_name}`,
+              amount: payoutAmount,
+              type: 'OUTFLOW',
+              category_id: outflowCategory?.id || null,
+              semester_id: targetAdvance.semester_id || currentSemester?.id || null,
+              logged_by: userProfile?.id || null,
+              transaction_date: new Date().toISOString().split('T')[0],
+              status: 'COMPLETED',
+              event_name: targetAdvance.event_name || null,
+            })
+            .select()
+            .single();
+
+          if (txError) {
+            return { error: txError.message || 'Failed to record transaction' };
+          }
+
+          await supabase
+            .from('advance_disbursements')
+            .insert({
+              advance_id: advanceId,
+              transaction_id: newTx?.id || null,
+              amount: payoutAmount,
+              disbursed_by: userProfile?.id || null,
+              notes: notes || null,
+            });
+
+          const updatedReimbursed = Number(targetAdvance.amount_reimbursed || 0) + payoutAmount;
+          const updatedStatus = updatedReimbursed >= Number(targetAdvance.total_amount) ? 'SETTLED' : 'PARTIALLY_REIMBURSED';
+
+          const { data: advRow, error: advUpdateError } = await supabase
+            .from('advances_payable')
+            .update({
+              amount_reimbursed: updatedReimbursed,
+              status: updatedStatus,
+            })
+            .eq('id', advanceId)
+            .select()
+            .single();
+
+          if (advUpdateError) {
+            return { error: advUpdateError.message || 'Failed to update advance record' };
+          }
+
+          updatedAdvance = advRow || { ...targetAdvance, amount_reimbursed: updatedReimbursed, status: updatedStatus };
+          if (newTx) addServerTransactionToState(newTx);
+        }
 
         const disbursement = await fetchLatestInstallmentWithTx('advance_disbursements', 'advance_id', advanceId);
         if (disbursement?.tx) addServerTransactionToState(disbursement.tx);
@@ -1630,12 +1699,79 @@ export default function Dashboard() {
 
       // Persisted record: atomic server-side RPC (ledger INFLOW + installment + balance)
       if (supabase && isPersistedId(debtId)) {
-        const { data: updatedDebt, error } = await supabase.rpc('record_debt_payment', {
+        let updatedDebt = null;
+        const { data: rpcDebt, error: rpcError } = await supabase.rpc('record_debt_payment', {
           p_debt_id: debtId,
           p_amount: Number(amount),
           p_notes: notes || null,
         });
-        if (error) return { error: error.message || 'Failed to record debt payment' };
+
+        if (!rpcError && rpcDebt) {
+          updatedDebt = rpcDebt;
+        } else {
+          const isSchemaCacheError = rpcError?.code === 'PGRST202' ||
+            rpcError?.message?.includes('schema cache') ||
+            rpcError?.message?.includes('record_debt_payment');
+
+          if (!isSchemaCacheError) {
+            return { error: rpcError?.message || 'Failed to record debt payment' };
+          }
+
+          console.warn('record_debt_payment RPC missing in schema cache; executing resilient fallback:', rpcError?.message);
+
+          const inflowCategory = categories.find((c) => c.type === 'INFLOW' && c.name?.toLowerCase().includes('inflow')) ||
+            categories.find((c) => c.type === 'INFLOW') || null;
+
+          const { data: newTx, error: txError } = await supabase
+            .from('transactions')
+            .insert({
+              title: `Debt Settlement: ${targetDebt.title} (${targetDebt.debtor_name})`,
+              description: notes || `Installment collection of ₱${Number(amount).toFixed(2)} from ${targetDebt.debtor_name}`,
+              amount: Number(amount),
+              type: 'INFLOW',
+              category_id: inflowCategory?.id || null,
+              semester_id: targetDebt.semester_id || currentSemester?.id || null,
+              logged_by: userProfile?.id || null,
+              transaction_date: new Date().toISOString().split('T')[0],
+              status: 'COMPLETED',
+            })
+            .select()
+            .single();
+
+          if (txError) {
+            return { error: txError.message || 'Failed to record transaction' };
+          }
+
+          await supabase
+            .from('debt_payments')
+            .insert({
+              debt_id: debtId,
+              transaction_id: newTx?.id || null,
+              amount: Number(amount),
+              received_by: userProfile?.id || null,
+              notes: notes || null,
+            });
+
+          const updatedPaid = Number(targetDebt.amount_paid || 0) + Number(amount);
+          const updatedStatus = updatedPaid >= Number(targetDebt.total_amount) ? 'SETTLED' : 'PARTIALLY_PAID';
+
+          const { data: debtRow, error: debtUpdateError } = await supabase
+            .from('debts_receivables')
+            .update({
+              amount_paid: updatedPaid,
+              status: updatedStatus,
+            })
+            .eq('id', debtId)
+            .select()
+            .single();
+
+          if (debtUpdateError) {
+            return { error: debtUpdateError.message || 'Failed to update debt record' };
+          }
+
+          updatedDebt = debtRow || { ...targetDebt, amount_paid: updatedPaid, status: updatedStatus };
+          if (newTx) addServerTransactionToState(newTx);
+        }
 
         const payment = await fetchLatestInstallmentWithTx('debt_payments', 'debt_id', debtId);
         if (payment?.tx) addServerTransactionToState(payment.tx);
