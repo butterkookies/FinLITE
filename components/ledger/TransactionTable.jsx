@@ -601,12 +601,12 @@ export default function TransactionTable({
 
       {/* Desktop/Tablet Transactions Table */}
       <div className={`${viewMode === 'cards' ? 'hidden' : viewMode === 'table' ? 'block' : 'hidden md:block'} overflow-x-auto max-h-[calc(100vh-280px)] min-h-[360px] overflow-y-auto scrollbar-thin`}>
-        <table className="w-full min-w-[960px] 2xl:min-w-full text-left border-separate border-spacing-0">
-          <thead className="sticky top-0 z-20">
-            <tr className="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-zinc-500 dark:text-zinc-400">
+        <table className="w-full min-w-[960px] 2xl:min-w-full text-left border-collapse table-fixed">
+          <thead className="sticky top-0 z-10 shadow-2xs">
+            <tr className="border-b text-[10px] sm:text-[11px] font-bold uppercase tracking-wider border-zinc-200 dark:border-zinc-800 text-zinc-500 dark:text-zinc-400 bg-zinc-50/95 dark:bg-[#121214]/95 backdrop-blur-xs">
               <th 
-                className={`py-3.5 pl-6 pr-4 min-w-[260px] max-w-[340px] text-left whitespace-nowrap sticky top-0 left-0 z-30 bg-zinc-50 dark:bg-[#121214] border-b border-r border-zinc-200 dark:border-zinc-800 shadow-[4px_0_10px_-2px_rgba(0,0,0,0.06)] dark:shadow-[6px_0_16px_-2px_rgba(0,0,0,0.45)] transition-colors ${
-                  sortField === 'title' ? 'bg-emerald-500/[0.04] dark:bg-emerald-500/[0.06]' : ''
+                className={`py-3.5 pl-6 pr-3 w-[28%] text-left whitespace-nowrap sticky top-0 z-10 bg-zinc-50/95 dark:bg-[#121214]/95 backdrop-blur-xs border-b border-zinc-200 dark:border-zinc-800 transition-colors ${
+                  sortField === 'title' ? 'bg-emerald-500/[0.03] dark:bg-emerald-500/[0.05]' : ''
                 }`}
                 aria-sort={sortField === 'title' ? (sortDirection === 'asc' ? 'ascending' : 'descending') : 'none'}
               >
@@ -624,7 +624,7 @@ export default function TransactionTable({
                 </button>
               </th>
               <th 
-                className={`py-3.5 px-3 w-[10%] text-left whitespace-nowrap sticky top-0 z-10 bg-zinc-50 dark:bg-[#121214] border-b border-zinc-200 dark:border-zinc-800 transition-colors ${
+                className={`py-3.5 px-3 w-[10%] text-left whitespace-nowrap sticky top-0 z-10 bg-zinc-50/95 dark:bg-[#121214]/95 backdrop-blur-xs border-b border-zinc-200 dark:border-zinc-800 transition-colors ${
                   sortField === 'date' ? 'bg-emerald-500/[0.03] dark:bg-emerald-500/[0.05]' : ''
                 }`}
                 aria-sort={sortField === 'date' ? (sortDirection === 'asc' ? 'ascending' : 'descending') : 'none'}
@@ -643,7 +643,7 @@ export default function TransactionTable({
                 </button>
               </th>
               <th 
-                className={`py-3.5 px-3 w-[20%] text-left whitespace-nowrap sticky top-0 z-10 bg-zinc-50 dark:bg-[#121214] border-b border-zinc-200 dark:border-zinc-800 transition-colors ${
+                className={`py-3.5 px-3 w-[20%] text-left whitespace-nowrap sticky top-0 z-10 bg-zinc-50/95 dark:bg-[#121214]/95 backdrop-blur-xs border-b border-zinc-200 dark:border-zinc-800 transition-colors ${
                   sortField === 'category' ? 'bg-emerald-500/[0.03] dark:bg-emerald-500/[0.05]' : ''
                 }`}
                 aria-sort={sortField === 'category' ? (sortDirection === 'asc' ? 'ascending' : 'descending') : 'none'}
@@ -662,7 +662,7 @@ export default function TransactionTable({
                 </button>
               </th>
               <th 
-                className={`py-3.5 px-3 w-[12%] text-right whitespace-nowrap sticky top-0 z-10 bg-zinc-50 dark:bg-[#121214] border-b border-zinc-200 dark:border-zinc-800 transition-colors ${
+                className={`py-3.5 px-3 w-[12%] text-right whitespace-nowrap sticky top-0 z-10 bg-zinc-50/95 dark:bg-[#121214]/95 backdrop-blur-xs border-b border-zinc-200 dark:border-zinc-800 transition-colors ${
                   sortField === 'amount' ? 'bg-emerald-500/[0.03] dark:bg-emerald-500/[0.05]' : ''
                 }`}
                 aria-sort={sortField === 'amount' ? (sortDirection === 'asc' ? 'ascending' : 'descending') : 'none'}
@@ -682,18 +682,18 @@ export default function TransactionTable({
                   </button>
                 </div>
               </th>
-              <th className="py-3.5 px-3 w-[14%] text-left whitespace-nowrap sticky top-0 z-10 bg-zinc-50 dark:bg-[#121214] border-b border-zinc-200 dark:border-zinc-800">
+              <th className="py-3.5 px-3 w-[14%] text-left whitespace-nowrap sticky top-0 z-10 bg-zinc-50/95 dark:bg-[#121214]/95 backdrop-blur-xs border-b border-zinc-200 dark:border-zinc-800">
                 <span className="px-2 py-1 block">Recorded By</span>
               </th>
-              <th className="py-3.5 pl-3 pr-6 w-[16%] text-right whitespace-nowrap sticky top-0 z-10 bg-zinc-50 dark:bg-[#121214] border-b border-zinc-200 dark:border-zinc-800">
+              <th className="py-3.5 pl-3 pr-6 w-[16%] text-right whitespace-nowrap sticky top-0 z-10 bg-zinc-50/95 dark:bg-[#121214]/95 backdrop-blur-xs border-b border-zinc-200 dark:border-zinc-800">
                 <span className="px-2 py-1 block">Receipts &amp; Actions</span>
               </th>
             </tr>
           </thead>
-          <tbody className="text-xs">
+          <tbody className="divide-y divide-zinc-200 dark:divide-zinc-800 text-xs">
             {paginatedTransactions.length === 0 ? (
               <tr>
-                <td colSpan="6" className="py-16 text-center border-b border-zinc-200 dark:border-zinc-800">
+                <td colSpan="6" className="py-16 text-center">
                   <div className="w-12 h-12 rounded-xl flex items-center justify-center mx-auto mb-3 border bg-zinc-100 dark:bg-zinc-900 text-zinc-500 dark:text-zinc-400 border-zinc-200 dark:border-zinc-800">
                     <Folder className="w-6 h-6" />
                   </div>
@@ -714,11 +714,8 @@ export default function TransactionTable({
                   title="Click anywhere on row to view full transaction details"
                 >
                   
-                  {/* Title & Event (Pinned Sticky Column on Horizontal Scroll) */}
-                  <td 
-                    className="py-3.5 pl-6 pr-4 min-w-[260px] max-w-[340px] sticky left-0 z-20 bg-white dark:bg-[#121214] group-hover:bg-zinc-50 dark:group-hover:bg-[#161619] border-b border-r border-zinc-200 dark:border-zinc-800 shadow-[4px_0_10px_-2px_rgba(0,0,0,0.06)] dark:shadow-[6px_0_16px_-2px_rgba(0,0,0,0.45)] transition-colors min-w-0" 
-                    title={tx.title}
-                  >
+                  {/* Title & Event */}
+                  <td className="py-3.5 pl-6 pr-3 min-w-0" title={tx.title}>
                     <div className="font-bold flex items-center gap-1.5 text-zinc-950 dark:text-zinc-100">
                       {tx.type === 'INFLOW' ? (
                         <ArrowDownRight className="w-4 h-4 shrink-0 text-emerald-600 dark:text-emerald-400" />
@@ -774,19 +771,19 @@ export default function TransactionTable({
                   </td>
 
                   {/* Date */}
-                  <td className="py-3.5 px-3 font-mono text-xs tabular-nums text-zinc-500 dark:text-zinc-400 whitespace-nowrap border-b border-zinc-200 dark:border-zinc-800">
+                  <td className="py-3.5 px-3 font-mono text-xs tabular-nums text-zinc-500 dark:text-zinc-400 whitespace-nowrap">
                     {formatFriendlyDate(tx.transaction_date)}
                   </td>
 
                   {/* Category */}
-                  <td className="py-3.5 px-3 min-w-0 border-b border-zinc-200 dark:border-zinc-800" title={tx.category_name || (tx.type === 'INFLOW' ? 'Revenue' : 'Disbursement')}>
+                  <td className="py-3.5 px-3 min-w-0" title={tx.category_name || (tx.type === 'INFLOW' ? 'Revenue' : 'Disbursement')}>
                     <span className="text-xs font-medium text-zinc-600 dark:text-zinc-400 truncate max-w-full block" title={tx.category_name || (tx.type === 'INFLOW' ? 'Revenue' : 'Disbursement')}>
                       {tx.category_name || (tx.type === 'INFLOW' ? 'Revenue' : 'Disbursement')}
                     </span>
                   </td>
 
                   {/* Amount */}
-                  <td className={`py-3.5 px-3 text-right font-mono font-bold whitespace-nowrap tabular-nums text-[13px] border-b border-zinc-200 dark:border-zinc-800 ${
+                  <td className={`py-3.5 px-3 text-right font-mono font-bold whitespace-nowrap tabular-nums text-[13px] ${
                     tx.type === 'INFLOW' 
                       ? 'text-emerald-600 dark:text-emerald-400 font-extrabold' 
                       : 'text-zinc-950 dark:text-zinc-100'
@@ -795,7 +792,7 @@ export default function TransactionTable({
                   </td>
 
                   {/* Recorded By */}
-                  <td className="py-3.5 px-3 whitespace-nowrap border-b border-zinc-200 dark:border-zinc-800">
+                  <td className="py-3.5 px-3 whitespace-nowrap">
                     {(() => {
                       const loggerName = tx.logged_by_name || tx.logged_by_profile?.full_name;
                       const loggerRole = tx.logged_by_role || tx.logged_by_profile?.role;
@@ -840,7 +837,7 @@ export default function TransactionTable({
                   </td>
 
                   {/* Receipts & Actions Column: Zero overlap, stable alignment */}
-                  <td className="relative py-3.5 pl-3 pr-6 text-right whitespace-nowrap border-b border-zinc-200 dark:border-zinc-800">
+                  <td className="relative py-3.5 pl-3 pr-6 text-right whitespace-nowrap">
                     {(() => {
                       const receipts = getTransactionReceipts(tx);
                       const hasComments = Boolean(commentCounts[tx.id]);
@@ -1345,61 +1342,29 @@ export default function TransactionTable({
 
           {/* Page Navigation Buttons */}
           {!isAll && totalPages > 1 && (
-            <div className="flex items-center gap-1 pl-3 border-l border-zinc-200 dark:border-zinc-800">
+            <div className="flex items-center gap-1.5 pl-3 border-l border-zinc-200 dark:border-zinc-800">
               <button
                 type="button"
                 disabled={safePage <= 1}
                 onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-                className="w-7 h-7 flex items-center justify-center rounded-lg border transition-colors duration-150 cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-700 dark:text-zinc-300"
+                className="p-1.5 rounded-lg border transition-colors duration-150 cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-700 dark:text-zinc-300"
                 title="Previous page"
               >
-                <ChevronLeft className="w-3.5 h-3.5" />
+                <ChevronLeft className="w-4 h-4" />
               </button>
 
-              {/* Numbered Page Buttons like in the video screenshot */}
-              {Array.from({ length: totalPages }, (_, i) => i + 1)
-                .filter((page) => {
-                  if (totalPages <= 7) return true;
-                  return page === 1 || page === totalPages || Math.abs(page - safePage) <= 1;
-                })
-                .reduce((acc, page, idx, arr) => {
-                  if (idx > 0 && page - arr[idx - 1] > 1) {
-                    acc.push('ellipsis-' + page);
-                  }
-                  acc.push(page);
-                  return acc;
-                }, [])
-                .map((item) => {
-                  if (typeof item === 'string') {
-                    return (
-                      <span key={item} className="px-1 text-zinc-400 select-none text-xs">…</span>
-                    );
-                  }
-                  const isActive = item === safePage;
-                  return (
-                    <button
-                      key={item}
-                      type="button"
-                      onClick={() => setCurrentPage(item)}
-                      className={`min-w-7 h-7 px-2 text-xs font-bold rounded-lg transition-colors duration-150 cursor-pointer select-none tabular-nums flex items-center justify-center ${
-                        isActive
-                          ? 'bg-emerald-600 text-white shadow-xs'
-                          : 'hover:bg-zinc-200/60 dark:hover:bg-zinc-800 text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100'
-                      }`}
-                    >
-                      {item}
-                    </button>
-                  );
-                })}
+              <span className="text-xs font-semibold px-2 select-none tabular-nums">
+                Page <span className="text-zinc-950 dark:text-white font-bold">{safePage}</span> of {totalPages}
+              </span>
 
               <button
                 type="button"
                 disabled={safePage >= totalPages}
                 onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-                className="w-7 h-7 flex items-center justify-center rounded-lg border transition-colors duration-150 cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-700 dark:text-zinc-300"
+                className="p-1.5 rounded-lg border transition-colors duration-150 cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-700 dark:text-zinc-300"
                 title="Next page"
               >
-                <ChevronRight className="w-3.5 h-3.5" />
+                <ChevronRight className="w-4 h-4" />
               </button>
             </div>
           )}
