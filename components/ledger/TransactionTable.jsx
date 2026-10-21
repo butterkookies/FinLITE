@@ -428,13 +428,14 @@ export default function TransactionTable({
   };
 
   const SortIndicator = ({ field }) => {
-    if (sortField !== field) {
+    const isActive = sortField === field;
+    if (!isActive) {
       return <ArrowUpDown className="w-3 h-3 opacity-30 group-hover/th:opacity-80 transition-opacity shrink-0" />;
     }
     return sortDirection === 'asc' ? (
-      <ArrowUp className="w-3.5 h-3.5 shrink-0 text-emerald-600 dark:text-emerald-400" />
+      <ArrowUp className="w-3.5 h-3.5 shrink-0 text-emerald-600 dark:text-emerald-400 stroke-[2.5]" />
     ) : (
-      <ArrowDown className="w-3.5 h-3.5 shrink-0 text-emerald-600 dark:text-emerald-400" />
+      <ArrowDown className="w-3.5 h-3.5 shrink-0 text-emerald-600 dark:text-emerald-400 stroke-[2.5]" />
     );
   };
 
@@ -542,32 +543,34 @@ export default function TransactionTable({
           </div>
 
           {/* View Mode Toggle: Spreadsheet vs Slim Cards (Hidden on mobile where Cards are native) */}
-          <div className="hidden sm:flex items-center gap-0.5 p-1 rounded-xl ring-1 ring-black/[0.04] dark:ring-white/[0.06] bg-zinc-100/80 dark:bg-zinc-900/90 shrink-0">
+          <div className="flex items-center gap-0.5 p-1 rounded-xl ring-1 ring-black/[0.04] dark:ring-white/[0.06] bg-zinc-100/80 dark:bg-zinc-900/90 shrink-0">
             <button
               type="button"
               onClick={() => setViewMode('table')}
-              className={`h-7 px-2.5 text-xs font-semibold rounded-md flex items-center gap-1.5 transition-colors duration-150 cursor-pointer ${
+              className={`h-7 px-2 sm:px-2.5 text-xs font-semibold rounded-md flex items-center gap-1.5 transition-colors duration-150 cursor-pointer ${
                 viewMode === 'table' || (viewMode === 'auto')
                   ? 'bg-white dark:bg-zinc-800 text-zinc-950 dark:text-white shadow-xs'
                   : 'text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100'
               }`}
               title="Dense Spreadsheet Table View"
+              aria-label="Spreadsheet View"
             >
-              <Table className="w-3.5 h-3.5" />
-              <span>Spreadsheet</span>
+              <Table className="w-3.5 h-3.5 shrink-0" />
+              <span className="hidden sm:inline">Spreadsheet</span>
             </button>
             <button
               type="button"
               onClick={() => setViewMode('cards')}
-              className={`h-7 px-2.5 text-xs font-semibold rounded-md flex items-center gap-1.5 transition-colors duration-150 cursor-pointer ${
+              className={`h-7 px-2 sm:px-2.5 text-xs font-semibold rounded-md flex items-center gap-1.5 transition-colors duration-150 cursor-pointer ${
                 viewMode === 'cards'
                   ? 'bg-white dark:bg-zinc-800 text-zinc-950 dark:text-white shadow-xs'
                   : 'text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100'
               }`}
               title="Mobile Slim Cards View"
+              aria-label="Slim Cards View"
             >
-              <LayoutList className="w-3.5 h-3.5" />
-              <span>Slim Cards</span>
+              <LayoutList className="w-3.5 h-3.5 shrink-0" />
+              <span className="hidden sm:inline">Slim Cards</span>
             </button>
           </div>
         </div>
@@ -597,54 +600,94 @@ export default function TransactionTable({
       )}
 
       {/* Desktop/Tablet Transactions Table */}
-      <div className={`${viewMode === 'cards' ? 'hidden' : viewMode === 'table' ? 'block' : 'hidden md:block'} overflow-x-auto lg:overflow-x-visible scrollbar-thin`}>
+      <div className={`${viewMode === 'cards' ? 'hidden' : viewMode === 'table' ? 'block' : 'hidden md:block'} overflow-x-auto max-h-[calc(100vh-280px)] min-h-[360px] overflow-y-auto scrollbar-thin`}>
         <table className="w-full min-w-[960px] 2xl:min-w-full text-left border-collapse table-fixed">
-          <thead>
-            <tr className="border-b text-[10px] sm:text-[11px] font-bold uppercase tracking-wider border-zinc-200 dark:border-zinc-800 text-zinc-500 dark:text-zinc-400 bg-zinc-50/80 dark:bg-zinc-900/60">
-              <th className="py-3.5 pl-6 pr-3 w-[28%] text-left whitespace-nowrap">
+          <thead className="sticky top-0 z-10 shadow-2xs">
+            <tr className="border-b text-[10px] sm:text-[11px] font-bold uppercase tracking-wider border-zinc-200 dark:border-zinc-800 text-zinc-500 dark:text-zinc-400 bg-zinc-50/95 dark:bg-[#121214]/95 backdrop-blur-xs">
+              <th 
+                className={`py-3.5 pl-6 pr-3 w-[28%] text-left whitespace-nowrap sticky top-0 z-10 bg-zinc-50/95 dark:bg-[#121214]/95 backdrop-blur-xs border-b border-zinc-200 dark:border-zinc-800 transition-colors ${
+                  sortField === 'title' ? 'bg-emerald-500/[0.03] dark:bg-emerald-500/[0.05]' : ''
+                }`}
+                aria-sort={sortField === 'title' ? (sortDirection === 'asc' ? 'ascending' : 'descending') : 'none'}
+              >
                 <button
                   type="button"
                   onClick={() => handleSort('title')}
-                  className="group/th inline-flex items-center gap-1.5 hover:text-emerald-500 transition-colors cursor-pointer select-none"
+                  className={`group/th inline-flex items-center gap-1.5 px-2 py-1 -ml-2 rounded-lg transition-colors cursor-pointer select-none ${
+                    sortField === 'title'
+                      ? 'text-emerald-600 dark:text-emerald-400 font-extrabold bg-emerald-500/10 dark:bg-emerald-500/15'
+                      : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-950 dark:hover:text-zinc-100 hover:bg-zinc-200/60 dark:hover:bg-zinc-800/60'
+                  }`}
                 >
                   <span>Transaction &amp; Event</span>
                   <SortIndicator field="title" />
                 </button>
               </th>
-              <th className="py-3.5 px-3 w-[10%] text-left whitespace-nowrap">
+              <th 
+                className={`py-3.5 px-3 w-[10%] text-left whitespace-nowrap sticky top-0 z-10 bg-zinc-50/95 dark:bg-[#121214]/95 backdrop-blur-xs border-b border-zinc-200 dark:border-zinc-800 transition-colors ${
+                  sortField === 'date' ? 'bg-emerald-500/[0.03] dark:bg-emerald-500/[0.05]' : ''
+                }`}
+                aria-sort={sortField === 'date' ? (sortDirection === 'asc' ? 'ascending' : 'descending') : 'none'}
+              >
                 <button
                   type="button"
                   onClick={() => handleSort('date')}
-                  className="group/th inline-flex items-center gap-1.5 hover:text-emerald-500 transition-colors cursor-pointer select-none"
+                  className={`group/th inline-flex items-center gap-1.5 px-2 py-1 -ml-2 rounded-lg transition-colors cursor-pointer select-none ${
+                    sortField === 'date'
+                      ? 'text-emerald-600 dark:text-emerald-400 font-extrabold bg-emerald-500/10 dark:bg-emerald-500/15'
+                      : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-950 dark:hover:text-zinc-100 hover:bg-zinc-200/60 dark:hover:bg-zinc-800/60'
+                  }`}
                 >
                   <span>Date</span>
                   <SortIndicator field="date" />
                 </button>
               </th>
-              <th className="py-3.5 px-3 w-[20%] text-left whitespace-nowrap">
+              <th 
+                className={`py-3.5 px-3 w-[20%] text-left whitespace-nowrap sticky top-0 z-10 bg-zinc-50/95 dark:bg-[#121214]/95 backdrop-blur-xs border-b border-zinc-200 dark:border-zinc-800 transition-colors ${
+                  sortField === 'category' ? 'bg-emerald-500/[0.03] dark:bg-emerald-500/[0.05]' : ''
+                }`}
+                aria-sort={sortField === 'category' ? (sortDirection === 'asc' ? 'ascending' : 'descending') : 'none'}
+              >
                 <button
                   type="button"
                   onClick={() => handleSort('category')}
-                  className="group/th inline-flex items-center gap-1.5 hover:text-emerald-500 transition-colors cursor-pointer select-none"
+                  className={`group/th inline-flex items-center gap-1.5 px-2 py-1 -ml-2 rounded-lg transition-colors cursor-pointer select-none ${
+                    sortField === 'category'
+                      ? 'text-emerald-600 dark:text-emerald-400 font-extrabold bg-emerald-500/10 dark:bg-emerald-500/15'
+                      : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-950 dark:hover:text-zinc-100 hover:bg-zinc-200/60 dark:hover:bg-zinc-800/60'
+                  }`}
                 >
                   <span>Category</span>
                   <SortIndicator field="category" />
                 </button>
               </th>
-              <th className="py-3.5 px-3 w-[12%] text-right whitespace-nowrap">
+              <th 
+                className={`py-3.5 px-3 w-[12%] text-right whitespace-nowrap sticky top-0 z-10 bg-zinc-50/95 dark:bg-[#121214]/95 backdrop-blur-xs border-b border-zinc-200 dark:border-zinc-800 transition-colors ${
+                  sortField === 'amount' ? 'bg-emerald-500/[0.03] dark:bg-emerald-500/[0.05]' : ''
+                }`}
+                aria-sort={sortField === 'amount' ? (sortDirection === 'asc' ? 'ascending' : 'descending') : 'none'}
+              >
                 <div className="flex justify-end">
                   <button
                     type="button"
                     onClick={() => handleSort('amount')}
-                    className="group/th inline-flex items-center gap-1.5 hover:text-emerald-500 transition-colors cursor-pointer select-none"
+                    className={`group/th inline-flex items-center gap-1.5 px-2 py-1 -mr-2 rounded-lg transition-colors cursor-pointer select-none ${
+                      sortField === 'amount'
+                        ? 'text-emerald-600 dark:text-emerald-400 font-extrabold bg-emerald-500/10 dark:bg-emerald-500/15'
+                        : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-950 dark:hover:text-zinc-100 hover:bg-zinc-200/60 dark:hover:bg-zinc-800/60'
+                    }`}
                   >
-                    <SortIndicator field="amount" />
                     <span>Amount</span>
+                    <SortIndicator field="amount" />
                   </button>
                 </div>
               </th>
-              <th className="py-3.5 px-3 w-[14%] text-left whitespace-nowrap">Recorded By</th>
-              <th className="py-3.5 pl-3 pr-6 w-[16%] text-right whitespace-nowrap">Receipts &amp; Actions</th>
+              <th className="py-3.5 px-3 w-[14%] text-left whitespace-nowrap sticky top-0 z-10 bg-zinc-50/95 dark:bg-[#121214]/95 backdrop-blur-xs border-b border-zinc-200 dark:border-zinc-800">
+                <span className="px-2 py-1 block">Recorded By</span>
+              </th>
+              <th className="py-3.5 pl-3 pr-6 w-[16%] text-right whitespace-nowrap sticky top-0 z-10 bg-zinc-50/95 dark:bg-[#121214]/95 backdrop-blur-xs border-b border-zinc-200 dark:border-zinc-800">
+                <span className="px-2 py-1 block">Receipts &amp; Actions</span>
+              </th>
             </tr>
           </thead>
           <tbody className="divide-y divide-zinc-200 dark:divide-zinc-800 text-xs">
@@ -667,7 +710,7 @@ export default function TransactionTable({
                     setSelectedTx(tx);
                     setActiveTxPhotoIndex(0);
                   }}
-                  className="group transition-colors cursor-pointer hover:bg-zinc-50 dark:hover:bg-zinc-900/40 active:bg-zinc-100 dark:active:bg-zinc-900/60"
+                  className="group transition-colors cursor-pointer hover:bg-emerald-500/[0.03] dark:hover:bg-emerald-500/[0.05] active:bg-zinc-100 dark:active:bg-zinc-900/60"
                   title="Click anywhere on row to view full transaction details"
                 >
                   
@@ -1328,15 +1371,68 @@ export default function TransactionTable({
         </div>
       </div>
 
-      {/* Mobile Ledger Summary Footer */}
-      <div className="md:hidden px-4 py-3 border-t flex items-center justify-between text-xs border-zinc-200 dark:border-zinc-800 bg-zinc-50/60 dark:bg-[#121214] text-zinc-600 dark:text-zinc-400">
-        <span className="font-medium">
-          Showing <span className="font-bold tabular-nums text-zinc-900 dark:text-zinc-100">{filtered.length}</span> {filtered.length === 1 ? 'transaction' : 'transactions'}
-        </span>
-        {filtered.length !== transactions.length && (
-          <span className="text-[11px] opacity-70">
-            Filtered from {transactions.length}
+      {/* Mobile Responsive Pagination & Ledger Summary Footer */}
+      <div className="md:hidden px-3.5 py-3 border-t space-y-2.5 text-xs border-zinc-200 dark:border-zinc-800 bg-zinc-50/60 dark:bg-[#121214] text-zinc-600 dark:text-zinc-400">
+        <div className="flex items-center justify-between gap-2">
+          <span className="font-medium text-[11px] truncate">
+            Showing <span className="font-bold tabular-nums text-zinc-900 dark:text-zinc-100">{isAll ? totalRecords : `${startIndex}–${endIndex}`}</span> of <span className="font-bold tabular-nums text-zinc-900 dark:text-zinc-100">{totalRecords}</span>
+            {totalRecords !== transactions.length && (
+              <span className="opacity-70 ml-1">({transactions.length} total)</span>
+            )}
           </span>
+
+          {/* Mobile Page Size Pills */}
+          <div className="flex items-center gap-1 shrink-0">
+            {[10, 25, 'all'].map((size) => {
+              const active = pageSize === size;
+              return (
+                <button
+                  key={size}
+                  type="button"
+                  onClick={() => {
+                    setPageSize(size);
+                    setCurrentPage(1);
+                  }}
+                  className={`px-1.5 py-0.5 text-[10px] font-semibold rounded transition-colors cursor-pointer select-none ${
+                    active
+                      ? 'bg-emerald-600 text-white shadow-2xs'
+                      : 'hover:bg-zinc-200/60 dark:hover:bg-zinc-800 text-zinc-600 dark:text-zinc-400'
+                  }`}
+                >
+                  {size === 'all' ? 'All' : size}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Mobile Page Navigation Controls (Prev / Next) */}
+        {!isAll && totalPages > 1 && (
+          <div className="flex items-center justify-between pt-1 border-t border-zinc-100 dark:border-zinc-800/80">
+            <button
+              type="button"
+              disabled={safePage <= 1}
+              onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+              className="px-2.5 py-1 text-xs rounded-lg border flex items-center gap-1 transition-colors cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-700 dark:text-zinc-300 font-medium"
+            >
+              <ChevronLeft className="w-3.5 h-3.5" />
+              <span>Prev</span>
+            </button>
+
+            <span className="text-xs font-semibold tabular-nums text-zinc-700 dark:text-zinc-300">
+              Page <span className="text-zinc-950 dark:text-white font-bold">{safePage}</span> of {totalPages}
+            </span>
+
+            <button
+              type="button"
+              disabled={safePage >= totalPages}
+              onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+              className="px-2.5 py-1 text-xs rounded-lg border flex items-center gap-1 transition-colors cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-700 dark:text-zinc-300 font-medium"
+            >
+              <span>Next</span>
+              <ChevronRight className="w-3.5 h-3.5" />
+            </button>
+          </div>
         )}
       </div>
 
