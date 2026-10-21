@@ -20,7 +20,7 @@ import {
   FileSpreadsheet,
 } from 'lucide-react';
 import './DocumentPreview.css';
-import { Button, Badge } from '@/components/ui';
+import { Button, Badge, Select } from '@/components/ui';
 
 // Proportional Scaled Sheet Wrapper maintaining exact Letter 8.5" x 11" dimensions
 function ScaledSheet({ scale, children, className = '' }) {
@@ -2054,7 +2054,7 @@ export default function DocumentPreviewModal({ isOpen, onClose, documentData, da
             {/* Drawer Scrollable Content */}
             <div className="flex-1 overflow-y-auto p-5 space-y-6 text-xs">
               {/* Section 1: Quick Metadata Editor (Mobile friendly) */}
-              <div className="space-y-3 bg-zinc-900/60 p-3.5 rounded-xl border border-zinc-800/80">
+              <div className="space-y-3 pb-5 border-b border-zinc-800/80">
                 <div className="font-semibold text-zinc-200 text-xs uppercase tracking-wider flex items-center gap-1.5">
                   <FileSpreadsheet className="w-3.5 h-3.5 text-emerald-400" />
                   Document Metadata
@@ -2072,7 +2072,7 @@ export default function DocumentPreviewModal({ isOpen, onClose, documentData, da
                         setTransmittalDate(e.target.value);
                         setFinalAsOf(`As of ${e.target.value}`);
                       }}
-                      className="w-full bg-zinc-950 border border-zinc-800 rounded-lg px-3 py-1.5 text-xs text-white focus:outline-none focus:border-emerald-500"
+                      className="w-full bg-zinc-900 ring-1 ring-zinc-800 rounded-lg px-3 py-1.5 text-xs text-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
                     />
                   </div>
 
@@ -2081,15 +2081,16 @@ export default function DocumentPreviewModal({ isOpen, onClose, documentData, da
                       <label className="text-[11px] font-medium text-zinc-400 block mb-1">
                         Semester
                       </label>
-                      <select
+                      <Select
                         value={semester}
-                        onChange={(e) => setSemester(e.target.value)}
-                        className="w-full bg-zinc-950 border border-zinc-800 rounded-lg px-2.5 py-1.5 text-xs text-white focus:outline-none focus:border-emerald-500"
-                      >
-                        <option value="1st SEMESTER">1st SEMESTER</option>
-                        <option value="2nd SEMESTER">2nd SEMESTER</option>
-                        <option value="SUMMER SEMESTER">SUMMER SEMESTER</option>
-                      </select>
+                        onChange={setSemester}
+                        options={[
+                          { value: '1st SEMESTER', label: '1st SEMESTER' },
+                          { value: '2nd SEMESTER', label: '2nd SEMESTER' },
+                          { value: 'SUMMER SEMESTER', label: 'SUMMER SEMESTER' },
+                        ]}
+                        size="sm"
+                      />
                     </div>
 
                     <div>
@@ -2100,7 +2101,7 @@ export default function DocumentPreviewModal({ isOpen, onClose, documentData, da
                         type="text"
                         value={academicYear}
                         onChange={(e) => setAcademicYear(e.target.value)}
-                        className="w-full bg-zinc-950 border border-zinc-800 rounded-lg px-3 py-1.5 text-xs text-white focus:outline-none focus:border-emerald-500"
+                        className="w-full bg-zinc-900 ring-1 ring-zinc-800 rounded-lg px-3 py-1.5 text-xs text-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
                         placeholder="e.g. 2026–2027"
                       />
                     </div>
@@ -2114,7 +2115,7 @@ export default function DocumentPreviewModal({ isOpen, onClose, documentData, da
                       type="text"
                       value={periodDesc}
                       onChange={(e) => setPeriodDesc(e.target.value)}
-                      className="w-full bg-zinc-950 border border-zinc-800 rounded-lg px-3 py-1.5 text-xs text-white focus:outline-none focus:border-emerald-500"
+                      className="w-full bg-zinc-900 ring-1 ring-zinc-800 rounded-lg px-3 py-1.5 text-xs text-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
                     />
                   </div>
 
@@ -2127,7 +2128,7 @@ export default function DocumentPreviewModal({ isOpen, onClose, documentData, da
                         type="text"
                         value={coordinatorName}
                         onChange={(e) => setCoordinatorName(e.target.value)}
-                        className="w-full bg-zinc-950 border border-zinc-800 rounded-lg px-3 py-1.5 text-xs text-white focus:outline-none focus:border-emerald-500"
+                        className="w-full bg-zinc-900 ring-1 ring-zinc-800 rounded-lg px-3 py-1.5 text-xs text-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
                       />
                     </div>
 
@@ -2139,7 +2140,7 @@ export default function DocumentPreviewModal({ isOpen, onClose, documentData, da
                         type="text"
                         value={salutation}
                         onChange={(e) => setSalutation(e.target.value)}
-                        className="w-full bg-zinc-950 border border-zinc-800 rounded-lg px-3 py-1.5 text-xs text-white focus:outline-none focus:border-emerald-500"
+                        className="w-full bg-zinc-900 ring-1 ring-zinc-800 rounded-lg px-3 py-1.5 text-xs text-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
                       />
                     </div>
                   </div>
@@ -2153,7 +2154,7 @@ export default function DocumentPreviewModal({ isOpen, onClose, documentData, da
                       step="0.01"
                       value={initialBudget}
                       onChange={(e) => setInitialBudget(parseFloat(e.target.value) || 0)}
-                      className="w-full bg-zinc-950 border border-zinc-800 rounded-lg px-3 py-1.5 text-xs text-white focus:outline-none focus:border-emerald-500"
+                      className="w-full bg-zinc-900 ring-1 ring-zinc-800 rounded-lg px-3 py-1.5 text-xs text-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
                     />
                   </div>
                 </div>
@@ -2161,12 +2162,12 @@ export default function DocumentPreviewModal({ isOpen, onClose, documentData, da
 
               {/* Section 2: Export Scope */}
               {!isProposal && (
-                <div className="space-y-2 bg-zinc-900/60 p-3.5 rounded-xl border border-zinc-800/80">
+                <div className="space-y-2.5 pb-5 border-b border-zinc-800/80">
                   <div className="font-semibold text-zinc-200 text-xs uppercase tracking-wider">
                     Document Export Scope
                   </div>
                   <div className="space-y-1.5">
-                    <label className="flex items-center gap-2 p-2 rounded-lg bg-zinc-950/60 border border-zinc-800/60 cursor-pointer hover:border-zinc-700">
+                    <label className="flex items-center gap-2.5 p-2.5 rounded-xl bg-zinc-900/50 hover:bg-zinc-900 ring-1 ring-zinc-800/60 transition-colors cursor-pointer">
                       <input
                         type="radio"
                         name="receiptsModeDrawer"
@@ -2181,7 +2182,7 @@ export default function DocumentPreviewModal({ isOpen, onClose, documentData, da
                       </div>
                     </label>
 
-                    <label className="flex items-center gap-2 p-2 rounded-lg bg-zinc-950/60 border border-zinc-800/60 cursor-pointer hover:border-zinc-700">
+                    <label className="flex items-center gap-2.5 p-2.5 rounded-xl bg-zinc-900/50 hover:bg-zinc-900 ring-1 ring-zinc-800/60 transition-colors cursor-pointer">
                       <input
                         type="radio"
                         name="receiptsModeDrawer"
@@ -2196,7 +2197,7 @@ export default function DocumentPreviewModal({ isOpen, onClose, documentData, da
                       </div>
                     </label>
 
-                    <label className="flex items-center gap-2 p-2 rounded-lg bg-zinc-950/60 border border-zinc-800/60 cursor-pointer hover:border-zinc-700">
+                    <label className="flex items-center gap-2.5 p-2.5 rounded-xl bg-zinc-900/50 hover:bg-zinc-900 ring-1 ring-zinc-800/60 transition-colors cursor-pointer">
                       <input
                         type="radio"
                         name="receiptsModeDrawer"
@@ -2216,7 +2217,7 @@ export default function DocumentPreviewModal({ isOpen, onClose, documentData, da
 
               {/* Section 3: CC Routing & Page Numbering */}
               {!isProposal && (
-                <div className="space-y-3 bg-zinc-900/60 p-3.5 rounded-xl border border-zinc-800/80">
+                <div className="space-y-3 pb-5 border-b border-zinc-800/80">
                   <div className="font-semibold text-zinc-200 text-xs uppercase tracking-wider">
                     Routing &amp; Formatting
                   </div>
@@ -2269,23 +2270,24 @@ export default function DocumentPreviewModal({ isOpen, onClose, documentData, da
                     <label className="text-[11px] font-medium text-zinc-400 block mb-1">
                       Footer Page Number Style
                     </label>
-                    <select
+                    <Select
                       value={pageNumberStyle}
-                      onChange={(e) => setPageNumberStyle(e.target.value)}
-                      className="w-full bg-zinc-950 border border-zinc-800 rounded-lg px-2.5 py-1.5 text-xs text-white focus:outline-none focus:border-emerald-500"
-                    >
-                      <option value="page_x_of_y">Page X of Y (Default)</option>
-                      <option value="page_x_of_y_no_cover">Page X of Y (Start on Page 2)</option>
-                      <option value="simple">Simple (1, 2, 3...)</option>
-                      <option value="none">No Page Numbers</option>
-                    </select>
+                      onChange={setPageNumberStyle}
+                      options={[
+                        { value: 'page_x_of_y', label: 'Page X of Y (Default)' },
+                        { value: 'page_x_of_y_no_cover', label: 'Page X of Y (Start on Page 2)' },
+                        { value: 'simple', label: 'Simple (1, 2, 3...)' },
+                        { value: 'none', label: 'No Page Numbers' },
+                      ]}
+                      size="sm"
+                    />
                   </div>
                 </div>
               )}
 
               {/* Section 4: Signatories Matrix */}
               {!isProposal && (
-                <div className="space-y-3 bg-zinc-900/60 p-3.5 rounded-xl border border-zinc-800/80">
+                <div className="space-y-3 pb-5 border-b border-zinc-800/80">
                   <div className="flex items-center justify-between">
                     <span className="font-semibold text-zinc-200 text-xs uppercase tracking-wider">
                       Signatories Matrix
@@ -2299,10 +2301,10 @@ export default function DocumentPreviewModal({ isOpen, onClose, documentData, da
                     {allSignatoryDefs.map((sig) => (
                       <div
                         key={sig.key}
-                        className={`p-2 rounded-lg border transition-colors ${
+                        className={`p-2.5 rounded-xl transition-colors ${
                           includedSignatories[sig.key]
-                            ? 'bg-zinc-950/80 border-emerald-500/30'
-                            : 'bg-zinc-950/30 border-zinc-800/40 opacity-70'
+                            ? 'bg-zinc-900/80 ring-1 ring-emerald-500/30'
+                            : 'bg-zinc-900/30 ring-1 ring-zinc-800/40 opacity-70'
                         }`}
                       >
                         <div className="flex items-center justify-between mb-1.5">
@@ -2321,20 +2323,20 @@ export default function DocumentPreviewModal({ isOpen, onClose, documentData, da
                         </div>
 
                         {includedSignatories[sig.key] && (
-                          <div className="grid grid-cols-2 gap-1.5 pt-1 border-t border-zinc-900">
+                          <div className="grid grid-cols-2 gap-1.5 pt-1.5 border-t border-zinc-800/80">
                             <input
                               type="text"
                               value={signatories[sig.nameKey] || ''}
                               onChange={(e) => handleUpdateSignatory(sig.nameKey, e.target.value)}
                               placeholder="Name"
-                              className="bg-zinc-900 border border-zinc-800 rounded px-2 py-0.5 text-[11px] text-white"
+                              className="bg-zinc-900 ring-1 ring-zinc-800 rounded px-2 py-1 text-[11px] text-white focus:outline-none focus:ring-1 focus:ring-emerald-500"
                             />
                             <input
                               type="text"
                               value={signatories[sig.roleKey] || ''}
                               onChange={(e) => handleUpdateSignatory(sig.roleKey, e.target.value)}
                               placeholder="Role / Title"
-                              className="bg-zinc-900 border border-zinc-800 rounded px-2 py-0.5 text-[11px] text-zinc-300"
+                              className="bg-zinc-900 ring-1 ring-zinc-800 rounded px-2 py-1 text-[11px] text-zinc-300 focus:outline-none focus:ring-1 focus:ring-emerald-500"
                             />
                           </div>
                         )}

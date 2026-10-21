@@ -43,6 +43,8 @@ export default function AdvancesManagementModal({
 
   // New Advance form state
   const [newClaimantName, setNewClaimantName] = useState('');
+  const [newAdvancedByName, setNewAdvancedByName] = useState('');
+  const [isProxyClaimant, setIsProxyClaimant] = useState(false);
   const [newTitle, setNewTitle] = useState('');
   const [newAmount, setNewAmount] = useState('');
   const [newEventName, setNewEventName] = useState('');
@@ -145,6 +147,7 @@ export default function AdvancesManagementModal({
     try {
       const res = await onCreateAdvance({
         claimant_name: newClaimantName.trim(),
+        advanced_by_name: isProxyClaimant ? (newAdvancedByName.trim() || newClaimantName.trim()) : newClaimantName.trim(),
         title: newTitle.trim(),
         total_amount: parsedAmt,
         event_name: newEventName.trim() || null,
@@ -157,6 +160,8 @@ export default function AdvancesManagementModal({
       } else {
         setIsNewAdvanceOpen(false);
         setNewClaimantName('');
+        setNewAdvancedByName('');
+        setIsProxyClaimant(false);
         setNewTitle('');
         setNewAmount('');
         setNewEventName('');
@@ -278,8 +283,10 @@ export default function AdvancesManagementModal({
                     {/* Left: Info */}
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-2 flex-wrap mb-1">
-                        <span className="text-sm font-bold text-zinc-950 dark:text-zinc-100 truncate">
-                          {adv.claimant_name}
+                        <span className="text-sm font-bold text-zinc-950 dark:text-zinc-100 truncate" title={adv.advanced_by_name && adv.advanced_by_name !== adv.claimant_name ? `Originally paid by ${adv.advanced_by_name}` : undefined}>
+                          {adv.advanced_by_name && adv.advanced_by_name !== adv.claimant_name
+                            ? `${adv.advanced_by_name} → ${adv.claimant_name}`
+                            : adv.claimant_name}
                         </span>
                         {isSettled ? (
                           <Badge variant="emerald" size="xs">Settled</Badge>
@@ -522,18 +529,59 @@ export default function AdvancesManagementModal({
               </div>
             )}
 
-            <div>
-              <label className="block text-xs font-semibold mb-1 text-zinc-700 dark:text-zinc-300">
-                Claimant / Advanced By *
+            <div className="space-y-2">
+              <label className="flex items-center gap-2 cursor-pointer text-xs text-zinc-600 dark:text-zinc-400">
+                <input
+                  type="checkbox"
+                  checked={isProxyClaimant}
+                  onChange={(e) => setIsProxyClaimant(e.target.checked)}
+                  className="rounded text-emerald-600 focus:ring-emerald-500"
+                />
+                <span>Authorized proxy is collecting payout on behalf of original payer</span>
               </label>
-              <Input
-                type="text"
-                value={newClaimantName}
-                onChange={(e) => setNewClaimantName(e.target.value)}
-                placeholder="e.g. Sir Harvey or Andrei Geronimo"
-                required
-                autoFocus
-              />
+
+              {isProxyClaimant ? (
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  <div>
+                    <label className="block text-xs font-semibold mb-1 text-zinc-700 dark:text-zinc-300">
+                      Originally Paid By (Creditor) *
+                    </label>
+                    <Input
+                      type="text"
+                      value={newAdvancedByName}
+                      onChange={(e) => setNewAdvancedByName(e.target.value)}
+                      placeholder="e.g. Ms. Kimberly Dawn Jatulan"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold mb-1 text-zinc-700 dark:text-zinc-300">
+                      Authorized Claimant (Proxy) *
+                    </label>
+                    <Input
+                      type="text"
+                      value={newClaimantName}
+                      onChange={(e) => setNewClaimantName(e.target.value)}
+                      placeholder="e.g. Andrei Geronimo"
+                      required
+                    />
+                  </div>
+                </div>
+              ) : (
+                <div>
+                  <label className="block text-xs font-semibold mb-1 text-zinc-700 dark:text-zinc-300">
+                    Claimant / Advanced By *
+                  </label>
+                  <Input
+                    type="text"
+                    value={newClaimantName}
+                    onChange={(e) => setNewClaimantName(e.target.value)}
+                    placeholder="e.g. Sir Harvey or Andrei Geronimo"
+                    required
+                    autoFocus
+                  />
+                </div>
+              )}
             </div>
 
             <div>

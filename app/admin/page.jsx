@@ -682,10 +682,10 @@ export default function AdminPage() {
   return (
     <>
       {/* Top Header */}
-      <header className={`sticky top-0 z-30 backdrop-blur-xl transition-colors ${
+      <header className={`sticky top-0 z-30 backdrop-blur-xl border-b transition-colors ${
           isLight
-            ? 'bg-white/95 text-gray-900'
-            : 'bg-[#09090b]/95 text-zinc-100'
+            ? 'bg-white/95 border-zinc-200 text-gray-900'
+            : 'bg-[#09090b]/95 border-zinc-800 text-zinc-100'
         }`}>
           <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 h-14 sm:h-16 flex items-center justify-between gap-2 min-w-0">
             

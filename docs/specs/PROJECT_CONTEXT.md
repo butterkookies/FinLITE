@@ -400,6 +400,7 @@ flowchart LR
      $$\text{Treasurer} \longrightarrow \text{Auditor} \longrightarrow \text{President} \longrightarrow \text{Club Advisers (Dual Sign-Off)} \longrightarrow \text{BSIT Program Director} \longrightarrow \text{CCS Dean}$$
    - Features **instant report unlocking**: if returned by the Program Director or Dean, the document switches back to editable mode for instant line-item correction and 1-click re-export, bypassing manual reprint paralysis.
    - Formally carries over verified unpaid Abono claims into next year's opening ledger as certified **Accounts Payable liabilities**.
+   - **Consolidated Semester Club Week Reporting Delimitation:** While historical student club practice occasionally generated separate ad-hoc financial reports for individual Club Week sub-events, FinLITE standardizes reporting through a dedicated semester-scoped Club Week configuration that isolates and compiles all Club Week expenditures across the active academic term into a unified institutional liquidation report, eliminating fragmented per-event paperwork.
    - **Full-Stack Implementation Architecture:** Powered by HTML5, CSS (Tailwind), React 19, Node.js (Next.js server runtime), Supabase (PostgreSQL), and the Node.js `docx` OpenXML library. Engineered with multi-tenant scalability to expand across all student organizations in PDM for the Capstone phase.
 
 6. **Grounded Natural-Language AI Financial Co-Pilot:**

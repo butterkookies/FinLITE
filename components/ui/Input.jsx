@@ -36,10 +36,11 @@ export const Input = forwardRef(function Input(
           type={type}
           disabled={disabled}
           className={cn(
-            'w-full rounded-lg border transition-colors',
-            'bg-zinc-50 dark:bg-zinc-900/60 border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-zinc-100',
+            'w-full rounded-xl transition-all border-0',
+            'bg-zinc-100/70 dark:bg-zinc-900/90 text-zinc-900 dark:text-zinc-100',
             'placeholder:text-zinc-400 dark:placeholder:text-zinc-500',
-            'focus:outline-none focus:ring-1 focus:ring-emerald-500/60 focus:border-emerald-500/60',
+            'ring-1 ring-black/[0.05] dark:ring-zinc-800',
+            'focus:outline-none focus:ring-2 focus:ring-emerald-500/50 dark:focus:ring-emerald-400/50 focus:bg-white dark:focus:bg-zinc-950',
             'disabled:cursor-not-allowed disabled:opacity-50',
             inputSizeClass,
             leftIcon && 'pl-8',
@@ -63,10 +64,11 @@ export const Input = forwardRef(function Input(
       type={type}
       disabled={disabled}
       className={cn(
-        'w-full rounded-lg border transition-colors',
-        'bg-zinc-50 dark:bg-zinc-900/60 border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-zinc-100',
+        'w-full rounded-xl transition-all border-0',
+        'bg-zinc-100/70 dark:bg-zinc-900/90 text-zinc-900 dark:text-zinc-100',
         'placeholder:text-zinc-400 dark:placeholder:text-zinc-500',
-        'focus:outline-none focus:ring-1 focus:ring-emerald-500/60 focus:border-emerald-500/60',
+        'ring-1 ring-black/[0.05] dark:ring-zinc-800',
+        'focus:outline-none focus:ring-2 focus:ring-emerald-500/50 dark:focus:ring-emerald-400/50 focus:bg-white dark:focus:bg-zinc-950',
         'disabled:cursor-not-allowed disabled:opacity-50',
         inputSizeClass,
         className

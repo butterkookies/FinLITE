@@ -22,6 +22,8 @@ import { fetchAuditTrail } from '@/lib/supabase/audit';
 import { formatPHP } from '@/lib/utils/currency';
 import { useTheme } from '@/components/theme/ThemeProvider';
 import { Button, Badge, Input, Card } from '@/components/ui';
+import UserAvatar from '@/components/common/UserAvatar';
+import AuditDiffViewer from './AuditDiffViewer';
 import { cn } from '@/lib/utils';
 
 function formatEventTimestamp(isoString) {
@@ -291,7 +293,7 @@ export default function AuditTrailDrawer({
               return (
                 <div
                   key={log.id}
-                  className="p-3.5 sm:p-4 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900/40 shadow-2xs hover:border-zinc-300 dark:hover:border-zinc-700 transition-all duration-150"
+                  className="p-3.5 sm:p-4 rounded-xl bg-white dark:bg-zinc-900/50 ring-1 ring-black/[0.04] dark:ring-white/[0.05] shadow-2xs hover:bg-zinc-50 dark:hover:bg-zinc-850/40 transition-all duration-150"
                 >
                   {/* Top Row: Action Badge + Timestamp */}
                   <div className="flex items-center justify-between gap-2 mb-2">
@@ -350,15 +352,19 @@ export default function AuditTrailDrawer({
                   </div>
 
                   {/* Actor Card + Expand Button */}
-                  <div className="pt-2.5 border-t border-zinc-100 dark:border-zinc-800 flex items-center justify-between text-xs">
+                  <div className="pt-2.5 border-t border-zinc-100 dark:border-zinc-800/80 flex items-center justify-between text-xs">
                     {/* Actor Identity */}
                     <div className="flex items-center gap-2">
-                      <div className="w-6 h-6 rounded-full bg-emerald-600 text-white font-bold text-[10px] flex items-center justify-center shrink-0">
-                        {log.actor_name ? log.actor_name.charAt(0).toUpperCase() : 'S'}
-                      </div>
+                      <UserAvatar
+                        src={log.actor_avatar_url}
+                        name={log.actor_name || 'Officer'}
+                        email={log.actor_email}
+                        size="xs"
+                        className="shrink-0"
+                      />
                       <div className="flex items-center gap-1.5">
                         <span className="font-medium text-zinc-800 dark:text-zinc-200">
-                          {log.actor_name}
+                          {log.actor_name || 'System'}
                         </span>
                         {log.actor_role && (
                           <Badge variant="neutral" size="xs">
@@ -368,28 +374,20 @@ export default function AuditTrailDrawer({
                       </div>
                     </div>
 
-                    {/* Diff / JSON Snapshot Toggle */}
+                    {/* Diff / Changes Toggle */}
                     <Button
-                      variant="ghost"
+                      variant={isExpanded ? "secondary" : "ghost"}
                       size="xs"
                       onClick={() => setExpandedLogId(isExpanded ? null : log.id)}
                     >
-                      {isExpanded ? 'Hide Payload' : 'Audit Data'}
+                      {isExpanded ? 'Hide Changes' : 'View Changes'}
                       {isExpanded ? <ChevronUp className="w-3 h-3 ml-1" /> : <ChevronDown className="w-3 h-3 ml-1" />}
                     </Button>
                   </div>
 
-                  {/* Expandable Technical Audit Payload */}
+                  {/* Expandable User-Friendly Diff & Audit Payload Viewer */}
                   {isExpanded && (
-                    <div className="mt-3 p-3 rounded-lg border font-mono text-[10px] overflow-x-auto bg-zinc-50 dark:bg-black/60 text-zinc-800 dark:text-zinc-300 border-zinc-200 dark:border-zinc-800">
-                      <div className="flex items-center justify-between text-zinc-400 pb-1 mb-2 border-b border-zinc-200/50 dark:border-zinc-800">
-                        <span>ENTITY ID: {log.entity_id || 'N/A'}</span>
-                        <span>OPERATION: {log.action}</span>
-                      </div>
-                      <pre className="whitespace-pre-wrap break-all">
-                        {JSON.stringify(details, null, 2)}
-                      </pre>
-                    </div>
+                    <AuditDiffViewer log={log} isLight={isLight} />
                   )}
                 </div>
               );

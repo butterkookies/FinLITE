@@ -5,35 +5,35 @@ import { cn } from '@/lib/utils';
 
 export const badgeVariants = {
   neutral:
-    'bg-zinc-100 text-zinc-700 dark:bg-zinc-800/80 dark:text-zinc-300 border-zinc-200 dark:border-zinc-700/60',
+    'bg-zinc-100 text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300',
   emerald:
-    'bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-500/20',
+    'bg-emerald-500/12 text-emerald-700 dark:text-emerald-400',
   success:
-    'bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-500/20',
+    'bg-emerald-500/12 text-emerald-700 dark:text-emerald-400',
   rose:
-    'bg-rose-500/10 text-rose-700 dark:text-rose-400 border-rose-500/20',
+    'bg-rose-500/12 text-rose-700 dark:text-rose-400',
   danger:
-    'bg-rose-500/10 text-rose-700 dark:text-rose-400 border-rose-500/20',
+    'bg-rose-500/12 text-rose-700 dark:text-rose-400',
   amber:
-    'bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-500/20',
+    'bg-amber-500/15 text-amber-800 dark:text-amber-300',
   warning:
-    'bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-500/20',
+    'bg-amber-500/15 text-amber-800 dark:text-amber-300',
   sky:
-    'bg-sky-500/10 text-sky-700 dark:text-sky-400 border-sky-500/20',
+    'bg-sky-500/12 text-sky-700 dark:text-sky-300',
   info:
-    'bg-sky-500/10 text-sky-700 dark:text-sky-400 border-sky-500/20',
+    'bg-sky-500/12 text-sky-700 dark:text-sky-300',
   orange:
-    'bg-orange-500/10 text-orange-700 dark:text-orange-400 border-orange-500/20',
+    'bg-orange-500/12 text-orange-700 dark:text-orange-300',
   teal:
-    'bg-teal-500/10 text-teal-700 dark:text-teal-400 border-teal-500/20',
+    'bg-teal-500/12 text-teal-700 dark:text-teal-300',
   outline:
-    'border-zinc-200 dark:border-zinc-800 text-zinc-600 dark:text-zinc-400',
+    'bg-zinc-100/80 text-zinc-700 dark:bg-zinc-800/80 dark:text-zinc-300',
 };
 
 export const badgeSizes = {
-  xs: 'text-[10px] px-1.5 py-0.5 rounded font-medium',
-  sm: 'text-[11px] px-2 py-0.5 rounded-full font-medium',
-  md: 'text-xs px-2.5 py-0.5 rounded-full font-medium',
+  xs: 'text-[10px] px-1.5 py-0.5 rounded-md font-semibold',
+  sm: 'text-[11px] px-2 py-0.5 rounded-full font-semibold',
+  md: 'text-xs px-2.5 py-0.5 rounded-full font-semibold',
 };
 
 export default function Badge({
@@ -69,7 +69,7 @@ export default function Badge({
   return (
     <span
       className={cn(
-        'inline-flex items-center gap-1.5 border leading-none transition-colors select-none shrink-0',
+        'inline-flex items-center gap-1.5 leading-none transition-colors select-none shrink-0',
         variantClass,
         sizeClass,
         className

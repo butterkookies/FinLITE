@@ -108,6 +108,7 @@ export async function PATCH(req, { params }) {
       transaction_date,
       is_reimbursement,
       reimbursement_recipient,
+      advanced_by_name,
       event_name,
       receipt_urls,
     } = body;
@@ -131,6 +132,7 @@ export async function PATCH(req, { params }) {
     if (transaction_date !== undefined) updates.transaction_date = transaction_date;
     if (is_reimbursement !== undefined) updates.is_reimbursement = Boolean(is_reimbursement);
     if (reimbursement_recipient !== undefined) updates.reimbursement_recipient = reimbursement_recipient ? reimbursement_recipient.trim() : null;
+    if (advanced_by_name !== undefined) updates.advanced_by_name = advanced_by_name ? advanced_by_name.trim() : null;
     if (event_name !== undefined) updates.event_name = event_name ? event_name.trim() : null;
 
     // Revision loop: If existing transaction was FLAGGED, editing it resets status to PENDING_AUDIT!

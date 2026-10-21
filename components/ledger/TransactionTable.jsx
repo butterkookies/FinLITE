@@ -1,5 +1,7 @@
 'use client';
 import { useState, useMemo, useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
+import { getReceiptUrls } from '@/lib/utils/receipts';
 import { 
   ArrowDownRight, 
   ArrowUpRight, 
@@ -33,7 +35,8 @@ import {
   LayoutList,
   CreditCard,
   Edit2,
-  Trash2
+  Trash2,
+  MoreHorizontal
 } from 'lucide-react';
 import { formatPHP } from '@/lib/utils/currency';
 import { compressReceiptImage } from '@/lib/utils/compression';
@@ -95,6 +98,12 @@ export default function TransactionTable({
   const canExport = userPermissions
     ? Boolean(userPermissions.export_reports)
     : true;
+
+  const canDelete = Boolean(onDeleteTransaction) && (
+    userPermissions
+      ? Boolean(userPermissions.delete_transaction)
+      : (currentRole === 'admin' || currentRole === 'superadmin')
+  );
   const [filterType, setFilterType] = useState('ALL');
   const [searchQuery, setSearchQuery] = useState('');
   const [viewMode, setViewMode] = useState('auto'); // 'auto' (table on desktop, cards on mobile) | 'table' | 'cards'
@@ -128,6 +137,43 @@ export default function TransactionTable({
 
   // Transaction Comments & Audit Remarks drawer state
   const [commentTx, setCommentTx] = useState(null);
+  const [menuTx, setMenuTx] = useState(null);
+  const [menuCoords, setMenuCoords] = useState(null);
+
+  const handleOpenRowMenu = (e, tx) => {
+    e.stopPropagation();
+    if (menuTx?.id === tx.id) {
+      setMenuTx(null);
+      setMenuCoords(null);
+    } else {
+      const rect = e.currentTarget.getBoundingClientRect();
+      const spaceBelow = window.innerHeight - rect.bottom;
+      const flipUp = spaceBelow < 250;
+      setMenuTx(tx);
+      setMenuCoords({
+        top: flipUp ? undefined : Math.round(rect.bottom + 6),
+        bottom: flipUp ? Math.round(window.innerHeight - rect.top + 6) : undefined,
+        right: Math.max(16, Math.round(window.innerWidth - rect.right)),
+      });
+    }
+  };
+
+  useEffect(() => {
+    if (!menuTx) return;
+    const handleClose = () => {
+      setMenuTx(null);
+      setMenuCoords(null);
+    };
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') handleClose();
+    };
+    window.addEventListener('resize', handleClose);
+    window.addEventListener('keydown', handleKeyDown);
+    return () => {
+      window.removeEventListener('resize', handleClose);
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [menuTx]);
   const [commentCounts, setCommentCounts] = useState({});
   const lastFetchedTxIdsRef = useRef('');
 
@@ -216,16 +262,7 @@ export default function TransactionTable({
     }
   };
 
-  const getTransactionReceipts = (tx) => {
-    if (!tx) return [];
-    if (Array.isArray(tx.receipt_urls) && tx.receipt_urls.length > 0) {
-      return tx.receipt_urls.filter(Boolean);
-    }
-    if (tx.receipt_url) {
-      return [tx.receipt_url];
-    }
-    return [];
-  };
+  const getTransactionReceipts = (tx) => getReceiptUrls(tx);
 
   const handleAttachFilesChange = async (e) => {
     if (!attachTx) return;
@@ -402,9 +439,9 @@ export default function TransactionTable({
   };
 
   return (
-    <div className="rounded-2xl transition-colors relative overflow-hidden bg-white dark:bg-[#121214] border border-zinc-200/70 dark:border-zinc-800/70 shadow-2xs">
+    <div className="rounded-2xl transition-colors relative overflow-hidden bg-white dark:bg-[#121214] ring-1 ring-black/[0.04] dark:ring-white/[0.06] shadow-sm shadow-zinc-950/5">
       {/* Table Header Controls */}
-      <div className="p-3.5 sm:p-5 border-b flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 border-zinc-200 dark:border-zinc-800 bg-zinc-50/50 dark:bg-[#121214]">
+      <div className="p-3.5 sm:p-5 border-b flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 border-zinc-100/80 dark:border-zinc-850/60 bg-zinc-50/50 dark:bg-[#121214]">
         <div className="min-w-0">
           <h2 className="text-lg sm:text-2xl font-black tracking-tight text-zinc-950 dark:text-white">
             Financial Ledger &amp; Transactions
@@ -460,7 +497,7 @@ export default function TransactionTable({
       </div>
 
       {/* Filter & Search Bar */}
-      <div className="px-4 sm:px-6 py-3 border-b flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5 sm:gap-3 border-zinc-200 dark:border-zinc-800 bg-white dark:bg-[#121214]">
+      <div className="px-4 sm:px-6 py-3 border-b flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5 sm:gap-3 border-zinc-100/80 dark:border-zinc-850/60 bg-white dark:bg-[#121214]">
         
         {/* Search Input */}
         <div className="w-full sm:w-80 shrink-0">
@@ -476,7 +513,7 @@ export default function TransactionTable({
         {/* Filter Tabs & View Mode Switcher */}
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between sm:justify-end gap-2 w-full sm:w-auto">
           {/* Tabs: Full width 5-column grid on mobile (zero horizontal scrolling), flex on desktop */}
-          <div className="grid grid-cols-5 sm:flex sm:overflow-visible items-center gap-1 p-1 rounded-lg border w-full sm:w-auto bg-zinc-100 dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800">
+          <div className="grid grid-cols-5 sm:flex sm:overflow-visible items-center gap-1 p-1 rounded-xl ring-1 ring-black/[0.04] dark:ring-white/[0.06] w-full sm:w-auto bg-zinc-100/80 dark:bg-zinc-900/90">
             {[
               { id: 'ALL', label: 'All', fullLabel: 'All Records' },
               { id: 'INFLOW', label: 'Inflows', fullLabel: 'Inflows' },
@@ -505,7 +542,7 @@ export default function TransactionTable({
           </div>
 
           {/* View Mode Toggle: Spreadsheet vs Slim Cards (Hidden on mobile where Cards are native) */}
-          <div className="hidden sm:flex items-center gap-0.5 p-1 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-zinc-100 dark:bg-zinc-900 shrink-0">
+          <div className="hidden sm:flex items-center gap-0.5 p-1 rounded-xl ring-1 ring-black/[0.04] dark:ring-white/[0.06] bg-zinc-100/80 dark:bg-zinc-900/90 shrink-0">
             <button
               type="button"
               onClick={() => setViewMode('table')}
@@ -564,7 +601,7 @@ export default function TransactionTable({
         <table className="w-full min-w-[960px] 2xl:min-w-full text-left border-collapse table-fixed">
           <thead>
             <tr className="border-b text-[10px] sm:text-[11px] font-bold uppercase tracking-wider border-zinc-200 dark:border-zinc-800 text-zinc-500 dark:text-zinc-400 bg-zinc-50/80 dark:bg-zinc-900/60">
-              <th className="py-3.5 pl-6 pr-3 w-[30%] text-left whitespace-nowrap">
+              <th className="py-3.5 pl-6 pr-3 w-[28%] text-left whitespace-nowrap">
                 <button
                   type="button"
                   onClick={() => handleSort('title')}
@@ -584,7 +621,7 @@ export default function TransactionTable({
                   <SortIndicator field="date" />
                 </button>
               </th>
-              <th className="py-3.5 px-3 w-[22%] text-left whitespace-nowrap">
+              <th className="py-3.5 px-3 w-[20%] text-left whitespace-nowrap">
                 <button
                   type="button"
                   onClick={() => handleSort('category')}
@@ -594,7 +631,7 @@ export default function TransactionTable({
                   <SortIndicator field="category" />
                 </button>
               </th>
-              <th className="py-3.5 px-3 w-[11%] text-right whitespace-nowrap">
+              <th className="py-3.5 px-3 w-[12%] text-right whitespace-nowrap">
                 <div className="flex justify-end">
                   <button
                     type="button"
@@ -606,8 +643,8 @@ export default function TransactionTable({
                   </button>
                 </div>
               </th>
-              <th className="py-3.5 px-3 w-[10%] text-left whitespace-nowrap">Recorded By</th>
-              <th className="py-3.5 pl-3 pr-6 w-[13%] text-right whitespace-nowrap">Receipts &amp; Actions</th>
+              <th className="py-3.5 px-3 w-[14%] text-left whitespace-nowrap">Recorded By</th>
+              <th className="py-3.5 pl-3 pr-6 w-[16%] text-right whitespace-nowrap">Receipts &amp; Actions</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-zinc-200 dark:divide-zinc-800 text-xs">
@@ -678,7 +715,11 @@ export default function TransactionTable({
                           ) : (
                             <>
                               <Clock className="w-2.5 h-2.5 shrink-0" />
-                              <span className="truncate max-w-[150px]">Advance: {tx.reimbursement_recipient || 'Officer'}</span>
+                              <span className="truncate max-w-[200px]" title={tx.advanced_by_name && tx.advanced_by_name !== tx.reimbursement_recipient ? `Paid by ${tx.advanced_by_name}, claimed by proxy ${tx.reimbursement_recipient}` : undefined}>
+                                {tx.advanced_by_name && tx.reimbursement_recipient && tx.advanced_by_name !== tx.reimbursement_recipient
+                                  ? `Advance: ${tx.advanced_by_name} → ${tx.reimbursement_recipient}`
+                                  : `Advance: ${tx.reimbursement_recipient || 'Officer'}`}
+                              </span>
                             </>
                           )}
                         </Badge>
@@ -752,17 +793,85 @@ export default function TransactionTable({
                     })()}
                   </td>
 
-                  {/* Receipts & Hover Action Dock (Option C: Stripe/Linear Pattern) */}
+                  {/* Receipts & Actions Column: Zero overlap, stable alignment */}
                   <td className="relative py-3.5 pl-3 pr-6 text-right whitespace-nowrap">
-                    {/* Resting State: Calm, perfectly aligned indicators */}
-                    <div className="flex items-center justify-end gap-2 transition-opacity duration-150 group-hover:opacity-0 group-focus-within:opacity-0">
-                      {(() => {
-                        const receipts = getTransactionReceipts(tx);
-                        const hasComments = Boolean(commentCounts[tx.id]);
-                        const isPendingAbono = tx.is_reimbursement && tx.status === 'PENDING_REIMBURSEMENT';
+                    {(() => {
+                      const receipts = getTransactionReceipts(tx);
+                      const hasComments = Boolean(commentCounts[tx.id]);
+                      const isPendingAbono = tx.is_reimbursement && tx.status === 'PENDING_REIMBURSEMENT';
+                      const isRowMenuOpen = menuTx?.id === tx.id;
 
-                        return (
-                          <>
+                      // Primary action calculation
+                      let primaryButton = null;
+                      if (isPendingAbono && canSettleAbono) {
+                        primaryButton = (
+                          <Button
+                            variant="amber-subtle"
+                            size="xs"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setSettleTx(tx);
+                              setSettleAmount(Number(tx.amount || 0).toString());
+                              setSettleError(null);
+                            }}
+                            leftIcon={<HandCoins className="w-3 h-3" />}
+                            title="Disburse refund"
+                          >
+                            <span>Settle</span>
+                          </Button>
+                        );
+                      } else if (canAudit && (tx.status === 'PENDING_AUDIT' || tx.status === 'FLAGGED')) {
+                        primaryButton = (
+                          <Button
+                            variant={tx.status === 'FLAGGED' ? 'rose-subtle' : 'amber-subtle'}
+                            size="xs"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              if (onAuditTransaction) onAuditTransaction(tx);
+                            }}
+                            leftIcon={<ShieldCheck className="w-3 h-3" />}
+                            title="Audit this transaction"
+                          >
+                            <span>Audit</span>
+                          </Button>
+                        );
+                      } else if (canEdit && tx.status === 'FLAGGED') {
+                        primaryButton = (
+                          <Button
+                            variant="rose-subtle"
+                            size="xs"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              if (onEditTransaction) onEditTransaction(tx);
+                            }}
+                            leftIcon={<Edit2 className="w-3 h-3" />}
+                            title="Revise transaction"
+                          >
+                            <span>Revise</span>
+                          </Button>
+                        );
+                      } else if (receipts.length > 0) {
+                        primaryButton = (
+                          <Button
+                            variant="emerald-subtle"
+                            size="xs"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setSelectedReceipt(tx);
+                              setActivePhotoIndex(0);
+                            }}
+                            leftIcon={<Receipt className="w-3 h-3" />}
+                            title="View receipts"
+                          >
+                            <span>{receipts.length > 1 ? `${receipts.length} Receipts` : '1 Receipt'}</span>
+                          </Button>
+                        );
+                      }
+
+                      return (
+                        <div className="flex items-center justify-end gap-1.5">
+                          {/* Resting Indicators (Fades out when hovered or when menu is open) */}
+                          <div className={`flex items-center justify-end gap-1.5 transition-opacity duration-150 group-hover:opacity-0 group-focus-within:opacity-0 ${isRowMenuOpen ? 'opacity-0' : 'opacity-100'}`}>
                             {isPendingAbono && (
                               <span className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-amber-600 dark:text-amber-400">
                                 <Clock className="w-3 h-3" />
@@ -771,7 +880,7 @@ export default function TransactionTable({
                             )}
 
                             {receipts.length > 0 ? (
-                              <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-[11px] font-semibold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+                              <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-[11px] font-semibold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
                                 <Receipt className="w-3 h-3 shrink-0" />
                                 <span>{receipts.length > 1 ? `${receipts.length} Receipts` : '1 Receipt'}</span>
                               </span>
@@ -785,125 +894,25 @@ export default function TransactionTable({
                                 <span className="tabular-nums">{commentCounts[tx.id]}</span>
                               </span>
                             )}
-                          </>
-                        );
-                      })()}
-                    </div>
+                          </div>
 
-                    {/* Action Dock: Smoothly revealed on row hover or keyboard focus */}
-                    <div 
-                      className="opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto group-focus-within:opacity-100 group-focus-within:pointer-events-auto transition-opacity duration-150 absolute right-6 inset-y-0 flex items-center justify-end gap-1.5"
-                      onClick={(e) => e.stopPropagation()}
-                    >
-                      {(() => {
-                        const receipts = getTransactionReceipts(tx);
-                        return (
-                          <>
-                            {receipts.length > 0 && (
-                              <Button
-                                variant="emerald-subtle"
-                                size="xs"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  setSelectedReceipt(tx);
-                                  setActivePhotoIndex(0);
-                                }}
-                                leftIcon={<Receipt className="w-3 h-3" />}
-                                title={`View ${receipts.length} attached receipt photo${receipts.length > 1 ? 's' : ''}`}
-                              >
-                                <span>{receipts.length > 1 ? `View (${receipts.length})` : 'View'}</span>
-                              </Button>
-                            )}
+                          {/* Hover/Active Action Strip: Completely contained, NO overlap on Recorded By */}
+                          <div className={`opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto group-focus-within:opacity-100 group-focus-within:pointer-events-auto transition-opacity duration-150 absolute right-6 inset-y-0 flex items-center justify-end gap-1.5 ${isRowMenuOpen ? 'opacity-100 pointer-events-auto' : ''}`}>
+                            {primaryButton}
 
-                            {isAuthorized && receipts.length < 3 && (
-                              <Button
-                                variant="outline"
-                                size="xs"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  setAttachTx(tx);
-                                  setAttachFiles([]);
-                                  setAttachPreviews([]);
-                                  setAttachError(null);
-                                }}
-                                leftIcon={<Plus className="w-3 h-3" />}
-                                title="Attach receipt or proof for this transaction"
-                              >
-                                <span>Attach</span>
-                              </Button>
-                            )}
-
-                            {/* Settle Abono Button */}
-                            {tx.is_reimbursement && tx.status === 'PENDING_REIMBURSEMENT' && canSettleAbono && (
-                              <Button
-                                variant="amber-subtle"
-                                size="xs"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  setSettleTx(tx);
-                                  setSettleAmount(Number(tx.amount || 0).toString());
-                                  setSettleError(null);
-                                }}
-                                leftIcon={<HandCoins className="w-3 h-3" />}
-                                title={`Disburse ${formatPHP(tx.amount)} refund to ${tx.reimbursement_recipient || 'claimant'}`}
-                              >
-                                <span>Settle</span>
-                              </Button>
-                            )}
-
-                            {/* Auditor Review Button */}
-                            {canAudit && (
-                              <Button
-                                variant={tx.status === 'PENDING_AUDIT' ? 'amber-subtle' : tx.status === 'FLAGGED' ? 'rose-subtle' : 'outline'}
-                                size="xs"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  if (onAuditTransaction) onAuditTransaction(tx);
-                                }}
-                                leftIcon={<ShieldCheck className="w-3 h-3" />}
-                                title="Audit & verify this transaction"
-                              >
-                                <span>Audit</span>
-                              </Button>
-                            )}
-
-                            {/* Edit / Revise Button */}
-                            {canEdit && (
-                              <Button
-                                variant={tx.status === 'FLAGGED' ? 'rose-subtle' : 'outline'}
-                                size="xs"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  if (onEditTransaction) onEditTransaction(tx);
-                                }}
-                                leftIcon={<Edit2 className="w-3 h-3" />}
-                                title={tx.status === 'FLAGGED' ? 'Revise and resubmit flagged transaction' : 'Edit transaction details'}
-                              >
-                                <span>{tx.status === 'FLAGGED' ? 'Revise' : 'Edit'}</span>
-                              </Button>
-                            )}
-
-                            {/* Comments / Remarks Button */}
-                            <Button
-                              variant={commentCounts[tx.id] ? "emerald-subtle" : "ghost"}
-                              size="xs"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                setCommentTx(tx);
-                              }}
-                              leftIcon={<MessageSquare className="w-3 h-3 shrink-0" />}
-                              title={commentCounts[tx.id] ? `${commentCounts[tx.id]} audit remark${commentCounts[tx.id] > 1 ? 's' : ''}` : 'View / Add audit remarks'}
+                            <button
+                              type="button"
+                              onClick={(e) => handleOpenRowMenu(e, tx)}
+                              className="w-7 h-7 rounded-lg flex items-center justify-center text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors cursor-pointer shrink-0"
+                              title="More options"
                             >
-                              {commentCounts[tx.id] ? (
-                                <span className="tabular-nums font-bold text-[10px]">{commentCounts[tx.id]}</span>
-                              ) : null}
-                            </Button>
-                          </>
-                        );
-                      })()}
-                    </div>
+                              <MoreHorizontal className="w-4 h-4" />
+                            </button>
+                          </div>
+                        </div>
+                      );
+                    })()}
                   </td>
-
                 </tr>
               ))
             )}
@@ -955,7 +964,7 @@ export default function TransactionTable({
                 setSelectedTx(tx);
                 setActiveTxPhotoIndex(0);
               }}
-              className="p-3 sm:p-3.5 rounded-xl bg-white dark:bg-zinc-900/60 border border-zinc-100 dark:border-zinc-800/80 hover:border-zinc-300 dark:hover:border-zinc-700 cursor-pointer flex items-center justify-between gap-3 transition-[background-color,border-color,transform] duration-150 active:scale-[0.99]"
+              className="p-3 sm:p-3.5 rounded-xl bg-white dark:bg-zinc-900/60 ring-1 ring-black/[0.04] dark:ring-white/[0.06] hover:bg-zinc-50 dark:hover:bg-zinc-850/50 shadow-2xs cursor-pointer flex items-center justify-between gap-3 transition-[background-color,transform] duration-150 active:scale-[0.99]"
             >
               {/* Left: Icon & Metadata */}
               <div className="flex items-center gap-3 min-w-0 flex-1">
@@ -991,7 +1000,11 @@ export default function TransactionTable({
                     {tx.is_reimbursement && tx.reimbursement_recipient && (
                       <>
                         <span>•</span>
-                        <span className="text-amber-600 dark:text-amber-400 font-medium truncate">{tx.reimbursement_recipient}</span>
+                        <span className="text-amber-600 dark:text-amber-400 font-medium truncate">
+                          {tx.advanced_by_name && tx.advanced_by_name !== tx.reimbursement_recipient
+                            ? `${tx.advanced_by_name} → ${tx.reimbursement_recipient}`
+                            : tx.reimbursement_recipient}
+                        </span>
                       </>
                     )}
                   </p>
@@ -1037,6 +1050,22 @@ export default function TransactionTable({
                   )}
                 </div>
               </div>
+
+              {/* Action Menu Trigger (Slim Cards) */}
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleOpenRowMenu(e, tx);
+                }}
+                className={`w-8 h-8 rounded-lg flex items-center justify-center text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors shrink-0 cursor-pointer -mr-1 ${
+                  menuTx?.id === tx.id ? 'text-zinc-900 dark:text-zinc-100 bg-zinc-100 dark:bg-zinc-800' : ''
+                }`}
+                title="More options"
+                aria-label={`More options for ${tx.title}`}
+              >
+                <MoreHorizontal className="w-4 h-4" />
+              </button>
             </div>
           );
         };
@@ -1222,7 +1251,7 @@ export default function TransactionTable({
       })()}
 
       {/* Desktop Pagination & Ledger Summary Footer */}
-      <div className="hidden md:flex px-6 py-3.5 border-t items-center justify-between gap-3 text-xs border-zinc-200 dark:border-zinc-800 bg-zinc-50/60 dark:bg-[#121214] text-zinc-600 dark:text-zinc-400">
+      <div className="hidden md:flex px-6 py-3.5 border-t items-center justify-between gap-3 text-xs border-zinc-100/80 dark:border-zinc-850/60 bg-zinc-50/60 dark:bg-[#121214] text-zinc-600 dark:text-zinc-400">
         {/* Left: Record Count Summary */}
         <div className="flex items-center gap-2">
           <span className="font-medium">
@@ -1650,15 +1679,50 @@ export default function TransactionTable({
             maxWidth="2xl"
             showCloseButton={false}
             footer={
-              <div className="flex items-center justify-between w-full">
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setSelectedTx(null)}
-                >
-                  Close
-                </Button>
+              <div className="flex items-center justify-between w-full flex-wrap gap-2">
+                <div className="flex items-center gap-1.5">
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setSelectedTx(null)}
+                  >
+                    Close
+                  </Button>
+
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => {
+                      const target = tx;
+                      setSelectedTx(null);
+                      setCommentTx(target);
+                    }}
+                    leftIcon={<MessageSquare className="w-3.5 h-3.5" />}
+                  >
+                    <span>Remarks {Boolean(commentCounts[tx.id]) ? `(${commentCounts[tx.id]})` : ''}</span>
+                  </Button>
+
+                  {txReceipts.length === 0 && canRecord && onAttachReceipt && (
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => {
+                        const target = tx;
+                        setSelectedTx(null);
+                        setAttachTx(target);
+                        setAttachFiles([]);
+                        setAttachPreviews([]);
+                        setAttachError(null);
+                      }}
+                      leftIcon={<Camera className="w-3.5 h-3.5" />}
+                    >
+                      <span>Attach Proof</span>
+                    </Button>
+                  )}
+                </div>
 
                 <div className="flex items-center gap-2">
                   {canEdit && (
@@ -1706,6 +1770,25 @@ export default function TransactionTable({
                     >
                       <HandCoins className="w-3.5 h-3.5" />
                       <span>Disburse Refund ({formatPHP(tx.amount)})</span>
+                    </Button>
+                  )}
+
+                  {canDelete && (
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => {
+                        const target = tx;
+                        setSelectedTx(null);
+                        if (window.confirm(`Are you sure you want to delete transaction "${target.title}"?`)) {
+                          onDeleteTransaction(target);
+                        }
+                      }}
+                      className="text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/30"
+                      leftIcon={<Trash2 className="w-3.5 h-3.5" />}
+                    >
+                      <span>Delete</span>
                     </Button>
                   )}
                 </div>
@@ -2194,6 +2277,212 @@ export default function TransactionTable({
         transaction={commentTx}
         onCommentAdded={(txId, count) => setCommentCounts((prev) => ({ ...prev, [txId]: count }))}
       />
+
+      {/* Contextual Action Menu: Adaptive Popover (Desktop) & Bottom Sheet (Mobile) */}
+      {typeof document !== 'undefined' && menuTx && (
+        createPortal(
+          <>
+            {/* Backdrop: translucent sheet blur on mobile, transparent click-catcher on desktop */}
+            <div
+              className="fixed inset-0 bg-black/40 backdrop-blur-xs sm:bg-transparent z-[9998] animate-in fade-in duration-150"
+              onClick={(e) => {
+                e.stopPropagation();
+                setMenuTx(null);
+                setMenuCoords(null);
+              }}
+              aria-hidden="true"
+            />
+
+            {/* Popover / Sheet Container */}
+            <div
+              style={
+                menuCoords && typeof window !== 'undefined' && window.innerWidth >= 640
+                  ? {
+                      position: 'fixed',
+                      top: menuCoords.top !== undefined ? `${menuCoords.top}px` : undefined,
+                      bottom: menuCoords.bottom !== undefined ? `${menuCoords.bottom}px` : undefined,
+                      right: `${menuCoords.right}px`,
+                    }
+                  : undefined
+              }
+              className="fixed sm:fixed bottom-0 inset-x-0 sm:bottom-auto sm:inset-x-auto w-full sm:w-auto sm:min-w-[220px] max-w-full sm:max-w-xs z-[9999] bg-white dark:bg-[#121214] ring-1 ring-black/[0.08] dark:ring-white/[0.08] shadow-2xl rounded-t-2xl sm:rounded-2xl p-2.5 sm:p-1.5 backdrop-blur-xl animate-in slide-in-from-bottom-4 sm:slide-in-from-top-1 sm:fade-in duration-150"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Mobile Drag Indicator */}
+              <div className="w-10 h-1 rounded-full bg-zinc-300 dark:bg-zinc-700 mx-auto my-1 sm:hidden" />
+
+              {/* Transaction Summary Header */}
+              <div className="px-3 py-2 sm:py-1.5 border-b border-zinc-100 dark:border-zinc-800/80 mb-1">
+                <p className="text-xs font-bold text-zinc-900 dark:text-zinc-100 truncate">
+                  {menuTx.title}
+                </p>
+                <p className="text-[11px] text-zinc-500 dark:text-zinc-400 font-medium tabular-nums truncate mt-0.5">
+                  {menuTx.type === 'INFLOW' ? '+' : '-'}{formatPHP(menuTx.amount)} · {formatFriendlyDate(menuTx.transaction_date)}
+                </p>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="space-y-0.5">
+                {/* 1. Audit & Verify */}
+                {canAudit && (menuTx.status === 'PENDING_AUDIT' || menuTx.status === 'FLAGGED') && onAuditTransaction && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const target = menuTx;
+                      setMenuTx(null);
+                      setMenuCoords(null);
+                      onAuditTransaction(target);
+                    }}
+                    className="w-full flex items-center gap-2.5 px-3 py-2 sm:py-1.5 rounded-xl text-xs font-semibold text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-950/30 transition-colors min-h-[44px] sm:min-h-0 text-left cursor-pointer"
+                  >
+                    <ShieldCheck className="w-4 h-4 shrink-0" />
+                    <span>Audit &amp; Verify</span>
+                  </button>
+                )}
+
+                {/* 2. Disburse / Settle Abono */}
+                {menuTx.is_reimbursement && menuTx.status === 'PENDING_REIMBURSEMENT' && canSettleAbono && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const target = menuTx;
+                      setMenuTx(null);
+                      setMenuCoords(null);
+                      setSettleTx(target);
+                      setSettleAmount(Number(target.amount || 0).toString());
+                      setSettleError(null);
+                    }}
+                    className="w-full flex items-center gap-2.5 px-3 py-2 sm:py-1.5 rounded-xl text-xs font-semibold text-amber-600 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-950/30 transition-colors min-h-[44px] sm:min-h-0 text-left cursor-pointer"
+                  >
+                    <HandCoins className="w-4 h-4 shrink-0" />
+                    <span>Disburse Abono Refund</span>
+                  </button>
+                )}
+
+                {/* 3. Revise / Edit Details */}
+                {canEdit && onEditTransaction && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const target = menuTx;
+                      setMenuTx(null);
+                      setMenuCoords(null);
+                      onEditTransaction(target);
+                    }}
+                    className="w-full flex items-center gap-2.5 px-3 py-2 sm:py-1.5 rounded-xl text-xs font-medium text-zinc-700 dark:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors min-h-[44px] sm:min-h-0 text-left cursor-pointer"
+                  >
+                    <Edit2 className="w-4 h-4 text-zinc-400 shrink-0" />
+                    <span>{menuTx.status === 'FLAGGED' ? 'Revise Transaction' : 'Edit Details'}</span>
+                  </button>
+                )}
+
+                {/* 4. Receipts */}
+                {(() => {
+                  const receipts = getTransactionReceipts(menuTx);
+                  if (receipts.length > 0) {
+                    return (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const target = receipts[0];
+                          setMenuTx(null);
+                          setMenuCoords(null);
+                          setSelectedReceipt(target);
+                          setActivePhotoIndex(0);
+                        }}
+                        className="w-full flex items-center gap-2.5 px-3 py-2 sm:py-1.5 rounded-xl text-xs font-medium text-zinc-700 dark:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors min-h-[44px] sm:min-h-0 text-left cursor-pointer"
+                      >
+                        <Receipt className="w-4 h-4 text-emerald-500 shrink-0" />
+                        <span>View Receipts ({receipts.length})</span>
+                      </button>
+                    );
+                  }
+                  if (canRecord && onAttachReceipt) {
+                    return (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const target = menuTx;
+                          setMenuTx(null);
+                          setMenuCoords(null);
+                          setAttachTx(target);
+                          setAttachFiles([]);
+                          setAttachPreviews([]);
+                          setAttachError(null);
+                        }}
+                        className="w-full flex items-center gap-2.5 px-3 py-2 sm:py-1.5 rounded-xl text-xs font-medium text-zinc-700 dark:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors min-h-[44px] sm:min-h-0 text-left cursor-pointer"
+                      >
+                        <Camera className="w-4 h-4 text-zinc-400 shrink-0" />
+                        <span>Attach Receipt Proof</span>
+                      </button>
+                    );
+                  }
+                  return null;
+                })()}
+
+                {/* 5. Remarks & Comments */}
+                <button
+                  type="button"
+                  onClick={() => {
+                    const target = menuTx;
+                    setMenuTx(null);
+                    setMenuCoords(null);
+                    setCommentTx(target);
+                  }}
+                  className="w-full flex items-center gap-2.5 px-3 py-2 sm:py-1.5 rounded-xl text-xs font-medium text-zinc-700 dark:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors min-h-[44px] sm:min-h-0 text-left cursor-pointer"
+                >
+                  <MessageSquare className="w-4 h-4 text-zinc-400 shrink-0" />
+                  <span className="flex-1">Remarks &amp; Activity</span>
+                  {Boolean(commentCounts[menuTx.id]) && (
+                    <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 tabular-nums">
+                      {commentCounts[menuTx.id]}
+                    </span>
+                  )}
+                </button>
+
+                {/* 6. View Full Details */}
+                <button
+                  type="button"
+                  onClick={() => {
+                    const target = menuTx;
+                    setMenuTx(null);
+                    setMenuCoords(null);
+                    setSelectedTx(target);
+                    setActiveTxPhotoIndex(0);
+                  }}
+                  className="w-full flex items-center gap-2.5 px-3 py-2 sm:py-1.5 rounded-xl text-xs font-medium text-zinc-700 dark:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors min-h-[44px] sm:min-h-0 text-left cursor-pointer"
+                >
+                  <FileText className="w-4 h-4 text-zinc-400 shrink-0" />
+                  <span>View Full Details</span>
+                </button>
+
+                {/* 7. Delete Record (Authorized officers with delete permission) */}
+                {canDelete && (
+                  <>
+                    <div className="my-1 border-t border-zinc-100 dark:border-zinc-800" />
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const target = menuTx;
+                        setMenuTx(null);
+                        setMenuCoords(null);
+                        if (window.confirm(`Are you sure you want to delete transaction "${target.title}"?`)) {
+                          onDeleteTransaction(target);
+                        }
+                      }}
+                      className="w-full flex items-center gap-2.5 px-3 py-2 sm:py-1.5 rounded-xl text-xs font-semibold text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/30 transition-colors min-h-[44px] sm:min-h-0 text-left cursor-pointer"
+                    >
+                      <Trash2 className="w-4 h-4 shrink-0" />
+                      <span>Delete Transaction</span>
+                    </button>
+                  </>
+                )}
+              </div>
+            </div>
+          </>,
+          document.body
+        )
+      )}
 
     </div>
   );

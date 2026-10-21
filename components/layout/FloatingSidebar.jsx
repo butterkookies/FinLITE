@@ -61,6 +61,11 @@ export default function FloatingSidebar({
   const isCollapsed = controlledCollapsed !== undefined ? controlledCollapsed : internalCollapsed;
 
   const [internalActiveTab, setInternalActiveTab] = useState('dashboard');
+  const [optimisticTab, setOptimisticTab] = useState(null);
+
+  useEffect(() => {
+    setOptimisticTab(null);
+  }, [pathname, controlledActiveTab]);
   const activeTab = controlledActiveTab !== undefined ? controlledActiveTab : internalActiveTab;
 
   const handleSelectTab = (tabId) => {
@@ -402,12 +407,13 @@ export default function FloatingSidebar({
             <nav className="space-y-1">
               {navItems.map((item) => {
                 const Icon = item.icon;
-                const isActive = activeTab === item.id;
+                const isActive = (optimisticTab || activeTab) === item.id;
                 return (
                   <button
                     key={item.id}
                     type="button"
                     onClick={() => {
+                      setOptimisticTab(item.id);
                       item.action();
                       setIsMobileOpen(false);
                     }}
@@ -450,11 +456,12 @@ export default function FloatingSidebar({
               {utilityItems.map((item) => {
                 const Icon = item.icon;
                 if (item.isLink) {
-                  const isLinkActive = pathname === item.href;
+                  const isLinkActive = (optimisticTab || (pathname === item.href ? item.id : null)) === item.id;
                   return (
                     <Link
                       key={item.id}
                       href={item.href}
+                      onClick={() => setOptimisticTab(item.id)}
                       title={isCollapsed && !isMobileOpen ? item.label : undefined}
                       className={`w-full flex items-center gap-2.5 rounded-xl transition-colors duration-150 cursor-pointer group text-xs font-medium
                         ${isCollapsed && !isMobileOpen ? 'justify-center p-2.5' : 'px-3 py-2'}

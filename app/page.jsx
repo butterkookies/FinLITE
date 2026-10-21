@@ -340,7 +340,8 @@ export default function Dashboard() {
           .from('advances_payable')
           .select(`
             *,
-            advance_disbursements (*)
+            advance_disbursements (*),
+            advance_receipts (*)
           `)
           .order('created_at', { ascending: false });
 
@@ -727,17 +728,21 @@ export default function Dashboard() {
     });
   }, [transactions, currentSemester?.academicYear, currentSemester?.semester]);
 
-  // Filter active debts for the current semester
+  // Filter active debts: Open/unsettled receivables persist across terms until collected (Balance Sheet)
   const activeDebts = useMemo(() => {
     return debts.filter((d) => {
+      const isUnsettled = d.status === 'UNPAID' || d.status === 'PARTIALLY_PAID';
+      if (isUnsettled) return true; // Open receivables maintain multi-semester continuity
       if (!d.semester_id) return true;
       return d.semester_id === currentSemester?.id || d.semester_id === `${currentSemester?.academicYear}-${currentSemester?.semester}`;
     });
   }, [debts, currentSemester?.id, currentSemester?.academicYear, currentSemester?.semester]);
 
-  // Filter active advances for the current semester
+  // Filter active advances: Open/unsettled abono liabilities persist across terms until reimbursed (Balance Sheet)
   const activeAdvances = useMemo(() => {
     return advances.filter((a) => {
+      const isUnsettled = a.status === 'UNPAID' || a.status === 'PARTIALLY_REIMBURSED' || a.status === 'PENDING';
+      if (isUnsettled) return true; // Open abono liabilities maintain multi-semester continuity
       if (!a.semester_id) return true;
       return a.semester_id === currentSemester?.id || a.semester_id === `${currentSemester?.academicYear}-${currentSemester?.semester}`;
     });
@@ -810,6 +815,7 @@ export default function Dashboard() {
       import('@/components/debts/AdvancesManagementModal');
       import('@/components/ai/AIChatDrawer');
       import('@/components/audit/AuditTrailDrawer');
+      import('@/components/audit/AuditReviewModal');
     };
     if ('requestIdleCallback' in window) {
       const handle = window.requestIdleCallback(preloadModals, { timeout: 3000 });
@@ -849,6 +855,7 @@ export default function Dashboard() {
             transaction_date: newTx.transaction_date,
             is_reimbursement: newTx.is_reimbursement,
             reimbursement_recipient: newTx.reimbursement_recipient,
+            advanced_by_name: newTx.advanced_by_name,
             event_name: newTx.event_name,
             receipt_urls: newTx.receipt_urls,
           }),
@@ -878,6 +885,7 @@ export default function Dashboard() {
     const optimisticTx = {
       ...newTx,
       id: tempId,
+      advanced_by_name: newTx.advanced_by_name || newTx.reimbursement_recipient || null,
       receipt_urls: optimisticReceiptUrls,
       receipt_url: optimisticReceiptUrls[0] || null,
       academic_year: newTx.academic_year || currentSemester.academicYear,
@@ -977,6 +985,7 @@ export default function Dashboard() {
           transaction_date: newTx.transaction_date || new Date().toISOString().split('T')[0],
           is_reimbursement: Boolean(newTx.is_reimbursement),
           reimbursement_recipient: newTx.is_reimbursement ? newTx.reimbursement_recipient : null,
+          advanced_by_name: newTx.is_reimbursement ? (newTx.advanced_by_name || newTx.reimbursement_recipient) : null,
           status: newTx.status || 'COMPLETED',
           event_name: newTx.event_name || null,
         };
@@ -998,6 +1007,7 @@ export default function Dashboard() {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
               ...payload,
+              advanced_by_name: payload.advanced_by_name,
               category_name: newTx.category_name,
               receipt_urls: uploadedReceiptUrls,
               receipt_url: uploadedReceiptUrls[0] || null,
@@ -1008,6 +1018,9 @@ export default function Dashboard() {
             data = apiResult.transaction;
           } else if (apiResult.error) {
             error = { message: apiResult.error };
+            alert(`Transaction rejected: ${apiResult.error}`);
+            setTransactions((prev) => prev.filter((t) => t.id !== tempId));
+            return;
           }
         } catch (apiErr) {
           console.warn('/api/transactions request error, trying direct fallback:', apiErr?.message);
@@ -1141,6 +1154,7 @@ export default function Dashboard() {
     }
 
     const uploadedUrls = [];
+    let lastUploadError = null;
     if (supabase) {
       for (const file of filesToUpload) {
         try {
@@ -1156,9 +1170,11 @@ export default function Dashboard() {
               .getPublicUrl(filePath);
             uploadedUrls.push(publicUrl);
           } else {
+            lastUploadError = uploadError.message;
             console.error('Storage upload error:', uploadError.message);
           }
         } catch (storageErr) {
+          lastUploadError = storageErr?.message;
           console.warn('Storage upload error:', storageErr);
         }
       }
@@ -1169,53 +1185,54 @@ export default function Dashboard() {
       }
     }
 
+    if (filesToUpload.length > 0 && uploadedUrls.length === 0) {
+      return {
+        success: false,
+        error: lastUploadError || 'Failed to upload receipt to Supabase Storage. Please ensure the receipts bucket exists and is accessible.',
+      };
+    }
+
     const combinedUrls = [...existingUrls, ...uploadedUrls].slice(0, 3);
 
-    // Update DB if Supabase is connected (Normalized transaction_receipts + legacy columns)
-    if (supabase && typeof transactionId === 'string' && !transactionId.startsWith('tx-')) {
+    // Update DB via server-side API (bypasses client RLS issues and synchronizes 3NF child table)
+    if (typeof transactionId === 'string' && !transactionId.startsWith('tx-')) {
       try {
-        if (uploadedUrls.length > 0) {
-          const receiptRecords = uploadedUrls.map((url, idx) => ({
-            transaction_id: transactionId,
-            public_url: url,
-            sort_order: existingUrls.length + idx,
-            uploaded_by: userProfile?.id || null,
-          }));
-          try {
-            await supabase.from('transaction_receipts').insert(receiptRecords);
-          } catch (childErr) {
-            console.warn('transaction_receipts child insert notice:', childErr?.message);
-          }
+        const patchRes = await fetch(`/api/transactions/${transactionId}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ receipt_urls: combinedUrls }),
+        });
+        const patchData = await patchRes.json();
+        if (!patchRes.ok || !patchData.success) {
+          console.warn('API PATCH receipt_urls notice:', patchData?.error);
         }
-
-        // In 3NF, receipts are stored in child table transaction_receipts.
-        // Best-effort update for legacy receipt_urls column if it still exists (pre-017).
-        try {
-          const { error: updateError } = await supabase
-            .from('transactions')
-            .update({
-              receipt_urls: combinedUrls,
-              receipt_url: combinedUrls[0] || null,
-            })
-            .eq('id', transactionId);
-
-          if (updateError && !updateError.message?.includes('receipt_urls') && updateError.code !== 'PGRST204') {
-            console.warn('Legacy receipt_urls update notice:', updateError.message);
-          }
-        } catch (_) {}
-      } catch (err) {
-        console.warn('Attach receipt notice:', err?.message || err);
+      } catch (patchErr) {
+        console.warn('API PATCH receipt error:', patchErr?.message);
       }
     }
 
-    // Optimistically update local state
+    const normalizedReceipts = combinedUrls.map((url, idx) => ({
+      id: `receipt-${Date.now()}-${idx}`,
+      public_url: url,
+      sort_order: idx,
+    }));
+
+    // Optimistically update local state for all transaction listings and modals
     setTransactions((prev) =>
       prev.map((t) => (t.id === transactionId ? {
         ...t,
         receipt_urls: combinedUrls,
         receipt_url: combinedUrls[0] || null,
+        transaction_receipts: normalizedReceipts,
       } : t))
     );
+
+    setAuditModalTx((prev) => (prev && prev.id === transactionId ? {
+      ...prev,
+      receipt_urls: combinedUrls,
+      receipt_url: combinedUrls[0] || null,
+      transaction_receipts: normalizedReceipts,
+    } : prev));
 
     return { success: true, urls: combinedUrls };
   };
@@ -1567,12 +1584,16 @@ export default function Dashboard() {
 
       if (supabase) {
         try {
+          const matchedCategory = categories.find(
+            (c) => c.id === newAdv.category_id || (newAdv.category_name && c.name?.toLowerCase() === newAdv.category_name.toLowerCase())
+          ) || categories.find((c) => c.type === 'OUTFLOW') || categories[0];
+
           const { data, error } = await supabase.from('advances_payable').insert([{
             semester_id: resolveDbSemesterId(),
             claimant_name: newAdv.claimant_name,
             claimant_contact: newAdv.claimant_contact,
             title: newAdv.title,
-            category_name: newAdv.category_name,
+            category_id: matchedCategory?.id || null,
             event_name: newAdv.event_name,
             total_amount: newAdv.total_amount,
             amount_reimbursed: 0,
@@ -1580,7 +1601,11 @@ export default function Dashboard() {
             advance_date: newAdv.advance_date,
             notes: newAdv.notes,
             created_by: userProfile?.id || null,
-          }]).select().single();
+          }]).select(`
+            *,
+            advance_disbursements (*),
+            advance_receipts (*)
+          `).single();
 
           if (!error && data) {
             setAdvances((prev) => prev.map((a) => (a.id === tempId ? { ...data, advance_disbursements: [] } : a)));
@@ -1753,33 +1778,16 @@ export default function Dashboard() {
   };
 
   const handleDeclareShortage = async ({ amount, notes }) => {
-    let shortageCatId = null;
-    if (categories && categories.length > 0) {
-      const match = categories.find((c) => c.name.toLowerCase().includes('shortage'));
-      if (match) shortageCatId = match.id;
-    }
-    let resolvedSemesterId = currentSemester?.id;
-    if (resolvedSemesterId && resolvedSemesterId.startsWith('sem-')) {
-      const matchedDbSem = semesters.find((s) => s.id && !s.id.startsWith('sem-') && s.academicYear === currentSemester.academicYear && s.semester === currentSemester.semester);
-      resolvedSemesterId = matchedDbSem ? matchedDbSem.id : null;
-    }
-
-    const shortageTx = {
-      title: 'Declared Cash Shortage (Adviser Approved)',
-      description: notes || 'Discrepancy identified during physical cash count audit',
-      amount: parseFloat(amount),
-      type: 'OUTFLOW',
-      category_id: shortageCatId,
-      category_name: 'Cash Shortage Discrepancy',
-      transaction_date: new Date().toISOString().split('T')[0],
-      academic_year: currentSemester?.academicYear,
-      semester: currentSemester?.semester,
-      is_reimbursement: false,
-      event_name: 'Cash Count Audit',
-      status: 'COMPLETED',
-    };
-
-    return handleSaveTransaction(shortageTx);
+    // Gated workflow: Discrepancies must be verified by an Adviser before committing to ledger
+    return handleSaveAuditCount({
+      physicalTotal: (currentSummary?.cash_on_hand || 0) - parseFloat(amount),
+      ledgerCashBalance: currentSummary?.cash_on_hand || 0,
+      variance: -Math.abs(parseFloat(amount)),
+      status: 'SHORTAGE',
+      approval_status: 'PENDING_APPROVAL',
+      notes: notes || 'Physical cash shortage declared for adviser audit review.',
+      counts: latestReconciliation?.counts || {},
+    });
   };
 
   const handleSaveAuditCount = async (audit) => {
@@ -1789,12 +1797,15 @@ export default function Dashboard() {
       resolvedSemesterId = matchedDbSem ? matchedDbSem.id : (semesters.find((s) => s.id && !s.id.startsWith('sem-'))?.id || null);
     }
 
+    const isVarianceZero = audit.variance === 0 || audit.status === 'BALANCED';
+
     // Pure 3NF relational payload for cash_reconciliations
     const reconPayload = {
       physical_total: audit.physicalTotal,
       ledger_cash_balance: audit.ledgerCashBalance,
       variance_amount: audit.variance,
       variance_status: audit.status,
+      approval_status: audit.approval_status || (isVarianceZero ? 'BALANCED' : 'PENDING_APPROVAL'),
       notes: audit.notes || null,
       semester_id: resolvedSemesterId || null,
       counted_by: userProfile?.id || currentUser?.id || null,
@@ -1822,11 +1833,25 @@ export default function Dashboard() {
     // 3. Persist to Supabase Database
     if (!supabase) return;
     try {
-      const { data, error } = await supabase
+      let { data, error } = await supabase
         .from('cash_reconciliations')
         .insert([reconPayload])
         .select()
         .single();
+
+      if (error && error.message?.includes('approval_status')) {
+        const fallbackRecon = { ...reconPayload };
+        delete fallbackRecon.approval_status;
+        const res2 = await supabase
+          .from('cash_reconciliations')
+          .insert([fallbackRecon])
+          .select()
+          .single();
+        if (res2.data) {
+          data = res2.data;
+          error = null;
+        }
+      }
 
       if (error) {
         console.warn('Supabase cash_reconciliations insert notice:', error?.message || error);

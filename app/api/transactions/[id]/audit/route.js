@@ -158,12 +158,27 @@ export async function POST(req, { params }) {
     const authorName = tx.profiles?.full_name || 'Officer';
     const auditorName = callerProfile?.full_name || email.split('@')[0] || 'Auditor';
 
+    // Resolve dynamic reviewer title based on role and superadmin status
+    let reviewerTitle = 'Auditor';
+    if (isSuperAdmin) {
+      reviewerTitle = 'Super Administrator';
+    } else if (callerProfile?.role === 'admin') {
+      reviewerTitle = 'Administrator';
+    } else if (callerProfile?.role === 'president') {
+      reviewerTitle = 'President';
+    } else if (callerProfile?.role === 'treasurer') {
+      reviewerTitle = 'Treasurer';
+    } else if (callerProfile?.role === 'adviser') {
+      reviewerTitle = 'Club Adviser';
+    }
+
     if (authorEmail) {
       sendAuditDecisionEmail({
         transaction: updatedTx || tx,
         decision: normalizedAction,
         auditorName,
         auditorEmail: email,
+        reviewerTitle,
         comment: comment?.trim() || null,
         authorEmail,
         authorName,

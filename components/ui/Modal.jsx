@@ -55,19 +55,19 @@ export default function Modal({
     >
       <div
         className={cn(
-          'w-full rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-[#121214] text-zinc-950 dark:text-zinc-100 shadow-2xl overflow-hidden flex flex-col max-h-[90vh] animate-in zoom-in-95 duration-150',
+          'w-full rounded-2xl bg-white dark:bg-[#121214] text-zinc-950 dark:text-zinc-100 shadow-2xl ring-1 ring-black/[0.05] dark:ring-white/[0.08] overflow-hidden flex flex-col max-h-[90vh] animate-in zoom-in-95 duration-150',
           resolvedMaxWidth,
           className
         )}
       >
         {/* Header */}
         {(title || showCloseButton) && (
-          <div className="flex items-start justify-between p-4 sm:p-5 border-b border-zinc-100 dark:border-zinc-800 shrink-0">
+          <div className="flex items-start justify-between p-4 sm:p-5 shrink-0 bg-zinc-50/40 dark:bg-zinc-900/30">
             <div>
               {title && (
-                <h3 className="text-base sm:text-lg font-bold tracking-tight text-zinc-900 dark:text-zinc-100">
+                <div className="text-base sm:text-lg font-bold tracking-tight text-zinc-900 dark:text-zinc-100">
                   {title}
-                </h3>
+                </div>
               )}
               {description && (
                 <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-1">
@@ -94,7 +94,7 @@ export default function Modal({
 
         {/* Footer */}
         {footer && (
-          <div className="p-4 sm:p-5 border-t border-zinc-100 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-900/30 flex items-center justify-end gap-2.5 shrink-0">
+          <div className="p-4 sm:p-5 bg-zinc-50/60 dark:bg-zinc-900/40 flex items-center justify-end gap-2.5 shrink-0">
             {footer}
           </div>
         )}

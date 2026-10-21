@@ -203,6 +203,12 @@ export default function AppShell({ children }) {
       ? 'profile'
       : 'dashboard';
 
+  const [isNavigating, setIsNavigating] = useState(false);
+
+  useEffect(() => {
+    setIsNavigating(false);
+  }, [pathname]);
+
   // For public / auth pages, render children with zero sidebar overhead
   if (isAuthRoute) {
     return <>{children}</>;
@@ -210,6 +216,13 @@ export default function AppShell({ children }) {
 
   return (
     <div className="min-h-screen flex">
+      {/* Top Global Route Progress Indicator */}
+      <div
+        className={`fixed top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-emerald-500 via-teal-400 to-emerald-600 z-[9999] pointer-events-none transition-all duration-300 ${
+          isNavigating ? 'opacity-100 scale-x-100' : 'opacity-0 scale-x-0'
+        }`}
+        style={{ transformOrigin: '0%' }}
+      />
       {/* 1. Persistent Shared Sidebar (Desktop In-Flow Sticky + Mobile Slide-Over) */}
       <div className="no-print shrink-0">
         <ModuleErrorBoundary moduleName="Navigation Sidebar">

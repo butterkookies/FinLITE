@@ -46,6 +46,7 @@ const ROUNDED_MAP = {
 };
 
 export default function UserAvatar({
+  user = null,
   src = null,
   name = '',
   email = '',
@@ -55,32 +56,41 @@ export default function UserAvatar({
   alt = '',
   showRing = false,
 }) {
+  const resolvedSrc = src || user?.avatar_url || user?.avatar || null;
+  const resolvedName =
+    name ||
+    user?.full_name ||
+    user?.name ||
+    (user?.first_name ? `${user.first_name} ${user.last_name || ''}`.trim() : '');
+  const resolvedEmail = email || user?.email || '';
+
   const [imageError, setImageError] = useState(false);
 
-  // Reset error state whenever src changes
+  // Reset error state whenever resolvedSrc changes
   useEffect(() => {
     setImageError(false);
-  }, [src]);
+  }, [resolvedSrc]);
 
   const sizeConfig = SIZE_MAP[size] || SIZE_MAP.base;
   const roundedClass = ROUNDED_MAP[rounded] || 'rounded-full';
-  const color = getGoogleAvatarColor(name || email);
-  const initial = getAvatarInitial(name, email);
+  const color = getGoogleAvatarColor(resolvedName || resolvedEmail);
+  const initial = getAvatarInitial(resolvedName, resolvedEmail);
 
   const ringClass = showRing ? 'ring-1 ring-emerald-500/40' : '';
 
-  if (src && !imageError) {
+  if (resolvedSrc && !imageError) {
     return (
       <div
-        className={`relative shrink-0 overflow-hidden ${sizeConfig.dimensions} ${roundedClass} ${ringClass} ${className}`}
+        className={`relative shrink-0 overflow-hidden bg-zinc-100 dark:bg-zinc-800 ${sizeConfig.dimensions} ${roundedClass} ${ringClass} ${className}`}
       >
         <img
-          src={src}
-          alt={alt || name || 'User profile'}
+          src={resolvedSrc}
+          alt={alt || resolvedName || 'User profile'}
           className={`object-cover w-full h-full ${roundedClass}`}
           referrerPolicy="no-referrer"
+          decoding="async"
+          loading="eager"
           onError={() => setImageError(true)}
-          loading="lazy"
         />
       </div>
     );
@@ -89,7 +99,7 @@ export default function UserAvatar({
   return (
     <div
       className={`shrink-0 flex items-center justify-center font-bold select-none ${sizeConfig.dimensions} ${sizeConfig.text} ${roundedClass} ${color.bg} ${color.text} ${ringClass} ${className}`}
-      title={name || email || 'User'}
+      title={resolvedName || resolvedEmail || 'User'}
     >
       <span>{initial}</span>
     </div>

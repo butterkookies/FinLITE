@@ -12,7 +12,7 @@ import {
   AlertCircle,
   HelpCircle,
 } from 'lucide-react';
-import { Modal, Button, Badge } from '@/components/ui';
+import { Modal, Button, Badge, Select } from '@/components/ui';
 import UserAvatar from '@/components/common/UserAvatar';
 import {
   ACTION_DEFINITIONS,
@@ -23,12 +23,11 @@ import {
 import { useTheme } from '@/components/theme/ThemeProvider';
 
 const ROLE_OPTIONS = [
-  { value: 'president', label: 'President', desc: 'Organizational Executive & Approval' },
-  { value: 'treasurer', label: 'Treasurer', desc: 'Disbursements, Inflows & Cash Custody' },
-  { value: 'auditor', label: 'Auditor', desc: 'Audit Review, Receipt Verification & Denominations' },
-  { value: 'adviser', label: 'Adviser', desc: 'Faculty Oversight & Signatory' },
-  { value: 'admin', label: 'Admin', desc: 'Full System & Access Control' },
-  { value: 'member', label: 'Officer / Member', desc: 'Standard Access' },
+  { value: 'president', label: 'President', description: 'Executive oversight & operational approval' },
+  { value: 'treasurer', label: 'Treasurer', description: 'Disbursements, inflows & cash custody' },
+  { value: 'auditor', label: 'Auditor', description: 'Audit review, receipt verification & counts' },
+  { value: 'adviser', label: 'Adviser', description: 'Faculty oversight & signatory' },
+  { value: 'admin', label: 'Admin', description: 'Full system & access control' },
 ];
 
 export default function UserPermissionsModal({
@@ -38,7 +37,7 @@ export default function UserPermissionsModal({
   onSaved,
 }) {
   const { isLight } = useTheme();
-  const [selectedRole, setSelectedRole] = useState('member');
+  const [selectedRole, setSelectedRole] = useState('treasurer');
   const [permissions, setPermissions] = useState({});
   const [isSaving, setIsSaving] = useState(false);
   const [feedback, setFeedback] = useState(null);
@@ -47,7 +46,7 @@ export default function UserPermissionsModal({
 
   useEffect(() => {
     if (user) {
-      setSelectedRole(user.role || 'member');
+      setSelectedRole(user.role || 'treasurer');
       const resolved = resolveUserPermissions(user, user.email);
       setPermissions(resolved);
       setFeedback(null);
@@ -61,7 +60,7 @@ export default function UserPermissionsModal({
   };
 
   const handleApplyDefaults = () => {
-    const defaults = ROLE_DEFAULT_PERMISSIONS[selectedRole] || ROLE_DEFAULT_PERMISSIONS.member;
+    const defaults = ROLE_DEFAULT_PERMISSIONS[selectedRole] || {};
     setPermissions({ ...defaults });
     setFeedback({
       type: 'info',
@@ -140,7 +139,7 @@ export default function UserPermissionsModal({
       onClose={onClose}
       title={
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 border bg-emerald-500/10 border-emerald-500/20 text-emerald-600 dark:text-emerald-400">
+          <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 bg-emerald-500/12 text-emerald-600 dark:text-emerald-400">
             <ShieldCheck className="w-5 h-5" />
           </div>
           <div>
@@ -155,13 +154,9 @@ export default function UserPermissionsModal({
       }
       maxWidth="max-w-3xl"
     >
-      <div className="space-y-6 pt-2">
-        {/* User Identity Header Card */}
-        <div
-          className={`p-4 rounded-2xl border flex flex-col sm:flex-row sm:items-center justify-between gap-4 ${
-            isLight ? 'bg-zinc-50 border-zinc-200' : 'bg-zinc-900/60 border-zinc-800'
-          }`}
-        >
+      <div className="space-y-5 pt-1">
+        {/* User Identity Header */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-zinc-100 dark:border-zinc-800/80">
           <div className="flex items-center gap-3 min-w-0">
             <UserAvatar
               src={user.avatar_url}
@@ -170,27 +165,21 @@ export default function UserPermissionsModal({
               size="lg-12"
               rounded="xl"
               alt={user.full_name || 'Officer'}
-              className="shrink-0 shadow-2xs"
+              className="shrink-0"
             />
             <div className="min-w-0">
               <div className="flex items-center gap-2 flex-wrap">
-                <span className="text-sm font-bold truncate">
+                <span className="text-sm font-bold truncate text-zinc-950 dark:text-zinc-50">
                   {user.full_name || `${user.first_name || ''} ${user.last_name || ''}`.trim()}
                 </span>
                 {isPrimarySuperAdmin && (
-                  <span
-                    className={`px-2 py-0.5 text-[9px] font-bold uppercase rounded flex items-center gap-1 ${
-                      isLight
-                        ? 'bg-purple-100 text-purple-900'
-                        : 'bg-purple-500/20 text-purple-200'
-                    }`}
-                  >
+                  <Badge variant="purple" size="xs">
                     <Lock className="w-2.5 h-2.5" />
                     <span>Super Admin</span>
-                  </span>
+                  </Badge>
                 )}
               </div>
-              <p className={`text-xs truncate ${isLight ? 'text-zinc-500' : 'text-zinc-400'}`}>
+              <p className="text-xs truncate text-zinc-500 dark:text-zinc-400 mt-0.5">
                 {user.email}
               </p>
             </div>
@@ -198,74 +187,48 @@ export default function UserPermissionsModal({
 
           {/* Quick Active Actions Metric */}
           <div className="flex items-center gap-2 sm:self-center shrink-0">
-            <span
-              className={`px-3 py-1.5 rounded-xl text-xs font-bold border flex items-center gap-1.5 ${
-                activeCount > 0
-                  ? isLight
-                    ? 'bg-emerald-50 border-emerald-200 text-emerald-800'
-                    : 'bg-emerald-500/10 border-emerald-500/20 text-emerald-300'
-                  : isLight
-                  ? 'bg-zinc-100 border-zinc-200 text-zinc-600'
-                  : 'bg-zinc-800 border-zinc-700 text-zinc-400'
-              }`}
-            >
+            <Badge variant={activeCount > 0 ? 'emerald' : 'neutral'} size="sm">
               <CheckCircle2 className="w-3.5 h-3.5" />
               <span>
                 {activeCount} of {totalCount} Actions Granted
               </span>
-            </span>
+            </Badge>
           </div>
         </div>
 
         {/* Position & Default Presets Bar */}
-        <div
-          className={`p-4 rounded-2xl border space-y-3 ${
-            isLight ? 'bg-white border-zinc-200' : 'bg-[#18181b] border-zinc-800'
-          }`}
-        >
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-            <div className="space-y-1">
-              <label className="text-xs font-bold uppercase tracking-wider text-zinc-500 dark:text-zinc-400">
-                Official Position / Role
-              </label>
-              <p className="text-xs text-zinc-500 dark:text-zinc-400">
-                Select position title or apply recommended template
-              </p>
-            </div>
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-zinc-100 dark:border-zinc-800/80">
+          <div className="space-y-0.5">
+            <label className="text-xs font-bold uppercase tracking-wider text-zinc-800 dark:text-zinc-200">
+              Official Position / Role
+            </label>
+            <p className="text-xs text-zinc-500 dark:text-zinc-400">
+              Select position title or apply recommended template
+            </p>
+          </div>
 
-            <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap">
-              <select
+          <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap">
+            <div className="w-48 sm:w-56 shrink-0">
+              <Select
                 disabled={isPrimarySuperAdmin}
                 value={selectedRole}
-                onChange={(e) => handleRoleChange(e.target.value)}
-                className={`text-xs font-bold rounded-xl px-3 py-2 cursor-pointer border focus:outline-none focus:ring-2 focus:ring-emerald-500/30 ${
-                  isLight
-                    ? 'bg-zinc-50 border-zinc-300 text-zinc-900'
-                    : 'bg-zinc-900 border-zinc-700 text-zinc-100'
-                }`}
-              >
-                {ROLE_OPTIONS.map((opt) => (
-                  <option key={opt.value} value={opt.value}>
-                    {opt.label}
-                  </option>
-                ))}
-              </select>
-
-              <button
-                type="button"
-                onClick={handleApplyDefaults}
-                disabled={isPrimarySuperAdmin}
-                className={`px-3 py-2 text-xs font-bold rounded-xl border flex items-center gap-1.5 transition-all cursor-pointer active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed ${
-                  isLight
-                    ? 'bg-emerald-50 text-emerald-800 border-emerald-300 hover:bg-emerald-100'
-                    : 'bg-emerald-500/10 text-emerald-300 border-emerald-500/30 hover:bg-emerald-500/20'
-                }`}
-                title="Populate recommended actions for this position"
-              >
-                <Sparkles className="w-3.5 h-3.5" />
-                <span>Apply Recommended Defaults</span>
-              </button>
+                onChange={handleRoleChange}
+                options={ROLE_OPTIONS}
+                size="sm"
+              />
             </div>
+
+            <Button
+              type="button"
+              variant="secondary"
+              size="sm"
+              onClick={handleApplyDefaults}
+              disabled={isPrimarySuperAdmin}
+              leftIcon={<Sparkles className="w-3.5 h-3.5 text-emerald-500" />}
+              title="Populate recommended actions for this position"
+            >
+              <span>Apply Defaults</span>
+            </Button>
           </div>
         </div>
 
@@ -276,8 +239,8 @@ export default function UserPermissionsModal({
               <h4 className="text-xs font-bold uppercase tracking-wider text-zinc-600 dark:text-zinc-400">
                 Permitted Actions
               </h4>
-              <span className="text-[11px] text-zinc-500">
-                (Click any checkbox to grant or revoke specific actions)
+              <span className="text-[11px] text-zinc-400 hidden sm:inline">
+                (Click any card to grant or revoke specific actions)
               </span>
             </div>
 
@@ -302,7 +265,7 @@ export default function UserPermissionsModal({
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5">
             {ACTION_DEFINITIONS.map((action) => {
               const isEnabled = Boolean(permissions[action.key]);
 
@@ -310,41 +273,27 @@ export default function UserPermissionsModal({
                 <div
                   key={action.key}
                   onClick={() => handleToggleAction(action.key)}
-                  className={`p-3.5 rounded-2xl border transition-all cursor-pointer flex items-start gap-3 select-none ${
+                  className={`p-3 rounded-xl transition-all cursor-pointer flex items-start gap-3 select-none ${
                     isEnabled
-                      ? isLight
-                        ? 'bg-emerald-50/50 border-emerald-300 shadow-2xs'
-                        : 'bg-emerald-950/20 border-emerald-500/30 shadow-2xs'
-                      : isLight
-                      ? 'bg-white border-zinc-200 hover:border-zinc-300 opacity-75'
-                      : 'bg-zinc-900/60 border-zinc-800 hover:border-zinc-700 opacity-75'
+                      ? 'bg-emerald-500/10 text-zinc-950 dark:text-zinc-50 ring-1 ring-emerald-500/30'
+                      : 'bg-zinc-50/60 dark:bg-zinc-900/40 hover:bg-zinc-100/80 dark:hover:bg-zinc-850/60 text-zinc-800 dark:text-zinc-200 ring-1 ring-black/[0.04] dark:ring-white/[0.05]'
                   }`}
                 >
                   <input
                     type="checkbox"
                     checked={isEnabled}
                     disabled={isPrimarySuperAdmin}
-                    onChange={() => {}} // Handled by container onClick
-                    className="mt-0.5 w-4 h-4 text-emerald-600 rounded border-zinc-300 focus:ring-emerald-500/30 cursor-pointer"
+                    onChange={() => {}}
+                    className="mt-0.5 w-4 h-4 text-emerald-600 rounded border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 focus:ring-emerald-500 cursor-pointer"
                   />
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center justify-between gap-2">
-                      <span className={`text-xs font-bold ${isEnabled ? 'text-zinc-900 dark:text-zinc-100' : 'text-zinc-600 dark:text-zinc-400'}`}>
+                      <span className={`text-xs font-bold ${isEnabled ? 'text-zinc-950 dark:text-zinc-100' : 'text-zinc-800 dark:text-zinc-200'}`}>
                         {action.label}
                       </span>
-                      <span
-                        className={`text-[9px] font-bold uppercase px-1.5 py-0.5 rounded ${
-                          isEnabled
-                            ? isLight
-                              ? 'bg-emerald-100 text-emerald-800'
-                              : 'bg-emerald-500/20 text-emerald-300'
-                            : isLight
-                            ? 'bg-zinc-100 text-zinc-500'
-                            : 'bg-zinc-800 text-zinc-400'
-                        }`}
-                      >
+                      <Badge variant={isEnabled ? 'emerald' : 'neutral'} size="xs">
                         {isEnabled ? 'Enabled' : 'Disabled'}
-                      </span>
+                      </Badge>
                     </div>
                     <p className="text-[11px] text-zinc-500 dark:text-zinc-400 mt-1 leading-snug">
                       {action.description}
@@ -361,16 +310,10 @@ export default function UserPermissionsModal({
           <div
             className={`p-3.5 rounded-xl text-xs font-semibold flex items-center gap-2 ${
               feedback.type === 'success'
-                ? isLight
-                  ? 'bg-emerald-50 text-emerald-900 border border-emerald-200'
-                  : 'bg-emerald-500/10 text-emerald-300 border border-emerald-500/20'
+                ? 'bg-emerald-500/12 text-emerald-800 dark:text-emerald-300'
                 : feedback.type === 'error'
-                ? isLight
-                  ? 'bg-rose-50 text-rose-900 border border-rose-200'
-                  : 'bg-rose-500/10 text-rose-300 border border-rose-500/20'
-                : isLight
-                ? 'bg-blue-50 text-blue-900 border border-blue-200'
-                : 'bg-blue-500/10 text-blue-300 border border-blue-500/20'
+                ? 'bg-rose-500/12 text-rose-800 dark:text-rose-300'
+                : 'bg-blue-500/12 text-blue-800 dark:text-blue-300'
             }`}
           >
             {feedback.type === 'success' ? (
@@ -385,7 +328,7 @@ export default function UserPermissionsModal({
         )}
 
         {/* Footer Actions */}
-        <div className="flex items-center justify-between pt-2 border-t border-zinc-200 dark:border-zinc-800">
+        <div className="flex items-center justify-between pt-2">
           <Button
             type="button"
             variant="outline"

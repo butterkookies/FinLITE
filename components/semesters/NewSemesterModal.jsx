@@ -1,8 +1,8 @@
 'use client';
-import { useState, useRef, useEffect } from 'react';
-import { ArrowRight, Calendar, ChevronDown, Check, AlertCircle } from 'lucide-react';
+import { useState, useRef } from 'react';
+import { ArrowRight, Calendar, AlertCircle } from 'lucide-react';
 import { formatPHP } from '@/lib/utils/currency';
-import { Modal, Button, Badge, Input } from '@/components/ui';
+import { Modal, Button, Badge, Input, Select } from '@/components/ui';
 
 export default function NewSemesterModal({
   isOpen,
@@ -22,23 +22,11 @@ export default function NewSemesterModal({
   const [newSemester, setNewSemester] = useState(
     currentSemester?.semester === '2nd Sem' ? '1st Sem' : '2nd Sem'
   );
-  const [isSemesterOpen, setIsSemesterOpen] = useState(false);
-  const semesterRef = useRef(null);
   const academicYearInputRef = useRef(null);
   const [error, setError] = useState(null);
   const [shakeKey, setShakeKey] = useState(0);
 
   const [rolloverCash, setRolloverCash] = useState(true);
-
-  useEffect(() => {
-    function handleClickOutside(event) {
-      if (semesterRef.current && !semesterRef.current.contains(event.target)) {
-        setIsSemesterOpen(false);
-      }
-    }
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
 
   const endingCash = currentSummary?.cash_on_hand || 0;
 
@@ -70,12 +58,12 @@ export default function NewSemesterModal({
       onClose={onClose}
       title={
         <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
+          <div className="w-8 h-8 rounded-xl bg-emerald-500/12 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
             <Calendar className="w-4 h-4" />
           </div>
           <div>
             <h3 className="text-sm sm:text-base font-bold text-zinc-900 dark:text-zinc-100">
-              Start New Semester & Carry-Over
+              Start New Semester &amp; Carry-Over
             </h3>
             <p className="text-[11px] sm:text-xs text-zinc-500 dark:text-zinc-400 font-medium">
               Archive previous term and roll over verified ending funds
@@ -89,7 +77,7 @@ export default function NewSemesterModal({
       <form onSubmit={handleSubmit} noValidate className="p-5 sm:p-6 space-y-5 text-xs text-zinc-700 dark:text-zinc-300">
         
         {/* Ending Balance Summary Card */}
-        <div className="bg-zinc-50 dark:bg-zinc-900/40 border border-zinc-200 dark:border-zinc-800 rounded-2xl p-4 space-y-2.5">
+        <div className="bg-zinc-100/60 dark:bg-zinc-850/60 rounded-2xl p-4 space-y-2.5 ring-1 ring-black/[0.04] dark:ring-white/[0.06]">
           <div className="flex items-center justify-between">
             <span className="text-[11px] font-semibold text-zinc-700 dark:text-zinc-300 uppercase tracking-wider">
               Ending Balances: {currentSemester?.label}
@@ -99,7 +87,7 @@ export default function NewSemesterModal({
             </Badge>
           </div>
           <div className="pt-1">
-            <div className="bg-white dark:bg-[#121214] p-3.5 rounded-xl border border-zinc-200 dark:border-zinc-800 flex items-center justify-between">
+            <div className="bg-white/80 dark:bg-[#121214] p-3.5 rounded-xl shadow-xs ring-1 ring-black/[0.04] dark:ring-white/[0.06] flex items-center justify-between">
               <div>
                 <span className="text-[10px] text-zinc-500 dark:text-zinc-400 block font-semibold uppercase tracking-wider">Physical Cashbox Balance</span>
                 <span className="text-xs text-zinc-400">Locked drawer in Program Director's Room</span>
@@ -110,7 +98,7 @@ export default function NewSemesterModal({
             </div>
           </div>
           <p className="text-[11px] text-zinc-500 dark:text-zinc-400 leading-relaxed">
-            Ang mga transaksyon sa kasalukuyang semester ay mananatiling naka-save at ligtas sa archive.
+            Ang mga transaksyon sa kasalukuyang semester ay mananatiling ligtas at naka-save sa archive.
           </p>
         </div>
 
@@ -135,7 +123,7 @@ export default function NewSemesterModal({
                 }}
                 placeholder="e.g. 2026–2027"
                 aria-invalid={Boolean(error)}
-                className={error ? 'border-rose-500 focus:border-rose-500 focus:ring-rose-500/20' : ''}
+                className={error ? 'ring-2 ring-rose-500/50' : ''}
               />
               {error && (
                 <p className="text-xs font-semibold text-rose-600 dark:text-rose-400 mt-1.5 flex items-center gap-1.5 animate-in fade-in duration-150">
@@ -145,59 +133,35 @@ export default function NewSemesterModal({
               )}
             </div>
 
-            <div className="relative" ref={semesterRef}>
+            <div>
               <label className="block text-zinc-700 dark:text-zinc-300 font-semibold mb-1">
                 Semester
               </label>
-              <button
-                type="button"
-                onClick={() => setIsSemesterOpen(!isSemesterOpen)}
-                className="w-full h-9 px-3 bg-white dark:bg-[#121214] hover:bg-zinc-50 dark:hover:bg-zinc-800/60 active:bg-zinc-100 border border-zinc-200 dark:border-zinc-800 rounded-lg flex items-center justify-between text-zinc-900 dark:text-zinc-100 font-semibold text-xs transition-colors cursor-pointer text-left"
-              >
-                <span className="truncate">{newSemester}</span>
-                <ChevronDown className="w-3.5 h-3.5 text-zinc-400 shrink-0 ml-1" />
-              </button>
-
-              {isSemesterOpen && (
-                <div className="absolute left-0 right-0 mt-1 bg-white dark:bg-[#121214] border border-zinc-200 dark:border-zinc-800 rounded-xl shadow-lg py-1 z-50 animate-in fade-in zoom-in-95 duration-100">
-                  {['1st Sem', '2nd Sem', 'Summer'].map((s) => (
-                    <button
-                      key={s}
-                      type="button"
-                      onClick={() => {
-                        setNewSemester(s);
-                        setIsSemesterOpen(false);
-                      }}
-                      className={`w-full h-9 flex items-center justify-between px-3 text-xs text-left cursor-pointer transition-colors ${
-                        newSemester === s 
-                          ? 'bg-zinc-100 dark:bg-zinc-800 font-semibold text-zinc-950 dark:text-zinc-50' 
-                          : 'text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-800/50'
-                      }`}
-                    >
-                      <span>{s === '1st Sem' ? '1st Semester' : s === '2nd Sem' ? '2nd Semester' : 'Summer / Mid-Year'}</span>
-                      {newSemester === s && (
-                        <Check className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 shrink-0 ml-1" />
-                      )}
-                    </button>
-                  ))}
-                </div>
-              )}
+              <Select
+                value={newSemester}
+                onChange={setNewSemester}
+                options={[
+                  { value: '1st Sem', label: '1st Semester' },
+                  { value: '2nd Sem', label: '2nd Semester' },
+                  { value: 'Summer', label: 'Summer / Mid-Year' },
+                ]}
+              />
             </div>
           </div>
         </div>
 
-        {/* Balance Rollover Checkboxes */}
+        {/* Balance Rollover Options */}
         <div className="space-y-2.5 pt-1">
           <h4 className="font-bold text-zinc-900 dark:text-zinc-100 uppercase tracking-wider text-[11px]">
-            Carry-Over & Beginning Balance Options
+            Carry-Over &amp; Beginning Balance Options
           </h4>
 
-          <label className="flex items-start gap-2.5 p-3 bg-zinc-50 dark:bg-zinc-900/40 border border-zinc-200 dark:border-zinc-800 rounded-xl cursor-pointer hover:bg-zinc-100/70 dark:hover:bg-zinc-800/40 transition-colors">
+          <label className="flex items-start gap-2.5 p-3 bg-zinc-100/60 dark:bg-zinc-850/60 ring-1 ring-black/[0.04] dark:ring-white/[0.06] rounded-xl cursor-pointer hover:bg-zinc-100 dark:hover:bg-zinc-800/80 transition-colors">
             <input
               type="checkbox"
               checked={rolloverCash}
               onChange={(e) => setRolloverCash(e.target.checked)}
-              className="mt-0.5 rounded text-emerald-600 focus:ring-emerald-500 bg-white dark:bg-zinc-900 border-zinc-300 dark:border-zinc-700"
+              className="mt-0.5 rounded text-emerald-600 focus:ring-emerald-500/40 border-0 bg-zinc-200 dark:bg-zinc-700"
             />
             <div className="text-xs">
               <span className="font-semibold text-zinc-900 dark:text-zinc-100 block">
@@ -211,7 +175,7 @@ export default function NewSemesterModal({
         </div>
 
         {/* Action Buttons */}
-        <div className="pt-3 pb-safe sm:pb-0 flex items-center justify-end gap-2 border-t border-zinc-200 dark:border-zinc-800">
+        <div className="pt-3 pb-safe sm:pb-0 flex items-center justify-end gap-2">
           <Button
             type="button"
             variant="ghost"

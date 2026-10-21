@@ -3,6 +3,7 @@ import fs from 'fs';
 import path from 'path';
 import os from 'os';
 import { execFileSync } from 'child_process';
+import { createClient, createAdminClient } from '@/lib/supabase/server';
 import {
   AlignmentType,
   BorderStyle,
@@ -148,6 +149,78 @@ export async function POST(req) {
       receipts = [],
       includedSignatories = {},
     } = body;
+
+    // Authoritative server-side recalculation: if semester_id is supplied, query database directly
+    let authoritativeTransactions = Array.isArray(transactions) ? transactions : [];
+    let authoritativeSummary = { ...summary };
+
+    try {
+      const adminClient = createAdminClient();
+      const supabase = await createClient();
+      const db = adminClient || supabase;
+
+      const targetSemId = body.semester_id || body.semesterId;
+      if (db && targetSemId && typeof targetSemId === 'string' && !targetSemId.startsWith('sem-')) {
+        const { data: dbTxs } = await db
+          .from('transactions')
+          .select(`
+            id, title, description, amount, type, transaction_date, event_name, status,
+            is_reimbursement, reimbursement_recipient, advanced_by_name,
+            categories (id, name, type),
+            transaction_receipts (id, public_url, sort_order)
+          `)
+          .eq('semester_id', targetSemId)
+          .eq('status', 'COMPLETED')
+          .order('transaction_date', { ascending: true });
+
+        if (Array.isArray(dbTxs) && dbTxs.length > 0) {
+          authoritativeTransactions = dbTxs.map((t) => ({
+            id: t.id,
+            title: t.title,
+            description: t.description,
+            amount: Number(t.amount || 0),
+            type: t.type,
+            date: t.transaction_date,
+            transaction_date: t.transaction_date,
+            category_name: t.categories?.name || (t.type === 'INFLOW' ? 'Revenue' : 'Disbursement'),
+            is_reimbursement: t.is_reimbursement,
+            reimbursement_recipient: t.reimbursement_recipient,
+            advanced_by_name: t.advanced_by_name,
+            event_name: t.event_name,
+            receipt_url: t.transaction_receipts?.[0]?.public_url || null,
+            receipt_urls: (t.transaction_receipts || []).map((r) => r.public_url),
+          }));
+
+          let sumInflows = 0;
+          let sumOutflows = 0;
+          authoritativeTransactions.forEach((t) => {
+            if (t.type === 'INFLOW') sumInflows += t.amount;
+            if (t.type === 'OUTFLOW') sumOutflows += t.amount;
+          });
+
+          const { data: abonoRows } = await db
+            .from('advances_payable')
+            .select('total_amount, amount_reimbursed')
+            .eq('semester_id', targetSemId)
+            .in('status', ['UNPAID', 'PARTIALLY_REIMBURSED']);
+
+          let sumPendingAbono = 0;
+          (abonoRows || []).forEach((a) => {
+            sumPendingAbono += Number(a.total_amount || 0) - Number(a.amount_reimbursed || 0);
+          });
+
+          authoritativeSummary = {
+            total_inflows: sumInflows,
+            total_outflows: sumOutflows,
+            cash_on_hand: sumInflows - sumOutflows,
+            net_balance: sumInflows - sumOutflows,
+            pending_reimbursements: sumPendingAbono,
+          };
+        }
+      }
+    } catch (dbErr) {
+      console.warn('DOCX authoritative resolution notice:', dbErr?.message);
+    }
 
     // 0. Pre-fetch receipt images with 3-second AbortController timeout & fallback PNG
     if ((receiptsMode === 'APPEND' || receiptsMode === 'STANDALONE') && Array.isArray(receipts) && receipts.length > 0) {
@@ -802,8 +875,11 @@ export async function POST(req) {
         }),
       ];
 
-      transactions.forEach((tx) => {
+      authoritativeTransactions.forEach((tx) => {
         const isInflow = tx.type === 'INFLOW';
+        const proxyNote = (tx.advanced_by_name && tx.reimbursement_recipient && tx.advanced_by_name !== tx.reimbursement_recipient)
+          ? ` [Proxy: Paid by ${tx.advanced_by_name}, Claimed by ${tx.reimbursement_recipient}]`
+          : '';
         tableRows.push(
           new TableRow({
             children: [
@@ -813,7 +889,10 @@ export async function POST(req) {
               }),
               new TableCell({
                 borders: borderNone,
-                children: [new Paragraph({ children: [new TextRun({ text: tx.title || 'Transaction', font: 'Calibri' })] })],
+                children: [new Paragraph({ children: [
+                  new TextRun({ text: (tx.title || 'Transaction'), font: 'Calibri' }),
+                  ...(proxyNote ? [new TextRun({ text: proxyNote, italics: true, color: '666666', font: 'Calibri', size: 18 })] : []),
+                ] })],
               }),
               new TableCell({
                 borders: borderNone,
@@ -865,7 +944,7 @@ export async function POST(req) {
                   alignment: AlignmentType.RIGHT,
                   children: [
                     new TextRun({
-                      text: `₱${(summary.total_inflows || 0).toLocaleString('en-PH', { minimumFractionDigits: 2 })}`,
+                      text: `₱${(authoritativeSummary.total_inflows || 0).toLocaleString('en-PH', { minimumFractionDigits: 2 })}`,
                       bold: true,
                       font: 'Calibri',
                     }),
@@ -880,7 +959,7 @@ export async function POST(req) {
                   alignment: AlignmentType.RIGHT,
                   children: [
                     new TextRun({
-                      text: `₱${(summary.total_outflows || 0).toLocaleString('en-PH', { minimumFractionDigits: 2 })}`,
+                      text: `₱${(authoritativeSummary.total_outflows || 0).toLocaleString('en-PH', { minimumFractionDigits: 2 })}`,
                       bold: true,
                       font: 'Calibri',
                     }),
@@ -911,7 +990,7 @@ export async function POST(req) {
                   alignment: AlignmentType.RIGHT,
                   children: [
                     new TextRun({
-                      text: `₱${(summary.cash_on_hand || 0).toLocaleString('en-PH', { minimumFractionDigits: 2 })}`,
+                      text: `₱${(authoritativeSummary.cash_on_hand || 0).toLocaleString('en-PH', { minimumFractionDigits: 2 })}`,
                       bold: true,
                       font: 'Calibri',
                     }),
@@ -953,11 +1032,11 @@ export async function POST(req) {
           children: [
             new TextRun({ text: `Transmittal Date: `, bold: true, font: 'Calibri' }),
             new TextRun({ text: `${transmittalDate}\n`, font: 'Calibri' }),
-            new TextRun({ text: `Total Inflows (Revenue): ₱${(summary.total_inflows || 0).toLocaleString('en-PH', { minimumFractionDigits: 2 })}\n`, font: 'Calibri' }),
-            new TextRun({ text: `Total Outflows (Disbursements): ₱${(summary.total_outflows || 0).toLocaleString('en-PH', { minimumFractionDigits: 2 })}\n`, font: 'Calibri' }),
-            new TextRun({ text: `Net Balance Remaining: ₱${((summary.total_inflows || 0) - (summary.total_outflows || 0)).toLocaleString('en-PH', { minimumFractionDigits: 2 })}\n`, font: 'Calibri', bold: true }),
-            new TextRun({ text: `Physical Cash-on-Hand: ₱${(summary.cash_on_hand || 0).toLocaleString('en-PH', { minimumFractionDigits: 2 })}\n`, font: 'Calibri' }),
-            new TextRun({ text: `Pending Advances (Abono): ₱${(summary.pending_reimbursements || 0).toLocaleString('en-PH', { minimumFractionDigits: 2 })}`, font: 'Calibri' }),
+            new TextRun({ text: `Total Inflows (Revenue): ₱${(authoritativeSummary.total_inflows || 0).toLocaleString('en-PH', { minimumFractionDigits: 2 })}\n`, font: 'Calibri' }),
+            new TextRun({ text: `Total Outflows (Disbursements): ₱${(authoritativeSummary.total_outflows || 0).toLocaleString('en-PH', { minimumFractionDigits: 2 })}\n`, font: 'Calibri' }),
+            new TextRun({ text: `Net Balance Remaining: ₱${((authoritativeSummary.total_inflows || 0) - (authoritativeSummary.total_outflows || 0)).toLocaleString('en-PH', { minimumFractionDigits: 2 })}\n`, font: 'Calibri', bold: true }),
+            new TextRun({ text: `Physical Cash-on-Hand: ₱${(authoritativeSummary.cash_on_hand || 0).toLocaleString('en-PH', { minimumFractionDigits: 2 })}\n`, font: 'Calibri' }),
+            new TextRun({ text: `Pending Advances (Abono): ₱${(authoritativeSummary.pending_reimbursements || 0).toLocaleString('en-PH', { minimumFractionDigits: 2 })}`, font: 'Calibri' }),
           ],
         }),
         new Paragraph({ text: '' }),

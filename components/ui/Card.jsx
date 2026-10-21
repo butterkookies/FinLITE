@@ -8,7 +8,7 @@ export const Card = forwardRef(function Card({ className, ...props }, ref) {
     <div
       ref={ref}
       className={cn(
-        'rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-[#121214] text-zinc-950 dark:text-zinc-100 shadow-xs transition-colors',
+        'rounded-2xl bg-white dark:bg-[#121214] text-zinc-950 dark:text-zinc-100 shadow-sm shadow-zinc-950/5 ring-1 ring-black/[0.04] dark:ring-white/[0.06] transition-all',
         className
       )}
       {...props}
@@ -66,9 +66,7 @@ export const CardContent = forwardRef(function CardContent(
   { className, ...props },
   ref
 ) {
-  return (
-    <div ref={ref} className={cn('p-4 sm:p-5 pt-0', className)} {...props} />
-  );
+  return <div ref={ref} className={cn('p-4 sm:p-5 pt-0', className)} {...props} />;
 });
 CardContent.displayName = 'CardContent';
 
@@ -79,7 +77,10 @@ export const CardFooter = forwardRef(function CardFooter(
   return (
     <div
       ref={ref}
-      className={cn('flex items-center p-4 sm:p-5 pt-0', className)}
+      className={cn(
+        'flex items-center p-4 sm:p-5 pt-0 text-xs text-zinc-500 dark:text-zinc-400',
+        className
+      )}
       {...props}
     />
   );

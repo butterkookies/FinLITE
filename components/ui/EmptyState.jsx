@@ -16,12 +16,12 @@ export default function EmptyState({
   return (
     <div
       className={cn(
-        'flex flex-col items-center justify-center p-8 sm:p-12 text-center rounded-xl border border-dashed border-zinc-200 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-900/20',
+        'flex flex-col items-center justify-center p-8 sm:p-12 text-center rounded-2xl bg-zinc-50/70 dark:bg-zinc-900/30 ring-1 ring-black/[0.03] dark:ring-white/[0.05]',
         className
       )}
     >
       {icon && (
-        <div className="w-12 h-12 rounded-2xl bg-zinc-100 dark:bg-zinc-800/80 border border-zinc-200 dark:border-zinc-700/60 flex items-center justify-center text-zinc-500 dark:text-zinc-400 mb-4 shrink-0 shadow-2xs">
+        <div className="w-12 h-12 rounded-2xl bg-zinc-100 dark:bg-zinc-850 flex items-center justify-center text-zinc-500 dark:text-zinc-400 mb-4 shrink-0 shadow-xs ring-1 ring-black/[0.04] dark:ring-white/[0.06]">
           {icon}
         </div>
       )}

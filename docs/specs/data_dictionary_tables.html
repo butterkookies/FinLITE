@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>FinLITE 18 Tables Data Dictionary</title>
+<style>
+  body {
+    font-family: 'Times New Roman', Times, serif;
+    font-size: 12pt;
+    line-height: 1.5;
+    margin: 40px;
+    color: #000;
+  }
+  h2 {
+    text-align: center;
+    font-size: 14pt;
+    font-weight: bold;
+    margin-top: 30px;
+    margin-bottom: 8px;
+  }
+  p.intro {
+    text-align: justify;
+    text-indent: 0.5in;
+    margin-bottom: 24px;
+  }
+  .table-title {
+    text-align: center;
+    font-weight: bold;
+    margin-top: 24px;
+    margin-bottom: 6px;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 30px;
+    font-size: 11pt;
+    table-layout: auto;
+  }
+  th, td {
+    border: 1px solid #000;
+    padding: 5px 6px;
+    vertical-align: middle;
+  }
+  th {
+    background-color: #f2f2f2;
+    text-align: center;
+    font-weight: bold;
+    padding: 6px 6px;
+  }
+  th:nth-child(1), td:nth-child(1) {
+    width: 20%;
+  }
+  th:nth-child(2), td:nth-child(2) {
+    width: 20%;
+    white-space: nowrap;
+  }
+  th:nth-child(3), td:nth-child(3) {
+    width: 15%;
+    white-space: nowrap;
+    text-align: center;
+  }
+  th:nth-child(4), td:nth-child(4) {
+    width: 8%;
+    white-space: nowrap;
+    text-align: center;
+  }
+  th:nth-child(5), td:nth-child(5) {
+    width: 37%;
+  }
+  td.center {
+    text-align: center;
+  }
+</style>
+</head>
+<body>
+
+<p class="intro">The data dictionary contains the collection and description of data in the database. It comprises the field name, field type, required, key, and domain</p>
+
+<!-- Table 1: Profiles -->
+<div class="table-title">Table 1: Profiles</div>
+<table>
+  <thead>
+    <tr>
+      <th class="col-field" width="20%" style="width: 20%;">Field</th>
+      <th class="col-type" width="20%" style="width: 20%; white-space: nowrap;">Type/Length</th>
+      <th class="col-required" width="15%" style="width: 15%; white-space: nowrap;">Required</th>
+      <th class="col-key" width="8%" style="width: 8%; white-space: nowrap;">Key</th>
+      <th class="col-domain" width="37%" style="width: 37%;">Domain</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr><td>id</td><td>uuid</td><td class="center">YES</td><td class="center">PK</td><td>The unique ID of the profile record.</td></tr>
+    <tr><td>auth_user_id</td><td>uuid</td><td class="center">YES</td><td class="center">UK</td><td>The foreign ID referencing auth.users.</td></tr>
+    <tr><td>full_name</td><td>varchar(150)</td><td class="center">YES</td><td class="center"></td><td>The full name of the user.</td></tr>
+    <tr><td>email</td><td>varchar(255)</td><td class="center">YES</td><td class="center">UK</td><td>The email address of the user.</td></tr>
+    <tr><td>role</td><td>varchar(20)</td><td class="center">YES</td><td class="center"></td><td>The system role of the user.</td></tr>
+    <tr><td>status</td><td>varchar(20)</td><td class="center">YES</td><td class="center"></td><td>The account approval status.</td></tr>
+    <tr><td>can_record_inflows</td><td>boolean</td><td class="center">YES</td><td class="center"></td><td>Flag allowing inflow entry.</td></tr>
+    <tr><td>can_record_outflows</td><td>boolean</td><td class="center">YES</td><td class="center"></td><td>Flag allowing outflow entry.</td></tr>
+    <tr><td>can_edit_transactions</td><td>boolean</td><td class="center">YES</td><td class="center"></td><td>Flag allowing transaction edits.</td></tr>
+    <tr><td>can_audit_transactions</td><td>boolean</td><td class="center">YES</td><td class="center"></td><td>Flag allowing transaction audits.</td></tr>
+    <tr><td>can_manage_debts</td><td>boolean</td><td class="center">YES</td><td class="center"></td><td>Flag allowing debt management.</td></tr>
+    <tr><td>can_manage_advances</td><td>boolean</td><td class="center">YES</td><td class="center"></td><td>Flag allowing advance management.</td></tr>
+    <tr><td>can_reconcile_cash</td><td>boolean</td><td class="center">YES</td><td class="center"></td><td>Flag allowing cash reconciliation.</td></tr>
+    <tr><td>can_generate_reports</td><td>boolean</td><td class="center">YES</td><td class="center"></td><td>Flag allowing report generation.</td></tr>
+    <tr><td>avatar_url</td><td>text</td><td class="center">NO</td><td class="center"></td><td>The profile image URL.</td></tr>
+    <tr><td>created_at</td><td>timestamptz</td><td class="center">YES</td><td class="center"></td><td>The date and time registered.</td></tr>
+    <tr><td>updated_at</td><td>timestamptz</td><td class="center">YES</td><td class="center"></td><td>The date and time last modified.</td></tr>
+  </tbody>
+</table>
+
+<!-- Table 2: Registration_Requests -->
+<div class="table-title">Table 2: Registration_Requests</div>
+<table>
+  <thead>
+    <tr>
+      <th class="col-field" width="20%" style="width: 20%;">Field</th>
+      <th class="col-type" width="20%" style="width: 20%; white-space: nowrap;">Type/Length</th>
+      <th class="col-required" width="15%" style="width: 15%; white-space: nowrap;">Required</th>
+      <th class="col-key" width="8%" style="width: 8%; white-space: nowrap;">Key</th>
+      <th class="col-domain" width="37%" style="width: 37%;">Domain</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr><td>id</td><td>uuid</td><td class="center">YES</td><td class="center">PK</td><td>The unique ID of the request.</td></tr>
+    <tr><td>first_name</td><td>varchar(100)</td><td class="center">YES</td><td class="center"></td><td>The first name of the applicant.</td></tr>
+    <tr><td>last_name</td><td>varchar(100)</td><td class="center">YES</td><td class="center"></td><td>The last name of the applicant.</td></tr>
+    <tr><td>email</td><td>varchar(255)</td><td class="center">YES</td><td class="center">UK</td><td>The email address of the applicant.</td></tr>
+    <tr><td>contact_number</td><td>varchar(20)</td><td class="center">NO</td><td class="center"></td><td>The contact number of the applicant.</td></tr>
+    <tr><td>auth_provider</td><td>varchar(20)</td><td class="center">YES</td><td class="center"></td><td>The sign-in method ('email' or 'google').</td></tr>
+    <tr><td>google_id</td><td>varchar(100)</td><td class="center">NO</td><td class="center"></td><td>The Google subject identifier.</td></tr>
+    <tr><td>avatar_url</td><td>text</td><td class="center">NO</td><td class="center"></td><td>The avatar photo URL.</td></tr>
+    <tr><td>status</td><td>varchar(20)</td><td class="center">YES</td><td class="center"></td><td>The approval status ('pending', 'approved', 'rejected').</td></tr>
+    <tr><td>rejection_reason</td><td>text</td><td class="center">NO</td><td class="center"></td><td>The reason for application rejection.</td></tr>
+    <tr><td>requested_role</td><td>varchar(20)</td><td class="center">YES</td><td class="center"></td><td>The requested user role.</td></tr>
+    <tr><td>reviewed_by</td><td>uuid</td><td class="center">NO</td><td class="center">FK</td><td>The ID of the reviewing adviser.</td></tr>
+    <tr><td>reviewed_at</td><td>timestamptz</td><td class="center">NO</td><td class="center"></td><td>The date and time reviewed.</td></tr>
+    <tr><td>created_at</td><td>timestamptz</td><td class="center">YES</td><td class="center"></td><td>The date and time submitted.</td></tr>
+    <tr><td>updated_at</td><td>timestamptz</td><td class="center">YES</td><td class="center"></td><td>The date and time last modified.</td></tr>
+  </tbody>
+</table>
+
+<!-- Table 3: Auth_Security_State -->
+<div class="table-title">Table 3: Auth_Security_State</div>
+<table>
+  <thead>
+    <tr>
+      <th class="col-field" width="20%" style="width: 20%;">Field</th>
+      <th class="col-type" width="20%" style="width: 20%; white-space: nowrap;">Type/Length</th>
+      <th class="col-required" width="15%" style="width: 15%; white-space: nowrap;">Required</th>
+      <th class="col-key" width="8%" style="width: 8%; white-space: nowrap;">Key</th>
+      <th class="col-domain" width="37%" style="width: 37%;">Domain</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr><td>auth_user_id</td><td>uuid</td><td class="center">YES</td><td class="center">PK</td><td>The user ID referencing auth.users.</td></tr>
+    <tr><td>password_enroll_until</td><td>timestamptz</td><td class="center">NO</td><td class="center"></td><td>Expiration timestamp for setting password.</td></tr>
+    <tr><td>google_link_until</td><td>timestamptz</td><td class="center">NO</td><td class="center"></td><td>Expiration timestamp for linking Google.</td></tr>
+    <tr><td>password_set_at</td><td>timestamptz</td><td class="center">NO</td><td class="center"></td><td>The date and time password was set.</td></tr>
+    <tr><td>google_linked_at</td><td>timestamptz</td><td class="center">NO</td><td class="center"></td><td>The date and time Google was linked.</td></tr>
+    <tr><td>updated_at</td><td>timestamptz</td><td class="center">YES</td><td class="center"></td><td>The date and time last updated.</td></tr>
+  </tbody>
+</table>
+
+<!-- Table 4: Email_Verification_OTPs -->
+<div class="table-title">Table 4: Email_Verification_OTPs</div>
+<table>
+  <thead>
+    <tr>
+      <th class="col-field" width="20%" style="width: 20%;">Field</th>
+      <th class="col-type" width="20%" style="width: 20%; white-space: nowrap;">Type/Length</th>
+      <th class="col-required" width="15%" style="width: 15%; white-space: nowrap;">Required</th>
+      <th class="col-key" width="8%" style="width: 8%; white-space: nowrap;">Key</th>
+      <th class="col-domain" width="37%" style="width: 37%;">Domain</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr><td>id</td><td>uuid</td><td class="center">YES</td><td class="center">PK</td><td>The unique ID of the OTP record.</td></tr>
+    <tr><td>email</td><td>varchar(255)</td><td class="center">YES</td><td class="center"></td><td>The email address receiving the OTP.</td></tr>
+    <tr><td>code</td><td>varchar(6)</td><td class="center">YES</td><td class="center"></td><td>The 6-digit verification code.</td></tr>
+    <tr><td>purpose</td><td>varchar(30)</td><td class="center">YES</td><td class="center"></td><td>The purpose ('registration' or 'password_reset').</td></tr>
+    <tr><td>expires_at</td><td>timestamptz</td><td class="center">YES</td><td class="center"></td><td>The expiration date and time.</td></tr>
+    <tr><td>used</td><td>boolean</td><td class="center">YES</td><td class="center"></td><td>Flag indicating if code was used.</td></tr>
+    <tr><td>created_at</td><td>timestamptz</td><td class="center">YES</td><td class="center"></td><td>The date and time code was created.</td></tr>
+  </tbody>
+</table>
+
+<!-- Table 5: Semesters -->
+<div class="table-title">Table 5: Semesters</div>
+<table>
+  <thead>
+    <tr>
+      <th class="col-field" width="20%" style="width: 20%;">Field</th>
+      <th class="col-type" width="20%" style="width: 20%; white-space: nowrap;">Type/Length</th>
+      <th class="col-required" width="15%" style="width: 15%; white-space: nowrap;">Required</th>
+      <th class="col-key" width="8%" style="width: 8%; white-space: nowrap;">Key</th>
+      <th class="col-domain" width="37%" style="width: 37%;">Domain</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr><td>id</td><td>uuid</td><td class="center">YES</td><td class="center">PK</td><td>The unique ID of the semester record.</td></tr>
+    <tr><td>academic_year</td><td>varchar(20)</td><td class="center">YES</td><td class="center"></td><td>The academic school year.</td></tr>
+    <tr><td>semester</td><td>varchar(20)</td><td class="center">YES</td><td class="center"></td><td>The semester term name.</td></tr>
+    <tr><td>label</td><td>varchar(100)</td><td class="center">YES</td><td class="center"></td><td>The display label of the semester.</td></tr>
+    <tr><td>starting_cash_on_hand</td><td>decimal(12,2)</td><td class="center">YES</td><td class="center"></td><td>The opening cashbox balance.</td></tr>
+    <tr><td>is_active</td><td>boolean</td><td class="center">YES</td><td class="center"></td><td>Flag indicating the active semester.</td></tr>
+    <tr><td>created_at</td><td>timestamptz</td><td class="center">YES</td><td class="center"></td><td>The date and time created.</td></tr>
+  </tbody>
+</table>
+
+<!-- Table 6: Semester_Signatories -->
+<div class="table-title">Table 6: Semester_Signatories</div>
+<table>
+  <thead>
+    <tr>
+      <th class="col-field" width="20%" style="width: 20%;">Field</th>
+      <th class="col-type" width="20%" style="width: 20%; white-space: nowrap;">Type/Length</th>
+      <th class="col-required" width="15%" style="width: 15%; white-space: nowrap;">Required</th>
+      <th class="col-key" width="8%" style="width: 8%; white-space: nowrap;">Key</th>
+      <th class="col-domain" width="37%" style="width: 37%;">Domain</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr><td>id</td><td>uuid</td><td class="center">YES</td><td class="center">PK</td><td>The unique ID of the signatory record.</td></tr>
+    <tr><td>academic_year</td><td>varchar(20)</td><td class="center">YES</td><td class="center"></td><td>The academic school year.</td></tr>
+    <tr><td>semester</td><td>varchar(20)</td><td class="center">YES</td><td class="center"></td><td>The semester term name.</td></tr>
+    <tr><td>role_key</td><td>varchar(50)</td><td class="center">YES</td><td class="center"></td><td>The role identifier of the signatory.</td></tr>
+    <tr><td>name</td><td>varchar(150)</td><td class="center">YES</td><td class="center"></td><td>The full name of the signatory.</td></tr>
+    <tr><td>position_title</td><td>varchar(150)</td><td class="center">YES</td><td class="center"></td><td>The official institutional title.</td></tr>
+    <tr><td>category</td><td>varchar(20)</td><td class="center">YES</td><td class="center"></td><td>The signatory tier ('OFFICER', 'ADVISER', 'ADMIN').</td></tr>
+    <tr><td>sort_order</td><td>int</td><td class="center">YES</td><td class="center"></td><td>The display order on reports.</td></tr>
+    <tr><td>is_active</td><td>boolean</td><td class="center">YES</td><td class="center"></td><td>Flag indicating if signatory is active.</td></tr>
+    <tr><td>created_at</td><td>timestamptz</td><td class="center">YES</td><td class="center"></td><td>The date and time created.</td></tr>
+    <tr><td>updated_at</td><td>timestamptz</td><td class="center">YES</td><td class="center"></td><td>The date and time last updated.</td></tr>
+  </tbody>
+</table>
+
+<!-- Table 7: Categories -->
+<div class="table-title">Table 7: Categories</div>
+<table>
+  <thead>
+    <tr>
+      <th class="col-field" width="20%" style="width: 20%;">Field</th>
+      <th class="col-type" width="20%" style="width: 20%; white-space: nowrap;">Type/Length</th>
+      <th class="col-required" width="15%" style="width: 15%; white-space: nowrap;">Required</th>
+      <th class="col-key" width="8%" style="width: 8%; white-space: nowrap;">Key</th>
+      <th class="col-domain" width="37%" style="width: 37%;">Domain</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr><td>id</td><td>uuid</td><td class="center">YES</td><td class="center">PK</td><td>The unique ID of the category record.</td></tr>
+    <tr><td>name</td><td>varchar(100)</td><td class="center">YES</td><td class="center"></td><td>The name of the category.</td></tr>
+    <tr><td>type</td><td>varchar(10)</td><td class="center">YES</td><td class="center"></td><td>The category type ('INFLOW' or 'OUTFLOW').</td></tr>
+    <tr><td>description</td><td>text</td><td class="center">NO</td><td class="center"></td><td>The description of the category.</td></tr>
+    <tr><td>created_at</td><td>timestamptz</td><td class="center">YES</td><td class="center"></td><td>The date and time created.</td></tr>
+  </tbody>
+</table>
+
+<!-- Table 8: Transactions -->
+<div class="table-title">Table 8: Transactions</div>
+<table>
+  <thead>
+    <tr>
+      <th class="col-field" width="20%" style="width: 20%;">Field</th>
+      <th class="col-type" width="20%" style="width: 20%; white-space: nowrap;">Type/Length</th>
+      <th class="col-required" width="15%" style="width: 15%; white-space: nowrap;">Required</th>
+      <th class="col-key" width="8%" style="width: 8%; white-space: nowrap;">Key</th>
+      <th class="col-domain" width="37%" style="width: 37%;">Domain</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr><td>id</td><td>uuid</td><td class="center">YES</td><td class="center">PK</td><td>The unique ID of the transaction record.</td></tr>
+    <tr><td>semester_id</td><td>uuid</td><td class="center">YES</td><td class="center">FK</td><td>The semester ID referencing Semesters.</td></tr>
+    <tr><td>title</td><td>varchar(255)</td><td class="center">YES</td><td class="center"></td><td>The title of the transaction.</td></tr>
+    <tr><td>description</td><td>text</td><td class="center">NO</td><td class="center"></td><td>The description of the transaction.</td></tr>
+    <tr><td>amount</td><td>decimal(12,2)</td><td class="center">YES</td><td class="center"></td><td>The monetary amount in pesos.</td></tr>
+    <tr><td>type</td><td>varchar(10)</td><td class="center">YES</td><td class="center"></td><td>The transaction type ('INFLOW' or 'OUTFLOW').</td></tr>
+    <tr><td>payment_method</td><td>varchar(20)</td><td class="center">YES</td><td class="center"></td><td>The payment method ('CASH').</td></tr>
+    <tr><td>category_id</td><td>uuid</td><td class="center">NO</td><td class="center">FK</td><td>The category ID referencing Categories.</td></tr>
+    <tr><td>logged_by</td><td>uuid</td><td class="center">NO</td><td class="center">FK</td><td>The user ID who encoded the entry.</td></tr>
+    <tr><td>transaction_date</td><td>date</td><td class="center">YES</td><td class="center"></td><td>The date of the transaction.</td></tr>
+    <tr><td>status</td><td>varchar(20)</td><td class="center">YES</td><td class="center"></td><td>The audit status ('PENDING', 'VERIFIED', 'REVISION_REQUIRED').</td></tr>
+    <tr><td>audited_by</td><td>uuid</td><td class="center">NO</td><td class="center">FK</td><td>The auditor ID who verified the entry.</td></tr>
+    <tr><td>audited_at</td><td>timestamptz</td><td class="center">NO</td><td class="center"></td><td>The date and time audited.</td></tr>
+    <tr><td>is_reimbursement</td><td>boolean</td><td class="center">YES</td><td class="center"></td><td>Flag indicating advance reimbursement.</td></tr>
+    <tr><td>payer_name</td><td>varchar(150)</td><td class="center">NO</td><td class="center"></td><td>The name of the payer.</td></tr>
+    <tr><td>claimant_name</td><td>varchar(150)</td><td class="center">NO</td><td class="center"></td><td>The name of the reimbursement claimant.</td></tr>
+    <tr><td>notes</td><td>text</td><td class="center">NO</td><td class="center"></td><td>Additional transaction notes.</td></tr>
+    <tr><td>created_at</td><td>timestamptz</td><td class="center">YES</td><td class="center"></td><td>The date and time created.</td></tr>
+    <tr><td>updated_at</td><td>timestamptz</td><td class="center">YES</td><td class="center"></td><td>The date and time last updated.</td></tr>
+  </tbody>
+</table>
+
+<!-- Table 9: Transaction_Receipts -->
+<div class="table-title">Table 9: Transaction_Receipts</div>
+<table>
+  <thead>
+    <tr>
+      <th class="col-field" width="20%" style="width: 20%;">Field</th>
+      <th class="col-type" width="20%" style="width: 20%; white-space: nowrap;">Type/Length</th>
+      <th class="col-required" width="15%" style="width: 15%; white-space: nowrap;">Required</th>
+      <th class="col-key" width="8%" style="width: 8%; white-space: nowrap;">Key</th>
+      <th class="col-domain" width="37%" style="width: 37%;">Domain</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr><td>id</td><td>uuid</td><td class="center">YES</td><td class="center">PK</td><td>The unique ID of the receipt record.</td></tr>
+    <tr><td>transaction_id</td><td>uuid</td><td class="center">YES</td><td class="center">FK</td><td>The transaction ID referencing Transactions.</td></tr>
+    <tr><td>public_url</td><td>text</td><td class="center">YES</td><td class="center"></td><td>The public image URL of the receipt.</td></tr>
+    <tr><td>file_path</td><td>text</td><td class="center">NO</td><td class="center"></td><td>The file path in cloud storage.</td></tr>
+    <tr><td>file_name</td><td>varchar(255)</td><td class="center">NO</td><td class="center"></td><td>The original file name.</td></tr>
+    <tr><td>file_size</td><td>int</td><td class="center">NO</td><td class="center"></td><td>The file size in bytes.</td></tr>
+    <tr><td>mime_type</td><td>varchar(50)</td><td class="center">NO</td><td class="center"></td><td>The MIME type of the file.</td></tr>
+    <tr><td>sort_order</td><td>int</td><td class="center">YES</td><td class="center"></td><td>The display sequence number.</td></tr>
+    <tr><td>created_at</td><td>timestamptz</td><td class="center">YES</td><td class="center"></td><td>The date and time uploaded.</td></tr>
+  </tbody>
+</table>
+
+<!-- Table 10: Transaction_Comments -->
+<div class="table-title">Table 10: Transaction_Comments</div>
+<table>
+  <thead>
+    <tr>
+      <th class="col-field" width="20%" style="width: 20%;">Field</th>
+      <th class="col-type" width="20%" style="width: 20%; white-space: nowrap;">Type/Length</th>
+      <th class="col-required" width="15%" style="width: 15%; white-space: nowrap;">Required</th>
+      <th class="col-key" width="8%" style="width: 8%; white-space: nowrap;">Key</th>
+      <th class="col-domain" width="37%" style="width: 37%;">Domain</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr><td>id</td><td>uuid</td><td class="center">YES</td><td class="center">PK</td><td>The unique ID of the comment record.</td></tr>
+    <tr><td>transaction_id</td><td>uuid</td><td class="center">YES</td><td class="center">FK</td><td>The transaction ID referencing Transactions.</td></tr>
+    <tr><td>author_id</td><td>uuid</td><td class="center">NO</td><td class="center">FK</td><td>The user ID of the comment author.</td></tr>
+    <tr><td>comment_text</td><td>text</td><td class="center">YES</td><td class="center"></td><td>The text content of the audit remark.</td></tr>
+    <tr><td>created_at</td><td>timestamptz</td><td class="center">YES</td><td class="center"></td><td>The date and time commented.</td></tr>
+    <tr><td>updated_at</td><td>timestamptz</td><td class="center">YES</td><td class="center"></td><td>The date and time last updated.</td></tr>
+  </tbody>
+</table>
+
+<!-- Table 11: Advances_Payable -->
+<div class="table-title">Table 11: Advances_Payable</div>
+<table>
+  <thead>
+    <tr>
+      <th class="col-field" width="20%" style="width: 20%;">Field</th>
+      <th class="col-type" width="20%" style="width: 20%; white-space: nowrap;">Type/Length</th>
+      <th class="col-required" width="15%" style="width: 15%; white-space: nowrap;">Required</th>
+      <th class="col-key" width="8%" style="width: 8%; white-space: nowrap;">Key</th>
+      <th class="col-domain" width="37%" style="width: 37%;">Domain</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr><td>id</td><td>uuid</td><td class="center">YES</td><td class="center">PK</td><td>The unique ID of the advance claim.</td></tr>
+    <tr><td>semester_id</td><td>uuid</td><td class="center">YES</td><td class="center">FK</td><td>The semester ID referencing Semesters.</td></tr>
+    <tr><td>claimant_name</td><td>varchar(150)</td><td class="center">YES</td><td class="center"></td><td>The name of the advance claimant.</td></tr>
+    <tr><td>claimant_contact</td><td>varchar(50)</td><td class="center">NO</td><td class="center"></td><td>The contact details of the claimant.</td></tr>
+    <tr><td>title</td><td>varchar(255)</td><td class="center">YES</td><td class="center"></td><td>The title of the advance claim.</td></tr>
+    <tr><td>category_id</td><td>uuid</td><td class="center">NO</td><td class="center">FK</td><td>The category ID referencing Categories.</td></tr>
+    <tr><td>event_name</td><td>varchar(150)</td><td class="center">NO</td><td class="center"></td><td>The name of the associated event.</td></tr>
+    <tr><td>total_amount</td><td>decimal(12,2)</td><td class="center">YES</td><td class="center"></td><td>The total advanced amount in pesos.</td></tr>
+    <tr><td>amount_reimbursed</td><td>decimal(12,2)</td><td class="center">YES</td><td class="center"></td><td>The total reimbursed amount.</td></tr>
+    <tr><td>status</td><td>varchar(25)</td><td class="center">YES</td><td class="center"></td><td>The settlement status ('UNPAID', 'PARTIALLY_REIMBURSED', 'SETTLED', 'CANCELLED').</td></tr>
+    <tr><td>advance_date</td><td>date</td><td class="center">YES</td><td class="center"></td><td>The date of the advance.</td></tr>
+    <tr><td>notes</td><td>text</td><td class="center">NO</td><td class="center"></td><td>Additional notes for the claim.</td></tr>
+    <tr><td>created_by</td><td>uuid</td><td class="center">NO</td><td class="center">FK</td><td>The user ID who filed the claim.</td></tr>
+    <tr><td>created_at</td><td>timestamptz</td><td class="center">YES</td><td class="center"></td><td>The date and time created.</td></tr>
+    <tr><td>updated_at</td><td>timestamptz</td><td class="center">YES</td><td class="center"></td><td>The date and time last updated.</td></tr>
+  </tbody>
+</table>
+
+<!-- Table 12: Advance_Disbursements -->
+<div class="table-title">Table 12: Advance_Disbursements</div>
+<table>
+  <thead>
+    <tr>
+      <th class="col-field" width="20%" style="width: 20%;">Field</th>
+      <th class="col-type" width="20%" style="width: 20%; white-space: nowrap;">Type/Length</th>
+      <th class="col-required" width="15%" style="width: 15%; white-space: nowrap;">Required</th>
+      <th class="col-key" width="8%" style="width: 8%; white-space: nowrap;">Key</th>
+      <th class="col-domain" width="37%" style="width: 37%;">Domain</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr><td>id</td><td>uuid</td><td class="center">YES</td><td class="center">PK</td><td>The unique ID of the disbursement record.</td></tr>
+    <tr><td>advance_id</td><td>uuid</td><td class="center">YES</td><td class="center">FK</td><td>The advance ID referencing Advances_Payable.</td></tr>
+    <tr><td>transaction_id</td><td>uuid</td><td class="center">NO</td><td class="center">FK</td><td>The transaction ID referencing Transactions.</td></tr>
+    <tr><td>amount</td><td>decimal(12,2)</td><td class="center">YES</td><td class="center"></td><td>The disbursement amount in pesos.</td></tr>
+    <tr><td>payment_method</td><td>varchar(20)</td><td class="center">YES</td><td class="center"></td><td>The payment method ('CASH').</td></tr>
+    <tr><td>disbursement_date</td><td>timestamptz</td><td class="center">YES</td><td class="center"></td><td>The date and time disbursed.</td></tr>
+    <tr><td>disbursed_by</td><td>uuid</td><td class="center">NO</td><td class="center">FK</td><td>The user ID who released the cash.</td></tr>
+    <tr><td>notes</td><td>text</td><td class="center">NO</td><td class="center"></td><td>Additional disbursement notes.</td></tr>
+    <tr><td>created_at</td><td>timestamptz</td><td class="center">YES</td><td class="center"></td><td>The date and time created.</td></tr>
+  </tbody>
+</table>
+
+<!-- Table 13: Advance_Receipts -->
+<div class="table-title">Table 13: Advance_Receipts</div>
+<table>
+  <thead>
+    <tr>
+      <th class="col-field" width="20%" style="width: 20%;">Field</th>
+      <th class="col-type" width="20%" style="width: 20%; white-space: nowrap;">Type/Length</th>
+      <th class="col-required" width="15%" style="width: 15%; white-space: nowrap;">Required</th>
+      <th class="col-key" width="8%" style="width: 8%; white-space: nowrap;">Key</th>
+      <th class="col-domain" width="37%" style="width: 37%;">Domain</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr><td>id</td><td>uuid</td><td class="center">YES</td><td class="center">PK</td><td>The unique ID of the receipt record.</td></tr>
+    <tr><td>advance_id</td><td>uuid</td><td class="center">YES</td><td class="center">FK</td><td>The advance ID referencing Advances_Payable.</td></tr>
+    <tr><td>public_url</td><td>text</td><td class="center">YES</td><td class="center"></td><td>The public image URL of the receipt.</td></tr>
+    <tr><td>sort_order</td><td>int</td><td class="center">YES</td><td class="center"></td><td>The display sequence number.</td></tr>
+    <tr><td>created_at</td><td>timestamptz</td><td class="center">YES</td><td class="center"></td><td>The date and time uploaded.</td></tr>
+  </tbody>
+</table>
+
+<!-- Table 14: Debts_Receivables -->
+<div class="table-title">Table 14: Debts_Receivables</div>
+<table>
+  <thead>
+    <tr>
+      <th class="col-field" width="20%" style="width: 20%;">Field</th>
+      <th class="col-type" width="20%" style="width: 20%; white-space: nowrap;">Type/Length</th>
+      <th class="col-required" width="15%" style="width: 15%; white-space: nowrap;">Required</th>
+      <th class="col-key" width="8%" style="width: 8%; white-space: nowrap;">Key</th>
+      <th class="col-domain" width="37%" style="width: 37%;">Domain</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr><td>id</td><td>uuid</td><td class="center">YES</td><td class="center">PK</td><td>The unique ID of the receivable record.</td></tr>
+    <tr><td>semester_id</td><td>uuid</td><td class="center">YES</td><td class="center">FK</td><td>The semester ID referencing Semesters.</td></tr>
+    <tr><td>debtor_name</td><td>varchar(150)</td><td class="center">YES</td><td class="center"></td><td>The full name of the debtor.</td></tr>
+    <tr><td>debtor_contact</td><td>varchar(50)</td><td class="center">NO</td><td class="center"></td><td>The contact details of the debtor.</td></tr>
+    <tr><td>title</td><td>varchar(255)</td><td class="center">YES</td><td class="center"></td><td>The description of items ordered.</td></tr>
+    <tr><td>total_amount</td><td>decimal(12,2)</td><td class="center">YES</td><td class="center"></td><td>The total debt amount in pesos.</td></tr>
+    <tr><td>amount_paid</td><td>decimal(12,2)</td><td class="center">YES</td><td class="center"></td><td>The total amount paid to date.</td></tr>
+    <tr><td>status</td><td>varchar(20)</td><td class="center">YES</td><td class="center"></td><td>The settlement status ('UNPAID', 'PARTIALLY_PAID', 'SETTLED', 'CANCELLED').</td></tr>
+    <tr><td>due_date</td><td>date</td><td class="center">NO</td><td class="center"></td><td>The due date for payment.</td></tr>
+    <tr><td>notes</td><td>text</td><td class="center">NO</td><td class="center"></td><td>Additional receivable notes.</td></tr>
+    <tr><td>created_by</td><td>uuid</td><td class="center">NO</td><td class="center">FK</td><td>The user ID who logged the order.</td></tr>
+    <tr><td>created_at</td><td>timestamptz</td><td class="center">YES</td><td class="center"></td><td>The date and time created.</td></tr>
+    <tr><td>updated_at</td><td>timestamptz</td><td class="center">YES</td><td class="center"></td><td>The date and time last updated.</td></tr>
+  </tbody>
+</table>
+
+<!-- Table 15: Debt_Payments -->
+<div class="table-title">Table 15: Debt_Payments</div>
+<table>
+  <thead>
+    <tr>
+      <th class="col-field" width="20%" style="width: 20%;">Field</th>
+      <th class="col-type" width="20%" style="width: 20%; white-space: nowrap;">Type/Length</th>
+      <th class="col-required" width="15%" style="width: 15%; white-space: nowrap;">Required</th>
+      <th class="col-key" width="8%" style="width: 8%; white-space: nowrap;">Key</th>
+      <th class="col-domain" width="37%" style="width: 37%;">Domain</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr><td>id</td><td>uuid</td><td class="center">YES</td><td class="center">PK</td><td>The unique ID of the payment record.</td></tr>
+    <tr><td>debt_id</td><td>uuid</td><td class="center">YES</td><td class="center">FK</td><td>The debt ID referencing Debts_Receivables.</td></tr>
+    <tr><td>transaction_id</td><td>uuid</td><td class="center">NO</td><td class="center">FK</td><td>The transaction ID referencing Transactions.</td></tr>
+    <tr><td>amount</td><td>decimal(12,2)</td><td class="center">YES</td><td class="center"></td><td>The payment amount in pesos.</td></tr>
+    <tr><td>payment_method</td><td>varchar(20)</td><td class="center">YES</td><td class="center"></td><td>The payment method ('CASH').</td></tr>
+    <tr><td>payment_date</td><td>timestamptz</td><td class="center">YES</td><td class="center"></td><td>The date and time paid.</td></tr>
+    <tr><td>received_by</td><td>uuid</td><td class="center">NO</td><td class="center">FK</td><td>The user ID who received the cash.</td></tr>
+    <tr><td>notes</td><td>text</td><td class="center">NO</td><td class="center"></td><td>Additional payment notes.</td></tr>
+    <tr><td>created_at</td><td>timestamptz</td><td class="center">YES</td><td class="center"></td><td>The date and time created.</td></tr>
+  </tbody>
+</table>
+
+<!-- Table 16: Denominations -->
+<div class="table-title">Table 16: Denominations</div>
+<table>
+  <thead>
+    <tr>
+      <th class="col-field" width="20%" style="width: 20%;">Field</th>
+      <th class="col-type" width="20%" style="width: 20%; white-space: nowrap;">Type/Length</th>
+      <th class="col-required" width="15%" style="width: 15%; white-space: nowrap;">Required</th>
+      <th class="col-key" width="8%" style="width: 8%; white-space: nowrap;">Key</th>
+      <th class="col-domain" width="37%" style="width: 37%;">Domain</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr><td>id</td><td>uuid</td><td class="center">YES</td><td class="center">PK</td><td>The unique ID of the denomination.</td></tr>
+    <tr><td>code</td><td>varchar(30)</td><td class="center">YES</td><td class="center">UK</td><td>The unique denomination code.</td></tr>
+    <tr><td>label</td><td>varchar(50)</td><td class="center">YES</td><td class="center"></td><td>The display label of the currency.</td></tr>
+    <tr><td>currency_type</td><td>varchar(10)</td><td class="center">YES</td><td class="center"></td><td>The currency type ('BILL' or 'COIN').</td></tr>
+    <tr><td>face_value</td><td>decimal(12,2)</td><td class="center">YES</td><td class="center"></td><td>The face value in pesos.</td></tr>
+    <tr><td>display_order</td><td>int</td><td class="center">YES</td><td class="center"></td><td>The display order on keypad.</td></tr>
+    <tr><td>is_active</td><td>boolean</td><td class="center">YES</td><td class="center"></td><td>Flag indicating if actively counted.</td></tr>
+    <tr><td>created_at</td><td>timestamptz</td><td class="center">YES</td><td class="center"></td><td>The date and time created.</td></tr>
+  </tbody>
+</table>
+
+<!-- Table 17: Cash_Reconciliations -->
+<div class="table-title">Table 17: Cash_Reconciliations</div>
+<table>
+  <thead>
+    <tr>
+      <th class="col-field" width="20%" style="width: 20%;">Field</th>
+      <th class="col-type" width="20%" style="width: 20%; white-space: nowrap;">Type/Length</th>
+      <th class="col-required" width="15%" style="width: 15%; white-space: nowrap;">Required</th>
+      <th class="col-key" width="8%" style="width: 8%; white-space: nowrap;">Key</th>
+      <th class="col-domain" width="37%" style="width: 37%;">Domain</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr><td>id</td><td>uuid</td><td class="center">YES</td><td class="center">PK</td><td>The unique ID of the reconciliation session.</td></tr>
+    <tr><td>semester_id</td><td>uuid</td><td class="center">YES</td><td class="center">FK</td><td>The semester ID referencing Semesters.</td></tr>
+    <tr><td>reconciliation_date</td><td>timestamptz</td><td class="center">YES</td><td class="center"></td><td>The date and time of reconciliation.</td></tr>
+    <tr><td>counted_by</td><td>uuid</td><td class="center">NO</td><td class="center">FK</td><td>The user ID who counted cash.</td></tr>
+    <tr><td>verified_by</td><td>uuid</td><td class="center">NO</td><td class="center">FK</td><td>The user ID who verified count.</td></tr>
+    <tr><td>physical_total</td><td>decimal(12,2)</td><td class="center">YES</td><td class="center"></td><td>The total physical cash counted.</td></tr>
+    <tr><td>ledger_cash_balance</td><td>decimal(12,2)</td><td class="center">YES</td><td class="center"></td><td>The theoretical ledger balance.</td></tr>
+    <tr><td>variance_amount</td><td>decimal(12,2)</td><td class="center">YES</td><td class="center"></td><td>The variance difference amount.</td></tr>
+    <tr><td>variance_status</td><td>varchar(20)</td><td class="center">YES</td><td class="center"></td><td>The status ('BALANCED', 'SHORTAGE', 'OVERAGE').</td></tr>
+    <tr><td>notes</td><td>text</td><td class="center">NO</td><td class="center"></td><td>General reconciliation remarks.</td></tr>
+    <tr><td>adviser_approval_notes</td><td>text</td><td class="center">NO</td><td class="center"></td><td>Adviser shortage justification notes.</td></tr>
+    <tr><td>status</td><td>varchar(20)</td><td class="center">YES</td><td class="center"></td><td>The session status ('DRAFT', 'SUBMITTED', 'VERIFIED').</td></tr>
+    <tr><td>created_at</td><td>timestamptz</td><td class="center">YES</td><td class="center"></td><td>The date and time created.</td></tr>
+  </tbody>
+</table>
+
+<!-- Table 18: Cash_Reconciliation_Items -->
+<div class="table-title">Table 18: Cash_Reconciliation_Items</div>
+<table>
+  <thead>
+    <tr>
+      <th class="col-field" width="20%" style="width: 20%;">Field</th>
+      <th class="col-type" width="20%" style="width: 20%; white-space: nowrap;">Type/Length</th>
+      <th class="col-required" width="15%" style="width: 15%; white-space: nowrap;">Required</th>
+      <th class="col-key" width="8%" style="width: 8%; white-space: nowrap;">Key</th>
+      <th class="col-domain" width="37%" style="width: 37%;">Domain</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr><td>id</td><td>uuid</td><td class="center">YES</td><td class="center">PK</td><td>The unique ID of the item count.</td></tr>
+    <tr><td>reconciliation_id</td><td>uuid</td><td class="center">YES</td><td class="center">FK</td><td>The session ID referencing Cash_Reconciliations.</td></tr>
+    <tr><td>denomination_id</td><td>uuid</td><td class="center">YES</td><td class="center">FK</td><td>The denomination ID referencing Denominations.</td></tr>
+    <tr><td>quantity</td><td>int</td><td class="center">YES</td><td class="center"></td><td>The piece-count quantity.</td></tr>
+    <tr><td>subtotal</td><td>decimal(12,2)</td><td class="center">YES</td><td class="center"></td><td>The calculated currency subtotal.</td></tr>
+    <tr><td>created_at</td><td>timestamptz</td><td class="center">YES</td><td class="center"></td><td>The date and time recorded.</td></tr>
+  </tbody>
+</table>
+
+</body>
+</html>

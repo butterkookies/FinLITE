@@ -99,11 +99,20 @@ export default function DenominationCounter({
 
   const handleDeclareShortageClick = () => {
     if (variance <= 0) return;
-    onDeclareShortage({
-      amount: variance,
+    onSaveCount({
+      counts,
+      physicalTotal,
+      ledgerCashBalance,
+      variance: -variance,
+      status: 'SHORTAGE',
+      approval_status: 'PENDING_APPROVAL',
       notes: justificationNotes || 'Declared minor shortage from loose coins during peak booth sales.',
     });
-    onClose();
+    setIsSaved(true);
+    setTimeout(() => {
+      setIsSaved(false);
+      onClose();
+    }, 400);
   };
 
   // Safe early return after all hooks
@@ -145,12 +154,14 @@ export default function DenominationCounter({
                 variant="primary"
                 size="sm"
                 onClick={() => {
+                  const approvalStatus = (variance === 0 || status === 'BALANCED') ? 'BALANCED' : 'PENDING_APPROVAL';
                   onSaveCount({
                     counts,
                     physicalTotal,
                     ledgerCashBalance,
-                    variance,
+                    variance: status === 'SHORTAGE' ? -variance : variance,
                     status,
+                    approval_status: approvalStatus,
                     notes: justificationNotes,
                   });
                   setIsSaved(true);
@@ -223,6 +234,9 @@ export default function DenominationCounter({
                 <AlertCircle className="w-4 h-4 text-rose-600 dark:text-rose-400 shrink-0" />
                 <span>Physical Shortage Detected (-{formatPHP(variance)})</span>
               </div>
+              <p className="text-[11px] text-zinc-500 dark:text-zinc-400">
+                Discrepancies require Faculty Club Adviser verification and approval before any adjusting entry is committed to the ledger.
+              </p>
               <div>
                 <label className="block font-semibold text-zinc-800 dark:text-zinc-200 mb-1">
                   Adviser Shortage Justification Notes:
@@ -241,7 +255,55 @@ export default function DenominationCounter({
                 size="sm"
                 onClick={handleDeclareShortageClick}
               >
-                Log Approved Shortage Expense (-{formatPHP(variance)})
+                Submit Shortage for Adviser Approval (-{formatPHP(variance)})
+              </Button>
+            </div>
+          )}
+
+          {status === 'OVERAGE' && (
+            <div className="p-4 bg-sky-50/50 dark:bg-sky-950/20 border border-sky-200 dark:border-sky-900/40 rounded-2xl space-y-2.5">
+              <div className="flex items-center gap-2 text-sky-900 dark:text-sky-300 font-bold">
+                <AlertCircle className="w-4 h-4 text-sky-600 dark:text-sky-400 shrink-0" />
+                <span>Physical Cash Surplus Detected (+{formatPHP(variance)})</span>
+              </div>
+              <p className="text-[11px] text-zinc-500 dark:text-zinc-400">
+                Surplus cash will be recorded into the general ledger under Miscellaneous Revenue upon Faculty Club Adviser verification.
+              </p>
+              <div>
+                <label className="block font-semibold text-zinc-800 dark:text-zinc-200 mb-1">
+                  Adviser Overage Justification Notes:
+                </label>
+                <input
+                  type="text"
+                  placeholder="e.g. Unclaimed loose change from merchandise pre-orders"
+                  value={justificationNotes}
+                  onChange={(e) => setJustificationNotes(e.target.value)}
+                  className="w-full h-9 px-3 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/20 text-xs text-zinc-900 dark:text-zinc-100 select-text"
+                />
+              </div>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="text-sky-700 border-sky-300 hover:bg-sky-100 dark:text-sky-300 dark:border-sky-800 dark:hover:bg-sky-950/40"
+                onClick={() => {
+                  onSaveCount({
+                    counts,
+                    physicalTotal,
+                    ledgerCashBalance,
+                    variance,
+                    status: 'OVERAGE',
+                    approval_status: 'PENDING_APPROVAL',
+                    notes: justificationNotes || 'Physical cash overage declared for adviser audit review.',
+                  });
+                  setIsSaved(true);
+                  setTimeout(() => {
+                    setIsSaved(false);
+                    onClose();
+                  }, 400);
+                }}
+              >
+                Submit Overage for Adviser Approval (+{formatPHP(variance)})
               </Button>
             </div>
           )}

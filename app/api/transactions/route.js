@@ -47,6 +47,7 @@ export async function POST(req) {
       transaction_date,
       is_reimbursement,
       reimbursement_recipient,
+      advanced_by_name,
       status,
       event_name,
       receipt_urls = [],
@@ -112,6 +113,46 @@ export async function POST(req) {
       resolvedSemesterId = activeSem?.id || null;
     }
 
+    // CASHBOX SOLVENCY GUARD: For direct cash OUTFLOWs (not abono), verify physical cash on hand
+    if (type === 'OUTFLOW' && !isTxAbono && resolvedSemesterId) {
+      let availableCash = null;
+      try {
+        const { data: rpcCash, error: rpcErr } = await queryClient.rpc('get_available_cash_on_hand', {
+          p_semester_id: resolvedSemesterId,
+        });
+        if (!rpcErr && rpcCash !== null && rpcCash !== undefined) {
+          availableCash = Number(rpcCash);
+        }
+      } catch (_) {}
+
+      // Fallback calculation if RPC is not yet registered in database
+      if (availableCash === null) {
+        const { data: txs } = await queryClient
+          .from('transactions')
+          .select('amount, type')
+          .eq('semester_id', resolvedSemesterId)
+          .eq('status', 'COMPLETED');
+        if (txs) {
+          let inf = 0;
+          let outf = 0;
+          txs.forEach((t) => {
+            if (t.type === 'INFLOW') inf += Number(t.amount || 0);
+            if (t.type === 'OUTFLOW') outf += Number(t.amount || 0);
+          });
+          availableCash = inf - outf;
+        }
+      }
+
+      if (availableCash !== null && parsedAmount > availableCash) {
+        return NextResponse.json({
+          error: `Insufficient physical cashbox balance. Available: ₱${availableCash.toLocaleString('en-PH', { minimumFractionDigits: 2 })}, Requested: ₱${parsedAmount.toLocaleString('en-PH', { minimumFractionDigits: 2 })}. Cash outflows cannot exceed cash on hand.`,
+        }, { status: 400 });
+      }
+    }
+
+    const resolvedClaimant = isTxAbono ? (reimbursement_recipient?.trim() || null) : null;
+    const resolvedAdvancedBy = isTxAbono ? (advanced_by_name?.trim() || resolvedClaimant) : null;
+
     const payload = {
       title: title.trim(),
       description: description?.trim() || null,
@@ -121,8 +162,9 @@ export async function POST(req) {
       semester_id: resolvedSemesterId,
       logged_by: profile?.id || null,
       transaction_date: transaction_date || new Date().toISOString().split('T')[0],
-      is_reimbursement: Boolean(is_reimbursement),
-      reimbursement_recipient: is_reimbursement ? (reimbursement_recipient?.trim() || null) : null,
+      is_reimbursement: isTxAbono,
+      reimbursement_recipient: resolvedClaimant,
+      advanced_by_name: resolvedAdvancedBy,
       status: status || 'PENDING_AUDIT',
       event_name: event_name?.trim() || null,
     };
@@ -144,10 +186,11 @@ export async function POST(req) {
       `)
       .single();
 
-    // Fallback if joined select or semester_id has schema deviation
-    if (insertRes.error && (insertRes.error.message?.includes('semester_id') || insertRes.error.code === 'PGRST204')) {
+    // Fallback if joined select, semester_id, or advanced_by_name has schema deviation
+    if (insertRes.error && (insertRes.error.message?.includes('semester_id') || insertRes.error.message?.includes('advanced_by_name') || insertRes.error.code === 'PGRST204')) {
       const fallbackPayload = { ...payload };
-      delete fallbackPayload.semester_id;
+      if (insertRes.error.message?.includes('semester_id')) delete fallbackPayload.semester_id;
+      if (insertRes.error.message?.includes('advanced_by_name')) delete fallbackPayload.advanced_by_name;
       insertRes = await queryClient
         .from('transactions')
         .insert([fallbackPayload])
@@ -194,6 +237,8 @@ export async function POST(req) {
           actor_email: email,
           actor_role: profile?.role || 'member',
           ip_address: clientIp,
+          reimbursement_recipient: resolvedClaimant,
+          advanced_by_name: resolvedAdvancedBy,
         },
       }]);
     } catch (auditErr) {

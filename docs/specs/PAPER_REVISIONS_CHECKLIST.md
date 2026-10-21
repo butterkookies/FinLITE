@@ -23,6 +23,10 @@
   - **Location in Paper:** Section 1.4 (Scope) and Diagram 0 (Figure 4).
   - **Revision:** Document the parent-child `debts_receivables` and `debt_payments` structure used to track student installment pre-orders (*hulog*) for batch merchandise (lanyards, t-shirts) and tournament entry fees.
 
+- [ ] **1.5. Scope Delimitation: Consolidated Semester-Wide Club Week Reporting vs. Granular Per-Event Reports**
+  - **Location in Paper:** Section 1.4 (Delimitations of the Study, pp. 9–10) and Phase 11 / Process 6 (Liquidation Reports).
+  - **Revision:** Document that although student organizations occasionally produce separate, ad-hoc financial reports for every individual Club Week event or sub-activity, FinLITE deliberately standardizes and delimits report generation to a **consolidated whole-semester Club Week report** (a dedicated reporting setup/filter that isolates and aggregates all Club Week operational expenses across the active semester) alongside the comprehensive semester-end financial report. The system intentionally excludes fragmented, standalone single-event micro-reports to maintain centralized audit integrity and cashbox reconciliation.
+
 ---
 
 ## 2. End-to-End System Journey Checklist (Login to Report Generation)
@@ -175,6 +179,12 @@
 
 ---
 
+
+- [ ] **2.50. Dedicated Semester-Wide Club Week Expense Reporting Setup:**
+  - Document that the reporting engine provides a dedicated semester-scoped Club Week expense compilation mode that filters and itemizes all Club Week disbursements across the term into an institutional liquidation report, rather than generating disconnected per-event documents.
+
+---
+
 ## 3. Specific Updates Required for Chapter 2 Diagrams
 
 ### 3.1. Figure 3: Context Diagram of FinLITE System (Page 16)
@@ -210,6 +220,10 @@
     3. Noted by: Vice President (`BAJAMUNDE, JHELLIAM T.`) & President (`GERONIMO, ANDREI JOHN P.`)
     4. Approved by: Dual Club Advisers (`MS. KIMBERLY DAWN JATULAN` & `MS. KRIZIA MAE GENOVIA`)
     5. Departmental & College Clearance: BSIT Program Director (`JOVYLYN ORTIZ-CESAR, MBA, MSIT`) & CCS Dean (`DR. EMRAIDA MARIE M. MANUCOM`).
+
+- [ ] **4.5. Club Week Event-Level Granular Reporting Delimitation:**
+  - **Operational Context:** In student council operations, individual Club Week activities or booths occasionally request standalone financial statements. FinLITE standardizes reporting at the semester level with a dedicated setup isolating semester-wide Club Week expenses.
+  - **Paper Note:** Explicitly state in Chapter 1 Delimitations that the system generates consolidated semester-level Club Week expense reports rather than fragmented per-sub-event or per-booth financial reports.
 
 ---
 *Checklist compiled and cross-verified against the FinLITE production codebase.*

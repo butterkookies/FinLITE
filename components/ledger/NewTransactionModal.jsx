@@ -52,6 +52,8 @@ export default function NewTransactionModal({
   const [eventName, setEventName] = useState('');
   const [isReimbursement, setIsReimbursement] = useState(false);
   const [recipient, setRecipient] = useState('');
+  const [advancedByName, setAdvancedByName] = useState('');
+  const [isProxyClaimant, setIsProxyClaimant] = useState(false);
   const [receiptFiles, setReceiptFiles] = useState([]);
   const [previewUrls, setPreviewUrls] = useState([]);
   const [compressing, setCompressing] = useState(false);
@@ -99,7 +101,11 @@ export default function NewTransactionModal({
         setCategoryId(transactionToEdit.category_id || null);
         setEventName(transactionToEdit.event_name || '');
         setIsReimbursement(Boolean(transactionToEdit.is_reimbursement));
-        setRecipient(transactionToEdit.reimbursement_recipient || '');
+        const rec = transactionToEdit.reimbursement_recipient || '';
+        const advBy = transactionToEdit.advanced_by_name || rec;
+        setRecipient(rec);
+        setAdvancedByName(advBy);
+        setIsProxyClaimant(Boolean(advBy && rec && advBy !== rec));
         const existingReceipts = transactionToEdit.transaction_receipts?.map((r) => r.public_url || r.file_url) ||
           (transactionToEdit.receipt_url ? [transactionToEdit.receipt_url] : []);
         setPreviewUrls(existingReceipts);
@@ -111,6 +117,8 @@ export default function NewTransactionModal({
         setEventName('');
         setIsReimbursement(false);
         setRecipient('');
+        setAdvancedByName('');
+        setIsProxyClaimant(false);
         setReceiptFiles([]);
         setPreviewUrls([]);
       }
@@ -251,6 +259,7 @@ export default function NewTransactionModal({
       event_name: eventName ? eventName.trim() : null,
       is_reimbursement: isReimbursement,
       reimbursement_recipient: isReimbursement ? recipient.trim() : null,
+      advanced_by_name: isReimbursement ? (isProxyClaimant ? (advancedByName.trim() || recipient.trim()) : recipient.trim()) : null,
       receipt_url: previewUrls[0] || null,
       receipt_urls: previewUrls,
       receiptFile: receiptFiles[0] || null,
@@ -308,7 +317,7 @@ export default function NewTransactionModal({
         <form id="new-transaction-form" onSubmit={handleSubmit} noValidate className="space-y-4 text-xs">
           
           {/* Type Toggle: Inflow vs Outflow */}
-          <div className="grid grid-cols-2 gap-2 bg-zinc-100 dark:bg-zinc-900 p-1 rounded-2xl border border-zinc-200 dark:border-zinc-800">
+          <div className="grid grid-cols-2 gap-2 bg-zinc-100/80 dark:bg-zinc-850/80 p-1 rounded-2xl ring-1 ring-black/[0.04] dark:ring-white/[0.06]">
             <Button
               type="button"
               disabled={!canInflow && !transactionToEdit}
@@ -361,10 +370,10 @@ export default function NewTransactionModal({
                 }}
                 onBlur={() => setAmountTouched(true)}
                 aria-invalid={Boolean(formErrors.amount || fieldError)}
-                className={`w-full h-10 text-sm font-bold pl-7 pr-3 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 border rounded-xl focus:outline-none transition-all tabular-nums select-text ${
+                className={`w-full h-10 text-sm font-bold pl-7 pr-3 bg-zinc-100/70 dark:bg-zinc-850/80 text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 rounded-xl ring-1 ring-black/[0.04] dark:ring-white/[0.06] focus:outline-none focus:bg-white dark:focus:bg-zinc-850 transition-all tabular-nums select-text ${
                   (formErrors.amount || fieldError)
-                    ? 'border-rose-500 ring-2 ring-rose-500/20'
-                    : 'border-zinc-200 dark:border-zinc-800 focus:ring-2 focus:ring-emerald-500/20'
+                    ? 'ring-2 ring-rose-500/50'
+                    : 'focus:ring-2 focus:ring-emerald-500/40'
                 }`}
               />
             </div>
@@ -400,10 +409,10 @@ export default function NewTransactionModal({
                 }
               }}
               aria-invalid={Boolean(formErrors.title)}
-              className={`w-full h-10 px-3 bg-white dark:bg-zinc-900 border rounded-xl focus:outline-none transition-all text-zinc-900 dark:text-zinc-100 select-text ${
+              className={`w-full h-10 px-3 bg-zinc-100/70 dark:bg-zinc-850/80 rounded-xl ring-1 ring-black/[0.04] dark:ring-white/[0.06] focus:outline-none focus:bg-white dark:focus:bg-zinc-850 transition-all text-zinc-900 dark:text-zinc-100 select-text ${
                 formErrors.title
-                  ? 'border-rose-500 ring-2 ring-rose-500/20'
-                  : 'border-zinc-200 dark:border-zinc-800 focus:ring-2 focus:ring-emerald-500/20'
+                  ? 'ring-2 ring-rose-500/50'
+                  : 'focus:ring-2 focus:ring-emerald-500/40'
               }`}
             />
             {formErrors.title && (
@@ -421,14 +430,14 @@ export default function NewTransactionModal({
               <button
                 type="button"
                 onClick={() => setIsCategoryOpen(!isCategoryOpen)}
-                className="w-full h-10 px-3 bg-white dark:bg-zinc-900 hover:bg-zinc-50 dark:hover:bg-zinc-800 border border-zinc-200 dark:border-zinc-800 rounded-xl flex items-center justify-between text-zinc-900 dark:text-zinc-100 font-medium transition-colors cursor-pointer text-left"
+                className="w-full h-10 px-3 bg-zinc-100/70 dark:bg-zinc-850/80 hover:bg-zinc-200/60 dark:hover:bg-zinc-800 ring-1 ring-black/[0.04] dark:ring-white/[0.06] rounded-xl flex items-center justify-between text-zinc-900 dark:text-zinc-100 font-medium transition-colors cursor-pointer text-left"
               >
                 <span className="truncate">{categoryName}</span>
                 <ChevronDown className="w-3.5 h-3.5 text-zinc-400 shrink-0 ml-1" />
               </button>
 
               {isCategoryOpen && (
-                <div className="absolute left-0 right-0 mt-1 bg-white dark:bg-[#18181b] border border-zinc-200 dark:border-zinc-800 rounded-xl shadow-lg py-1 z-50 animate-in fade-in zoom-in-95 duration-100 max-h-48 overflow-y-auto">
+                <div className="absolute left-0 right-0 mt-1.5 bg-white dark:bg-[#18181b] rounded-xl shadow-xl ring-1 ring-black/[0.06] dark:ring-white/[0.08] py-1 z-50 animate-in fade-in zoom-in-95 duration-100 max-h-48 overflow-y-auto">
                   {(categories && categories.length > 0
                     ? categories.filter((c) => c.type === type)
                     : (type === 'INFLOW' ? OFFICIAL_INFLOW_CATEGORIES : OFFICIAL_OUTFLOW_CATEGORIES).map((catName) => ({ id: null, name: catName }))
@@ -468,14 +477,14 @@ export default function NewTransactionModal({
                 placeholder="e.g. Club Week 2026"
                 value={eventName}
                 onChange={(e) => setEventName(e.target.value)}
-                className="w-full h-10 px-3 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/20 text-zinc-900 dark:text-zinc-100 select-text"
+                className="w-full h-10 px-3 bg-zinc-100/70 dark:bg-zinc-850/80 rounded-xl ring-1 ring-black/[0.04] dark:ring-white/[0.06] focus:outline-none focus:ring-2 focus:ring-emerald-500/40 focus:bg-white dark:focus:bg-zinc-850 text-zinc-900 dark:text-zinc-100 select-text transition-all"
               />
             </div>
           </div>
 
           {/* Abono / Personal Advance Checkbox (Outflow only) */}
           {type === 'OUTFLOW' && (
-            <div className="p-3 bg-zinc-50 dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800 rounded-xl space-y-2">
+            <div className="py-2.5 space-y-2.5">
               <label className="flex items-center gap-2 cursor-pointer">
                 <input
                   type="checkbox"
@@ -494,38 +503,83 @@ export default function NewTransactionModal({
               </label>
 
               {isReimbursement && (
-                <div className={`pt-1 ${formErrors.recipient ? 'animate-field-shake' : ''}`} key={`rec-${shakeKey}`}>
-                  <label className="block text-zinc-700 dark:text-zinc-300 font-medium mb-1">
-                    Advance Paid By: <span className="text-rose-500">*</span>
+                <div className="space-y-3 pt-1">
+                  <label className="flex items-center gap-2 cursor-pointer text-xs text-zinc-600 dark:text-zinc-400">
+                    <input
+                      type="checkbox"
+                      checked={isProxyClaimant}
+                      onChange={(e) => setIsProxyClaimant(e.target.checked)}
+                      className="rounded text-emerald-600 focus:ring-emerald-500"
+                    />
+                    <span>Authorized proxy is collecting payout on behalf of original payer</span>
                   </label>
-                  <input
-                    ref={recipientInputRef}
-                    type="text"
-                    placeholder="e.g. Ms. Kimberly Dawn Jatulan"
-                    value={recipient}
-                    onChange={(e) => {
-                      setRecipient(e.target.value);
-                      if (formErrors.recipient) {
-                        setFormErrors((prev) => ({ ...prev, recipient: null }));
-                      }
-                    }}
-                    aria-invalid={Boolean(formErrors.recipient)}
-                    className={`w-full h-9 px-3 bg-white dark:bg-zinc-900 border rounded-xl focus:outline-none transition-all text-zinc-900 dark:text-zinc-100 select-text ${
-                      formErrors.recipient
-                        ? 'border-rose-500 ring-2 ring-rose-500/20'
-                        : 'border-zinc-200 dark:border-zinc-800 focus:ring-2 focus:ring-emerald-500/20'
-                    }`}
-                  />
-                  {formErrors.recipient ? (
+
+                  {isProxyClaimant ? (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <div>
+                        <label className="block text-zinc-700 dark:text-zinc-300 font-medium mb-1">
+                          Originally Paid By (Creditor): <span className="text-rose-500">*</span>
+                        </label>
+                        <input
+                          type="text"
+                          placeholder="e.g. Ms. Kimberly Dawn Jatulan"
+                          value={advancedByName}
+                          onChange={(e) => setAdvancedByName(e.target.value)}
+                          className="w-full h-9 px-3 bg-zinc-100/70 dark:bg-zinc-850/80 rounded-xl ring-1 ring-black/[0.04] dark:ring-white/[0.06] focus:outline-none focus:ring-2 focus:ring-emerald-500/40 text-zinc-900 dark:text-zinc-100 text-xs"
+                        />
+                      </div>
+                      <div className={formErrors.recipient ? 'animate-field-shake' : ''} key={`rec-${shakeKey}`}>
+                        <label className="block text-zinc-700 dark:text-zinc-300 font-medium mb-1">
+                          Authorized Cash Claimant (Proxy): <span className="text-rose-500">*</span>
+                        </label>
+                        <input
+                          ref={recipientInputRef}
+                          type="text"
+                          placeholder="e.g. Andrei Geronimo"
+                          value={recipient}
+                          onChange={(e) => {
+                            setRecipient(e.target.value);
+                            if (formErrors.recipient) setFormErrors((prev) => ({ ...prev, recipient: null }));
+                          }}
+                          className={`w-full h-9 px-3 bg-zinc-100/70 dark:bg-zinc-850/80 rounded-xl ring-1 ring-black/[0.04] dark:ring-white/[0.06] focus:outline-none focus:ring-2 focus:ring-emerald-500/40 text-zinc-900 dark:text-zinc-100 text-xs ${formErrors.recipient ? 'ring-2 ring-rose-500/50' : ''}`}
+                        />
+                      </div>
+                    </div>
+                  ) : (
+                    <div className={formErrors.recipient ? 'animate-field-shake' : ''} key={`rec-${shakeKey}`}>
+                      <label className="block text-zinc-700 dark:text-zinc-300 font-medium mb-1">
+                        Advance Paid By: <span className="text-rose-500">*</span>
+                      </label>
+                      <input
+                        ref={recipientInputRef}
+                        type="text"
+                        placeholder="e.g. Ms. Kimberly Dawn Jatulan"
+                        value={recipient}
+                        onChange={(e) => {
+                          setRecipient(e.target.value);
+                          if (formErrors.recipient) {
+                            setFormErrors((prev) => ({ ...prev, recipient: null }));
+                          }
+                        }}
+                        aria-invalid={Boolean(formErrors.recipient)}
+                        className={`w-full h-9 px-3 bg-zinc-100/70 dark:bg-zinc-850/80 rounded-xl ring-1 ring-black/[0.04] dark:ring-white/[0.06] focus:outline-none focus:bg-white dark:focus:bg-zinc-850 transition-all text-zinc-900 dark:text-zinc-100 select-text ${
+                          formErrors.recipient
+                            ? 'ring-2 ring-rose-500/50'
+                            : 'focus:ring-2 focus:ring-emerald-500/40'
+                        }`}
+                      />
+                    </div>
+                  )}
+
+                  {formErrors.recipient && (
                     <p className="text-xs font-semibold text-rose-600 dark:text-rose-400 mt-1 flex items-center gap-1.5 animate-in fade-in duration-150">
                       <AlertCircle className="w-3.5 h-3.5 shrink-0 text-rose-600 dark:text-rose-400" />
                       <span>{formErrors.recipient}</span>
                     </p>
-                  ) : (
-                    <p className="text-[10px] text-zinc-400 mt-1">
-                      Will be queued under Pending Reimbursements until cash is refunded.
-                    </p>
                   )}
+                  <p className="text-[10px] text-zinc-400 mt-1">
+                    Will be queued under Pending Reimbursements until cash is refunded.
+                  </p>
                 </div>
               )}
             </div>
@@ -546,7 +600,7 @@ export default function NewTransactionModal({
             {previewUrls.length > 0 && (
               <div className="grid grid-cols-3 gap-2">
                 {previewUrls.map((url, idx) => (
-                  <div key={idx} className="relative group rounded-xl overflow-hidden border border-zinc-200 dark:border-zinc-800 bg-zinc-100 dark:bg-zinc-900 aspect-square">
+                  <div key={idx} className="relative group rounded-xl overflow-hidden ring-1 ring-black/[0.05] dark:ring-white/[0.08] bg-zinc-100 dark:bg-zinc-900 aspect-square">
                     <img src={url} alt={`Receipt ${idx + 1}`} className="w-full h-full object-cover" />
                     <button
                       type="button"
@@ -574,7 +628,7 @@ export default function NewTransactionModal({
 
             {/* Add / Upload Photo Button */}
             {receiptFiles.length < 3 && (
-              <label className="h-10 flex items-center justify-center gap-2 px-3 bg-white dark:bg-zinc-900 hover:bg-zinc-50 dark:hover:bg-zinc-800 active:bg-zinc-100 dark:active:bg-zinc-700 border border-zinc-200 dark:border-zinc-800 rounded-xl cursor-pointer transition-colors shadow-2xs">
+              <label className="h-10 flex items-center justify-center gap-2 px-3 bg-zinc-100/70 dark:bg-zinc-850/80 hover:bg-zinc-200/60 dark:hover:bg-zinc-800 rounded-xl ring-1 ring-black/[0.04] dark:ring-white/[0.06] cursor-pointer transition-colors shadow-xs">
                 <Camera className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
                 <span className="text-zinc-700 dark:text-zinc-300 font-medium">
                   {compressing ? 'Compressing photo...' : receiptFiles.length === 0 ? 'Take or Upload Photo (Up to 3)' : `Add Another Photo (${receiptFiles.length}/3)`}

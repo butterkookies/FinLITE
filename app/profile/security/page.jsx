@@ -15,8 +15,9 @@ import {
   CheckCircle2,
   Link2,
   Fingerprint,
+  Check,
 } from 'lucide-react';
-import { Button } from '@/components/ui';
+import { Button, Badge } from '@/components/ui';
 import { validatePassword } from '@/lib/utils/validation';
 
 function GoogleIcon() {
@@ -30,26 +31,22 @@ function GoogleIcon() {
   );
 }
 
-const CARD =
-  'rounded-3xl bg-gradient-to-br from-[#0a2e1d]/90 via-[#072417]/85 to-[#051b11]/90 backdrop-blur-xl p-5 sm:p-6 shadow-xl relative overflow-hidden transition-all';
-const INPUT =
-  'w-full h-11 px-3.5 pr-10 rounded-xl border border-zinc-800 bg-[#121214] text-xs text-white placeholder-zinc-500 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-emerald-500/50 focus-visible:border-emerald-500 transition-all select-text';
-const LABEL = 'block text-xs font-semibold text-zinc-300 mb-1.5';
-
 function Banner({ tone, children }) {
   const isError = tone === 'error';
   return (
     <div
-      className={`flex items-start gap-2.5 bg-black/30 border border-white/[0.1] rounded-xl px-4 py-3 text-xs font-medium ${
-        isError ? 'text-rose-300' : 'text-emerald-300'
+      className={`flex items-start gap-2.5 rounded-xl px-4 py-3 text-xs font-medium transition-colors ${
+        isError
+          ? 'bg-rose-500/10 text-rose-700 dark:text-rose-400 ring-1 ring-rose-500/20'
+          : 'bg-emerald-500/10 text-emerald-800 dark:text-emerald-300 ring-1 ring-emerald-500/20'
       }`}
     >
       {isError ? (
-        <AlertCircle className="w-4 h-4 mt-0.5 shrink-0 text-rose-400" strokeWidth={1.75} />
+        <AlertCircle className="w-4 h-4 mt-0.5 shrink-0 text-rose-500" strokeWidth={2} />
       ) : (
-        <CheckCircle2 className="w-4 h-4 mt-0.5 shrink-0 text-emerald-400" strokeWidth={1.75} />
+        <CheckCircle2 className="w-4 h-4 mt-0.5 shrink-0 text-emerald-600 dark:text-emerald-400" strokeWidth={2} />
       )}
-      <span>{children}</span>
+      <span className="leading-relaxed">{children}</span>
     </div>
   );
 }
@@ -57,8 +54,8 @@ function Banner({ tone, children }) {
 function PasswordField({ label, value, onChange, placeholder, autoComplete }) {
   const [show, setShow] = useState(false);
   return (
-    <div>
-      <label className={LABEL}>{label}</label>
+    <div className="space-y-1.5">
+      <label className="block text-xs font-semibold text-zinc-700 dark:text-zinc-300">{label}</label>
       <div className="relative">
         <input
           type={show ? 'text' : 'password'}
@@ -66,12 +63,12 @@ function PasswordField({ label, value, onChange, placeholder, autoComplete }) {
           onChange={(e) => onChange(e.target.value)}
           placeholder={placeholder}
           autoComplete={autoComplete}
-          className={INPUT}
+          className="w-full h-11 px-3.5 pr-10 rounded-xl bg-zinc-100/70 dark:bg-zinc-900/90 text-xs font-medium text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 dark:placeholder-zinc-500 ring-1 ring-black/[0.05] dark:ring-zinc-800 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:bg-white dark:focus:bg-zinc-950 transition-all select-text"
         />
         <button
           type="button"
           onClick={() => setShow(!show)}
-          className="absolute right-3.5 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-white cursor-pointer p-1"
+          className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 cursor-pointer p-1 rounded-lg transition-colors"
           tabIndex={-1}
           aria-label={show ? 'Hide password' : 'Show password'}
         >
@@ -102,21 +99,26 @@ export default function AccountSecurityPage() {
   const [linkError, setLinkError] = useState('');
   const [linkNotice, setLinkNotice] = useState('');
 
+  // Google re-auth
   const [isReauthing, setIsReauthing] = useState(false);
 
   const load = useCallback(async () => {
+    setIsLoading(true);
+    setLoadError('');
     try {
       const res = await fetch('/api/auth/security');
       if (res.status === 401) {
-        router.push('/login');
+        router.replace('/login');
         return;
       }
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Failed to load.');
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        setLoadError(data.error || 'Failed to load security status.');
+        return;
+      }
       setState(data);
-      setLoadError('');
-    } catch (err) {
-      setLoadError(err.message || 'Failed to load security settings.');
+    } catch {
+      setLoadError('Network error. Could not check security status.');
     } finally {
       setIsLoading(false);
     }
@@ -126,14 +128,17 @@ export default function AccountSecurityPage() {
     load();
   }, [load]);
 
-  // Return to this page after an OAuth round trip.
   const rememberDestination = () => {
-    document.cookie = 'finlite_next=/profile/security; path=/; max-age=600; SameSite=Lax';
+    try {
+      sessionStorage.setItem('auth_redirect_after_link', '/profile/security');
+    } catch {
+      // sessionStorage unavailable
+    }
   };
 
   const handleReauthWithGoogle = async () => {
-    setPasswordError('');
     setIsReauthing(true);
+    setPasswordError('');
     try {
       const supabase = createClient();
       rememberDestination();
@@ -144,10 +149,12 @@ export default function AccountSecurityPage() {
           queryParams: { prompt: 'select_account' },
         },
       });
-      if (error) setPasswordError('Google confirmation failed. Please try again.');
+      if (error) {
+        setPasswordError('Could not start Google confirmation. Please try again.');
+        setIsReauthing(false);
+      }
     } catch {
-      setPasswordError('Google confirmation failed. Please try again.');
-    } finally {
+      setPasswordError('Network error. Could not reach Google.');
       setIsReauthing(false);
     }
   };
@@ -157,25 +164,44 @@ export default function AccountSecurityPage() {
     setPasswordError('');
     setPasswordNotice('');
 
-    const err = validatePassword(newPassword);
-    if (err) return setPasswordError(err);
-    if (newPassword !== confirmPassword) return setPasswordError('Passwords do not match. Please re-enter.');
-    if (state.hasPassword && !currentPassword) return setPasswordError('Enter your current password.');
+    if (hasPassword && !currentPassword) {
+      return setPasswordError('Please enter your current password.');
+    }
+    const valErr = validatePassword(newPassword);
+    if (valErr) {
+      return setPasswordError(valErr);
+    }
+    if (newPassword !== confirmPassword) {
+      return setPasswordError('New passwords do not match.');
+    }
 
     setIsSavingPassword(true);
     try {
       const res = await fetch('/api/auth/password', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ newPassword, currentPassword: state.hasPassword ? currentPassword : undefined }),
+        body: JSON.stringify({
+          newPassword,
+          ...(hasPassword ? { currentPassword } : {}),
+        }),
       });
       const data = await res.json().catch(() => ({}));
+
       if (!res.ok) {
-        setPasswordError(data.error || 'Could not update your password.');
-        if (data.code === 'reauth_required') await load();
+        if (data.code === 'reauth_required') {
+          setPasswordError('Your Google session expired. Please confirm with Google again.');
+          await load();
+          return;
+        }
+        setPasswordError(data.error || 'Could not update password.');
         return;
       }
-      setPasswordNotice(data.message || 'Password updated.');
+
+      setPasswordNotice(
+        hasPassword
+          ? 'Password updated successfully. Other sessions have been signed out.'
+          : 'Password set successfully. You can now sign in with your email and password.'
+      );
       setCurrentPassword('');
       setNewPassword('');
       setConfirmPassword('');
@@ -235,33 +261,33 @@ export default function AccountSecurityPage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center p-4">
-        <div className="w-8 h-8 rounded-full border-2 border-emerald-400 border-t-transparent animate-spin" />
+      <div className="min-h-screen bg-zinc-50/50 dark:bg-[#09090b] flex items-center justify-center p-4">
+        <div className="w-8 h-8 rounded-full border-2 border-emerald-500 border-t-transparent animate-spin" />
       </div>
     );
   }
 
   const hasPassword = Boolean(state?.hasPassword);
-  const googleLinked = Boolean(state?.googleLinked);
+  const isGoogleLinked = Boolean(state?.googleLinked || state?.googleIdentityPresent);
 
   return (
-    <div className="min-h-screen flex flex-col font-sans select-none">
+    <div className="min-h-screen flex flex-col font-sans bg-zinc-50/50 dark:bg-[#09090b] text-zinc-900 dark:text-zinc-100 transition-colors duration-200 select-none">
 
-      {/* Top Header: matches the Account Profile header */}
-      <header className="sticky top-0 z-30 bg-[#09090b]/95 backdrop-blur-xl border-b border-zinc-800 transition-colors">
+      {/* Top Header: matches Account Profile */}
+      <header className="sticky top-0 z-30 bg-white/95 dark:bg-[#09090b]/95 backdrop-blur-xl border-b border-zinc-100 dark:border-zinc-800 transition-colors">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <Link
               href="/profile"
-              className="flex items-center gap-2 p-1.5 rounded-lg hover:bg-zinc-800 transition-colors text-zinc-400 hover:text-zinc-100"
+              className="flex items-center gap-2 p-1.5 rounded-lg text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
               title="Return to Account Profile"
             >
               <ArrowLeft className="w-5 h-5" strokeWidth={1.75} />
             </Link>
-            <div className="h-5 w-px bg-zinc-800" />
+            <div className="h-5 w-px bg-zinc-200 dark:bg-zinc-800" />
             <div>
-              <h1 className="text-sm sm:text-base font-bold text-zinc-100">Account Security</h1>
-              <p className="text-[10px] text-zinc-400 font-medium">Sign-in methods and password</p>
+              <h1 className="text-sm sm:text-base font-bold text-zinc-950 dark:text-zinc-100">Account Security</h1>
+              <p className="text-[10px] text-zinc-500 dark:text-zinc-400 font-medium">Sign-in methods and password credentials</p>
             </div>
           </div>
         </div>
@@ -271,80 +297,93 @@ export default function AccountSecurityPage() {
 
         {loadError && <Banner tone="error">{loadError}</Banner>}
 
-        {/* Sign-in methods */}
-        <div className={CARD}>
-          <div className="absolute -top-16 -right-16 w-40 h-40 bg-emerald-400/10 rounded-full blur-2xl pointer-events-none" />
-          <div className="flex items-center gap-2.5 mb-4 relative z-10">
-            <div className="w-8 h-8 rounded-xl bg-emerald-500/15 flex items-center justify-center shrink-0">
-              <Fingerprint className="w-4 h-4 text-emerald-400" strokeWidth={1.75} />
+        {/* Card 1: Active Sign-in Methods */}
+        <div className="rounded-2xl bg-white dark:bg-[#121214] ring-1 ring-black/[0.04] dark:ring-white/[0.06] shadow-sm shadow-zinc-950/5 p-5 sm:p-6 transition-all">
+          <div className="flex items-center gap-3 mb-5">
+            <div className="w-9 h-9 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
+              <Fingerprint className="w-4.5 h-4.5" strokeWidth={2} />
             </div>
             <div className="min-w-0">
-              <h2 className="text-sm font-bold text-white">Sign-in methods</h2>
-              <p className="text-[11px] text-white/50 truncate" title={state?.email}>{state?.email}</p>
+              <h2 className="text-sm font-bold text-zinc-950 dark:text-zinc-100">Sign-in Methods</h2>
+              <p className="text-[11px] text-zinc-500 dark:text-zinc-400 truncate" title={state?.email}>
+                Connected authentication channels for <span className="font-semibold text-zinc-700 dark:text-zinc-300">{state?.email}</span>
+              </p>
             </div>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 relative z-10">
-            <div className="p-4 rounded-2xl bg-gradient-to-br from-[#0b2f1e]/90 to-[#061d12]/90 flex items-center justify-between gap-3 shadow-md">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+            {/* Google Channel */}
+            <div className="p-4 rounded-xl bg-zinc-50/70 dark:bg-zinc-900/60 ring-1 ring-black/[0.03] dark:ring-zinc-800/60 flex items-center justify-between gap-3 transition-colors">
               <div className="flex items-center gap-3 min-w-0">
                 <GoogleIcon />
                 <div className="min-w-0">
-                  <p className="text-xs font-bold text-white">Google</p>
-                  <p className="text-[11px] text-white/50 truncate">Sign in with your Google account</p>
+                  <p className="text-xs font-bold text-zinc-900 dark:text-zinc-100">Google Workspace</p>
+                  <p className="text-[11px] text-zinc-500 dark:text-zinc-400 truncate">One-tap institutional SSO</p>
                 </div>
               </div>
-              <span className={`text-xs font-bold whitespace-nowrap ${googleLinked ? 'text-emerald-300' : 'text-white/40'}`}>
-                {googleLinked ? 'Connected' : 'Not connected'}
-              </span>
+              <Badge variant={isGoogleLinked ? 'emerald' : 'neutral'} size="xs">
+                {isGoogleLinked ? 'Connected' : 'Not linked'}
+              </Badge>
             </div>
 
-            <div className="p-4 rounded-2xl bg-gradient-to-br from-[#0b2f1e]/90 to-[#061d12]/90 flex items-center justify-between gap-3 shadow-md">
+            {/* Password Channel */}
+            <div className="p-4 rounded-xl bg-zinc-50/70 dark:bg-zinc-900/60 ring-1 ring-black/[0.03] dark:ring-zinc-800/60 flex items-center justify-between gap-3 transition-colors">
               <div className="flex items-center gap-3 min-w-0">
-                <KeyRound className="w-5 h-5 text-emerald-400 shrink-0" strokeWidth={1.75} />
+                <div className="w-7 h-7 rounded-lg bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300 flex items-center justify-center shrink-0">
+                  <KeyRound className="w-4 h-4" strokeWidth={2} />
+                </div>
                 <div className="min-w-0">
-                  <p className="text-xs font-bold text-white">Password</p>
-                  <p className="text-[11px] text-white/50 truncate">Sign in with email and password</p>
+                  <p className="text-xs font-bold text-zinc-900 dark:text-zinc-100">Password</p>
+                  <p className="text-[11px] text-zinc-500 dark:text-zinc-400 truncate">Email and password access</p>
                 </div>
               </div>
-              <span className={`text-xs font-bold whitespace-nowrap ${hasPassword ? 'text-emerald-300' : 'text-white/40'}`}>
-                {hasPassword ? 'Set' : 'Not set'}
-              </span>
+              <Badge variant={hasPassword ? 'emerald' : 'amber'} size="xs">
+                {hasPassword ? 'Configured' : 'Not set'}
+              </Badge>
             </div>
           </div>
         </div>
 
-        {/* Password: add or change */}
+        {/* Card 2: Password Management (Credentials) */}
         {state && (
-          <div className={CARD}>
-            <div className="absolute -top-12 -right-12 w-32 h-32 bg-emerald-400/10 rounded-full blur-2xl pointer-events-none" />
-            <div className="flex items-center gap-2.5 mb-1 relative z-10">
-              <div className="w-8 h-8 rounded-xl bg-emerald-500/15 flex items-center justify-center shrink-0">
-                <Lock className="w-4 h-4 text-emerald-400" strokeWidth={1.75} />
+          <div className="rounded-2xl bg-white dark:bg-[#121214] ring-1 ring-black/[0.04] dark:ring-white/[0.06] shadow-sm shadow-zinc-950/5 p-5 sm:p-6 transition-all">
+            <div className="flex items-center gap-3 mb-2">
+              <div className="w-9 h-9 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
+                <Lock className="w-4.5 h-4.5" strokeWidth={2} />
               </div>
-              <h2 className="text-sm font-bold text-white">{hasPassword ? 'Change password' : 'Add a password'}</h2>
+              <div>
+                <h2 className="text-sm font-bold text-zinc-950 dark:text-zinc-100">
+                  {hasPassword ? 'Change Password' : 'Add Password Credentials'}
+                </h2>
+                <p className="text-[11px] text-zinc-500 dark:text-zinc-400">
+                  {hasPassword
+                    ? 'Update your password credentials. Active sessions on other devices will be signed out.'
+                    : 'Add a secure password to sign in without requiring Google authentication.'}
+                </p>
+              </div>
             </div>
-            <p className="text-xs text-white/60 mb-5 relative z-10 leading-relaxed">
-              {hasPassword
-                ? 'Enter your current password to choose a new one. Your other sessions are signed out when it changes.'
-                : 'Your account signs in with Google. You can add a password as a second way in. This is the only place a password can be added, and it needs a fresh Google confirmation.'}
-            </p>
 
-            <div className="relative z-10 space-y-4 max-w-md">
+            <div className="mt-5 space-y-4 max-w-md">
               {passwordError && <Banner tone="error">{passwordError}</Banner>}
               {passwordNotice && <Banner tone="success">{passwordNotice}</Banner>}
 
               {!hasPassword && !state.recentSignIn ? (
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="lg"
-                  onClick={handleReauthWithGoogle}
-                  loading={isReauthing}
-                  leftIcon={<GoogleIcon />}
-                  className="w-full bg-[#121214] border-zinc-800 hover:bg-zinc-800/60 text-white font-semibold h-11 whitespace-nowrap"
-                >
-                  <span>{isReauthing ? 'Redirecting...' : 'Confirm with Google to continue'}</span>
-                </Button>
+                <div className="p-4 rounded-xl bg-amber-500/10 border border-amber-500/20 text-xs text-amber-800 dark:text-amber-300 space-y-3">
+                  <p className="leading-relaxed">
+                    To add password credentials to a Google-linked account, confirm your Google identity first.
+                  </p>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={handleReauthWithGoogle}
+                    loading={isReauthing}
+                    leftIcon={<GoogleIcon />}
+                    className="w-full bg-white dark:bg-zinc-800 border-zinc-200 dark:border-zinc-700 font-semibold"
+                  >
+                    <span>{isReauthing ? 'Redirecting to Google...' : 'Confirm with Google to continue'}</span>
+                  </Button>
+                </div>
               ) : (
                 <form onSubmit={handleSavePassword} className="space-y-4">
                   {hasPassword && (
@@ -352,7 +391,7 @@ export default function AccountSecurityPage() {
                       label="Current password"
                       value={currentPassword}
                       onChange={setCurrentPassword}
-                      placeholder="Your current password"
+                      placeholder="Enter your current password"
                       autoComplete="current-password"
                     />
                   )}
@@ -370,16 +409,33 @@ export default function AccountSecurityPage() {
                     placeholder="Re-type new password"
                     autoComplete="new-password"
                   />
+
+                  {/* Live Criteria Checklist */}
+                  {newPassword.length > 0 && (
+                    <div className="p-3 rounded-xl bg-zinc-50 dark:bg-zinc-850/60 ring-1 ring-black/[0.04] dark:ring-white/[0.05] space-y-1.5 text-[11px]">
+                      <div className={`flex items-center gap-1.5 ${newPassword.length >= 8 ? 'text-emerald-600 dark:text-emerald-400 font-semibold' : 'text-zinc-400 dark:text-zinc-500'}`}>
+                        <Check className="w-3.5 h-3.5" />
+                        <span>At least 8 characters long</span>
+                      </div>
+                      {confirmPassword.length > 0 && (
+                        <div className={`flex items-center gap-1.5 ${newPassword === confirmPassword ? 'text-emerald-600 dark:text-emerald-400 font-semibold' : 'text-rose-500 font-medium'}`}>
+                          {newPassword === confirmPassword ? <Check className="w-3.5 h-3.5" /> : <AlertCircle className="w-3.5 h-3.5" />}
+                          <span>{newPassword === confirmPassword ? 'Passwords match' : 'Passwords do not match'}</span>
+                        </div>
+                      )}
+                    </div>
+                  )}
+
                   <Button
                     type="submit"
                     variant="primary"
                     size="lg"
                     loading={isSavingPassword}
-                    disabled={!newPassword || !confirmPassword || (hasPassword && !currentPassword)}
-                    leftIcon={<ShieldCheck className="w-4 h-4" strokeWidth={1.75} />}
+                    disabled={newPassword.length < 8 || newPassword !== confirmPassword || (hasPassword && !currentPassword)}
+                    leftIcon={<ShieldCheck className="w-4 h-4" strokeWidth={2} />}
                     className="w-full h-11 whitespace-nowrap"
                   >
-                    {isSavingPassword ? 'Saving...' : hasPassword ? 'Change password' : 'Add password'}
+                    {isSavingPassword ? 'Saving Changes...' : hasPassword ? 'Update Password' : 'Save Password'}
                   </Button>
                 </form>
               )}
@@ -387,28 +443,33 @@ export default function AccountSecurityPage() {
           </div>
         )}
 
-        {/* Connect Google: only for password accounts without an approved Google link */}
-        {state && hasPassword && !googleLinked && (
-          <div className={CARD}>
-            <div className="absolute -top-12 -right-12 w-32 h-32 bg-emerald-400/10 rounded-full blur-2xl pointer-events-none" />
-            <div className="flex items-center gap-2.5 mb-1 relative z-10">
-              <div className="w-8 h-8 rounded-xl bg-emerald-500/15 flex items-center justify-center shrink-0">
-                <Link2 className="w-4 h-4 text-emerald-400" strokeWidth={1.75} />
+        {/* Card 3: Connect Google (for password accounts without linked Google) */}
+        {state && hasPassword && !isGoogleLinked && (
+          <div className="rounded-2xl bg-white dark:bg-[#121214] ring-1 ring-black/[0.04] dark:ring-white/[0.06] shadow-sm shadow-zinc-950/5 p-5 sm:p-6 transition-all">
+            <div className="flex items-center gap-3 mb-2">
+              <div className="w-9 h-9 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
+                <Link2 className="w-4.5 h-4.5" strokeWidth={2} />
               </div>
-              <h2 className="text-sm font-bold text-white">Connect Google</h2>
+              <div>
+                <h2 className="text-sm font-bold text-zinc-950 dark:text-zinc-100">Connect Google Account</h2>
+                <p className="text-[11px] text-zinc-500 dark:text-zinc-400">
+                  Link institutional Google Sign-In to this password account.
+                </p>
+              </div>
             </div>
-            <p className="text-xs text-white/60 mb-5 relative z-10 leading-relaxed">
-              Signing in with Google is never linked to a password account automatically. Confirm your password here first, then choose the Google account that uses this same Gmail address.
+
+            <p className="text-xs text-zinc-600 dark:text-zinc-400 mb-5 leading-relaxed">
+              Confirm your password first to authorize connecting the Google account that shares this email address.
             </p>
 
-            <form onSubmit={handleConnectGoogle} className="relative z-10 space-y-4 max-w-md">
+            <form onSubmit={handleConnectGoogle} className="space-y-4 max-w-md">
               {linkError && <Banner tone="error">{linkError}</Banner>}
               {linkNotice && <Banner tone="success">{linkNotice}</Banner>}
               <PasswordField
-                label="Your password"
+                label="Account password"
                 value={linkPassword}
                 onChange={setLinkPassword}
-                placeholder="Confirm it is you"
+                placeholder="Confirm your password to link"
                 autoComplete="current-password"
               />
               <Button
@@ -417,16 +478,18 @@ export default function AccountSecurityPage() {
                 size="lg"
                 loading={isLinking}
                 disabled={!linkPassword}
-                leftIcon={<Link2 className="w-4 h-4" strokeWidth={1.75} />}
+                leftIcon={<Link2 className="w-4 h-4" strokeWidth={2} />}
                 className="w-full h-11 whitespace-nowrap"
               >
-                {isLinking ? 'Connecting...' : 'Connect Google'}
+                {isLinking ? 'Connecting...' : 'Authorize Google Linking'}
               </Button>
             </form>
           </div>
         )}
 
-        <p className="text-center text-[11px] text-zinc-600">Pambayang Dalubhasaan ng Marilao · LITE</p>
+        <p className="text-center text-[11px] text-zinc-400 dark:text-zinc-600 font-medium">
+          Pambayang Dalubhasaan ng Marilao · LITE
+        </p>
       </main>
     </div>
   );
