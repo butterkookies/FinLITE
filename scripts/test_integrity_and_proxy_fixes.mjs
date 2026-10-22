@@ -373,6 +373,60 @@ assert(
   'Stored disbursement procedure raises exception when available cash is insufficient'
 );
 
+console.log('\n7. Testing Declined Registration Request Reset Workflow & UI Action:');
+
+const adminResetRoute = fs.readFileSync(
+  path.join(projectRoot, 'app/api/admin/reset-request/route.js'),
+  'utf-8'
+);
+assert(
+  adminResetRoute.includes('verifyAdmin') && adminResetRoute.includes('export async function POST'),
+  'Reset request endpoint enforces administrator authorization'
+);
+assert(
+  adminResetRoute.includes(".delete()"),
+  'Reset request endpoint deletes declined registration from database'
+);
+assert(
+  adminResetRoute.includes("action: 'REGISTRATION_RESET'"),
+  'Reset request endpoint logs REGISTRATION_RESET governance audit event'
+);
+
+const adminPage = fs.readFileSync(
+  path.join(projectRoot, 'app/admin/page.jsx'),
+  'utf-8'
+);
+assert(
+  adminPage.includes("onClick={() => setResettingRequest(req)}") && adminPage.includes('<span>Reset</span>'),
+  'Admin console declined category renders Reset button on right side for each row'
+);
+assert(
+  adminPage.includes('Reset Registration Request') && adminPage.includes('handleConfirmReset'),
+  'Admin console includes dedicated confirmation modal before resetting declined applicant'
+);
+assert(
+  adminPage.includes("fetch('/api/admin/reset-request'"),
+  'Admin console calls reset-request API upon confirmation'
+);
+
+const googleRegRoute = fs.readFileSync(
+  path.join(projectRoot, 'app/api/auth/google-register/route.js'),
+  'utf-8'
+);
+assert(
+  googleRegRoute.includes("dup.status === 'rejected'"),
+  'Google register route clears rejected registration request to permit clean resubmission'
+);
+
+const mailerCode = fs.readFileSync(
+  path.join(projectRoot, 'lib/email/mailer.js'),
+  'utf-8'
+);
+assert(
+  mailerCode.includes("changeType === 'RESET'") && mailerCode.includes('Registration Reset'),
+  'Mailer supports RESET status change notification for resubmission'
+);
+
 // ==============================================================================
 // SUMMARY RESULTS
 // ==============================================================================

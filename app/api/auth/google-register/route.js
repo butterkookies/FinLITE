@@ -75,7 +75,10 @@ export async function POST(req) {
     if (dup) {
       // A Google-verified owner outranks an unverified email/password squatter.
       let cleared = false;
-      if (adminClient && isReplaceableRegistration(dup)) {
+      if (adminClient && dup.status === 'rejected') {
+        const { error: delErr } = await adminClient.from('registration_requests').delete().eq('id', dup.id);
+        cleared = !delErr;
+      } else if (adminClient && isReplaceableRegistration(dup)) {
         if (dup.google_id === googleUid) {
           const { error: delErr } = await adminClient.from('registration_requests').delete().eq('id', dup.id);
           cleared = !delErr;
