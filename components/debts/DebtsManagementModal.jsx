@@ -378,6 +378,11 @@ export default function DebtsManagementModal({
                       type="text"
                       inputMode="decimal"
                       value={paymentAmount}
+                      onKeyDown={(e) => {
+                        if (['-', '+', 'e', 'E'].includes(e.key)) {
+                          e.preventDefault();
+                        }
+                      }}
                       onChange={(e) => setPaymentAmount(sanitizeAmountInput(e.target.value))}
                       placeholder="e.g. 500.00 (max 99,999)"
                       required

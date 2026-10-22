@@ -430,6 +430,11 @@ export default function AdvancesManagementModal({
                 type="text"
                 inputMode="decimal"
                 value={disbursementAmount}
+                onKeyDown={(e) => {
+                  if (['-', '+', 'e', 'E'].includes(e.key)) {
+                    e.preventDefault();
+                  }
+                }}
                 onChange={(e) => setDisbursementAmount(sanitizeAmountInput(e.target.value))}
                 placeholder="Enter payout amount (max 99,999)..."
                 autoFocus
