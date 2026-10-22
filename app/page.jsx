@@ -2083,6 +2083,8 @@ export default function Dashboard() {
   };
 
   const handleSaveAuditCount = async (audit) => {
+    // Snapshot prior reconciliation before updating optimistic state
+    const prevReconSnapshot = latestReconciliation ? { ...latestReconciliation } : null;
     let resolvedSemesterId = currentSemester?.id;
     if (resolvedSemesterId && resolvedSemesterId.startsWith('sem-')) {
       const matchedDbSem = semesters.find((s) => s.id && !s.id.startsWith('sem-') && s.academicYear === currentSemester.academicYear && s.semester === currentSemester.semester);
@@ -2180,6 +2182,26 @@ export default function Dashboard() {
           } catch (_) {}
         }
 
+        const previousCounts = prevReconSnapshot
+          ? (prevReconSnapshot.counts || {
+              bills_1000: prevReconSnapshot.bills_1000,
+              bills_500: prevReconSnapshot.bills_500,
+              bills_200: prevReconSnapshot.bills_200,
+              bills_100: prevReconSnapshot.bills_100,
+              bills_50: prevReconSnapshot.bills_50,
+              bills_20: prevReconSnapshot.bills_20,
+              coins_20: prevReconSnapshot.coins_20,
+              coins_10: prevReconSnapshot.coins_10,
+              coins_5: prevReconSnapshot.coins_5,
+              coins_1: prevReconSnapshot.coins_1,
+              coins_cents: prevReconSnapshot.coins_cents,
+            })
+          : null;
+        const previousTotal = prevReconSnapshot
+          ? (prevReconSnapshot.physical_total ?? prevReconSnapshot.physicalTotal ?? null)
+          : null;
+        const previousDate = prevReconSnapshot?.created_at || null;
+
         // Dispatch cash box audit notification email to all active officers
         fetch('/api/notifications/reconciliation', {
           method: 'POST',
@@ -2192,6 +2214,10 @@ export default function Dashboard() {
             varianceStatus: audit.status || (isVarianceZero ? 'BALANCED' : (audit.variance < 0 ? 'SHORTAGE' : 'OVERAGE')),
             approvalStatus: audit.approval_status || (isVarianceZero ? 'BALANCED' : 'PENDING_APPROVAL'),
             notes: audit.notes || null,
+            currentCounts: audit.counts || {},
+            previousCounts,
+            previousTotal,
+            previousDate,
           }),
         }).catch((notifErr) => console.warn('[Reconciliation Notification] Dispatch notice:', notifErr?.message || notifErr));
       }

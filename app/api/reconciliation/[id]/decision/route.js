@@ -164,6 +164,52 @@ export async function POST(req, { params }) {
       try {
         const officerEmails = await getActiveOfficerEmails(db);
         if (officerEmails.length > 0) {
+          let currentCounts = {};
+          let previousCounts = null;
+          let previousTotal = null;
+          let previousDate = null;
+          try {
+            const { data: curItems } = await db
+              .from('cash_reconciliation_items')
+              .select('quantity, denominations(code)')
+              .eq('reconciliation_id', reconciliationId);
+            if (curItems) {
+              curItems.forEach((item) => {
+                const code = item.denominations?.code;
+                if (code) {
+                  currentCounts[code.toLowerCase()] = item.quantity;
+                  if (code.startsWith('B')) currentCounts[`bills_${code.substring(1)}`] = item.quantity;
+                  else if (code.startsWith('C')) currentCounts[`coins_${code.substring(1)}`] = item.quantity;
+                }
+              });
+            }
+            const { data: priorRecons } = await db
+              .from('cash_reconciliations')
+              .select(`
+                id, physical_total, created_at,
+                cash_reconciliation_items (quantity, denominations(code))
+              `)
+              .lt('created_at', recon.created_at || new Date().toISOString())
+              .order('created_at', { ascending: false })
+              .limit(1);
+            if (priorRecons && priorRecons.length > 0) {
+              const prior = priorRecons[0];
+              previousTotal = prior.physical_total;
+              previousDate = prior.created_at;
+              previousCounts = {};
+              if (Array.isArray(prior.cash_reconciliation_items)) {
+                prior.cash_reconciliation_items.forEach((item) => {
+                  const code = item.denominations?.code;
+                  if (code) {
+                    previousCounts[code.toLowerCase()] = item.quantity;
+                    if (code.startsWith('B')) previousCounts[`bills_${code.substring(1)}`] = item.quantity;
+                    else if (code.startsWith('C')) previousCounts[`coins_${code.substring(1)}`] = item.quantity;
+                  }
+                });
+              }
+            }
+          } catch (_) {}
+
           sendReconciliationNotificationEmail({
             action: 'VARIANCE_DECISION',
             physicalTotal: recon.physical_total,
@@ -177,6 +223,10 @@ export async function POST(req, { params }) {
             adviserDecision: 'APPROVED',
             adviserNotes: notes?.trim() || null,
             date: new Date().toLocaleDateString('en-PH', { timeZone: 'Asia/Manila' }),
+            currentCounts,
+            previousCounts,
+            previousTotal,
+            previousDate,
             recipients: officerEmails,
           }).catch((mailErr) => console.warn('[Reconciliation Decision Email] Warning:', mailErr));
         }
@@ -224,6 +274,52 @@ export async function POST(req, { params }) {
       try {
         const officerEmails = await getActiveOfficerEmails(db);
         if (officerEmails.length > 0) {
+          let currentCounts = {};
+          let previousCounts = null;
+          let previousTotal = null;
+          let previousDate = null;
+          try {
+            const { data: curItems } = await db
+              .from('cash_reconciliation_items')
+              .select('quantity, denominations(code)')
+              .eq('reconciliation_id', reconciliationId);
+            if (curItems) {
+              curItems.forEach((item) => {
+                const code = item.denominations?.code;
+                if (code) {
+                  currentCounts[code.toLowerCase()] = item.quantity;
+                  if (code.startsWith('B')) currentCounts[`bills_${code.substring(1)}`] = item.quantity;
+                  else if (code.startsWith('C')) currentCounts[`coins_${code.substring(1)}`] = item.quantity;
+                }
+              });
+            }
+            const { data: priorRecons } = await db
+              .from('cash_reconciliations')
+              .select(`
+                id, physical_total, created_at,
+                cash_reconciliation_items (quantity, denominations(code))
+              `)
+              .lt('created_at', recon.created_at || new Date().toISOString())
+              .order('created_at', { ascending: false })
+              .limit(1);
+            if (priorRecons && priorRecons.length > 0) {
+              const prior = priorRecons[0];
+              previousTotal = prior.physical_total;
+              previousDate = prior.created_at;
+              previousCounts = {};
+              if (Array.isArray(prior.cash_reconciliation_items)) {
+                prior.cash_reconciliation_items.forEach((item) => {
+                  const code = item.denominations?.code;
+                  if (code) {
+                    previousCounts[code.toLowerCase()] = item.quantity;
+                    if (code.startsWith('B')) previousCounts[`bills_${code.substring(1)}`] = item.quantity;
+                    else if (code.startsWith('C')) previousCounts[`coins_${code.substring(1)}`] = item.quantity;
+                  }
+                });
+              }
+            }
+          } catch (_) {}
+
           sendReconciliationNotificationEmail({
             action: 'VARIANCE_DECISION',
             physicalTotal: recon.physical_total,
@@ -237,6 +333,10 @@ export async function POST(req, { params }) {
             adviserDecision: 'REJECTED',
             adviserNotes: notes?.trim() || 'Recount requested by Faculty Adviser.',
             date: new Date().toLocaleDateString('en-PH', { timeZone: 'Asia/Manila' }),
+            currentCounts,
+            previousCounts,
+            previousTotal,
+            previousDate,
             recipients: officerEmails,
           }).catch((mailErr) => console.warn('[Reconciliation Decision Email] Warning:', mailErr));
         }

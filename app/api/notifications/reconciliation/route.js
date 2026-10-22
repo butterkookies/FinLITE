@@ -43,7 +43,52 @@ export async function POST(req) {
       adviserRole,
       adviserDecision,
       adviserNotes,
+      currentCounts = null,
+      previousCounts = null,
+      previousTotal = null,
+      previousDate = null,
     } = body;
+
+    let resolvedPreviousCounts = previousCounts;
+    let resolvedPreviousTotal = previousTotal;
+    let resolvedPreviousDate = previousDate;
+
+    // If previous counts not supplied by client, attempt to resolve from prior database reconciliation
+    if (!resolvedPreviousCounts && db) {
+      try {
+        const { data: pastRecons } = await db
+          .from('cash_reconciliations')
+          .select(`
+            id, physical_total, created_at,
+            cash_reconciliation_items (
+              denomination_id, quantity,
+              denominations (code)
+            )
+          `)
+          .order('created_at', { ascending: false })
+          .limit(2);
+
+        if (pastRecons && pastRecons.length > 1) {
+          const prior = pastRecons[1];
+          resolvedPreviousTotal = prior.physical_total;
+          resolvedPreviousDate = prior.created_at;
+          const priorCounts = {};
+          if (Array.isArray(prior.cash_reconciliation_items)) {
+            prior.cash_reconciliation_items.forEach((item) => {
+              const code = item.denominations?.code;
+              if (code) {
+                priorCounts[code.toLowerCase()] = item.quantity;
+                if (code.startsWith('B')) priorCounts[`bills_${code.substring(1)}`] = item.quantity;
+                else if (code.startsWith('C')) priorCounts[`coins_${code.substring(1)}`] = item.quantity;
+              }
+            });
+          }
+          resolvedPreviousCounts = priorCounts;
+        }
+      } catch (pastErr) {
+        console.warn('Notice resolving past reconciliation from db:', pastErr?.message);
+      }
+    }
 
     const officerEmails = await getActiveOfficerEmails(db);
     if (officerEmails.length === 0) {
@@ -73,6 +118,10 @@ export async function POST(req) {
       adviserRole,
       adviserDecision,
       adviserNotes,
+      currentCounts,
+      previousCounts: resolvedPreviousCounts,
+      previousTotal: resolvedPreviousTotal,
+      previousDate: resolvedPreviousDate,
       recipients: officerEmails,
     });
 

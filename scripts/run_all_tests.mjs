@@ -1550,17 +1550,20 @@ async function testPermissionsAndAuditWorkflow() {
   });
   assert(fullAdvRes.success === true, 'sendAdvanceNotificationEmail full settlement succeeds');
 
-  // Test Reconciliation / Cash Box notifications
+  // Test Reconciliation / Cash Box notifications with denomination breakdowns (Current & Previous)
   const balancedReconRes = await sendReconciliationNotificationEmail({
     action: 'CASHBOX_COUNTED',
-    physicalTotal: 5420.50,
-    ledgerCashBalance: 5420.50,
+    physicalTotal: 1560,
+    ledgerCashBalance: 1560,
     varianceAmount: 0,
     varianceStatus: 'BALANCED',
     approvalStatus: 'BALANCED',
     notes: 'Weekly cash box count',
     countedByName: 'Treasurer Officer',
     countedByRole: 'TREASURER',
+    currentCounts: { bills_1000: 1, bills_500: 1, coins_10: 6 },
+    previousCounts: { bills_500: 1, coins_10: 6 },
+    previousTotal: 560,
     recipients: ['officers@example.com'],
   });
   assert(balancedReconRes.success === true, 'sendReconciliationNotificationEmail CASHBOX_COUNTED balanced succeeds');
