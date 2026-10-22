@@ -42,6 +42,7 @@ export const Input = forwardRef(function Input(
             'ring-1 ring-black/[0.05] dark:ring-zinc-800',
             'focus:outline-none focus:ring-2 focus:ring-emerald-500/50 dark:focus:ring-emerald-400/50 focus:bg-white dark:focus:bg-zinc-950',
             'disabled:cursor-not-allowed disabled:opacity-50',
+            '[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none',
             inputSizeClass,
             leftIcon && 'pl-8',
             rightElement && 'pr-8',

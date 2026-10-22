@@ -18,6 +18,7 @@ import {
   Tag
 } from 'lucide-react';
 import { formatPHP } from '@/lib/utils/currency';
+import { sanitizeAmountInput } from '@/lib/utils/validation';
 import { Modal, Button, Badge, Input } from '@/components/ui';
 
 export default function AdvancesManagementModal({
@@ -426,12 +427,11 @@ export default function AdvancesManagementModal({
                 Amount to Disburse (₱)
               </label>
               <Input
-                type="number"
-                step="0.01"
-                min="0.01"
+                type="text"
+                inputMode="decimal"
                 value={disbursementAmount}
-                onChange={(e) => setDisbursementAmount(e.target.value)}
-                placeholder="Enter payout amount..."
+                onChange={(e) => setDisbursementAmount(sanitizeAmountInput(e.target.value))}
+                placeholder="Enter payout amount (max 99,999)..."
                 autoFocus
                 required
               />
@@ -603,12 +603,11 @@ export default function AdvancesManagementModal({
                   Total Amount (₱) *
                 </label>
                 <Input
-                  type="number"
-                  step="0.01"
-                  min="0.01"
+                  type="text"
+                  inputMode="decimal"
                   value={newAmount}
-                  onChange={(e) => setNewAmount(e.target.value)}
-                  placeholder="1000.00"
+                  onChange={(e) => setNewAmount(sanitizeAmountInput(e.target.value))}
+                  placeholder="e.g. 1000.00 (max 99,999)"
                   required
                 />
               </div>

@@ -328,3 +328,13 @@ html[data-theme="light"] ::-webkit-scrollbar-thumb:hover {
     color: #000000 !important;
   }
 }
+
+/* Remove number input spin buttons across all browsers */
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+input[type="number"] {
+  -moz-appearance: textfield;
+}
