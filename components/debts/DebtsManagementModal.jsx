@@ -17,6 +17,7 @@ import {
   Check
 } from 'lucide-react';
 import { formatPHP } from '@/lib/utils/currency';
+import { sanitizeAmountInput } from '@/lib/utils/validation';
 import { Modal, Button, Badge, Input } from '@/components/ui';
 
 export default function DebtsManagementModal({
@@ -374,12 +375,16 @@ export default function DebtsManagementModal({
                       Amount Tendered / Received (₱)
                     </label>
                     <Input
-                      type="number"
-                      step="0.01"
-                      min="0.01"
+                      type="text"
+                      inputMode="decimal"
                       value={paymentAmount}
-                      onChange={(e) => setPaymentAmount(e.target.value)}
-                      placeholder="e.g. 500.00"
+                      onKeyDown={(e) => {
+                        if (['-', '+', 'e', 'E'].includes(e.key)) {
+                          e.preventDefault();
+                        }
+                      }}
+                      onChange={(e) => setPaymentAmount(sanitizeAmountInput(e.target.value))}
+                      placeholder="e.g. 500.00 (max 99,999)"
                       required
                     />
                     {/* Quick percentage buttons */}
@@ -498,12 +503,11 @@ export default function DebtsManagementModal({
                   Total Amount (₱) *
                 </label>
                 <Input
-                  type="number"
-                  step="0.01"
-                  min="0.01"
+                  type="text"
+                  inputMode="decimal"
                   value={newAmount}
-                  onChange={(e) => setNewAmount(e.target.value)}
-                  placeholder="e.g. 750.00"
+                  onChange={(e) => setNewAmount(sanitizeAmountInput(e.target.value))}
+                  placeholder="e.g. 750.00 (max 99,999)"
                   required
                 />
               </div>

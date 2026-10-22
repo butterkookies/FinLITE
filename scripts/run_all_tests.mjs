@@ -29,6 +29,12 @@ import {
   validateOutflowBalance,
   MAX_TRANSACTION_AMOUNT,
 } from '../lib/utils/validation.js';
+import {
+  formatFriendlyDate,
+  formatFriendlyTime,
+  getTransactionTimestamp,
+  sortTransactions,
+} from '../lib/utils/transaction.js';
 import { isSuperAdminEmail, getSuperAdminEmails, resolveEffectiveRole } from '../lib/config/admin.js';
 import {
   rateLimiter,
@@ -49,7 +55,10 @@ import {
 import {
   sendAuditRequestEmail,
   sendAuditDecisionEmail,
-  sendRevisionSubmittedEmail
+  sendRevisionSubmittedEmail,
+  sendDebtNotificationEmail,
+  sendAdvanceNotificationEmail,
+  sendReconciliationNotificationEmail
 } from '../lib/email/mailer.js';
 import { execFileSync, spawn } from 'child_process';
 import fs from 'fs';
@@ -254,6 +263,64 @@ assert(validateOutflowBalance({ type: 'OUTFLOW', isReimbursement: false, amount:
   "validateOutflowBalance uses exact centavos to catch 1 centavo overdraft");
 assert(validateOutflowBalance({ type: 'OUTFLOW', isReimbursement: false, amount: 100.00, cashBalance: 100.00 }) === null,
   "validateOutflowBalance allows outflow exactly equal to channel balance");
+
+
+// ==============================================================================
+// 1c. TRANSACTION DATE & TIME MULTI-COLUMN SORTING UNIT TESTS
+// ==============================================================================
+console.log('\n============================================================');
+console.log('1c. RUNNING TRANSACTION DATE & TIME SORTING TESTS');
+console.log('============================================================');
+
+// Date & Time formatting
+assert(formatFriendlyDate('2026-10-22') === 'Oct 22, 2026', "formatFriendlyDate('2026-10-22') formats to Oct 22, 2026");
+assert(formatFriendlyDate(null) === '—', "formatFriendlyDate(null) returns em-dash fallback");
+assert(formatFriendlyTime(null) === null, "formatFriendlyTime(null) returns null");
+assert(typeof formatFriendlyTime('2026-10-22T08:30:00Z') === 'string', "formatFriendlyTime parses ISO timestamp to string");
+
+// Timestamp extraction
+const sampleIso = '2026-10-22T10:30:00.000Z';
+const sampleMs = new Date(sampleIso).getTime();
+assert(getTransactionTimestamp({ created_at: sampleIso }) === sampleMs, "getTransactionTimestamp reads created_at");
+assert(getTransactionTimestamp({ updated_at: sampleIso }) === sampleMs, "getTransactionTimestamp reads updated_at fallback");
+assert(getTransactionTimestamp({ id: 'tx-1729600000000' }) === 1729600000000, "getTransactionTimestamp extracts epoch from temp ID");
+assert(getTransactionTimestamp({}) === 0, "getTransactionTimestamp returns 0 for empty object");
+
+// Sorting transactions on the same date by time
+const testTxsSameDate = [
+  { id: 'tx-1', title: 'Morning Coffee', transaction_date: '2026-10-22', created_at: '2026-10-22T08:00:00.000Z', amount: 50 },
+  { id: 'tx-2', title: 'Afternoon Supplies', transaction_date: '2026-10-22', created_at: '2026-10-22T14:30:00.000Z', amount: 150 },
+  { id: 'tx-3', title: 'Evening Dinner', transaction_date: '2026-10-22', created_at: '2026-10-22T19:00:00.000Z', amount: 300 },
+];
+
+const sortedDesc = sortTransactions(testTxsSameDate, 'date', 'desc');
+assert(sortedDesc[0].id === 'tx-3', "Date desc: latest time (Evening) is first");
+assert(sortedDesc[1].id === 'tx-2', "Date desc: middle time (Afternoon) is second");
+assert(sortedDesc[2].id === 'tx-1', "Date desc: earliest time (Morning) is last");
+
+const sortedAsc = sortTransactions(testTxsSameDate, 'date', 'asc');
+assert(sortedAsc[0].id === 'tx-1', "Date asc: earliest time (Morning) is first");
+assert(sortedAsc[1].id === 'tx-2', "Date asc: middle time (Afternoon) is second");
+assert(sortedAsc[2].id === 'tx-3', "Date asc: latest time (Evening) is last");
+
+// Sorting across multiple dates
+const testMultiDate = [
+  { id: 'tx-old', title: 'Yesterday Late', transaction_date: '2026-10-21', created_at: '2026-10-21T23:59:00.000Z' },
+  { id: 'tx-new-am', title: 'Today Early', transaction_date: '2026-10-22', created_at: '2026-10-22T06:00:00.000Z' },
+  { id: 'tx-new-pm', title: 'Today Late', transaction_date: '2026-10-22', created_at: '2026-10-22T18:00:00.000Z' },
+];
+const sortedMulti = sortTransactions(testMultiDate, 'date', 'desc');
+assert(sortedMulti[0].id === 'tx-new-pm', "Multi-date desc: Today Late is 1st");
+assert(sortedMulti[1].id === 'tx-new-am', "Multi-date desc: Today Early is 2nd");
+assert(sortedMulti[2].id === 'tx-old', "Multi-date desc: Yesterday is 3rd");
+
+// Amount tie-breaking
+const testAmountTie = [
+  { id: 'tx-amt-1', title: 'First ₱100', amount: 100, created_at: '2026-10-22T09:00:00.000Z' },
+  { id: 'tx-amt-2', title: 'Second ₱100', amount: 100, created_at: '2026-10-22T15:00:00.000Z' },
+];
+const sortedAmtDesc = sortTransactions(testAmountTie, 'amount', 'desc');
+assert(sortedAmtDesc[0].id === 'tx-amt-2', "Amount tie-breaker: newer tx appears first in desc");
 
 
 // ==============================================================================
@@ -1389,6 +1456,177 @@ async function testPermissionsAndAuditWorkflow() {
     recipients: ['auditor@example.com'],
   });
   assert(revisionRes.success === true, 'sendRevisionSubmittedEmail succeeds in simulation/dispatch');
+
+  // Test Debt notifications
+  const newDebtRes = await sendDebtNotificationEmail({
+    action: 'DEBT_CREATED',
+    debtorName: 'Juan Dela Cruz',
+    debtorContact: '09123456789',
+    title: 'Hackathon Registration Fee',
+    totalAmount: 500,
+    dueDate: '2026-11-01',
+    notes: 'Pending allowance',
+    loggedByName: 'Treasurer Officer',
+    loggedByRole: 'TREASURER',
+    recipients: ['officers@example.com'],
+  });
+  assert(newDebtRes.success === true, 'sendDebtNotificationEmail DEBT_CREATED succeeds');
+
+  const partialDebtRes = await sendDebtNotificationEmail({
+    action: 'DEBT_PAYMENT_COLLECTED',
+    debtorName: 'Juan Dela Cruz',
+    title: 'Hackathon Registration Fee',
+    totalAmount: 500,
+    collectedAmount: 200,
+    amountPaidSoFar: 200,
+    remainingBalance: 300,
+    isFull: false,
+    loggedByName: 'Treasurer Officer',
+    loggedByRole: 'TREASURER',
+    recipients: ['officers@example.com'],
+  });
+  assert(partialDebtRes.success === true, 'sendDebtNotificationEmail partial installment succeeds');
+
+  const fullDebtRes = await sendDebtNotificationEmail({
+    action: 'DEBT_PAYMENT_COLLECTED',
+    debtorName: 'Juan Dela Cruz',
+    title: 'Hackathon Registration Fee',
+    totalAmount: 500,
+    collectedAmount: 300,
+    amountPaidSoFar: 500,
+    remainingBalance: 0,
+    isFull: true,
+    loggedByName: 'Treasurer Officer',
+    loggedByRole: 'TREASURER',
+    recipients: ['officers@example.com'],
+  });
+  assert(fullDebtRes.success === true, 'sendDebtNotificationEmail full settlement succeeds');
+
+  // Test Advance notifications
+  const newAdvRes = await sendAdvanceNotificationEmail({
+    action: 'ADVANCE_CREATED',
+    claimantName: 'Maria Santos',
+    advancedByName: 'Maria Santos',
+    title: 'Booth Decor & Materials',
+    category: 'Supplies & Materials',
+    eventName: 'Club Week 2026',
+    totalAmount: 1200,
+    notes: 'Bought at Divisoria',
+    loggedByName: 'President Officer',
+    loggedByRole: 'PRESIDENT',
+    recipients: ['officers@example.com'],
+  });
+  assert(newAdvRes.success === true, 'sendAdvanceNotificationEmail ADVANCE_CREATED succeeds');
+
+  const partialAdvRes = await sendAdvanceNotificationEmail({
+    action: 'ADVANCE_DISBURSEMENT',
+    claimantName: 'Maria Santos',
+    title: 'Booth Decor & Materials',
+    totalAmount: 1200,
+    disbursedAmount: 600,
+    reimbursedSoFar: 600,
+    remainingBalance: 600,
+    isFull: false,
+    notes: 'First tranche payout',
+    loggedByName: 'Treasurer Officer',
+    loggedByRole: 'TREASURER',
+    recipients: ['officers@example.com'],
+  });
+  assert(partialAdvRes.success === true, 'sendAdvanceNotificationEmail partial disbursement succeeds');
+
+  const fullAdvRes = await sendAdvanceNotificationEmail({
+    action: 'ADVANCE_DISBURSEMENT',
+    claimantName: 'Maria Santos',
+    title: 'Booth Decor & Materials',
+    totalAmount: 1200,
+    disbursedAmount: 600,
+    reimbursedSoFar: 1200,
+    remainingBalance: 0,
+    isFull: true,
+    notes: 'Final settlement tranche',
+    loggedByName: 'Treasurer Officer',
+    loggedByRole: 'TREASURER',
+    recipients: ['officers@example.com'],
+  });
+  assert(fullAdvRes.success === true, 'sendAdvanceNotificationEmail full settlement succeeds');
+
+  // Test Reconciliation / Cash Box notifications with denomination breakdowns (Current & Previous)
+  const balancedReconRes = await sendReconciliationNotificationEmail({
+    action: 'CASHBOX_COUNTED',
+    physicalTotal: 1560,
+    ledgerCashBalance: 1560,
+    varianceAmount: 0,
+    varianceStatus: 'BALANCED',
+    approvalStatus: 'BALANCED',
+    notes: 'Weekly cash box count',
+    countedByName: 'Treasurer Officer',
+    countedByRole: 'TREASURER',
+    currentCounts: { bills_1000: 1, bills_500: 1, coins_10: 6 },
+    previousCounts: { bills_500: 1, coins_10: 6 },
+    previousTotal: 560,
+    recipients: ['officers@example.com'],
+  });
+  assert(balancedReconRes.success === true, 'sendReconciliationNotificationEmail CASHBOX_COUNTED balanced succeeds');
+
+  const shortageReconRes = await sendReconciliationNotificationEmail({
+    action: 'VARIANCE_SUBMITTED',
+    physicalTotal: 5320.50,
+    ledgerCashBalance: 5420.50,
+    varianceAmount: -100,
+    varianceStatus: 'SHORTAGE',
+    approvalStatus: 'PENDING_APPROVAL',
+    notes: 'Loose coins shortage during event',
+    countedByName: 'Treasurer Officer',
+    countedByRole: 'TREASURER',
+    recipients: ['officers@example.com'],
+  });
+  assert(shortageReconRes.success === true, 'sendReconciliationNotificationEmail VARIANCE_SUBMITTED shortage succeeds');
+
+  const overageReconRes = await sendReconciliationNotificationEmail({
+    action: 'VARIANCE_SUBMITTED',
+    physicalTotal: 5520.50,
+    ledgerCashBalance: 5420.50,
+    varianceAmount: 100,
+    varianceStatus: 'OVERAGE',
+    approvalStatus: 'PENDING_APPROVAL',
+    notes: 'Surplus cash from loose change',
+    countedByName: 'Treasurer Officer',
+    countedByRole: 'TREASURER',
+    recipients: ['officers@example.com'],
+  });
+  assert(overageReconRes.success === true, 'sendReconciliationNotificationEmail VARIANCE_SUBMITTED overage succeeds');
+
+  const approveReconRes = await sendReconciliationNotificationEmail({
+    action: 'VARIANCE_DECISION',
+    physicalTotal: 5320.50,
+    ledgerCashBalance: 5420.50,
+    varianceAmount: -100,
+    varianceStatus: 'SHORTAGE',
+    approvalStatus: 'APPROVED',
+    notes: 'Loose coins shortage during event',
+    adviserName: 'Dr. Santos',
+    adviserRole: 'Club Adviser',
+    adviserDecision: 'APPROVED',
+    adviserNotes: 'Shortage approved and ledger adjusted.',
+    recipients: ['officers@example.com'],
+  });
+  assert(approveReconRes.success === true, 'sendReconciliationNotificationEmail VARIANCE_DECISION approved succeeds');
+
+  const rejectReconRes = await sendReconciliationNotificationEmail({
+    action: 'VARIANCE_DECISION',
+    physicalTotal: 5320.50,
+    ledgerCashBalance: 5420.50,
+    varianceAmount: -100,
+    varianceStatus: 'SHORTAGE',
+    approvalStatus: 'REJECTED',
+    notes: 'Loose coins shortage during event',
+    adviserName: 'Dr. Santos',
+    adviserRole: 'Club Adviser',
+    adviserDecision: 'REJECTED',
+    adviserNotes: 'Recount requested.',
+    recipients: ['officers@example.com'],
+  });
+  assert(rejectReconRes.success === true, 'sendReconciliationNotificationEmail VARIANCE_DECISION rejected succeeds');
 }
 await testPermissionsAndAuditWorkflow();
 

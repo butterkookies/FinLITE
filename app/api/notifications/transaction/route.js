@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { createClient, createAdminClient } from '@/lib/supabase/server';
 import { isSuperAdminEmail } from '@/lib/config/admin';
-import { sendTransactionNotificationEmail, sendAuditRequestEmail } from '@/lib/email/mailer';
+import { sendAuditRequestEmail } from '@/lib/email/mailer';
 import { hasPermission, resolveUserPermissions, ACTION_KEYS } from '@/lib/auth/permissions';
 
 export async function POST(req) {
@@ -114,28 +114,21 @@ export async function POST(req) {
       return true;
     });
 
-    // 1. Separate auditors (officers with audit_approve capability)
+    // Separate auditors & admins (officers with audit_approve capability)
     const auditorRecipients = otherOfficers
       .filter((u) => hasPermission(u, ACTION_KEYS.AUDIT_APPROVE, u.email))
       .map((u) => u.email.trim().toLowerCase());
 
     const uniqueAuditors = Array.from(new Set(auditorRecipients));
 
-    // 2. All other officers for standard ledger broadcast
-    const generalRecipients = otherOfficers
-      .filter((u) => !uniqueAuditors.includes(u.email.trim().toLowerCase()))
-      .map((u) => u.email.trim().toLowerCase());
-
-    const uniqueGeneral = Array.from(new Set(generalRecipients));
-
-    // Dispatch institutional audit request email to Auditors
+    // Initially waiting for Admin confirmation: dispatched ONLY to Admins/Auditors
     if (uniqueAuditors.length > 0 && transactionId) {
       sendAuditRequestEmail({
         transaction: {
           id: transactionId,
           title,
           amount: Number(amount) || 0,
-          type: actionType.includes('INFLOW') ? 'INFLOW' : 'OUTFLOW',
+          type: actionType.toUpperCase().includes('INFLOW') ? 'INFLOW' : 'OUTFLOW',
           category_name: category,
           event_name: eventName,
           reimbursement_recipient: reimbursementRecipient,
@@ -150,27 +143,10 @@ export async function POST(req) {
       }).catch((mailErr) => console.warn('[Audit Request Mailer] Email dispatch error:', mailErr));
     }
 
-    // Dispatch standard notification to other officers
-    if (uniqueGeneral.length > 0) {
-      sendTransactionNotificationEmail({
-        authorName: effectiveAuthorName,
-        authorEmail: effectiveAuthorEmail || 'System',
-        actionType,
-        amount: Number(amount) || 0,
-        title,
-        category,
-        eventName,
-        reimbursementRecipient,
-        date: date || new Date().toISOString().split('T')[0],
-        recipients: uniqueGeneral,
-      }).catch((mailErr) => console.warn('[General Ledger Mailer] Email dispatch error:', mailErr));
-    }
-
     return NextResponse.json({
       success: true,
       auditorCount: uniqueAuditors.length,
-      generalCount: uniqueGeneral.length,
-      message: `Audit notification dispatched to ${uniqueAuditors.length} auditor(s) and broadcast to ${uniqueGeneral.length} officer(s).`,
+      message: `Audit notification dispatched to ${uniqueAuditors.length} admin/auditor(s). General ledger broadcast will follow once confirmed.`,
     });
   } catch (err) {
     console.error('Transaction notification route error:', err);

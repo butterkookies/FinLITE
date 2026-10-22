@@ -115,6 +115,9 @@ export default function AdminPage() {
   const [rejectionReason, setRejectionReason] = useState('');
   const [isSubmittingAction, setIsSubmittingAction] = useState(false);
 
+  // Reset Declined Registration Request State
+  const [resettingRequest, setResettingRequest] = useState(null);
+
   // Account Removal modal state (Safe Deletion & Financial Ledger Dependency Check)
   const [removingUser, setRemovingUser] = useState(null);
   const [isCheckingDeps, setIsCheckingDeps] = useState(false);
@@ -443,6 +446,38 @@ export default function AdminPage() {
     } catch (err) {
       console.error('Reject failed:', err);
       setFeedback({ type: 'error', text: 'An unexpected error occurred.' });
+    } finally {
+      setIsSubmittingAction(false);
+    }
+  };
+
+  // Confirm Reset Declined Registration Request
+  const handleConfirmReset = async () => {
+    if (!resettingRequest) return;
+    setIsSubmittingAction(true);
+    setFeedback(null);
+    try {
+      const res = await fetch('/api/admin/reset-request', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ requestId: resettingRequest.id }),
+      });
+
+      const data = await res.json();
+      if (res.ok && data.success) {
+        setFeedback({ 
+          type: 'success', 
+          text: data.message || `Registration request for ${resettingRequest.first_name} ${resettingRequest.last_name} has been reset.` 
+        });
+        setResettingRequest(null);
+        await fetchData();
+        if (activeTab === 'audit') fetchAuditLogs(auditFilter);
+      } else {
+        setFeedback({ type: 'error', text: data.error || 'Failed to reset registration request.' });
+      }
+    } catch (err) {
+      console.error('Reset request failed:', err);
+      setFeedback({ type: 'error', text: 'An unexpected error occurred while resetting the request.' });
     } finally {
       setIsSubmittingAction(false);
     }
@@ -1645,8 +1680,9 @@ export default function AdminPage() {
               <>
                 <div className="hidden lg:grid grid-cols-12 px-5 py-3 text-[10px] font-bold uppercase tracking-wider text-zinc-500 dark:text-zinc-400 bg-zinc-50/70 dark:bg-zinc-900/40 border-b border-black/[0.06] dark:border-zinc-800">
                   <div className="col-span-4">Applicant / Email</div>
-                  <div className="col-span-5">Reason For Rejection</div>
-                  <div className="col-span-3 text-right">Reviewed Date</div>
+                  <div className="col-span-4">Reason For Rejection</div>
+                  <div className="col-span-2 text-right">Reviewed Date</div>
+                  <div className="col-span-2 text-right">Action</div>
                 </div>
 
                 <div className={`divide-y ${isLight ? 'divide-black/[0.06]' : 'divide-white/[0.06]'}`}>
@@ -1669,7 +1705,7 @@ export default function AdminPage() {
                         </div>
                       </div>
 
-                      <div className="col-span-5 w-full">
+                      <div className="col-span-4 w-full">
                         {req.rejection_reason ? (
                           <span className={`text-xs font-medium px-2.5 py-1 rounded-md inline-block ${
                             isLight ? 'bg-rose-100 text-rose-900' : 'bg-rose-950/60 text-rose-300'
@@ -1681,8 +1717,25 @@ export default function AdminPage() {
                         )}
                       </div>
 
-                      <div className={`col-span-3 text-left lg:text-right text-[11px] font-medium ${isLight ? 'text-gray-400' : 'text-zinc-500'} w-full`}>
+                      <div className={`col-span-2 text-left lg:text-right text-[11px] font-medium ${isLight ? 'text-gray-400' : 'text-zinc-500'} w-full`}>
                         Declined: {req.reviewed_at ? new Date(req.reviewed_at).toLocaleDateString() : 'N/A'}
+                      </div>
+
+                      <div className="col-span-2 flex items-center justify-start lg:justify-end w-full">
+                        <button
+                          type="button"
+                          onClick={() => setResettingRequest(req)}
+                          disabled={isSubmittingAction}
+                          className={`px-3 py-1.5 text-xs font-bold rounded-xl transition-all cursor-pointer border flex items-center gap-1.5 active:scale-95 ${
+                            isLight
+                              ? 'bg-blue-50 text-blue-700 hover:bg-blue-100 border-blue-200'
+                              : 'bg-blue-500/15 text-blue-300 hover:bg-blue-500/25 border-blue-500/30'
+                          }`}
+                          title="Reset registration request to allow applicant to resubmit"
+                        >
+                          <RotateCcw className="w-3.5 h-3.5 shrink-0" />
+                          <span>Reset</span>
+                        </button>
                       </div>
                     </div>
                   ))}
@@ -2168,6 +2221,65 @@ export default function AdminPage() {
                 disabled={isSubmittingAction}
               >
                 Confirm Decline
+              </Button>
+            </div>
+          </div>
+        )}
+      </Modal>
+
+      {/* Reset Registration Request Modal */}
+      <Modal
+        isOpen={Boolean(resettingRequest)}
+        onClose={() => setResettingRequest(null)}
+        title={
+          resettingRequest ? (
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 border bg-blue-500/10 border-blue-500/20 text-blue-600 dark:text-blue-400">
+                <RotateCcw className="w-5 h-5" />
+              </div>
+              <div>
+                <h3 className="text-base font-bold text-zinc-950 dark:text-zinc-50">Reset Registration Request</h3>
+                <p className="text-xs text-zinc-500 dark:text-zinc-400">
+                  {resettingRequest.first_name} {resettingRequest.last_name} ({resettingRequest.email})
+                </p>
+              </div>
+            </div>
+          ) : null
+        }
+        maxWidth="md"
+      >
+        {resettingRequest && (
+          <div className="p-6">
+            <p className="text-xs mb-3 font-medium text-zinc-600 dark:text-zinc-400 leading-relaxed">
+              Are you sure you want to reset the declined registration request for <strong>{resettingRequest.first_name} {resettingRequest.last_name}</strong> (<span className="font-semibold">{resettingRequest.email}</span>)?
+            </p>
+            <div className="bg-blue-50/70 dark:bg-blue-950/20 border border-blue-200/80 dark:border-blue-800/40 rounded-xl p-3 mb-4 text-xs text-blue-900 dark:text-blue-300 space-y-1.5">
+              <p className="font-bold">What this does:</p>
+              <ul className="list-disc list-inside space-y-0.5 text-[11px] text-blue-800 dark:text-blue-300/90">
+                <li>Clears the declined registration record from the system</li>
+                <li>Allows the applicant to submit a new registration request fresh via email or Google sign-in</li>
+                <li>Logs an institutional audit trail event</li>
+              </ul>
+            </div>
+
+            <div className="flex items-center justify-end gap-2.5">
+              <Button
+                type="button"
+                variant="ghost"
+                onClick={() => setResettingRequest(null)}
+              >
+                Cancel
+              </Button>
+              <Button
+                type="button"
+                variant="primary"
+                onClick={handleConfirmReset}
+                loading={isSubmittingAction}
+                disabled={isSubmittingAction}
+                className="bg-blue-600 hover:bg-blue-500 active:bg-blue-700 text-white"
+              >
+                <RotateCcw className="w-3.5 h-3.5 mr-1" />
+                Confirm Reset
               </Button>
             </div>
           </div>

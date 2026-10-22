@@ -87,10 +87,12 @@ export default function DenominationCounter({
   };
 
   const handleQtyChange = (field, value) => {
-    const val = parseInt(value, 10);
+    // Only allow whole digits 0-9; strictly strip any non-digit character (such as '-')
+    const cleanDigits = String(value ?? '').replace(/\D/g, '').slice(0, 5);
+    const val = cleanDigits ? parseInt(cleanDigits, 10) : 0;
     setCounts((prev) => ({
       ...prev,
-      [field]: isNaN(val) || val < 0 ? 0 : val,
+      [field]: val,
     }));
   };
 
@@ -283,9 +285,8 @@ export default function DenominationCounter({
               </div>
               <Button
                 type="button"
-                variant="outline"
+                variant="sky-subtle"
                 size="sm"
-                className="text-sky-700 border-sky-300 hover:bg-sky-100 dark:text-sky-300 dark:border-sky-800 dark:hover:bg-sky-950/40"
                 onClick={() => {
                   onSaveCount({
                     counts,
@@ -340,13 +341,18 @@ export default function DenominationCounter({
                       </span>
                     </div>
                     <input
-                      type="number"
+                      type="text"
                       inputMode="numeric"
-                      min="0"
-                      value={counts[den.key] || ''}
+                      pattern="[0-9]*"
+                      value={counts[den.key] === 0 ? '' : counts[den.key]}
                       placeholder="0"
+                      onKeyDown={(e) => {
+                        if (['-', '+', 'e', 'E', '.', ','].includes(e.key)) {
+                          e.preventDefault();
+                        }
+                      }}
                       onChange={(e) => handleQtyChange(den.key, e.target.value)}
-                      className="w-14 text-center font-bold bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100 border border-zinc-200 dark:border-zinc-800 rounded-lg py-1 focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                      className="w-14 text-center font-bold bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100 border border-zinc-200 dark:border-zinc-800 rounded-lg py-1 focus:outline-none focus:ring-1 focus:ring-emerald-500 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                     />
                   </div>
                 ))}
@@ -374,13 +380,18 @@ export default function DenominationCounter({
                       </span>
                     </div>
                     <input
-                      type="number"
+                      type="text"
                       inputMode="numeric"
-                      min="0"
-                      value={counts[den.key] || ''}
+                      pattern="[0-9]*"
+                      value={counts[den.key] === 0 ? '' : counts[den.key]}
                       placeholder="0"
+                      onKeyDown={(e) => {
+                        if (['-', '+', 'e', 'E', '.', ','].includes(e.key)) {
+                          e.preventDefault();
+                        }
+                      }}
                       onChange={(e) => handleQtyChange(den.key, e.target.value)}
-                      className="w-14 text-center font-bold bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100 border border-zinc-200 dark:border-zinc-800 rounded-lg py-1 focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                      className="w-14 text-center font-bold bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100 border border-zinc-200 dark:border-zinc-800 rounded-lg py-1 focus:outline-none focus:ring-1 focus:ring-emerald-500 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                     />
                   </div>
                 ))}
