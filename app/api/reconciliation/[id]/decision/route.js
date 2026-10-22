@@ -3,6 +3,7 @@ import { createClient, createAdminClient } from '@/lib/supabase/server';
 import { isSuperAdminEmail } from '@/lib/config/admin';
 import { fetchProfileWithPermissions } from '@/lib/auth/permissions';
 import { getClientIp } from '@/lib/security/ratelimit';
+import { sendReconciliationNotificationEmail, getActiveOfficerEmails } from '@/lib/email/mailer';
 
 // POST /api/reconciliation/[id]/decision — Faculty Adviser Approve / Reject Cash Variance
 export async function POST(req, { params }) {
@@ -159,6 +160,30 @@ export async function POST(req, { params }) {
         }]);
       } catch (_) {}
 
+      // Dispatch email notification to all active officers
+      try {
+        const officerEmails = await getActiveOfficerEmails(db);
+        if (officerEmails.length > 0) {
+          sendReconciliationNotificationEmail({
+            action: 'VARIANCE_DECISION',
+            physicalTotal: recon.physical_total,
+            ledgerCashBalance: recon.ledger_cash_balance,
+            varianceAmount: varianceAmt,
+            varianceStatus: recon.variance_status,
+            approvalStatus: 'APPROVED',
+            notes: recon.notes,
+            adviserName: callerProfile?.full_name || email.split('@')[0],
+            adviserRole: isSuperAdmin ? 'Super Administrator' : (callerProfile?.role === 'admin' ? 'Administrator' : 'Club Adviser'),
+            adviserDecision: 'APPROVED',
+            adviserNotes: notes?.trim() || null,
+            date: new Date().toLocaleDateString('en-PH', { timeZone: 'Asia/Manila' }),
+            recipients: officerEmails,
+          }).catch((mailErr) => console.warn('[Reconciliation Decision Email] Warning:', mailErr));
+        }
+      } catch (officerErr) {
+        console.warn('[Reconciliation Decision Broadcast] Error fetching officers:', officerErr?.message);
+      }
+
       return NextResponse.json({
         success: true,
         message: 'Reconciliation approved and ledger adjusted successfully.',
@@ -194,6 +219,30 @@ export async function POST(req, { params }) {
           },
         }]);
       } catch (_) {}
+
+      // Dispatch email notification to all active officers
+      try {
+        const officerEmails = await getActiveOfficerEmails(db);
+        if (officerEmails.length > 0) {
+          sendReconciliationNotificationEmail({
+            action: 'VARIANCE_DECISION',
+            physicalTotal: recon.physical_total,
+            ledgerCashBalance: recon.ledger_cash_balance,
+            varianceAmount: varianceAmt,
+            varianceStatus: recon.variance_status,
+            approvalStatus: 'REJECTED',
+            notes: recon.notes,
+            adviserName: callerProfile?.full_name || email.split('@')[0],
+            adviserRole: isSuperAdmin ? 'Super Administrator' : (callerProfile?.role === 'admin' ? 'Administrator' : 'Club Adviser'),
+            adviserDecision: 'REJECTED',
+            adviserNotes: notes?.trim() || 'Recount requested by Faculty Adviser.',
+            date: new Date().toLocaleDateString('en-PH', { timeZone: 'Asia/Manila' }),
+            recipients: officerEmails,
+          }).catch((mailErr) => console.warn('[Reconciliation Decision Email] Warning:', mailErr));
+        }
+      } catch (officerErr) {
+        console.warn('[Reconciliation Decision Broadcast] Error fetching officers:', officerErr?.message);
+      }
 
       return NextResponse.json({
         success: true,

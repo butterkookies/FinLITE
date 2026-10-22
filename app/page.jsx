@@ -2179,6 +2179,21 @@ export default function Dashboard() {
             localStorage.setItem('finlite_latest_reconciliation', JSON.stringify(reconciledRecord));
           } catch (_) {}
         }
+
+        // Dispatch cash box audit notification email to all active officers
+        fetch('/api/notifications/reconciliation', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            action: isVarianceZero ? 'CASHBOX_COUNTED' : 'VARIANCE_SUBMITTED',
+            physicalTotal: audit.physicalTotal,
+            ledgerCashBalance: audit.ledgerCashBalance,
+            varianceAmount: audit.variance,
+            varianceStatus: audit.status || (isVarianceZero ? 'BALANCED' : (audit.variance < 0 ? 'SHORTAGE' : 'OVERAGE')),
+            approvalStatus: audit.approval_status || (isVarianceZero ? 'BALANCED' : 'PENDING_APPROVAL'),
+            notes: audit.notes || null,
+          }),
+        }).catch((notifErr) => console.warn('[Reconciliation Notification] Dispatch notice:', notifErr?.message || notifErr));
       }
     } catch (err) {
       console.warn('Save audit count exception notice:', err?.message || err);

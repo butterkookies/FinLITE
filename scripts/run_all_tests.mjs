@@ -57,7 +57,8 @@ import {
   sendAuditDecisionEmail,
   sendRevisionSubmittedEmail,
   sendDebtNotificationEmail,
-  sendAdvanceNotificationEmail
+  sendAdvanceNotificationEmail,
+  sendReconciliationNotificationEmail
 } from '../lib/email/mailer.js';
 import { execFileSync, spawn } from 'child_process';
 import fs from 'fs';
@@ -1548,6 +1549,81 @@ async function testPermissionsAndAuditWorkflow() {
     recipients: ['officers@example.com'],
   });
   assert(fullAdvRes.success === true, 'sendAdvanceNotificationEmail full settlement succeeds');
+
+  // Test Reconciliation / Cash Box notifications
+  const balancedReconRes = await sendReconciliationNotificationEmail({
+    action: 'CASHBOX_COUNTED',
+    physicalTotal: 5420.50,
+    ledgerCashBalance: 5420.50,
+    varianceAmount: 0,
+    varianceStatus: 'BALANCED',
+    approvalStatus: 'BALANCED',
+    notes: 'Weekly cash box count',
+    countedByName: 'Treasurer Officer',
+    countedByRole: 'TREASURER',
+    recipients: ['officers@example.com'],
+  });
+  assert(balancedReconRes.success === true, 'sendReconciliationNotificationEmail CASHBOX_COUNTED balanced succeeds');
+
+  const shortageReconRes = await sendReconciliationNotificationEmail({
+    action: 'VARIANCE_SUBMITTED',
+    physicalTotal: 5320.50,
+    ledgerCashBalance: 5420.50,
+    varianceAmount: -100,
+    varianceStatus: 'SHORTAGE',
+    approvalStatus: 'PENDING_APPROVAL',
+    notes: 'Loose coins shortage during event',
+    countedByName: 'Treasurer Officer',
+    countedByRole: 'TREASURER',
+    recipients: ['officers@example.com'],
+  });
+  assert(shortageReconRes.success === true, 'sendReconciliationNotificationEmail VARIANCE_SUBMITTED shortage succeeds');
+
+  const overageReconRes = await sendReconciliationNotificationEmail({
+    action: 'VARIANCE_SUBMITTED',
+    physicalTotal: 5520.50,
+    ledgerCashBalance: 5420.50,
+    varianceAmount: 100,
+    varianceStatus: 'OVERAGE',
+    approvalStatus: 'PENDING_APPROVAL',
+    notes: 'Surplus cash from loose change',
+    countedByName: 'Treasurer Officer',
+    countedByRole: 'TREASURER',
+    recipients: ['officers@example.com'],
+  });
+  assert(overageReconRes.success === true, 'sendReconciliationNotificationEmail VARIANCE_SUBMITTED overage succeeds');
+
+  const approveReconRes = await sendReconciliationNotificationEmail({
+    action: 'VARIANCE_DECISION',
+    physicalTotal: 5320.50,
+    ledgerCashBalance: 5420.50,
+    varianceAmount: -100,
+    varianceStatus: 'SHORTAGE',
+    approvalStatus: 'APPROVED',
+    notes: 'Loose coins shortage during event',
+    adviserName: 'Dr. Santos',
+    adviserRole: 'Club Adviser',
+    adviserDecision: 'APPROVED',
+    adviserNotes: 'Shortage approved and ledger adjusted.',
+    recipients: ['officers@example.com'],
+  });
+  assert(approveReconRes.success === true, 'sendReconciliationNotificationEmail VARIANCE_DECISION approved succeeds');
+
+  const rejectReconRes = await sendReconciliationNotificationEmail({
+    action: 'VARIANCE_DECISION',
+    physicalTotal: 5320.50,
+    ledgerCashBalance: 5420.50,
+    varianceAmount: -100,
+    varianceStatus: 'SHORTAGE',
+    approvalStatus: 'REJECTED',
+    notes: 'Loose coins shortage during event',
+    adviserName: 'Dr. Santos',
+    adviserRole: 'Club Adviser',
+    adviserDecision: 'REJECTED',
+    adviserNotes: 'Recount requested.',
+    recipients: ['officers@example.com'],
+  });
+  assert(rejectReconRes.success === true, 'sendReconciliationNotificationEmail VARIANCE_DECISION rejected succeeds');
 }
 await testPermissionsAndAuditWorkflow();
 
