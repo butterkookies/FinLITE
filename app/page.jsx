@@ -1400,6 +1400,27 @@ export default function Dashboard() {
       })
     );
 
+    // Dispatch settlement notification to all active officers
+    fetch('/api/notifications/advance', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        action: 'ADVANCE_DISBURSEMENT',
+        transactionId,
+        claimantName: targetTx.reimbursement_recipient || 'Officer',
+        advancedByName: targetTx.advanced_by_name || null,
+        title: targetTx.title,
+        category: targetTx.category_name,
+        eventName: targetTx.event_name,
+        totalAmount: totalClaim,
+        disbursedAmount: payoutAmount,
+        reimbursedSoFar: payoutAmount,
+        remainingBalance: remainingBal,
+        isFull: isFullSettlement,
+        notes: targetTx.description || null,
+      }),
+    }).catch((nErr) => console.warn('Settle reimbursement notification trigger notice:', nErr?.message));
+
     return { success: true };
   };
 
@@ -1587,6 +1608,33 @@ export default function Dashboard() {
               : a
           )
         );
+
+        // Dispatch advance disbursement notification email to all active officers
+        const totalAdvClaim = Number(targetAdvance.total_amount || 0);
+        const totalReimbSoFar = Number(updatedAdvance?.amount_reimbursed ?? (Number(targetAdvance.amount_reimbursed || 0) + payoutAmount));
+        const remAdvClaim = Math.max(0, totalAdvClaim - totalReimbSoFar);
+        const isAdvSettled = totalReimbSoFar >= totalAdvClaim;
+
+        fetch('/api/notifications/advance', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            action: 'ADVANCE_DISBURSEMENT',
+            advanceId,
+            claimantName: targetAdvance.claimant_name,
+            advancedByName: targetAdvance.advanced_by_name,
+            title: targetAdvance.title,
+            category: targetAdvance.category_name,
+            eventName: targetAdvance.event_name,
+            totalAmount: totalAdvClaim,
+            disbursedAmount: payoutAmount,
+            reimbursedSoFar: totalReimbSoFar,
+            remainingBalance: remAdvClaim,
+            isFull: isAdvSettled,
+            notes,
+          }),
+        }).catch((nErr) => console.warn('Advance disbursement notification trigger notice:', nErr?.message));
+
         return { success: true };
       }
 
@@ -1625,6 +1673,31 @@ export default function Dashboard() {
             : a
         )
       );
+
+      // Dispatch advance disbursement notification email to all active officers
+      const totClaim = Number(targetAdvance.total_amount || 0);
+      const remClaim = Math.max(0, totClaim - updatedReimbursed);
+      const isClaimSettled = updatedReimbursed >= totClaim;
+
+      fetch('/api/notifications/advance', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'ADVANCE_DISBURSEMENT',
+          advanceId,
+          claimantName: targetAdvance.claimant_name,
+          advancedByName: targetAdvance.advanced_by_name,
+          title: targetAdvance.title,
+          category: targetAdvance.category_name,
+          eventName: targetAdvance.event_name,
+          totalAmount: totClaim,
+          disbursedAmount: payoutAmount,
+          reimbursedSoFar: updatedReimbursed,
+          remainingBalance: remClaim,
+          isFull: isClaimSettled,
+          notes,
+        }),
+      }).catch((nErr) => console.warn('Advance disbursement notification trigger notice:', nErr?.message));
 
       return { success: true };
     } catch (err) {
@@ -1688,6 +1761,22 @@ export default function Dashboard() {
           console.warn('Persisting advance to Supabase skipped:', dbErr);
         }
       }
+
+      // Dispatch advance notification email to all active officers
+      fetch('/api/notifications/advance', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'ADVANCE_CREATED',
+          claimantName: newAdv.claimant_name,
+          advancedByName: newAdv.advanced_by_name,
+          title: newAdv.title,
+          category: newAdv.category_name,
+          eventName: newAdv.event_name,
+          totalAmount: newAdv.total_amount,
+          notes: newAdv.notes,
+        }),
+      }).catch((nErr) => console.warn('Advance creation notification trigger notice:', nErr?.message));
 
       return { success: true };
     } catch (err) {
@@ -1792,6 +1881,31 @@ export default function Dashboard() {
               : d
           )
         );
+
+        // Dispatch debt payment notification to all active officers
+        const totalDebtAmt = Number(targetDebt.total_amount || 0);
+        const totalPaidSoFar = Number(updatedDebt?.amount_paid ?? (Number(targetDebt.amount_paid || 0) + Number(amount)));
+        const remDebtBal = Math.max(0, totalDebtAmt - totalPaidSoFar);
+        const isDebtSettled = totalPaidSoFar >= totalDebtAmt;
+
+        fetch('/api/notifications/debt', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            action: 'DEBT_PAYMENT_COLLECTED',
+            debtId,
+            debtorName: targetDebt.debtor_name,
+            debtorContact: targetDebt.debtor_contact,
+            title: targetDebt.title,
+            totalAmount: totalDebtAmt,
+            collectedAmount: Number(amount),
+            amountPaidSoFar: totalPaidSoFar,
+            remainingBalance: remDebtBal,
+            isFull: isDebtSettled,
+            notes,
+          }),
+        }).catch((nErr) => console.warn('Debt payment notification trigger notice:', nErr?.message));
+
         return { success: true };
       }
 
@@ -1812,6 +1926,28 @@ export default function Dashboard() {
       setDebts((prev) =>
         prev.map((d) => (d.id === debtId ? { ...d, amount_paid: updatedPaid, status: updatedStatus } : d))
       );
+
+      // Dispatch debt collection notification email to all active officers
+      const totalAmt = Number(targetDebt.total_amount || 0);
+      const remBal = Math.max(0, totalAmt - updatedPaid);
+      const isSettled = updatedPaid >= totalAmt;
+      fetch('/api/notifications/debt', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'DEBT_PAYMENT_COLLECTED',
+          debtId,
+          debtorName: targetDebt.debtor_name,
+          debtorContact: targetDebt.debtor_contact,
+          title: targetDebt.title,
+          totalAmount: totalAmt,
+          collectedAmount: Number(amount),
+          amountPaidSoFar: updatedPaid,
+          remainingBalance: remBal,
+          isFull: isSettled,
+          notes,
+        }),
+      }).catch((nErr) => console.warn('Debt payment notification trigger notice:', nErr?.message));
 
       return { success: true };
     } catch (err) {
@@ -1862,6 +1998,21 @@ export default function Dashboard() {
           console.warn('Persisting new debt to Supabase skipped:', dbErr);
         }
       }
+
+      // Dispatch debt notification email to all active officers
+      fetch('/api/notifications/debt', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'DEBT_CREATED',
+          debtorName: newDebt.debtor_name,
+          debtorContact: newDebt.debtor_contact,
+          title: newDebt.title,
+          totalAmount: newDebt.total_amount,
+          dueDate: newDebt.due_date,
+          notes: newDebt.notes,
+        }),
+      }).catch((nErr) => console.warn('Debt creation notification trigger notice:', nErr?.message));
 
       return { success: true };
     } catch (err) {

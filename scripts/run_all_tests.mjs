@@ -55,7 +55,9 @@ import {
 import {
   sendAuditRequestEmail,
   sendAuditDecisionEmail,
-  sendRevisionSubmittedEmail
+  sendRevisionSubmittedEmail,
+  sendDebtNotificationEmail,
+  sendAdvanceNotificationEmail
 } from '../lib/email/mailer.js';
 import { execFileSync, spawn } from 'child_process';
 import fs from 'fs';
@@ -1453,6 +1455,99 @@ async function testPermissionsAndAuditWorkflow() {
     recipients: ['auditor@example.com'],
   });
   assert(revisionRes.success === true, 'sendRevisionSubmittedEmail succeeds in simulation/dispatch');
+
+  // Test Debt notifications
+  const newDebtRes = await sendDebtNotificationEmail({
+    action: 'DEBT_CREATED',
+    debtorName: 'Juan Dela Cruz',
+    debtorContact: '09123456789',
+    title: 'Hackathon Registration Fee',
+    totalAmount: 500,
+    dueDate: '2026-11-01',
+    notes: 'Pending allowance',
+    loggedByName: 'Treasurer Officer',
+    loggedByRole: 'TREASURER',
+    recipients: ['officers@example.com'],
+  });
+  assert(newDebtRes.success === true, 'sendDebtNotificationEmail DEBT_CREATED succeeds');
+
+  const partialDebtRes = await sendDebtNotificationEmail({
+    action: 'DEBT_PAYMENT_COLLECTED',
+    debtorName: 'Juan Dela Cruz',
+    title: 'Hackathon Registration Fee',
+    totalAmount: 500,
+    collectedAmount: 200,
+    amountPaidSoFar: 200,
+    remainingBalance: 300,
+    isFull: false,
+    loggedByName: 'Treasurer Officer',
+    loggedByRole: 'TREASURER',
+    recipients: ['officers@example.com'],
+  });
+  assert(partialDebtRes.success === true, 'sendDebtNotificationEmail partial installment succeeds');
+
+  const fullDebtRes = await sendDebtNotificationEmail({
+    action: 'DEBT_PAYMENT_COLLECTED',
+    debtorName: 'Juan Dela Cruz',
+    title: 'Hackathon Registration Fee',
+    totalAmount: 500,
+    collectedAmount: 300,
+    amountPaidSoFar: 500,
+    remainingBalance: 0,
+    isFull: true,
+    loggedByName: 'Treasurer Officer',
+    loggedByRole: 'TREASURER',
+    recipients: ['officers@example.com'],
+  });
+  assert(fullDebtRes.success === true, 'sendDebtNotificationEmail full settlement succeeds');
+
+  // Test Advance notifications
+  const newAdvRes = await sendAdvanceNotificationEmail({
+    action: 'ADVANCE_CREATED',
+    claimantName: 'Maria Santos',
+    advancedByName: 'Maria Santos',
+    title: 'Booth Decor & Materials',
+    category: 'Supplies & Materials',
+    eventName: 'Club Week 2026',
+    totalAmount: 1200,
+    notes: 'Bought at Divisoria',
+    loggedByName: 'President Officer',
+    loggedByRole: 'PRESIDENT',
+    recipients: ['officers@example.com'],
+  });
+  assert(newAdvRes.success === true, 'sendAdvanceNotificationEmail ADVANCE_CREATED succeeds');
+
+  const partialAdvRes = await sendAdvanceNotificationEmail({
+    action: 'ADVANCE_DISBURSEMENT',
+    claimantName: 'Maria Santos',
+    title: 'Booth Decor & Materials',
+    totalAmount: 1200,
+    disbursedAmount: 600,
+    reimbursedSoFar: 600,
+    remainingBalance: 600,
+    isFull: false,
+    notes: 'First tranche payout',
+    loggedByName: 'Treasurer Officer',
+    loggedByRole: 'TREASURER',
+    recipients: ['officers@example.com'],
+  });
+  assert(partialAdvRes.success === true, 'sendAdvanceNotificationEmail partial disbursement succeeds');
+
+  const fullAdvRes = await sendAdvanceNotificationEmail({
+    action: 'ADVANCE_DISBURSEMENT',
+    claimantName: 'Maria Santos',
+    title: 'Booth Decor & Materials',
+    totalAmount: 1200,
+    disbursedAmount: 600,
+    reimbursedSoFar: 1200,
+    remainingBalance: 0,
+    isFull: true,
+    notes: 'Final settlement tranche',
+    loggedByName: 'Treasurer Officer',
+    loggedByRole: 'TREASURER',
+    recipients: ['officers@example.com'],
+  });
+  assert(fullAdvRes.success === true, 'sendAdvanceNotificationEmail full settlement succeeds');
 }
 await testPermissionsAndAuditWorkflow();
 

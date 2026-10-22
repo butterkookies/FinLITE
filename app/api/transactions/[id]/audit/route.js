@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { createClient, createAdminClient } from '@/lib/supabase/server';
 import { isSuperAdminEmail } from '@/lib/config/admin';
 import { hasPermission, fetchProfileWithPermissions, ACTION_KEYS } from '@/lib/auth/permissions';
-import { sendAuditDecisionEmail } from '@/lib/email/mailer';
+import { sendAuditDecisionEmail, sendTransactionNotificationEmail, getActiveOfficerEmails } from '@/lib/email/mailer';
 import { getClientIp } from '@/lib/security/ratelimit';
 
 // POST /api/transactions/[id]/audit — Auditor Approve or Flag transaction
@@ -184,6 +184,36 @@ export async function POST(req, { params }) {
         authorName,
         ccEmails,
       }).catch((mailErr) => console.warn('[Audit Email] Dispatch warning:', mailErr));
+    }
+
+    // When transaction is approved & confirmed by Admin/Auditor, broadcast to ALL active approved officers
+    if (normalizedAction === 'APPROVE') {
+      try {
+        const officerEmails = await getActiveOfficerEmails(db);
+        if (officerEmails.length > 0) {
+          const targetTx = updatedTx || tx;
+          const txAmount = typeof targetTx.amount === 'number' ? targetTx.amount : parseFloat(targetTx.amount || 0);
+          sendTransactionNotificationEmail({
+            authorName,
+            authorEmail: authorEmail || 'Officer',
+            authorRole: targetTx.profiles?.role || 'Officer',
+            actionType: targetTx.type === 'INFLOW' ? 'Inflow (Income)' : 'Outflow (Disbursement)',
+            type: targetTx.type,
+            amount: txAmount,
+            title: targetTx.title,
+            category: targetTx.category_name || targetTx.categories?.name || null,
+            eventName: targetTx.event_name || null,
+            reimbursementRecipient: targetTx.reimbursement_recipient || null,
+            receiptUrl: targetTx.receipt_url || (targetTx.transaction_receipts && targetTx.transaction_receipts[0]?.public_url) || null,
+            receiptUrls: Array.isArray(targetTx.receipt_urls) ? targetTx.receipt_urls : [],
+            verifiedBy: `${auditorName} (${reviewerTitle})`,
+            date: targetTx.transaction_date,
+            recipients: officerEmails,
+          }).catch((mailErr) => console.warn('[Confirmed Ledger Mailer] Dispatch error:', mailErr));
+        }
+      } catch (officerErr) {
+        console.warn('[Audit Approval Broadcast] Error fetching officers:', officerErr?.message);
+      }
     }
 
     return NextResponse.json({
