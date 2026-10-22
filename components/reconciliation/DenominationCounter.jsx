@@ -283,9 +283,8 @@ export default function DenominationCounter({
               </div>
               <Button
                 type="button"
-                variant="outline"
+                variant="sky-subtle"
                 size="sm"
-                className="text-sky-700 border-sky-300 hover:bg-sky-100 dark:text-sky-300 dark:border-sky-800 dark:hover:bg-sky-950/40"
                 onClick={() => {
                   onSaveCount({
                     counts,

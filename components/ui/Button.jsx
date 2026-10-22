@@ -21,6 +21,8 @@ export const buttonVariants = {
     'bg-amber-500/15 text-amber-800 dark:text-amber-300 hover:bg-amber-500/25 focus-visible:ring-amber-500/40',
   'rose-subtle':
     'bg-rose-500/12 text-rose-700 dark:text-rose-400 hover:bg-rose-500/20 focus-visible:ring-rose-500/40',
+  'sky-subtle':
+    'bg-sky-500/12 text-sky-700 dark:text-sky-300 hover:bg-sky-500/20 active:bg-sky-500/25 focus-visible:ring-sky-500/40 border border-sky-500/20',
 };
 
 export const buttonSizes = {
