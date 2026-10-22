@@ -44,24 +44,19 @@ import { Button, Badge, Input, Card, Modal } from '@/components/ui';
 import TransactionCommentsDrawer from '@/components/ledger/TransactionCommentsDrawer';
 import UserAvatar from '@/components/common/UserAvatar';
 
-export function formatFriendlyDate(dateStr) {
-  if (!dateStr) return '—';
-  try {
-    const raw = String(dateStr).split('T')[0];
-    const parts = raw.split('-');
-    if (parts.length !== 3) return dateStr;
-    const [year, month, day] = parts;
-    const date = new Date(Number(year), Number(month) - 1, Number(day));
-    if (isNaN(date.getTime())) return dateStr;
-    return date.toLocaleDateString('en-US', {
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric'
-    });
-  } catch (_) {
-    return dateStr;
-  }
-}
+import {
+  formatFriendlyDate,
+  formatFriendlyTime,
+  getTransactionTimestamp,
+  sortTransactions,
+} from '@/lib/utils/transaction';
+
+export {
+  formatFriendlyDate,
+  formatFriendlyTime,
+  getTransactionTimestamp,
+  sortTransactions,
+};
 
 export default function TransactionTable({ 
   transactions = [], 
@@ -374,31 +369,9 @@ export default function TransactionTable({
     setCurrentPage(1);
   }, [filterType, searchQuery, pageSize]);
 
-  // Multi-column sorting
+  // Multi-column sorting with time tie-breaker
   const sortedTransactions = useMemo(() => {
-    const list = [...filtered];
-    return list.sort((a, b) => {
-      let comparison = 0;
-      if (sortField === 'date') {
-        const dateA = a.transaction_date || '';
-        const dateB = b.transaction_date || '';
-        comparison = dateA.localeCompare(dateB);
-      } else if (sortField === 'amount') {
-        const amtA = Number(a.amount) || 0;
-        const amtB = Number(b.amount) || 0;
-        comparison = amtA - amtB;
-      } else if (sortField === 'title') {
-        const titleA = (a.title || '').toLowerCase();
-        const titleB = (b.title || '').toLowerCase();
-        comparison = titleA.localeCompare(titleB);
-      } else if (sortField === 'category') {
-        const catA = (a.category_name || (a.type === 'INFLOW' ? 'Revenue' : 'Disbursement')).toLowerCase();
-        const catB = (b.category_name || (b.type === 'INFLOW' ? 'Revenue' : 'Disbursement')).toLowerCase();
-        comparison = catA.localeCompare(catB);
-      }
-
-      return sortDirection === 'asc' ? comparison : -comparison;
-    });
+    return sortTransactions(filtered, sortField, sortDirection);
   }, [filtered, sortField, sortDirection]);
 
   // Pagination calculation
@@ -728,8 +701,16 @@ export default function TransactionTable({
                   </td>
 
                   {/* Date */}
-                  <td className="py-3.5 px-3 font-mono text-xs tabular-nums text-zinc-500 dark:text-zinc-400 whitespace-nowrap">
-                    {formatFriendlyDate(tx.transaction_date)}
+                  <td
+                    className="py-3.5 px-3 font-mono text-xs tabular-nums text-zinc-500 dark:text-zinc-400 whitespace-nowrap"
+                    title={tx.created_at ? new Date(tx.created_at).toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short' }) : undefined}
+                  >
+                    <div>{formatFriendlyDate(tx.transaction_date)}</div>
+                    {formatFriendlyTime(tx.created_at) && (
+                      <div className="text-[10px] text-zinc-400 dark:text-zinc-500 font-sans tracking-tight">
+                        {formatFriendlyTime(tx.created_at)}
+                      </div>
+                    )}
                   </td>
 
                   {/* Category */}
@@ -995,6 +976,9 @@ export default function TransactionTable({
 
                   <p className="text-[11px] text-zinc-500 dark:text-zinc-400 flex items-center gap-1.5 truncate mt-0.5">
                     <span>{formatFriendlyDate(tx.transaction_date)}</span>
+                    {formatFriendlyTime(tx.created_at) && (
+                      <span className="text-[10px] text-zinc-400 dark:text-zinc-500 font-mono">({formatFriendlyTime(tx.created_at)})</span>
+                    )}
                     <span>•</span>
                     <span className="truncate">{tx.category_name || (tx.type === 'INFLOW' ? 'Revenue' : 'Disbursement')}</span>
                     {tx.is_reimbursement && tx.reimbursement_recipient && (

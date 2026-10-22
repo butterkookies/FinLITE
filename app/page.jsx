@@ -307,7 +307,8 @@ export default function Dashboard() {
             transaction_receipts (id, public_url, sort_order),
             profiles (id, full_name, role, email, avatar_url)
           `)
-          .order('transaction_date', { ascending: false });
+          .order('transaction_date', { ascending: false })
+          .order('created_at', { ascending: false });
 
         // 6. Latest Cash Reconciliation Promise
         const reconPromise = supabase
@@ -443,7 +444,8 @@ export default function Dashboard() {
             const { data: flatData, error: flatError } = await supabase
               .from('transactions')
               .select('*')
-              .order('transaction_date', { ascending: false });
+              .order('transaction_date', { ascending: false })
+              .order('created_at', { ascending: false });
 
             if (flatError) {
               console.warn('Supabase transactions fetch failed:', flatError.message);
@@ -886,6 +888,7 @@ export default function Dashboard() {
       ...newTx,
       id: tempId,
       advanced_by_name: newTx.advanced_by_name || newTx.reimbursement_recipient || null,
+      created_at: new Date().toISOString(),
       receipt_urls: optimisticReceiptUrls,
       receipt_url: optimisticReceiptUrls[0] || null,
       academic_year: newTx.academic_year || currentSemester.academicYear,
@@ -1359,6 +1362,7 @@ export default function Dashboard() {
       const remainingTx = {
         ...targetTx,
         id: `tx-${Date.now()}`,
+        created_at: new Date().toISOString(),
         amount: remainingBal,
         description: `Remaining balance of ${formatPHP(totalClaim)} advance by ${targetTx.reimbursement_recipient || 'Officer'}`,
         status: 'PENDING_REIMBURSEMENT',
@@ -1444,6 +1448,7 @@ export default function Dashboard() {
     setTransactions((prev) => [
       {
         ...tx,
+        created_at: tx.created_at || new Date().toISOString(),
         category_name: category?.name || tx.category_name,
         receipt_urls: [],
         receipt_url: null,
