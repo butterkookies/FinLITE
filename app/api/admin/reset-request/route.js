@@ -92,7 +92,7 @@ export async function POST(req) {
     try {
       const clientIp = getClientIp(req);
       await db.from('audit_logs').insert([{
-        user_id: auth.user.id,
+        user_id: auth.profile?.id || auth.user.id,
         action: 'REGISTRATION_RESET',
         entity_type: 'registration_requests',
         entity_id: requestId,

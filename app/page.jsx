@@ -1527,8 +1527,7 @@ export default function Dashboard() {
           updatedAdvance = rpcAdv;
         } else {
           const isSchemaCacheError = rpcError?.code === 'PGRST202' ||
-            rpcError?.message?.includes('schema cache') ||
-            rpcError?.message?.includes('record_advance_disbursement');
+            rpcError?.message?.includes('schema cache');
 
           if (!isSchemaCacheError) {
             return { error: rpcError?.message || 'Failed to record advance disbursement' };
@@ -1561,7 +1560,7 @@ export default function Dashboard() {
             return { error: txError.message || 'Failed to record transaction' };
           }
 
-          await supabase
+          const { error: disbInsertError } = await supabase
             .from('advance_disbursements')
             .insert({
               advance_id: advanceId,
@@ -1570,6 +1569,10 @@ export default function Dashboard() {
               disbursed_by: userProfile?.id || null,
               notes: notes || null,
             });
+
+          if (disbInsertError) {
+            return { error: disbInsertError.message || 'Failed to record advance disbursement' };
+          }
 
           const updatedReimbursed = Number(targetAdvance.amount_reimbursed || 0) + payoutAmount;
           const updatedStatus = updatedReimbursed >= Number(targetAdvance.total_amount) ? 'SETTLED' : 'PARTIALLY_REIMBURSED';
@@ -1788,6 +1791,11 @@ export default function Dashboard() {
   // Handler for collecting payments on uncollected member debts and pre-orders
   const handleRecordDebtPayment = async (debtId, { amount, tendered, notes = '' }) => {
     try {
+      const isAuthorized = currentRole === 'admin' || currentRole === 'treasurer' || currentRole === 'president' || currentRole === 'adviser';
+      if (!isAuthorized) {
+        return { error: 'Unauthorized. Only club officers and advisers can collect debt payments.' };
+      }
+
       const targetDebt = debts.find((d) => d.id === debtId);
       if (!targetDebt) return { error: 'Debt record not found.' };
 
@@ -1804,8 +1812,7 @@ export default function Dashboard() {
           updatedDebt = rpcDebt;
         } else {
           const isSchemaCacheError = rpcError?.code === 'PGRST202' ||
-            rpcError?.message?.includes('schema cache') ||
-            rpcError?.message?.includes('record_debt_payment');
+            rpcError?.message?.includes('schema cache');
 
           if (!isSchemaCacheError) {
             return { error: rpcError?.message || 'Failed to record debt payment' };
@@ -1836,7 +1843,7 @@ export default function Dashboard() {
             return { error: txError.message || 'Failed to record transaction' };
           }
 
-          await supabase
+          const { error: debtInsertError } = await supabase
             .from('debt_payments')
             .insert({
               debt_id: debtId,
@@ -1845,6 +1852,10 @@ export default function Dashboard() {
               received_by: userProfile?.id || null,
               notes: notes || null,
             });
+
+          if (debtInsertError) {
+            return { error: debtInsertError.message || 'Failed to record debt payment' };
+          }
 
           const updatedPaid = Number(targetDebt.amount_paid || 0) + Number(amount);
           const updatedStatus = updatedPaid >= Number(targetDebt.total_amount) ? 'SETTLED' : 'PARTIALLY_PAID';
