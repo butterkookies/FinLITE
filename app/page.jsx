@@ -1571,6 +1571,9 @@ export default function Dashboard() {
             });
 
           if (disbInsertError) {
+            if (newTx?.id) {
+              await supabase.from('transactions').delete().eq('id', newTx.id);
+            }
             return { error: disbInsertError.message || 'Failed to record advance disbursement' };
           }
 
@@ -1799,6 +1802,11 @@ export default function Dashboard() {
       const targetDebt = debts.find((d) => d.id === debtId);
       if (!targetDebt) return { error: 'Debt record not found.' };
 
+      const paymentAmount = Number(amount);
+      if (isNaN(paymentAmount) || paymentAmount <= 0) {
+        return { error: 'Payment amount must be greater than ₱0.00' };
+      }
+
       // Persisted record: atomic server-side RPC (ledger INFLOW + installment + balance)
       if (supabase && isPersistedId(debtId)) {
         let updatedDebt = null;
@@ -1854,6 +1862,9 @@ export default function Dashboard() {
             });
 
           if (debtInsertError) {
+            if (newTx?.id) {
+              await supabase.from('transactions').delete().eq('id', newTx.id);
+            }
             return { error: debtInsertError.message || 'Failed to record debt payment' };
           }
 

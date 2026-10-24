@@ -427,6 +427,62 @@ assert(
   'Mailer supports RESET status change notification for resubmission'
 );
 
+console.log('\n8. Testing PR-7 Schema Cache Resilience, Officer Auth, and Audit FK Hardening:');
+
+const pageCode = fs.readFileSync(
+  path.join(projectRoot, 'app/page.jsx'),
+  'utf-8'
+);
+
+assert(
+  pageCode.includes("const handleRecordDebtPayment = async (debtId, { amount, tendered, notes = '' }) => {") &&
+  pageCode.includes("isAuthorized") &&
+  pageCode.includes("'Unauthorized. Only club officers and advisers can collect debt payments.'"),
+  'Debt payment handler strictly enforces officer authorization check'
+);
+
+assert(
+  !pageCode.includes("rpcError?.message?.includes('record_debt_payment')") &&
+  !pageCode.includes("rpcError?.message?.includes('record_advance_disbursement')"),
+  'Schema cache error detection strictly checks code PGRST202 or schema cache string without function name heuristic'
+);
+
+assert(
+  pageCode.includes("debtInsertError") &&
+  pageCode.includes("return { error: debtInsertError.message || 'Failed to record debt payment' };"),
+  'Debt payment fallback checks and returns error if debt_payments insert fails'
+);
+
+assert(
+  pageCode.includes("disbInsertError") &&
+  pageCode.includes("return { error: disbInsertError.message || 'Failed to record advance disbursement' };"),
+  'Advance disbursement fallback checks and returns error if advance_disbursements insert fails'
+);
+
+assert(
+  pageCode.includes("if (debtInsertError)") && pageCode.includes("await supabase.from('transactions').delete().eq('id', newTx.id)") &&
+  pageCode.includes("if (disbInsertError)") && pageCode.includes("await supabase.from('transactions').delete().eq('id', newTx.id)"),
+  'Fallback rollback purges orphaned ledger transaction if child installment insert fails'
+);
+
+assert(
+  adminResetRoute.includes("user_id: auth.profile?.id || auth.user.id") &&
+  adminResetRoute.includes("auditInsertError.code === '23503'"),
+  'Reset request audit logging satisfies profiles foreign key and provides fallback against FK violations'
+);
+
+const adminCheckCode = fs.readFileSync(
+  path.join(projectRoot, 'lib/auth/admin-check.js'),
+  'utf-8'
+);
+assert(
+  adminCheckCode.includes("isSuperAdminEmail(email)") &&
+  adminCheckCode.includes(".from('profiles')") &&
+  adminCheckCode.includes("profile: superProfile || null"),
+  'Admin check resolves profile for Super Admin ensuring auth.profile is populated'
+);
+
+
 // ==============================================================================
 // SUMMARY RESULTS
 // ==============================================================================

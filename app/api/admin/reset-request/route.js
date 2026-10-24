@@ -91,7 +91,7 @@ export async function POST(req) {
     // 5. Audit log telemetry
     try {
       const clientIp = getClientIp(req);
-      await db.from('audit_logs').insert([{
+      const auditPayload = {
         user_id: auth.profile?.id || auth.user.id,
         action: 'REGISTRATION_RESET',
         entity_type: 'registration_requests',
@@ -103,7 +103,13 @@ export async function POST(req) {
           reset_by: auth.user.email,
           ip_address: clientIp,
         },
-      }]);
+      };
+
+      const { error: auditInsertError } = await db.from('audit_logs').insert([auditPayload]);
+      if (auditInsertError && auditInsertError.code === '23503') {
+        // Fallback: foreign key violation on profiles(id) if user has no profile row
+        await db.from('audit_logs').insert([{ ...auditPayload, user_id: null }]);
+      }
     } catch (auditErr) {
       console.warn('Audit log error for registration reset:', auditErr?.message);
     }
