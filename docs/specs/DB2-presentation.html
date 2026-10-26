@@ -584,264 +584,132 @@
     <!-- ==========================================
          SLIDE 1: Title & Defense Roster
          ========================================== -->
-    <section class="slide active" data-index="1">
-      <div class="slide-label">PAMBAYANG DALUBHASAAN NG MARILAO · IT31-DB2</div>
-      <h1 class="slide-title">FINLITE: Web-Based Financial Ledger and Automated Report Generation System</h1>
-      <p class="slide-subtitle">Relational PostgreSQL Architecture, 3NF Normalization & Live CRUD Demonstration for the League of Information Technology Enthusiasts (LITE)</p>
-
-      <div class="hero-card" style="padding: 28px 36px;">
-        <div style="font-size: 13px; font-weight: 800; color: var(--brand-emerald); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 16px;">Presenters & Defense Panel Roster</div>
-        <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px;">
-          <div>
-            <strong style="display: block; font-size: 15px; color: var(--text-main);">Andrei John P. Geronimo</strong>
-            <span style="font-size: 12.5px; color: var(--text-muted);">Collegiate Context & Relational Choice</span>
-          </div>
-          <div>
-            <strong style="display: block; font-size: 15px; color: var(--text-main);">Christian Rey C. Kasilag</strong>
-            <span style="font-size: 12.5px; color: var(--text-muted);">Normalization (UNF &rarr; 1NF &rarr; 2NF &rarr; 3NF)</span>
-          </div>
-          <div>
-            <strong style="display: block; font-size: 15px; color: var(--text-main);">Emanuel P. Malbarosa</strong>
-            <span style="font-size: 12.5px; color: var(--text-muted);">Logical 3NF ERD & Data Dictionary</span>
-          </div>
-          <div>
-            <strong style="display: block; font-size: 15px; color: var(--text-main);">Ervin James C. Ramos</strong>
-            <span style="font-size: 12.5px; color: var(--text-muted);">DB Security, Integrity & Live CRUD Demo</span>
-          </div>
-        </div>
-      </div>
+        <!-- SLIDE 1: Title & Overview -->
+    <section class="slide active" data-index="1" style="display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; min-height: 520px;">
+      <div class="slide-label" style="font-size: 14px; margin-bottom: 24px;">PAMBAYANG DALUBHASAAN NG MARILAO · IT31-DB2</div>
+      <h2 class="slide-title" style="font-size: 34px; line-height: 1.25; max-width: 900px; margin: 0 auto 20px;">FinLITE: A Web-Based Financial Ledger and Automated Report Generation System With AI Co-Pilot for the League of Information Technology Enthusiasts</h2>
+      <div style="font-size: 15px; font-weight: 700; color: var(--brand-emerald); letter-spacing: 0.06em; text-transform: uppercase; margin-top: 16px;">College of Computer Studies</div>
     </section>
 
-    <!-- ==========================================
-         SLIDES 2A - 2D: Uncompacted Collegiate Constraints
-         ========================================== -->
+    <!-- SLIDE 2: Operational Constraints (Consolidated) -->
     <section class="slide" data-index="2">
-      <div class="slide-label">COLLEGIATE OPERATIONAL CONSTRAINT 1 OF 4</div>
-      <span class="badge">Physical Space Reality</span>
-      <h2 class="slide-title">No Dedicated Physical Office</h2>
-      <div class="hero-card">
-        <p class="card-body">
-          LITE operates under severe collegiate physical constraints, possessing no dedicated physical office, private conference room, or institutional workstation.<br><br>
-          Administrative planning, audit sessions, and ledger consultations take place <strong>transiently in campus corridors, student lounges, event booths, or at a communal faculty table</strong> located in the College of Computer Studies Office on the second floor.
-        </p>
+      <div class="slide-label">COLLEGIATE OPERATIONAL CONSTRAINTS</div>
+      <h2 class="slide-title">Four Real-World Operational Realities</h2>
+      <div class="hero-card" style="padding: 32px 36px; margin-top: 24px;">
+        <div style="display: flex; flex-direction: column; gap: 20px;">
+          <div style="display: flex; align-items: flex-start; gap: 16px;">
+            <span style="display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 8px; background: #e0f2fe; color: #0369a1; font-weight: 800; font-size: 14px; flex-shrink: 0;">1</span>
+            <div style="font-size: 17px; color: var(--text-main); line-height: 1.5;">
+              <strong>No Physical Office:</strong> Officers lack a permanent headquarters, requiring mobile, cloud-accessible bookkeeping from anywhere.
+            </div>
+          </div>
+          <div style="display: flex; align-items: flex-start; gap: 16px;">
+            <span style="display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 8px; background: #e0f2fe; color: #0369a1; font-weight: 800; font-size: 14px; flex-shrink: 0;">2</span>
+            <div style="font-size: 17px; color: var(--text-main); line-height: 1.5;">
+              <strong>Single Metal Cashbox:</strong> Physical money is locked inside a shared metal box stored in the Program Director's office.
+            </div>
+          </div>
+          <div style="display: flex; align-items: flex-start; gap: 16px;">
+            <span style="display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 8px; background: #e0f2fe; color: #0369a1; font-weight: 800; font-size: 14px; flex-shrink: 0;">3</span>
+            <div style="font-size: 17px; color: var(--text-main); line-height: 1.5;">
+              <strong>High-Stress Turnover:</strong> Passing cash custody between officers requires an immediate, manual piece count of every bill and coin.
+            </div>
+          </div>
+          <div style="display: flex; align-items: flex-start; gap: 16px;">
+            <span style="display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 8px; background: #e0f2fe; color: #0369a1; font-weight: 800; font-size: 14px; flex-shrink: 0;">4</span>
+            <div style="font-size: 17px; color: var(--text-main); line-height: 1.5;">
+              <strong>Strict Segregation of Duties:</strong> College rules strictly separate the roles of the Counter (Treasurer) and the Verifier (Auditor).
+            </div>
+          </div>
+        </div>
       </div>
     </section>
 
+    <!-- SLIDE 3: Operational Problems (Consolidated) -->
     <section class="slide" data-index="3">
-      <div class="slide-label">COLLEGIATE OPERATIONAL CONSTRAINT 2 OF 4</div>
-      <span class="badge">Money Custody Reality</span>
-      <h2 class="slide-title">Single Metal Cashbox in Program Director's Office</h2>
-      <div class="hero-card">
-        <p class="card-body">
-          Money custody follows strict institutional protocols where all physical cash holdings, petty cash reserves, and accumulated coin collections are <strong>secured inside a single small metal cashbox stored inside a locked drawer within the Program Director's Office</strong>.<br><br>
-          Because the cashbox <strong>never leaves campus</strong>, off-campus purchasing expeditions for event supplies cannot utilize upfront cashbox money directly, requiring out-of-pocket frontings.
-        </p>
+      <div class="slide-label">FIELD RESEARCH FINDINGS</div>
+      <h2 class="slide-title">Five Core Operational Problems</h2>
+      <div class="hero-card" style="padding: 28px 36px; margin-top: 20px;">
+        <div style="display: flex; flex-direction: column; gap: 18px;">
+          <div style="display: flex; align-items: flex-start; gap: 16px;">
+            <span style="display: inline-flex; align-items: center; justify-content: center; width: 30px; height: 30px; border-radius: 8px; background: #fee2e2; color: #b91c1c; font-weight: 800; font-size: 14px; flex-shrink: 0;">1</span>
+            <div style="font-size: 16.5px; color: var(--text-main); line-height: 1.45;">
+              <strong>Abono Liabilities:</strong> Officers pay club expenses out-of-pocket and suffer personal financial loss when paper receipts are lost or damaged.
+            </div>
+          </div>
+          <div style="display: flex; align-items: flex-start; gap: 16px;">
+            <span style="display: inline-flex; align-items: center; justify-content: center; width: 30px; height: 30px; border-radius: 8px; background: #fee2e2; color: #b91c1c; font-weight: 800; font-size: 14px; flex-shrink: 0;">2</span>
+            <div style="font-size: 16.5px; color: var(--text-main); line-height: 1.45;">
+              <strong>Micro-Transit Leakage:</strong> Tricycle and jeepney fares lack official printed receipts, creating unaccounted cash discrepancies.
+            </div>
+          </div>
+          <div style="display: flex; align-items: flex-start; gap: 16px;">
+            <span style="display: inline-flex; align-items: center; justify-content: center; width: 30px; height: 30px; border-radius: 8px; background: #fee2e2; color: #b91c1c; font-weight: 800; font-size: 14px; flex-shrink: 0;">3</span>
+            <div style="font-size: 16.5px; color: var(--text-main); line-height: 1.45;">
+              <strong>Turnover Discrepancies:</strong> Unrecorded transactions cause unexplained shortages that officers must cover out-of-pocket for clearance.
+            </div>
+          </div>
+          <div style="display: flex; align-items: flex-start; gap: 16px;">
+            <span style="display: inline-flex; align-items: center; justify-content: center; width: 30px; height: 30px; border-radius: 8px; background: #fee2e2; color: #b91c1c; font-weight: 800; font-size: 14px; flex-shrink: 0;">4</span>
+            <div style="font-size: 16.5px; color: var(--text-main); line-height: 1.45;">
+              <strong>Slow Manual Computations:</strong> Hand-calculating cashbox balances without automated formulas hides errors until the end of the semester.
+            </div>
+          </div>
+          <div style="display: flex; align-items: flex-start; gap: 16px;">
+            <span style="display: inline-flex; align-items: center; justify-content: center; width: 30px; height: 30px; border-radius: 8px; background: #fee2e2; color: #b91c1c; font-weight: 800; font-size: 14px; flex-shrink: 0;">5</span>
+            <div style="font-size: 16.5px; color: var(--text-main); line-height: 1.45;">
+              <strong>Signatory Routing Bottlenecks:</strong> Even a tiny manual arithmetic error restarts a rigid 6-stage physical liquidation signing process.
+            </div>
+          </div>
+        </div>
       </div>
     </section>
 
+    <!-- SLIDE 4: Database Selection Simplified -->
     <section class="slide" data-index="4">
-      <div class="slide-label">COLLEGIATE OPERATIONAL CONSTRAINT 3 OF 4</div>
-      <span class="badge">Accountability Protocol</span>
-      <h2 class="slide-title">High-Stress Face-Value Turnover Protocol</h2>
-      <div class="hero-card">
-        <p class="card-body">
-          Leadership transitions occur annually under a strict face-value turnover protocol.<br><br>
-          The physical cash inside the small metal cashbox <strong>must match the exact numerical balance attested on the audited final financial report down to the exact centavo</strong> before outgoing officers receive institutional clearance for graduation and academic credentials.
-        </p>
-      </div>
-    </section>
-
-    <section class="slide" data-index="5">
-      <div class="slide-label">COLLEGIATE OPERATIONAL CONSTRAINT 4 OF 4</div>
-      <span class="badge">Institutional Governance</span>
-      <h2 class="slide-title">Strict Institutional Segregation of Duties</h2>
-      <div class="hero-card">
-        <p class="card-body">
-          <strong>• LITE Treasurer:</strong> Operates as the physical cash custodian, encodes collections and disbursements, and counts cashbox denominations.<br><br>
-          <strong>• LITE Auditor:</strong> Acts as the transactional verification checkpoint; inspects receipts, approves records, and flags discrepancies.<br><br>
-          <strong>• Club Advisers:</strong> Provide administrative governance, authorize user roles, and endorse cash shortages.<br><br>
-          <strong>• College Leadership (Dean & Director):</strong> Reviews the completed dossier and issues institutional clearance.
-        </p>
-      </div>
-    </section>
-
-    <!-- ==========================================
-         SLIDES 3A - 3E: Uncompacted 5 Manual Problems
-         ========================================== -->
-    <section class="slide" data-index="6">
-      <div class="slide-label">OPERATIONAL PROBLEM 1 OF 5 · FIELD RESEARCH</div>
-      <span class="badge">Accounts Payable & Abono</span>
-      <h2 class="slide-title">Personal Advance Vulnerability (Abono) & Lost Receipts</h2>
-      <div class="hero-card">
-        <p class="card-body">
-          Because LITE has no bank account and operates from a single locked cashbox, off-campus purchasing requires officers and advisers to front personal capital.<br><br>
-          <strong>The Crisis:</strong> Thermal paper receipts gathered during fast-paced events frequently <strong>fade, crumple, or get lost</strong> before reaching campus. Loose slips lack two-person tracking (who paid vs. who is claiming). Unaudited receipts force students and advisers to <strong>absorb institutional costs personally</strong>.<br><br>
-          <strong>FinLITE Database Solution:</strong> 3NF <code>advances_payable</code>, <code>advance_disbursements</code>, and <code>advance_receipts</code> tables supporting dual-entity tracking, compressed photo uploads, and partial payout states.
-        </p>
-      </div>
-    </section>
-
-    <section class="slide" data-index="7">
-      <div class="slide-label">OPERATIONAL PROBLEM 2 OF 5 · FIELD RESEARCH</div>
-      <span class="badge">Expense Tracking</span>
-      <h2 class="slide-title">Administrative Leakage in Non-Receipted Micro-Transit</h2>
-      <div class="hero-card">
-        <p class="card-body">
-          Non-receipted small cash purchases, such as jeepney and tricycle fares between PDM and Marilao Poblacion, emergency photocopies, or public market craft purchases, lack printed commercial invoices.<br><br>
-          <strong>The Crisis:</strong> Documented on loose paper scraps, sticky notes, or unstructured Messenger chat screenshots that get smudged or mislaid over a multi-month semester, creating <strong>unliquidated expense leakage</strong>.<br><br>
-          <strong>FinLITE Database Solution:</strong> Dedicated Non-Receipted Transit Logging with standardized travel route presets, itemized descriptions, and digital supervisory officer verification.
-        </p>
-      </div>
-    </section>
-
-    <section class="slide" data-index="8">
-      <div class="slide-label">OPERATIONAL PROBLEM 3 OF 5 · FIELD RESEARCH</div>
-      <span class="badge">Clearance Risk</span>
-      <h2 class="slide-title">Cumulative Turnover Discrepancies & Out-of-Pocket Settlements</h2>
-      <div class="hero-card">
-        <p class="card-body">
-          Daily transaction tracking and paper ledger updates are frequently delayed until weeks or months after major departmental events.<br><br>
-          <strong>The Crisis:</strong> Bookkeeping errors, duplicate entries, and unrecorded petty disbursements accumulate unnoticed. At year-end turnover, when physical cash is compared with the paper balance, <strong>unexplained cash shortfalls emerge</strong>. Outgoing student officers are forced to <strong>pay these shortfalls out of their own personal pockets</strong> simply to obtain graduation clearance.<br><br>
-          <strong>FinLITE Database Solution:</strong> Real-time ledger calculations, immutable audit logs, and certified Turnover Reconciliation Certificates.
-        </p>
-      </div>
-    </section>
-
-    <section class="slide" data-index="9">
-      <div class="slide-label">OPERATIONAL PROBLEM 4 OF 5 · FIELD RESEARCH</div>
-      <span class="badge">Cashbox Reconciliation</span>
-      <h2 class="slide-title">Latent Discrepancies & Slow Manual Cash Computations</h2>
-      <div class="hero-card">
-        <p class="card-body">
-          Physical cash counts, sorting bills from ₱1,000 down to one-peso coins and centavos, are performed weeks or months late.<br><br>
-          <strong>The Crisis:</strong> Officers perform manual cross-multiplication against loose paper tallies. When arithmetic cash variances emerge, the resulting <strong>mandatory spending freeze paralyzes club activities</strong> while officers struggle to locate the discrepancy.<br><br>
-          <strong>FinLITE Database Solution:</strong> Interactive digital keypad covering all 11 Philippine currency denominations with instant real-time variance cross-referencing against the theoretical book balance.
-        </p>
-      </div>
-    </section>
-
-    <section class="slide" data-index="10">
-      <div class="slide-label">OPERATIONAL PROBLEM 5 OF 5 · FIELD RESEARCH</div>
-      <span class="badge">Institutional Compliance</span>
-      <h2 class="slide-title">Signatory Rejections & 6-Stage Routing Bottlenecks</h2>
-      <div class="hero-card">
-        <p class="card-body">
-          Manual preparation of end-of-term liquidation reports using desktop word processors results in formatting non-compliance with College of Computer Studies standards (uneven table borders, misaligned decimals).<br><br>
-          <strong>The Crisis:</strong> If a typographical error or arithmetic defect is caught by the Program Director or Dean at stage 5 or 6, <strong>the report is rejected</strong>. Officers must manually re-compute, re-edit, reprint on institutional bond paper, and restart physical wet-ink routing from stage 1.<br><br>
-          <strong>FinLITE Database Solution:</strong> 1-click institutional DOCX generation with borderless financial tables, automated 4-up receipt sheets, and pre-formatted wet-ink signature blocks.
-        </p>
-      </div>
-    </section>
-
-    <!-- ==========================================
-         SLIDE 11: Database Selection Rationale
-         ========================================== -->
-    <section class="slide" data-index="11">
       <div class="slide-label">DATABASE SELECTION RATIONALE</div>
-      <span class="badge">DBMS Architecture</span>
+      <span class="badge">Architecture Choice</span>
       <h2 class="slide-title">Why PostgreSQL on Supabase over MongoDB?</h2>
-      <div class="hero-card">
-        <p class="card-body">
-          <strong>1. Strict ACID Compliance over Eventual Consistency:</strong> Financial ledgers cannot tolerate synchronization delays. Every inflow, disbursement, and denomination count must commit atomically.<br><br>
-          <strong>2. Foreign Key Referential Integrity:</strong> Guarantees that child records (such as <code>transaction_receipts</code> or <code>cash_reconciliation_items</code>) cannot exist as orphans if parent records are modified.<br><br>
-          <strong>3. Exact Base-10 Decimal Precision:</strong> PostgreSQL <code>decimal(12,2)</code> eliminates IEEE-754 floating-point rounding errors inherent in loose document stores.<br><br>
-          <strong>4. Managed Cloud Infrastructure:</strong> Dedicated connection pooler (Supavisor on port 6543) with SSL encryption, daily point-in-time backups, and sub-millisecond query responses for Vercel.
-        </p>
-      </div>
-    </section>
-
-    <!-- ==========================================
-         SLIDES 12 - 17: Normalization & Schema Proofs
-         ========================================== -->
-    <section class="slide" data-index="12">
-      <div class="slide-label">NORMALIZATION EVIDENCE · STEP 0</div>
-      <span class="badge">Unnormalized Form (UNF)</span>
-      <h2 class="slide-title">Unnormalized Form (UNF) — The Flat Paper Ledger</h2>
-      <div class="image-showcase-card" style="padding: 16px;">
-        <img src="normalization_unf.svg" alt="Unnormalized Form" class="image-preview" style="width: 100%; max-height: 510px; object-fit: contain;">
-      </div>
-    </section>
-
-    <section class="slide" data-index="13">
-      <div class="slide-label">NORMALIZATION EVIDENCE · STEP 1</div>
-      <span class="badge">First Normal Form (1NF)</span>
-      <h2 class="slide-title">First Normal Form (1NF) — Atomicity &amp; No Repeating Groups</h2>
-      <div class="image-showcase-card" style="padding: 16px;">
-        <img src="normalization_1nf.svg" alt="First Normal Form" class="image-preview" style="width: 100%; max-height: 510px; object-fit: contain;">
-      </div>
-    </section>
-
-    <section class="slide" data-index="14">
-      <div class="slide-label">NORMALIZATION EVIDENCE · STEP 2</div>
-      <span class="badge">Second Normal Form (2NF)</span>
-      <h2 class="slide-title">Second Normal Form (2NF) — Removing Partial Dependencies</h2>
-      <div class="image-showcase-card" style="padding: 16px;">
-        <img src="normalization_2nf.svg" alt="Second Normal Form" class="image-preview" style="width: 100%; max-height: 510px; object-fit: contain;">
-      </div>
-    </section>
-
-    <section class="slide" data-index="15">
-      <div class="slide-label">NORMALIZATION EVIDENCE · STEP 3</div>
-      <span class="badge">Third Normal Form (3NF)</span>
-      <h2 class="slide-title">Third Normal Form (3NF) — Pure Non-Key Independence</h2>
-      <div class="image-showcase-card" style="padding: 16px;">
-        <img src="normalization_3nf.svg" alt="Third Normal Form" class="image-preview" style="width: 100%; max-height: 510px; object-fit: contain;">
-      </div>
-    </section>
-
-    <section class="slide" data-index="16">
-      <div class="slide-label">LOGICAL SCHEMA DESIGN · PAPER ARTIFACT</div>
-      <span class="badge">Figure 13: Manuscript p. 40</span>
-      <h2 class="slide-title">Complete 3NF Entity-Relationship Diagram (ERD)</h2>
-      <div class="image-showcase-card">
-        <div class="image-placeholder" id="placeholder-erd">
-          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
-          <span>Awaiting ERD image upload from user...</span>
+      <div class="hero-card" style="padding: 30px 36px; margin-top: 24px;">
+        <div style="display: flex; flex-direction: column; gap: 20px;">
+          <div style="display: flex; align-items: flex-start; gap: 16px;">
+            <span style="display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 8px; background: #ecfdf5; color: #047857; font-weight: 800; font-size: 14px; flex-shrink: 0;">1</span>
+            <div style="font-size: 16.5px; color: var(--text-main); line-height: 1.45;">
+              <strong>Money Can Never Be Out of Sync:</strong> When cash is spent or recorded, the receipt and the ledger update together at the exact same instant—it can never be "half-saved" or delayed.
+            </div>
+          </div>
+          <div style="display: flex; align-items: flex-start; gap: 16px;">
+            <span style="display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 8px; background: #ecfdf5; color: #047857; font-weight: 800; font-size: 14px; flex-shrink: 0;">2</span>
+            <div style="font-size: 16.5px; color: var(--text-main); line-height: 1.45;">
+              <strong>Receipts Never Get Disconnected:</strong> Relational links lock receipt photos to their specific transaction and officer so proof can never be lost or orphaned.
+            </div>
+          </div>
+          <div style="display: flex; align-items: flex-start; gap: 16px;">
+            <span style="display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 8px; background: #ecfdf5; color: #047857; font-weight: 800; font-size: 14px; flex-shrink: 0;">3</span>
+            <div style="font-size: 16.5px; color: var(--text-main); line-height: 1.45;">
+              <strong>Exact Centavo Math:</strong> PostgreSQL prevents decimal rounding glitches, ensuring every single centavo in the cashbox matches the final financial liquidation report.
+            </div>
+          </div>
+          <div style="display: flex; align-items: flex-start; gap: 16px;">
+            <span style="display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 8px; background: #ecfdf5; color: #047857; font-weight: 800; font-size: 14px; flex-shrink: 0;">4</span>
+            <div style="font-size: 16.5px; color: var(--text-main); line-height: 1.45;">
+              <strong>Secure Cloud Backups:</strong> Automatic cloud connection pooling, continuous SSL encryption, and daily backups protect club funds from data loss.
+            </div>
+          </div>
         </div>
       </div>
     </section>
 
-    <section class="slide" data-index="17">
-      <div class="slide-label">DATA DICTIONARY · PAPER ARTIFACT</div>
-      <span class="badge">Section 2.2.2: Manuscript pp. 41–62</span>
-      <h2 class="slide-title">Data Dictionary Specifications (18 Tables)</h2>
-      <div class="image-showcase-card">
-        <div class="image-placeholder" id="placeholder-dd">
-          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
-          <span>Awaiting Data Dictionary image upload from user...</span>
-        </div>
-      </div>
-    </section>
-
-    <!-- ==========================================
-         SLIDE 18: Database Security & Connection
-         ========================================== -->
-    <section class="slide" data-index="18">
-      <div class="slide-label">DATABASE SECURITY & CONNECTION POOLING</div>
-      <span class="badge">5 Points Rubric</span>
-      <h2 class="slide-title">Database Connection Security & Zero Credential Exposure</h2>
-      <div class="hero-card">
-        <p class="card-body">
-          <strong>• Server Connection Pooler:</strong> Managed Supabase Supavisor connection pooler on port 6543 with SSL enforcement (<code>sslmode=require</code>), preventing connection limits during concurrent transactions.<br><br>
-          <strong>• Zero Client Secrets:</strong> Client browser bundles never receive database credentials or master keys. All queries originate from authenticated server-side API routes.<br><br>
-          <strong>• Environment Variable Isolation:</strong> Credentials isolated in encrypted environment variables. Clean <code>.env.example</code> provided without live secrets.<br><br>
-          <strong>• Resilient Error Handling:</strong> Server-side try-catch blocks gracefully handle connection drops and return sanitized JSON responses without exposing raw SQL stack traces.
-        </p>
-      </div>
-    </section>
-
-    <!-- ==========================================
-         SLIDE 19: CREATE Operation
-         ========================================== -->
-    <section class="slide" data-index="19">
+    <!-- SLIDE 5: Backend CRUD · CREATE Operation -->
+    <section class="slide" data-index="5">
       <div class="slide-label">BACKEND CRUD · CREATE OPERATION</div>
-      <span class="badge">Beginner-Friendly Data Pipeline</span>
+      <span class="badge">Data Pipeline</span>
       <h2 class="slide-title">How FinLITE Creates a Real Financial Record</h2>
-      <p class="slide-subtitle">Step-by-step visual journey: From form submission to permanent dual-table database storage</p>
+      <p class="slide-subtitle">From form submission to dual-table database storage</p>
 
       <div class="crud-pipeline-container">
         <!-- Visual Pipeline Rail -->
-        <div class="pipeline-rail">
+        <div class="pipeline-rail" style="margin-top: 30px;">
           <div class="pipeline-connector-line">
             <div class="pipeline-connector-pulse"></div>
           </div>
@@ -851,26 +719,26 @@
               <div class="station-step-num">1</div>
               <span class="station-pill">Client UI</span>
             </div>
-            <div class="station-title">User Inputs Expense</div>
-            <div class="station-desc">Officer enters <strong>₱150.00</strong> for "Event Materials", selects category, and uploads receipt photo (compressed &lt;1MB).</div>
+            <div class="station-title">Officer Submits Expense</div>
+            <div class="station-desc">Officer enters <strong>₱150.00</strong> for "Event Materials", selects a category, and uploads a receipt image.</div>
           </div>
 
           <div class="pipeline-station">
             <div class="station-header">
               <div class="station-step-num">2</div>
-              <span class="station-pill success">Zod Safety Gate</span>
+              <span class="station-pill success">Validation</span>
             </div>
-            <div class="station-title">Automatic Inspection</div>
-            <div class="station-desc">Server checks: Is user logged in? Is amount positive (<code>CHECK > 0</code>)? Invalid data is rejected before touching the DB.</div>
+            <div class="station-title">Server Safety Gate</div>
+            <div class="station-desc">Server checks officer session, permissions, and validates that amount is positive (<code>CHECK &gt; 0</code>).</div>
           </div>
 
           <div class="pipeline-station">
             <div class="station-header">
               <div class="station-step-num">3</div>
-              <span class="station-pill">PostgreSQL + Storage</span>
+              <span class="station-pill">PostgreSQL</span>
             </div>
-            <div class="station-title">Dual Table Storage</div>
-            <div class="station-desc">Photo saved to cloud bucket; master data inserted into <code>transactions</code> and linked into <code>transaction_receipts</code> via UUID.</div>
+            <div class="station-title">Dual-Table Insertion</div>
+            <div class="station-desc">Master data inserts into <code>transactions</code> and receipt metadata links into <code>transaction_receipts</code>.</div>
           </div>
 
           <div class="pipeline-station">
@@ -879,38 +747,22 @@
               <span class="station-pill success">Live State</span>
             </div>
             <div class="station-title">Cashbox Decremented</div>
-            <div class="station-desc">The physical cashbox ledger balance instantly drops by <strong>₱150.00</strong> across all active officer screens.</div>
-          </div>
-        </div>
-
-        <!-- Plain English Beginner Callout -->
-        <div class="plain-english-box">
-          <div class="plain-english-icon">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
-          </div>
-          <div class="plain-english-content">
-            <div class="plain-english-badge">In Plain English (The Real-World Picture)</div>
-            <div class="plain-english-headline">Nothing Can Go Missing or Be Faked</div>
-            <div class="plain-english-text">
-              When an officer buys supplies, the photo proof and the expense details are permanently locked together in the database using a unique ID. You cannot submit an entry without required fields, and the club's cashbox total drops automatically so no money goes unaccounted for.
-            </div>
+            <div class="station-desc">Physical cash balance immediately decreases by <strong>₱150.00</strong> across all active officer screens.</div>
           </div>
         </div>
       </div>
     </section>
 
-    <!-- ==========================================
-         SLIDE 20: READ Operation
-         ========================================== -->
-    <section class="slide" data-index="20">
+    <!-- SLIDE 6: Backend CRUD · READ Operation -->
+    <section class="slide" data-index="6">
       <div class="slide-label">BACKEND CRUD · READ OPERATION</div>
-      <span class="badge">Beginner-Friendly Data Pipeline</span>
+      <span class="badge">Data Pipeline</span>
       <h2 class="slide-title">How FinLITE Reads & Calculates Your Money</h2>
-      <p class="slide-subtitle">Step-by-step visual journey: Connecting 4 database tables to display real-time dashboard totals</p>
+      <p class="slide-subtitle">Connecting database tables to display real-time dashboard totals</p>
 
       <div class="crud-pipeline-container">
         <!-- Visual Pipeline Rail -->
-        <div class="pipeline-rail">
+        <div class="pipeline-rail" style="margin-top: 30px;">
           <div class="pipeline-connector-line">
             <div class="pipeline-connector-pulse"></div>
           </div>
@@ -921,65 +773,49 @@
               <span class="station-pill">Dashboard</span>
             </div>
             <div class="station-title">User Opens Screen</div>
-            <div class="station-desc">Officer opens FinLITE; the frontend asks the server: <em>"What are our active funds and debts for this semester?"</em></div>
+            <div class="station-desc">Officer opens FinLITE; client asks the server for active semester transactions, payables, and receivables.</div>
           </div>
 
           <div class="pipeline-station">
             <div class="station-header">
               <div class="station-step-num">2</div>
-              <span class="station-pill">SQL JOIN</span>
+              <span class="station-pill">Multi-Table Join</span>
             </div>
-            <div class="station-title">Connecting 4 Tables</div>
-            <div class="station-desc">PostgreSQL connects <code>transactions</code> + <code>categories</code> + <code>profiles</code> (who spent) + <code>receipts</code> in one fast query.</div>
+            <div class="station-title">Database Gathers Data</div>
+            <div class="station-desc">Server queries <code>transactions</code> joining <code>categories</code>, <code>profiles</code>, and <code>transaction_receipts</code>.</div>
           </div>
 
           <div class="pipeline-station">
             <div class="station-header">
               <div class="station-step-num">3</div>
-              <span class="station-pill success">Decimal Math</span>
+              <span class="station-pill success">SQL SUM Aggregation</span>
             </div>
-            <div class="station-title">Zero Float Drift</div>
-            <div class="station-desc">Computes <code>SUM(inflows) - SUM(outflows)</code> using exact base-10 decimals, eliminating centavo calculation errors.</div>
+            <div class="station-title">Math Done by Engine</div>
+            <div class="station-desc">PostgreSQL calculates total collections minus disbursements using exact centavo precision math.</div>
           </div>
 
           <div class="pipeline-station">
             <div class="station-header">
               <div class="station-step-num">4</div>
-              <span class="station-pill success">Live UI</span>
+              <span class="station-pill">Live KPI Cards</span>
             </div>
-            <div class="station-title">6 Cards Light Up</div>
-            <div class="station-desc">Dashboard illuminates: Cashbox Physical Cash, Net Position, Student Receivables, and Total Outflows.</div>
-          </div>
-        </div>
-
-        <!-- Plain English Beginner Callout -->
-        <div class="plain-english-box">
-          <div class="plain-english-icon">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-          </div>
-          <div class="plain-english-content">
-            <div class="plain-english-badge">In Plain English (The Real-World Picture)</div>
-            <div class="plain-english-headline">No More Manual Calculator Errors</div>
-            <div class="plain-english-text">
-              Instead of officers flipping through loose paper slips and adding numbers by hand on a pocket calculator, the database instantly connects 4 separate tables, calculates the exact balance down to the last centavo, and displays it in less than a second.
-            </div>
+            <div class="station-title">Instant Overview</div>
+            <div class="station-desc">Treasurers and auditors see live Net Balance, Total Inflows, Total Outflows, and Cash-on-Hand.</div>
           </div>
         </div>
       </div>
     </section>
 
-    <!-- ==========================================
-         SLIDE 21: UPDATE Operation
-         ========================================== -->
-    <section class="slide" data-index="21">
+    <!-- SLIDE 7: Backend CRUD · UPDATE Operation -->
+    <section class="slide" data-index="7">
       <div class="slide-label">BACKEND CRUD · UPDATE OPERATION</div>
-      <span class="badge">Beginner-Friendly Data Pipeline</span>
+      <span class="badge">Data Pipeline</span>
       <h2 class="slide-title">How the Auditor Verifies a Transaction</h2>
-      <p class="slide-subtitle">Step-by-step visual journey: Enforcing two-stage verification and permanent auditor identity binding</p>
+      <p class="slide-subtitle">Two-person verification with immutable auditor signatures</p>
 
       <div class="crud-pipeline-container">
         <!-- Visual Pipeline Rail -->
-        <div class="pipeline-rail">
+        <div class="pipeline-rail" style="margin-top: 30px;">
           <div class="pipeline-connector-line">
             <div class="pipeline-connector-pulse"></div>
           </div>
@@ -987,68 +823,52 @@
           <div class="pipeline-station">
             <div class="station-header">
               <div class="station-step-num">1</div>
-              <span class="station-pill">Audit Queue</span>
+              <span class="station-pill">Audit Screen</span>
             </div>
-            <div class="station-title">Auditor Inspects Proof</div>
-            <div class="station-desc">Auditor opens the pending item, zooms into the receipt photo, and checks if amount and vendor match.</div>
+            <div class="station-title">Auditor Reviews Voucher</div>
+            <div class="station-desc">Club Auditor inspects the physical receipt photo and confirms items match legitimate club activities.</div>
           </div>
 
           <div class="pipeline-station">
             <div class="station-header">
               <div class="station-step-num">2</div>
-              <span class="station-pill warning">RBAC Gate</span>
+              <span class="station-pill success">Two-Person Rule</span>
             </div>
-            <div class="station-title">Role Gatekeeper</div>
-            <div class="station-desc">System checks: <em>"Is this user really an Auditor?"</em> (Treasurers are strictly blocked from approving their own entries).</div>
+            <div class="station-title">Conflict of Interest Gate</div>
+            <div class="station-desc">Database constraint prevents officers from auditing or approving their own submitted expenses.</div>
           </div>
 
           <div class="pipeline-station">
             <div class="station-header">
               <div class="station-step-num">3</div>
-              <span class="station-pill success">State Mutation</span>
+              <span class="station-pill">Audit Stamping</span>
             </div>
-            <div class="station-title">Permanent Stamp</div>
-            <div class="station-desc">Status flips from yellow <code>PENDING</code> to green <code>VERIFIED</code>. The Auditor's UUID and exact time are saved.</div>
+            <div class="station-title">Audit Columns Updated</div>
+            <div class="station-desc">Database stamps status as <code>VERIFIED</code>, recording <code>audited_by</code> UUID and immutable <code>audited_at</code> timestamp.</div>
           </div>
 
           <div class="pipeline-station">
             <div class="station-header">
               <div class="station-step-num">4</div>
-              <span class="station-pill">audit_logs</span>
+              <span class="station-pill success">Report Ready</span>
             </div>
-            <div class="station-title">Audit History Saved</div>
-            <div class="station-desc">An immutable record is committed to <code>audit_logs</code>, ensuring tamper-evident accountability.</div>
-          </div>
-        </div>
-
-        <!-- Plain English Beginner Callout -->
-        <div class="plain-english-box">
-          <div class="plain-english-icon">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-          </div>
-          <div class="plain-english-content">
-            <div class="plain-english-badge">In Plain English (The Real-World Picture)</div>
-            <div class="plain-english-headline">Segregation of Duties Enforced by Code</div>
-            <div class="plain-english-text">
-              The person who holds the money (the Treasurer) cannot simply declare their own spending valid. The Auditor must physically review the receipt photo, click verify, and the database permanently stamps the Auditor's name and exact timestamp onto that transaction row.
-            </div>
+            <div class="station-title">Liquidation Certified</div>
+            <div class="station-desc">Transaction is officially certified and marked ready for institutional semester-end liquidation.</div>
           </div>
         </div>
       </div>
     </section>
 
-    <!-- ==========================================
-         SLIDE 22: DELETE / VOID Operation
-         ========================================== -->
-    <section class="slide" data-index="22">
+    <!-- SLIDE 8: Backend CRUD · DELETE / VOID Operation -->
+    <section class="slide" data-index="8">
       <div class="slide-label">BACKEND CRUD · DELETE / VOID OPERATION</div>
-      <span class="badge">Beginner-Friendly Data Pipeline</span>
+      <span class="badge">Data Pipeline</span>
       <h2 class="slide-title">Why Financial Records Are Never Truly 'Deleted'</h2>
-      <p class="slide-subtitle">Step-by-step visual journey: Financial Audit Preservation Rule and soft-void mutations</p>
+      <p class="slide-subtitle">Soft-deletion and immutable audit trail preservation</p>
 
       <div class="crud-pipeline-container">
         <!-- Visual Pipeline Rail -->
-        <div class="pipeline-rail">
+        <div class="pipeline-rail" style="margin-top: 30px;">
           <div class="pipeline-connector-line">
             <div class="pipeline-connector-pulse"></div>
           </div>
@@ -1056,67 +876,51 @@
           <div class="pipeline-station">
             <div class="station-header">
               <div class="station-step-num">1</div>
-              <span class="station-pill">Correction</span>
+              <span class="station-pill">Error Discovered</span>
             </div>
-            <div class="station-title">Void Requested</div>
-            <div class="station-desc">Officer realizes a mistake was encoded and clicks "Void Transaction", giving a mandatory cancellation reason.</div>
+            <div class="station-title">Officer Cancels Entry</div>
+            <div class="station-desc">An officer realizes an entry was logged under the wrong category or duplicate amount and clicks Void.</div>
           </div>
 
           <div class="pipeline-station">
             <div class="station-header">
               <div class="station-step-num">2</div>
-              <span class="station-pill warning">Audit Shield</span>
+              <span class="station-pill success">No Hard Deletes</span>
             </div>
-            <div class="station-title">Hard Delete Blocked!</div>
-            <div class="station-desc">Audit Rule: Raw SQL <code>DELETE</code> is prohibited so records never vanish into thin air without explanation.</div>
+            <div class="station-title">Record Preserved</div>
+            <div class="station-desc">The database strictly blocks <code>DELETE FROM transactions</code> so historical financial audits can never be wiped out.</div>
           </div>
 
           <div class="pipeline-station">
             <div class="station-header">
               <div class="station-step-num">3</div>
-              <span class="station-pill success">Soft-Void</span>
+              <span class="station-pill">Archival Stamping</span>
             </div>
-            <div class="station-title">Marked as VOIDED</div>
-            <div class="station-desc">Row status flips to <code>'VOIDED'</code> (struck through). Money is returned to the cashbox balance immediately.</div>
+            <div class="station-title">Soft-Delete Flagged</div>
+            <div class="station-desc">Database flags status as <code>VOIDED</code> and records <code>archived_at</code> timestamp and mandatory <code>void_reason</code>.</div>
           </div>
 
           <div class="pipeline-station">
             <div class="station-header">
               <div class="station-step-num">4</div>
-              <span class="station-pill">audit_logs</span>
+              <span class="station-pill success">Ledger Corrected</span>
             </div>
-            <div class="station-title">Black Box Logged</div>
-            <div class="station-desc">The cancellation reason, timestamp, and acting officer's ID are written permanently into <code>audit_logs</code>.</div>
-          </div>
-        </div>
-
-        <!-- Plain English Beginner Callout -->
-        <div class="plain-english-box">
-          <div class="plain-english-icon">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-          </div>
-          <div class="plain-english-content">
-            <div class="plain-english-badge">In Plain English (The Real-World Picture)</div>
-            <div class="plain-english-headline">Honest Bookkeeping Guaranteed</div>
-            <div class="plain-english-text">
-              In real accounting, if an entry was made by mistake, you cannot just make it disappear without a trace. FinLITE crosses it out, restores the money to the cashbox, and writes down who cancelled it and why, ensuring the financial audit trail remains 100% tamper-evident.
-            </div>
+            <div class="station-title">Balance Restored</div>
+            <div class="station-desc">The voided amount is removed from active calculations while preserving full audit history for the Dean.</div>
           </div>
         </div>
       </div>
     </section>
 
-    <!-- ==========================================
-         SLIDE 23: Two-Tier Data Integrity
-         ========================================== -->
-    <section class="slide" data-index="23">
+    <!-- SLIDE 9: Data Integrity & Validation Defenses -->
+    <section class="slide" data-index="9">
       <div class="slide-label">DATA INTEGRITY & VALIDATION DEFENSES</div>
-      <span class="badge">4 Points Rubric</span>
+      <span class="badge">Core Defenses</span>
       <h2 class="slide-title">Two-Tier Data Integrity: Database Engine & Server Schemas</h2>
-      <div class="hero-card">
-        <p class="card-body">
+      <div class="hero-card" style="padding: 30px 36px; margin-top: 24px;">
+        <p class="card-body" style="font-size: 16px; line-height: 1.6;">
           <strong>Tier 1: PostgreSQL Engine-Level Constraints:</strong><br>
-          • <code>CHECK (amount > 0)</code>: Makes negative or zero ledger entries physically impossible at the database engine level.<br>
+          • <code>CHECK (amount &gt; 0)</code>: Makes negative or zero ledger entries physically impossible at the database engine level.<br>
           • <code>UNIQUE</code> constraints on email, denomination codes, and active semester indicators.<br>
           • <code>ON DELETE RESTRICT</code>: Prohibits cascading deletions that would orphan financial records.<br><br>
           <strong>Tier 2: Server-Side Zod Schemas & Dynamic RBAC:</strong><br>
@@ -1127,63 +931,17 @@
       </div>
     </section>
 
-    <!-- ==========================================
-         SLIDE 24: Cashbox Reconciliation (11 Denominations)
-         ========================================== -->
-    <section class="slide" data-index="24">
-      <div class="slide-label">CUSTODIAL RECONCILIATION · 11 DENOMINATIONS</div>
-      <span class="badge">Dual-Officer Attestation</span>
-      <h2 class="slide-title">Dual-Officer Attestation & 11 Currency Denominations</h2>
-      <div class="hero-card">
-        <p class="card-body">
-          <strong>• Dual-Officer Protocol:</strong> Treasurer acts as the Counter (physically inputting bill and coin quantities); Auditor acts as the Verifier (witnessing the count and co-signing the session).<br><br>
-          <strong>• 11 Supported Denominations (<code>denominations</code> master table):</strong><br>
-          &nbsp;&nbsp;Banknotes: ₱1,000, ₱500, ₱200, ₱100, ₱50, ₱20<br>
-          &nbsp;&nbsp;Coins: ₱20, ₱10, ₱5, ₱1, ₱0.25 centavos<br><br>
-          <strong>• Real-Time Variance Formula:</strong><br>
-          &nbsp;&nbsp;$$\text{Variance} = \text{Counted Cash} - \text{Book Balance}$$<br>
-          &nbsp;&nbsp;Balanced (Variance = 0) | Shortage (Variance &lt; 0 &rarr; Shortage Justification Report) | Overage (Petty Cash Buffer).<br><br>
-          <strong>• Turnover Reconciliation Certificate:</strong> Certifies physical cash matches the audited report down to the exact centavo for graduation clearance.
-        </p>
+    <!-- SLIDE 10: Defense Conclusion -->
+    <section class="slide" data-index="10" style="display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; min-height: 520px;">
+      <div class="slide-label" style="font-size: 15px; margin-bottom: 24px;">PAMBAYANG DALUBHASAAN NG MARILAO · IT31-DB2</div>
+      <h1 class="slide-title" style="font-size: 56px; font-weight: 900; color: var(--brand-dark); margin-bottom: 16px;">Thank You!</h1>
+      <p style="font-size: 20px; font-weight: 600; color: var(--brand-emerald); margin-bottom: 32px;">Questions &amp; Discussion</p>
+      <div style="font-family: 'JetBrains Mono', monospace; font-size: 14px; color: var(--text-muted); max-width: 600px; line-height: 1.6;">
+        FinLITE · League of Information Technology Enthusiasts<br>
+        College of Computer Studies
       </div>
     </section>
-
-    <!-- ==========================================
-         SLIDE 25: Production Deployment Architecture
-         ========================================== -->
-    <section class="slide" data-index="25">
-      <div class="slide-label">DEPLOYMENT INTEGRATION & LIVE ACCESS</div>
-      <span class="badge">5 Points Rubric</span>
-      <h2 class="slide-title">Production Deployment Architecture & Live Submission URLs</h2>
-      <div class="hero-card">
-        <p class="card-body">
-          <strong>• Frontend (Vercel):</strong> Deployed on Vercel Global Edge CDN with automated HTTPS SSL, sub-millisecond response, and Next.js App Router.<br><br>
-          <strong>• Database (Supabase PostgreSQL):</strong> Hosted managed cloud PostgreSQL instance with Supavisor connection pooling on port 6543, daily backups, and RLS policies.<br><br>
-          <strong>• Live Submission Artifacts Checklist:</strong><br>
-          &nbsp;&nbsp;1. Live Vercel Frontend URL<br>
-          &nbsp;&nbsp;2. Live Backend API Health Endpoint (<code>/api/health</code>)<br>
-          &nbsp;&nbsp;3. Complete 18-Table 3NF ERD Diagram<br>
-          &nbsp;&nbsp;4. Public GitHub Repository with safe <code>.env.example</code><br>
-          &nbsp;&nbsp;5. UNF &rarr; 3NF Normalization Paper Evidence.
-        </p>
-      </div>
-    </section>
-
-    <!-- ==========================================
-         SLIDE 26: Defense Conclusion & Q&A
-         ========================================== -->
-    <section class="slide" data-index="26">
-      <div class="slide-label">INSTITUTIONAL LIQUIDATION · DEFENSE CONCLUSION</div>
-      <span class="badge">Academic Defense</span>
-      <h2 class="slide-title">Conclusion & Committee Defense Q&A</h2>
-      <div class="hero-card" style="text-align: center; padding: 48px;">
-        <h3 style="font-size: 28px; font-weight: 900; color: var(--brand-dark); margin-bottom: 12px;">Thank You, Sir Harvey Blue Pardico & Committee Panelists</h3>
-        <p class="card-body" style="max-width: 720px; margin: 0 auto 24px;">
-          FinLITE eliminates manual ledger errors, protects student leaders from personal financial liabilities, and delivers an audit-ready, 3NF-compliant relational system for the League of Information Technology Enthusiasts.
-        </p>
-        <div style="font-family: 'JetBrains Mono', monospace; font-size: 14px; font-weight: 700; color: var(--brand-emerald);">The floor is now open for committee questions, database inspection, and technical inquiry.</div>
-      </div>
-    </section>
+    
 
   </main>
 
@@ -1216,33 +974,17 @@
     const total = slides.length;
     document.getElementById('totalSlides').textContent = total;
 
-    const titles = [
-      "1. Title & Defense Roster",
-      "2. Constraint 1: No Physical Office",
-      "3. Constraint 2: Single Cashbox in Director's Office",
-      "4. Constraint 3: Face-Value Turnover Protocol",
-      "5. Constraint 4: Segregation of Duties",
-      "6. Problem 1: Personal Advances (Abono) & Lost Receipts",
-      "7. Problem 2: Non-Receipted Micro-Transit Leakage",
-      "8. Problem 3: Cumulative Discrepancies & Settlements",
-      "9. Problem 4: Latent Cash Computation Discrepancies",
-      "10. Problem 5: Signatory Rejections & Formatting Delays",
-      "11. Database Selection: PostgreSQL on Supabase",
-      "12. Normalization: Unnormalized Form (UNF Image)",
-      "13. Normalization: First Normal Form (1NF Image)",
-      "14. Normalization: Second Normal Form (2NF Image)",
-      "15. Normalization: Third Normal Form (3NF Image)",
-      "16. Complete 3NF ERD (Figure 13 Image)",
-      "17. Data Dictionary (Section 2.2.2 Image)",
-      "18. Database Security & Connection Pooling",
-      "19. CREATE Operation: Multi-Table Flow",
-      "20. READ Operation: Multi-Table Joins & Aggregation",
-      "21. UPDATE Operation: Audit Verification Flow",
-      "22. DELETE / VOID Operation: Audit Preservation",
-      "23. Two-Tier Data Integrity Defenses",
-      "24. Dual-Officer Reconciliation (11 Denominations)",
-      "25. Production Deployment (Vercel + Supabase)",
-      "26. Defense Conclusion & Committee Q&A"
+        const titles = [
+      "1. Title: FinLITE Financial Ledger",
+      "2. Four Operational Constraints",
+      "3. Five Core Operational Problems",
+      "4. Database Selection: PostgreSQL over MongoDB",
+      "5. CREATE: Expense Recording Pipeline",
+      "6. READ: Real-Time Balance Aggregation",
+      "7. UPDATE: Audit Verification & Remarks",
+      "8. DELETE: Immutability & Audit Trail Preservation",
+      "9. Two-Tier Data Integrity Defenses",
+      "10. Thank You (Questions & Discussion)"
     ];
 
     function showSlide(n) {
