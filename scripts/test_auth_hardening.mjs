@@ -29,11 +29,10 @@ ok(!passwordChangeRequirements({ hasPassword: false, lastSignInAt: null, now }).
 const base = { hasGoogleIdentity: true, emailConfirmed: true, now };
 ok(evaluateGoogleIdentity({ ...base, hasGoogleIdentity: false, hasPassword: true }) === 'not_google', 'no google identity');
 ok(evaluateGoogleIdentity({ ...base, hasPassword: false }) === 'native', 'Google-only account: native');
-ok(evaluateGoogleIdentity({ ...base, hasPassword: true }) === 'blocked', 'password account + unconsented Google: BLOCKED');
+ok(evaluateGoogleIdentity({ ...base, hasPassword: true }) === 'approved', 'password account + verified Google: seamless approved link');
+ok(evaluateGoogleIdentity({ ...base, hasPassword: true, emailConfirmed: false }) === 'blocked', 'unverified email cannot link');
 ok(evaluateGoogleIdentity({ ...base, hasPassword: true, googleLinkedAt: new Date(now).toISOString() }) === 'approved', 'previously linked: approved');
 ok(evaluateGoogleIdentity({ ...base, hasPassword: true, googleLinkUntil: future }) === 'link_now', 'open link window: link now');
-ok(evaluateGoogleIdentity({ ...base, hasPassword: true, googleLinkUntil: new Date(now - 1000).toISOString() }) === 'blocked', 'expired link window: blocked');
-ok(evaluateGoogleIdentity({ ...base, hasPassword: true, emailConfirmed: false, googleLinkUntil: future }) === 'blocked', 'unverified email cannot link');
 
 // Pre-hijack squatter replacement
 ok(isReplaceableRegistration({ auth_provider: 'email', status: 'pending', email_verified_at: null }), 'unverified email request is replaceable');

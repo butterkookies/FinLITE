@@ -65,7 +65,35 @@ function LoginForm() {
 
       if (idTokenError) {
         console.error('Supabase signInWithIdToken error:', idTokenError);
-        setError(idTokenError.message || 'Google sign-in failed. Please try again.');
+
+        let userEmail = '';
+        try {
+          const payloadBase64 = response.credential?.split('.')[1];
+          if (payloadBase64) {
+            const decoded = JSON.parse(atob(payloadBase64.replace(/-/g, '+').replace(/_/g, '/')));
+            userEmail = decoded.email || '';
+          }
+        } catch {
+          // ignore credential decode error
+        }
+
+        const isIdentityConflict =
+          idTokenError.message?.toLowerCase().includes('identity') ||
+          idTokenError.status === 500 ||
+          idTokenError.name === 'AuthRetryableFetchError';
+
+        if (isIdentityConflict) {
+          if (userEmail) {
+            setEmail(userEmail);
+          }
+          setError(
+            userEmail
+              ? `An account with ${userEmail} already exists with a password. Please sign in with your password below, then connect Google under Account Security.`
+              : 'An account with this email already exists with a password. Please sign in with your password below, then connect Google under Account Security.'
+          );
+        } else {
+          setError(idTokenError.message || 'Google sign-in failed. Please try again.');
+        }
         setIsGoogleLoading(false);
         return;
       }

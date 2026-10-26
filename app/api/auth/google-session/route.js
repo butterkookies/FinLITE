@@ -3,6 +3,7 @@ import { createClient, createAdminClient } from '@/lib/supabase/server';
 import { isSuperAdminEmail } from '@/lib/config/admin';
 import { getClientIp } from '@/lib/security/ratelimit';
 import { isCustomUploadedAvatar } from '@/lib/utils/avatar';
+import { patchSecurityState } from '@/lib/auth/methods';
 
 // POST /api/auth/google-session
 // Called after client-side signInWithIdToken to finalize profile routing,
@@ -185,6 +186,16 @@ export async function POST(req) {
           ]);
         } catch (auditErr) {
           console.warn('OAuth login audit telemetry note:', auditErr?.message);
+        }
+
+        if (adminClient) {
+          try {
+            await patchSecurityState(adminClient, user.id, {
+              google_linked_at: new Date().toISOString(),
+            });
+          } catch (secErr) {
+            console.warn('Google session security state sync note:', secErr?.message);
+          }
         }
 
         return NextResponse.json({ success: true, redirect: '/' });
