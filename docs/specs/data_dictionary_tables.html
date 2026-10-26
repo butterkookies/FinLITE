@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>FinLITE 18 Tables Data Dictionary</title>
+<title>FinLITE Data Dictionary (Production Live Schema)</title>
 <style>
   body {
     font-family: 'Times New Roman', Times, serif;
@@ -74,7 +74,7 @@
 </head>
 <body>
 
-<p class="intro">The data dictionary contains the collection and description of data in the database. It comprises the field name, field type, required, key, and domain</p>
+<p class="intro">The data dictionary contains the collection and description of data in the database. It comprises the field name, field type, required, key, and domain for all production entities conforming to Third Normal Form (3NF) and live PostgreSQL database specifications.</p>
 
 <!-- Table 1: Profiles -->
 <div class="table-title">Table 1: Profiles</div>
@@ -90,22 +90,29 @@
   </thead>
   <tbody>
     <tr><td>id</td><td>uuid</td><td class="center">YES</td><td class="center">PK</td><td>The unique ID of the profile record.</td></tr>
-    <tr><td>auth_user_id</td><td>uuid</td><td class="center">YES</td><td class="center">UK</td><td>The foreign ID referencing auth.users.</td></tr>
-    <tr><td>full_name</td><td>varchar(150)</td><td class="center">YES</td><td class="center"></td><td>The full name of the user.</td></tr>
-    <tr><td>email</td><td>varchar(255)</td><td class="center">YES</td><td class="center">UK</td><td>The email address of the user.</td></tr>
-    <tr><td>role</td><td>varchar(20)</td><td class="center">YES</td><td class="center"></td><td>The system role of the user.</td></tr>
-    <tr><td>status</td><td>varchar(20)</td><td class="center">YES</td><td class="center"></td><td>The account approval status.</td></tr>
-    <tr><td>can_record_inflows</td><td>boolean</td><td class="center">YES</td><td class="center"></td><td>Flag allowing inflow entry.</td></tr>
-    <tr><td>can_record_outflows</td><td>boolean</td><td class="center">YES</td><td class="center"></td><td>Flag allowing outflow entry.</td></tr>
-    <tr><td>can_edit_transactions</td><td>boolean</td><td class="center">YES</td><td class="center"></td><td>Flag allowing transaction edits.</td></tr>
-    <tr><td>can_audit_transactions</td><td>boolean</td><td class="center">YES</td><td class="center"></td><td>Flag allowing transaction audits.</td></tr>
-    <tr><td>can_manage_debts</td><td>boolean</td><td class="center">YES</td><td class="center"></td><td>Flag allowing debt management.</td></tr>
-    <tr><td>can_manage_advances</td><td>boolean</td><td class="center">YES</td><td class="center"></td><td>Flag allowing advance management.</td></tr>
-    <tr><td>can_reconcile_cash</td><td>boolean</td><td class="center">YES</td><td class="center"></td><td>Flag allowing cash reconciliation.</td></tr>
-    <tr><td>can_generate_reports</td><td>boolean</td><td class="center">YES</td><td class="center"></td><td>Flag allowing report generation.</td></tr>
-    <tr><td>avatar_url</td><td>text</td><td class="center">NO</td><td class="center"></td><td>The profile image URL.</td></tr>
-    <tr><td>created_at</td><td>timestamptz</td><td class="center">YES</td><td class="center"></td><td>The date and time registered.</td></tr>
-    <tr><td>updated_at</td><td>timestamptz</td><td class="center">YES</td><td class="center"></td><td>The date and time last modified.</td></tr>
+    <tr><td>auth_user_id</td><td>uuid</td><td class="center">NO</td><td class="center">UK</td><td>The foreign ID referencing auth.users in Supabase.</td></tr>
+    <tr><td>full_name</td><td>text</td><td class="center">YES</td><td class="center"></td><td>The full display name of the user.</td></tr>
+    <tr><td>email</td><td>text</td><td class="center">YES</td><td class="center">UK</td><td>The verified email address of the user.</td></tr>
+    <tr><td>role</td><td>user_role</td><td class="center">YES</td><td class="center"></td><td>The system role of the user ('admin', 'treasurer', 'auditor', 'adviser', 'member').</td></tr>
+    <tr><td>avatar_url</td><td>text</td><td class="center">NO</td><td class="center"></td><td>The profile photo or Google avatar URL.</td></tr>
+    <tr><td>created_at</td><td>timestamptz</td><td class="center">YES</td><td class="center"></td><td>The date and time the profile was created.</td></tr>
+    <tr><td>updated_at</td><td>timestamptz</td><td class="center">YES</td><td class="center"></td><td>The date and time the profile was last modified.</td></tr>
+    <tr><td>first_name</td><td>text</td><td class="center">NO</td><td class="center"></td><td>The given / first name of the user.</td></tr>
+    <tr><td>last_name</td><td>text</td><td class="center">NO</td><td class="center"></td><td>The family / last name of the user.</td></tr>
+    <tr><td>contact_number</td><td>text</td><td class="center">NO</td><td class="center"></td><td>The primary contact telephone or mobile number.</td></tr>
+    <tr><td>auth_provider</td><td>text</td><td class="center">YES</td><td class="center"></td><td>The primary authentication provider ('email' or 'google').</td></tr>
+    <tr><td>status</td><td>text</td><td class="center">YES</td><td class="center"></td><td>The account approval status ('pending', 'approved', 'rejected', 'suspended').</td></tr>
+    <tr><td>approved_by</td><td>uuid</td><td class="center">NO</td><td class="center">FK</td><td>The administrator user ID who reviewed and approved the profile.</td></tr>
+    <tr><td>approved_at</td><td>timestamptz</td><td class="center">NO</td><td class="center"></td><td>The date and time the user account was approved.</td></tr>
+    <tr><td>permissions</td><td>jsonb</td><td class="center">NO</td><td class="center"></td><td>Granular JSON dictionary of custom feature overrides.</td></tr>
+    <tr><td>can_record_inflows</td><td>boolean</td><td class="center">YES</td><td class="center"></td><td>Flag allowing inflow cash recording permissions.</td></tr>
+    <tr><td>can_record_outflows</td><td>boolean</td><td class="center">YES</td><td class="center"></td><td>Flag allowing outflow cash disbursement permissions.</td></tr>
+    <tr><td>can_edit_transactions</td><td>boolean</td><td class="center">YES</td><td class="center"></td><td>Flag allowing modification of existing transactions.</td></tr>
+    <tr><td>can_audit_transactions</td><td>boolean</td><td class="center">YES</td><td class="center"></td><td>Flag allowing transaction audit review and flagging.</td></tr>
+    <tr><td>can_manage_debts</td><td>boolean</td><td class="center">YES</td><td class="center"></td><td>Flag allowing debt and receivable management.</td></tr>
+    <tr><td>can_manage_advances</td><td>boolean</td><td class="center">YES</td><td class="center"></td><td>Flag allowing out-of-pocket advance management.</td></tr>
+    <tr><td>can_reconcile_cash</td><td>boolean</td><td class="center">YES</td><td class="center"></td><td>Flag allowing physical cashbox reconciliation.</td></tr>
+    <tr><td>can_generate_reports</td><td>boolean</td><td class="center">YES</td><td class="center"></td><td>Flag allowing financial statement and report generation.</td></tr>
   </tbody>
 </table>
 
@@ -122,21 +129,28 @@
     </tr>
   </thead>
   <tbody>
-    <tr><td>id</td><td>uuid</td><td class="center">YES</td><td class="center">PK</td><td>The unique ID of the request.</td></tr>
-    <tr><td>first_name</td><td>varchar(100)</td><td class="center">YES</td><td class="center"></td><td>The first name of the applicant.</td></tr>
-    <tr><td>last_name</td><td>varchar(100)</td><td class="center">YES</td><td class="center"></td><td>The last name of the applicant.</td></tr>
-    <tr><td>email</td><td>varchar(255)</td><td class="center">YES</td><td class="center">UK</td><td>The email address of the applicant.</td></tr>
-    <tr><td>contact_number</td><td>varchar(20)</td><td class="center">NO</td><td class="center"></td><td>The contact number of the applicant.</td></tr>
-    <tr><td>auth_provider</td><td>varchar(20)</td><td class="center">YES</td><td class="center"></td><td>The sign-in method ('email' or 'google').</td></tr>
-    <tr><td>google_id</td><td>varchar(100)</td><td class="center">NO</td><td class="center"></td><td>The Google subject identifier.</td></tr>
-    <tr><td>avatar_url</td><td>text</td><td class="center">NO</td><td class="center"></td><td>The avatar photo URL.</td></tr>
-    <tr><td>status</td><td>varchar(20)</td><td class="center">YES</td><td class="center"></td><td>The approval status ('pending', 'approved', 'rejected').</td></tr>
-    <tr><td>rejection_reason</td><td>text</td><td class="center">NO</td><td class="center"></td><td>The reason for application rejection.</td></tr>
-    <tr><td>requested_role</td><td>varchar(20)</td><td class="center">YES</td><td class="center"></td><td>The requested user role.</td></tr>
-    <tr><td>reviewed_by</td><td>uuid</td><td class="center">NO</td><td class="center">FK</td><td>The ID of the reviewing adviser.</td></tr>
-    <tr><td>reviewed_at</td><td>timestamptz</td><td class="center">NO</td><td class="center"></td><td>The date and time reviewed.</td></tr>
-    <tr><td>created_at</td><td>timestamptz</td><td class="center">YES</td><td class="center"></td><td>The date and time submitted.</td></tr>
-    <tr><td>updated_at</td><td>timestamptz</td><td class="center">YES</td><td class="center"></td><td>The date and time last modified.</td></tr>
+    <tr><td>id</td><td>uuid</td><td class="center">YES</td><td class="center">PK</td><td>The unique ID of the registration request.</td></tr>
+    <tr><td>first_name</td><td>text</td><td class="center">YES</td><td class="center"></td><td>The first name of the applicant.</td></tr>
+    <tr><td>last_name</td><td>text</td><td class="center">YES</td><td class="center"></td><td>The last name of the applicant.</td></tr>
+    <tr><td>username</td><td>text</td><td class="center">YES</td><td class="center">UK</td><td>The unique username identifier of the applicant.</td></tr>
+    <tr><td>email</td><td>text</td><td class="center">YES</td><td class="center">UK</td><td>The email address of the applicant.</td></tr>
+    <tr><td>contact_number</td><td>text</td><td class="center">NO</td><td class="center"></td><td>The contact telephone or mobile number of the applicant.</td></tr>
+    <tr><td>auth_provider</td><td>text</td><td class="center">YES</td><td class="center"></td><td>The initial sign-in method ('email' or 'google').</td></tr>
+    <tr><td>google_id</td><td>text</td><td class="center">NO</td><td class="center"></td><td>The Google subject identifier if authenticating via OAuth.</td></tr>
+    <tr><td>avatar_url</td><td>text</td><td class="center">NO</td><td class="center"></td><td>The applicant avatar image URL.</td></tr>
+    <tr><td>status</td><td>text</td><td class="center">YES</td><td class="center"></td><td>The review status ('pending', 'approved', 'rejected').</td></tr>
+    <tr><td>rejection_reason</td><td>text</td><td class="center">NO</td><td class="center"></td><td>Reason notes explaining application rejection if applicable.</td></tr>
+    <tr><td>requested_role</td><td>user_role</td><td class="center">YES</td><td class="center"></td><td>The requested organization role ('treasurer', 'auditor', 'member', etc.).</td></tr>
+    <tr><td>reviewed_by</td><td>uuid</td><td class="center">NO</td><td class="center">FK</td><td>The user ID of the reviewing administrator or adviser.</td></tr>
+    <tr><td>reviewed_at</td><td>timestamptz</td><td class="center">NO</td><td class="center"></td><td>The date and time the request was reviewed.</td></tr>
+    <tr><td>created_at</td><td>timestamptz</td><td class="center">YES</td><td class="center"></td><td>The date and time the request was submitted.</td></tr>
+    <tr><td>updated_at</td><td>timestamptz</td><td class="center">YES</td><td class="center"></td><td>The date and time the request was last updated.</td></tr>
+    <tr><td>approved_profile_id</td><td>uuid</td><td class="center">NO</td><td class="center">FK</td><td>The profile ID generated upon application approval.</td></tr>
+    <tr><td>email_verified_at</td><td>timestamptz</td><td class="center">NO</td><td class="center"></td><td>The date and time the email was verified.</td></tr>
+    <tr><td>permissions</td><td>jsonb</td><td class="center">NO</td><td class="center"></td><td>Granular JSON permissions assigned upon approval.</td></tr>
+    <tr><td>email_verified</td><td>boolean</td><td class="center">YES</td><td class="center"></td><td>Flag indicating if email ownership was verified.</td></tr>
+    <tr><td>verification_code</td><td>text</td><td class="center">NO</td><td class="center"></td><td>One-time registration email verification code.</td></tr>
+    <tr><td>verification_expires_at</td><td>timestamptz</td><td class="center">NO</td><td class="center"></td><td>Expiration timestamp for the registration verification code.</td></tr>
   </tbody>
 </table>
 
@@ -155,10 +169,10 @@
   <tbody>
     <tr><td>auth_user_id</td><td>uuid</td><td class="center">YES</td><td class="center">PK</td><td>The user ID referencing auth.users.</td></tr>
     <tr><td>password_enroll_until</td><td>timestamptz</td><td class="center">NO</td><td class="center"></td><td>Expiration timestamp for setting password.</td></tr>
-    <tr><td>google_link_until</td><td>timestamptz</td><td class="center">NO</td><td class="center"></td><td>Expiration timestamp for linking Google.</td></tr>
-    <tr><td>password_set_at</td><td>timestamptz</td><td class="center">NO</td><td class="center"></td><td>The date and time password was set.</td></tr>
-    <tr><td>google_linked_at</td><td>timestamptz</td><td class="center">NO</td><td class="center"></td><td>The date and time Google was linked.</td></tr>
-    <tr><td>updated_at</td><td>timestamptz</td><td class="center">YES</td><td class="center"></td><td>The date and time last updated.</td></tr>
+    <tr><td>google_link_until</td><td>timestamptz</td><td class="center">NO</td><td class="center"></td><td>Expiration timestamp for linking Google account.</td></tr>
+    <tr><td>password_set_at</td><td>timestamptz</td><td class="center">NO</td><td class="center"></td><td>The date and time password was set or enrolled.</td></tr>
+    <tr><td>google_linked_at</td><td>timestamptz</td><td class="center">NO</td><td class="center"></td><td>The date and time Google identity was connected.</td></tr>
+    <tr><td>updated_at</td><td>timestamptz</td><td class="center">YES</td><td class="center"></td><td>The date and time the security state was last updated.</td></tr>
   </tbody>
 </table>
 
@@ -176,12 +190,12 @@
   </thead>
   <tbody>
     <tr><td>id</td><td>uuid</td><td class="center">YES</td><td class="center">PK</td><td>The unique ID of the OTP record.</td></tr>
-    <tr><td>email</td><td>varchar(255)</td><td class="center">YES</td><td class="center"></td><td>The email address receiving the OTP.</td></tr>
-    <tr><td>code</td><td>varchar(6)</td><td class="center">YES</td><td class="center"></td><td>The 6-digit verification code.</td></tr>
-    <tr><td>purpose</td><td>varchar(30)</td><td class="center">YES</td><td class="center"></td><td>The purpose ('registration' or 'password_reset').</td></tr>
-    <tr><td>expires_at</td><td>timestamptz</td><td class="center">YES</td><td class="center"></td><td>The expiration date and time.</td></tr>
-    <tr><td>used</td><td>boolean</td><td class="center">YES</td><td class="center"></td><td>Flag indicating if code was used.</td></tr>
-    <tr><td>created_at</td><td>timestamptz</td><td class="center">YES</td><td class="center"></td><td>The date and time code was created.</td></tr>
+    <tr><td>email</td><td>text</td><td class="center">YES</td><td class="center"></td><td>The email address receiving the OTP.</td></tr>
+    <tr><td>code</td><td>text</td><td class="center">YES</td><td class="center"></td><td>The 6-digit numeric verification OTP code.</td></tr>
+    <tr><td>purpose</td><td>text</td><td class="center">YES</td><td class="center"></td><td>The purpose of the OTP ('registration' or 'password_reset').</td></tr>
+    <tr><td>expires_at</td><td>timestamptz</td><td class="center">YES</td><td class="center"></td><td>The expiration date and time of the OTP.</td></tr>
+    <tr><td>used</td><td>boolean</td><td class="center">YES</td><td class="center"></td><td>Flag indicating if the OTP code has been redeemed.</td></tr>
+    <tr><td>created_at</td><td>timestamptz</td><td class="center">YES</td><td class="center"></td><td>The date and time the OTP code was generated.</td></tr>
   </tbody>
 </table>
 
@@ -198,13 +212,14 @@
     </tr>
   </thead>
   <tbody>
-    <tr><td>id</td><td>uuid</td><td class="center">YES</td><td class="center">PK</td><td>The unique ID of the semester record.</td></tr>
-    <tr><td>academic_year</td><td>varchar(20)</td><td class="center">YES</td><td class="center"></td><td>The academic school year.</td></tr>
-    <tr><td>semester</td><td>varchar(20)</td><td class="center">YES</td><td class="center"></td><td>The semester term name.</td></tr>
-    <tr><td>label</td><td>varchar(100)</td><td class="center">YES</td><td class="center"></td><td>The display label of the semester.</td></tr>
-    <tr><td>starting_cash_on_hand</td><td>decimal(12,2)</td><td class="center">YES</td><td class="center"></td><td>The opening cashbox balance.</td></tr>
-    <tr><td>is_active</td><td>boolean</td><td class="center">YES</td><td class="center"></td><td>Flag indicating the active semester.</td></tr>
-    <tr><td>created_at</td><td>timestamptz</td><td class="center">YES</td><td class="center"></td><td>The date and time created.</td></tr>
+    <tr><td>id</td><td>uuid</td><td class="center">YES</td><td class="center">PK</td><td>The unique ID of the semester term record.</td></tr>
+    <tr><td>academic_year</td><td>text</td><td class="center">YES</td><td class="center">UK</td><td>The academic school year (e.g., '2026-2027').</td></tr>
+    <tr><td>semester</td><td>text</td><td class="center">YES</td><td class="center">UK</td><td>The semester term name (e.g., '1st Semester', '2nd Semester').</td></tr>
+    <tr><td>label</td><td>text</td><td class="center">YES</td><td class="center"></td><td>The descriptive display label of the academic term.</td></tr>
+    <tr><td>starting_cash_on_hand</td><td>decimal(12,2)</td><td class="center">YES</td><td class="center"></td><td>The opening physical cashbox float balance in pesos.</td></tr>
+    <tr><td>starting_gcash_balance</td><td>decimal(12,2)</td><td class="center">YES</td><td class="center"></td><td>The opening GCash digital wallet balance in pesos.</td></tr>
+    <tr><td>is_active</td><td>boolean</td><td class="center">YES</td><td class="center"></td><td>Flag designating the currently active fiscal term.</td></tr>
+    <tr><td>created_at</td><td>timestamptz</td><td class="center">YES</td><td class="center"></td><td>The date and time the semester term was created.</td></tr>
   </tbody>
 </table>
 
@@ -221,17 +236,18 @@
     </tr>
   </thead>
   <tbody>
-    <tr><td>id</td><td>uuid</td><td class="center">YES</td><td class="center">PK</td><td>The unique ID of the signatory record.</td></tr>
-    <tr><td>academic_year</td><td>varchar(20)</td><td class="center">YES</td><td class="center"></td><td>The academic school year.</td></tr>
-    <tr><td>semester</td><td>varchar(20)</td><td class="center">YES</td><td class="center"></td><td>The semester term name.</td></tr>
-    <tr><td>role_key</td><td>varchar(50)</td><td class="center">YES</td><td class="center"></td><td>The role identifier of the signatory.</td></tr>
-    <tr><td>name</td><td>varchar(150)</td><td class="center">YES</td><td class="center"></td><td>The full name of the signatory.</td></tr>
-    <tr><td>position_title</td><td>varchar(150)</td><td class="center">YES</td><td class="center"></td><td>The official institutional title.</td></tr>
-    <tr><td>category</td><td>varchar(20)</td><td class="center">YES</td><td class="center"></td><td>The signatory tier ('OFFICER', 'ADVISER', 'ADMIN').</td></tr>
-    <tr><td>sort_order</td><td>int</td><td class="center">YES</td><td class="center"></td><td>The display order on reports.</td></tr>
-    <tr><td>is_active</td><td>boolean</td><td class="center">YES</td><td class="center"></td><td>Flag indicating if signatory is active.</td></tr>
-    <tr><td>created_at</td><td>timestamptz</td><td class="center">YES</td><td class="center"></td><td>The date and time created.</td></tr>
-    <tr><td>updated_at</td><td>timestamptz</td><td class="center">YES</td><td class="center"></td><td>The date and time last updated.</td></tr>
+    <tr><td>id</td><td>uuid</td><td class="center">YES</td><td class="center">PK</td><td>The unique ID of the semester signatory record.</td></tr>
+    <tr><td>academic_year</td><td>text</td><td class="center">YES</td><td class="center">UK</td><td>The academic school year for the signatory group.</td></tr>
+    <tr><td>semester</td><td>text</td><td class="center">YES</td><td class="center">UK</td><td>The semester term for the signatory group.</td></tr>
+    <tr><td>role_key</td><td>text</td><td class="center">YES</td><td class="center">UK</td><td>The standardized role key (e.g., 'treasurer', 'president', 'adviser').</td></tr>
+    <tr><td>name</td><td>text</td><td class="center">YES</td><td class="center"></td><td>The full official name of the designated signatory officer.</td></tr>
+    <tr><td>position_title</td><td>text</td><td class="center">YES</td><td class="center"></td><td>The official title printed on reports (e.g., 'LITE Treasurer').</td></tr>
+    <tr><td>category</td><td>text</td><td class="center">YES</td><td class="center"></td><td>Signatory level ('OFFICER', 'ADMINISTRATION', 'FACULTY').</td></tr>
+    <tr><td>sort_order</td><td>int</td><td class="center">YES</td><td class="center"></td><td>Display sorting sequence in generated financial reports.</td></tr>
+    <tr><td>is_active</td><td>boolean</td><td class="center">YES</td><td class="center"></td><td>Flag indicating if the signatory is currently active.</td></tr>
+    <tr><td>created_at</td><td>timestamptz</td><td class="center">YES</td><td class="center"></td><td>The date and time the signatory was created.</td></tr>
+    <tr><td>updated_at</td><td>timestamptz</td><td class="center">YES</td><td class="center"></td><td>The date and time the signatory was last modified.</td></tr>
+    <tr><td>semester_id</td><td>uuid</td><td class="center">NO</td><td class="center">FK</td><td>The semester ID referencing Semesters.</td></tr>
   </tbody>
 </table>
 
@@ -249,10 +265,10 @@
   </thead>
   <tbody>
     <tr><td>id</td><td>uuid</td><td class="center">YES</td><td class="center">PK</td><td>The unique ID of the category record.</td></tr>
-    <tr><td>name</td><td>varchar(100)</td><td class="center">YES</td><td class="center"></td><td>The name of the category.</td></tr>
-    <tr><td>type</td><td>varchar(10)</td><td class="center">YES</td><td class="center"></td><td>The category type ('INFLOW' or 'OUTFLOW').</td></tr>
-    <tr><td>description</td><td>text</td><td class="center">NO</td><td class="center"></td><td>The description of the category.</td></tr>
-    <tr><td>created_at</td><td>timestamptz</td><td class="center">YES</td><td class="center"></td><td>The date and time created.</td></tr>
+    <tr><td>name</td><td>text</td><td class="center">YES</td><td class="center"></td><td>The name of the revenue or expenditure category.</td></tr>
+    <tr><td>type</td><td>transaction_type</td><td class="center">YES</td><td class="center"></td><td>The category transaction classification ('INFLOW' or 'OUTFLOW').</td></tr>
+    <tr><td>description</td><td>text</td><td class="center">NO</td><td class="center"></td><td>Detailed description of allowable items in category.</td></tr>
+    <tr><td>created_at</td><td>timestamptz</td><td class="center">YES</td><td class="center"></td><td>The date and time the category was created.</td></tr>
   </tbody>
 </table>
 
@@ -270,24 +286,31 @@
   </thead>
   <tbody>
     <tr><td>id</td><td>uuid</td><td class="center">YES</td><td class="center">PK</td><td>The unique ID of the transaction record.</td></tr>
-    <tr><td>semester_id</td><td>uuid</td><td class="center">YES</td><td class="center">FK</td><td>The semester ID referencing Semesters.</td></tr>
-    <tr><td>title</td><td>varchar(255)</td><td class="center">YES</td><td class="center"></td><td>The title of the transaction.</td></tr>
-    <tr><td>description</td><td>text</td><td class="center">NO</td><td class="center"></td><td>The description of the transaction.</td></tr>
+    <tr><td>title</td><td>text</td><td class="center">YES</td><td class="center"></td><td>The title or summary of the financial transaction.</td></tr>
+    <tr><td>description</td><td>text</td><td class="center">NO</td><td class="center"></td><td>Detailed itemized description of the transaction.</td></tr>
     <tr><td>amount</td><td>decimal(12,2)</td><td class="center">YES</td><td class="center"></td><td>The monetary amount in pesos.</td></tr>
-    <tr><td>type</td><td>varchar(10)</td><td class="center">YES</td><td class="center"></td><td>The transaction type ('INFLOW' or 'OUTFLOW').</td></tr>
-    <tr><td>payment_method</td><td>varchar(20)</td><td class="center">YES</td><td class="center"></td><td>The payment method ('CASH').</td></tr>
-    <tr><td>category_id</td><td>uuid</td><td class="center">NO</td><td class="center">FK</td><td>The category ID referencing Categories.</td></tr>
-    <tr><td>logged_by</td><td>uuid</td><td class="center">NO</td><td class="center">FK</td><td>The user ID who encoded the entry.</td></tr>
-    <tr><td>transaction_date</td><td>date</td><td class="center">YES</td><td class="center"></td><td>The date of the transaction.</td></tr>
-    <tr><td>status</td><td>varchar(20)</td><td class="center">YES</td><td class="center"></td><td>The audit status ('PENDING', 'VERIFIED', 'REVISION_REQUIRED').</td></tr>
-    <tr><td>audited_by</td><td>uuid</td><td class="center">NO</td><td class="center">FK</td><td>The auditor ID who verified the entry.</td></tr>
-    <tr><td>audited_at</td><td>timestamptz</td><td class="center">NO</td><td class="center"></td><td>The date and time audited.</td></tr>
-    <tr><td>is_reimbursement</td><td>boolean</td><td class="center">YES</td><td class="center"></td><td>Flag indicating advance reimbursement.</td></tr>
-    <tr><td>payer_name</td><td>varchar(150)</td><td class="center">NO</td><td class="center"></td><td>The name of the payer.</td></tr>
-    <tr><td>claimant_name</td><td>varchar(150)</td><td class="center">NO</td><td class="center"></td><td>The name of the reimbursement claimant.</td></tr>
-    <tr><td>notes</td><td>text</td><td class="center">NO</td><td class="center"></td><td>Additional transaction notes.</td></tr>
-    <tr><td>created_at</td><td>timestamptz</td><td class="center">YES</td><td class="center"></td><td>The date and time created.</td></tr>
-    <tr><td>updated_at</td><td>timestamptz</td><td class="center">YES</td><td class="center"></td><td>The date and time last updated.</td></tr>
+    <tr><td>type</td><td>transaction_type</td><td class="center">YES</td><td class="center"></td><td>The flow direction ('INFLOW' or 'OUTFLOW').</td></tr>
+    <tr><td>payment_method</td><td>payment_method</td><td class="center">YES</td><td class="center"></td><td>The payment method used ('CASH' or 'GCASH').</td></tr>
+    <tr><td>category_id</td><td>uuid</td><td class="center">YES</td><td class="center">FK</td><td>The category ID referencing Categories.</td></tr>
+    <tr><td>logged_by</td><td>uuid</td><td class="center">NO</td><td class="center">FK</td><td>The user ID who originally entered the transaction.</td></tr>
+    <tr><td>transaction_date</td><td>date</td><td class="center">YES</td><td class="center"></td><td>The date the transaction took place.</td></tr>
+    <tr><td>receipt_notes</td><td>text</td><td class="center">NO</td><td class="center"></td><td>Additional annotations regarding attached physical receipts.</td></tr>
+    <tr><td>is_reimbursement</td><td>boolean</td><td class="center">YES</td><td class="center"></td><td>Flag indicating if outlay is subject to personal reimbursement.</td></tr>
+    <tr><td>reimbursement_recipient</td><td>text</td><td class="center">NO</td><td class="center"></td><td>Legacy recipient name for advance reimbursements.</td></tr>
+    <tr><td>status</td><td>transaction_status</td><td class="center">YES</td><td class="center"></td><td>Audit status ('PENDING_AUDIT', 'COMPLETED', 'FLAGGED').</td></tr>
+    <tr><td>event_name</td><td>text</td><td class="center">NO</td><td class="center"></td><td>The related student event or club project name.</td></tr>
+    <tr><td>created_at</td><td>timestamptz</td><td class="center">YES</td><td class="center"></td><td>The date and time the transaction was recorded.</td></tr>
+    <tr><td>updated_at</td><td>timestamptz</td><td class="center">YES</td><td class="center"></td><td>The date and time the transaction was last updated.</td></tr>
+    <tr><td>semester_id</td><td>uuid</td><td class="center">YES</td><td class="center">FK</td><td>The semester ID referencing Semesters.</td></tr>
+    <tr><td>audited_by</td><td>uuid</td><td class="center">NO</td><td class="center">FK</td><td>The auditor ID who verified or flagged the transaction.</td></tr>
+    <tr><td>audited_at</td><td>timestamptz</td><td class="center">NO</td><td class="center"></td><td>The date and time the audit was completed.</td></tr>
+    <tr><td>payer_name</td><td>varchar(150)</td><td class="center">NO</td><td class="center"></td><td>Name of the student or entity paying funds (for inflows).</td></tr>
+    <tr><td>claimant_name</td><td>varchar(150)</td><td class="center">NO</td><td class="center"></td><td>Authorized officer claiming reimbursement payout.</td></tr>
+    <tr><td>notes</td><td>text</td><td class="center">NO</td><td class="center"></td><td>Auditor remarks, revision directives, or general notes.</td></tr>
+    <tr><td>advanced_by_name</td><td>text</td><td class="center">NO</td><td class="center"></td><td>Original out-of-pocket payer name when claimed by proxy.</td></tr>
+    <tr><td>archived_at</td><td>timestamptz</td><td class="center">NO</td><td class="center"></td><td>Timestamp when the transaction was voided and archived.</td></tr>
+    <tr><td>archived_by</td><td>uuid</td><td class="center">NO</td><td class="center">FK</td><td>Officer ID who voided or archived the transaction.</td></tr>
+    <tr><td>void_reason</td><td>text</td><td class="center">NO</td><td class="center"></td><td>Auditor-compliant justification explaining why transaction was voided.</td></tr>
   </tbody>
 </table>
 
@@ -304,15 +327,18 @@
     </tr>
   </thead>
   <tbody>
-    <tr><td>id</td><td>uuid</td><td class="center">YES</td><td class="center">PK</td><td>The unique ID of the receipt record.</td></tr>
+    <tr><td>id</td><td>uuid</td><td class="center">YES</td><td class="center">PK</td><td>The unique ID of the receipt image record.</td></tr>
     <tr><td>transaction_id</td><td>uuid</td><td class="center">YES</td><td class="center">FK</td><td>The transaction ID referencing Transactions.</td></tr>
-    <tr><td>public_url</td><td>text</td><td class="center">YES</td><td class="center"></td><td>The public image URL of the receipt.</td></tr>
-    <tr><td>file_path</td><td>text</td><td class="center">NO</td><td class="center"></td><td>The file path in cloud storage.</td></tr>
-    <tr><td>file_name</td><td>varchar(255)</td><td class="center">NO</td><td class="center"></td><td>The original file name.</td></tr>
-    <tr><td>file_size</td><td>int</td><td class="center">NO</td><td class="center"></td><td>The file size in bytes.</td></tr>
-    <tr><td>mime_type</td><td>varchar(50)</td><td class="center">NO</td><td class="center"></td><td>The MIME type of the file.</td></tr>
-    <tr><td>sort_order</td><td>int</td><td class="center">YES</td><td class="center"></td><td>The display sequence number.</td></tr>
-    <tr><td>created_at</td><td>timestamptz</td><td class="center">YES</td><td class="center"></td><td>The date and time uploaded.</td></tr>
+    <tr><td>storage_path</td><td>text</td><td class="center">NO</td><td class="center"></td><td>Internal Supabase Storage bucket object path.</td></tr>
+    <tr><td>public_url</td><td>text</td><td class="center">YES</td><td class="center"></td><td>Public CDN or signed URL for viewing the receipt.</td></tr>
+    <tr><td>file_name</td><td>text</td><td class="center">NO</td><td class="center"></td><td>Original uploaded file name.</td></tr>
+    <tr><td>file_size_bytes</td><td>int</td><td class="center">NO</td><td class="center"></td><td>Exact attachment size in bytes.</td></tr>
+    <tr><td>mime_type</td><td>text</td><td class="center">NO</td><td class="center"></td><td>MIME content type ('image/jpeg', 'image/png', 'application/pdf').</td></tr>
+    <tr><td>sort_order</td><td>int</td><td class="center">YES</td><td class="center">UK</td><td>Display sequence order when multiple receipts are attached.</td></tr>
+    <tr><td>uploaded_by</td><td>uuid</td><td class="center">NO</td><td class="center">FK</td><td>Officer ID who uploaded the receipt image.</td></tr>
+    <tr><td>created_at</td><td>timestamptz</td><td class="center">YES</td><td class="center"></td><td>The date and time the receipt was uploaded.</td></tr>
+    <tr><td>file_path</td><td>text</td><td class="center">NO</td><td class="center"></td><td>Legacy file path string.</td></tr>
+    <tr><td>file_size</td><td>int</td><td class="center">NO</td><td class="center"></td><td>Legacy file size value in bytes.</td></tr>
   </tbody>
 </table>
 
@@ -331,10 +357,13 @@
   <tbody>
     <tr><td>id</td><td>uuid</td><td class="center">YES</td><td class="center">PK</td><td>The unique ID of the comment record.</td></tr>
     <tr><td>transaction_id</td><td>uuid</td><td class="center">YES</td><td class="center">FK</td><td>The transaction ID referencing Transactions.</td></tr>
-    <tr><td>author_id</td><td>uuid</td><td class="center">NO</td><td class="center">FK</td><td>The user ID of the comment author.</td></tr>
-    <tr><td>comment_text</td><td>text</td><td class="center">YES</td><td class="center"></td><td>The text content of the audit remark.</td></tr>
-    <tr><td>created_at</td><td>timestamptz</td><td class="center">YES</td><td class="center"></td><td>The date and time commented.</td></tr>
-    <tr><td>updated_at</td><td>timestamptz</td><td class="center">YES</td><td class="center"></td><td>The date and time last updated.</td></tr>
+    <tr><td>user_id</td><td>uuid</td><td class="center">YES</td><td class="center">FK</td><td>User ID of the commenter referencing Profiles.</td></tr>
+    <tr><td>comment</td><td>text</td><td class="center">YES</td><td class="center"></td><td>The body text of the auditor remarks or transaction comment.</td></tr>
+    <tr><td>created_at</td><td>timestamptz</td><td class="center">YES</td><td class="center"></td><td>The date and time the comment was posted.</td></tr>
+    <tr><td>updated_at</td><td>timestamptz</td><td class="center">YES</td><td class="center"></td><td>The date and time the comment was last modified.</td></tr>
+    <tr><td>author_id</td><td>uuid</td><td class="center">NO</td><td class="center">FK</td><td>Legacy author profile reference.</td></tr>
+    <tr><td>comment_text</td><td>text</td><td class="center">NO</td><td class="center"></td><td>Legacy comment text representation.</td></tr>
+    <tr><td>content</td><td>text</td><td class="center">NO</td><td class="center"></td><td>Synchronized comment content column for query backwards compatibility.</td></tr>
   </tbody>
 </table>
 
@@ -351,21 +380,22 @@
     </tr>
   </thead>
   <tbody>
-    <tr><td>id</td><td>uuid</td><td class="center">YES</td><td class="center">PK</td><td>The unique ID of the advance claim.</td></tr>
-    <tr><td>semester_id</td><td>uuid</td><td class="center">YES</td><td class="center">FK</td><td>The semester ID referencing Semesters.</td></tr>
-    <tr><td>claimant_name</td><td>varchar(150)</td><td class="center">YES</td><td class="center"></td><td>The name of the advance claimant.</td></tr>
-    <tr><td>claimant_contact</td><td>varchar(50)</td><td class="center">NO</td><td class="center"></td><td>The contact details of the claimant.</td></tr>
-    <tr><td>title</td><td>varchar(255)</td><td class="center">YES</td><td class="center"></td><td>The title of the advance claim.</td></tr>
+    <tr><td>id</td><td>uuid</td><td class="center">YES</td><td class="center">PK</td><td>The unique ID of the advance payable record.</td></tr>
+    <tr><td>semester_id</td><td>text</td><td class="center">YES</td><td class="center"></td><td>The semester term key or identifier.</td></tr>
+    <tr><td>claimant_name</td><td>text</td><td class="center">YES</td><td class="center"></td><td>Authorized officer claiming reimbursement payout.</td></tr>
+    <tr><td>claimant_contact</td><td>text</td><td class="center">NO</td><td class="center"></td><td>Contact telephone or mobile number of claimant.</td></tr>
+    <tr><td>title</td><td>text</td><td class="center">YES</td><td class="center"></td><td>Title or event description of the advance outlay.</td></tr>
     <tr><td>category_id</td><td>uuid</td><td class="center">NO</td><td class="center">FK</td><td>The category ID referencing Categories.</td></tr>
-    <tr><td>event_name</td><td>varchar(150)</td><td class="center">NO</td><td class="center"></td><td>The name of the associated event.</td></tr>
-    <tr><td>total_amount</td><td>decimal(12,2)</td><td class="center">YES</td><td class="center"></td><td>The total advanced amount in pesos.</td></tr>
-    <tr><td>amount_reimbursed</td><td>decimal(12,2)</td><td class="center">YES</td><td class="center"></td><td>The total reimbursed amount.</td></tr>
-    <tr><td>status</td><td>varchar(25)</td><td class="center">YES</td><td class="center"></td><td>The settlement status ('UNPAID', 'PARTIALLY_REIMBURSED', 'SETTLED', 'CANCELLED').</td></tr>
-    <tr><td>advance_date</td><td>date</td><td class="center">YES</td><td class="center"></td><td>The date of the advance.</td></tr>
-    <tr><td>notes</td><td>text</td><td class="center">NO</td><td class="center"></td><td>Additional notes for the claim.</td></tr>
-    <tr><td>created_by</td><td>uuid</td><td class="center">NO</td><td class="center">FK</td><td>The user ID who filed the claim.</td></tr>
-    <tr><td>created_at</td><td>timestamptz</td><td class="center">YES</td><td class="center"></td><td>The date and time created.</td></tr>
-    <tr><td>updated_at</td><td>timestamptz</td><td class="center">YES</td><td class="center"></td><td>The date and time last updated.</td></tr>
+    <tr><td>event_name</td><td>text</td><td class="center">NO</td><td class="center"></td><td>The related club event or project name.</td></tr>
+    <tr><td>total_amount</td><td>decimal(12,2)</td><td class="center">YES</td><td class="center"></td><td>The total advance obligation in pesos.</td></tr>
+    <tr><td>amount_reimbursed</td><td>decimal(12,2)</td><td class="center">YES</td><td class="center"></td><td>Total cumulative amount reimbursed to date.</td></tr>
+    <tr><td>status</td><td>advance_status</td><td class="center">YES</td><td class="center"></td><td>Settlement status ('UNPAID', 'PARTIALLY_REIMBURSED', 'SETTLED', 'CANCELLED').</td></tr>
+    <tr><td>advance_date</td><td>date</td><td class="center">YES</td><td class="center"></td><td>Date the out-of-pocket expense was incurred.</td></tr>
+    <tr><td>notes</td><td>text</td><td class="center">NO</td><td class="center"></td><td>Additional reimbursement terms or notes.</td></tr>
+    <tr><td>created_by</td><td>uuid</td><td class="center">NO</td><td class="center">FK</td><td>The user ID who recorded the advance payable.</td></tr>
+    <tr><td>created_at</td><td>timestamptz</td><td class="center">YES</td><td class="center"></td><td>The date and time the advance was recorded.</td></tr>
+    <tr><td>updated_at</td><td>timestamptz</td><td class="center">YES</td><td class="center"></td><td>The date and time the advance was last updated.</td></tr>
+    <tr><td>advanced_by_name</td><td>text</td><td class="center">NO</td><td class="center"></td><td>Original out-of-pocket payer name when claimed by proxy.</td></tr>
   </tbody>
 </table>
 
@@ -382,15 +412,15 @@
     </tr>
   </thead>
   <tbody>
-    <tr><td>id</td><td>uuid</td><td class="center">YES</td><td class="center">PK</td><td>The unique ID of the disbursement record.</td></tr>
-    <tr><td>advance_id</td><td>uuid</td><td class="center">YES</td><td class="center">FK</td><td>The advance ID referencing Advances_Payable.</td></tr>
-    <tr><td>transaction_id</td><td>uuid</td><td class="center">NO</td><td class="center">FK</td><td>The transaction ID referencing Transactions.</td></tr>
-    <tr><td>amount</td><td>decimal(12,2)</td><td class="center">YES</td><td class="center"></td><td>The disbursement amount in pesos.</td></tr>
-    <tr><td>payment_method</td><td>varchar(20)</td><td class="center">YES</td><td class="center"></td><td>The payment method ('CASH').</td></tr>
-    <tr><td>disbursement_date</td><td>timestamptz</td><td class="center">YES</td><td class="center"></td><td>The date and time disbursed.</td></tr>
-    <tr><td>disbursed_by</td><td>uuid</td><td class="center">NO</td><td class="center">FK</td><td>The user ID who released the cash.</td></tr>
-    <tr><td>notes</td><td>text</td><td class="center">NO</td><td class="center"></td><td>Additional disbursement notes.</td></tr>
-    <tr><td>created_at</td><td>timestamptz</td><td class="center">YES</td><td class="center"></td><td>The date and time created.</td></tr>
+    <tr><td>id</td><td>uuid</td><td class="center">YES</td><td class="center">PK</td><td>The unique ID of the disbursement payout record.</td></tr>
+    <tr><td>advance_id</td><td>uuid</td><td class="center">YES</td><td class="center">FK</td><td>The advance payable ID referencing Advances_Payable.</td></tr>
+    <tr><td>transaction_id</td><td>uuid</td><td class="center">NO</td><td class="center">FK</td><td>Ledger transaction ID referencing Transactions.</td></tr>
+    <tr><td>amount</td><td>decimal(12,2)</td><td class="center">YES</td><td class="center"></td><td>Disbursed payout amount in pesos.</td></tr>
+    <tr><td>payment_method</td><td>payment_method</td><td class="center">YES</td><td class="center"></td><td>Disbursement payment method ('CASH' or 'GCASH').</td></tr>
+    <tr><td>disbursement_date</td><td>timestamptz</td><td class="center">YES</td><td class="center"></td><td>Date and time the reimbursement cash was handed over.</td></tr>
+    <tr><td>disbursed_by</td><td>uuid</td><td class="center">NO</td><td class="center">FK</td><td>Officer ID who disbursed the reimbursement funds.</td></tr>
+    <tr><td>notes</td><td>text</td><td class="center">NO</td><td class="center"></td><td>Disbursement receipt notes or claimant acknowledgments.</td></tr>
+    <tr><td>created_at</td><td>timestamptz</td><td class="center">YES</td><td class="center"></td><td>The date and time the disbursement was logged.</td></tr>
   </tbody>
 </table>
 
@@ -407,11 +437,11 @@
     </tr>
   </thead>
   <tbody>
-    <tr><td>id</td><td>uuid</td><td class="center">YES</td><td class="center">PK</td><td>The unique ID of the receipt record.</td></tr>
+    <tr><td>id</td><td>uuid</td><td class="center">YES</td><td class="center">PK</td><td>The unique ID of the advance receipt record.</td></tr>
     <tr><td>advance_id</td><td>uuid</td><td class="center">YES</td><td class="center">FK</td><td>The advance ID referencing Advances_Payable.</td></tr>
-    <tr><td>public_url</td><td>text</td><td class="center">YES</td><td class="center"></td><td>The public image URL of the receipt.</td></tr>
-    <tr><td>sort_order</td><td>int</td><td class="center">YES</td><td class="center"></td><td>The display sequence number.</td></tr>
-    <tr><td>created_at</td><td>timestamptz</td><td class="center">YES</td><td class="center"></td><td>The date and time uploaded.</td></tr>
+    <tr><td>public_url</td><td>text</td><td class="center">YES</td><td class="center"></td><td>Public storage URL of the reimbursement receipt.</td></tr>
+    <tr><td>sort_order</td><td>int</td><td class="center">YES</td><td class="center"></td><td>Display sequence number.</td></tr>
+    <tr><td>created_at</td><td>timestamptz</td><td class="center">YES</td><td class="center"></td><td>The date and time the receipt was uploaded.</td></tr>
   </tbody>
 </table>
 
@@ -429,18 +459,18 @@
   </thead>
   <tbody>
     <tr><td>id</td><td>uuid</td><td class="center">YES</td><td class="center">PK</td><td>The unique ID of the receivable record.</td></tr>
-    <tr><td>semester_id</td><td>uuid</td><td class="center">YES</td><td class="center">FK</td><td>The semester ID referencing Semesters.</td></tr>
-    <tr><td>debtor_name</td><td>varchar(150)</td><td class="center">YES</td><td class="center"></td><td>The full name of the debtor.</td></tr>
-    <tr><td>debtor_contact</td><td>varchar(50)</td><td class="center">NO</td><td class="center"></td><td>The contact details of the debtor.</td></tr>
-    <tr><td>title</td><td>varchar(255)</td><td class="center">YES</td><td class="center"></td><td>The description of items ordered.</td></tr>
-    <tr><td>total_amount</td><td>decimal(12,2)</td><td class="center">YES</td><td class="center"></td><td>The total debt amount in pesos.</td></tr>
-    <tr><td>amount_paid</td><td>decimal(12,2)</td><td class="center">YES</td><td class="center"></td><td>The total amount paid to date.</td></tr>
-    <tr><td>status</td><td>varchar(20)</td><td class="center">YES</td><td class="center"></td><td>The settlement status ('UNPAID', 'PARTIALLY_PAID', 'SETTLED', 'CANCELLED').</td></tr>
-    <tr><td>due_date</td><td>date</td><td class="center">NO</td><td class="center"></td><td>The due date for payment.</td></tr>
-    <tr><td>notes</td><td>text</td><td class="center">NO</td><td class="center"></td><td>Additional receivable notes.</td></tr>
-    <tr><td>created_by</td><td>uuid</td><td class="center">NO</td><td class="center">FK</td><td>The user ID who logged the order.</td></tr>
-    <tr><td>created_at</td><td>timestamptz</td><td class="center">YES</td><td class="center"></td><td>The date and time created.</td></tr>
-    <tr><td>updated_at</td><td>timestamptz</td><td class="center">YES</td><td class="center"></td><td>The date and time last updated.</td></tr>
+    <tr><td>semester_id</td><td>text</td><td class="center">YES</td><td class="center"></td><td>The semester term key or identifier.</td></tr>
+    <tr><td>debtor_name</td><td>text</td><td class="center">YES</td><td class="center"></td><td>Full name of the debtor (e.g., student buyer).</td></tr>
+    <tr><td>debtor_contact</td><td>text</td><td class="center">NO</td><td class="center"></td><td>Contact telephone or mobile number of debtor.</td></tr>
+    <tr><td>title</td><td>text</td><td class="center">YES</td><td class="center"></td><td>Description of items ordered or merchandise sold.</td></tr>
+    <tr><td>total_amount</td><td>decimal(12,2)</td><td class="center">YES</td><td class="center"></td><td>Total receivable amount in pesos.</td></tr>
+    <tr><td>amount_paid</td><td>decimal(12,2)</td><td class="center">YES</td><td class="center"></td><td>Total amount paid to date in pesos.</td></tr>
+    <tr><td>status</td><td>debt_status</td><td class="center">YES</td><td class="center"></td><td>Settlement status ('UNPAID', 'PARTIALLY_PAID', 'SETTLED', 'CANCELLED').</td></tr>
+    <tr><td>due_date</td><td>date</td><td class="center">NO</td><td class="center"></td><td>Agreed due date for debt settlement.</td></tr>
+    <tr><td>notes</td><td>text</td><td class="center">NO</td><td class="center"></td><td>Additional receivable notes or payment terms.</td></tr>
+    <tr><td>created_by</td><td>uuid</td><td class="center">NO</td><td class="center">FK</td><td>User ID who recorded the receivable.</td></tr>
+    <tr><td>created_at</td><td>timestamptz</td><td class="center">YES</td><td class="center"></td><td>The date and time the receivable was recorded.</td></tr>
+    <tr><td>updated_at</td><td>timestamptz</td><td class="center">YES</td><td class="center"></td><td>The date and time the receivable was last updated.</td></tr>
   </tbody>
 </table>
 
@@ -457,15 +487,15 @@
     </tr>
   </thead>
   <tbody>
-    <tr><td>id</td><td>uuid</td><td class="center">YES</td><td class="center">PK</td><td>The unique ID of the payment record.</td></tr>
+    <tr><td>id</td><td>uuid</td><td class="center">YES</td><td class="center">PK</td><td>The unique ID of the debt payment record.</td></tr>
     <tr><td>debt_id</td><td>uuid</td><td class="center">YES</td><td class="center">FK</td><td>The debt ID referencing Debts_Receivables.</td></tr>
-    <tr><td>transaction_id</td><td>uuid</td><td class="center">NO</td><td class="center">FK</td><td>The transaction ID referencing Transactions.</td></tr>
-    <tr><td>amount</td><td>decimal(12,2)</td><td class="center">YES</td><td class="center"></td><td>The payment amount in pesos.</td></tr>
-    <tr><td>payment_method</td><td>varchar(20)</td><td class="center">YES</td><td class="center"></td><td>The payment method ('CASH').</td></tr>
-    <tr><td>payment_date</td><td>timestamptz</td><td class="center">YES</td><td class="center"></td><td>The date and time paid.</td></tr>
-    <tr><td>received_by</td><td>uuid</td><td class="center">NO</td><td class="center">FK</td><td>The user ID who received the cash.</td></tr>
-    <tr><td>notes</td><td>text</td><td class="center">NO</td><td class="center"></td><td>Additional payment notes.</td></tr>
-    <tr><td>created_at</td><td>timestamptz</td><td class="center">YES</td><td class="center"></td><td>The date and time created.</td></tr>
+    <tr><td>transaction_id</td><td>uuid</td><td class="center">NO</td><td class="center">FK</td><td>Ledger transaction ID referencing Transactions.</td></tr>
+    <tr><td>amount</td><td>decimal(12,2)</td><td class="center">YES</td><td class="center"></td><td>Payment installment amount in pesos.</td></tr>
+    <tr><td>payment_method</td><td>payment_method</td><td class="center">YES</td><td class="center"></td><td>Payment method ('CASH' or 'GCASH').</td></tr>
+    <tr><td>payment_date</td><td>timestamptz</td><td class="center">YES</td><td class="center"></td><td>Date and time payment was received.</td></tr>
+    <tr><td>received_by</td><td>uuid</td><td class="center">NO</td><td class="center">FK</td><td>User ID who collected and received the cash.</td></tr>
+    <tr><td>notes</td><td>text</td><td class="center">NO</td><td class="center"></td><td>Collection receipt notes or acknowledgment.</td></tr>
+    <tr><td>created_at</td><td>timestamptz</td><td class="center">YES</td><td class="center"></td><td>The date and time the payment was logged.</td></tr>
   </tbody>
 </table>
 
@@ -482,14 +512,14 @@
     </tr>
   </thead>
   <tbody>
-    <tr><td>id</td><td>uuid</td><td class="center">YES</td><td class="center">PK</td><td>The unique ID of the denomination.</td></tr>
-    <tr><td>code</td><td>varchar(30)</td><td class="center">YES</td><td class="center">UK</td><td>The unique denomination code.</td></tr>
-    <tr><td>label</td><td>varchar(50)</td><td class="center">YES</td><td class="center"></td><td>The display label of the currency.</td></tr>
-    <tr><td>currency_type</td><td>varchar(10)</td><td class="center">YES</td><td class="center"></td><td>The currency type ('BILL' or 'COIN').</td></tr>
-    <tr><td>face_value</td><td>decimal(12,2)</td><td class="center">YES</td><td class="center"></td><td>The face value in pesos.</td></tr>
-    <tr><td>display_order</td><td>int</td><td class="center">YES</td><td class="center"></td><td>The display order on keypad.</td></tr>
-    <tr><td>is_active</td><td>boolean</td><td class="center">YES</td><td class="center"></td><td>Flag indicating if actively counted.</td></tr>
-    <tr><td>created_at</td><td>timestamptz</td><td class="center">YES</td><td class="center"></td><td>The date and time created.</td></tr>
+    <tr><td>id</td><td>uuid</td><td class="center">YES</td><td class="center">PK</td><td>The unique ID of the currency denomination.</td></tr>
+    <tr><td>code</td><td>text</td><td class="center">YES</td><td class="center">UK</td><td>Unique denomination code (e.g., 'PHP_1000', 'PHP_500').</td></tr>
+    <tr><td>label</td><td>text</td><td class="center">YES</td><td class="center"></td><td>Display label of the currency (e.g., '₱1,000 Bill').</td></tr>
+    <tr><td>currency_type</td><td>text</td><td class="center">YES</td><td class="center"></td><td>Currency format ('BILL' or 'COIN').</td></tr>
+    <tr><td>face_value</td><td>decimal(12,2)</td><td class="center">YES</td><td class="center"></td><td>Nominal face value in pesos.</td></tr>
+    <tr><td>display_order</td><td>int</td><td class="center">YES</td><td class="center"></td><td>Display sorting order on physical cashbox keypad.</td></tr>
+    <tr><td>is_active</td><td>boolean</td><td class="center">YES</td><td class="center"></td><td>Flag indicating if actively counted in reconciliation.</td></tr>
+    <tr><td>created_at</td><td>timestamptz</td><td class="center">YES</td><td class="center"></td><td>The date and time the denomination was created.</td></tr>
   </tbody>
 </table>
 
@@ -506,19 +536,23 @@
     </tr>
   </thead>
   <tbody>
-    <tr><td>id</td><td>uuid</td><td class="center">YES</td><td class="center">PK</td><td>The unique ID of the reconciliation session.</td></tr>
-    <tr><td>semester_id</td><td>uuid</td><td class="center">YES</td><td class="center">FK</td><td>The semester ID referencing Semesters.</td></tr>
-    <tr><td>reconciliation_date</td><td>timestamptz</td><td class="center">YES</td><td class="center"></td><td>The date and time of reconciliation.</td></tr>
-    <tr><td>counted_by</td><td>uuid</td><td class="center">NO</td><td class="center">FK</td><td>The user ID who counted cash.</td></tr>
-    <tr><td>verified_by</td><td>uuid</td><td class="center">NO</td><td class="center">FK</td><td>The user ID who verified count.</td></tr>
-    <tr><td>physical_total</td><td>decimal(12,2)</td><td class="center">YES</td><td class="center"></td><td>The total physical cash counted.</td></tr>
-    <tr><td>ledger_cash_balance</td><td>decimal(12,2)</td><td class="center">YES</td><td class="center"></td><td>The theoretical ledger balance.</td></tr>
-    <tr><td>variance_amount</td><td>decimal(12,2)</td><td class="center">YES</td><td class="center"></td><td>The variance difference amount.</td></tr>
-    <tr><td>variance_status</td><td>varchar(20)</td><td class="center">YES</td><td class="center"></td><td>The status ('BALANCED', 'SHORTAGE', 'OVERAGE').</td></tr>
-    <tr><td>notes</td><td>text</td><td class="center">NO</td><td class="center"></td><td>General reconciliation remarks.</td></tr>
+    <tr><td>id</td><td>uuid</td><td class="center">YES</td><td class="center">PK</td><td>The unique ID of the cash reconciliation audit session.</td></tr>
+    <tr><td>reconciliation_date</td><td>timestamptz</td><td class="center">YES</td><td class="center"></td><td>Date and time physical cashbox count took place.</td></tr>
+    <tr><td>counted_by</td><td>uuid</td><td class="center">NO</td><td class="center">FK</td><td>User ID of the treasurer who counted the physical cash.</td></tr>
+    <tr><td>verified_by</td><td>uuid</td><td class="center">NO</td><td class="center">FK</td><td>User ID of the auditor or officer who witnessed the count.</td></tr>
+    <tr><td>physical_total</td><td>decimal(12,2)</td><td class="center">YES</td><td class="center"></td><td>Total calculated physical cash counted in pesos.</td></tr>
+    <tr><td>ledger_cash_balance</td><td>decimal(12,2)</td><td class="center">YES</td><td class="center"></td><td>Theoretical cashbook balance recorded in the ledger.</td></tr>
+    <tr><td>variance_amount</td><td>decimal(12,2)</td><td class="center">YES</td><td class="center"></td><td>Variance discrepancy difference (Physical - Ledger).</td></tr>
+    <tr><td>variance_status</td><td>text</td><td class="center">YES</td><td class="center"></td><td>Discrepancy classification ('BALANCED', 'SHORTAGE', 'OVERAGE').</td></tr>
+    <tr><td>notes</td><td>text</td><td class="center">NO</td><td class="center"></td><td>General remarks from counting officers.</td></tr>
     <tr><td>adviser_approval_notes</td><td>text</td><td class="center">NO</td><td class="center"></td><td>Adviser shortage justification notes.</td></tr>
-    <tr><td>status</td><td>varchar(20)</td><td class="center">YES</td><td class="center"></td><td>The session status ('DRAFT', 'SUBMITTED', 'VERIFIED').</td></tr>
-    <tr><td>created_at</td><td>timestamptz</td><td class="center">YES</td><td class="center"></td><td>The date and time created.</td></tr>
+    <tr><td>status</td><td>text</td><td class="center">YES</td><td class="center"></td><td>Session status ('DRAFT', 'SUBMITTED', 'VERIFIED').</td></tr>
+    <tr><td>created_at</td><td>timestamptz</td><td class="center">YES</td><td class="center"></td><td>The date and time the reconciliation session was recorded.</td></tr>
+    <tr><td>semester_id</td><td>uuid</td><td class="center">NO</td><td class="center">FK</td><td>The semester ID referencing Semesters.</td></tr>
+    <tr><td>approval_status</td><td>variance_approval_status</td><td class="center">YES</td><td class="center"></td><td>Adviser review workflow state ('BALANCED', 'PENDING_APPROVAL', 'APPROVED', 'REJECTED').</td></tr>
+    <tr><td>adviser_decision_by</td><td>uuid</td><td class="center">NO</td><td class="center">FK</td><td>Adviser user ID who approved or rejected the variance.</td></tr>
+    <tr><td>adviser_decision_at</td><td>timestamptz</td><td class="center">NO</td><td class="center"></td><td>Date and time the adviser decided on the variance.</td></tr>
+    <tr><td>adviser_notes</td><td>text</td><td class="center">NO</td><td class="center"></td><td>Official remarks or directives written by the reviewing adviser.</td></tr>
   </tbody>
 </table>
 
@@ -535,12 +569,35 @@
     </tr>
   </thead>
   <tbody>
-    <tr><td>id</td><td>uuid</td><td class="center">YES</td><td class="center">PK</td><td>The unique ID of the item count.</td></tr>
-    <tr><td>reconciliation_id</td><td>uuid</td><td class="center">YES</td><td class="center">FK</td><td>The session ID referencing Cash_Reconciliations.</td></tr>
-    <tr><td>denomination_id</td><td>uuid</td><td class="center">YES</td><td class="center">FK</td><td>The denomination ID referencing Denominations.</td></tr>
-    <tr><td>quantity</td><td>int</td><td class="center">YES</td><td class="center"></td><td>The piece-count quantity.</td></tr>
-    <tr><td>subtotal</td><td>decimal(12,2)</td><td class="center">YES</td><td class="center"></td><td>The calculated currency subtotal.</td></tr>
-    <tr><td>created_at</td><td>timestamptz</td><td class="center">YES</td><td class="center"></td><td>The date and time recorded.</td></tr>
+    <tr><td>id</td><td>uuid</td><td class="center">YES</td><td class="center">PK</td><td>The unique ID of the denomination count item.</td></tr>
+    <tr><td>reconciliation_id</td><td>uuid</td><td class="center">YES</td><td class="center">FK</td><td>Session ID referencing Cash_Reconciliations.</td></tr>
+    <tr><td>denomination_id</td><td>uuid</td><td class="center">YES</td><td class="center">FK</td><td>Denomination ID referencing Denominations.</td></tr>
+    <tr><td>quantity</td><td>int</td><td class="center">YES</td><td class="center"></td><td>Piece count quantity of the denomination.</td></tr>
+    <tr><td>subtotal</td><td>decimal(12,2)</td><td class="center">YES</td><td class="center"></td><td>Calculated subtotal for this denomination in pesos.</td></tr>
+    <tr><td>created_at</td><td>timestamptz</td><td class="center">YES</td><td class="center"></td><td>The date and time the piece count was recorded.</td></tr>
+  </tbody>
+</table>
+
+<!-- Table 19: Audit_Logs (Supplemental Audit Trail) -->
+<div class="table-title">Table 19: Audit_Logs (Supplemental Audit Trail)</div>
+<table>
+  <thead>
+    <tr>
+      <th class="col-field" width="20%" style="width: 20%;">Field</th>
+      <th class="col-type" width="20%" style="width: 20%; white-space: nowrap;">Type/Length</th>
+      <th class="col-required" width="15%" style="width: 15%; white-space: nowrap;">Required</th>
+      <th class="col-key" width="8%" style="width: 8%; white-space: nowrap;">Key</th>
+      <th class="col-domain" width="37%" style="width: 37%;">Domain</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr><td>id</td><td>uuid</td><td class="center">YES</td><td class="center">PK</td><td>The unique ID of the immutable audit event log.</td></tr>
+    <tr><td>user_id</td><td>uuid</td><td class="center">NO</td><td class="center">FK</td><td>The user profile ID who initiated the financial event.</td></tr>
+    <tr><td>action</td><td>text</td><td class="center">YES</td><td class="center"></td><td>High-level action verb ('AUTH_LOGIN', 'TRANSACTION_VOID', 'VARIANCE_DECISION', etc.).</td></tr>
+    <tr><td>entity_type</td><td>text</td><td class="center">YES</td><td class="center"></td><td>Relational domain of the target record ('transaction', 'auth_session', 'cash_box').</td></tr>
+    <tr><td>entity_id</td><td>text</td><td class="center">NO</td><td class="center"></td><td>Business record UUID or unique key affected.</td></tr>
+    <tr><td>details</td><td>jsonb</td><td class="center">NO</td><td class="center"></td><td>JSON snapshot of previous/current diffs, client IP address, and role metadata.</td></tr>
+    <tr><td>created_at</td><td>timestamptz</td><td class="center">YES</td><td class="center"></td><td>The immutable timestamp when the audit log entry was committed.</td></tr>
   </tbody>
 </table>
 

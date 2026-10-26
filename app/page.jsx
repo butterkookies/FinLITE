@@ -1909,11 +1909,18 @@ export default function Dashboard() {
   const handleCreateAdvance = async (advanceData) => {
     try {
       const tempId = `adv-${Date.now()}`;
+      const optimisticReceipts = (advanceData.receiptPreviewUrls || []).map((url, idx) => ({
+        id: `temp-rcpt-${Date.now()}-${idx}`,
+        public_url: url,
+        sort_order: idx,
+      }));
+
       const newAdv = {
         id: tempId,
         semester_id: currentSemester?.id || 'sem-26-27-1',
         claimant_name: advanceData.claimant_name,
         claimant_contact: advanceData.claimant_contact || null,
+        advanced_by_name: advanceData.advanced_by_name || advanceData.claimant_name,
         title: advanceData.title,
         category_name: advanceData.category_name || 'Food & Refreshments',
         event_name: advanceData.event_name || null,
@@ -1923,6 +1930,7 @@ export default function Dashboard() {
         advance_date: new Date().toISOString().split('T')[0],
         notes: advanceData.notes || null,
         advance_disbursements: [],
+        advance_receipts: optimisticReceipts,
         created_at: new Date().toISOString(),
       };
 
@@ -1930,6 +1938,35 @@ export default function Dashboard() {
 
       if (supabase) {
         try {
+          // Upload advance receipt photos to Supabase Storage if provided
+          const uploadedReceiptUrls = [];
+          if (Array.isArray(advanceData.receiptFiles) && advanceData.receiptFiles.length > 0) {
+            for (let i = 0; i < advanceData.receiptFiles.length; i++) {
+              const file = advanceData.receiptFiles[i];
+              try {
+                const fileExt = file.name ? file.name.split('.').pop() : 'jpg';
+                const filePath = `advances/adv-${Date.now()}-${Math.random().toString(36).substring(2, 8)}-${i}.${fileExt}`;
+                const { error: uploadError } = await supabase.storage
+                  .from('receipts')
+                  .upload(filePath, file, {
+                    cacheControl: '3600',
+                    upsert: false,
+                  });
+
+                if (!uploadError) {
+                  const { data: { publicUrl } } = supabase.storage
+                    .from('receipts')
+                    .getPublicUrl(filePath);
+                  uploadedReceiptUrls.push(publicUrl);
+                } else {
+                  console.error('Storage advance upload error:', uploadError.message);
+                }
+              } catch (storageErr) {
+                console.warn('Storage advance upload note:', storageErr?.message);
+              }
+            }
+          }
+
           const matchedCategory = categories.find(
             (c) => c.id === newAdv.category_id || (newAdv.category_name && c.name?.toLowerCase() === newAdv.category_name.toLowerCase())
           ) || categories.find((c) => c.type === 'OUTFLOW') || categories[0];
@@ -1938,6 +1975,7 @@ export default function Dashboard() {
             semester_id: resolveDbSemesterId(),
             claimant_name: newAdv.claimant_name,
             claimant_contact: newAdv.claimant_contact,
+            advanced_by_name: newAdv.advanced_by_name,
             title: newAdv.title,
             category_id: matchedCategory?.id || null,
             event_name: newAdv.event_name,
@@ -1954,7 +1992,37 @@ export default function Dashboard() {
           `).single();
 
           if (!error && data) {
-            setAdvances((prev) => prev.map((a) => (a.id === tempId ? { ...data, advance_disbursements: [] } : a)));
+            let finalReceipts = data.advance_receipts || [];
+            if (uploadedReceiptUrls.length > 0) {
+              const receiptItems = uploadedReceiptUrls.map((url, idx) => ({
+                advance_id: data.id,
+                public_url: url,
+                sort_order: idx,
+              }));
+              try {
+                const { data: insertedReceipts } = await supabase
+                  .from('advance_receipts')
+                  .insert(receiptItems)
+                  .select();
+                if (insertedReceipts && insertedReceipts.length > 0) {
+                  finalReceipts = insertedReceipts;
+                }
+              } catch (rErr) {
+                console.warn('advance_receipts insert notice:', rErr?.message);
+              }
+            }
+
+            setAdvances((prev) =>
+              prev.map((a) =>
+                a.id === tempId
+                  ? {
+                      ...data,
+                      advance_disbursements: data.advance_disbursements || [],
+                      advance_receipts: finalReceipts,
+                    }
+                  : a
+              )
+            );
           }
         } catch (dbErr) {
           console.warn('Persisting advance to Supabase skipped:', dbErr);

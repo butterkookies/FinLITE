@@ -30,7 +30,14 @@ const advCode = fs.readFileSync('components/debts/AdvancesManagementModal.jsx', 
 assert(advCode.includes('title="Out-of-Pocket Advances (Accounts Payable)"\n      description="Track personal advances by officers/advisers and disburse full or partial reimbursements"\n      maxWidth="4xl"') || advCode.includes('title="Out-of-Pocket Advances (Accounts Payable)"\r\n      description="Track personal advances by officers/advisers and disburse full or partial reimbursements"\r\n      maxWidth="4xl"'), 'AdvancesManagementModal.jsx main modal should use maxWidth="4xl"');
 assert(advCode.includes('title="Disburse Reimbursement"') && advCode.includes('maxWidth="2xl"'), 'Disburse reimbursement submodal should use maxWidth="2xl"');
 assert(advCode.includes('title="Record Out-of-Pocket Advance"') && advCode.includes('maxWidth="2xl"'), 'Record advance submodal should use maxWidth="2xl"');
-console.log('✅ PASS: Personal Advances modal and submodals expanded (4xl main, 2xl submodals)');
+assert(advCode.includes('receiptFiles') && advCode.includes('compressReceiptImage'), 'AdvancesManagementModal.jsx should support receipt photo upload and compression');
+assert(advCode.includes('advance_receipts') && advCode.includes('zoomedReceipt'), 'AdvancesManagementModal.jsx should display attached receipts and provide high-res inspection');
+console.log('✅ PASS: Personal Advances modal and submodals expanded with receipt upload and high-res inspection');
+
+// 4.1. app/page.jsx advance receipts persistence
+const pageCode = fs.readFileSync('app/page.jsx', 'utf8');
+assert(pageCode.includes(".from('advance_receipts')") && pageCode.includes('.insert(receiptItems)'), 'app/page.jsx should persist uploaded receipts to advance_receipts child table');
+console.log('✅ PASS: app/page.jsx persists advance receipt vouchers into advance_receipts');
 
 // 5. DebtsManagementModal.jsx tests
 const debtCode = fs.readFileSync('components/debts/DebtsManagementModal.jsx', 'utf8');

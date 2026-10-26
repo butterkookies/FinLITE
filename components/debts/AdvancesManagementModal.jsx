@@ -15,10 +15,14 @@ import {
   ChevronDown, 
   ChevronUp,
   Receipt,
-  Tag
+  Tag,
+  Camera,
+  ExternalLink,
+  ZoomIn
 } from 'lucide-react';
 import { formatPHP } from '@/lib/utils/currency';
 import { sanitizeAmountInput } from '@/lib/utils/validation';
+import { compressReceiptImage } from '@/lib/utils/compression';
 import { Modal, Button, Badge, Input } from '@/components/ui';
 
 export function getLiquidationWindowInfo(adv) {
@@ -65,6 +69,12 @@ export default function AdvancesManagementModal({
   const [newNotes, setNewNotes] = useState('');
   const [isSubmittingAdvance, setIsSubmittingAdvance] = useState(false);
   const [advanceFormError, setAdvanceFormError] = useState('');
+
+  // Receipt attachment states
+  const [receiptFiles, setReceiptFiles] = useState([]);
+  const [previewUrls, setPreviewUrls] = useState([]);
+  const [compressing, setCompressing] = useState(false);
+  const [zoomedReceipt, setZoomedReceipt] = useState(null);
 
   // Aggregate totals
   const totalAdvances = advances.reduce((sum, a) => sum + Number(a.total_amount || 0), 0);
@@ -151,6 +161,60 @@ export default function AdvancesManagementModal({
     }
   };
 
+  const handleReceiptChange = async (e) => {
+    const selectedFiles = Array.from(e.target.files || []);
+    if (selectedFiles.length === 0) return;
+
+    const remainingSlots = 3 - receiptFiles.length;
+    if (remainingSlots <= 0) return;
+
+    const filesToProcess = selectedFiles.slice(0, remainingSlots);
+    setCompressing(true);
+
+    try {
+      const processedFiles = [];
+      const newUrls = [];
+
+      for (const file of filesToProcess) {
+        try {
+          const compressed = await compressReceiptImage(file);
+          processedFiles.push(compressed);
+          newUrls.push(URL.createObjectURL(compressed));
+        } catch (err) {
+          console.error('Error compressing advance receipt:', err);
+          processedFiles.push(file);
+          newUrls.push(URL.createObjectURL(file));
+        }
+      }
+
+      setReceiptFiles((prev) => [...prev, ...processedFiles]);
+      setPreviewUrls((prev) => [...prev, ...newUrls]);
+    } finally {
+      setCompressing(false);
+      e.target.value = '';
+    }
+  };
+
+  const handleRemoveReceipt = (index) => {
+    setReceiptFiles((prev) => prev.filter((_, i) => i !== index));
+    setPreviewUrls((prev) => {
+      try {
+        URL.revokeObjectURL(prev[index]);
+      } catch (_) {}
+      return prev.filter((_, i) => i !== index);
+    });
+  };
+
+  const handleClearReceipts = () => {
+    previewUrls.forEach((url) => {
+      try {
+        URL.revokeObjectURL(url);
+      } catch (_) {}
+    });
+    setReceiptFiles([]);
+    setPreviewUrls([]);
+  };
+
   const handleCreateAdvanceSubmit = async (e) => {
     e?.preventDefault();
     setAdvanceFormError('');
@@ -180,6 +244,8 @@ export default function AdvancesManagementModal({
         event_name: newEventName.trim() || null,
         category_name: newCategoryName.trim() || null,
         notes: newNotes.trim() || null,
+        receiptFiles,
+        receiptPreviewUrls: previewUrls,
       });
 
       if (res && res.error) {
@@ -193,6 +259,7 @@ export default function AdvancesManagementModal({
         setNewAmount('');
         setNewEventName('');
         setNewNotes('');
+        handleClearReceipts();
       }
     } catch (err) {
       setAdvanceFormError(err?.message || 'Failed to record new advance');
@@ -420,6 +487,33 @@ export default function AdvancesManagementModal({
                     </div>
                   </div>
 
+                  {/* Attached Receipts */}
+                  {Array.isArray(adv.advance_receipts) && adv.advance_receipts.length > 0 && (
+                    <div className="pt-2 border-t border-zinc-100 dark:border-zinc-800/60 flex items-center gap-2">
+                      <span className="text-[10px] font-semibold text-zinc-400 uppercase tracking-wider flex items-center gap-1 shrink-0">
+                        <Receipt className="w-3.5 h-3.5 text-emerald-500" />
+                        {adv.advance_receipts.length} {adv.advance_receipts.length === 1 ? 'Receipt' : 'Receipts'}:
+                      </span>
+                      <div className="flex items-center gap-1.5 overflow-x-auto py-0.5">
+                        {adv.advance_receipts.map((r, rIdx) => (
+                          <button
+                            key={r.id || rIdx}
+                            type="button"
+                            onClick={() => setZoomedReceipt(r.public_url)}
+                            className="relative group w-8 h-8 rounded-lg overflow-hidden ring-1 ring-black/10 dark:ring-white/10 shrink-0 hover:ring-2 hover:ring-emerald-500 transition-all cursor-pointer"
+                            title={`View Receipt ${rIdx + 1}`}
+                          >
+                            <img
+                              src={r.public_url}
+                              alt={`Receipt ${rIdx + 1}`}
+                              className="w-full h-full object-cover group-hover:scale-110 transition-transform"
+                            />
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
                   {/* Past Disbursements Expand Toggle */}
                   {disbursements.length > 0 && (
                     <div className="pt-2 border-t border-zinc-100 dark:border-zinc-800/60">
@@ -495,6 +589,33 @@ export default function AdvancesManagementModal({
                 </span>
               </div>
             </div>
+
+            {/* Attached Receipts Preview */}
+            {Array.isArray(selectedAdvanceForPayout.advance_receipts) && selectedAdvanceForPayout.advance_receipts.length > 0 && (
+              <div className="p-3 rounded-xl bg-zinc-50 dark:bg-zinc-900/60 border border-zinc-100 dark:border-zinc-800 space-y-1.5">
+                <span className="text-[11px] font-semibold text-zinc-600 dark:text-zinc-400 flex items-center gap-1">
+                  <Receipt className="w-3.5 h-3.5 text-emerald-500" />
+                  Attached Purchase Receipts ({selectedAdvanceForPayout.advance_receipts.length})
+                </span>
+                <div className="flex items-center gap-2 pt-1 overflow-x-auto">
+                  {selectedAdvanceForPayout.advance_receipts.map((r, rIdx) => (
+                    <button
+                      key={r.id || rIdx}
+                      type="button"
+                      onClick={() => setZoomedReceipt(r.public_url)}
+                      className="relative group w-12 h-12 rounded-lg overflow-hidden ring-1 ring-black/10 dark:ring-white/10 shrink-0 hover:ring-2 hover:ring-emerald-500 transition-all cursor-pointer"
+                      title="Inspect Receipt in Full Resolution"
+                    >
+                      <img
+                        src={r.public_url}
+                        alt={`Receipt ${rIdx + 1}`}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform"
+                      />
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
 
             {/* Payout Amount Input */}
             <div>
@@ -596,7 +717,7 @@ export default function AdvancesManagementModal({
       {isNewAdvanceOpen && (
         <Modal
           isOpen={isNewAdvanceOpen}
-          onClose={() => setIsNewAdvanceOpen(false)}
+          onClose={() => { setIsNewAdvanceOpen(false); handleClearReceipts(); }}
           title="Record Out-of-Pocket Advance"
           description="Log personal funds advanced by an officer or adviser"
           maxWidth="2xl"
@@ -718,8 +839,78 @@ export default function AdvancesManagementModal({
               />
             </div>
 
+            {/* Receipts & Proof of Purchase Upload */}
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <label className="block text-xs font-semibold text-zinc-700 dark:text-zinc-300">
+                  Receipts &amp; Proof of Purchase ({receiptFiles.length}/3)
+                </label>
+                <span className="text-[10px] text-zinc-400">
+                  Optional (OR, Sales Invoice, Voucher)
+                </span>
+              </div>
+
+              {/* Thumbnail Previews */}
+              {previewUrls.length > 0 && (
+                <div className="grid grid-cols-3 gap-2">
+                  {previewUrls.map((url, idx) => (
+                    <div
+                      key={idx}
+                      className="relative group rounded-xl overflow-hidden ring-1 ring-black/[0.05] dark:ring-white/[0.08] bg-zinc-100 dark:bg-zinc-900 aspect-square"
+                    >
+                      <img src={url} alt={`Receipt ${idx + 1}`} className="w-full h-full object-cover" />
+                      <button
+                        type="button"
+                        onClick={() => setZoomedReceipt(url)}
+                        className="absolute top-1 left-1 w-5 h-5 rounded-full bg-black/70 hover:bg-emerald-600 text-white flex items-center justify-center transition-colors cursor-pointer"
+                        title="Zoom photo"
+                      >
+                        <ZoomIn className="w-2.5 h-2.5" />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveReceipt(idx)}
+                        className="absolute top-1 right-1 w-5 h-5 rounded-full bg-black/70 hover:bg-rose-600 text-white flex items-center justify-center transition-colors cursor-pointer"
+                        title="Remove image"
+                      >
+                        <X className="w-3 h-3" />
+                      </button>
+                      <span className="absolute bottom-1 left-1 px-1.5 py-0.5 bg-black/60 rounded text-[9px] font-semibold text-white">
+                        Receipt {idx + 1}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* Add / Upload Photo Button */}
+              {receiptFiles.length < 3 && (
+                <label className="h-10 flex items-center justify-center gap-2 px-3 bg-zinc-100/70 dark:bg-zinc-800 hover:bg-zinc-200/60 dark:hover:bg-zinc-700 rounded-xl ring-1 ring-black/[0.04] dark:ring-white/[0.08] cursor-pointer transition-colors shadow-xs">
+                  <Camera className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+                  <span className="text-xs text-zinc-700 dark:text-zinc-300 font-medium">
+                    {compressing
+                      ? 'Compressing photo...'
+                      : receiptFiles.length === 0
+                      ? 'Take or Upload Receipt (Up to 3)'
+                      : `Add Another Receipt (${receiptFiles.length}/3)`}
+                  </span>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    multiple
+                    disabled={compressing}
+                    onChange={handleReceiptChange}
+                    className="hidden"
+                  />
+                </label>
+              )}
+              <p className="text-[10px] text-zinc-400">
+                Automatically compressed to &lt;350KB each before cloud storage.
+              </p>
+            </div>
+
             <div className="flex items-center justify-end gap-2 pt-2 border-t border-zinc-100 dark:border-zinc-800">
-              <Button variant="ghost" size="sm" onClick={() => setIsNewAdvanceOpen(false)}>
+              <Button variant="ghost" size="sm" onClick={() => { setIsNewAdvanceOpen(false); handleClearReceipts(); }}>
                 Cancel
               </Button>
               <Button
@@ -733,6 +924,37 @@ export default function AdvancesManagementModal({
               </Button>
             </div>
           </form>
+        </Modal>
+      )}
+
+      {/* Lightbox / Zoomed Receipt Modal */}
+      {zoomedReceipt && (
+        <Modal
+          isOpen={Boolean(zoomedReceipt)}
+          onClose={() => setZoomedReceipt(null)}
+          maxWidth="2xl"
+          title="Inspect Receipt / Voucher"
+        >
+          <div className="space-y-4">
+            <div className="max-h-[75vh] overflow-auto flex items-center justify-center rounded-2xl bg-zinc-950 p-2">
+              <img
+                src={zoomedReceipt}
+                alt="Zoomed Receipt"
+                className="max-h-[70vh] w-auto object-contain rounded-xl"
+              />
+            </div>
+            <div className="flex justify-end">
+              <a
+                href={zoomedReceipt}
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
+              >
+                <ExternalLink className="w-3.5 h-3.5" />
+                <span>Open original in new tab</span>
+              </a>
+            </div>
+          </div>
         </Modal>
       )}
     </Modal>
