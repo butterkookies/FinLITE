@@ -46,7 +46,7 @@ def ensure_invisible_table_borders(tbl):
 def set_cell_border(cell, **kwargs):
     """
     Set individual cell borders: top, bottom, left, right.
-    Example: set_cell_border(cell, bottom={"val": "single", "sz": "4", "color": "000000"})
+    Example: set_cell_border(cell, top={"val": "single", "sz": "4", "color": "000000"})
     """
     tcPr = cell._element.get_or_add_tcPr()
     tcBorders = tcPr.find(qn('w:tcBorders'))
@@ -54,12 +54,66 @@ def set_cell_border(cell, **kwargs):
         tcBorders = OxmlElement('w:tcBorders')
         tcPr.append(tcBorders)
     for edge in ('top', 'left', 'bottom', 'right'):
+        # Clean existing border on this edge first to avoid duplicate XML tags
+        existing = tcBorders.find(qn(f'w:{edge}'))
+        if existing is not None:
+            tcBorders.remove(existing)
         edge_data = kwargs.get(edge)
         if edge_data:
             b = OxmlElement(f'w:{edge}')
             for key, val in edge_data.items():
                 b.set(qn(f'w:{key}'), str(val))
             tcBorders.append(b)
+
+def rebalance_table_column_widths(tbl, col_widths_dxa):
+    """
+    Rebalances column widths across tblGrid and all row cells.
+    Ensures amount column has generous width (e.g. 2.0+ inches) to prevent
+    large numbers from wrapping.
+    """
+    tblGrid = tbl._element.find(qn('w:tblGrid'))
+    if tblGrid is not None:
+        tblGrid.clear()
+        for w in col_widths_dxa:
+            gc = OxmlElement('w:gridCol')
+            gc.set(qn('w:w'), str(w))
+            tblGrid.append(gc)
+
+    total_w = sum(col_widths_dxa)
+    for row in tbl.rows:
+        unique_cells = []
+        for c in row.cells:
+            if c._element not in [u._element for u in unique_cells]:
+                unique_cells.append(c)
+
+        if len(unique_cells) == 1:
+            cell = unique_cells[0]
+            cell.width = Inches(total_w / 1440.0)
+            tcPr = cell._element.get_or_add_tcPr()
+            tcW = tcPr.find(qn('w:tcW'))
+            if tcW is not None:
+                tcW.set(qn('w:w'), str(total_w))
+                tcW.set(qn('w:type'), 'dxa')
+            else:
+                tcW = OxmlElement('w:tcW')
+                tcW.set(qn('w:w'), str(total_w))
+                tcW.set(qn('w:type'), 'dxa')
+                tcPr.append(tcW)
+        else:
+            for idx, cell in enumerate(unique_cells):
+                if idx < len(col_widths_dxa):
+                    w = col_widths_dxa[idx]
+                    cell.width = Inches(w / 1440.0)
+                    tcPr = cell._element.get_or_add_tcPr()
+                    tcW = tcPr.find(qn('w:tcW'))
+                    if tcW is not None:
+                        tcW.set(qn('w:w'), str(w))
+                        tcW.set(qn('w:type'), 'dxa')
+                    else:
+                        tcW = OxmlElement('w:tcW')
+                        tcW.set(qn('w:w'), str(w))
+                        tcW.set(qn('w:type'), 'dxa')
+                        tcPr.append(tcW)
 
 def replace_text_in_paragraph(p, search, replace):
     if search not in p.text:
@@ -299,11 +353,13 @@ def create_borderless_noted_table(doc, advisers, admins, font_name='Calibri', fo
     tbl_elm.getparent().remove(tbl_elm)
     return tbl_elm
 
-def add_receipt_sheets_table(doc, receipts, academic_year, semester, font_name='Calibri', font_size_pt=11):
+def add_receipt_sheets_table(doc, receipts, academic_year, semester, font_name='Calibri', font_size_pt=11, is_attached=False):
     """
     Renders 2-column Word table holding up to 4 receipts per page (2 rows x 2 cols).
     Scales pictures proportionally into max 3.1" x 3.0" bounding box.
     First receipt sheet displays 'Receipts' heading; subsequent sheets show only the 2x2 grid.
+    Uses doc.add_page_break() so breaks stay in normal document flow before sectPr,
+    guaranteeing receipts are cleanly separated from prior pages with zero trailing empty pages.
     """
     if not receipts:
         return
@@ -313,9 +369,11 @@ def add_receipt_sheets_table(doc, receipts, academic_year, semester, font_name='
     chunks = [receipts[i:i + 4] for i in range(0, len(receipts), 4)]
 
     for sheet_idx, chunk in enumerate(chunks):
-        if sheet_idx > 0 or len(doc.paragraphs) > 0:
-            p_break = parse_xml(r'<w:p %s><w:r><w:br w:type="page"/></w:r></w:p>' % nsdecls('w'))
-            doc._element.body.append(p_break)
+        if sheet_idx > 0 or is_attached:
+            p_break = doc.add_page_break()
+            p_break.paragraph_format.space_before = Pt(0)
+            p_break.paragraph_format.space_after = Pt(0)
+            p_break.paragraph_format.line_spacing = 1.0
 
         if sheet_idx == 0:
             p_title = doc.add_paragraph()
@@ -524,7 +582,7 @@ def populate_report(data, template_path=DEFAULT_TEMPLATE, output_path=DEFAULT_OU
             p_elm = p._element
             p_elm.getparent().remove(p_elm)
 
-        add_receipt_sheets_table(doc, receipts, academic_year, semester, font_name=font_name, font_size_pt=font_size_pt)
+        add_receipt_sheets_table(doc, receipts, academic_year, semester, font_name=font_name, font_size_pt=font_size_pt, is_attached=False)
         setup_footer(doc.sections[0], style=page_number_style, font_name=font_name)
         doc.save(output_path)
         print(f"Successfully generated standalone receipts report: {output_path}")
@@ -578,12 +636,14 @@ def populate_report(data, template_path=DEFAULT_TEMPLATE, output_path=DEFAULT_OU
     # -------------------------------------------------------------
     tbl0 = doc.tables[0]
     ensure_invisible_table_borders(tbl0)
+    rebalance_table_column_widths(tbl0, [2800, 2500, 1100, 960, 2000])
     tbl0.rows[0].cells[0].text = 'INITIAL BUDGET / BEGINNING BALANCE (Carried over from prior semester)'
     for r in tbl0.rows[0].cells[0].paragraphs[0].runs:
         r.font.name = font_name
         r.font.size = Pt(font_size_pt)
         r.bold = True
     tbl0.rows[1].cells[4].text = f"P{initial_budget:,.2f}"
+    tbl0.rows[1].cells[4].paragraphs[0].alignment = docx.enum.text.WD_ALIGN_PARAGRAPH.RIGHT
 
     # -------------------------------------------------------------
     # 3. TABLE 1: INCOME SCHEDULE (STRICTLY FROM DATABASE)
@@ -614,6 +674,7 @@ def populate_report(data, template_path=DEFAULT_TEMPLATE, output_path=DEFAULT_OU
             row.cells[0].text = title
             row.cells[1].text = ""
             row.cells[2].text = f"P{amt:,.2f}"
+            row.cells[2].paragraphs[0].alignment = docx.enum.text.WD_ALIGN_PARAGRAPH.RIGHT
 
     # Append Total Income summary row
     new_tr = copy.deepcopy(row_template)
@@ -622,7 +683,9 @@ def populate_report(data, template_path=DEFAULT_TEMPLATE, output_path=DEFAULT_OU
     total_row.cells[0].text = "Total Income:"
     total_row.cells[1].text = ""
     total_row.cells[2].text = f"P{total_income:,.2f}"
-    set_cell_border(total_row.cells[2], bottom={"val": "single", "sz": "4", "color": "000000"})
+    total_row.cells[2].paragraphs[0].alignment = docx.enum.text.WD_ALIGN_PARAGRAPH.RIGHT
+    set_cell_border(total_row.cells[2], top={"val": "single", "sz": "4", "color": "000000"})
+    rebalance_table_column_widths(tbl1, [4800, 2560, 2000])
     for p in total_row.cells[0].paragraphs:
         for r in p.runs:
             r.bold = True
@@ -665,6 +728,7 @@ def populate_report(data, template_path=DEFAULT_TEMPLATE, output_path=DEFAULT_OU
             row.cells[0].text = title
             row.cells[1].text = ""
             row.cells[2].text = f"P{amt:,.2f}"
+            row.cells[2].paragraphs[0].alignment = docx.enum.text.WD_ALIGN_PARAGRAPH.RIGHT
 
     # Append Total Expenses summary row
     new_tr = copy.deepcopy(exp_template)
@@ -673,7 +737,9 @@ def populate_report(data, template_path=DEFAULT_TEMPLATE, output_path=DEFAULT_OU
     total_exp_row.cells[0].text = "Total Expenses:"
     total_exp_row.cells[1].text = ""
     total_exp_row.cells[2].text = f"P{total_expenses:,.2f}"
-    set_cell_border(total_exp_row.cells[2], bottom={"val": "single", "sz": "4", "color": "000000"})
+    total_exp_row.cells[2].paragraphs[0].alignment = docx.enum.text.WD_ALIGN_PARAGRAPH.RIGHT
+    set_cell_border(total_exp_row.cells[2], top={"val": "single", "sz": "4", "color": "000000"})
+    rebalance_table_column_widths(tbl_exp, [5200, 2160, 2000])
     for p in total_exp_row.cells[0].paragraphs:
         for r in p.runs:
             r.bold = True
@@ -686,11 +752,35 @@ def populate_report(data, template_path=DEFAULT_TEMPLATE, output_path=DEFAULT_OU
     # -------------------------------------------------------------
     tbl_summary = doc.tables[3]
     ensure_invisible_table_borders(tbl_summary)
-    tbl_summary.rows[1].cells[2].text = f"P{total_funds:,.2f}"
-    tbl_summary.rows[2].cells[2].text = f"P{total_expenses:,.2f}"
-    tbl_summary.rows[3].cells[2].text = f"P{cash_on_hand:,.2f}"
-    set_cell_border(tbl_summary.rows[2].cells[2], bottom={"val": "single", "sz": "4", "color": "000000"})
-    set_cell_border(tbl_summary.rows[3].cells[2], top={"val": "single", "sz": "4", "color": "000000"})
+    if len(tbl_summary.rows) == 4:
+        tr0 = tbl_summary.rows[0]._element
+        tr0.getparent().remove(tr0)
+
+    tbl_summary.rows[0].cells[0].text = "Total Funds"
+    tbl_summary.rows[0].cells[1].text = ""
+    tbl_summary.rows[0].cells[2].text = f"P{total_funds:,.2f}"
+    tbl_summary.rows[0].cells[2].paragraphs[0].alignment = docx.enum.text.WD_ALIGN_PARAGRAPH.RIGHT
+
+    tbl_summary.rows[1].cells[0].text = "Total Expenses"
+    tbl_summary.rows[1].cells[1].text = ""
+    tbl_summary.rows[1].cells[2].text = f"P{total_expenses:,.2f}"
+    tbl_summary.rows[1].cells[2].paragraphs[0].alignment = docx.enum.text.WD_ALIGN_PARAGRAPH.RIGHT
+    set_cell_border(tbl_summary.rows[1].cells[2], bottom={"val": "single", "sz": "4", "color": "000000"})
+
+    tbl_summary.rows[2].cells[0].text = "Cash on Hand"
+    tbl_summary.rows[2].cells[1].text = ""
+    tbl_summary.rows[2].cells[2].text = f"P{cash_on_hand:,.2f}"
+    tbl_summary.rows[2].cells[2].paragraphs[0].alignment = docx.enum.text.WD_ALIGN_PARAGRAPH.RIGHT
+    set_cell_border(tbl_summary.rows[2].cells[2], top=None, bottom=None)
+
+    for p in tbl_summary.rows[2].cells[0].paragraphs:
+        for r in p.runs:
+            r.bold = True
+    for p in tbl_summary.rows[2].cells[2].paragraphs:
+        for r in p.runs:
+            r.bold = True
+
+    rebalance_table_column_widths(tbl_summary, [3600, 3760, 2000])
 
     # -------------------------------------------------------------
     # 7. STRUCTURED SIGNATORIES (PAGE 1 & PAGE 4)
@@ -878,7 +968,28 @@ def populate_report(data, template_path=DEFAULT_TEMPLATE, output_path=DEFAULT_OU
     # 11. ATTACHED RECEIPT SHEETS (PAGE 5+)
     # -------------------------------------------------------------
     if receipts_mode == 'APPEND' and receipts:
-        add_receipt_sheets_table(doc, receipts, academic_year, semester, font_name=font_name, font_size_pt=font_size_pt)
+        # Clean trailing empty paragraphs at the end of the report before inserting page break
+        while len(doc._element.body) > 1:
+            last_el = doc._element.body[-2]
+            if last_el.tag.endswith('p'):
+                p = docx.text.paragraph.Paragraph(last_el, doc)
+                has_br = any('w:br' in r._r.xml for r in p.runs)
+                if not p.text.strip() and not has_br:
+                    doc._element.body.remove(last_el)
+                    continue
+            break
+        add_receipt_sheets_table(doc, receipts, academic_year, semester, font_name=font_name, font_size_pt=font_size_pt, is_attached=True)
+
+    # Clean any trailing empty paragraphs at the end of the document body before sectPr
+    while len(doc._element.body) > 1:
+        last_el = doc._element.body[-2]
+        if last_el.tag.endswith('p'):
+            p = docx.text.paragraph.Paragraph(last_el, doc)
+            has_br = any('w:br' in r._r.xml for r in p.runs)
+            if not p.text.strip() and not has_br:
+                doc._element.body.remove(last_el)
+                continue
+        break
 
     doc.save(output_path)
     print(f"Successfully generated institutional financial report: {output_path}")

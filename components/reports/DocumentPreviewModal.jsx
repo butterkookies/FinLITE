@@ -18,6 +18,9 @@ import {
   Plus,
   Trash2,
   FileSpreadsheet,
+  Lock,
+  Undo2,
+  Redo2,
 } from 'lucide-react';
 import './DocumentPreview.css';
 import { Button, Badge, Select } from '@/components/ui';
@@ -94,7 +97,18 @@ function normalizeReportAcademicYearKey(raw) {
     .replace(/[\u2013\u2014]/g, '-');
 }
 
-export default function DocumentPreviewModal({ isOpen, onClose, documentData, data }) {
+export default function DocumentPreviewModal({
+  isOpen,
+  onClose,
+  documentData,
+  data,
+  userPermissions = null,
+  canExport = null,
+}) {
+  const canExportReport = canExport !== null
+    ? Boolean(canExport)
+    : (userPermissions ? Boolean(userPermissions.export_reports) : true);
+
   const activeDocData = documentData || data;
   const isProposal = activeDocData?.type === 'PROPOSAL';
 
@@ -136,6 +150,9 @@ export default function DocumentPreviewModal({ isOpen, onClose, documentData, da
   // Bottom-Right Page Numbering Configuration ('page_x_of_y' | 'page_x_of_y_no_cover' | 'simple' | 'none')
   const [pageNumberStyle, setPageNumberStyle] = useState('page_x_of_y');
 
+  // Report Typography Mode (Patch 14): 'calibri' (Calibri 11pt) | 'times' (Times New Roman 12pt)
+  const [typography, setTypography] = useState('calibri');
+
   // Dynamic Initial Budget & Transaction Rows (Zero Fake Data)
   const [initialBudget, setInitialBudget] = useState(0);
   const [inflowRows, setInflowRows] = useState([]);
@@ -173,7 +190,151 @@ export default function DocumentPreviewModal({ isOpen, onClose, documentData, da
     dean: false,
   });
 
+  // 10-Step Undo & Redo History System (Max 10 for both undo & redo)
+  const MAX_HISTORY = 10;
+  const undoStackRef = useRef([]);
+  const redoStackRef = useRef([]);
+  const isApplyingHistoryRef = useRef(false);
+  const typingTimerRef = useRef(null);
+  const typingBaselineRef = useRef(null);
+  const [canUndo, setCanUndo] = useState(false);
+  const [canRedo, setCanRedo] = useState(false);
+
+  const captureReportState = useCallback(() => ({
+    initialBudget,
+    inflowRows: JSON.parse(JSON.stringify(inflowRows)),
+    expenseRows: JSON.parse(JSON.stringify(expenseRows)),
+    signatories: { ...signatories },
+    includedSignatories: { ...includedSignatories },
+    transmittalDate,
+    coordinatorName,
+    coordinatorRole,
+    salutation,
+    periodDesc,
+    finalAsOf,
+    includeCc,
+    ccRecipients: [...ccRecipients],
+    pageNumberStyle,
+    typography,
+  }), [
+    initialBudget,
+    inflowRows,
+    expenseRows,
+    signatories,
+    includedSignatories,
+    transmittalDate,
+    coordinatorName,
+    coordinatorRole,
+    salutation,
+    periodDesc,
+    finalAsOf,
+    includeCc,
+    ccRecipients,
+    pageNumberStyle,
+    typography,
+  ]);
+
+  const pushUndoSnapshot = useCallback((customSnapshot = null) => {
+    if (isApplyingHistoryRef.current) return;
+    const snap = customSnapshot || captureReportState();
+    const top = undoStackRef.current[undoStackRef.current.length - 1];
+    if (top && JSON.stringify(top) === JSON.stringify(snap)) return;
+
+    undoStackRef.current.push(snap);
+    if (undoStackRef.current.length > MAX_HISTORY) {
+      undoStackRef.current.shift();
+    }
+    redoStackRef.current = [];
+    setCanUndo(true);
+    setCanRedo(false);
+  }, [captureReportState]);
+
+  const recordTypingMutation = useCallback(() => {
+    if (isApplyingHistoryRef.current) return;
+    if (!typingBaselineRef.current) {
+      typingBaselineRef.current = captureReportState();
+    }
+    if (typingTimerRef.current) clearTimeout(typingTimerRef.current);
+    typingTimerRef.current = setTimeout(() => {
+      if (typingBaselineRef.current) {
+        pushUndoSnapshot(typingBaselineRef.current);
+        typingBaselineRef.current = null;
+      }
+    }, 450);
+  }, [captureReportState, pushUndoSnapshot]);
+
+  const applyHistorySnapshot = useCallback((snap) => {
+    if (!snap) return;
+    isApplyingHistoryRef.current = true;
+    if (typeof snap.initialBudget === 'number') setInitialBudget(snap.initialBudget);
+    if (Array.isArray(snap.inflowRows)) setInflowRows(snap.inflowRows);
+    if (Array.isArray(snap.expenseRows)) setExpenseRows(snap.expenseRows);
+    if (snap.signatories) setSignatories(snap.signatories);
+    if (snap.includedSignatories) setIncludedSignatories(snap.includedSignatories);
+    if (snap.transmittalDate !== undefined) setTransmittalDate(snap.transmittalDate);
+    if (snap.coordinatorName !== undefined) setCoordinatorName(snap.coordinatorName);
+    if (snap.coordinatorRole !== undefined) setCoordinatorRole(snap.coordinatorRole);
+    if (snap.salutation !== undefined) setSalutation(snap.salutation);
+    if (snap.periodDesc !== undefined) setPeriodDesc(snap.periodDesc);
+    if (snap.finalAsOf !== undefined) setFinalAsOf(snap.finalAsOf);
+    if (typeof snap.includeCc === 'boolean') setIncludeCc(snap.includeCc);
+    if (Array.isArray(snap.ccRecipients)) setCcRecipients(snap.ccRecipients);
+    if (snap.pageNumberStyle !== undefined) setPageNumberStyle(snap.pageNumberStyle);
+    if (snap.typography !== undefined) setTypography(snap.typography);
+
+    setTimeout(() => {
+      isApplyingHistoryRef.current = false;
+    }, 40);
+  }, []);
+
+  const handleUndo = useCallback(() => {
+    if (typingTimerRef.current) {
+      clearTimeout(typingTimerRef.current);
+      typingTimerRef.current = null;
+    }
+    if (typingBaselineRef.current) {
+      pushUndoSnapshot(typingBaselineRef.current);
+      typingBaselineRef.current = null;
+    }
+
+    if (undoStackRef.current.length === 0) return;
+
+    const previousSnap = undoStackRef.current.pop();
+    const currentSnap = captureReportState();
+
+    redoStackRef.current.push(currentSnap);
+    if (redoStackRef.current.length > MAX_HISTORY) {
+      redoStackRef.current.shift();
+    }
+
+    applyHistorySnapshot(previousSnap);
+    setCanUndo(undoStackRef.current.length > 0);
+    setCanRedo(redoStackRef.current.length > 0);
+  }, [captureReportState, applyHistorySnapshot, pushUndoSnapshot]);
+
+  const handleRedo = useCallback(() => {
+    if (redoStackRef.current.length === 0) return;
+
+    const nextSnap = redoStackRef.current.pop();
+    const currentSnap = captureReportState();
+
+    undoStackRef.current.push(currentSnap);
+    if (undoStackRef.current.length > MAX_HISTORY) {
+      undoStackRef.current.shift();
+    }
+
+    applyHistorySnapshot(nextSnap);
+    setCanUndo(undoStackRef.current.length > 0);
+    setCanRedo(redoStackRef.current.length > 0);
+  }, [captureReportState, applyHistorySnapshot]);
+
+  const handleUpdateInitialBudget = useCallback((val) => {
+    recordTypingMutation();
+    setInitialBudget(val);
+  }, [recordTypingMutation]);
+
   const toggleSignatory = (key) => {
+    pushUndoSnapshot();
     setIncludedSignatories((prev) => ({
       ...prev,
       [key]: !prev[key],
@@ -182,9 +343,6 @@ export default function DocumentPreviewModal({ isOpen, onClose, documentData, da
 
   // Export & Attachment Scope: 'APPEND' (Report + Receipts), 'NONE' (Report Only), 'STANDALONE' (Receipts Only)
   const [receiptsMode, setReceiptsMode] = useState('APPEND');
-
-  // Report Typography Mode (Patch 14): 'calibri' (Calibri 11pt) | 'times' (Times New Roman 12pt)
-  const [typography, setTypography] = useState('calibri');
 
   // 4-Stage Pre-Print Routing & Draft Persistence (Patch 10)
   const ROUTING_STAGES = [
@@ -719,48 +877,58 @@ export default function DocumentPreviewModal({ isOpen, onClose, documentData, da
   const cashOnHand = totalFunds - totalExpenses;
 
   const handleUpdateSignatory = (field, val) => {
+    recordTypingMutation();
     setSignatories(prev => ({ ...prev, [field]: val }));
   };
 
   const handleUpdateInflow = (idx, field, val) => {
+    recordTypingMutation();
     const next = [...inflowRows];
     next[idx] = { ...next[idx], [field]: field === 'amount' ? (parseFloat(val) || 0) : val };
     setInflowRows(next);
   };
 
   const handleAddInflow = () => {
+    pushUndoSnapshot();
     setInflowRows(prev => [...prev, { id: `manual-in-${Date.now()}`, desc: 'New Income Particulars', amount: 0, category: 'Income Collection' }]);
   };
 
   const handleRemoveInflow = (idx) => {
+    pushUndoSnapshot();
     setInflowRows(prev => prev.filter((_, i) => i !== idx));
   };
 
   const handleUpdateExpense = (idx, field, val) => {
+    recordTypingMutation();
     const next = [...expenseRows];
     next[idx] = { ...next[idx], [field]: field === 'amount' ? (parseFloat(val) || 0) : val };
     setExpenseRows(next);
   };
 
   const handleAddExpense = () => {
+    pushUndoSnapshot();
     setExpenseRows(prev => [...prev, { id: `manual-out-${Date.now()}`, desc: 'New Expense Particulars', amount: 0, category: 'Operating Expense' }]);
   };
 
   const handleRemoveExpense = (idx) => {
+    pushUndoSnapshot();
     setExpenseRows(prev => prev.filter((_, i) => i !== idx));
   };
 
   const handleUpdateCcRecipient = (idx, val) => {
+    recordTypingMutation();
     const next = [...ccRecipients];
     next[idx] = val;
     setCcRecipients(next);
   };
 
   const handleAddCcRecipient = () => {
+    pushUndoSnapshot();
     setCcRecipients(prev => [...prev, 'cc: ']);
   };
 
   const handleRemoveCcRecipient = (idx) => {
+    pushUndoSnapshot();
     setCcRecipients(prev => prev.filter((_, i) => i !== idx));
   };
 
@@ -879,6 +1047,10 @@ export default function DocumentPreviewModal({ isOpen, onClose, documentData, da
   const activeAdmins = adminOfficers.filter((adm) => includedSignatories[adm.key]);
 
   const handleExportDocx = async () => {
+    if (!canExportReport) {
+      alert('Report export is restricted by Administrator.');
+      return;
+    }
     try {
       setIsExporting(true);
       const allExportTransactions = [
@@ -1127,6 +1299,22 @@ export default function DocumentPreviewModal({ isOpen, onClose, documentData, da
   useEffect(() => {
     if (!isOpen) return;
     const handleKeyDown = (e) => {
+      // 1. Undo / Redo Shortcuts (up to 10 steps, active document-wide)
+      if ((e.ctrlKey || e.metaKey) && (e.key === 'z' || e.key === 'Z')) {
+        e.preventDefault();
+        if (e.shiftKey) {
+          handleRedo();
+        } else {
+          handleUndo();
+        }
+        return;
+      }
+      if ((e.ctrlKey || e.metaKey) && (e.key === 'y' || e.key === 'Y')) {
+        e.preventDefault();
+        handleRedo();
+        return;
+      }
+
       if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'SELECT') return;
 
       if (e.key === 'Escape') {
@@ -1153,7 +1341,7 @@ export default function DocumentPreviewModal({ isOpen, onClose, documentData, da
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isOpen, isSettingsOpen, isPageSelectorOpen, activePage, availablePages, currentPageIndex, handleCloseModal]);
+  }, [isOpen, isSettingsOpen, isPageSelectorOpen, activePage, availablePages, currentPageIndex, handleCloseModal, handleUndo, handleRedo]);
 
   // Touch Swipe Gesture on Mobile
   const touchStartX = useRef(null);
@@ -1241,6 +1429,30 @@ export default function DocumentPreviewModal({ isOpen, onClose, documentData, da
 
           {/* Right: Actions */}
           <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
+            {/* Undo / Redo Controls (Up to 10 steps) */}
+            <div className="flex items-center gap-0.5 bg-zinc-900 border border-zinc-800 rounded-lg p-0.5 shadow-xs">
+              <button
+                type="button"
+                onClick={handleUndo}
+                disabled={!canUndo}
+                className="p-1 sm:p-1.5 rounded-md text-zinc-300 hover:text-white hover:bg-zinc-800 disabled:opacity-30 disabled:pointer-events-none transition-colors"
+                title="Undo (Ctrl+Z) — up to 10 steps"
+                aria-label="Undo edit"
+              >
+                <Undo2 className="w-3.5 h-3.5" />
+              </button>
+              <button
+                type="button"
+                onClick={handleRedo}
+                disabled={!canRedo}
+                className="p-1 sm:p-1.5 rounded-md text-zinc-300 hover:text-white hover:bg-zinc-800 disabled:opacity-30 disabled:pointer-events-none transition-colors"
+                title="Redo (Ctrl+Y or Ctrl+Shift+Z) — up to 10 steps"
+                aria-label="Redo edit"
+              >
+                <Redo2 className="w-3.5 h-3.5" />
+              </button>
+            </div>
+
             {/* Save Draft Button (Patch 10) */}
             {!isProposal && (
               <Button
@@ -1299,12 +1511,21 @@ export default function DocumentPreviewModal({ isOpen, onClose, documentData, da
             <Button
               variant="primary"
               size="sm"
-              onClick={handleExportDocx}
+              disabled={!canExportReport}
+              onClick={canExportReport ? handleExportDocx : undefined}
               loading={isExporting}
-              leftIcon={<Download className="w-3.5 h-3.5" />}
-              className="active:scale-95 whitespace-nowrap text-xs px-2.5 sm:px-3.5 h-8 font-semibold shadow-md"
+              leftIcon={!canExportReport ? <Lock className="w-3.5 h-3.5" /> : <Download className="w-3.5 h-3.5" />}
+              className={`active:scale-95 whitespace-nowrap text-xs px-2.5 sm:px-3.5 h-8 font-semibold shadow-md ${
+                !canExportReport ? 'opacity-50 cursor-not-allowed select-none bg-zinc-700 text-zinc-400 hover:bg-zinc-700' : ''
+              }`}
+              title={!canExportReport ? 'Export restricted by Administrator' : 'Download editable 1:1 Microsoft Word (.docx) document'}
             >
-              {isExporting ? 'Exporting...' : (
+              {isExporting ? 'Exporting...' : !canExportReport ? (
+                <>
+                  <span className="hidden xs:inline">Export Locked</span>
+                  <span className="xs:hidden">Locked</span>
+                </>
+              ) : (
                 <>
                   <span className="hidden xs:inline">Export .docx</span>
                   <span className="xs:hidden">Export</span>
@@ -1867,7 +2088,7 @@ export default function DocumentPreviewModal({ isOpen, onClose, documentData, da
                       type="number"
                       step="0.01"
                       value={initialBudget}
-                      onChange={(e) => setInitialBudget(parseFloat(e.target.value) || 0)}
+                      onChange={(e) => handleUpdateInitialBudget(parseFloat(e.target.value) || 0)}
                       className="pdm-input text-right font-semibold"
                     />
                   </td>
@@ -2614,7 +2835,7 @@ export default function DocumentPreviewModal({ isOpen, onClose, documentData, da
                       type="number"
                       step="0.01"
                       value={initialBudget}
-                      onChange={(e) => setInitialBudget(parseFloat(e.target.value) || 0)}
+                      onChange={(e) => handleUpdateInitialBudget(parseFloat(e.target.value) || 0)}
                       className="w-full bg-zinc-900 ring-1 ring-zinc-800 rounded-lg px-3 py-1.5 text-xs text-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
                     />
                   </div>
@@ -2960,12 +3181,16 @@ export default function DocumentPreviewModal({ isOpen, onClose, documentData, da
                 <Button
                   variant="primary"
                   size="sm"
-                  onClick={handleExportDocx}
+                  disabled={!canExportReport}
+                  onClick={canExportReport ? handleExportDocx : undefined}
                   loading={isExporting}
-                  leftIcon={<Download className="w-4 h-4" />}
-                  className="w-full justify-center"
+                  leftIcon={!canExportReport ? <Lock className="w-4 h-4" /> : <Download className="w-4 h-4" />}
+                  className={`w-full justify-center ${
+                    !canExportReport ? 'opacity-50 cursor-not-allowed select-none bg-zinc-700 text-zinc-400 hover:bg-zinc-700' : ''
+                  }`}
+                  title={!canExportReport ? 'Export restricted by Administrator' : undefined}
                 >
-                  Export .docx Report
+                  {!canExportReport ? 'Export Restricted by Administrator' : 'Export .docx Report'}
                 </Button>
               </div>
             </div>

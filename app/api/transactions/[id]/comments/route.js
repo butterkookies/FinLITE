@@ -214,6 +214,9 @@ export async function POST(req, { params }) {
       if (insertError.code === '42501' || insertError.message?.toLowerCase().includes('row-level security')) {
         userFriendlyMessage = 'Database permission check failed: your login session is not yet linked to an authorized officer profile, or migration 021 must be applied in Supabase.';
       } else if (insertError.message) {
+        if (insertError.message.includes('content')) {
+          userFriendlyMessage = 'Database trigger error: Please run migration 036_fix_transaction_comments_trigger.sql in your Supabase SQL Editor to fix fn_sync_transaction_comments_columns.';
+        } else
         userFriendlyMessage = insertError.message;
       }
 

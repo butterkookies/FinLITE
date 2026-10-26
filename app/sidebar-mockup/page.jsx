@@ -20,6 +20,7 @@ import ModuleErrorBoundary from '@/components/common/ModuleErrorBoundary';
 import { createClient } from '@/lib/supabase/client';
 import { isSuperAdminEmail } from '@/lib/config/admin';
 import { toCentavos, fromCentavos, denomCodeToCountKey } from '@/lib/utils/currency';
+import { logAuditEvent } from '@/lib/supabase/audit';
 import { validateTransactionAmount, validateOutflowBalance } from '@/lib/utils/validation';
 import { Card, Badge, Button } from '@/components/ui';
 

@@ -37,12 +37,17 @@ import {
   Edit2,
   Trash2,
   MoreHorizontal,
-  Lock
+  Lock,
+  Archive,
+  RotateCcw,
+  Ban
 } from 'lucide-react';
 import { formatPHP } from '@/lib/utils/currency';
 import { compressReceiptImage } from '@/lib/utils/compression';
 import { Button, Badge, Input, Card, Modal } from '@/components/ui';
 import TransactionCommentsDrawer from '@/components/ledger/TransactionCommentsDrawer';
+import VoidTransactionModal from '@/components/ledger/VoidTransactionModal';
+import RestoreTransactionModal from '@/components/ledger/RestoreTransactionModal';
 import UserAvatar from '@/components/common/UserAvatar';
 
 import {
@@ -78,6 +83,8 @@ export default function TransactionTable({
   onAuditTransaction = null,
   onEditTransaction = null,
   onDeleteTransaction = null,
+  onVoidTransaction = null,
+  onRestoreTransaction = null,
 }) {
   const canViewAudit = ['admin', 'auditor', 'treasurer', 'president', 'vice_president', 'adviser'].includes(currentRole);
 
@@ -97,11 +104,17 @@ export default function TransactionTable({
     ? Boolean(userPermissions.export_reports)
     : true;
 
-  const canDelete = Boolean(onDeleteTransaction) && (
+  const voidAction = onVoidTransaction || onDeleteTransaction;
+  const canDelete = Boolean(voidAction) && (
     userPermissions
       ? Boolean(userPermissions.delete_transaction)
       : (currentRole === 'admin' || currentRole === 'superadmin')
   );
+  const canRestore = Boolean(onRestoreTransaction) && canDelete;
+
+  const voidedCount = useMemo(() => {
+    return transactions.filter((t) => t.status === 'VOIDED' || t.status === 'ARCHIVED').length;
+  }, [transactions]);
   const [filterType, setFilterType] = useState('ALL');
   const [searchQuery, setSearchQuery] = useState('');
   const [viewMode, setViewMode] = useState('auto'); // 'auto' (table on desktop, cards on mobile) | 'table' | 'cards'
@@ -128,6 +141,10 @@ export default function TransactionTable({
   const [isSubmittingSettle, setIsSubmittingSettle] = useState(false);
   const [settleError, setSettleError] = useState(null);
   const [settleToast, setSettleToast] = useState(null);
+
+  // Void & Restore Modal states
+  const [voidingTx, setVoidingTx] = useState(null);
+  const [restoringTx, setRestoringTx] = useState(null);
 
   // Expanded transaction details modal state
   const [selectedTx, setSelectedTx] = useState(null);
@@ -234,8 +251,12 @@ export default function TransactionTable({
     };
   }, [transactions]);
 
-  const isAuthorized = currentRole === 'admin' || currentRole === 'treasurer' || currentRole === 'auditor';
-  const canSettleAbono = currentRole === 'admin' || currentRole === 'treasurer' || currentRole === 'president' || currentRole === 'vice_president' || currentRole === 'adviser';
+  const isAuthorized = userPermissions
+    ? Boolean(userPermissions.record_inflow || userPermissions.record_outflow || userPermissions.record_abono)
+    : (currentRole === 'admin' || currentRole === 'treasurer' || currentRole === 'auditor');
+  const canSettleAbono = userPermissions
+    ? Boolean(userPermissions.record_outflow && userPermissions.record_abono)
+    : (currentRole === 'admin' || currentRole === 'treasurer' || currentRole === 'president' || currentRole === 'vice_president' || currentRole === 'adviser');
 
   const handleConfirmSettle = async () => {
     if (!settleTx) return;
@@ -371,8 +392,15 @@ export default function TransactionTable({
   const filtered = useMemo(() => {
     const query = searchQuery.trim().toLowerCase();
     return transactions.filter((tx) => {
+      const isVoided = tx.status === 'VOIDED' || tx.status === 'ARCHIVED';
+      if (filterType === 'VOIDED') {
+        if (!isVoided) return false;
+      } else {
+        if (isVoided) return false;
+      }
+
       const matchesType = 
-        filterType === 'ALL' ? true :
+        filterType === 'ALL' || filterType === 'VOIDED' ? true :
         filterType === 'REIMBURSEMENT' ? tx.is_reimbursement :
         filterType === 'RECEIVABLE' ? (
           tx.type === 'RECEIVABLE' ||
@@ -392,7 +420,8 @@ export default function TransactionTable({
         (tx.description && tx.description.toLowerCase().includes(query)) ||
         (tx.event_name && tx.event_name.toLowerCase().includes(query)) ||
         (tx.reimbursement_recipient && tx.reimbursement_recipient.toLowerCase().includes(query)) ||
-        (tx.category_name && tx.category_name.toLowerCase().includes(query))
+        (tx.category_name && tx.category_name.toLowerCase().includes(query)) ||
+        (tx.void_reason && tx.void_reason.toLowerCase().includes(query))
       );
     });
   }, [transactions, filterType, searchQuery]);
@@ -474,7 +503,7 @@ export default function TransactionTable({
           )}
 
           {/* Review & Export Report Button */}
-          {canExport && (
+          {canExport ? (
             <Button
               variant="secondary"
               size="sm"
@@ -485,10 +514,21 @@ export default function TransactionTable({
             >
               <span>Preview Report</span>
             </Button>
+          ) : (
+            <Button
+              variant="secondary"
+              size="sm"
+              disabled={true}
+              className={`w-full sm:w-auto justify-center opacity-50 cursor-not-allowed select-none ${!canViewAudit ? 'col-span-2' : ''}`}
+              leftIcon={<Lock className="w-3.5 h-3.5 text-zinc-400 shrink-0" />}
+              title="Report preview and export restricted by Administrator"
+            >
+              <span>Preview Report (Restricted)</span>
+            </Button>
           )}
 
           {/* New Transaction Button (Permissions-driven) */}
-          {canRecord && (
+          {canRecord ? (
             <Button
               variant="primary"
               size="sm"
@@ -497,6 +537,17 @@ export default function TransactionTable({
               leftIcon={<Plus className="w-3.5 h-3.5 shrink-0 stroke-[2.5]" />}
             >
               <span>Record Transaction</span>
+            </Button>
+          ) : (
+            <Button
+              variant="primary"
+              size="sm"
+              disabled={true}
+              className="col-span-2 sm:col-auto w-full sm:w-auto justify-center opacity-50 cursor-not-allowed select-none"
+              leftIcon={<Lock className="w-3.5 h-3.5 shrink-0 stroke-[2.5]" />}
+              title="Transaction recording restricted by Administrator"
+            >
+              <span>Record Entry (Restricted)</span>
             </Button>
           )}
         </div>
@@ -526,6 +577,7 @@ export default function TransactionTable({
               { id: 'OUTFLOW', label: 'Outflows', fullLabel: 'Outflows' },
               { id: 'REIMBURSEMENT', label: 'Abono', fullLabel: 'Pending Abono' },
               { id: 'RECEIVABLE', label: 'Debts', fullLabel: 'Receivables' },
+              { id: 'VOIDED', label: 'Archived', fullLabel: 'Archived / Voided', count: voidedCount },
             ].map((tab) => {
               const isActive = filterType === tab.id;
               return (
@@ -534,14 +586,21 @@ export default function TransactionTable({
                   type="button"
                   onClick={() => setFilterType(tab.id)}
                   title={tab.fullLabel}
-                  className={`h-7 px-1.5 sm:px-3 text-[11px] sm:text-xs font-semibold whitespace-nowrap transition-colors duration-150 rounded-md text-center flex items-center justify-center cursor-pointer ${
+                  className={`h-7 px-1.5 sm:px-3 text-[11px] sm:text-xs font-semibold whitespace-nowrap transition-colors duration-150 rounded-md text-center flex items-center justify-center gap-1 cursor-pointer ${
                     isActive
-                      ? 'bg-emerald-600 text-white shadow-xs'
+                      ? (tab.id === 'VOIDED' ? 'bg-amber-600 text-white shadow-xs' : 'bg-emerald-600 text-white shadow-xs')
                       : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-200/60 dark:hover:bg-zinc-800'
                   }`}
                 >
                   <span className="sm:hidden">{tab.label}</span>
                   <span className="hidden sm:inline">{tab.fullLabel}</span>
+                  {tab.count != null && tab.count > 0 && (
+                    <span className={`text-[9px] px-1 py-0.2 rounded-full font-bold leading-none ${
+                      isActive ? 'bg-white/25 text-white' : 'bg-zinc-200 dark:bg-zinc-700 text-zinc-700 dark:text-zinc-300'
+                    }`}>
+                      {tab.count}
+                    </span>
+                  )}
                 </button>
               );
             })}
@@ -708,6 +767,13 @@ export default function TransactionTable({
                         </Badge>
                       )}
 
+                      {(tx.status === 'VOIDED' || tx.status === 'ARCHIVED') && (
+                        <Badge variant="rose" size="xs" title={tx.void_reason ? `Voided: ${tx.void_reason}` : 'Voided Entry'}>
+                          <Ban className="w-2.5 h-2.5 shrink-0" />
+                          <span>Voided</span>
+                        </Badge>
+                      )}
+
                       {tx.is_reimbursement && (
                         <Badge 
                           variant={tx.status === 'REIMBURSED' ? 'emerald' : 'amber'} 
@@ -834,10 +900,21 @@ export default function TransactionTable({
                             <span>Settle</span>
                           </Button>
                         );
-                      } else if (canAudit && (tx.status === 'PENDING_AUDIT' || tx.status === 'FLAGGED')) {
+                      } else if (
+                        canAudit && (
+                          tx.status === 'PENDING_AUDIT' ||
+                          tx.status === 'FLAGGED' ||
+                          tx.status === 'REIMBURSED' ||
+                          tx.status === 'PENDING_REIMBURSEMENT' ||
+                          tx.status === 'COMPLETED' ||
+                          tx.is_reimbursement ||
+                          tx.category === 'RECEIVABLES' ||
+                          tx.type === 'RECEIVABLE'
+                        )
+                      ) {
                         primaryButton = (
                           <Button
-                            variant={tx.status === 'FLAGGED' ? 'rose-subtle' : 'amber-subtle'}
+                            variant={tx.status === 'FLAGGED' ? 'rose-subtle' : tx.status === 'AUDITED' ? 'emerald-subtle' : 'amber-subtle'}
                             size="xs"
                             onClick={(e) => {
                               e.stopPropagation();
@@ -1359,8 +1436,11 @@ export default function TransactionTable({
 
       {/* Receipt Modal Preview (Multi-Receipt Carousel) */}
       {selectedReceipt && (() => {
+        const txObj = (typeof selectedReceipt === 'object' && selectedReceipt !== null)
+          ? selectedReceipt
+          : (transactions.find((t) => t.id === selectedReceipt) || {});
         const viewReceipts = getTransactionReceipts(selectedReceipt);
-        const currentPhotoUrl = viewReceipts[activePhotoIndex] || viewReceipts[0] || selectedReceipt.receipt_url;
+        const currentPhotoUrl = viewReceipts[activePhotoIndex] || viewReceipts[0] || txObj.receipt_url || (typeof selectedReceipt === 'string' ? selectedReceipt : null);
 
         const handlePrevPhoto = (e) => {
           e.stopPropagation();
@@ -1387,20 +1467,20 @@ export default function TransactionTable({
                     Official Receipt
                   </Badge>
                   <span className="text-xs text-zinc-500 dark:text-zinc-400 font-medium">
-                    {formatFriendlyDate(selectedReceipt.transaction_date)}
+                    {formatFriendlyDate(txObj.transaction_date)}
                   </span>
                 </div>
                 <h3 className="text-base font-bold text-zinc-900 dark:text-zinc-100 mt-1 truncate">
-                  {selectedReceipt.title}
+                  {txObj.title || 'Official Receipt Proof'}
                 </h3>
                 <p className="text-xs text-zinc-600 dark:text-zinc-400 mt-0.5">
-                  Amount: <span className="tabular-nums font-bold text-zinc-900 dark:text-zinc-100">{formatPHP(selectedReceipt.amount)}</span>
+                  Amount: <span className="tabular-nums font-bold text-zinc-900 dark:text-zinc-100">{formatPHP(txObj.amount ?? 0)}</span>
                 </p>
                 {(() => {
-                  const loggerName = selectedReceipt.logged_by_name || selectedReceipt.logged_by_profile?.full_name;
-                  const loggerRole = selectedReceipt.logged_by_role || selectedReceipt.logged_by_profile?.role;
-                  const loggerAvatar = selectedReceipt.logged_by_avatar_url || selectedReceipt.logged_by_profile?.avatar_url;
-                  if (!loggerName && !loggerRole && !selectedReceipt.logged_by) return null;
+                  const loggerName = txObj.logged_by_name || txObj.logged_by_profile?.full_name;
+                  const loggerRole = txObj.logged_by_role || txObj.logged_by_profile?.role;
+                  const loggerAvatar = txObj.logged_by_avatar_url || txObj.logged_by_profile?.avatar_url;
+                  if (!loggerName && !loggerRole && !txObj.logged_by) return null;
                   return (
                     <div className="flex items-center gap-1.5 text-[11px] text-zinc-600 dark:text-zinc-400 mt-1.5 pt-1.5 border-t border-zinc-200 dark:border-zinc-800">
                       <UserAvatar
@@ -1513,24 +1593,38 @@ export default function TransactionTable({
               </a>
 
               {/* Add Photo Button if < 3 and authorized */}
-              {isAuthorized && viewReceipts.length < 3 && (
-                <Button
-                  type="button"
-                  variant="emerald-subtle"
-                  size="sm"
-                  onClick={() => {
-                    const txToAttach = selectedReceipt;
-                    setSelectedReceipt(null);
-                    setAttachTx(txToAttach);
-                    setAttachFiles([]);
-                    setAttachPreviews([]);
-                    setAttachError(null);
-                  }}
-                  title="Add another photo proof (up to 3 max)"
-                >
-                  <Plus className="w-3.5 h-3.5" />
-                  <span>+ Add Photo ({viewReceipts.length}/3)</span>
-                </Button>
+              {viewReceipts.length < 3 && (
+                canRecord ? (
+                  <Button
+                    type="button"
+                    variant="emerald-subtle"
+                    size="sm"
+                    onClick={() => {
+                      const txToAttach = txObj;
+                      setSelectedReceipt(null);
+                      setAttachTx(txToAttach);
+                      setAttachFiles([]);
+                      setAttachPreviews([]);
+                      setAttachError(null);
+                    }}
+                    title="Add another photo proof (up to 3 max)"
+                  >
+                    <Plus className="w-3.5 h-3.5" />
+                    <span>+ Add Photo ({viewReceipts.length}/3)</span>
+                  </Button>
+                ) : (
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    size="sm"
+                    disabled={true}
+                    className="opacity-50 cursor-not-allowed select-none"
+                    leftIcon={<Lock className="w-3.5 h-3.5 text-zinc-400 shrink-0" />}
+                    title="Attaching receipts is restricted by Administrator"
+                  >
+                    <span>Add Photo (Restricted)</span>
+                  </Button>
+                )
               )}
 
               <Button
@@ -1721,28 +1815,42 @@ export default function TransactionTable({
                     <span>Remarks {Boolean(commentCounts[tx.id]) ? `(${commentCounts[tx.id]})` : ''}</span>
                   </Button>
 
-                  {txReceipts.length === 0 && canRecord && onAttachReceipt && (
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => {
-                        const target = tx;
-                        setSelectedTx(null);
-                        setAttachTx(target);
-                        setAttachFiles([]);
-                        setAttachPreviews([]);
-                        setAttachError(null);
-                      }}
-                      leftIcon={<Camera className="w-3.5 h-3.5" />}
-                    >
-                      <span>Attach Proof</span>
-                    </Button>
+                  {txReceipts.length === 0 && onAttachReceipt && (
+                    canRecord ? (
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => {
+                          const target = tx;
+                          setSelectedTx(null);
+                          setAttachTx(target);
+                          setAttachFiles([]);
+                          setAttachPreviews([]);
+                          setAttachError(null);
+                        }}
+                        leftIcon={<Camera className="w-3.5 h-3.5" />}
+                      >
+                        <span>Attach Proof</span>
+                      </Button>
+                    ) : (
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        disabled={true}
+                        className="opacity-50 cursor-not-allowed select-none text-zinc-400"
+                        leftIcon={<Lock className="w-3.5 h-3.5 shrink-0" />}
+                        title="Attaching receipts is restricted by Administrator"
+                      >
+                        <span>Attach Proof (Restricted)</span>
+                      </Button>
+                    )
                   )}
                 </div>
 
                 <div className="flex items-center gap-2">
-                  {canEdit && (
+                  {canEdit ? (
                     <Button
                       type="button"
                       variant={tx.status === 'FLAGGED' ? 'rose-subtle' : 'secondary'}
@@ -1756,6 +1864,18 @@ export default function TransactionTable({
                     >
                       <span>{tx.status === 'FLAGGED' ? 'Revise Transaction' : 'Edit Details'}</span>
                     </Button>
+                  ) : (
+                    <Button
+                      type="button"
+                      variant="secondary"
+                      size="sm"
+                      disabled={true}
+                      className="opacity-50 cursor-not-allowed select-none"
+                      leftIcon={<Lock className="w-3.5 h-3.5 text-zinc-400 shrink-0" />}
+                      title="Editing transactions is restricted by Administrator"
+                    >
+                      <span>Edit Details (Restricted)</span>
+                    </Button>
                   )}
 
                   {tx.status === 'FLAGGED' && !canEdit && (
@@ -1768,7 +1888,7 @@ export default function TransactionTable({
                     </span>
                   )}
 
-                  {canAudit && (
+                  {canAudit ? (
                     <Button
                       type="button"
                       variant="primary"
@@ -1782,25 +1902,68 @@ export default function TransactionTable({
                     >
                       <span>Audit &amp; Verify</span>
                     </Button>
-                  )}
-
-                  {isPendingAbono && canSettleAbono && (
+                  ) : (
                     <Button
                       type="button"
-                      variant="amber-subtle"
+                      variant="secondary"
                       size="sm"
-                      onClick={() => {
-                        setSettleTx(tx);
-                        setSettleAmount(Number(tx.amount || 0).toString());
-                        setSettleError(null);
-                      }}
+                      disabled={true}
+                      className="opacity-50 cursor-not-allowed select-none"
+                      leftIcon={<Lock className="w-3.5 h-3.5 text-zinc-400 shrink-0" />}
+                      title="Auditing transactions is restricted by Administrator"
                     >
-                      <HandCoins className="w-3.5 h-3.5" />
-                      <span>Disburse Refund ({formatPHP(tx.amount)})</span>
+                      <span>Audit &amp; Verify (Restricted)</span>
                     </Button>
                   )}
 
-                  {canDelete && (
+                  {isPendingAbono && (
+                    canSettleAbono ? (
+                      <Button
+                        type="button"
+                        variant="amber-subtle"
+                        size="sm"
+                        onClick={() => {
+                          setSettleTx(tx);
+                          setSettleAmount(Number(tx.amount || 0).toString());
+                          setSettleError(null);
+                        }}
+                      >
+                        <HandCoins className="w-3.5 h-3.5" />
+                        <span>Disburse Refund ({formatPHP(tx.amount)})</span>
+                      </Button>
+                    ) : (
+                      <Button
+                        type="button"
+                        variant="secondary"
+                        size="sm"
+                        disabled={true}
+                        className="opacity-50 cursor-not-allowed select-none text-zinc-400"
+                        leftIcon={<Lock className="w-3.5 h-3.5 shrink-0" />}
+                        title="Disbursing reimbursement refunds is restricted by Administrator"
+                      >
+                        <span>Disburse Refund (Restricted)</span>
+                      </Button>
+                    )
+                  )}
+
+                  {tx && (tx.status === 'VOIDED' || tx.status === 'ARCHIVED') ? (
+                    canRestore ? (
+                      <Button
+                        type="button"
+                        variant="secondary"
+                        size="sm"
+                        onClick={() => {
+                          const target = tx;
+                          setSelectedTx(null);
+                          setRestoringTx(target);
+                        }}
+                        className="text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-950/30"
+                        leftIcon={<RotateCcw className="w-3.5 h-3.5" />}
+                      >
+                        <span>Restore to Ledger</span>
+                      </Button>
+                    ) : null
+                  ) : canDelete ? (
                     <Button
                       type="button"
                       variant="ghost"
@@ -1808,14 +1971,24 @@ export default function TransactionTable({
                       onClick={() => {
                         const target = tx;
                         setSelectedTx(null);
-                        if (window.confirm(`Are you sure you want to delete transaction "${target.title}"?`)) {
-                          onDeleteTransaction(target);
-                        }
+                        setVoidingTx(target);
                       }}
-                      className="text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/30"
-                      leftIcon={<Trash2 className="w-3.5 h-3.5" />}
+                      className="text-amber-600 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-950/30"
+                      leftIcon={<Archive className="w-3.5 h-3.5" />}
                     >
-                      <span>Delete</span>
+                      <span>Void / Archive</span>
+                    </Button>
+                  ) : (
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      disabled={true}
+                      className="opacity-50 cursor-not-allowed select-none text-zinc-400"
+                      leftIcon={<Lock className="w-3.5 h-3.5 shrink-0" />}
+                      title="Voiding/Archiving transactions is restricted by Administrator"
+                    >
+                      <span>Void (Restricted)</span>
                     </Button>
                   )}
                 </div>
@@ -1871,6 +2044,28 @@ export default function TransactionTable({
             {/* Scrollable Modal Content: Clean Single-Column Flow */}
             <div className="space-y-5 text-xs">
               
+              {(tx.status === 'VOIDED' || tx.status === 'ARCHIVED') && (
+                <div className="p-3.5 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-700 dark:text-rose-300 text-xs flex items-start gap-2.5 shadow-2xs">
+                  <Ban className="w-4 h-4 shrink-0 text-rose-500 mt-0.5" />
+                  <div className="space-y-1">
+                    <div className="font-bold flex items-center gap-1.5">
+                      <span>Voided &amp; Archived Entry</span>
+                      <span className="text-[10px] font-normal px-1.5 py-0.2 rounded bg-rose-200 dark:bg-rose-900/60 text-rose-800 dark:text-rose-200">
+                        Zero Ledger Impact
+                      </span>
+                    </div>
+                    <div className="text-zinc-600 dark:text-zinc-400">
+                      This transaction was archived from the active financial ledger
+                      {tx.archived_at ? ` on ${formatFriendlyDate(tx.archived_at)}` : ''}.
+                      {tx.void_reason ? ` Reason: "${tx.void_reason}".` : ''}
+                    </div>
+                    <div className="text-[11px] text-zinc-500 dark:text-zinc-500">
+                      Excluded from current Cash on Hand balances, official income statements, and liquidation exports.
+                    </div>
+                  </div>
+                </div>
+              )}
+
               {/* Deck 0: Borderless Financial Statement Hero Header */}
               <div className="pb-4 border-b border-zinc-100 dark:border-zinc-800">
                 <span className="text-[10px] font-bold uppercase tracking-wider block text-zinc-400 dark:text-zinc-500">
@@ -2073,21 +2268,35 @@ export default function TransactionTable({
                     </span>
                   </div>
 
-                  {isAuthorized && txReceipts.length < 3 && (
-                    <Button
-                      type="button"
-                      variant="emerald-subtle"
-                      size="xs"
-                      onClick={() => {
-                        setAttachTx(tx);
-                        setAttachFiles([]);
-                        setAttachPreviews([]);
-                        setAttachError(null);
-                      }}
-                    >
-                      <Plus className="w-3 h-3" />
-                      <span>Add Photo</span>
-                    </Button>
+                  {txReceipts.length < 3 && (
+                    canRecord ? (
+                      <Button
+                        type="button"
+                        variant="emerald-subtle"
+                        size="xs"
+                        onClick={() => {
+                          setAttachTx(tx);
+                          setAttachFiles([]);
+                          setAttachPreviews([]);
+                          setAttachError(null);
+                        }}
+                      >
+                        <Plus className="w-3 h-3" />
+                        <span>Add Photo</span>
+                      </Button>
+                    ) : (
+                      <Button
+                        type="button"
+                        variant="secondary"
+                        size="xs"
+                        disabled={true}
+                        className="opacity-50 cursor-not-allowed select-none"
+                        leftIcon={<Lock className="w-3 h-3 text-zinc-400 shrink-0" />}
+                        title="Attaching receipts is restricted by Administrator"
+                      >
+                        <span>Add Photo (Restricted)</span>
+                      </Button>
+                    )
                   )}
                 </div>
 
@@ -2387,7 +2596,7 @@ export default function TransactionTable({
               {/* Action Buttons */}
               <div className="space-y-0.5">
                 {/* 1. Audit & Verify */}
-                {canAudit && (menuTx.status === 'PENDING_AUDIT' || menuTx.status === 'FLAGGED') && onAuditTransaction && (
+                {canAudit && onAuditTransaction ? (
                   <button
                     type="button"
                     onClick={() => {
@@ -2401,29 +2610,57 @@ export default function TransactionTable({
                     <ShieldCheck className="w-4 h-4 shrink-0" />
                     <span>Audit &amp; Verify</span>
                   </button>
-                )}
+                ) : (menuTx.status === 'PENDING_AUDIT' || menuTx.status === 'FLAGGED') ? (
+                  <div
+                    role="menuitem"
+                    aria-disabled="true"
+                    title="Audit & verification restricted by Administrator"
+                    className="w-full flex items-center justify-between px-3 py-2 sm:py-1.5 rounded-xl text-xs font-medium text-zinc-400 dark:text-zinc-500 opacity-60 cursor-not-allowed select-none min-h-[44px] sm:min-h-0"
+                  >
+                    <div className="flex items-center gap-2.5">
+                      <Lock className="w-4 h-4 shrink-0 text-zinc-400" />
+                      <span>Audit &amp; Verify</span>
+                    </div>
+                    <span className="text-[10px] px-1.5 py-0.5 rounded bg-zinc-200 dark:bg-zinc-800 text-zinc-500 font-normal">Locked</span>
+                  </div>
+                ) : null}
 
                 {/* 2. Disburse / Settle Abono */}
-                {menuTx.is_reimbursement && menuTx.status === 'PENDING_REIMBURSEMENT' && canSettleAbono && (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      const target = menuTx;
-                      setMenuTx(null);
-                      setMenuCoords(null);
-                      setSettleTx(target);
-                      setSettleAmount(Number(target.amount || 0).toString());
-                      setSettleError(null);
-                    }}
-                    className="w-full flex items-center gap-2.5 px-3 py-2 sm:py-1.5 rounded-xl text-xs font-semibold text-amber-600 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-950/30 transition-colors min-h-[44px] sm:min-h-0 text-left cursor-pointer"
-                  >
-                    <HandCoins className="w-4 h-4 shrink-0" />
-                    <span>Disburse Abono Refund</span>
-                  </button>
+                {menuTx.is_reimbursement && menuTx.status === 'PENDING_REIMBURSEMENT' && (
+                  canSettleAbono ? (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const target = menuTx;
+                        setMenuTx(null);
+                        setMenuCoords(null);
+                        setSettleTx(target);
+                        setSettleAmount(Number(target.amount || 0).toString());
+                        setSettleError(null);
+                      }}
+                      className="w-full flex items-center gap-2.5 px-3 py-2 sm:py-1.5 rounded-xl text-xs font-semibold text-amber-600 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-950/30 transition-colors min-h-[44px] sm:min-h-0 text-left cursor-pointer"
+                    >
+                      <HandCoins className="w-4 h-4 shrink-0" />
+                      <span>Disburse Abono Refund</span>
+                    </button>
+                  ) : (
+                    <div
+                      role="menuitem"
+                      aria-disabled="true"
+                      title="Disbursing reimbursement refunds is restricted by Administrator"
+                      className="w-full flex items-center justify-between px-3 py-2 sm:py-1.5 rounded-xl text-xs font-medium text-zinc-400 dark:text-zinc-500 opacity-60 cursor-not-allowed select-none min-h-[44px] sm:min-h-0"
+                    >
+                      <div className="flex items-center gap-2.5">
+                        <Lock className="w-4 h-4 shrink-0 text-zinc-400" />
+                        <span>Disburse Abono Refund</span>
+                      </div>
+                      <span className="text-[10px] px-1.5 py-0.5 rounded bg-zinc-200 dark:bg-zinc-800 text-zinc-500 font-normal">Locked</span>
+                    </div>
+                  )
                 )}
 
                 {/* 3. Revise / Edit Details */}
-                {canEdit && onEditTransaction && (
+                {canEdit && onEditTransaction ? (
                   <button
                     type="button"
                     onClick={() => {
@@ -2437,6 +2674,19 @@ export default function TransactionTable({
                     <Edit2 className="w-4 h-4 text-zinc-400 shrink-0" />
                     <span>{menuTx.status === 'FLAGGED' ? 'Revise Transaction' : 'Edit Details'}</span>
                   </button>
+                ) : (
+                  <div
+                    role="menuitem"
+                    aria-disabled="true"
+                    title="Editing transactions is restricted by Administrator"
+                    className="w-full flex items-center justify-between px-3 py-2 sm:py-1.5 rounded-xl text-xs font-medium text-zinc-400 dark:text-zinc-500 opacity-60 cursor-not-allowed select-none min-h-[44px] sm:min-h-0"
+                  >
+                    <div className="flex items-center gap-2.5">
+                      <Lock className="w-4 h-4 shrink-0 text-zinc-400" />
+                      <span>{menuTx.status === 'FLAGGED' ? 'Revise Transaction' : 'Edit Details'}</span>
+                    </div>
+                    <span className="text-[10px] px-1.5 py-0.5 rounded bg-zinc-200 dark:bg-zinc-800 text-zinc-500 font-normal">Locked</span>
+                  </div>
                 )}
 
                 {/* 4. Receipts */}
@@ -2447,7 +2697,7 @@ export default function TransactionTable({
                       <button
                         type="button"
                         onClick={() => {
-                          const target = receipts[0];
+                          const target = menuTx;
                           setMenuTx(null);
                           setMenuCoords(null);
                           setSelectedReceipt(target);
@@ -2460,24 +2710,40 @@ export default function TransactionTable({
                       </button>
                     );
                   }
-                  if (canRecord && onAttachReceipt) {
+                  if (onAttachReceipt) {
+                    if (canRecord) {
+                      return (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const target = menuTx;
+                            setMenuTx(null);
+                            setMenuCoords(null);
+                            setAttachTx(target);
+                            setAttachFiles([]);
+                            setAttachPreviews([]);
+                            setAttachError(null);
+                          }}
+                          className="w-full flex items-center gap-2.5 px-3 py-2 sm:py-1.5 rounded-xl text-xs font-medium text-zinc-700 dark:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors min-h-[44px] sm:min-h-0 text-left cursor-pointer"
+                        >
+                          <Camera className="w-4 h-4 text-zinc-400 shrink-0" />
+                          <span>Attach Receipt Proof</span>
+                        </button>
+                      );
+                    }
                     return (
-                      <button
-                        type="button"
-                        onClick={() => {
-                          const target = menuTx;
-                          setMenuTx(null);
-                          setMenuCoords(null);
-                          setAttachTx(target);
-                          setAttachFiles([]);
-                          setAttachPreviews([]);
-                          setAttachError(null);
-                        }}
-                        className="w-full flex items-center gap-2.5 px-3 py-2 sm:py-1.5 rounded-xl text-xs font-medium text-zinc-700 dark:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors min-h-[44px] sm:min-h-0 text-left cursor-pointer"
+                      <div
+                        role="menuitem"
+                        aria-disabled="true"
+                        title="Attaching receipts is restricted by Administrator"
+                        className="w-full flex items-center justify-between px-3 py-2 sm:py-1.5 rounded-xl text-xs font-medium text-zinc-400 dark:text-zinc-500 opacity-60 cursor-not-allowed select-none min-h-[44px] sm:min-h-0"
                       >
-                        <Camera className="w-4 h-4 text-zinc-400 shrink-0" />
-                        <span>Attach Receipt Proof</span>
-                      </button>
+                        <div className="flex items-center gap-2.5">
+                          <Lock className="w-4 h-4 shrink-0 text-zinc-400" />
+                          <span>Attach Receipt Proof</span>
+                        </div>
+                        <span className="text-[10px] px-1.5 py-0.5 rounded bg-zinc-200 dark:bg-zinc-800 text-zinc-500 font-normal">Locked</span>
+                      </div>
                     );
                   }
                   return null;
@@ -2519,32 +2785,81 @@ export default function TransactionTable({
                   <span>View Full Details</span>
                 </button>
 
-                {/* 7. Delete Record (Authorized officers with delete permission) */}
-                {canDelete && (
-                  <>
-                    <div className="my-1 border-t border-zinc-100 dark:border-zinc-800" />
+                {/* 7. Void or Restore Record */}
+                <div className="my-1 border-t border-zinc-100 dark:border-zinc-800" />
+                {menuTx && (menuTx.status === 'VOIDED' || menuTx.status === 'ARCHIVED') ? (
+                  canRestore ? (
                     <button
                       type="button"
                       onClick={() => {
                         const target = menuTx;
                         setMenuTx(null);
                         setMenuCoords(null);
-                        if (window.confirm(`Are you sure you want to delete transaction "${target.title}"?`)) {
-                          onDeleteTransaction(target);
-                        }
+                        setRestoringTx(target);
                       }}
-                      className="w-full flex items-center gap-2.5 px-3 py-2 sm:py-1.5 rounded-xl text-xs font-semibold text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/30 transition-colors min-h-[44px] sm:min-h-0 text-left cursor-pointer"
+                      className="w-full flex items-center gap-2.5 px-3 py-2 sm:py-1.5 rounded-xl text-xs font-semibold text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-950/30 transition-colors min-h-[44px] sm:min-h-0 text-left cursor-pointer"
                     >
-                      <Trash2 className="w-4 h-4 shrink-0" />
-                      <span>Delete Transaction</span>
+                      <RotateCcw className="w-4 h-4 shrink-0" />
+                      <span>Restore Transaction</span>
                     </button>
-                  </>
+                  ) : null
+                ) : canDelete ? (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const target = menuTx;
+                      setMenuTx(null);
+                      setMenuCoords(null);
+                      setVoidingTx(target);
+                    }}
+                    className="w-full flex items-center gap-2.5 px-3 py-2 sm:py-1.5 rounded-xl text-xs font-semibold text-amber-600 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-950/30 transition-colors min-h-[44px] sm:min-h-0 text-left cursor-pointer"
+                  >
+                    <Archive className="w-4 h-4 shrink-0" />
+                    <span>Void / Archive Entry</span>
+                  </button>
+                ) : (
+                  <div
+                    role="menuitem"
+                    aria-disabled="true"
+                    title="Voiding/Archiving transactions is restricted by Administrator"
+                    className="w-full flex items-center justify-between px-3 py-2 sm:py-1.5 rounded-xl text-xs font-medium text-zinc-400 dark:text-zinc-500 opacity-60 cursor-not-allowed select-none min-h-[44px] sm:min-h-0"
+                  >
+                    <div className="flex items-center gap-2.5">
+                      <Lock className="w-4 h-4 shrink-0 text-zinc-400" />
+                      <span>Void Entry</span>
+                    </div>
+                    <span className="text-[10px] px-1.5 py-0.5 rounded bg-zinc-200 dark:bg-zinc-800 text-zinc-500 font-normal">Locked</span>
+                  </div>
                 )}
               </div>
             </div>
           </>,
           document.body
         )
+      )}
+
+      {/* Void & Archive Modal */}
+      {voidingTx && (
+        <VoidTransactionModal
+          isOpen={Boolean(voidingTx)}
+          onClose={() => setVoidingTx(null)}
+          transaction={voidingTx}
+          onConfirm={(target, reason) => {
+            return (onVoidTransaction || onDeleteTransaction)?.(target, reason);
+          }}
+        />
+      )}
+
+      {/* Restore Transaction Modal */}
+      {restoringTx && (
+        <RestoreTransactionModal
+          isOpen={Boolean(restoringTx)}
+          onClose={() => setRestoringTx(null)}
+          transaction={restoringTx}
+          onConfirm={(target) => {
+            return (onRestoreTransaction || onVoidTransaction || onDeleteTransaction)?.(target);
+          }}
+        />
       )}
 
     </div>

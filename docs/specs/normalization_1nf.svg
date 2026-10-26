@@ -1,0 +1,160 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 680" width="100%" height="100%">
+  <defs>
+    <style>
+      .bg { fill: #f8fafc; }
+      .header-title { font-family: 'Inter', system-ui, sans-serif; font-size: 26px; font-weight: 800; fill: #0f172a; }
+      .header-sub { font-family: 'Inter', system-ui, sans-serif; font-size: 14px; fill: #64748b; font-weight: 500; }
+      .stage-pill { font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 700; fill: #b45309; }
+      .pill-bg { fill: #fef3c7; rx: 6px; }
+      .card-bg { fill: #ffffff; rx: 14px; filter: drop-shadow(0 10px 24px rgba(15, 23, 42, 0.05)); }
+      .table-header { fill: #0f172a; }
+      .th-text { font-family: 'Inter', system-ui, sans-serif; font-size: 12px; font-weight: 700; fill: #ffffff; }
+      .td-text { font-family: 'Inter', system-ui, sans-serif; font-size: 11.5px; fill: #334155; }
+      .td-mono { font-family: 'JetBrains Mono', monospace; font-size: 11px; fill: #0f172a; font-weight: 600; }
+      .pill-pk { fill: #fee2e2; rx: 4px; }
+      .pill-fk { fill: #e0e7ff; rx: 4px; }
+      .pill-text-pk { font-family: 'JetBrains Mono', monospace; font-size: 10px; font-weight: 800; fill: #991b1b; }
+      .pill-text-fk { font-family: 'JetBrains Mono', monospace; font-size: 10px; font-weight: 800; fill: #3730a3; }
+      .callout-bg { fill: #eff6ff; stroke: #bfdbfe; stroke-width: 1.5; rx: 12px; }
+      .callout-title { font-family: 'Inter', system-ui, sans-serif; font-size: 14px; font-weight: 800; fill: #1e40af; }
+      .callout-text { font-family: 'Inter', system-ui, sans-serif; font-size: 12px; fill: #1e3a8a; line-height: 1.45; }
+      .grid-line { stroke: #f1f5f9; stroke-width: 1; }
+      .arrow-line { stroke: #047857; stroke-width: 2; stroke-dasharray: 4,4; }
+    </style>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1200" height="680" class="bg" />
+
+  <!-- Header Section -->
+  <g transform="translate(60, 45)">
+    <rect x="0" y="0" width="80" height="26" class="pill-bg" />
+    <text x="40" y="17" text-anchor="middle" class="stage-pill">STEP 1</text>
+    <text x="96" y="20" class="header-title">First Normal Form (1NF) — Atomicity &amp; No Repeating Groups</text>
+    <text x="0" y="48" class="header-sub">Eliminated multi-valued receipt arrays and 11 static denomination columns into dedicated child relations with primary keys.</text>
+  </g>
+
+  <!-- Table 1: TRANSACTIONS (1NF) -->
+  <g transform="translate(60, 115)">
+    <rect width="700" height="280" class="card-bg" />
+    <rect x="0" y="0" width="700" height="38" fill="#0f172a" rx="14" />
+    <rect x="0" y="20" width="700" height="18" fill="#0f172a" />
+    
+    <text x="18" y="24" class="th-text">TABLE: 1NF_TRANSACTIONS</text>
+    <text x="18" y="58" class="td-mono"><tspan fill="#b91c1c">[PK]</tspan> id</text>
+    <text x="90" y="58" class="td-text">date</text>
+    <text x="170" y="58" class="td-text">title</text>
+    <text x="280" y="58" class="td-text">amount</text>
+    <text x="350" y="58" class="td-text">category_name (Partial)</text>
+    <text x="520" y="58" class="td-text">officer_name (Partial)</text>
+    <line x1="0" y1="68" x2="700" y2="68" class="grid-line" stroke="#e2e8f0" stroke-width="1.5" />
+
+    <!-- Row 1 -->
+    <text x="18" y="94" class="td-mono">TRX-001</text>
+    <text x="90" y="94" class="td-text">2026-10-12</text>
+    <text x="170" y="94" class="td-text" font-weight="700">Markers &amp; Tape</text>
+    <text x="280" y="94" class="td-mono">P150.00</text>
+    <text x="350" y="94" class="td-text">Supplies &amp; Materials</text>
+    <text x="520" y="94" class="td-text">Andrei John Geronimo</text>
+    <line x1="0" y1="108" x2="700" y2="108" class="grid-line" />
+
+    <!-- Row 2 -->
+    <text x="18" y="134" class="td-mono">TRX-002</text>
+    <text x="90" y="134" class="td-text">2026-10-14</text>
+    <text x="170" y="134" class="td-text" font-weight="700">Tricycle Fare</text>
+    <text x="280" y="134" class="td-mono">P60.00</text>
+    <text x="350" y="134" class="td-text">Local Transit / Errands</text>
+    <text x="520" y="134" class="td-text">Christian Rey Kasilag</text>
+    <line x1="0" y1="148" x2="700" y2="148" class="grid-line" />
+
+    <!-- Row 3 -->
+    <text x="18" y="174" class="td-mono">TRX-003</text>
+    <text x="90" y="174" class="td-text">2026-10-15</text>
+    <text x="170" y="174" class="td-text" font-weight="700">T-Shirt Pre-order</text>
+    <text x="280" y="174" class="td-mono">P1,200.00</text>
+    <text x="350" y="174" class="td-text">Batch Merchandise</text>
+    <text x="520" y="174" class="td-text">Andrei John Geronimo</text>
+    <line x1="0" y1="188" x2="700" y2="188" class="grid-line" />
+
+    <!-- 1NF Observation Footer -->
+    <rect x="0" y="210" width="700" height="70" fill="#f8fafc" rx="10" />
+    <text x="18" y="234" font-family="'Inter', sans-serif" font-size="12px" font-weight="700" fill="#0f172a">1NF ACHIEVEMENT:</text>
+    <text x="18" y="254" font-family="'Inter', sans-serif" font-size="11.5px" fill="#475569">
+      All column attributes are strictly atomic. Repeating receipt images and denomination columns have been completely removed into dedicated child relations shown on the right.
+    </text>
+  </g>
+
+  <!-- Table 2: 1NF_TRANSACTION_RECEIPTS (Decomposed 1:N) -->
+  <g transform="translate(780, 115)">
+    <rect width="360" height="135" class="card-bg" />
+    <rect x="0" y="0" width="360" height="34" fill="#047857" rx="14" />
+    <rect x="0" y="18" width="360" height="16" fill="#047857" />
+    <text x="16" y="22" class="th-text">CHILD: 1NF_TRANSACTION_RECEIPTS</text>
+
+    <text x="16" y="52" class="td-mono"><tspan fill="#b91c1c">[PK]</tspan> id</text>
+    <text x="80" y="52" class="td-mono"><tspan fill="#3730a3">[FK]</tspan> trx_id</text>
+    <text x="170" y="52" class="td-text">public_url</text>
+    <text x="300" y="52" class="td-text">sort</text>
+    <line x1="0" y1="60" x2="360" y2="60" class="grid-line" stroke="#e2e8f0" />
+
+    <text x="16" y="80" class="td-mono">RCP-01</text>
+    <text x="80" y="80" class="td-mono">TRX-001</text>
+    <text x="170" y="80" class="td-text">store_or.jpg</text>
+    <text x="305" y="80" class="td-mono">1</text>
+    <line x1="0" y1="92" x2="360" y2="92" class="grid-line" />
+
+    <text x="16" y="112" class="td-mono">RCP-02</text>
+    <text x="80" y="112" class="td-mono">TRX-001</text>
+    <text x="170" y="112" class="td-text">tape_receipt.jpg</text>
+    <text x="305" y="112" class="td-mono">2</text>
+  </g>
+
+  <!-- Table 3: 1NF_CASH_COUNTS (Decomposed 1:N) -->
+  <g transform="translate(780, 260)">
+    <rect width="360" height="135" class="card-bg" />
+    <rect x="0" y="0" width="360" height="34" fill="#047857" rx="14" />
+    <rect x="0" y="18" width="360" height="16" fill="#047857" />
+    <text x="16" y="22" class="th-text">CHILD: 1NF_CASH_COUNTS</text>
+
+    <text x="16" y="52" class="td-mono"><tspan fill="#b91c1c">[PK]</tspan> id</text>
+    <text x="75" y="52" class="td-mono"><tspan fill="#3730a3">[FK]</tspan> recon_id</text>
+    <text x="160" y="52" class="td-text">denom_code</text>
+    <text x="250" y="52" class="td-text">qty</text>
+    <text x="295" y="52" class="td-text">subtotal</text>
+    <line x1="0" y1="60" x2="360" y2="60" class="grid-line" stroke="#e2e8f0" />
+
+    <text x="16" y="80" class="td-mono">CNT-01</text>
+    <text x="75" y="80" class="td-mono">REC-2026</text>
+    <text x="160" y="80" class="td-text">P1000</text>
+    <text x="255" y="80" class="td-mono">2</text>
+    <text x="295" y="80" class="td-mono">P2,000</text>
+    <line x1="0" y1="92" x2="360" y2="92" class="grid-line" />
+
+    <text x="16" y="112" class="td-mono">CNT-02</text>
+    <text x="75" y="112" class="td-mono">REC-2026</text>
+    <text x="160" y="112" class="td-text">P100</text>
+    <text x="255" y="112" class="td-mono">5</text>
+    <text x="295" y="112" class="td-mono">P500</text>
+  </g>
+
+  <!-- 2 Callouts at Bottom: Why 1NF Still Needs 2NF -->
+  <g transform="translate(60, 420)">
+    <rect x="0" y="0" width="525" height="175" class="callout-bg" />
+    <text x="24" y="32" class="callout-title">The Lingering Flaw: Partial Functional Dependencies</text>
+    <text x="24" y="60" class="callout-text">
+      Notice that in <code>1NF_TRANSACTIONS</code>, attributes such as <strong>category_name</strong> and <strong>category_type</strong> depend solely on an implied category, while <strong>officer_name</strong> and <strong>officer_email</strong> depend solely on the officer, NOT on the primary key <code>id</code> of the transaction.
+      <tspan x="24" dy="24" font-weight="700">This partial dependency means Andrei's name is still duplicated across 50 rows.</tspan>
+    </text>
+  </g>
+
+  <g transform="translate(615, 420)">
+    <rect x="0" y="0" width="525" height="175" class="callout-bg" style="fill: #f0fdf4; stroke: #bbf7d0;" />
+    <text x="24" y="32" class="callout-title" style="fill: #166534;">The Solution Moving to 2NF</text>
+    <text x="24" y="60" class="callout-text" style="fill: #14532d;">
+      To advance to <strong>Second Normal Form (2NF)</strong>, we must extract standalone master entities:
+      <tspan x="24" dy="22">• Extract <strong>PROFILES</strong> (isolating officer names, roles, and emails to a single profile row).</tspan>
+      <tspan x="24" dy="18">• Extract <strong>CATEGORIES</strong> (isolating category labels and types to a single category row).</tspan>
+      <tspan x="24" dy="18">• Transactions will now store lightweight <strong>UUID foreign keys</strong> instead of repeated text.</tspan>
+    </text>
+  </g>
+</svg>

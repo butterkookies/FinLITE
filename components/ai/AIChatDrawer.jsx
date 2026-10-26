@@ -75,11 +75,28 @@ export default function AIChatDrawer({
     } catch (err) {
       console.error(err);
       // Fallback deterministic response based strictly on live client data
-      let fallbackReply = 'Nakuha ko ang iyong katanungan. Batay sa kasalukuyang talaan sa ating ledger:';
-      const lower = text.toLowerCase();
+      const q = text.trim().toLowerCase();
+      let fallbackReply = '';
 
-      if (lower.includes('jatulan') || lower.includes('abono') || lower.includes('reimburse') || lower.includes('advance')) {
+      if (
+        q === 'hello' ||
+        q === 'hi' ||
+        q === 'hey' ||
+        q.startsWith('kamusta') ||
+        q.startsWith('kumusta') ||
+        q.startsWith('magandang') ||
+        q.startsWith('good morning') ||
+        q.startsWith('good afternoon') ||
+        q.startsWith('good evening') ||
+        q.startsWith('good day') ||
+        q === 'sup'
+      ) {
+        fallbackReply = 'Kamusta! Ako ang iyong FinLITE Co-Pilot. Paano kita matutulungan sa ating physical cashbox o financial ledger ngayon? Maaari kang magtanong ukol sa ating physical cash on hand, pending abono, uncollected receivables, o mga nakaraang transaksyon.\n\n💡 *Tip: Tandaan na ang ating cashbox ay nananatili sa loob ng Program Director\'s Office at hindi inilalabas ng campus.*';
+      } else if (q.startsWith('salamat') || q.startsWith('thank') || q.startsWith('maraming salamat')) {
+        fallbackReply = 'Walang anuman! Laging handang maglingkod ang FinLITE Co-Pilot upang mapanatiling tumpak, transparent, at maayos ang pondo ng LITE. Mayroon ka pa bang ibang gustong i-check?';
+      } else if (q.includes('jatulan') || q.includes('abono') || q.includes('reimburse') || q.includes('advance')) {
         const pendingAdv = advances.filter((a) => a.status !== 'SETTLED' && a.status !== 'CANCELLED');
+        const settledAdv = advances.filter((a) => a.status === 'SETTLED');
         if (pendingAdv.length > 0) {
           const list = pendingAdv
             .map((a) => {
@@ -87,37 +104,32 @@ export default function AIChatDrawer({
               return `**${a.claimant_name || 'Officer'}** (₱${rem.toLocaleString('en-PH', { minimumFractionDigits: 2 })} para sa *${a.title}*)`;
             })
             .join(', ');
-          fallbackReply = `Batay sa ating database, may mga sumusunod na pending advance (abono): ${list}. Hindi pa ito nailalabas mula sa physical cash box.`;
+          fallbackReply = `Batay sa ating verified database, may mga sumusunod na pending advance (abono): ${list}. Hindi pa ito nailalabas mula sa physical cash box.\n\n💡 *Tip: Siguraduhing may kalakip na Official Receipt (OR) o valid proof of purchase ang liquidation.*`;
+        } else if (settledAdv.length > 0) {
+          fallbackReply = 'Ayon sa ating verified database records, **walang nakabinbing reimbursement (abono)** sa kasalukuyan (₱0.00 pending). Ang lahat ng nakaraang advance ay na-liquidate at pormal nang na-reimburse mula sa cashbox.\n\n💡 *Tip: Dahil walang pending abono, ang ating Net Position ay katumbas mismo ng buong Physical Cash on Hand.*';
         } else {
-          const reimbursements = transactions.filter((t) => t.is_reimbursement && t.status === 'PENDING_REIMBURSEMENT');
-          if (reimbursements.length > 0) {
-            const list = reimbursements
-              .map((r) => `**${r.reimbursement_recipient || 'Officer'}** (₱${Number(r.amount).toLocaleString('en-PH', { minimumFractionDigits: 2 })} para sa *${r.title}*)`)
-              .join(', ');
-            fallbackReply = `Batay sa ating database, may mga sumusunod na pending advance (abono): ${list}. Hindi pa ito nailalabas mula sa physical cash box.`;
-          } else {
-            fallbackReply = 'Batay sa ating database, walang nakatalang pending reimbursement (abono) sa kasalukuyan.';
-          }
+          fallbackReply = 'Batay sa ating database, walang nakatalang pending reimbursement (abono) sa kasalukuyan.';
         }
-      } else if (lower.includes('shortage') || lower.includes('discrepanc') || lower.includes('kulang')) {
+      } else if (q.includes('shortage') || q.includes('discrepanc') || q.includes('kulang')) {
         const shortages = transactions.filter((t) => (t.category_name && t.category_name.toLowerCase().includes('shortage')) || (t.title && t.title.toLowerCase().includes('shortage')) || (t.description && t.description.toLowerCase().includes('shortage')));
         if (shortages.length > 0) {
           const totalShortage = shortages.reduce((sum, s) => sum + (Number(s.amount) || 0), 0);
           const list = shortages.map((s) => `**${s.title}** (₱${Number(s.amount).toLocaleString('en-PH', { minimumFractionDigits: 2 })})`).join(', ');
-          fallbackReply = `Mayroong naitalang kabuuang **₱${totalShortage.toLocaleString('en-PH', { minimumFractionDigits: 2 })} Cash Shortage** sa ating talaan (${list}) na pormal nang ini-log at dumaan sa beripikasyon.`;
+          fallbackReply = `Mayroong naitalang kabuuang **₱${totalShortage.toLocaleString('en-PH', { minimumFractionDigits: 2 })} Cash Shortage** sa ating talaan (${list}) na pormal nang ini-log at dumaan sa beripikasyon.\n\n💡 *Tip: Ang bawat shortage discrepancy ay nangangailangan ng pormal na justification note mula sa Club Adviser.*`;
         } else {
           fallbackReply = 'Walang naitalang cash shortage o discrepancy sa ating kasalukuyang talaan.';
         }
       } else if (
-        lower.includes('receivable') ||
-        lower.includes('pautang') ||
-        lower.includes('utang') ||
-        lower.includes('debt') ||
-        lower.includes('collectible') ||
-        debts.some((d) => d.debtor_name && lower.includes(d.debtor_name.toLowerCase()))
+        q.includes('receivable') ||
+        q.includes('pautang') ||
+        q.includes('utang') ||
+        q.includes('debt') ||
+        q.includes('collectible') ||
+        debts.some((d) => d.debtor_name && q.includes(d.debtor_name.toLowerCase()))
       ) {
         const uncollected = debts.filter((d) => d.status !== 'SETTLED' && d.status !== 'CANCELLED');
-        const specific = uncollected.filter((d) => d.debtor_name && lower.includes(d.debtor_name.toLowerCase()));
+        const settled = debts.filter((d) => d.status === 'SETTLED');
+        const specific = uncollected.filter((d) => d.debtor_name && q.includes(d.debtor_name.toLowerCase()));
         const targetList = specific.length > 0 ? specific : uncollected;
 
         if (targetList.length > 0) {
@@ -128,21 +140,24 @@ export default function AIChatDrawer({
             })
             .join(', ');
           const totalRem = targetList.reduce((sum, d) => sum + Math.max(0, Number(d.total_amount || 0) - Number(d.amount_paid || 0)), 0);
-          fallbackReply = `Mayroong naitalang kabuuang **₱${totalRem.toLocaleString('en-PH', { minimumFractionDigits: 2 })}** sa Uncollected Receivables: ${list}. Maaari ring buksan ang **Debts & Receivables** module mula sa sidebar para sa buong detalye.`;
+          fallbackReply = `Mayroong naitalang kabuuang **₱${totalRem.toLocaleString('en-PH', { minimumFractionDigits: 2 })}** sa Uncollected Receivables: ${list}. Maaari ring buksan ang **Debts & Receivables** module mula sa sidebar para sa buong detalye.\n\n💡 *Tip: Ang bawat payment collection ay dapat agad i-remit sa physical cashbox upang magtugma ang periodic reconciliation.*`;
+        } else if (settled.length > 0) {
+          const settledList = settled.map((d) => `**${d.debtor_name}** (₱${Number(d.total_amount || 0).toLocaleString('en-PH', { minimumFractionDigits: 2 })} para sa *${d.title}*)`).join(', ');
+          fallbackReply = `Batay sa FinLITE System Ledger, kasalukuyang **walang outstanding receivables o uncollected debts (₱0.00)** ang LITE. Ang mga naitalang pautang noon ay pormal nang **SETTLED** o bayad na: ${settledList}.\n\n💡 *Tip: Mananatiling transparent ang ledger dahil nakatala pa rin ang completed records sa Debts & Receivables module.*`;
         } else {
           fallbackReply = 'Walang naitalang active receivables o pautang sa kasalukuyang talaan.';
         }
-      } else if (lower.includes('inflow') || lower.includes('outflow') || lower.includes('pasok') || lower.includes('labas') || lower.includes('gastos')) {
-        fallbackReply = `Ang ating kabuuang Inflows ngayong semestre ay **₱${(summary.total_inflows || 0).toLocaleString('en-PH', { minimumFractionDigits: 2 })}** at ang kabuuang Outflows ay **₱${(summary.total_outflows || 0).toLocaleString('en-PH', { minimumFractionDigits: 2 })}**. Ang ating Net Semester Balance ay **₱${((summary.total_inflows || 0) - (summary.total_outflows || 0)).toLocaleString('en-PH', { minimumFractionDigits: 2 })}**.`;
-      } else if (lower.includes('physical cash') || lower.includes('on hand') || lower.includes('cashbox') || lower.includes('cash box') || lower.includes('hawak na pera')) {
+      } else if (q.includes('inflow') || q.includes('outflow') || q.includes('pasok') || q.includes('labas') || q.includes('gastos')) {
+        fallbackReply = `Ang ating kabuuang Inflows ngayong semestre ay **₱${(summary.total_inflows || 0).toLocaleString('en-PH', { minimumFractionDigits: 2 })}** at ang kabuuang Outflows ay **₱${(summary.total_outflows || 0).toLocaleString('en-PH', { minimumFractionDigits: 2 })}**. Ang ating Net Semester Balance ay **₱${((summary.total_inflows || 0) - (summary.total_outflows || 0)).toLocaleString('en-PH', { minimumFractionDigits: 2 })}**.\n\n💡 *Tip: Ang lahat ng outflows ay dapat suportado ng resibo bago pumasok sa pinal na semester financial statement.*`;
+      } else if (q.includes('physical cash') || q.includes('on hand') || q.includes('cashbox') || q.includes('cash box') || q.includes('hawak na pera')) {
         const netPos = summary.net_position != null ? summary.net_position : (summary.cash_on_hand || 0) - (summary.pending_reimbursements || 0);
-        fallbackReply = `Ang kasalukuyang verified **Physical Cash on Hand** sa ating cashbox ay **₱${(summary.cash_on_hand || 0).toLocaleString('en-PH', { minimumFractionDigits: 2 })}**, na may Net Position na **₱${netPos.toLocaleString('en-PH', { minimumFractionDigits: 2 })}** matapos ibawas ang pending abono.`;
-      } else if (lower.includes('balance') || lower.includes('remaining') || lower.includes('reserve') || lower.includes('vault') || lower.includes('cash') || lower.includes('net position')) {
+        fallbackReply = `Ang kasalukuyang verified **Physical Cash on Hand** sa ating cashbox ay **₱${(summary.cash_on_hand || 0).toLocaleString('en-PH', { minimumFractionDigits: 2 })}**, na may Net Position na **₱${netPos.toLocaleString('en-PH', { minimumFractionDigits: 2 })}** matapos ibawas ang pending abono.\n\n💡 *Tip: Nananatili ang physical cashbox sa opisina ng Program Director at binibilang gamit ang 11 Philippine currency denominations tuwing reconciliation.*`;
+      } else if (q.includes('balance') || q.includes('remaining') || q.includes('reserve') || q.includes('vault') || q.includes('cash') || q.includes('net position')) {
         const netPos = summary.net_position != null ? summary.net_position : (summary.cash_on_hand || 0) - (summary.pending_reimbursements || 0);
         fallbackReply = `Ang kasalukuyang verified balance sa ating physical cashbox: **Physical Cash on Hand** ay **₱${(summary.cash_on_hand || 0).toLocaleString('en-PH', { minimumFractionDigits: 2 })}**, habang ang ating **Net Position** (matapos ibawas ang pending abono na ₱${(summary.pending_reimbursements || 0).toLocaleString('en-PH', { minimumFractionDigits: 2 })}) ay **₱${netPos.toLocaleString('en-PH', { minimumFractionDigits: 2 })}**.`;
       } else {
         const netPos = summary.net_position != null ? summary.net_position : (summary.cash_on_hand || 0) - (summary.pending_reimbursements || 0);
-        fallbackReply = `Batay sa ating FinLITE ledger: May verified Physical Cash on Hand na **₱${(summary.cash_on_hand || 0).toLocaleString('en-PH', { minimumFractionDigits: 2 })}** sa ating cashbox, Net Position na **₱${netPos.toLocaleString('en-PH', { minimumFractionDigits: 2 })}**, Inflows na **₱${(summary.total_inflows || 0).toLocaleString('en-PH', { minimumFractionDigits: 2 })}**, at Outflows na **₱${(summary.total_outflows || 0).toLocaleString('en-PH', { minimumFractionDigits: 2 })}**.`;
+        fallbackReply = `Batay sa ating FinLITE ledger: May verified Physical Cash on Hand na **₱${(summary.cash_on_hand || 0).toLocaleString('en-PH', { minimumFractionDigits: 2 })}** sa ating cashbox, Net Position na **₱${netPos.toLocaleString('en-PH', { minimumFractionDigits: 2 })}**, Inflows na **₱${(summary.total_inflows || 0).toLocaleString('en-PH', { minimumFractionDigits: 2 })}**, at Outflows na **₱${(summary.total_outflows || 0).toLocaleString('en-PH', { minimumFractionDigits: 2 })}**.\n\n💡 *Tip: Maaari kang magtanong tungkol sa partikular na gastusin, abono, o receivables para sa mas detalyadong pagsusuri.*`;
       }
 
       setMessages((prev) => [

@@ -44,6 +44,7 @@ import { Modal, Button, Badge, Input } from '@/components/ui';
 import UserAvatar from '@/components/common/UserAvatar';
 import UserPermissionsModal from '@/components/admin/UserPermissionsModal';
 import { resolveUserPermissions, ACTION_KEYS } from '@/lib/auth/permissions';
+import { formatPHP } from '@/lib/utils/currency';
 
 const ROLE_OPTIONS = [
   { value: 'treasurer', label: 'Treasurer', desc: 'Disbursements & Collections' },

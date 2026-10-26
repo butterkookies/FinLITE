@@ -191,6 +191,28 @@ export async function POST(req) {
       }).catch((emailErr) => console.warn('Approval email notification warning:', emailErr));
     }
 
+    // Record approval event in audit_logs
+    try {
+      const approveAudit = {
+        user_id: auth.profile?.id || null,
+        action: 'REGISTRATION_APPROVED',
+        entity_type: 'registration_requests',
+        entity_id: requestId,
+        details: {
+          applicant_name: fullName,
+          applicant_email: request.email,
+          assigned_role: normalizedRole,
+          approved_by: auth.user.email,
+        },
+      };
+      const { error: insErr } = await supabase.from('audit_logs').insert([approveAudit]);
+      if (insErr && insErr.code === '23503') {
+        await supabase.from('audit_logs').insert([{ ...approveAudit, user_id: null }]);
+      }
+    } catch (auditErr) {
+      console.warn('Approval audit log warning:', auditErr?.message);
+    }
+
     return NextResponse.json({
       success: true,
       message: `Registration approved successfully for ${fullName} with role '${normalizedRole}'.`,

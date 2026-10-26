@@ -42,7 +42,7 @@ export async function GET(req) {
     if (filter === 'sessions') {
       query = query.or('action.eq.AUTH_LOGIN,action.eq.AUTH_LOGOUT,entity_type.eq.auth_session');
     } else if (filter === 'financial') {
-      query = query.in('entity_type', ['transactions', 'cash_reconciliations', 'shortages_abono', 'reports', 'categories', 'transaction_comments']);
+      query = query.or('entity_type.in.(transactions,cash_reconciliations,shortages_abono,reports,categories,transaction_comments,advances_payable,debts),action.eq.SETTLE_ABONO_REIMBURSEMENT,action.eq.PARTIAL_ABONO_DISBURSEMENT,action.eq.ABONO_SETTLED,action.eq.DEBT_INSTALLMENT_COLLECTED,action.eq.DEBT_FULLY_SETTLED');
     } else if (filter === 'governance') {
       query = query.or('action.eq.ROLE_UPDATE,action.eq.STATUS_UPDATE,action.eq.ACCOUNT_DELETED,action.eq.USER_APPROVED,action.eq.USER_REJECTED,action.eq.REGISTRATION_RESET,action.eq.ROSTER_UPDATE,action.eq.ROSTER_CLONE,entity_type.eq.profiles,entity_type.eq.registration_requests,entity_type.eq.semesters,entity_type.eq.semester_signatories');
     }
@@ -86,7 +86,11 @@ export async function GET(req) {
         const matchEntity = (entry.entity_type || '').toLowerCase().includes(search);
         const matchIp = (entry.details?.ip_address || '').toLowerCase().includes(search);
         const matchAuthMethod = (entry.details?.auth_method || '').toLowerCase().includes(search);
-        return matchActor || matchAction || matchEntity || matchIp || matchAuthMethod;
+        const matchTitle = (entry.details?.title || entry.details?.transaction_title || entry.details?.snapshot?.title || '').toLowerCase().includes(search);
+        const matchComment = (entry.details?.comment || '').toLowerCase().includes(search);
+        const matchAmount = String(entry.details?.amount ?? entry.details?.disbursed_amount ?? '').includes(search);
+
+        return matchActor || matchAction || matchEntity || matchIp || matchAuthMethod || matchTitle || matchComment || matchAmount;
       });
     }
 
@@ -98,6 +102,6 @@ export async function GET(req) {
     });
   } catch (err) {
     console.error('Audit logs API error:', err);
-    return NextResponse.json({ error: 'Server error retrieving activity logs.' }, { status: 500 });
+    return NextResponse.json({ error: 'Internal server error retrieving logs.' }, { status: 500 });
   }
 }

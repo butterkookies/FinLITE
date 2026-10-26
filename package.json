@@ -7,7 +7,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "test": "node scripts/test_auth_hardening.mjs && node scripts/test_integrity_and_proxy_fixes.mjs && node scripts/run_all_tests.mjs",
+    "test": "node scripts/test_auth_hardening.mjs && node scripts/test_integrity_and_proxy_fixes.mjs && node scripts/test_new_modal_and_audit_features.mjs && node scripts/test_transaction_void_and_archive.mjs && node scripts/run_all_tests.mjs",
     "release:broadcast": "node scripts/broadcast_release.mjs",
     "video": "remotion preview src/motion/Root.tsx",
     "video:render": "remotion render src/motion/Root.tsx FinLiteReveal out/finlite-reveal.mp4"

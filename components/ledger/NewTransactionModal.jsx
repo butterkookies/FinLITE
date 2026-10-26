@@ -1,6 +1,6 @@
 'use client';
 import { useState, useRef, useEffect } from 'react';
-import { Camera, Check, ChevronDown, Crop, Upload, X, AlertCircle } from 'lucide-react';
+import { Camera, Check, ChevronDown, Crop, Upload, X, AlertCircle, Lock } from 'lucide-react';
 import dynamic from 'next/dynamic';
 import { compressReceiptImage } from '@/lib/utils/compression';
 
@@ -32,6 +32,8 @@ export default function NewTransactionModal({
   const canInflow = userPermissions ? Boolean(userPermissions.record_inflow) : true;
   const canOutflow = userPermissions ? Boolean(userPermissions.record_outflow) : true;
   const canAbono = userPermissions ? Boolean(userPermissions.record_abono) : true;
+
+  const allRecordingDisabled = !canInflow && !canOutflow && !canAbono;
 
   const [type, setType] = useState('OUTFLOW');
   const [title, setTitle] = useState('');
@@ -321,7 +323,7 @@ export default function NewTransactionModal({
       <Modal
         isOpen={isOpen}
         onClose={onClose}
-        maxWidth="md"
+        maxWidth="2xl"
         title={
           transactionToEdit
             ? (transactionToEdit.status === 'FLAGGED' ? 'Revise Flagged Transaction' : 'Edit Transaction Details')
@@ -347,16 +349,33 @@ export default function NewTransactionModal({
               form="new-transaction-form"
               variant="primary"
               size="sm"
+              disabled={!transactionToEdit && (allRecordingDisabled || (type === 'INFLOW' ? !canInflow : isReimbursement ? !canAbono : !canOutflow))}
+              className={!transactionToEdit && (allRecordingDisabled || (type === 'INFLOW' ? !canInflow : isReimbursement ? !canAbono : !canOutflow)) ? 'opacity-50 cursor-not-allowed select-none' : ''}
+              leftIcon={!transactionToEdit && (allRecordingDisabled || (type === 'INFLOW' ? !canInflow : isReimbursement ? !canAbono : !canOutflow)) ? <Lock className="w-3.5 h-3.5 text-zinc-400" /> : null}
             >
               {transactionToEdit
                 ? (transactionToEdit.status === 'FLAGGED' ? 'Resubmit for Audit' : 'Update Record')
-                : 'Save Record'}
+                : allRecordingDisabled
+                  ? 'Recording Restricted'
+                  : (type === 'INFLOW' && !canInflow)
+                    ? 'Inflow Restricted'
+                    : (isReimbursement && !canAbono)
+                      ? 'Abono Restricted'
+                      : (!canOutflow)
+                        ? 'Outflow Restricted'
+                        : 'Save Record'}
             </Button>
           </>
         }
       >
         {/* Form Body */}
         <form id="new-transaction-form" onSubmit={handleSubmit} noValidate className="space-y-4 text-xs">
+          {allRecordingDisabled && !transactionToEdit && (
+            <div className="flex items-center gap-2.5 p-3 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-800 dark:text-amber-300 text-xs">
+              <Lock className="w-4 h-4 text-amber-500 shrink-0" />
+              <span>Recording transactions is currently restricted for your role by the Administrator.</span>
+            </div>
+          )}
           {transactionToEdit && (transactionToEdit.status === 'FLAGGED' || auditorRemarks.length > 0) && (
             <div className="rounded-xl p-3 bg-rose-50/70 dark:bg-rose-950/30 ring-1 ring-rose-500/25 space-y-1.5">
               <div className="flex items-center justify-between gap-2">
@@ -408,6 +427,8 @@ export default function NewTransactionModal({
                 setCategoryName('Tournament & E-Sports Registration Fees');
               }}
               className={`${type === 'INFLOW' ? 'bg-emerald-600 dark:bg-emerald-600 text-white' : 'text-zinc-600 dark:text-zinc-400'} disabled:opacity-40 disabled:cursor-not-allowed`}
+              leftIcon={!canInflow && !transactionToEdit ? <Lock className="w-3.5 h-3.5 text-zinc-400" /> : null}
+              title={!canInflow && !transactionToEdit ? 'Inflow recording restricted by Administrator' : undefined}
             >
               + Inflow (Income)
             </Button>
@@ -421,6 +442,8 @@ export default function NewTransactionModal({
                 setCategoryName('Supplies & Materials');
               }}
               className={`${type === 'OUTFLOW' ? 'bg-amber-600 text-white hover:bg-amber-700' : 'text-zinc-600 dark:text-zinc-400'} disabled:opacity-40 disabled:cursor-not-allowed`}
+              leftIcon={!canOutflow && !transactionToEdit ? <Lock className="w-3.5 h-3.5 text-zinc-400" /> : null}
+              title={!canOutflow && !transactionToEdit ? 'Outflow recording restricted by Administrator' : undefined}
             >
               - Outflow
             </Button>
@@ -564,21 +587,31 @@ export default function NewTransactionModal({
 
           {/* Abono / Personal Advance Checkbox (Outflow only) */}
           {type === 'OUTFLOW' && (
-            <div className="py-2.5 space-y-2.5">
-              <label className="flex items-center gap-2 cursor-pointer">
+            <div className={`py-2.5 space-y-2.5 ${!canAbono && !transactionToEdit ? 'opacity-60' : ''}`}>
+              <label
+                className={`flex items-center gap-2 ${!canAbono && !transactionToEdit ? 'cursor-not-allowed select-none' : 'cursor-pointer'}`}
+                title={!canAbono && !transactionToEdit ? 'Abono / Reimbursement recording restricted by Administrator' : undefined}
+              >
                 <input
                   type="checkbox"
                   checked={isReimbursement}
+                  disabled={!canAbono && !transactionToEdit}
                   onChange={(e) => {
+                    if (!canAbono && !transactionToEdit) return;
                     setIsReimbursement(e.target.checked);
                     if (!e.target.checked && formErrors.recipient) {
                       setFormErrors((prev) => ({ ...prev, recipient: null }));
                     }
                   }}
-                  className="rounded text-emerald-600 focus:ring-emerald-500"
+                  className="rounded text-emerald-600 focus:ring-emerald-500 disabled:cursor-not-allowed"
                 />
-                <span className="font-semibold text-zinc-900 dark:text-zinc-100">
+                <span className="font-semibold text-zinc-900 dark:text-zinc-100 flex items-center gap-1.5">
                   This was an out-of-pocket advance (Abono)
+                  {!canAbono && !transactionToEdit && (
+                    <span className="inline-flex items-center gap-1 text-[10px] text-amber-600 dark:text-amber-400 font-semibold bg-amber-500/10 px-1.5 py-0.5 rounded border border-amber-500/20">
+                      <Lock className="w-2.5 h-2.5" /> Restricted
+                    </span>
+                  )}
                 </span>
               </label>
 

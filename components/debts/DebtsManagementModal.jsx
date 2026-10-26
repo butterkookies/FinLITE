@@ -165,7 +165,7 @@ export default function DebtsManagementModal({
       onClose={onClose}
       title="Accounts Receivable & Debts"
       description="Track and collect uncollected dues, pre-orders, and member debts"
-      size="xl"
+      maxWidth="4xl"
     >
       <div className="space-y-4">
         {/* Top Metric Strip — Clean Borderless Surface */}
@@ -340,7 +340,7 @@ export default function DebtsManagementModal({
           onClose={() => setSelectedDebtForPayment(null)}
           title={`Collect Payment — ${selectedDebtForPayment.debtor_name}`}
           description={`Purpose: ${selectedDebtForPayment.title}`}
-          size="md"
+          maxWidth="2xl"
         >
           <form onSubmit={handleConfirmPayment} className="space-y-4">
             {paymentError && (
@@ -472,7 +472,7 @@ export default function DebtsManagementModal({
           onClose={() => setIsNewDebtOpen(false)}
           title="Create New Debt / Receivable"
           description="Record an uncollected fee, batch merchandise order, or member balance"
-          size="md"
+          maxWidth="2xl"
         >
           <form onSubmit={handleCreateNewDebt} className="space-y-3">
             {debtFormError && (

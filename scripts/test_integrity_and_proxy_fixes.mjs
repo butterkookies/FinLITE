@@ -373,6 +373,12 @@ assert(
   'Stored disbursement procedure raises exception when available cash is insufficient'
 );
 
+const mig037Path = path.join(projectRoot, 'supabase/migrations/037_smart_semester_disbursement_and_overdraft.sql');
+assert(fs.existsSync(mig037Path), 'Migration 037 exists on disk');
+const mig037 = fs.readFileSync(mig037Path, 'utf-8');
+assert(mig037.includes('p_semester_id UUID DEFAULT NULL'), 'Migration 037 accepts optional p_semester_id parameter');
+assert(mig037.includes('DROP FUNCTION IF EXISTS public.record_advance_disbursement(UUID, NUMERIC, TEXT)'), 'Migration 037 drops obsolete 3-parameter overload');
+
 console.log('\n7. Testing Declined Registration Request Reset Workflow & UI Action:');
 
 const adminResetRoute = fs.readFileSync(

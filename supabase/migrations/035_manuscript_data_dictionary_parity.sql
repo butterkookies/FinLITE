@@ -99,7 +99,9 @@ RETURNS TRIGGER
 LANGUAGE plpgsql
 AS $$
 BEGIN
-  NEW.payment_method := COALESCE(NULLIF(NEW.payment_method, ''), 'CASH');
+  IF NEW.payment_method IS NULL THEN
+    NEW.payment_method := 'CASH';
+  END IF;
 
   -- Sync audited_by <-> reviewed_by if reviewed_by exists via JSONB inspection
   IF NEW.audited_by IS NULL AND (to_jsonb(NEW)->>'reviewed_by') IS NOT NULL THEN
@@ -181,7 +183,8 @@ BEGIN
   IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_schema = 'public' AND table_name = 'transaction_comments') THEN
     ALTER TABLE public.transaction_comments
       ADD COLUMN IF NOT EXISTS author_id UUID REFERENCES public.profiles(id) ON DELETE SET NULL,
-      ADD COLUMN IF NOT EXISTS comment_text TEXT;
+      ADD COLUMN IF NOT EXISTS comment_text TEXT,
+      ADD COLUMN IF NOT EXISTS content TEXT;
   END IF;
 END $$;
 
@@ -196,10 +199,16 @@ BEGIN
     NEW.user_id := NEW.author_id;
   END IF;
 
-  IF NEW.comment_text IS NULL AND NEW.content IS NOT NULL THEN
-    NEW.comment_text := NEW.content;
-  ELSIF NEW.content IS NULL AND NEW.comment_text IS NOT NULL THEN
-    NEW.content := NEW.comment_text;
+  IF NEW.comment_text IS NULL AND NEW.comment IS NOT NULL THEN
+    NEW.comment_text := NEW.comment;
+  ELSIF NEW.comment IS NULL AND NEW.comment_text IS NOT NULL THEN
+    NEW.comment := NEW.comment_text;
+  END IF;
+
+  IF NEW.content IS NULL THEN
+    NEW.content := COALESCE(NEW.comment, NEW.comment_text);
+  ELSIF NEW.comment IS NULL THEN
+    NEW.comment := NEW.content;
   END IF;
 
   RETURN NEW;

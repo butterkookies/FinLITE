@@ -1,6 +1,6 @@
 'use client';
 import { useState, useEffect } from 'react';
-import { AlertCircle, CheckCircle2, ShieldAlert, Wallet, X, RotateCcw } from 'lucide-react';
+import { AlertCircle, CheckCircle2, ShieldAlert, Wallet, X, RotateCcw, Lock } from 'lucide-react';
 import { calculatePhysicalTotal, calculateVariance, formatPHP, denomCodeToCountKey } from '@/lib/utils/currency';
 import { Button, Badge, Modal } from '@/components/ui';
 
@@ -12,10 +12,16 @@ export default function DenominationCounter({
   ledgerCashBalance = 0,
   onDeclareShortage,
   onSaveCount,
-  currentRole,
+  currentRole = 'treasurer',
   latestReconciliation = null,
   denominations = EMPTY_DENOMINATIONS,
+  userPermissions = null,
+  canReconcile = null,
 }) {
+  const canPerformReconciliation = canReconcile !== null
+    ? Boolean(canReconcile)
+    : (userPermissions ? Boolean(userPermissions.cash_reconciliation) : true);
+
   const [counts, setCounts] = useState({
     bills_1000: 0,
     bills_500: 0,
@@ -125,7 +131,7 @@ export default function DenominationCounter({
       <Modal
         isOpen={isOpen}
         onClose={onClose}
-        maxWidth="xl"
+        maxWidth="4xl"
         title={
           <div className="flex items-center gap-2.5">
             <div className="w-8 h-8 rounded-xl bg-emerald-100 dark:bg-emerald-950/80 flex items-center justify-center text-emerald-700 dark:text-emerald-300 shrink-0">
@@ -155,7 +161,12 @@ export default function DenominationCounter({
               <Button
                 variant="primary"
                 size="sm"
+                disabled={!canPerformReconciliation}
+                className={!canPerformReconciliation ? 'opacity-50 cursor-not-allowed select-none' : ''}
+                leftIcon={!canPerformReconciliation ? <Lock className="w-3.5 h-3.5 text-zinc-400" /> : (isSaved ? <CheckCircle2 className="w-3.5 h-3.5 text-white" /> : null)}
+                title={!canPerformReconciliation ? 'Cash reconciliation restricted by Administrator' : 'Save Audit Count'}
                 onClick={() => {
+                  if (!canPerformReconciliation) return;
                   const approvalStatus = (variance === 0 || status === 'BALANCED') ? 'BALANCED' : 'PENDING_APPROVAL';
                   onSaveCount({
                     counts,
@@ -173,14 +184,20 @@ export default function DenominationCounter({
                   }, 400);
                 }}
               >
-                {isSaved && <CheckCircle2 className="w-3.5 h-3.5 text-white" />}
-                <span>{isSaved ? 'Saved!' : 'Save Audit Count'}</span>
+                <span>{!canPerformReconciliation ? 'Save Count (Restricted)' : (isSaved ? 'Saved!' : 'Save Audit Count')}</span>
               </Button>
             </div>
           </div>
         }
       >
         <div className="space-y-4 sm:space-y-5 text-xs">
+          {!canPerformReconciliation && (
+            <div className="flex items-center gap-2.5 p-3 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-800 dark:text-amber-300 text-xs">
+              <Lock className="w-4 h-4 text-amber-500 shrink-0" />
+              <span>Cash reconciliation is in read-only mode. Recording counts and declaring shortages are restricted by the Administrator.</span>
+            </div>
+          )}
+
           {/* Saved Audit Active Banner */}
           {latestReconciliation && (
             <div className="flex items-center justify-between px-3.5 py-2.5 bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200/90 dark:border-emerald-800/40 rounded-2xl text-[11px] text-emerald-950 dark:text-emerald-200">
@@ -194,8 +211,10 @@ export default function DenominationCounter({
                 type="button"
                 variant="emerald-subtle"
                 size="xs"
-                onClick={() => setShowResetConfirm(true)}
-                title="Reset all denomination counts to 0 for a new physical count"
+                disabled={!canPerformReconciliation}
+                className={!canPerformReconciliation ? 'opacity-50 cursor-not-allowed select-none' : ''}
+                onClick={canPerformReconciliation ? () => setShowResetConfirm(true) : undefined}
+                title={!canPerformReconciliation ? 'Reset restricted by Administrator' : 'Reset all denomination counts to 0 for a new physical count'}
               >
                 <RotateCcw className="w-3 h-3" />
                 <span>Reset to 0</span>
@@ -247,17 +266,24 @@ export default function DenominationCounter({
                   type="text"
                   placeholder="e.g. Minor variance incurred during Club Week booth rush (₱161.00 approved)"
                   value={justificationNotes}
+                  readOnly={!canPerformReconciliation}
                   onChange={(e) => setJustificationNotes(e.target.value)}
-                  className="w-full h-9 px-3 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/20 text-xs text-zinc-900 dark:text-zinc-100 select-text"
+                  className={`w-full h-9 px-3 border border-zinc-200 dark:border-zinc-800 rounded-xl text-xs text-zinc-900 dark:text-zinc-100 select-text ${
+                    !canPerformReconciliation ? 'opacity-70 cursor-not-allowed bg-zinc-100 dark:bg-zinc-800' : 'bg-white dark:bg-zinc-900 focus:outline-none focus:ring-2 focus:ring-emerald-500/20'
+                  }`}
                 />
               </div>
               <Button
                 type="button"
                 variant="destructive"
                 size="sm"
-                onClick={handleDeclareShortageClick}
+                disabled={!canPerformReconciliation}
+                className={!canPerformReconciliation ? 'opacity-50 cursor-not-allowed select-none' : ''}
+                leftIcon={!canPerformReconciliation ? <Lock className="w-3.5 h-3.5" /> : null}
+                title={!canPerformReconciliation ? 'Declaring shortages restricted by Administrator' : undefined}
+                onClick={canPerformReconciliation ? handleDeclareShortageClick : undefined}
               >
-                Submit Shortage for Adviser Approval (-{formatPHP(variance)})
+                {!canPerformReconciliation ? `Submit Shortage (Restricted) (-${formatPHP(variance)})` : `Submit Shortage for Adviser Approval (-${formatPHP(variance)})`}
               </Button>
             </div>
           )}
@@ -279,15 +305,22 @@ export default function DenominationCounter({
                   type="text"
                   placeholder="e.g. Unclaimed loose change from merchandise pre-orders"
                   value={justificationNotes}
+                  readOnly={!canPerformReconciliation}
                   onChange={(e) => setJustificationNotes(e.target.value)}
-                  className="w-full h-9 px-3 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/20 text-xs text-zinc-900 dark:text-zinc-100 select-text"
+                  className={`w-full h-9 px-3 border border-zinc-200 dark:border-zinc-800 rounded-xl text-xs text-zinc-900 dark:text-zinc-100 select-text ${
+                    !canPerformReconciliation ? 'opacity-70 cursor-not-allowed bg-zinc-100 dark:bg-zinc-800' : 'bg-white dark:bg-zinc-900 focus:outline-none focus:ring-2 focus:ring-emerald-500/20'
+                  }`}
                 />
               </div>
               <Button
                 type="button"
                 variant="sky-subtle"
                 size="sm"
-                onClick={() => {
+                disabled={!canPerformReconciliation}
+                className={!canPerformReconciliation ? 'opacity-50 cursor-not-allowed select-none' : ''}
+                leftIcon={!canPerformReconciliation ? <Lock className="w-3.5 h-3.5" /> : null}
+                title={!canPerformReconciliation ? 'Declaring overages restricted by Administrator' : undefined}
+                onClick={canPerformReconciliation ? () => {
                   onSaveCount({
                     counts,
                     physicalTotal,
@@ -302,9 +335,9 @@ export default function DenominationCounter({
                     setIsSaved(false);
                     onClose();
                   }, 400);
-                }}
+                } : undefined}
               >
-                Submit Overage for Adviser Approval (+{formatPHP(variance)})
+                {!canPerformReconciliation ? `Submit Overage (Restricted) (+${formatPHP(variance)})` : `Submit Overage for Adviser Approval (+${formatPHP(variance)})`}
               </Button>
             </div>
           )}
@@ -324,7 +357,7 @@ export default function DenominationCounter({
               <h4 className="font-bold text-zinc-900 dark:text-zinc-100 mb-2 uppercase tracking-wider text-[10px]">
                 Paper Banknotes
               </h4>
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                 {[
                   { key: 'bills_1000', label: '₱1,000 Bill', value: 1000 },
                   { key: 'bills_500', label: '₱500 Bill', value: 500 },
@@ -344,15 +377,20 @@ export default function DenominationCounter({
                       type="text"
                       inputMode="numeric"
                       pattern="[0-9]*"
+                      readOnly={!canPerformReconciliation}
                       value={counts[den.key] === 0 ? '' : counts[den.key]}
                       placeholder="0"
                       onKeyDown={(e) => {
-                        if (['-', '+', 'e', 'E', '.', ','].includes(e.key)) {
+                        if (!canPerformReconciliation || ['-', '+', 'e', 'E', '.', ','].includes(e.key)) {
                           e.preventDefault();
                         }
                       }}
-                      onChange={(e) => handleQtyChange(den.key, e.target.value)}
-                      className="w-14 text-center font-bold bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100 border border-zinc-200 dark:border-zinc-800 rounded-lg py-1 focus:outline-none focus:ring-1 focus:ring-emerald-500 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                      onChange={(e) => canPerformReconciliation && handleQtyChange(den.key, e.target.value)}
+                      className={`w-14 text-center font-bold border border-zinc-200 dark:border-zinc-800 rounded-lg py-1 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${
+                        !canPerformReconciliation
+                          ? 'bg-zinc-100 dark:bg-zinc-800/60 text-zinc-400 dark:text-zinc-500 cursor-not-allowed select-none'
+                          : 'bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100 focus:outline-none focus:ring-1 focus:ring-emerald-500'
+                      }`}
                     />
                   </div>
                 ))}
@@ -383,15 +421,20 @@ export default function DenominationCounter({
                       type="text"
                       inputMode="numeric"
                       pattern="[0-9]*"
+                      readOnly={!canPerformReconciliation}
                       value={counts[den.key] === 0 ? '' : counts[den.key]}
                       placeholder="0"
                       onKeyDown={(e) => {
-                        if (['-', '+', 'e', 'E', '.', ','].includes(e.key)) {
+                        if (!canPerformReconciliation || ['-', '+', 'e', 'E', '.', ','].includes(e.key)) {
                           e.preventDefault();
                         }
                       }}
-                      onChange={(e) => handleQtyChange(den.key, e.target.value)}
-                      className="w-14 text-center font-bold bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100 border border-zinc-200 dark:border-zinc-800 rounded-lg py-1 focus:outline-none focus:ring-1 focus:ring-emerald-500 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                      onChange={(e) => canPerformReconciliation && handleQtyChange(den.key, e.target.value)}
+                      className={`w-14 text-center font-bold border border-zinc-200 dark:border-zinc-800 rounded-lg py-1 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${
+                        !canPerformReconciliation
+                          ? 'bg-zinc-100 dark:bg-zinc-800/60 text-zinc-400 dark:text-zinc-500 cursor-not-allowed select-none'
+                          : 'bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100 focus:outline-none focus:ring-1 focus:ring-emerald-500'
+                      }`}
                     />
                   </div>
                 ))}

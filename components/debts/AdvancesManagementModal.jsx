@@ -207,7 +207,7 @@ export default function AdvancesManagementModal({
       onClose={onClose}
       title="Out-of-Pocket Advances (Accounts Payable)"
       description="Track personal advances by officers/advisers and disburse full or partial reimbursements"
-      size="xl"
+      maxWidth="4xl"
     >
       <div className="space-y-4">
         {/* Top Metric Strip */}
@@ -464,7 +464,7 @@ export default function AdvancesManagementModal({
           onClose={() => setSelectedAdvanceForPayout(null)}
           title="Disburse Reimbursement"
           description={`Refund advance to ${selectedAdvanceForPayout.claimant_name}`}
-          size="sm"
+          maxWidth="2xl"
         >
           <form onSubmit={handleConfirmPayout} className="space-y-4">
             {payoutError && (
@@ -599,7 +599,7 @@ export default function AdvancesManagementModal({
           onClose={() => setIsNewAdvanceOpen(false)}
           title="Record Out-of-Pocket Advance"
           description="Log personal funds advanced by an officer or adviser"
-          size="sm"
+          maxWidth="2xl"
         >
           <form onSubmit={handleCreateAdvanceSubmit} className="space-y-3.5">
             {advanceFormError && (

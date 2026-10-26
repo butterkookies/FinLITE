@@ -25,7 +25,8 @@ import {
   Settings,
   Menu,
   X,
-  ExternalLink
+  ExternalLink,
+  Lock,
 } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import { useTheme } from '@/components/theme/ThemeProvider';
@@ -33,6 +34,7 @@ import ThemeToggle from '@/components/theme/ThemeToggle';
 import { Badge } from '@/components/ui';
 import UserAvatar from '@/components/common/UserAvatar';
 import { isSuperAdminEmail } from '@/lib/config/admin';
+import { resolveUserPermissions, ACTION_KEYS } from '@/lib/auth/permissions';
 
 export default function FloatingSidebar({
   currentRole = 'member',
@@ -95,6 +97,10 @@ export default function FloatingSidebar({
   const isSuperAdmin = isSuperAdminEmail(email);
   const isAdmin = currentRole === 'admin' || isSuperAdmin;
   const isOfficer = isAdmin || ['treasurer', 'president', 'vice_president', 'auditor', 'adviser'].includes(currentRole);
+
+  const userPermissions = resolveUserPermissions(userProfile, email);
+  const canReconcileCash = Boolean(userPermissions[ACTION_KEYS.CASH_RECONCILIATION]);
+  const canExportReports = Boolean(userPermissions[ACTION_KEYS.EXPORT_REPORTS]);
 
   const fullName = userProfile?.full_name || currentUser?.user_metadata?.full_name || 'FinLITE Member';
   const avatarUrl = userProfile?.avatar_url || currentUser?.user_metadata?.avatar_url || currentUser?.user_metadata?.picture || null;
@@ -161,7 +167,10 @@ export default function FloatingSidebar({
       id: 'cashbox',
       label: 'Cash Box & Audit',
       icon: Wallet,
+      disabled: !canReconcileCash,
+      tooltip: !canReconcileCash ? 'Cash reconciliation restricted by Administrator' : undefined,
       action: () => {
+        if (!canReconcileCash) return;
         if (typeof onOpenDenominations === 'function') onOpenDenominations();
       },
     },
@@ -186,7 +195,10 @@ export default function FloatingSidebar({
       id: 'reports',
       label: 'Financial Report',
       icon: FileSpreadsheet,
+      disabled: !canExportReports,
+      tooltip: !canExportReports ? 'Report generation restricted by Administrator' : undefined,
       action: () => {
+        if (!canExportReports) return;
         if (typeof onExportReport === 'function') onExportReport();
       },
     },
@@ -408,36 +420,57 @@ export default function FloatingSidebar({
               {navItems.map((item) => {
                 const Icon = item.icon;
                 const isActive = (optimisticTab || activeTab) === item.id;
+                const isDisabled = Boolean(item.disabled);
                 return (
                   <button
                     key={item.id}
                     type="button"
+                    disabled={isDisabled}
                     onClick={() => {
+                      if (isDisabled) return;
                       setOptimisticTab(item.id);
                       item.action();
                       setIsMobileOpen(false);
                     }}
                     onMouseEnter={() => {
-                      if (pathname !== '/' && (item.id === 'dashboard' || item.id === 'ledger') && router?.prefetch) {
+                      if (!isDisabled && pathname !== '/' && (item.id === 'dashboard' || item.id === 'ledger') && router?.prefetch) {
                         router.prefetch('/');
                       }
                     }}
-                    title={isCollapsed && !isMobileOpen ? item.label : undefined}
-                    className={`w-full flex items-center gap-2.5 rounded-xl transition-colors duration-150 cursor-pointer group text-xs font-medium
+                    title={isDisabled ? (item.tooltip || 'Restricted by Administrator') : (isCollapsed && !isMobileOpen ? item.label : undefined)}
+                    className={`w-full flex items-center gap-2.5 rounded-xl transition-colors duration-150 text-xs font-medium
+                      ${isDisabled ? 'opacity-50 cursor-not-allowed select-none' : 'cursor-pointer group'}
                       ${isCollapsed && !isMobileOpen ? 'justify-center p-2.5' : 'px-3 py-2'}
                       ${isActive 
                         ? 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 font-semibold shadow-xs' 
-                        : 'text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800/70 hover:text-zinc-900 dark:hover:text-zinc-100'}
+                        : isDisabled
+                          ? 'text-zinc-400 dark:text-zinc-500'
+                          : 'text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800/70 hover:text-zinc-900 dark:hover:text-zinc-100'}
                     `}
                   >
-                    <Icon className={`w-4 h-4 shrink-0 transition-transform duration-150 group-hover:scale-110 ${isActive ? 'text-emerald-700 dark:text-emerald-400' : 'text-zinc-600 dark:text-zinc-400'}`} />
+                    <div className="relative">
+                      <Icon className={`w-4 h-4 shrink-0 transition-transform duration-150 ${!isDisabled ? 'group-hover:scale-110' : ''} ${isActive ? 'text-emerald-700 dark:text-emerald-400' : 'text-zinc-600 dark:text-zinc-400'}`} />
+                      {isDisabled && (
+                        <span className="absolute -top-1 -right-1 p-0.5 rounded-full bg-zinc-900 text-amber-400 shadow-xs" title="Restricted by Administrator">
+                          <Lock className="w-2 h-2" />
+                        </span>
+                      )}
+                    </div>
                     {(!isCollapsed || isMobileOpen) && (
-                      <span className="truncate flex-1 text-left">{item.label}</span>
+                      <span className="truncate flex-1 text-left flex items-center gap-1">
+                        {item.label}
+                        {isDisabled && <Lock className="w-2.5 h-2.5 text-zinc-400 shrink-0" />}
+                      </span>
                     )}
-                    {(!isCollapsed || isMobileOpen) && item.badge && (
+                    {(!isCollapsed || isMobileOpen) && item.badge && !isDisabled && (
                       <Badge variant="amber" size="xs">
                         {item.badge}
                       </Badge>
+                    )}
+                    {(!isCollapsed || isMobileOpen) && isDisabled && (
+                      <span className="text-[10px] px-1.5 py-0.5 rounded bg-zinc-200 dark:bg-zinc-800 text-zinc-500 font-normal">
+                        Locked
+                      </span>
                     )}
                   </button>
                 );

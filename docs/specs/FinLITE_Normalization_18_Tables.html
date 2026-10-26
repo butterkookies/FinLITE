@@ -1,0 +1,856 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>FinLITE 18-Table 3NF Normalization Reference</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
+      background: #0f172a;
+      color: #f8fafc;
+      margin: 0;
+      padding: 32px;
+    }
+    h1 {
+      font-size: 24px;
+      font-weight: 700;
+      margin-bottom: 8px;
+      color: #10b981;
+    }
+    p.subtitle {
+      font-size: 14px;
+      color: #94a3b8;
+      margin-bottom: 32px;
+    }
+    .section-title {
+      font-size: 18px;
+      font-weight: 700;
+      margin: 40px 0 16px 0;
+      padding-bottom: 8px;
+      border-bottom: 2px solid #334155;
+      color: #38bdf8;
+    }
+    .table-container {
+      background: #ffffff;
+      border-radius: 8px;
+      overflow: hidden;
+      margin-bottom: 28px;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+    }
+    .table-header-title {
+      background: #1e293b;
+      color: #f1f5f9;
+      padding: 10px 16px;
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      border-bottom: 1px solid #334155;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 11px;
+      color: #0f172a;
+    }
+    th {
+      background: #0f172a;
+      color: #ffffff;
+      font-weight: 600;
+      padding: 8px 12px;
+      text-align: left;
+      white-space: nowrap;
+      border: 1px solid #334155;
+    }
+    td {
+      padding: 6px 12px;
+      border: 1px solid #cbd5e1;
+      white-space: nowrap;
+      font-family: 'SF Mono', Consolas, Monaco, monospace;
+      font-size: 11px;
+    }
+    tr:nth-child(even) td {
+      background: #f8fafc;
+    }
+    tr:nth-child(odd) td {
+      background: #ffffff;
+    }
+    .badge-pk {
+      background: #ef4444;
+      color: #fff;
+      padding: 2px 5px;
+      border-radius: 3px;
+      font-size: 9px;
+      font-weight: bold;
+      margin-left: 4px;
+    }
+    .badge-fk {
+      background: #3b82f6;
+      color: #fff;
+      padding: 2px 5px;
+      border-radius: 3px;
+      font-size: 9px;
+      font-weight: bold;
+      margin-left: 4px;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>FinLITE — Complete 18-Table 3NF Normalization Reference</h1>
+  <p class="subtitle">Verified against Supabase Production Migrations & Section 2.2.2 Data Dictionary (Pambayang Dalubhasaan ng Marilao • LITE)</p>
+
+  <!-- SUBSYSTEM A -->
+  <div class="section-title">Subsystem A: Authentication, Governance & RBAC</div>
+
+  <div class="table-container">
+    <div class="table-header-title">Table 1: Profiles</div>
+    <table>
+      <thead>
+        <tr>
+          <th>id <span class="badge-pk">PK</span></th>
+          <th>auth_user_id</th>
+          <th>full_name</th>
+          <th>email</th>
+          <th>role</th>
+          <th>status</th>
+          <th>can_record_inflows</th>
+          <th>can_record_outflows</th>
+          <th>can_audit_transactions</th>
+          <th>can_reconcile_cash</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>11111111-1111-1111-1111-111111111111</td>
+          <td>a1111111-0000-0000-0000-000000000001</td>
+          <td>Andrei John P. Geronimo</td>
+          <td>treasurer@pdm.edu.ph</td>
+          <td>treasurer</td>
+          <td>approved</td>
+          <td>TRUE</td>
+          <td>TRUE</td>
+          <td>FALSE</td>
+          <td>TRUE</td>
+        </tr>
+        <tr>
+          <td>22222222-2222-2222-2222-222222222222</td>
+          <td>a2222222-0000-0000-0000-000000000002</td>
+          <td>Christian Rey C. Kasilag</td>
+          <td>auditor@pdm.edu.ph</td>
+          <td>auditor</td>
+          <td>approved</td>
+          <td>FALSE</td>
+          <td>FALSE</td>
+          <td>TRUE</td>
+          <td>TRUE</td>
+        </tr>
+        <tr>
+          <td>44444444-4444-4444-4444-444444444444</td>
+          <td>a4444444-0000-0000-0000-000000000004</td>
+          <td>Ms. Kimberly Dawn Jatulan</td>
+          <td>adviser.jatulan@pdm.edu.ph</td>
+          <td>adviser</td>
+          <td>approved</td>
+          <td>FALSE</td>
+          <td>FALSE</td>
+          <td>TRUE</td>
+          <td>FALSE</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="table-container">
+    <div class="table-header-title">Table 2: Registration_Requests</div>
+    <table>
+      <thead>
+        <tr>
+          <th>id <span class="badge-pk">PK</span></th>
+          <th>first_name</th>
+          <th>last_name</th>
+          <th>email</th>
+          <th>contact_number</th>
+          <th>auth_provider</th>
+          <th>status</th>
+          <th>requested_role</th>
+          <th>reviewed_by <span class="badge-fk">FK</span></th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>r1111111-1111-4000-8000-000000000001</td>
+          <td>Andrei John</td>
+          <td>Geronimo</td>
+          <td>treasurer@pdm.edu.ph</td>
+          <td>09171234567</td>
+          <td>email</td>
+          <td>approved</td>
+          <td>treasurer</td>
+          <td>44444444-4444-4444-4444-444444444444</td>
+        </tr>
+        <tr>
+          <td>r2222222-2222-4000-8000-000000000002</td>
+          <td>Christian Rey</td>
+          <td>Kasilag</td>
+          <td>auditor@pdm.edu.ph</td>
+          <td>09187654321</td>
+          <td>google</td>
+          <td>approved</td>
+          <td>auditor</td>
+          <td>44444444-4444-4444-4444-444444444444</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="table-container">
+    <div class="table-header-title">Table 3: Auth_Security_State</div>
+    <table>
+      <thead>
+        <tr>
+          <th>auth_user_id <span class="badge-pk">PK/FK</span></th>
+          <th>password_enroll_until</th>
+          <th>google_link_until</th>
+          <th>password_set_at</th>
+          <th>google_linked_at</th>
+          <th>updated_at</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>a1111111-0000-0000-0000-000000000001</td>
+          <td>NULL</td>
+          <td>NULL</td>
+          <td>2026-08-01 08:30:00+08</td>
+          <td>NULL</td>
+          <td>2026-08-01 08:30:00+08</td>
+        </tr>
+        <tr>
+          <td>a2222222-0000-0000-0000-000000000002</td>
+          <td>NULL</td>
+          <td>NULL</td>
+          <td>NULL</td>
+          <td>2026-08-02 09:15:00+08</td>
+          <td>2026-08-02 09:15:00+08</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="table-container">
+    <div class="table-header-title">Table 4: Email_Verification_OTPs</div>
+    <table>
+      <thead>
+        <tr>
+          <th>id <span class="badge-pk">PK</span></th>
+          <th>email</th>
+          <th>code</th>
+          <th>purpose</th>
+          <th>expires_at</th>
+          <th>used</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>otp11111-0000-4000-8000-000000000001</td>
+          <td>treasurer@pdm.edu.ph</td>
+          <td>849201</td>
+          <td>registration</td>
+          <td>2026-08-01 08:45:00+08</td>
+          <td>TRUE</td>
+        </tr>
+        <tr>
+          <td>otp22222-0000-4000-8000-000000000002</td>
+          <td>auditor@pdm.edu.ph</td>
+          <td>319582</td>
+          <td>registration</td>
+          <td>2026-08-02 09:30:00+08</td>
+          <td>TRUE</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- SUBSYSTEM B -->
+  <div class="section-title">Subsystem B: Academic Governance & Wet-Ink Roster</div>
+
+  <div class="table-container">
+    <div class="table-header-title">Table 5: Semesters</div>
+    <table>
+      <thead>
+        <tr>
+          <th>id <span class="badge-pk">PK</span></th>
+          <th>academic_year</th>
+          <th>semester</th>
+          <th>label</th>
+          <th>starting_cash_on_hand</th>
+          <th>is_active</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>s1111111-0000-4000-8000-000000000001</td>
+          <td>2025-2026</td>
+          <td>2nd Sem</td>
+          <td>AY 2025–2026 • 2nd Sem</td>
+          <td>0.00</td>
+          <td>FALSE</td>
+        </tr>
+        <tr>
+          <td>s2222222-0000-4000-8000-000000000002</td>
+          <td>2026-2027</td>
+          <td>1st Sem</td>
+          <td>AY 2026–2027 • 1st Sem</td>
+          <td>2433.00</td>
+          <td>TRUE</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="table-container">
+    <div class="table-header-title">Table 6: Semester_Signatories</div>
+    <table>
+      <thead>
+        <tr>
+          <th>id <span class="badge-pk">PK</span></th>
+          <th>academic_year</th>
+          <th>semester</th>
+          <th>role_key</th>
+          <th>name</th>
+          <th>position_title</th>
+          <th>category</th>
+          <th>sort_order</th>
+          <th>is_active</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>sig11111-0000-4000-8000-000000000001</td>
+          <td>2026-2027</td>
+          <td>1st Sem</td>
+          <td>treasurer</td>
+          <td>ANDREI JOHN P. GERONIMO</td>
+          <td>LITE Treasurer</td>
+          <td>OFFICER</td>
+          <td>3</td>
+          <td>TRUE</td>
+        </tr>
+        <tr>
+          <td>sig22222-0000-4000-8000-000000000002</td>
+          <td>2026-2027</td>
+          <td>1st Sem</td>
+          <td>auditor</td>
+          <td>CHRISTIAN REY C. KASILAG</td>
+          <td>LITE Auditor</td>
+          <td>OFFICER</td>
+          <td>4</td>
+          <td>TRUE</td>
+        </tr>
+        <tr>
+          <td>sig33333-0000-4000-8000-000000000003</td>
+          <td>2026-2027</td>
+          <td>1st Sem</td>
+          <td>adviser1</td>
+          <td>MS. KIMBERLY DAWN JATULAN</td>
+          <td>Faculty Club Adviser</td>
+          <td>ADVISER</td>
+          <td>5</td>
+          <td>TRUE</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- SUBSYSTEM C -->
+  <div class="section-title">Subsystem C: Central Financial Ledger & Audit Trail</div>
+
+  <div class="table-container">
+    <div class="table-header-title">Table 7: Categories</div>
+    <table>
+      <thead>
+        <tr>
+          <th>id <span class="badge-pk">PK</span></th>
+          <th>name</th>
+          <th>type</th>
+          <th>description</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>b1111111-bbbb-bbbb-bbbb-bbbbbbbbbbbb</td>
+          <td>Tournament &amp; E-Sports Registration Fees</td>
+          <td>INFLOW</td>
+          <td>Team registrations for MLBB and Valorant tournaments</td>
+        </tr>
+        <tr>
+          <td>b2222222-bbbb-bbbb-bbbb-bbbbbbbbbbbb</td>
+          <td>Merchandise Sales (Batch Pre-Order)</td>
+          <td>INFLOW</td>
+          <td>Official LITE shirts, lanyards, and sticker packs</td>
+        </tr>
+        <tr>
+          <td>b6666666-bbbb-bbbb-bbbb-bbbbbbbbbbbb</td>
+          <td>Supplies &amp; Materials</td>
+          <td>OUTFLOW</td>
+          <td>Tarpaulins, poster boards, ribbons, laminating sheets</td>
+        </tr>
+        <tr>
+          <td>b7777777-bbbb-bbbb-bbbb-bbbbbbbbbbbb</td>
+          <td>Food &amp; Committee Meals</td>
+          <td>OUTFLOW</td>
+          <td>Packed meals from Jollibee for volunteer marshals</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="table-container">
+    <div class="table-header-title">Table 8: Transactions</div>
+    <table>
+      <thead>
+        <tr>
+          <th>id <span class="badge-pk">PK</span></th>
+          <th>semester_id <span class="badge-fk">FK</span></th>
+          <th>title</th>
+          <th>amount</th>
+          <th>type</th>
+          <th>payment_method</th>
+          <th>category_id <span class="badge-fk">FK</span></th>
+          <th>logged_by <span class="badge-fk">FK</span></th>
+          <th>transaction_date</th>
+          <th>status</th>
+          <th>audited_by <span class="badge-fk">FK</span></th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>tx111111-1111-4000-8000-000000000001</td>
+          <td>s2222222-0000-4000-8000-000000000002</td>
+          <td>Booth Setup Tarpaulin &amp; Décor</td>
+          <td>1450.00</td>
+          <td>OUTFLOW</td>
+          <td>CASH</td>
+          <td>b6666666-bbbb-bbbb-bbbb-bbbbbbbbbbbb</td>
+          <td>11111111-1111-1111-1111-111111111111</td>
+          <td>2026-10-12</td>
+          <td>VERIFIED</td>
+          <td>22222222-2222-2222-2222-222222222222</td>
+        </tr>
+        <tr>
+          <td>tx222222-2222-4000-8000-000000000002</td>
+          <td>s2222222-0000-4000-8000-000000000002</td>
+          <td>MLBB Tournament Team Registrations (16 Teams)</td>
+          <td>4800.00</td>
+          <td>INFLOW</td>
+          <td>CASH</td>
+          <td>b1111111-bbbb-bbbb-bbbb-bbbbbbbbbbbb</td>
+          <td>11111111-1111-1111-1111-111111111111</td>
+          <td>2026-10-14</td>
+          <td>VERIFIED</td>
+          <td>22222222-2222-2222-2222-222222222222</td>
+        </tr>
+        <tr>
+          <td>tx333333-3333-4000-8000-000000000003</td>
+          <td>s2222222-0000-4000-8000-000000000002</td>
+          <td>Volunteer Marshals Packed Lunch Day 1</td>
+          <td>2100.00</td>
+          <td>OUTFLOW</td>
+          <td>CASH</td>
+          <td>b7777777-bbbb-bbbb-bbbb-bbbbbbbbbbbb</td>
+          <td>11111111-1111-1111-1111-111111111111</td>
+          <td>2026-10-15</td>
+          <td>PENDING</td>
+          <td>NULL</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="table-container">
+    <div class="table-header-title">Table 9: Transaction_Receipts</div>
+    <table>
+      <thead>
+        <tr>
+          <th>id <span class="badge-pk">PK</span></th>
+          <th>transaction_id <span class="badge-fk">FK</span></th>
+          <th>public_url</th>
+          <th>file_name</th>
+          <th>mime_type</th>
+          <th>sort_order</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>rcp11111-0000-4000-8000-000000000001</td>
+          <td>tx111111-1111-4000-8000-000000000001</td>
+          <td>https://supastorage.pdm.edu.ph/receipts/tarpaulin_or.jpg</td>
+          <td>tarpaulin_or.jpg</td>
+          <td>image/jpeg</td>
+          <td>0</td>
+        </tr>
+        <tr>
+          <td>rcp22222-0000-4000-8000-000000000002</td>
+          <td>tx111111-1111-4000-8000-000000000001</td>
+          <td>https://supastorage.pdm.edu.ph/receipts/tape_supplies.jpg</td>
+          <td>tape_supplies.jpg</td>
+          <td>image/jpeg</td>
+          <td>1</td>
+        </tr>
+        <tr>
+          <td>rcp33333-0000-4000-8000-000000000003</td>
+          <td>tx333333-3333-4000-8000-000000000003</td>
+          <td>https://supastorage.pdm.edu.ph/receipts/jollibee_receipt.jpg</td>
+          <td>jollibee_receipt.jpg</td>
+          <td>image/jpeg</td>
+          <td>0</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="table-container">
+    <div class="table-header-title">Table 10: Transaction_Comments</div>
+    <table>
+      <thead>
+        <tr>
+          <th>id <span class="badge-pk">PK</span></th>
+          <th>transaction_id <span class="badge-fk">FK</span></th>
+          <th>author_id <span class="badge-fk">FK</span></th>
+          <th>comment_text</th>
+          <th>created_at</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>cmt11111-0000-4000-8000-000000000001</td>
+          <td>tx111111-1111-4000-8000-000000000001</td>
+          <td>22222222-2222-2222-2222-222222222222</td>
+          <td>Official receipt verified against Marilao Commercial Center delivery.</td>
+          <td>2026-10-12 16:45:00+08</td>
+        </tr>
+        <tr>
+          <td>cmt22222-0000-4000-8000-000000000002</td>
+          <td>tx222222-2222-4000-8000-000000000002</td>
+          <td>22222222-2222-2222-2222-222222222222</td>
+          <td>All 16 captain waivers and cash payments cross-checked.</td>
+          <td>2026-10-14 18:20:00+08</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- SUBSYSTEM D -->
+  <div class="section-title">Subsystem D: Liabilities, Advances & Receivables</div>
+
+  <div class="table-container">
+    <div class="table-header-title">Table 11: Advances_Payable</div>
+    <table>
+      <thead>
+        <tr>
+          <th>id <span class="badge-pk">PK</span></th>
+          <th>semester_id <span class="badge-fk">FK</span></th>
+          <th>claimant_name</th>
+          <th>title</th>
+          <th>total_amount</th>
+          <th>amount_reimbursed</th>
+          <th>status</th>
+          <th>advance_date</th>
+          <th>created_by <span class="badge-fk">FK</span></th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>adv11111-0000-4000-8000-000000000001</td>
+          <td>s2222222-0000-4000-8000-000000000002</td>
+          <td>Ms. Kimberly Dawn Jatulan</td>
+          <td>Abono for Guest Speaker Tokens</td>
+          <td>1250.00</td>
+          <td>1250.00</td>
+          <td>SETTLED</td>
+          <td>2026-10-10</td>
+          <td>11111111-1111-1111-1111-111111111111</td>
+        </tr>
+        <tr>
+          <td>adv22222-0000-4000-8000-000000000002</td>
+          <td>s2222222-0000-4000-8000-000000000002</td>
+          <td>Andrei John P. Geronimo</td>
+          <td>Emergency Electrical Extension Cables</td>
+          <td>800.00</td>
+          <td>0.00</td>
+          <td>UNPAID</td>
+          <td>2026-10-13</td>
+          <td>11111111-1111-1111-1111-111111111111</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="table-container">
+    <div class="table-header-title">Table 12: Advance_Disbursements</div>
+    <table>
+      <thead>
+        <tr>
+          <th>id <span class="badge-pk">PK</span></th>
+          <th>advance_id <span class="badge-fk">FK</span></th>
+          <th>transaction_id <span class="badge-fk">FK</span></th>
+          <th>amount</th>
+          <th>payment_method</th>
+          <th>disbursement_date</th>
+          <th>disbursed_by <span class="badge-fk">FK</span></th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>disb1111-0000-4000-8000-000000000001</td>
+          <td>adv11111-0000-4000-8000-000000000001</td>
+          <td>tx111111-1111-4000-8000-000000000001</td>
+          <td>1250.00</td>
+          <td>CASH</td>
+          <td>2026-10-11 14:00:00+08</td>
+          <td>11111111-1111-1111-1111-111111111111</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="table-container">
+    <div class="table-header-title">Table 13: Advance_Receipts</div>
+    <table>
+      <thead>
+        <tr>
+          <th>id <span class="badge-pk">PK</span></th>
+          <th>advance_id <span class="badge-fk">FK</span></th>
+          <th>public_url</th>
+          <th>sort_order</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>ar111111-0000-4000-8000-000000000001</td>
+          <td>adv11111-0000-4000-8000-000000000001</td>
+          <td>https://supastorage.pdm.edu.ph/advances/speaker_token_or.jpg</td>
+          <td>0</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="table-container">
+    <div class="table-header-title">Table 14: Debts_Receivables</div>
+    <table>
+      <thead>
+        <tr>
+          <th>id <span class="badge-pk">PK</span></th>
+          <th>semester_id <span class="badge-fk">FK</span></th>
+          <th>debtor_name</th>
+          <th>title</th>
+          <th>total_amount</th>
+          <th>amount_paid</th>
+          <th>status</th>
+          <th>due_date</th>
+          <th>created_by <span class="badge-fk">FK</span></th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>dbt11111-0000-4000-8000-000000000001</td>
+          <td>s2222222-0000-4000-8000-000000000002</td>
+          <td>Mark Joshua Bautista</td>
+          <td>LITE Club Polo Shirt (Size L)</td>
+          <td>450.00</td>
+          <td>200.00</td>
+          <td>PARTIALLY_PAID</td>
+          <td>2026-10-25</td>
+          <td>11111111-1111-1111-1111-111111111111</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="table-container">
+    <div class="table-header-title">Table 15: Debt_Payments</div>
+    <table>
+      <thead>
+        <tr>
+          <th>id <span class="badge-pk">PK</span></th>
+          <th>debt_id <span class="badge-fk">FK</span></th>
+          <th>transaction_id <span class="badge-fk">FK</span></th>
+          <th>amount</th>
+          <th>payment_method</th>
+          <th>payment_date</th>
+          <th>received_by <span class="badge-fk">FK</span></th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>pay11111-0000-4000-8000-000000000001</td>
+          <td>dbt11111-0000-4000-8000-000000000001</td>
+          <td>tx222222-2222-4000-8000-000000000002</td>
+          <td>200.00</td>
+          <td>CASH</td>
+          <td>2026-10-16 11:30:00+08</td>
+          <td>11111111-1111-1111-1111-111111111111</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- SUBSYSTEM E -->
+  <div class="section-title">Subsystem E: Cashbox Reconciliation & Denominations</div>
+
+  <div class="table-container">
+    <div class="table-header-title">Table 16: Denominations</div>
+    <table>
+      <thead>
+        <tr>
+          <th>id <span class="badge-pk">PK</span></th>
+          <th>code</th>
+          <th>label</th>
+          <th>currency_type</th>
+          <th>face_value</th>
+          <th>display_order</th>
+          <th>is_active</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>den10000-0000-4000-8000-000000000001</td>
+          <td>BILL_1000</td>
+          <td>₱1,000 Bill</td>
+          <td>BILL</td>
+          <td>1000.00</td>
+          <td>1</td>
+          <td>TRUE</td>
+        </tr>
+        <tr>
+          <td>den05000-0000-4000-8000-000000000002</td>
+          <td>BILL_500</td>
+          <td>₱500 Bill</td>
+          <td>BILL</td>
+          <td>500.00</td>
+          <td>2</td>
+          <td>TRUE</td>
+        </tr>
+        <tr>
+          <td>den01000-0000-4000-8000-000000000004</td>
+          <td>BILL_100</td>
+          <td>₱100 Bill</td>
+          <td>BILL</td>
+          <td>100.00</td>
+          <td>4</td>
+          <td>TRUE</td>
+        </tr>
+        <tr>
+          <td>den00500-0000-4000-8000-000000000005</td>
+          <td>BILL_50</td>
+          <td>₱50 Bill</td>
+          <td>BILL</td>
+          <td>50.00</td>
+          <td>5</td>
+          <td>TRUE</td>
+        </tr>
+        <tr>
+          <td>den00200-0000-4000-8000-000000000006</td>
+          <td>BILL_20</td>
+          <td>₱20 Bill</td>
+          <td>BILL</td>
+          <td>20.00</td>
+          <td>6</td>
+          <td>TRUE</td>
+        </tr>
+        <tr>
+          <td>den00010-0000-4000-8000-000000000008</td>
+          <td>COIN_10</td>
+          <td>₱10 Coin</td>
+          <td>COIN</td>
+          <td>10.00</td>
+          <td>8</td>
+          <td>TRUE</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="table-container">
+    <div class="table-header-title">Table 17: Cash_Reconciliations</div>
+    <table>
+      <thead>
+        <tr>
+          <th>id <span class="badge-pk">PK</span></th>
+          <th>semester_id <span class="badge-fk">FK</span></th>
+          <th>reconciliation_date</th>
+          <th>counted_by <span class="badge-fk">FK</span></th>
+          <th>verified_by <span class="badge-fk">FK</span></th>
+          <th>physical_total</th>
+          <th>ledger_cash_balance</th>
+          <th>variance_amount</th>
+          <th>variance_status</th>
+          <th>status</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>rec11111-0000-4000-8000-000000000001</td>
+          <td>s2222222-0000-4000-8000-000000000002</td>
+          <td>2026-10-16 17:00:00+08</td>
+          <td>11111111-1111-1111-1111-111111111111</td>
+          <td>22222222-2222-2222-2222-222222222222</td>
+          <td>4820.00</td>
+          <td>4820.00</td>
+          <td>0.00</td>
+          <td>BALANCED</td>
+          <td>VERIFIED</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="table-container">
+    <div class="table-header-title">Table 18: Cash_Reconciliation_Items</div>
+    <table>
+      <thead>
+        <tr>
+          <th>id <span class="badge-pk">PK</span></th>
+          <th>reconciliation_id <span class="badge-fk">FK</span></th>
+          <th>denomination_id <span class="badge-fk">FK</span></th>
+          <th>quantity</th>
+          <th>subtotal</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>item1111-0000-4000-8000-000000000001</td>
+          <td>rec11111-0000-4000-8000-000000000001</td>
+          <td>den10000-0000-4000-8000-000000000001</td>
+          <td>4</td>
+          <td>4000.00</td>
+        </tr>
+        <tr>
+          <td>item2222-0000-4000-8000-000000000002</td>
+          <td>rec11111-0000-4000-8000-000000000001</td>
+          <td>den05000-0000-4000-8000-000000000002</td>
+          <td>1</td>
+          <td>500.00</td>
+        </tr>
+        <tr>
+          <td>item3333-0000-4000-8000-000000000003</td>
+          <td>rec11111-0000-4000-8000-000000000001</td>
+          <td>den01000-0000-4000-8000-000000000004</td>
+          <td>3</td>
+          <td>300.00</td>
+        </tr>
+        <tr>
+          <td>item4444-0000-4000-8000-000000000004</td>
+          <td>rec11111-0000-4000-8000-000000000001</td>
+          <td>den00010-0000-4000-8000-000000000008</td>
+          <td>2</td>
+          <td>20.00</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+</body>
+</html>

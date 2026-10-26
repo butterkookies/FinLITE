@@ -45,3 +45,5 @@ supabase/.temp/
 
 # Ephemeral security caches
 lib/security/.*.json
+
+supabase_dump/

@@ -1,0 +1,153 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 680" width="100%" height="100%">
+  <defs>
+    <style>
+      .bg { fill: #f8fafc; }
+      .header-title { font-family: 'Inter', system-ui, -apple-system, sans-serif; font-size: 26px; font-weight: 800; fill: #0f172a; }
+      .header-sub { font-family: 'Inter', system-ui, -apple-system, sans-serif; font-size: 14px; fill: #64748b; font-weight: 500; }
+      .stage-pill { font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 700; fill: #991b1b; }
+      .pill-bg { fill: #fee2e2; rx: 6px; }
+      .card-bg { fill: #ffffff; rx: 16px; filter: drop-shadow(0 10px 25px rgba(15, 23, 42, 0.06)); }
+      .table-header { fill: #0f172a; }
+      .th-text { font-family: 'Inter', system-ui, sans-serif; font-size: 13px; font-weight: 700; fill: #ffffff; }
+      .td-text { font-family: 'Inter', system-ui, sans-serif; font-size: 12px; fill: #334155; }
+      .td-mono { font-family: 'JetBrains Mono', monospace; font-size: 11px; fill: #0f172a; font-weight: 600; }
+      .td-repeat { fill: #fff1f2; font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 700; color: #be123c; }
+      .callout-bg { fill: #fff7ed; stroke: #fed7aa; stroke-width: 1.5; rx: 12px; }
+      .callout-title { font-family: 'Inter', system-ui, sans-serif; font-size: 14px; font-weight: 800; fill: #9a3412; }
+      .callout-text { font-family: 'Inter', system-ui, sans-serif; font-size: 12px; fill: #7c2d12; line-height: 1.4; }
+      .anomaly-badge { fill: #fee2e2; rx: 4px; }
+      .anomaly-text { font-family: 'JetBrains Mono', monospace; font-size: 10px; font-weight: 700; fill: #b91c1c; }
+      .grid-line { stroke: #e2e8f0; stroke-width: 1; }
+    </style>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1200" height="680" class="bg" />
+
+  <!-- Header Section -->
+  <g transform="translate(60, 45)">
+    <rect x="0" y="0" width="80" height="26" class="pill-bg" />
+    <text x="40" y="17" text-anchor="middle" class="stage-pill">STEP 0</text>
+    <text x="96" y="20" class="header-title">Unnormalized Form (UNF) — The Flat Paper Ledger</text>
+    <text x="0" y="48" class="header-sub">Simulating LITE's legacy spreadsheet: A single flat record crammed with repeating groups and mixed business entities.</text>
+  </g>
+
+  <!-- Main Table Container -->
+  <g transform="translate(60, 115)">
+    <rect width="1080" height="320" class="card-bg" />
+    
+    <!-- Table Header Row -->
+    <rect x="0" y="0" width="1080" height="42" fill="#0f172a" rx="16" />
+    <rect x="0" y="24" width="1080" height="18" fill="#0f172a" />
+    
+    <text x="20" y="26" class="th-text">Trans_ID</text>
+    <text x="95" y="26" class="th-text">Date</text>
+    <text x="170" y="26" class="th-text">Title &amp; Category</text>
+    <text x="310" y="26" class="th-text">Amount</text>
+    <text x="380" y="26" class="th-text">Encoder Profile (Name, Email, Role)</text>
+    <text x="640" y="26" class="th-text" fill="#f87171" style="fill: #f87171;">Repeating Receipts [1..N]</text>
+    <text x="870" y="26" class="th-text" fill="#f87171" style="fill: #f87171;">Repeating Denominations [11]</text>
+
+    <!-- Row 1 -->
+    <rect x="0" y="42" width="1080" height="52" fill="#ffffff" />
+    <text x="20" y="73" class="td-mono">TRX-001</text>
+    <text x="95" y="73" class="td-text">2026-10-12</text>
+    <text x="170" y="66" class="td-text" font-weight="700">Markers &amp; Tape</text>
+    <text x="170" y="82" class="td-text" fill="#64748b">Supplies (OUTFLOW)</text>
+    <text x="310" y="73" class="td-mono">P150.00</text>
+    <text x="380" y="66" class="td-text">Andrei John Geronimo</text>
+    <text x="380" y="82" class="td-text" fill="#64748b">andrei@pdm.edu · Treasurer</text>
+    
+    <!-- Repeating Receipts Highlight Box -->
+    <rect x="635" y="47" width="220" height="42" fill="#fff1f2" rx="6" stroke="#fecdd3" stroke-width="1" />
+    <text x="645" y="65" class="td-repeat">receipt_1.jpg, receipt_2.jpg</text>
+    <text x="645" y="80" class="td-text" fill="#9f1239" font-size="10.5px">Array of loose photo URLs</text>
+
+    <!-- Repeating Denominations Highlight Box -->
+    <rect x="865" y="47" width="200" height="42" fill="#fff1f2" rx="6" stroke="#fecdd3" stroke-width="1" />
+    <text x="875" y="65" class="td-repeat">d1000:0, d500:0, d100:1, d50:1...</text>
+    <text x="875" y="80" class="td-text" fill="#9f1239" font-size="10.5px">11 hardcoded bill/coin counts</text>
+    <line x1="0" y1="94" x2="1080" y2="94" class="grid-line" />
+
+    <!-- Row 2 -->
+    <rect x="0" y="94" width="1080" height="52" fill="#f8fafc" />
+    <text x="20" y="125" class="td-mono">TRX-002</text>
+    <text x="95" y="125" class="td-text">2026-10-14</text>
+    <text x="170" y="118" class="td-text" font-weight="700">Tricycle Fare</text>
+    <text x="170" y="134" class="td-text" fill="#64748b">Transit (OUTFLOW)</text>
+    <text x="310" y="125" class="td-mono">P60.00</text>
+    <text x="380" y="118" class="td-text">Christian Rey Kasilag</text>
+    <text x="380" y="134" class="td-text" fill="#64748b">kasilag@pdm.edu · Auditor</text>
+
+    <rect x="635" y="99" width="220" height="42" fill="#fff1f2" rx="6" stroke="#fecdd3" stroke-width="1" />
+    <text x="645" y="117" class="td-repeat">fare_slip_scrap.png</text>
+    <text x="645" y="132" class="td-text" fill="#9f1239" font-size="10.5px">Loose unverified slip</text>
+
+    <rect x="865" y="99" width="200" height="42" fill="#fff1f2" rx="6" stroke="#fecdd3" stroke-width="1" />
+    <text x="875" y="117" class="td-repeat">d1000:0, d500:0, d20:3, d10:0...</text>
+    <text x="875" y="132" class="td-text" fill="#9f1239" font-size="10.5px">Blank values in unused columns</text>
+    <line x1="0" y1="146" x2="1080" y2="146" class="grid-line" />
+
+    <!-- Row 3 -->
+    <rect x="0" y="146" width="1080" height="52" fill="#ffffff" />
+    <text x="20" y="177" class="td-mono">TRX-003</text>
+    <text x="95" y="177" class="td-text">2026-10-15</text>
+    <text x="170" y="170" class="td-text" font-weight="700">T-Shirt Merch Pre-order</text>
+    <text x="170" y="186" class="td-text" fill="#64748b">Collections (INFLOW)</text>
+    <text x="310" y="177" class="td-mono">P1,200.00</text>
+    <text x="380" y="170" class="td-text">Andrei John Geronimo</text>
+    <text x="380" y="186" class="td-text" fill="#64748b">andrei@pdm.edu · Treasurer</text>
+
+    <rect x="635" y="151" width="220" height="42" fill="#fff1f2" rx="6" stroke="#fecdd3" stroke-width="1" />
+    <text x="645" y="169" class="td-repeat">stub_001.jpg, stub_002.jpg</text>
+    <text x="645" y="184" class="td-text" fill="#9f1239" font-size="10.5px">Array of student stubs</text>
+
+    <rect x="865" y="151" width="200" height="42" fill="#fff1f2" rx="6" stroke="#fecdd3" stroke-width="1" />
+    <text x="875" y="169" class="td-repeat">d1000:1, d100:2, d20:0, d5:0...</text>
+    <text x="875" y="184" class="td-text" fill="#9f1239" font-size="10.5px">Fixed 11 columns repeated</text>
+    <line x1="0" y1="198" x2="1080" y2="198" class="grid-line" />
+
+    <!-- Summary Footprint -->
+    <rect x="0" y="240" width="1080" height="80" fill="#f1f5f9" rx="12" />
+    <text x="24" y="268" font-family="'Inter', sans-serif" font-size="13px" font-weight="700" fill="#0f172a">UNF DIAGNOSIS: 3 SEVERE STRUCTURAL ANOMALIES</text>
+    <text x="24" y="292" font-family="'Inter', sans-serif" font-size="12.5px" fill="#475569">
+      • <tspan font-weight="700" fill="#b91c1c">Repeating Groups:</tspan> Multi-valued receipt URLs and 11 static denomination columns waste space with NULLs.
+      • <tspan font-weight="700" fill="#b91c1c">Redundant Data:</tspan> Officer details (Name, Role, Email) and Category descriptions are duplicated on every single row.
+      • <tspan font-weight="700" fill="#b91c1c">No Primary Key:</tspan> Flat rows lack unique surrogate keys to enforce individual parent-child referential integrity.
+    </text>
+  </g>
+
+  <!-- 3 Anomaly Callout Cards at Bottom -->
+  <g transform="translate(60, 465)">
+    <!-- Insertion Anomaly -->
+    <rect x="0" y="0" width="345" height="175" class="callout-bg" />
+    <rect x="18" y="16" width="135" height="20" class="anomaly-badge" />
+    <text x="24" y="30" class="anomaly-text">INSERTION ANOMALY</text>
+    <text x="18" y="58" class="callout-title">Cannot Add Officers or Categories</text>
+    <text x="18" y="82" class="callout-text">
+      Under UNF, you cannot register an approved officer profile or add a new event budget category without creating a fake, unverified financial transaction row with dummy amounts.
+    </text>
+  </g>
+
+  <g transform="translate(427, 465)">
+    <!-- Update Anomaly -->
+    <rect x="0" y="0" width="345" height="175" class="callout-bg" />
+    <rect x="18" y="16" width="120" height="20" class="anomaly-badge" />
+    <text x="24" y="30" class="anomaly-text">UPDATE ANOMALY</text>
+    <text x="18" y="58" class="callout-title">Dangerous Inconsistent Edits</text>
+    <text x="18" y="82" class="callout-text">
+      If Andrei's email or role changes, every historical transaction ever recorded must be manually located and updated. A single missed row produces conflicting, untrustworthy financial records.
+    </text>
+  </g>
+
+  <g transform="translate(795, 465)">
+    <!-- Deletion Anomaly -->
+    <rect x="0" y="0" width="345" height="175" class="callout-bg" />
+    <rect x="18" y="16" width="125" height="20" class="anomaly-badge" />
+    <text x="24" y="30" class="anomaly-text">DELETION ANOMALY</text>
+    <text x="18" y="58" class="callout-title">Accidental Data Destruction</text>
+    <text x="18" y="82" class="callout-text">
+      If a cancelled transaction for "T-Shirt Merch Pre-order" is deleted from the ledger, the entire record of the Merchandise category itself is destroyed and permanently lost from the system.
+    </text>
+  </g>
+</svg>

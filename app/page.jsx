@@ -1,8 +1,8 @@
 'use client';
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
-import { Plus, Wallet, Calculator, Sparkles, FileText, CreditCard, Bot } from 'lucide-react';
+import { Plus, Wallet, Calculator, Sparkles, FileText, CreditCard, Bot, Lock } from 'lucide-react';
 import BottomNav from '@/components/layout/BottomNav';
 import StatCards from '@/components/dashboard/StatCards';
 import TransactionTable from '@/components/ledger/TransactionTable';
@@ -11,6 +11,7 @@ import { createClient } from '@/lib/supabase/client';
 import { isSuperAdminEmail } from '@/lib/config/admin';
 import { DEFAULT_SEMESTERS } from '@/lib/config/semesters';
 import { toCentavos, fromCentavos, denomCodeToCountKey, formatPHP } from '@/lib/utils/currency';
+import { logAuditEvent } from '@/lib/supabase/audit';
 import { validateTransactionAmount, validateOutflowBalance } from '@/lib/utils/validation';
 import { Card, Badge, Button } from '@/components/ui';
 import { resolveUserPermissions, hasPermission, ACTION_KEYS } from '@/lib/auth/permissions';
@@ -151,18 +152,30 @@ export default function Dashboard() {
     }
   }, []);
 
+  // Permissions ref for event listener access
+  const permissionsRef = useRef({ canRecordAny: true, canReconcileCash: true, canExportReports: true });
+
   // Listen to modal open triggers dispatched from AppShell or URL
   useEffect(() => {
     const handleOpenModal = (e) => {
       const act = e.detail;
-      if (act === 'record') setIsNewTxOpen(true);
-      else if (act === 'cashbox') setIsDenomOpen(true);
-      else if (act === 'advances') setIsAdvancesOpen(true);
-      else if (act === 'debts') setIsDebtsOpen(true);
-      else if (act === 'ai') setIsAIOpen(true);
-      else if (act === 'audit') setIsAuditOpen(true);
-      else if (act === 'export') handleOpenLiquidationPreview();
-      else if (act === 'new_semester') setIsNewSemesterOpen(true);
+      if (act === 'record') {
+        if (permissionsRef.current.canRecordAny) setIsNewTxOpen(true);
+      } else if (act === 'cashbox') {
+        if (permissionsRef.current.canReconcileCash) setIsDenomOpen(true);
+      } else if (act === 'advances') {
+        setIsAdvancesOpen(true);
+      } else if (act === 'debts') {
+        setIsDebtsOpen(true);
+      } else if (act === 'ai') {
+        setIsAIOpen(true);
+      } else if (act === 'audit') {
+        setIsAuditOpen(true);
+      } else if (act === 'export') {
+        if (permissionsRef.current.canExportReports) handleOpenLiquidationPreview();
+      } else if (act === 'new_semester') {
+        setIsNewSemesterOpen(true);
+      }
     };
 
     const handleSemesterChanged = (e) => {
@@ -196,8 +209,29 @@ export default function Dashboard() {
     return resolveUserPermissions(userProfile, currentUser?.email);
   }, [userProfile, currentUser]);
 
+  const canRecordAny =
+    isSuperAdmin ||
+    Boolean(
+      userPermissions?.[ACTION_KEYS.RECORD_INFLOW] ||
+      userPermissions?.[ACTION_KEYS.RECORD_OUTFLOW] ||
+      userPermissions?.[ACTION_KEYS.RECORD_ABONO]
+    );
+
+  const canReconcileCash =
+    isSuperAdmin || Boolean(userPermissions?.[ACTION_KEYS.CASH_RECONCILIATION]);
+
+  const canExportReports =
+    isSuperAdmin || Boolean(userPermissions?.[ACTION_KEYS.EXPORT_REPORTS]);
+
   const canEditTransactions =
     isSuperAdmin || Boolean(userPermissions?.[ACTION_KEYS.EDIT_TRANSACTION]);
+
+  const canDeleteTransactions =
+    isSuperAdmin || Boolean(userPermissions?.[ACTION_KEYS.DELETE_TRANSACTION]);
+
+  useEffect(() => {
+    permissionsRef.current = { canRecordAny, canReconcileCash, canExportReports };
+  }, [canRecordAny, canReconcileCash, canExportReports]);
 
   // Handle Deep-Links from Audit & Revision Emails (?auditTx=id, ?editTx=id, ?viewTx=id)
   // Per Manuscript Page 8: President/VP (or Treasurer with Adviser-granted edit_transaction) open the
@@ -477,23 +511,32 @@ export default function Dashboard() {
           }
 
           if (rawData) {
-            normalized = rawData.map((t) => ({
-              ...t,
-              category_name: t.categories?.name || t.category_name,
-              category_id: t.category_id || t.categories?.id,
-              academic_year: t.semesters?.academic_year || t.academic_year,
-              semester: t.semesters?.semester || t.semester,
-              logged_by_name: t.profiles?.full_name || t.logged_by_name || null,
-              logged_by_role: t.profiles?.role || t.logged_by_role || null,
-              logged_by_email: t.profiles?.email || t.logged_by_email || null,
-              logged_by_avatar_url: t.profiles?.avatar_url || t.logged_by_avatar_url || null,
-              receipt_urls: (Array.isArray(t.transaction_receipts) && t.transaction_receipts.length > 0)
-                ? t.transaction_receipts.sort((a, b) => a.sort_order - b.sort_order).map((r) => r.public_url)
-                : (Array.isArray(t.receipt_urls) && t.receipt_urls.length > 0 ? t.receipt_urls : (t.receipt_url ? [t.receipt_url] : [])),
-              receipt_url: (Array.isArray(t.transaction_receipts) && t.transaction_receipts.length > 0)
-                ? (t.transaction_receipts.find((r) => r.sort_order === 0)?.public_url || t.transaction_receipts[0]?.public_url)
-                : (t.receipt_url || (Array.isArray(t.receipt_urls) && t.receipt_urls[0]) || null),
-            }));
+            normalized = rawData.map((t) => {
+              const isNotesArchived = typeof t.notes === 'string' && t.notes.includes('[ARCHIVED]');
+              const extractedReason = isNotesArchived
+                ? (t.notes.match(/REASON:\s*([^|]+)/)?.[1]?.trim() || 'Voided by Administrator')
+                : null;
+
+              return {
+                ...t,
+                status: (t.status === 'VOIDED' || t.status === 'ARCHIVED' || isNotesArchived) ? 'VOIDED' : t.status,
+                void_reason: t.void_reason || extractedReason,
+                category_name: t.categories?.name || t.category_name,
+                category_id: t.category_id || t.categories?.id,
+                academic_year: t.semesters?.academic_year || t.academic_year,
+                semester: t.semesters?.semester || t.semester,
+                logged_by_name: t.profiles?.full_name || t.logged_by_name || null,
+                logged_by_role: t.profiles?.role || t.logged_by_role || null,
+                logged_by_email: t.profiles?.email || t.logged_by_email || null,
+                logged_by_avatar_url: t.profiles?.avatar_url || t.logged_by_avatar_url || null,
+                receipt_urls: (Array.isArray(t.transaction_receipts) && t.transaction_receipts.length > 0)
+                  ? t.transaction_receipts.sort((a, b) => a.sort_order - b.sort_order).map((r) => r.public_url)
+                  : (Array.isArray(t.receipt_urls) && t.receipt_urls.length > 0 ? t.receipt_urls : (t.receipt_url ? [t.receipt_url] : [])),
+                receipt_url: (Array.isArray(t.transaction_receipts) && t.transaction_receipts.length > 0)
+                  ? (t.transaction_receipts.find((r) => r.sort_order === 0)?.public_url || t.transaction_receipts[0]?.public_url)
+                  : (t.receipt_url || (Array.isArray(t.receipt_urls) && t.receipt_urls[0]) || null),
+              };
+            });
 
             // Secondary enrichment: Resolve names for any transactions with missing profile joins
             const missingProfileIds = [...new Set(
@@ -801,6 +844,7 @@ export default function Dashboard() {
     let pending_reimbursements_c = 0;
 
     txs.forEach((tx) => {
+      if (tx.status === 'VOIDED' || tx.status === 'ARCHIVED') return;
       const amt_c = toCentavos(Number(tx.amount) || 0);
 
       if (tx.type === 'INFLOW') {
@@ -901,6 +945,36 @@ export default function Dashboard() {
     // 1. Edit existing transaction branch
     if (newTx.id) {
       try {
+        // Collect existing non-blob URLs
+        let finalReceiptUrls = Array.isArray(newTx.receipt_urls)
+          ? newTx.receipt_urls.filter((u) => typeof u === 'string' && !u.startsWith('blob:') && u.trim().length > 0)
+          : (newTx.receipt_url && !newTx.receipt_url.startsWith('blob:') ? [newTx.receipt_url.trim()] : []);
+
+        // Upload any newly selected receipt files before updating
+        if (supabase && Array.isArray(newTx.receiptFiles) && newTx.receiptFiles.length > 0) {
+          for (const file of newTx.receiptFiles) {
+            if (finalReceiptUrls.length >= 3) break;
+            try {
+              const fileExt = file.name ? file.name.split('.').pop() : 'jpg';
+              const filePath = `receipt-${Date.now()}-${Math.random().toString(36).substring(2, 8)}.${fileExt}`;
+              const { error: uploadError } = await supabase.storage
+                .from('receipts')
+                .upload(filePath, file, { cacheControl: '3600', upsert: false });
+
+              if (!uploadError) {
+                const { data: { publicUrl } } = supabase.storage
+                  .from('receipts')
+                  .getPublicUrl(filePath);
+                finalReceiptUrls.push(publicUrl);
+              } else {
+                console.error('Storage upload error during edit:', uploadError.message);
+              }
+            } catch (storageErr) {
+              console.warn('Storage upload note during edit:', storageErr?.message);
+            }
+          }
+        }
+
         const res = await fetch(`/api/transactions/${newTx.id}`, {
           method: 'PATCH',
           headers: { 'Content-Type': 'application/json' },
@@ -916,7 +990,7 @@ export default function Dashboard() {
             reimbursement_recipient: newTx.reimbursement_recipient,
             advanced_by_name: newTx.advanced_by_name,
             event_name: newTx.event_name,
-            receipt_urls: newTx.receipt_urls,
+            receipt_urls: finalReceiptUrls,
           }),
         });
 
@@ -1138,7 +1212,6 @@ export default function Dashboard() {
             const receiptItems = uploadedReceiptUrls.map((url, idx) => ({
               transaction_id: data.id,
               public_url: url,
-              file_url: url,
               sort_order: idx,
               uploaded_by: userProfile?.id || null,
             }));
@@ -1190,6 +1263,48 @@ export default function Dashboard() {
       }
     }
   };
+
+  const handleVoidTransaction = async (tx, reason = null) => {
+    if (!tx?.id) return;
+    try {
+      const res = await fetch(`/api/transactions/${tx.id}`, {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ reason: reason || 'Voided by Administrator' }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        throw new Error(data.error || 'Failed to void transaction.');
+      }
+      const updated = data.transaction || { ...tx, status: 'VOIDED', void_reason: reason };
+      setTransactions((prev) => prev.map((t) => (t.id === tx.id ? { ...t, ...updated } : t)));
+      return updated;
+    } catch (err) {
+      console.error('Void transaction failed:', err);
+      throw err;
+    }
+  };
+
+  const handleRestoreTransaction = async (tx) => {
+    if (!tx?.id) return;
+    try {
+      const res = await fetch(`/api/transactions/${tx.id}/restore`, {
+        method: 'POST',
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        throw new Error(data.error || 'Failed to restore transaction.');
+      }
+      const updated = data.transaction || { ...tx, status: 'COMPLETED', void_reason: null };
+      setTransactions((prev) => prev.map((t) => (t.id === tx.id ? { ...t, ...updated } : t)));
+      return updated;
+    } catch (err) {
+      console.error('Restore transaction failed:', err);
+      throw err;
+    }
+  };
+
+  const handleDeleteTransaction = handleVoidTransaction;
 
   // Handler for attaching additional receipts to an existing transaction (Post-Entry)
   const handleAttachReceipt = async (transactionId, newReceiptFiles) => {
@@ -1574,11 +1689,32 @@ export default function Dashboard() {
       // Auditing is handled by the trg_audit_advance_disbursements trigger.
       if (supabase && isPersistedId(advanceId)) {
         let updatedAdvance = null;
-        const { data: rpcAdv, error: rpcError } = await supabase.rpc('record_advance_disbursement', {
+        const targetSemesterId = resolveDbSemesterId() || targetAdvance.semester_id || currentSemester?.id || null;
+
+        // Attempt smart-semester 4-parameter RPC first (Migration 037)
+        let rpcAdv = null;
+        let rpcError = null;
+
+        const modernRes = await supabase.rpc('record_advance_disbursement', {
           p_advance_id: advanceId,
           p_amount: payoutAmount,
           p_notes: notes || null,
+          p_semester_id: targetSemesterId,
         });
+
+        if (modernRes.error && (modernRes.error.code === 'PGRST202' || modernRes.error.message?.includes('schema cache') || modernRes.error.message?.includes('p_semester_id'))) {
+          // Graceful fallback to legacy 3-parameter signature if migration 037 is pending in DB
+          const legacyRes = await supabase.rpc('record_advance_disbursement', {
+            p_advance_id: advanceId,
+            p_amount: payoutAmount,
+            p_notes: notes || null,
+          });
+          rpcAdv = legacyRes.data;
+          rpcError = legacyRes.error;
+        } else {
+          rpcAdv = modernRes.data;
+          rpcError = modernRes.error;
+        }
 
         if (!rpcError && rpcAdv) {
           updatedAdvance = rpcAdv;
@@ -1604,7 +1740,7 @@ export default function Dashboard() {
               amount: payoutAmount,
               type: 'OUTFLOW',
               category_id: outflowCategory?.id || null,
-              semester_id: targetAdvance.semester_id || currentSemester?.id || null,
+              semester_id: targetSemesterId || targetAdvance.semester_id || currentSemester?.id || null,
               logged_by: userProfile?.id || null,
               transaction_date: new Date().toISOString().split('T')[0],
               status: 'COMPLETED',
@@ -2203,52 +2339,36 @@ export default function Dashboard() {
       } catch (_) {}
     }
 
-    // 3. Persist to Supabase Database
-    if (!supabase) return;
+    // 3. Persist to Database via Server API with strict action permission validation
     try {
-      let { data, error } = await supabase
-        .from('cash_reconciliations')
-        .insert([reconPayload])
-        .select()
-        .single();
-
-      if (error && error.message?.includes('approval_status')) {
-        const fallbackRecon = { ...reconPayload };
-        delete fallbackRecon.approval_status;
-        const res2 = await supabase
-          .from('cash_reconciliations')
-          .insert([fallbackRecon])
-          .select()
-          .single();
-        if (res2.data) {
-          data = res2.data;
-          error = null;
-        }
-      }
-
-      if (error) {
-        console.warn('Supabase cash_reconciliations insert notice:', error?.message || error);
-      } else if (data) {
-        // 4. Upsert normalized cash_reconciliation_items
-        if (denominations && denominations.length > 0) {
-          const reconItems = denominations.map((d) => {
+      const reconItems = denominations && denominations.length > 0
+        ? denominations.map((d) => {
             const countKey = denomCodeToCountKey(d.code);
             const qty = audit.counts[countKey] ?? audit.counts[d.code.toLowerCase()] ?? 0;
             return {
-              reconciliation_id: data.id,
               denomination_id: d.id,
               quantity: qty,
               subtotal: qty * parseFloat(d.face_value),
             };
-          });
-          try {
-            await supabase
-              .from('cash_reconciliation_items')
-              .upsert(reconItems, { onConflict: 'reconciliation_id,denomination_id' });
-          } catch (itemErr) {
-            console.warn('cash_reconciliation_items upsert note:', itemErr?.message);
-          }
-        }
+          })
+        : [];
+
+      const res = await fetch('/api/reconciliation', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          ...reconPayload,
+          items: reconItems,
+        }),
+      });
+
+      const resJson = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        throw new Error(resJson.error || 'Failed to save cash reconciliation.');
+      }
+
+      const data = resJson.data;
+      if (data) {
 
         const reconciledRecord = {
           ...data,
@@ -2302,6 +2422,10 @@ export default function Dashboard() {
       }
     } catch (err) {
       console.warn('Save audit count exception notice:', err?.message || err);
+      if (prevReconSnapshot) {
+        setLatestReconciliation(prevReconSnapshot);
+      }
+      alert(err.message || 'Failed to save cash reconciliation.');
     }
   };
 
@@ -2357,42 +2481,90 @@ export default function Dashboard() {
                 {/* Pod 1: Record Transaction */}
                 <button
                   type="button"
-                  onClick={() => setIsNewTxOpen(true)}
-                  className="flex flex-col items-center gap-1 p-1 sm:px-2 group cursor-pointer"
+                  onClick={() => {
+                    if (canRecordAny) setIsNewTxOpen(true);
+                  }}
+                  disabled={!canRecordAny}
+                  title={!canRecordAny ? 'Recording restricted by Administrator' : 'Record Transaction'}
+                  className={`flex flex-col items-center gap-1 p-1 sm:px-2 group ${
+                    !canRecordAny ? 'opacity-50 cursor-not-allowed select-none' : 'cursor-pointer'
+                  }`}
                 >
-                  <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-lg flex items-center justify-center transition-[background-color,transform] duration-150 shadow-xs bg-emerald-600 text-white group-hover:bg-emerald-500 active:scale-95">
+                  <div className={`relative w-9 h-9 sm:w-10 sm:h-10 rounded-lg flex items-center justify-center transition-[background-color,transform] duration-150 shadow-xs ${
+                    !canRecordAny
+                      ? 'bg-zinc-300 dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400 cursor-not-allowed'
+                      : 'bg-emerald-600 text-white group-hover:bg-emerald-500 active:scale-95'
+                  }`}>
                     <Plus className="w-5 h-5 stroke-[2.5]" />
+                    {!canRecordAny && (
+                      <span className="absolute -top-1 -right-1 p-0.5 rounded-full bg-zinc-900 text-amber-400 shadow-xs" title="Restricted by Administrator">
+                        <Lock className="w-2.5 h-2.5" />
+                      </span>
+                    )}
                   </div>
-                  <span className="text-[10px] sm:text-[11px] font-medium transition-colors text-zinc-600 dark:text-zinc-300 group-hover:text-emerald-600 dark:group-hover:text-emerald-400">
+                  <span className="text-[10px] sm:text-[11px] font-medium transition-colors text-zinc-600 dark:text-zinc-300 flex items-center gap-0.5">
                     Record
+                    {!canRecordAny && <Lock className="w-2.5 h-2.5 text-zinc-400" />}
                   </span>
                 </button>
 
                 {/* Pod 2: Cash Box Audit */}
                 <button
                   type="button"
-                  onClick={() => setIsDenomOpen(true)}
-                  className="flex flex-col items-center gap-1 p-1 sm:px-2 group cursor-pointer"
+                  onClick={() => {
+                    if (canReconcileCash) setIsDenomOpen(true);
+                  }}
+                  disabled={!canReconcileCash}
+                  title={!canReconcileCash ? 'Cash reconciliation restricted by Administrator' : 'Cash Box Reconciliation'}
+                  className={`flex flex-col items-center gap-1 p-1 sm:px-2 group ${
+                    !canReconcileCash ? 'opacity-50 cursor-not-allowed select-none' : 'cursor-pointer'
+                  }`}
                 >
-                  <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-lg flex items-center justify-center transition-[background-color,border-color,color,transform] duration-150 border bg-white dark:bg-zinc-900 text-zinc-700 dark:text-zinc-300 border-zinc-200 dark:border-zinc-800 group-hover:border-emerald-500/40 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 active:scale-95">
+                  <div className={`relative w-9 h-9 sm:w-10 sm:h-10 rounded-lg flex items-center justify-center transition-[background-color,border-color,color,transform] duration-150 border ${
+                    !canReconcileCash
+                      ? 'bg-zinc-100 dark:bg-zinc-800 text-zinc-400 border-zinc-200 dark:border-zinc-700 cursor-not-allowed'
+                      : 'bg-white dark:bg-zinc-900 text-zinc-700 dark:text-zinc-300 border-zinc-200 dark:border-zinc-800 group-hover:border-emerald-500/40 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 active:scale-95'
+                  }`}>
                     <Wallet className="w-4 h-4 stroke-[2]" />
+                    {!canReconcileCash && (
+                      <span className="absolute -top-1 -right-1 p-0.5 rounded-full bg-zinc-900 text-amber-400 shadow-xs" title="Restricted by Administrator">
+                        <Lock className="w-2.5 h-2.5" />
+                      </span>
+                    )}
                   </div>
-                  <span className="text-[10px] sm:text-[11px] font-medium transition-colors text-zinc-600 dark:text-zinc-300 group-hover:text-emerald-600 dark:group-hover:text-emerald-400">
+                  <span className="text-[10px] sm:text-[11px] font-medium transition-colors text-zinc-600 dark:text-zinc-300 flex items-center gap-0.5">
                     Cash Box
+                    {!canReconcileCash && <Lock className="w-2.5 h-2.5 text-zinc-400" />}
                   </span>
                 </button>
 
                 {/* Pod 3: Preview Report */}
                 <button
                   type="button"
-                  onClick={handleOpenLiquidationPreview}
-                  className="flex flex-col items-center gap-1 p-1 sm:px-2 group cursor-pointer"
+                  onClick={() => {
+                    if (canExportReports) handleOpenLiquidationPreview();
+                  }}
+                  disabled={!canExportReports}
+                  title={!canExportReports ? 'Report generation restricted by Administrator' : 'Generate & Preview Financial Report'}
+                  className={`flex flex-col items-center gap-1 p-1 sm:px-2 group ${
+                    !canExportReports ? 'opacity-50 cursor-not-allowed select-none' : 'cursor-pointer'
+                  }`}
                 >
-                  <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-lg flex items-center justify-center transition-[background-color,border-color,color,transform] duration-150 border bg-white dark:bg-zinc-900 text-zinc-700 dark:text-zinc-300 border-zinc-200 dark:border-zinc-800 group-hover:border-emerald-500/40 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 active:scale-95">
+                  <div className={`relative w-9 h-9 sm:w-10 sm:h-10 rounded-lg flex items-center justify-center transition-[background-color,border-color,color,transform] duration-150 border ${
+                    !canExportReports
+                      ? 'bg-zinc-100 dark:bg-zinc-800 text-zinc-400 border-zinc-200 dark:border-zinc-700 cursor-not-allowed'
+                      : 'bg-white dark:bg-zinc-900 text-zinc-700 dark:text-zinc-300 border-zinc-200 dark:border-zinc-800 group-hover:border-emerald-500/40 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 active:scale-95'
+                  }`}>
                     <FileText className="w-4 h-4 stroke-[2]" />
+                    {!canExportReports && (
+                      <span className="absolute -top-1 -right-1 p-0.5 rounded-full bg-zinc-900 text-amber-400 shadow-xs" title="Restricted by Administrator">
+                        <Lock className="w-2.5 h-2.5" />
+                      </span>
+                    )}
                   </div>
-                  <span className="text-[10px] sm:text-[11px] font-medium transition-colors text-zinc-600 dark:text-zinc-300 group-hover:text-emerald-600 dark:group-hover:text-emerald-400">
+                  <span className="text-[10px] sm:text-[11px] font-medium transition-colors text-zinc-600 dark:text-zinc-300 flex items-center gap-0.5">
                     Report
+                    {!canExportReports && <Lock className="w-2.5 h-2.5 text-zinc-400" />}
                   </span>
                 </button>
 
@@ -2498,6 +2670,9 @@ export default function Dashboard() {
                   setEditingTx(tx);
                   setIsNewTxOpen(true);
                 }}
+                onDeleteTransaction={handleDeleteTransaction}
+                onVoidTransaction={handleVoidTransaction}
+                onRestoreTransaction={handleRestoreTransaction}
               />
             </ModuleErrorBoundary>
           </div>
@@ -2515,6 +2690,8 @@ export default function Dashboard() {
 
       {/* Native Mobile Bottom Navigation Bar (Option 1: Quick thumb access for daily events) */}
       <BottomNav
+        canRecord={canRecordAny}
+        canReconcile={canReconcileCash}
         onOpenNewTx={() => setIsNewTxOpen(true)}
         onOpenDenominations={() => setIsDenomOpen(true)}
         onOpenAI={() => setIsAIOpen(true)}
@@ -2615,6 +2792,8 @@ export default function Dashboard() {
             isOpen={isPreviewOpen}
             onClose={() => setIsPreviewOpen(false)}
             documentData={previewData}
+            userPermissions={userPermissions}
+            canExport={canExportReports}
           />
         )}
       </ModuleErrorBoundary>
@@ -2631,6 +2810,8 @@ export default function Dashboard() {
               currentRole={currentRole}
               latestReconciliation={latestReconciliation}
               denominations={denominations}
+              userPermissions={userPermissions}
+              canReconcile={canReconcileCash}
             />
           </ModuleErrorBoundary>
         )}

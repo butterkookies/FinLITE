@@ -63,6 +63,28 @@ export async function POST(req) {
       }).catch((emailErr) => console.warn('Rejection email notification warning:', emailErr));
     }
 
+    // Record rejection event in audit_logs
+    try {
+      const rejectAudit = {
+        user_id: auth.profile?.id || null,
+        action: 'REGISTRATION_REJECTED',
+        entity_type: 'registration_requests',
+        entity_id: requestId,
+        details: {
+          applicant_name: `${request.first_name || ''} ${request.last_name || ''}`.trim() || 'Applicant',
+          applicant_email: request.email,
+          rejection_reason: rejectionReason,
+          rejected_by: auth.user.email,
+        },
+      };
+      const { error: insErr } = await supabase.from('audit_logs').insert([rejectAudit]);
+      if (insErr && insErr.code === '23503') {
+        await supabase.from('audit_logs').insert([{ ...rejectAudit, user_id: null }]);
+      }
+    } catch (auditErr) {
+      console.warn('Rejection audit log warning:', auditErr?.message);
+    }
+
     return NextResponse.json({
       success: true,
       message: `Registration request for ${request.first_name} ${request.last_name} was rejected.`,

@@ -158,8 +158,8 @@ export async function POST(req) {
 
     // Write audit trail entry
     try {
-      await supabase.from('audit_logs').insert([{
-        user_id: auth.user.id,
+      const rosterAudit = {
+        user_id: auth.profile?.id || null,
         action: 'ROSTER_UPDATE',
         entity_type: 'semester_signatories',
         entity_id: `${academic_year} • ${semester}`,
@@ -175,7 +175,11 @@ export async function POST(req) {
           })),
           updated_by: auth.user.email,
         },
-      }]);
+      };
+      const { error: insErr } = await supabase.from('audit_logs').insert([rosterAudit]);
+      if (insErr && insErr.code === '23503') {
+        await supabase.from('audit_logs').insert([{ ...rosterAudit, user_id: null }]);
+      }
     } catch (auditErr) {
       console.warn('Audit logging error for ROSTER_UPDATE (non-fatal):', auditErr);
     }

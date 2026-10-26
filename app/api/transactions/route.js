@@ -129,15 +129,14 @@ export async function POST(req) {
       if (availableCash === null) {
         const { data: txs } = await queryClient
           .from('transactions')
-          .select('amount, type')
-          .eq('semester_id', resolvedSemesterId)
-          .eq('status', 'COMPLETED');
+          .select('amount, type, status')
+          .eq('semester_id', resolvedSemesterId);
         if (txs) {
           let inf = 0;
           let outf = 0;
           txs.forEach((t) => {
-            if (t.type === 'INFLOW') inf += Number(t.amount || 0);
-            if (t.type === 'OUTFLOW') outf += Number(t.amount || 0);
+            if (t.type === 'INFLOW' && (t.status === 'COMPLETED' || t.status === 'PENDING_AUDIT')) inf += Number(t.amount || 0);
+            if (t.type === 'OUTFLOW' && t.status !== 'PENDING_REIMBURSEMENT' && t.status !== 'FLAGGED') outf += Number(t.amount || 0);
           });
           availableCash = inf - outf;
         }
@@ -206,12 +205,14 @@ export async function POST(req) {
     const createdTx = insertRes.data;
 
     // Insert receipts if provided
-    const receiptList = Array.isArray(receipt_urls) ? receipt_urls : (body.receipt_url ? [body.receipt_url] : []);
+    const rawReceiptList = Array.isArray(receipt_urls) ? receipt_urls : (body.receipt_url ? [body.receipt_url] : []);
+    const receiptList = rawReceiptList.filter(
+      (url) => typeof url === 'string' && !url.startsWith('blob:') && url.trim().length > 0
+    );
     if (receiptList.length > 0 && createdTx?.id) {
       const receiptRows = receiptList.map((url, idx) => ({
         transaction_id: createdTx.id,
-        public_url: url,
-        file_url: url,
+        public_url: url.trim(),
         sort_order: idx,
         uploaded_by: profile?.id || null,
       }));

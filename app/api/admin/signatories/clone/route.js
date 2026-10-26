@@ -77,8 +77,8 @@ export async function POST(req) {
 
     // 4. Log audit trail
     try {
-      await supabase.from('audit_logs').insert([{
-        user_id: auth.user.id,
+      const cloneAudit = {
+        user_id: auth.profile?.id || null,
         action: 'ROSTER_CLONE',
         entity_type: 'semester_signatories',
         entity_id: `${to_academic_year} • ${to_semester}`,
@@ -88,7 +88,11 @@ export async function POST(req) {
           copied_count: targetRecords.length,
           updated_by: auth.user.email,
         },
-      }]);
+      };
+      const { error: insErr } = await supabase.from('audit_logs').insert([cloneAudit]);
+      if (insErr && insErr.code === '23503') {
+        await supabase.from('audit_logs').insert([{ ...cloneAudit, user_id: null }]);
+      }
     } catch (auditErr) {
       console.warn('Audit logging error for ROSTER_CLONE (non-fatal):', auditErr);
     }

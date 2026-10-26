@@ -310,15 +310,20 @@ export async function PATCH(req) {
     }
 
     // Record governance audit log entries
+    const actorUserId = auth.profile?.id || null;
     for (const audit of auditActions) {
+      const auditPayload = {
+        user_id: actorUserId,
+        action: audit.action,
+        entity_type: audit.entity_type,
+        entity_id: audit.entity_id,
+        details: audit.details,
+      };
       try {
-        await supabase.from('audit_logs').insert([{
-          user_id: auth.user.id,
-          action: audit.action,
-          entity_type: audit.entity_type,
-          entity_id: audit.entity_id,
-          details: audit.details,
-        }]);
+        const { error: insErr } = await supabase.from('audit_logs').insert([auditPayload]);
+        if (insErr && insErr.code === '23503') {
+          await supabase.from('audit_logs').insert([{ ...auditPayload, user_id: null }]);
+        }
       } catch (auditErr) {
         console.warn('Admin action audit logging warning:', auditErr.message);
       }
@@ -488,8 +493,8 @@ export async function DELETE(req) {
 
     // Record deletion event in audit_logs
     try {
-      await db.from('audit_logs').insert([{
-        user_id: auth.user.id,
+      const deleteAudit = {
+        user_id: auth.profile?.id || null,
         action: 'ACCOUNT_DELETED',
         entity_type: 'profiles',
         entity_id: userId,
@@ -499,7 +504,11 @@ export async function DELETE(req) {
           deleted_role: targetUser.role,
           deleted_by: auth.user.email,
         },
-      }]);
+      };
+      const { error: insErr } = await db.from('audit_logs').insert([deleteAudit]);
+      if (insErr && insErr.code === '23503') {
+        await db.from('audit_logs').insert([{ ...deleteAudit, user_id: null }]);
+      }
     } catch (auditErr) {
       console.warn('Account deletion audit log error:', auditErr.message);
     }

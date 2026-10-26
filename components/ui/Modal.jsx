@@ -12,7 +12,8 @@ export default function Modal({
   description,
   children,
   footer,
-  maxWidth = 'lg',
+  maxWidth,
+  size,
   className,
   showCloseButton = true,
 }) {
@@ -29,6 +30,8 @@ export default function Modal({
 
   if (!isOpen) return null;
 
+  const effectiveSize = maxWidth || size || 'lg';
+
   const maxWidthClasses = {
     sm: 'max-w-sm',
     md: 'max-w-md',
@@ -37,10 +40,13 @@ export default function Modal({
     '2xl': 'max-w-2xl',
     '3xl': 'max-w-3xl',
     '4xl': 'max-w-4xl',
-    full: 'max-w-5xl',
+    '5xl': 'max-w-5xl',
+    '6xl': 'max-w-6xl',
+    '7xl': 'max-w-7xl',
+    full: 'max-w-full',
   };
 
-  const resolvedMaxWidth = maxWidthClasses[maxWidth] || maxWidthClasses.lg;
+  const resolvedMaxWidth = maxWidthClasses[effectiveSize] || maxWidthClasses.lg;
 
   return (
     <div

@@ -4,6 +4,8 @@ import path from 'path';
 import os from 'os';
 import { execFileSync } from 'child_process';
 import { createClient, createAdminClient } from '@/lib/supabase/server';
+import { isSuperAdminEmail } from '@/lib/config/admin';
+import { hasPermission, fetchProfileWithPermissions, ACTION_KEYS } from '@/lib/auth/permissions';
 import {
   AlignmentType,
   BorderStyle,
@@ -116,6 +118,39 @@ export async function POST(req) {
   const downloadedFiles = [];
 
   try {
+    const supabase = await createClient();
+    if (!supabase) {
+      return NextResponse.json({ error: 'Database service unavailable.' }, { status: 503 });
+    }
+
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser();
+
+    if (authError || !user) {
+      return NextResponse.json({ error: 'Authentication required to export reports.' }, { status: 401 });
+    }
+
+    const adminClient = createAdminClient();
+    const db = adminClient || supabase;
+
+    const email = user.email?.toLowerCase();
+    const isSuperAdmin = isSuperAdminEmail(email);
+
+    const callerProfile = await fetchProfileWithPermissions(db, { userId: user.id, email });
+
+    const isApproved = isSuperAdmin || callerProfile?.status === 'approved' || user.app_metadata?.status === 'approved';
+    if (!isApproved) {
+      return NextResponse.json({ error: 'Your account is pending admin approval.' }, { status: 403 });
+    }
+
+    if (!isSuperAdmin && !hasPermission(callerProfile, ACTION_KEYS.EXPORT_REPORTS, email)) {
+      return NextResponse.json({
+        error: 'Forbidden: You do not have permission to generate or export reports.',
+      }, { status: 403 });
+    }
+
     const body = await req.json();
 
     // Dynamically calculate current Academic Year & Semester (August starts the new AY in PH universities)
@@ -305,8 +340,15 @@ export async function POST(req) {
       await Promise.allSettled(fetchPromises);
     }
 
-    // 1. If LIQUIDATION report, attempt exact institutional rendering via master template populator
-    if (type === 'LIQUIDATION') {
+    // 1. If LIQUIDATION report, attempt exact institutional rendering via master template populator (local dev with Python)
+    const isServerlessOrCloud = Boolean(
+      process.env.VERCEL ||
+      process.env.RENDER ||
+      process.env.AWS_LAMBDA_FUNCTION_NAME ||
+      process.env.NEXT_RUNTIME === 'edge'
+    );
+
+    if (type === 'LIQUIDATION' && !isServerlessOrCloud) {
       const templatePath = path.join(process.cwd(), 'templates', 'LITE-Financial-Report-Universal-Template.docx');
       const scriptPath = path.join(process.cwd(), 'scripts', 'export_report_engine.py');
 
@@ -316,26 +358,27 @@ export async function POST(req) {
 
         try {
           fs.writeFileSync(tmpInput, JSON.stringify(body), 'utf8');
-          const primaryCmd = process.platform === 'win32' ? 'python' : 'python3';
-          const fallbackCmd = primaryCmd === 'python' ? 'python3' : 'python';
+          const candidates = process.platform === 'win32'
+            ? [process.env.PYTHON_PATH, 'py', 'python', 'C:\\Python314\\python.exe', 'python3'].filter(Boolean)
+            : [process.env.PYTHON_PATH, 'python3', 'python'].filter(Boolean);
 
-          try {
-            execFileSync(primaryCmd, [scriptPath, tmpInput, tmpOutput], {
-              timeout: 15000,
-              windowsHide: true,
-            });
-          } catch (primaryErr) {
+          let executed = false;
+          for (const cmd of candidates) {
             try {
-              execFileSync(fallbackCmd, [scriptPath, tmpInput, tmpOutput], {
+              execFileSync(cmd, [scriptPath, tmpInput, tmpOutput], {
                 timeout: 15000,
                 windowsHide: true,
               });
+              if (fs.existsSync(tmpOutput)) {
+                executed = true;
+                break;
+              }
             } catch (_) {
-              throw primaryErr;
+              // try next candidate
             }
           }
 
-          if (fs.existsSync(tmpOutput)) {
+          if (executed && fs.existsSync(tmpOutput)) {
             const buffer = fs.readFileSync(tmpOutput);
             try { fs.unlinkSync(tmpInput); } catch (_) {}
             try { fs.unlinkSync(tmpOutput); } catch (_) {}
@@ -352,7 +395,7 @@ export async function POST(req) {
             });
           }
         } catch (pyErr) {
-          console.warn('Python master template populator error, falling back to programmatic docx:', pyErr.message);
+          console.warn('Python master template populator error, falling back to pure Node.js institutional engine:', pyErr.message);
         } finally {
           try { if (fs.existsSync(tmpInput)) fs.unlinkSync(tmpInput); } catch (_) {}
           try { if (fs.existsSync(tmpOutput)) fs.unlinkSync(tmpOutput); } catch (_) {}
@@ -375,6 +418,20 @@ export async function POST(req) {
     const borderSingle = {
       top: { style: BorderStyle.SINGLE, size: 4, color: '4B5563' },
       bottom: { style: BorderStyle.SINGLE, size: 4, color: '4B5563' },
+      left: { style: BorderStyle.NONE, size: 0, color: 'auto' },
+      right: { style: BorderStyle.NONE, size: 0, color: 'auto' },
+    };
+
+    const borderSingleTop = {
+      top: { style: BorderStyle.SINGLE, size: 4, color: '000000' },
+      bottom: { style: BorderStyle.NONE, size: 0, color: 'auto' },
+      left: { style: BorderStyle.NONE, size: 0, color: 'auto' },
+      right: { style: BorderStyle.NONE, size: 0, color: 'auto' },
+    };
+
+    const borderSingleBottom = {
+      top: { style: BorderStyle.NONE, size: 0, color: 'auto' },
+      bottom: { style: BorderStyle.SINGLE, size: 4, color: '000000' },
       left: { style: BorderStyle.NONE, size: 0, color: 'auto' },
       right: { style: BorderStyle.NONE, size: 0, color: 'auto' },
     };
@@ -590,7 +647,7 @@ export async function POST(req) {
 
     // Function to generate 2-column 4-up receipt attachment sheets
     // Patch 15: Only 'Receipts' heading on first receipt sheet (sheetIdx === 0); no heading text above the 2x2 grid on subsequent receipt sheets (sheetIdx > 0).
-    function createReceiptSheetsSection(receiptsList, ay, sem) {
+    function createReceiptSheetsSection(receiptsList, ay, sem, isAttached = true) {
       if (!receiptsList || receiptsList.length === 0) return [];
       const chunks = [];
       for (let i = 0; i < receiptsList.length; i += 4) {
@@ -599,16 +656,21 @@ export async function POST(req) {
       const elements = [];
 
       chunks.forEach((chunk, sheetIdx) => {
-        elements.push(new Paragraph({ children: [new PageBreak()] }));
+        if (sheetIdx > 0 || isAttached) {
+          elements.push(new Paragraph({
+            spacing: { before: 0, after: 0 },
+            children: [new PageBreak()],
+          }));
+        }
 
         if (sheetIdx === 0) {
           elements.push(new Paragraph({
             alignment: AlignmentType.CENTER,
+            spacing: { before: 120, after: 120 },
             children: [
               new TextRun({ text: 'Receipts', bold: true, size: docBaseSizeHalfPt, font: docFontFamily }),
             ],
           }));
-          elements.push(new Paragraph({ text: '' }));
         }
 
         const tableRows = [];
@@ -678,7 +740,7 @@ export async function POST(req) {
     if (receiptsMode === 'STANDALONE') {
       sectionChildren = [
         ...pdmHeader,
-        ...createReceiptSheetsSection(receipts, body.academicYear || defaultAcademicYear, body.semester || defaultSemester),
+        ...createReceiptSheetsSection(receipts, body.academicYear || defaultAcademicYear, body.semester || defaultSemester, false),
       ];
     } else if (type === 'PROPOSAL') {
       // Build Proposal Items Table
@@ -844,244 +906,350 @@ export async function POST(req) {
         ...createSignatoryTables(signatories, borderNone, 'PROPOSAL', includedSignatories),
       ];
     } else {
-      // Build Liquidation Transaction Rows
-      const tableRows = [
-        new TableRow({
-          tableHeader: true,
+      // =========================================================================
+      // AUTHENTIC 4-PAGE INSTITUTIONAL FINANCIAL REPORT ENGINE (PURE NODE.JS)
+      // 100% cloud-compatible (Vercel, Render, AWS, Localhost without Python)
+      // Matches templates/LITE-Financial-Report-Universal-Template.docx exactly.
+      // =========================================================================
+
+      const resolvedSemester = body.semester || defaultSemester;
+      const resolvedAcademicYear = body.academicYear || defaultAcademicYear;
+      const coordinatorName = body.coordinatorName || 'MS. LIGAYA H. ESTRELLA';
+      const coordinatorRole = body.coordinatorRole || 'Co-curricular Affairs Coordinator';
+      const coordinatorSalutation = body.coordinatorSalutation || 'Mrs. Estrella';
+      const periodDesc = body.periodDesc || activityTitle || eventName || 'Financial Operations';
+      const finalAsOf = body.finalAsOf || `As of ${transmittalDate}`;
+      const includeCc = Boolean(body.include_cc ?? true);
+      const ccRecipients = Array.isArray(body.cc_recipients) && body.cc_recipients.length > 0
+        ? body.cc_recipients
+        : ['cc: Co-Curricular', "cc: Dean's Office"];
+
+      // Separate Inflows and Outflows authoritatively
+      const derivedIncomeItems = (Array.isArray(body.income_items) && body.income_items.length > 0)
+        ? body.income_items
+        : authoritativeTransactions
+            .filter((t) => t.type === 'INFLOW' && !/rollover|beginning/i.test(t.category_name || t.title || ''))
+            .map((t) => ({ particulars: t.title || t.description || 'Income', desc: t.title || 'Income', amount: Number(t.amount || 0) }));
+
+      const derivedExpenseItems = (Array.isArray(body.expense_items) && body.expense_items.length > 0)
+        ? body.expense_items
+        : authoritativeTransactions
+            .filter((tx) => tx.type === 'OUTFLOW')
+            .map((tx) => {
+              const proxyNote = (tx.advanced_by_name && tx.reimbursement_recipient && tx.advanced_by_name !== tx.reimbursement_recipient)
+                ? ` [Proxy: Paid by ${tx.advanced_by_name}, Claimed by ${tx.reimbursement_recipient}]`
+                : '';
+              return {
+                particulars: `${tx.title || tx.description || 'Expense'}${proxyNote}`,
+                desc: `${tx.title || 'Expense'}${proxyNote}`,
+                amount: Number(tx.amount || 0),
+              };
+            });
+
+      const initialBudget = Number(body.initial_budget ?? authoritativeSummary.initial_budget ?? 0);
+      const totalIncome = derivedIncomeItems.reduce((acc, i) => acc + (Number(i.amount) || 0), 0);
+      const totalFunds = initialBudget + totalIncome;
+      const totalExpenses = derivedExpenseItems.reduce((acc, i) => acc + (Number(i.amount) || 0), 0);
+      const cashOnHand = totalFunds - totalExpenses;
+
+      // -------------------------------------------------------------
+      // PAGE 1: OFFICIAL TRANSMITTAL LETTER
+      // -------------------------------------------------------------
+      const page1Elements = [
+        ...pdmHeader,
+        new Paragraph({
+          children: [new TextRun({ text: transmittalDate, font: docFontFamily, size: docBaseSizeHalfPt })],
+          spacing: { before: 240, after: 180 },
+        }),
+        new Paragraph({
+          children: [
+            new TextRun({ text: `${coordinatorName}\n`, bold: true, font: docFontFamily, size: docBaseSizeHalfPt }),
+            new TextRun({ text: `${coordinatorRole}\n`, font: docFontFamily, size: docBaseSizeHalfPt }),
+            new TextRun({ text: 'This School', font: docFontFamily, size: docBaseSizeHalfPt }),
+          ],
+          spacing: { before: 180, after: 240 },
+        }),
+        new Paragraph({
+          children: [new TextRun({ text: `Dear ${coordinatorSalutation},`, font: docFontFamily, size: docBaseSizeHalfPt })],
+          spacing: { before: 180, after: 180 },
+        }),
+        new Paragraph({
+          children: [
+            new TextRun({
+              text: `This is to respectfully submit the attached “LITE Financial Report” for the ${resolvedSemester} Academic Year ${resolvedAcademicYear}.`,
+              font: docFontFamily,
+              size: docBaseSizeHalfPt,
+            }),
+          ],
+          spacing: { before: 180, after: 240 },
+        }),
+        new Paragraph({
+          children: [
+            new TextRun({ text: 'Respectfully,\n\n', font: docFontFamily, size: docBaseSizeHalfPt }),
+            new TextRun({ text: 'LITE Officers', bold: true, font: docFontFamily, size: docBaseSizeHalfPt }),
+          ],
+          spacing: { before: 180, after: 240 },
+        }),
+        ...createSignatoryTables(signatories, borderNone, 'LIQUIDATION', includedSignatories),
+        ...(includeCc ? [
+          new Paragraph({
+            children: ccRecipients.map((rec) => new TextRun({ text: `${rec}\n`, font: docFontFamily, size: docBaseSizeHalfPt, color: '333333' })),
+            spacing: { before: 240, after: 120 },
+          })
+        ] : []),
+        new Paragraph({ children: [new PageBreak()] }),
+      ];
+
+      // -------------------------------------------------------------
+      // PAGE 2: INCOME SCHEDULE & TOTAL FUNDS AVAILABLE
+      // -------------------------------------------------------------
+      const incomeTableRows = [
+        ...derivedIncomeItems.map((item) => new TableRow({
           children: [
             new TableCell({
-              borders: borderSingle,
-              children: [new Paragraph({ children: [new TextRun({ text: 'Date', bold: true, font: docFontFamily })] })],
-              width: { size: 15, type: WidthType.PERCENTAGE },
+              borders: borderNone,
+              width: { size: 65, type: WidthType.PERCENTAGE },
+              children: [new Paragraph({ children: [new TextRun({ text: item.particulars || item.desc || 'Income Collection', font: docFontFamily })] })],
             }),
             new TableCell({
-              borders: borderSingle,
-              children: [new Paragraph({ children: [new TextRun({ text: 'Particulars / Description', bold: true, font: docFontFamily })] })],
-              width: { size: 45, type: WidthType.PERCENTAGE },
+              borders: borderNone,
+              width: { size: 35, type: WidthType.PERCENTAGE },
+              children: [
+                new Paragraph({
+                  alignment: AlignmentType.RIGHT,
+                  children: [new TextRun({ text: `₱${(Number(item.amount) || 0).toLocaleString('en-PH', { minimumFractionDigits: 2 })}`, font: docFontFamily })],
+                }),
+              ],
+            }),
+          ],
+        })),
+        new TableRow({
+          children: [
+            new TableCell({
+              borders: borderNone,
+              width: { size: 65, type: WidthType.PERCENTAGE },
+              children: [new Paragraph({ children: [new TextRun({ text: 'Total Income:', bold: true, font: docFontFamily })] })],
             }),
             new TableCell({
-              borders: borderSingle,
-              children: [new Paragraph({ children: [new TextRun({ text: 'Category / Ref', bold: true, font: docFontFamily })] })],
-              width: { size: 20, type: WidthType.PERCENTAGE },
+              borders: borderSingleTop,
+              width: { size: 35, type: WidthType.PERCENTAGE },
+              children: [
+                new Paragraph({
+                  alignment: AlignmentType.RIGHT,
+                  children: [new TextRun({ text: `₱${totalIncome.toLocaleString('en-PH', { minimumFractionDigits: 2 })}`, bold: true, font: docFontFamily })],
+                }),
+              ],
+            }),
+          ],
+        }),
+        new TableRow({
+          children: [
+            new TableCell({
+              borders: borderNone,
+              width: { size: 65, type: WidthType.PERCENTAGE },
+              children: [new Paragraph({ children: [new TextRun({ text: 'Total Funds Available:', bold: true, font: docFontFamily })] })],
             }),
             new TableCell({
-              borders: borderSingle,
-              children: [new Paragraph({ alignment: AlignmentType.RIGHT, children: [new TextRun({ text: 'Inflow (₱)', bold: true, font: docFontFamily })] })],
-              width: { size: 10, type: WidthType.PERCENTAGE },
-            }),
-            new TableCell({
-              borders: borderSingle,
-              children: [new Paragraph({ alignment: AlignmentType.RIGHT, children: [new TextRun({ text: 'Outflow (₱)', bold: true, font: docFontFamily })] })],
-              width: { size: 10, type: WidthType.PERCENTAGE },
+              borders: borderNone,
+              width: { size: 35, type: WidthType.PERCENTAGE },
+              children: [
+                new Paragraph({
+                  alignment: AlignmentType.RIGHT,
+                  children: [new TextRun({ text: `₱${totalFunds.toLocaleString('en-PH', { minimumFractionDigits: 2 })}`, bold: true, font: docFontFamily })],
+                }),
+              ],
             }),
           ],
         }),
       ];
 
-      authoritativeTransactions.forEach((tx) => {
-        const isInflow = tx.type === 'INFLOW';
-        const proxyNote = (tx.advanced_by_name && tx.reimbursement_recipient && tx.advanced_by_name !== tx.reimbursement_recipient)
-          ? ` [Proxy: Paid by ${tx.advanced_by_name}, Claimed by ${tx.reimbursement_recipient}]`
-          : '';
-        tableRows.push(
-          new TableRow({
-            children: [
-              new TableCell({
-                borders: borderNone,
-                children: [new Paragraph({ children: [new TextRun({ text: tx.transaction_date ? new Date(tx.transaction_date).toLocaleDateString() : '—', font: docFontFamily })] })],
-              }),
-              new TableCell({
-                borders: borderNone,
-                children: [new Paragraph({ children: [
-                  new TextRun({ text: (tx.title || 'Transaction'), font: docFontFamily }),
-                  ...(proxyNote ? [new TextRun({ text: proxyNote, italics: true, color: '666666', font: docFontFamily, size: 18 })] : []),
-                ] })],
-              }),
-              new TableCell({
-                borders: borderNone,
-                children: [new Paragraph({ children: [new TextRun({ text: tx.category_name || tx.category || 'General', font: docFontFamily })] })],
-              }),
-              new TableCell({
-                borders: borderNone,
-                children: [
-                  new Paragraph({
-                    alignment: AlignmentType.RIGHT,
-                    children: [new TextRun({ text: isInflow ? `₱${Number(tx.amount || 0).toLocaleString('en-PH', { minimumFractionDigits: 2 })}` : '—', font: docFontFamily })],
-                  }),
-                ],
-              }),
-              new TableCell({
-                borders: borderNone,
-                children: [
-                  new Paragraph({
-                    alignment: AlignmentType.RIGHT,
-                    children: [new TextRun({ text: !isInflow ? `₱${Number(tx.amount || 0).toLocaleString('en-PH', { minimumFractionDigits: 2 })}` : '—', font: docFontFamily })],
-                  }),
-                ],
-              }),
-            ],
-          })
-        );
-      });
-
-      // Summary Rows
-      tableRows.push(
-        new TableRow({
-          children: [
-            new TableCell({
-              borders: borderSingle,
-              children: [new Paragraph({ children: [new TextRun({ text: 'TOTAL ACCUMULATED AMOUNTS', bold: true, font: docFontFamily })] })],
-            }),
-            new TableCell({
-              borders: borderSingle,
-              children: [new Paragraph({ children: [new TextRun({ text: 'Sum of all verified inflows & disbursements', italics: true, font: docFontFamily })] })],
-            }),
-            new TableCell({
-              borders: borderSingle,
-              children: [new Paragraph({ children: [new TextRun({ text: 'Total Funds', font: docFontFamily })] })],
-            }),
-            new TableCell({
-              borders: borderSingle,
-              children: [
-                new Paragraph({
-                  alignment: AlignmentType.RIGHT,
-                  children: [
-                    new TextRun({
-                      text: `₱${(authoritativeSummary.total_inflows || 0).toLocaleString('en-PH', { minimumFractionDigits: 2 })}`,
-                      bold: true,
-                      font: docFontFamily,
-                    }),
-                  ],
-                }),
-              ],
-            }),
-            new TableCell({
-              borders: borderSingle,
-              children: [
-                new Paragraph({
-                  alignment: AlignmentType.RIGHT,
-                  children: [
-                    new TextRun({
-                      text: `₱${(authoritativeSummary.total_outflows || 0).toLocaleString('en-PH', { minimumFractionDigits: 2 })}`,
-                      bold: true,
-                      font: docFontFamily,
-                    }),
-                  ],
-                }),
-              ],
-            }),
-          ],
-        }),
-        new TableRow({
-          children: [
-            new TableCell({
-              borders: borderDoubleBottom,
-              children: [new Paragraph({ children: [new TextRun({ text: 'REMAINING CASH IN VAULT', bold: true, font: docFontFamily })] })],
-            }),
-            new TableCell({
-              borders: borderDoubleBottom,
-              children: [new Paragraph({ children: [new TextRun({ text: 'Reconciled Physical Cash Count', italics: true, font: docFontFamily })] })],
-            }),
-            new TableCell({
-              borders: borderDoubleBottom,
-              children: [new Paragraph({ children: [new TextRun({ text: 'Liquid Balance', font: docFontFamily })] })],
-            }),
-            new TableCell({
-              borders: borderDoubleBottom,
-              children: [
-                new Paragraph({
-                  alignment: AlignmentType.RIGHT,
-                  children: [
-                    new TextRun({
-                      text: `₱${(authoritativeSummary.cash_on_hand || 0).toLocaleString('en-PH', { minimumFractionDigits: 2 })}`,
-                      bold: true,
-                      font: docFontFamily,
-                    }),
-                  ],
-                }),
-              ],
-            }),
-            new TableCell({
-              borders: borderDoubleBottom,
-              children: [new Paragraph({ text: '' })],
-            }),
-          ],
-        })
-      );
-
-      sectionChildren = [
+      const page2Elements = [
         ...pdmHeader,
         new Paragraph({
           alignment: AlignmentType.CENTER,
           children: [
-            new TextRun({ text: 'FORMAL FINANCIAL LIQUIDATION REPORT', bold: true, size: 26, underline: {}, font: docFontFamily }),
+            new TextRun({ text: 'LITE FINANCIAL REPORT\n', bold: true, size: 26, font: docFontFamily }),
+            new TextRun({ text: `${resolvedSemester}\n`, bold: true, size: 22, font: docFontFamily }),
+            new TextRun({ text: `ACADEMIC YEAR ${resolvedAcademicYear}\n\n`, bold: true, size: 22, font: docFontFamily }),
+            new TextRun({ text: periodDesc, bold: true, size: 22, font: docFontFamily }),
           ],
-        }),
-        new Paragraph({
-          alignment: AlignmentType.CENTER,
-          children: [
-            new TextRun({ text: `Activity / Event: ${activityTitle || eventName} • Academic Year ${body.academicYear || targetDate || defaultAcademicYear}`, bold: true, size: 20, font: docFontFamily }),
-          ],
-        }),
-        new Paragraph({ text: '' }),
-
-        // Financial Summary Block
-        new Paragraph({
-          children: [
-            new TextRun({ text: 'I. EXECUTIVE FINANCIAL SUMMARY', bold: true, size: 20, font: docFontFamily }),
-          ],
+          spacing: { before: 200, after: 240 },
         }),
         new Paragraph({
           children: [
-            new TextRun({ text: `Transmittal Date: `, bold: true, font: docFontFamily }),
-            new TextRun({ text: `${transmittalDate}\n`, font: docFontFamily }),
-            new TextRun({ text: `Total Inflows (Revenue): ₱${(authoritativeSummary.total_inflows || 0).toLocaleString('en-PH', { minimumFractionDigits: 2 })}\n`, font: docFontFamily }),
-            new TextRun({ text: `Total Outflows (Disbursements): ₱${(authoritativeSummary.total_outflows || 0).toLocaleString('en-PH', { minimumFractionDigits: 2 })}\n`, font: docFontFamily }),
-            new TextRun({ text: `Net Balance Remaining: ₱${((authoritativeSummary.total_inflows || 0) - (authoritativeSummary.total_outflows || 0)).toLocaleString('en-PH', { minimumFractionDigits: 2 })}\n`, font: docFontFamily, bold: true }),
-            new TextRun({ text: `Physical Cash-on-Hand: ₱${(authoritativeSummary.cash_on_hand || 0).toLocaleString('en-PH', { minimumFractionDigits: 2 })}\n`, font: docFontFamily }),
-            new TextRun({ text: `Pending Advances (Abono): ₱${(authoritativeSummary.pending_reimbursements || 0).toLocaleString('en-PH', { minimumFractionDigits: 2 })}`, font: docFontFamily }),
+            new TextRun({ text: 'INITIAL BUDGET / BEGINNING BALANCE (Carried over from prior semester)', bold: true, font: docFontFamily, size: docBaseSizeHalfPt }),
           ],
-        }),
-        new Paragraph({ text: '' }),
-
-        // Itemized Transactions Table
-        new Paragraph({
-          children: [
-            new TextRun({ text: 'II. ITEMIZED SCHEDULE OF INFLOWS & DISBURSEMENTS', bold: true, size: 20, font: docFontFamily }),
-          ],
+          spacing: { before: 160, after: 80 },
         }),
         new Table({
           width: { size: 100, type: WidthType.PERCENTAGE },
-          rows: tableRows,
+          rows: [
+            new TableRow({
+              children: [
+                new TableCell({
+                  borders: borderNone,
+                  width: { size: 65, type: WidthType.PERCENTAGE },
+                  children: [new Paragraph({ children: [new TextRun({ text: 'Beginning Cash-on-Hand / Rollover Balance', font: docFontFamily })] })],
+                }),
+                new TableCell({
+                  borders: borderNone,
+                  width: { size: 35, type: WidthType.PERCENTAGE },
+                  children: [
+                    new Paragraph({
+                      alignment: AlignmentType.RIGHT,
+                      children: [new TextRun({ text: `₱${initialBudget.toLocaleString('en-PH', { minimumFractionDigits: 2 })}`, bold: true, font: docFontFamily })],
+                    }),
+                  ],
+                }),
+              ],
+            }),
+          ],
         }),
-        new Paragraph({ text: '' }),
+        new Paragraph({
+          children: [
+            new TextRun({ text: 'INCOME & COLLECTIONS:', bold: true, font: docFontFamily, size: docBaseSizeHalfPt }),
+          ],
+          spacing: { before: 200, after: 80 },
+        }),
+        new Table({
+          width: { size: 100, type: WidthType.PERCENTAGE },
+          rows: incomeTableRows,
+        }),
+        new Paragraph({ children: [new PageBreak()] }),
+      ];
 
-        // Audit Remarks
-        new Paragraph({
+      // -------------------------------------------------------------
+      // PAGE 3: MISCELLANEOUS OPERATING EXPENSES
+      // -------------------------------------------------------------
+      const expenseTableRows = [
+        ...derivedExpenseItems.map((item) => new TableRow({
           children: [
-            new TextRun({ text: 'III. AUDIT REMARKS & GOVERNANCE NOTES', bold: true, size: 20, font: docFontFamily }),
+            new TableCell({
+              borders: borderNone,
+              width: { size: 65, type: WidthType.PERCENTAGE },
+              children: [new Paragraph({ children: [new TextRun({ text: item.particulars || item.desc || 'Operating Expense', font: docFontFamily })] })],
+            }),
+            new TableCell({
+              borders: borderNone,
+              width: { size: 35, type: WidthType.PERCENTAGE },
+              children: [
+                new Paragraph({
+                  alignment: AlignmentType.RIGHT,
+                  children: [new TextRun({ text: `₱${(Number(item.amount) || 0).toLocaleString('en-PH', { minimumFractionDigits: 2 })}`, font: docFontFamily })],
+                }),
+              ],
+            }),
+          ],
+        })),
+        new TableRow({
+          children: [
+            new TableCell({
+              borders: borderNone,
+              width: { size: 65, type: WidthType.PERCENTAGE },
+              children: [new Paragraph({ children: [new TextRun({ text: 'Total Expenses:', bold: true, font: docFontFamily })] })],
+            }),
+            new TableCell({
+              borders: borderSingleTop,
+              width: { size: 35, type: WidthType.PERCENTAGE },
+              children: [
+                new Paragraph({
+                  alignment: AlignmentType.RIGHT,
+                  children: [new TextRun({ text: `₱${totalExpenses.toLocaleString('en-PH', { minimumFractionDigits: 2 })}`, bold: true, font: docFontFamily })],
+                }),
+              ],
+            }),
           ],
         }),
-        new Paragraph({
-          children: [
-            new TextRun({ text: remarks || 'All transactions recorded conform with the 7-day receipt submission policy and dual club adviser audit verification.', font: docFontFamily }),
-          ],
-        }),
-        new Paragraph({ text: '' }),
+      ];
 
-        // Signatories
+      const page3Elements = [
+        ...pdmHeader,
         new Paragraph({
+          alignment: AlignmentType.CENTER,
           children: [
-            new TextRun({ text: 'IV. INSTITUTIONAL ROUTING & SIGNATORIES', bold: true, size: 20, font: docFontFamily }),
+            new TextRun({ text: 'SCHEDULE OF DISBURSEMENTS / OPERATING EXPENSES\n', bold: true, size: 24, font: docFontFamily }),
+            new TextRun({ text: 'Itemized Operating & Event Expenses', italics: true, size: 20, font: docFontFamily }),
+          ],
+          spacing: { before: 200, after: 200 },
+        }),
+        new Table({
+          width: { size: 100, type: WidthType.PERCENTAGE },
+          rows: expenseTableRows,
+        }),
+        new Paragraph({ children: [new PageBreak()] }),
+      ];
+
+      // -------------------------------------------------------------
+      // PAGE 4: RECONCILIATION SUMMARY & FINAL SIGNATORIES
+      // -------------------------------------------------------------
+      const page4Elements = [
+        ...pdmHeader,
+        new Paragraph({
+          alignment: AlignmentType.CENTER,
+          children: [new TextRun({ text: finalAsOf, bold: true, size: docBaseSizeHalfPt, font: docFontFamily })],
+          spacing: { before: 200, after: 240 },
+        }),
+        new Table({
+          width: { size: 100, type: WidthType.PERCENTAGE },
+          rows: [
+            new TableRow({
+              children: [
+                new TableCell({
+                  borders: borderNone,
+                  width: { size: 60, type: WidthType.PERCENTAGE },
+                  children: [new Paragraph({ children: [new TextRun({ text: 'Total Funds', font: docFontFamily })] })],
+                }),
+                new TableCell({
+                  borders: borderNone,
+                  width: { size: 40, type: WidthType.PERCENTAGE },
+                  children: [new Paragraph({ alignment: AlignmentType.RIGHT, children: [new TextRun({ text: `₱${totalFunds.toLocaleString('en-PH', { minimumFractionDigits: 2 })}`, font: docFontFamily })] })],
+                }),
+              ],
+            }),
+            new TableRow({
+              children: [
+                new TableCell({
+                  borders: borderNone,
+                  width: { size: 60, type: WidthType.PERCENTAGE },
+                  children: [new Paragraph({ children: [new TextRun({ text: 'Total Expenses', font: docFontFamily })] })],
+                }),
+                new TableCell({
+                  borders: borderSingleBottom,
+                  width: { size: 40, type: WidthType.PERCENTAGE },
+                  children: [new Paragraph({ alignment: AlignmentType.RIGHT, children: [new TextRun({ text: `₱${totalExpenses.toLocaleString('en-PH', { minimumFractionDigits: 2 })}`, font: docFontFamily })] })],
+                }),
+              ],
+            }),
+            new TableRow({
+              children: [
+                new TableCell({
+                  borders: borderNone,
+                  width: { size: 60, type: WidthType.PERCENTAGE },
+                  children: [new Paragraph({ children: [new TextRun({ text: 'Cash on Hand', bold: true, font: docFontFamily })] })],
+                }),
+                new TableCell({
+                  borders: borderNone,
+                  width: { size: 40, type: WidthType.PERCENTAGE },
+                  children: [new Paragraph({ alignment: AlignmentType.RIGHT, children: [new TextRun({ text: `₱${cashOnHand.toLocaleString('en-PH', { minimumFractionDigits: 2 })}`, bold: true, font: docFontFamily })] })],
+                }),
+              ],
+            }),
           ],
         }),
-        new Paragraph({ text: '' }),
+        new Paragraph({ text: '', spacing: { before: 240, after: 120 } }),
         ...createSignatoryTables(signatories, borderNone, 'LIQUIDATION', includedSignatories),
+      ];
+
+      sectionChildren = [
+        ...page1Elements,
+        ...page2Elements,
+        ...page3Elements,
+        ...page4Elements,
       ];
 
       // Attached receipts if requested
       if (receiptsMode === 'APPEND' && receipts && receipts.length > 0) {
-        sectionChildren.push(...createReceiptSheetsSection(receipts, body.academicYear || defaultAcademicYear, body.semester || defaultSemester));
+        sectionChildren.push(...createReceiptSheetsSection(receipts, resolvedAcademicYear, resolvedSemester, true));
       }
     }
 

@@ -1,0 +1,173 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 680" width="100%" height="100%">
+  <defs>
+    <style>
+      .bg { fill: #f8fafc; }
+      .header-title { font-family: 'Inter', system-ui, sans-serif; font-size: 26px; font-weight: 800; fill: #0f172a; }
+      .header-sub { font-family: 'Inter', system-ui, sans-serif; font-size: 14px; fill: #64748b; font-weight: 500; }
+      .stage-pill { font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 700; fill: #1d4ed8; }
+      .pill-bg { fill: #dbeafe; rx: 6px; }
+      .card-bg { fill: #ffffff; rx: 14px; filter: drop-shadow(0 10px 24px rgba(15, 23, 42, 0.05)); }
+      .th-text { font-family: 'Inter', system-ui, sans-serif; font-size: 12px; font-weight: 700; fill: #ffffff; }
+      .td-text { font-family: 'Inter', system-ui, sans-serif; font-size: 11px; fill: #334155; }
+      .td-mono { font-family: 'JetBrains Mono', monospace; font-size: 10.5px; fill: #0f172a; font-weight: 600; }
+      .grid-line { stroke: #f1f5f9; stroke-width: 1; }
+      .callout-bg { fill: #fefce8; stroke: #fde047; stroke-width: 1.5; rx: 12px; }
+      .callout-title { font-family: 'Inter', system-ui, sans-serif; font-size: 14px; font-weight: 800; fill: #854d0e; }
+      .callout-text { font-family: 'Inter', system-ui, sans-serif; font-size: 12px; fill: #713f12; line-height: 1.45; }
+      .fk-tag { fill: #e0e7ff; color: #3730a3; font-weight: 800; }
+    </style>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1200" height="680" class="bg" />
+
+  <!-- Header Section -->
+  <g transform="translate(60, 40)">
+    <rect x="0" y="0" width="80" height="26" class="pill-bg" />
+    <text x="40" y="17" text-anchor="middle" class="stage-pill">STEP 2</text>
+    <text x="96" y="20" class="header-title">Second Normal Form (2NF) — Removing Partial Dependencies</text>
+    <text x="0" y="46" class="header-sub">Extracted standalone master entities (Profiles, Categories, Semesters). All non-key attributes fully depend on their entire PK.</text>
+  </g>
+
+  <!-- Extracted Entity 1: PROFILES -->
+  <g transform="translate(60, 110)">
+    <rect width="330" height="185" class="card-bg" />
+    <rect x="0" y="0" width="330" height="34" fill="#0f172a" rx="14" />
+    <rect x="0" y="18" width="330" height="16" fill="#0f172a" />
+    <text x="14" y="22" class="th-text">MASTER: PROFILES</text>
+
+    <text x="14" y="52" class="td-mono"><tspan fill="#b91c1c">[PK]</tspan> id (UUID)</text>
+    <text x="135" y="52" class="td-text">full_name</text>
+    <text x="240" y="52" class="td-text">role</text>
+    <line x1="0" y1="60" x2="330" y2="60" stroke="#e2e8f0" />
+
+    <text x="14" y="78" class="td-mono">PRF-101</text>
+    <text x="135" y="78" class="td-text">Andrei John Geronimo</text>
+    <text x="240" y="78" class="td-text">Treasurer</text>
+    <line x1="0" y1="90" x2="330" y2="90" class="grid-line" />
+
+    <text x="14" y="108" class="td-mono">PRF-102</text>
+    <text x="135" y="108" class="td-text">Christian Rey Kasilag</text>
+    <text x="240" y="108" class="td-text">Auditor</text>
+    <line x1="0" y1="120" x2="330" y2="120" class="grid-line" />
+
+    <text x="14" y="138" class="td-mono">PRF-103</text>
+    <text x="135" y="138" class="td-text">Emanuel P. Malbarosa</text>
+    <text x="240" y="138" class="td-text">President</text>
+    <line x1="0" y1="150" x2="330" y2="150" class="grid-line" />
+
+    <text x="14" y="168" class="td-text" fill="#64748b" font-size="10.5px">Stores dynamic RBAC permission flags</text>
+  </g>
+
+  <!-- Extracted Entity 2: CATEGORIES -->
+  <g transform="translate(420, 110)">
+    <rect width="330" height="185" class="card-bg" />
+    <rect x="0" y="0" width="330" height="34" fill="#0f172a" rx="14" />
+    <rect x="0" y="18" width="330" height="16" fill="#0f172a" />
+    <text x="14" y="22" class="th-text">MASTER: CATEGORIES</text>
+
+    <text x="14" y="52" class="td-mono"><tspan fill="#b91c1c">[PK]</tspan> id (UUID)</text>
+    <text x="135" y="52" class="td-text">name</text>
+    <text x="245" y="52" class="td-text">type</text>
+    <line x1="0" y1="60" x2="330" y2="60" stroke="#e2e8f0" />
+
+    <text x="14" y="78" class="td-mono">CAT-001</text>
+    <text x="135" y="78" class="td-text">Supplies &amp; Materials</text>
+    <text x="245" y="78" class="td-mono" fill="#b91c1c">OUTFLOW</text>
+    <line x1="0" y1="90" x2="330" y2="90" class="grid-line" />
+
+    <text x="14" y="108" class="td-mono">CAT-002</text>
+    <text x="135" y="108" class="td-text">Local Transit / Fare</text>
+    <text x="245" y="108" class="td-mono" fill="#b91c1c">OUTFLOW</text>
+    <line x1="0" y1="120" x2="330" y2="120" class="grid-line" />
+
+    <text x="14" y="138" class="td-mono">CAT-003</text>
+    <text x="135" y="138" class="td-text">Batch Merchandise</text>
+    <text x="245" y="138" class="td-mono" fill="#047857">INFLOW</text>
+    <line x1="0" y1="150" x2="330" y2="150" class="grid-line" />
+
+    <text x="14" y="168" class="td-text" fill="#64748b" font-size="10.5px">Independent category dictionary</text>
+  </g>
+
+  <!-- Extracted Entity 3: SEMESTERS -->
+  <g transform="translate(780, 110)">
+    <rect width="360" height="185" class="card-bg" />
+    <rect x="0" y="0" width="360" height="34" fill="#0f172a" rx="14" />
+    <rect x="0" y="18" width="360" height="16" fill="#0f172a" />
+    <text x="14" y="22" class="th-text">MASTER: SEMESTERS</text>
+
+    <text x="14" y="52" class="td-mono"><tspan fill="#b91c1c">[PK]</tspan> id (UUID)</text>
+    <text x="140" y="52" class="td-text">academic_year</text>
+    <text x="250" y="52" class="td-text">starting_cash</text>
+    <line x1="0" y1="60" x2="360" y2="60" stroke="#e2e8f0" />
+
+    <text x="14" y="78" class="td-mono">SEM-01</text>
+    <text x="140" y="78" class="td-text">2025-2026 2nd Sem</text>
+    <text x="250" y="78" class="td-mono">P0.00</text>
+    <line x1="0" y1="90" x2="360" y2="90" class="grid-line" />
+
+    <text x="14" y="108" class="td-mono">SEM-02</text>
+    <text x="140" y="108" class="td-text">2026-2027 1st Sem</text>
+    <text x="250" y="108" class="td-mono">P2,433.00</text>
+    <line x1="0" y1="120" x2="360" y2="120" class="grid-line" />
+
+    <text x="14" y="138" class="td-mono">SEM-03</text>
+    <text x="140" y="138" class="td-text">2026-2027 2nd Sem</text>
+    <text x="250" y="138" class="td-mono">P4,120.00</text>
+    <line x1="0" y1="150" x2="360" y2="150" class="grid-line" />
+
+    <text x="14" y="168" class="td-text" fill="#64748b" font-size="10.5px">Enforces academic tenure isolation</text>
+  </g>
+
+  <!-- The Normalized 2NF TRANSACTIONS Table (Center) -->
+  <g transform="translate(60, 320)">
+    <rect width="1080" height="150" class="card-bg" />
+    <rect x="0" y="0" width="1080" height="34" fill="#047857" rx="14" />
+    <rect x="0" y="18" width="1080" height="16" fill="#047857" />
+    <text x="18" y="22" class="th-text">TRANSACTIONS TABLE IN 2NF (Referencing Foreign Keys)</text>
+
+    <text x="18" y="52" class="td-mono"><tspan fill="#b91c1c">[PK]</tspan> id</text>
+    <text x="110" y="52" class="td-mono"><tspan fill="#3730a3">[FK]</tspan> semester_id</text>
+    <text x="240" y="52" class="td-mono"><tspan fill="#3730a3">[FK]</tspan> category_id</text>
+    <text x="370" y="52" class="td-mono"><tspan fill="#3730a3">[FK]</tspan> logged_by</text>
+    <text x="500" y="52" class="td-text">title</text>
+    <text x="690" y="52" class="td-text">amount</text>
+    <text x="780" y="52" class="td-text">status</text>
+    <text x="890" y="52" class="td-mono"><tspan fill="#3730a3">[FK]</tspan> audited_by</text>
+    <line x1="0" y1="60" x2="1080" y2="60" stroke="#e2e8f0" />
+
+    <text x="18" y="80" class="td-mono">TRX-001</text>
+    <text x="110" y="80" class="td-mono">SEM-02</text>
+    <text x="240" y="80" class="td-mono">CAT-001</text>
+    <text x="370" y="80" class="td-mono">PRF-101</text>
+    <text x="500" y="80" class="td-text" font-weight="700">Markers &amp; Tape</text>
+    <text x="690" y="80" class="td-mono">P150.00</text>
+    <text x="780" y="80" class="td-text">PENDING</text>
+    <text x="890" y="80" class="td-mono">PRF-102</text>
+    <line x1="0" y1="92" x2="1080" y2="92" class="grid-line" />
+
+    <text x="18" y="112" class="td-mono">TRX-002</text>
+    <text x="110" y="112" class="td-mono">SEM-02</text>
+    <text x="240" y="112" class="td-mono">CAT-002</text>
+    <text x="370" y="112" class="td-mono">PRF-102</text>
+    <text x="500" y="112" class="td-text" font-weight="700">Tricycle Fare</text>
+    <text x="690" y="112" class="td-mono">P60.00</text>
+    <text x="780" y="112" class="td-text">VERIFIED</text>
+    <text x="890" y="112" class="td-mono">PRF-102</text>
+    
+    <rect x="0" y="126" width="1080" height="24" fill="#ecfdf5" rx="6" />
+    <text x="18" y="142" font-family="'Inter', sans-serif" font-size="11px" font-weight="700" fill="#047857">BENEFIT: Zero text redundancy. If an officer's name or category name changes, it is updated in ONE place only.</text>
+  </g>
+
+  <!-- Bottom Callout: What still needs 3NF -->
+  <g transform="translate(60, 495)">
+    <rect x="0" y="0" width="1080" height="145" class="callout-bg" />
+    <text x="24" y="28" class="callout-title">The Remaining Challenge: Transitive Dependencies</text>
+    <text x="24" y="54" class="callout-text">
+      Even in 2NF, non-key attributes still depend on other non-key attributes ($X \rightarrow Y$ and $Y \rightarrow Z$):<br>
+      • In cash count logs, currency face value (₱1,000, ₱500) and currency type ('BILL', 'COIN') depend on the <strong>denomination code</strong>, not on the reconciliation session.<br>
+      • In out-of-pocket advance claims, partial reimbursement payout logs and claimant balances depend on the <strong>disbursement event</strong>, not just the advance claim header.<br>
+      <tspan font-weight="700" fill="#854d0e">To reach pure 3NF, these transitive relationships must be decomposed into independent lookup and transaction junction tables.</tspan>
+    </text>
+  </g>
+</svg>

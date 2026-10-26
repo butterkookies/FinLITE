@@ -30,9 +30,11 @@ const FIELD_LABELS = {
   category_id: 'Category',
   type: 'Transaction Type',
   date: 'Transaction Date',
+  transaction_date: 'Transaction Date',
   is_reimbursement: 'Abono / Personal Advance',
   proof_attachment_url: 'Receipt Attachment',
   notes: 'Auditor Remarks / Notes',
+  comment: 'Auditor Remarks / Notes',
   role: 'Assigned Role',
   is_active: 'Account Status',
   physical_total: 'Physical Cashbox Total',
@@ -41,6 +43,8 @@ const FIELD_LABELS = {
   variance_type: 'Reconciliation Result',
   academic_year: 'Academic Year',
   semester: 'Semester',
+  void_reason: 'Audited Void Reason',
+  archived_at: 'Archived Timestamp',
 };
 
 const IGNORED_KEYS = new Set([
@@ -70,11 +74,12 @@ function formatValue(key, val) {
     }
     return val ? 'True' : 'False';
   }
-  if (key === 'amount' || key === 'physical_total' || key === 'system_total' || key === 'variance') {
+  if (key === 'amount' || key === 'physical_total' || key === 'system_total' || key === 'variance' || key === 'disbursed_amount' || key === 'total_claim') {
     return formatPHP(val);
   }
   if (key === 'type') {
-    return val === 'inflow' ? '+ Inflow (Income)' : '- Outflow (Disbursement)';
+    const t = String(val).toLowerCase();
+    return t === 'inflow' ? '+ Inflow (Income)' : '- Outflow (Disbursement)';
   }
   if (typeof val === 'object') {
     return JSON.stringify(val);
@@ -87,16 +92,52 @@ export default function AuditDiffViewer({ log, isLight }) {
   const [copied, setCopied] = useState(false);
 
   const details = log.details || {};
-  const operation = details.operation || (
-    log.action === 'INSERT' ? 'INSERT' :
-    log.action === 'UPDATE' ? 'UPDATE' :
-    log.action === 'DELETE' ? 'DELETE' :
-    log.action === 'ABONO_SETTLED' ? 'UPDATE' : 'ACTION'
-  );
 
-  const snapshot = details.snapshot || details.new || details.deleted_snapshot || {};
-  const changedFields = details.changed_fields || {};
-  const previousFields = details.previous || {};
+  // Resilient operation resolution across all trigger & manual application actions
+  let operation = details.operation;
+  if (!operation) {
+    if (log.action === 'INSERT' || log.action === 'TRANSACTION_CREATED' || log.action.includes('COLLECTED')) {
+      operation = 'INSERT';
+    } else if (log.action === 'UPDATE' || log.action === 'TRANSACTION_UPDATED' || log.action === 'TRANSACTION_REVISED' || log.action.includes('SETTLED') || log.action.includes('DISBURSEMENT')) {
+      operation = 'UPDATE';
+    } else if (log.action === 'DELETE' || log.action === 'ACCOUNT_DELETED') {
+      operation = 'DELETE';
+    } else if (log.action === 'TRANSACTION_VOIDED') {
+      operation = 'VOID';
+    } else if (log.action === 'TRANSACTION_RESTORED') {
+      operation = 'RESTORE';
+    } else if (log.action === 'TRANSACTION_FLAGGED' || log.action === 'TRANSACTION_AUDITED') {
+      operation = 'AUDIT_REVIEW';
+    } else {
+      operation = 'ACTION';
+    }
+  }
+
+  // Synthesized snapshot supporting both nested trigger objects and flat telemetry structures
+  const rawSnapshot = details.snapshot || details.new || details.deleted_snapshot || {};
+  const snapshot = {
+    title: rawSnapshot.title || details.title || details.transaction_title || null,
+    amount: rawSnapshot.amount ?? details.amount ?? details.disbursed_amount ?? details.total_claim ?? null,
+    type: rawSnapshot.type || details.type || null,
+    payment_method: rawSnapshot.payment_method || details.payment_method || (details.amount != null ? 'CASH' : null),
+    category_name: rawSnapshot.category_name || details.category_name || null,
+    is_reimbursement: rawSnapshot.is_reimbursement ?? details.is_reimbursement ?? null,
+    status: rawSnapshot.status || details.status || details.new_status || null,
+    notes: rawSnapshot.notes || details.comment || details.notes || null,
+    physical_total: rawSnapshot.physical_total ?? details.physical_total ?? null,
+    system_total: rawSnapshot.system_total ?? details.system_total ?? null,
+    variance: rawSnapshot.variance ?? details.variance ?? null,
+    ...rawSnapshot
+  };
+
+  const changedFields = { ...(details.changed_fields || {}) };
+  const previousFields = { ...(details.previous || {}) };
+
+  // Fallback: if changed_fields is empty but status transitioned, synthesize it
+  if (Object.keys(changedFields).length === 0 && details.previous_status && details.new_status && details.previous_status !== details.new_status) {
+    changedFields.status = details.new_status;
+    previousFields.status = details.previous_status;
+  }
 
   const handleCopyJson = async () => {
     try {
@@ -160,25 +201,28 @@ export default function AuditDiffViewer({ log, isLight }) {
       {/* Visual Mode View */}
       {viewMode === 'visual' ? (
         <div className="p-3.5 space-y-3">
-          {/* Case 1: Abono Settled */}
-          {log.action === 'ABONO_SETTLED' ? (
+          {/* Case 1: Abono Settled / Disbursed */}
+          {(log.action === 'ABONO_SETTLED' || log.action === 'SETTLE_ABONO_REIMBURSEMENT' || log.action === 'PARTIAL_ABONO_DISBURSEMENT') ? (
             <div className="p-3 rounded-lg border border-amber-200 dark:border-amber-900/40 bg-amber-500/10 text-amber-900 dark:text-amber-200">
               <div className="flex items-center gap-2 font-semibold">
                 <HandCoins className="w-4 h-4 text-amber-600 dark:text-amber-400" />
-                <span>Abono Reimbursement Settlement</span>
+                <span>
+                  {log.action === 'PARTIAL_ABONO_DISBURSEMENT' ? 'Partial Abono Disbursement' : 'Abono Reimbursement Settlement'}
+                </span>
               </div>
               <p className="mt-1 text-[11px] text-amber-800/90 dark:text-amber-300/80">
-                The personal advance was disbursed and repaid to the officer from the physical cashbox. Status transitioned to <strong>REIMBURSED</strong>.
+                {snapshot.title ? <strong>{snapshot.title}: </strong> : ''}
+                Disbursed and repaid to the officer from the physical cashbox. Status updated to <strong>{snapshot.status || 'REIMBURSED'}</strong>.
               </p>
-              {details.amount != null && (
+              {snapshot.amount != null && (
                 <div className="mt-2 text-xs font-mono font-bold text-amber-700 dark:text-amber-300">
-                  Settled Amount: {formatPHP(details.amount)}
+                  Payout Amount: {formatPHP(snapshot.amount)}
                 </div>
               )}
             </div>
-          ) : log.entity_type === 'cash_reconciliations' ? (
+          ) : (log.entity_type === 'cash_reconciliations' || log.action.includes('CASHBOX') || log.action.includes('RECONCIL')) ? (
             /* Case 2: Cashbox Reconciliation */
-            <div className="space-y-2">
+            <div className="space-y-2.5">
               <div className="flex items-center gap-2 font-semibold text-zinc-800 dark:text-zinc-200">
                 <Calculator className="w-4 h-4 text-sky-500" />
                 <span>Physical Cashbox Count Summary</span>
@@ -187,37 +231,100 @@ export default function AuditDiffViewer({ log, isLight }) {
                 <div className="p-2.5 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900/70">
                   <span className="text-[10px] text-zinc-500 block uppercase">Physical Count</span>
                   <span className="font-mono font-bold text-zinc-900 dark:text-zinc-100 text-sm">
-                    {formatPHP(snapshot.physical_total || 0)}
+                    {formatPHP(snapshot.physical_total ?? details.physical_total ?? 0)}
                   </span>
                 </div>
                 <div className="p-2.5 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900/70">
                   <span className="text-[10px] text-zinc-500 block uppercase">System Recorded</span>
                   <span className="font-mono font-bold text-zinc-900 dark:text-zinc-100 text-sm">
-                    {formatPHP(snapshot.system_total || 0)}
+                    {formatPHP(snapshot.system_total ?? snapshot.ledger_cash_balance ?? details.ledger_cash_balance ?? details.system_total ?? 0)}
                   </span>
                 </div>
                 <div className="p-2.5 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900/70">
                   <span className="text-[10px] text-zinc-500 block uppercase">Variance (Discrepancy)</span>
-                  <span className={cn(
-                    "font-mono font-bold text-sm",
-                    (snapshot.variance || 0) < 0 ? "text-rose-600 dark:text-rose-400" :
-                    (snapshot.variance || 0) > 0 ? "text-sky-600 dark:text-sky-400" : "text-emerald-600 dark:text-emerald-400"
-                  )}>
-                    {formatPHP(snapshot.variance || 0)}
-                  </span>
+                  {(() => {
+                    const phys = Number(snapshot.physical_total ?? details.physical_total ?? 0);
+                    const sys = Number(snapshot.system_total ?? snapshot.ledger_cash_balance ?? details.ledger_cash_balance ?? details.system_total ?? 0);
+                    const v = snapshot.variance ?? snapshot.variance_amount ?? details.variance_amount ?? details.variance ?? (phys - sys);
+                    return (
+                      <span className={cn(
+                        "font-mono font-bold text-sm",
+                        v < 0 ? "text-rose-600 dark:text-rose-400" :
+                        v > 0 ? "text-sky-600 dark:text-sky-400" : "text-emerald-600 dark:text-emerald-400"
+                      )}>
+                        {formatPHP(v)}
+                      </span>
+                    );
+                  })()}
                 </div>
               </div>
-              {snapshot.notes && (
+              {(snapshot.notes || details.notes) && (
                 <p className="text-[11px] text-zinc-500 italic mt-1">
-                  Remark: &ldquo;{snapshot.notes}&rdquo;
+                  Remark: &ldquo;{snapshot.notes || details.notes}&rdquo;
                 </p>
               )}
+              {Array.isArray(snapshot.items || details.items) && (snapshot.items || details.items).length > 0 && (
+                <div className="mt-2 pt-2 border-t border-zinc-200/80 dark:border-zinc-800">
+                  <span className="text-[10px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider block mb-1.5">
+                    Denomination Breakdown ({(snapshot.items || details.items).length} items)
+                  </span>
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5 text-xs font-mono">
+                    {(snapshot.items || details.items).map((it, idx) => (
+                      <div key={idx} className="p-1.5 rounded-md bg-zinc-50 dark:bg-zinc-800/40 border border-zinc-200/60 dark:border-zinc-800/60 flex items-center justify-between">
+                        <span className="text-zinc-600 dark:text-zinc-400 text-[11px]">
+                          {it.code || `D-${idx + 1}`}: {it.quantity}x
+                        </span>
+                        <span className="font-semibold text-zinc-900 dark:text-zinc-100 text-[11px]">
+                          {formatPHP(it.subtotal || 0)}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          ) : (operation === 'AUDIT_REVIEW' || log.action === 'TRANSACTION_FLAGGED' || log.action === 'TRANSACTION_AUDITED') ? (
+            /* Case 2.5: Auditor Review / Flag / Decision */
+            <div className="space-y-2.5">
+              <div className={cn(
+                "p-3 rounded-lg border flex flex-col gap-1.5",
+                log.action === 'TRANSACTION_FLAGGED'
+                  ? "bg-rose-500/10 border-rose-500/20 text-rose-900 dark:text-rose-200"
+                  : "bg-emerald-500/10 border-emerald-500/20 text-emerald-900 dark:text-emerald-200"
+              )}>
+                <div className="flex items-center justify-between flex-wrap gap-2">
+                  <div className="flex items-center gap-1.5 font-semibold text-xs">
+                    {log.action === 'TRANSACTION_FLAGGED' ? <AlertCircle className="w-4 h-4 text-rose-600" /> : <CheckCircle2 className="w-4 h-4 text-emerald-600" />}
+                    <span>{log.action === 'TRANSACTION_FLAGGED' ? 'Audit Checkpoint: Transaction Flagged' : 'Audit Checkpoint: Transaction Verified & Cleared'}</span>
+                  </div>
+                  {(details.previous_status || details.new_status) && (
+                    <div className="flex items-center gap-1 font-mono text-[11px]">
+                      <Badge variant="neutral" size="xs">{details.previous_status || 'PENDING'}</Badge>
+                      <ArrowRight className="w-3 h-3" />
+                      <Badge variant={log.action === 'TRANSACTION_FLAGGED' ? 'rose' : 'emerald'} size="xs">{details.new_status || 'AUDITED'}</Badge>
+                    </div>
+                  )}
+                </div>
+
+                {snapshot.title && (
+                  <p className="text-xs font-semibold mt-1">
+                    {snapshot.title} {snapshot.amount != null ? `(${formatPHP(snapshot.amount)})` : ''}
+                  </p>
+                )}
+
+                {details.comment && (
+                  <p className="text-[11px] italic mt-1 bg-white/50 dark:bg-black/30 p-2 rounded">
+                    Auditor Remark: &ldquo;{details.comment}&rdquo;
+                  </p>
+                )}
+              </div>
             </div>
           ) : operation === 'UPDATE' ? (
             /* Case 3: Update with Before vs After Diff */
             <div className="space-y-2.5">
               {/* Status Transition Banner */}
-              {(details.previous_status || details.current_status) && details.previous_status !== details.current_status && (
+              {(details.previous_status || details.new_status || details.current_status) && 
+               (details.previous_status !== (details.new_status || details.current_status)) && (
                 <div className="p-2.5 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-between flex-wrap gap-2">
                   <span className="text-[11px] font-medium text-emerald-800 dark:text-emerald-300">
                     Status Transition
@@ -228,7 +335,7 @@ export default function AuditDiffViewer({ log, isLight }) {
                     </Badge>
                     <ArrowRight className="w-3 h-3 text-emerald-600 dark:text-emerald-400" />
                     <Badge variant="emerald" size="xs">
-                      {details.current_status || 'UPDATED'}
+                      {details.new_status || details.current_status || 'UPDATED'}
                     </Badge>
                   </div>
                 </div>
@@ -285,12 +392,17 @@ export default function AuditDiffViewer({ log, isLight }) {
                   })}
                 </div>
               ) : (
-                <div className="p-3 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900/40 text-[11px] text-zinc-500">
-                  <div className="flex items-center gap-1.5 font-medium text-zinc-700 dark:text-zinc-300 mb-1">
+                <div className="p-3 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900/40 text-[11px] text-zinc-500 space-y-1">
+                  <div className="flex items-center gap-1.5 font-medium text-zinc-700 dark:text-zinc-300">
                     <Info className="w-3.5 h-3.5 text-zinc-400" />
-                    <span>Metadata / Approval Checkpoint</span>
+                    <span>Ledger Update Record</span>
                   </div>
-                  System audit verification touched this record without changing core ledger amounts.
+                  {snapshot.title && (
+                    <p className="font-medium text-zinc-800 dark:text-zinc-200">
+                      Record: {snapshot.title} {snapshot.amount != null ? `(${formatPHP(snapshot.amount)})` : ''}
+                    </p>
+                  )}
+                  <p>System audit recorded modifications for this entry.</p>
                 </div>
               )}
             </div>
@@ -375,6 +487,11 @@ export default function AuditDiffViewer({ log, isLight }) {
               <div className="font-semibold text-zinc-800 dark:text-zinc-200">
                 Action: {log.action}
               </div>
+              {snapshot.title && (
+                <div className="text-xs font-medium text-zinc-700 dark:text-zinc-300">
+                  Target Item: <strong>{snapshot.title}</strong>
+                </div>
+              )}
               {details.auth_method && (
                 <div className="text-[11px] text-zinc-600 dark:text-zinc-400">
                   Auth Method: <strong>{details.auth_method}</strong>

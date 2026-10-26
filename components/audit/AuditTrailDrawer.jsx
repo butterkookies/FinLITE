@@ -16,9 +16,13 @@ import {
   Search,
   Filter,
   Lock,
-  Clock
+  Clock,
+  AlertCircle,
+  CheckCircle2,
+  FileEdit
 } from 'lucide-react';
 import { fetchAuditTrail } from '@/lib/supabase/audit';
+import { createClient } from '@/lib/supabase/client';
 import { formatPHP } from '@/lib/utils/currency';
 import { useTheme } from '@/components/theme/ThemeProvider';
 import { Button, Badge, Input, Card } from '@/components/ui';
@@ -57,11 +61,14 @@ export default function AuditTrailDrawer({
   const [searchQuery, setSearchQuery] = useState('');
   const [expandedLogId, setExpandedLogId] = useState(null);
 
-  const loadLogs = useCallback(async () => {
-    if (!supabase) return;
+  // Fallback to client if supabase instance is not provided via props
+  const client = useMemo(() => supabase || createClient(), [supabase]);
+
+  const loadLogs = useCallback(async (cat = filterCategory) => {
+    if (!client) return;
     setLoading(true);
     try {
-      const { data, error } = await fetchAuditTrail(supabase, 80);
+      const { data, error } = await fetchAuditTrail(client, 100, cat);
       if (!error && Array.isArray(data)) {
         setLogs(data);
       }
@@ -70,14 +77,38 @@ export default function AuditTrailDrawer({
     } finally {
       setLoading(false);
     }
-  }, [supabase]);
+  }, [client, filterCategory]);
 
   useEffect(() => {
     if (isOpen) {
-      loadLogs();
+      loadLogs(filterCategory);
       setExpandedLogId(null);
     }
-  }, [isOpen, loadLogs]);
+  }, [isOpen, filterCategory, loadLogs]);
+
+  // Real-time live updates: listen for new audit records
+  useEffect(() => {
+    if (!isOpen || !client) return;
+
+    try {
+      const channel = client
+        .channel('realtime_audit_trail_drawer')
+        .on(
+          'postgres_changes',
+          { event: 'INSERT', schema: 'public', table: 'audit_logs' },
+          () => {
+            loadLogs(filterCategory);
+          }
+        )
+        .subscribe();
+
+      return () => {
+        client.removeChannel(channel);
+      };
+    } catch (realtimeErr) {
+      console.warn('Realtime audit subscription note:', realtimeErr?.message);
+    }
+  }, [isOpen, client, filterCategory, loadLogs]);
 
   // Handle ESC key to close
   useEffect(() => {
@@ -99,18 +130,37 @@ export default function AuditTrailDrawer({
 
   const filteredLogs = useMemo(() => {
     return logs.filter((log) => {
+      const details = log.details || {};
+      const snapshot = details.snapshot || details.new || details.deleted_snapshot || {};
+      const isAbono = log.action === 'ABONO_SETTLED' || 
+        log.action === 'SETTLE_ABONO_REIMBURSEMENT' ||
+        log.action === 'PARTIAL_ABONO_DISBURSEMENT' ||
+        log.entity_type === 'advances_payable' ||
+        Boolean(snapshot.is_reimbursement) ||
+        Boolean(details.is_reimbursement) ||
+        details.changed_fields?.status === 'REIMBURSED';
+
       // 1. Filter by category
       if (filterCategory === 'TRANSACTIONS') {
-        if (log.entity_type !== 'transactions' || log.action === 'ABONO_SETTLED') return false;
+        if ((log.entity_type !== 'transactions' && log.entity_type !== 'debts') || isAbono) return false;
       } else if (filterCategory === 'ABONO') {
-        const isAbono = log.action === 'ABONO_SETTLED' || 
-          (log.details?.snapshot?.is_reimbursement) ||
-          (log.details?.changed_fields?.status === 'REIMBURSED');
         if (!isAbono) return false;
       } else if (filterCategory === 'RECONCILIATION') {
-        if (log.entity_type !== 'cash_reconciliations') return false;
+        const isRecon = log.entity_type === 'cash_reconciliations' || 
+          log.action.includes('CASHBOX') || 
+          log.action.includes('RECONCIL');
+        if (!isRecon) return false;
       } else if (filterCategory === 'GOVERNANCE') {
-        if (log.entity_type !== 'profiles' && log.entity_type !== 'semesters') return false;
+        const isGov = log.entity_type === 'profiles' || 
+          log.entity_type === 'semesters' || 
+          log.entity_type === 'semester_signatories' ||
+          log.entity_type === 'registration_requests' ||
+          log.action?.includes('ROSTER') ||
+          log.action?.includes('ROLE') ||
+          log.action?.includes('ACCOUNT') ||
+          log.action?.includes('REGISTRATION') ||
+          log.action?.includes('GOVERNANCE');
+        if (!isGov) return false;
       }
 
       // 2. Filter by search query
@@ -120,13 +170,15 @@ export default function AuditTrailDrawer({
         const role = (log.actor_role || '').toLowerCase();
         const action = (log.action || '').toLowerCase();
         const entity = (log.entity_type || '').toLowerCase();
-        const detailsStr = JSON.stringify(log.details || {}).toLowerCase();
+        const title = (snapshot.title || details.title || details.transaction_title || '').toLowerCase();
+        const detailsStr = JSON.stringify(details).toLowerCase();
 
         return (
           actor.includes(query) ||
           role.includes(query) ||
           action.includes(query) ||
           entity.includes(query) ||
+          title.includes(query) ||
           detailsStr.includes(query)
         );
       }
@@ -171,7 +223,7 @@ export default function AuditTrailDrawer({
             <Button
               variant="outline"
               size="icon-sm"
-              onClick={loadLogs}
+              onClick={() => loadLogs(filterCategory)}
               disabled={loading}
               title="Refresh Audit Trail"
             >
@@ -220,7 +272,10 @@ export default function AuditTrailDrawer({
                   key={cat.id}
                   variant={active ? 'primary' : 'outline'}
                   size="xs"
-                  onClick={() => setFilterCategory(cat.id)}
+                  onClick={() => {
+                    setFilterCategory(cat.id);
+                    loadLogs(cat.id);
+                  }}
                 >
                   {cat.label}
                 </Button>
@@ -254,40 +309,125 @@ export default function AuditTrailDrawer({
               const isExpanded = expandedLogId === log.id;
               const details = log.details || {};
               const snapshot = details.snapshot || details.new || details.deleted_snapshot || {};
-              const isAbono = log.action === 'ABONO_SETTLED' || snapshot.is_reimbursement;
+              const isAbono = log.action === 'ABONO_SETTLED' || 
+                log.action === 'SETTLE_ABONO_REIMBURSEMENT' ||
+                log.action === 'PARTIAL_ABONO_DISBURSEMENT' ||
+                log.entity_type === 'advances_payable' ||
+                Boolean(snapshot.is_reimbursement) ||
+                Boolean(details.is_reimbursement) ||
+                details.changed_fields?.status === 'REIMBURSED';
+
+              // Resilient detail extraction across both trigger snapshots and flat API payloads
+              const title = snapshot.title || details.title || details.transaction_title || 
+                (log.entity_type === 'cash_reconciliations' ? 'Cashbox Reconciliation' : 
+                (log.entity_type === 'registration_requests' ? (details.applicant_name ? `${details.applicant_name} (${details.applicant_email || ''})` : 'Registration Request') :
+                (log.entity_type === 'semester_signatories' ? `Signatories: ${log.entity_id || 'Roster'}` : 
+                (log.entity_type === 'profiles' && details.role ? `Officer Role: ${details.role}` : null))));
+              const amount = snapshot.amount ?? details.amount ?? details.disbursed_amount ?? details.total_claim;
+              const paymentMethod = snapshot.payment_method || details.payment_method || (amount != null ? 'CASH' : null);
+              const categoryName = snapshot.category_name || details.category_name || (isAbono ? 'Abono Reimbursement' : null);
 
               // Action badge variant
               let badgeVariant = 'neutral';
               let actionTitle = log.action;
               let IconComponent = FileText;
 
-              if (log.action === 'ABONO_SETTLED') {
+              if (log.action === 'ABONO_SETTLED' || log.action === 'SETTLE_ABONO_REIMBURSEMENT') {
                 badgeVariant = 'amber';
                 actionTitle = 'Abono Reimbursement Settled';
                 IconComponent = HandCoins;
-              } else if (log.entity_type === 'cash_reconciliations') {
+              } else if (log.action === 'PARTIAL_ABONO_DISBURSEMENT') {
+                badgeVariant = 'amber';
+                actionTitle = 'Partial Abono Disbursed';
+                IconComponent = HandCoins;
+              } else if (log.action === 'DEBT_INSTALLMENT_COLLECTED' || log.action === 'DEBT_FULLY_SETTLED') {
+                badgeVariant = 'emerald';
+                actionTitle = log.action === 'DEBT_FULLY_SETTLED' ? 'Debt Fully Collected' : '+ Debt Installment Inflow';
+                IconComponent = ArrowDownRight;
+              } else if (log.action === 'TRANSACTION_FLAGGED') {
+                badgeVariant = 'rose';
+                actionTitle = 'Transaction Flagged (Audit)';
+                IconComponent = AlertCircle;
+              } else if (log.action === 'TRANSACTION_AUDITED') {
+                badgeVariant = 'emerald';
+                actionTitle = 'Transaction Audited & Verified';
+                IconComponent = CheckCircle2;
+              } else if (log.action === 'TRANSACTION_REVISED') {
                 badgeVariant = 'sky';
-                actionTitle = 'Physical Cashbox Reconciled';
+                actionTitle = 'Transaction Revised & Resubmitted';
+                IconComponent = FileEdit;
+              } else if (log.action === 'TRANSACTION_VOIDED') {
+                badgeVariant = 'rose';
+                actionTitle = 'Transaction Voided / Archived';
+                IconComponent = AlertCircle;
+              } else if (log.action === 'TRANSACTION_RESTORED') {
+                badgeVariant = 'emerald';
+                actionTitle = 'Transaction Restored to Ledger';
+                IconComponent = CheckCircle2;
+              } else if (log.entity_type === 'cash_reconciliations' || log.action.includes('CASHBOX') || log.action.includes('RECONCIL')) {
+                const varAmt = snapshot.variance ?? snapshot.variance_amount ?? details.variance_amount ?? 0;
+                badgeVariant = log.action === 'CASHBOX_SHORTAGE_DECLARED' || varAmt < 0
+                  ? 'rose'
+                  : log.action === 'CASHBOX_OVERAGE_DECLARED' || varAmt > 0
+                    ? 'sky'
+                    : 'emerald';
+                actionTitle = log.action === 'CASHBOX_SHORTAGE_DECLARED'
+                  ? 'Cashbox Shortage Declared'
+                  : log.action === 'CASHBOX_OVERAGE_DECLARED'
+                    ? 'Cashbox Overage Declared'
+                    : log.action === 'RECONCILIATION_APPROVED'
+                      ? 'Reconciliation Approved'
+                      : log.action === 'RECONCILIATION_REJECTED'
+                        ? 'Reconciliation Rejected'
+                        : 'Physical Cashbox Reconciled';
                 IconComponent = Calculator;
               } else if (log.entity_type === 'transactions') {
-                const txType = snapshot.type || details.type || 'TRANSACTION';
+                const txType = (snapshot.type || details.type || 'outflow').toLowerCase();
                 if (txType === 'inflow') {
                   badgeVariant = 'emerald';
-                  actionTitle = log.action === 'INSERT' ? '+ Inflow Logged' : 'Inflow Updated';
+                  actionTitle = (log.action === 'INSERT' || log.action === 'TRANSACTION_CREATED') ? '+ Inflow Logged' : 'Inflow Updated';
                   IconComponent = ArrowDownRight;
                 } else {
                   badgeVariant = 'rose';
-                  actionTitle = log.action === 'INSERT' ? '- Outflow Disbursed' : 'Outflow Updated';
+                  actionTitle = (log.action === 'INSERT' || log.action === 'TRANSACTION_CREATED') ? '- Outflow Disbursed' : 'Outflow Updated';
                   IconComponent = ArrowUpRight;
                 }
+              } else if (log.action === 'REGISTRATION_APPROVED') {
+                badgeVariant = 'emerald';
+                actionTitle = 'Registration Approved';
+                IconComponent = UserCheck;
+              } else if (log.action === 'REGISTRATION_REJECTED') {
+                badgeVariant = 'rose';
+                actionTitle = 'Registration Declined';
+                IconComponent = AlertCircle;
+              } else if (log.action === 'REGISTRATION_RESET') {
+                badgeVariant = 'amber';
+                actionTitle = 'Registration Reset';
+                IconComponent = UserCheck;
+              } else if (log.action === 'ACCOUNT_DELETED') {
+                badgeVariant = 'rose';
+                actionTitle = 'Account Deleted';
+                IconComponent = AlertCircle;
+              } else if (log.action === 'ROSTER_UPDATE') {
+                badgeVariant = 'sky';
+                actionTitle = 'Signatories Roster Updated';
+                IconComponent = Calendar;
+              } else if (log.action === 'ROSTER_CLONE') {
+                badgeVariant = 'sky';
+                actionTitle = 'Signatories Roster Cloned';
+                IconComponent = Calendar;
               } else if (log.entity_type === 'profiles') {
                 badgeVariant = 'neutral';
-                actionTitle = 'Officer Role / Profile Update';
+                actionTitle = log.action === 'ROLE_CHANGED' ? 'Officer Role Changed' : log.action === 'STATUS_CHANGED' ? 'Account Status Changed' : 'Officer Profile Update';
                 IconComponent = UserCheck;
-              } else if (log.entity_type === 'semesters') {
+              } else if (log.entity_type === 'semesters' || log.entity_type === 'semester_signatories') {
                 badgeVariant = 'neutral';
                 actionTitle = 'Semester Configuration Update';
                 IconComponent = Calendar;
+              } else if (log.entity_type === 'registration_requests') {
+                badgeVariant = 'neutral';
+                actionTitle = 'Registration Request Event';
+                IconComponent = UserCheck;
               }
 
               return (
@@ -297,18 +437,18 @@ export default function AuditTrailDrawer({
                 >
                   {/* Top Row: Action Badge + Timestamp */}
                   <div className="flex items-center justify-between gap-2 mb-2">
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 flex-wrap">
                       <Badge variant={badgeVariant} size="sm">
                         <IconComponent className="w-3 h-3" />
                         {actionTitle}
                       </Badge>
-                      {isAbono && log.action !== 'ABONO_SETTLED' && (
+                      {isAbono && log.action !== 'ABONO_SETTLED' && log.action !== 'SETTLE_ABONO_REIMBURSEMENT' && log.action !== 'PARTIAL_ABONO_DISBURSEMENT' && (
                         <Badge variant="amber" size="xs">
                           Abono
                         </Badge>
                       )}
                     </div>
-                    <span className="text-[11px] flex items-center gap-1 text-zinc-400 dark:text-zinc-500">
+                    <span className="text-[11px] flex items-center gap-1 text-zinc-400 dark:text-zinc-500 whitespace-nowrap">
                       <Clock className="w-3 h-3" />
                       {formatEventTimestamp(log.created_at)}
                     </span>
@@ -316,37 +456,42 @@ export default function AuditTrailDrawer({
 
                   {/* Summary Details / Amounts */}
                   <div className="mb-2.5 text-xs">
-                    {snapshot.title && (
+                    {title && (
                       <p className="font-semibold text-zinc-900 dark:text-zinc-100">
-                        {snapshot.title}
+                        {title}
                       </p>
                     )}
-                    {snapshot.amount != null && (
-                      <div className="flex items-center gap-2 mt-0.5">
+                    {amount != null && (
+                      <div className="flex items-center gap-2 mt-0.5 flex-wrap">
                         <span className="font-mono font-bold text-emerald-600 dark:text-emerald-400 text-sm">
-                          {formatPHP(snapshot.amount)}
+                          {formatPHP(amount)}
                         </span>
-                        {snapshot.payment_method && (
-                          <Badge variant={snapshot.payment_method === 'CASH' ? 'amber' : 'sky'} size="xs">
-                            {snapshot.payment_method}
+                        {paymentMethod && (
+                          <Badge variant={paymentMethod === 'CASH' ? 'amber' : 'sky'} size="xs">
+                            {paymentMethod}
                           </Badge>
                         )}
-                        {snapshot.category_name && (
+                        {categoryName && (
                           <span className="text-[11px] text-zinc-500 dark:text-zinc-400">
-                            • {snapshot.category_name}
+                            • {categoryName}
                           </span>
                         )}
                       </div>
                     )}
-                    {log.entity_type === 'cash_reconciliations' && snapshot.physical_total != null && (
-                      <div className="flex items-center gap-2 mt-1 font-mono text-xs">
-                        <span>Physical: <strong>{formatPHP(snapshot.physical_total)}</strong></span>
+                    {(log.entity_type === 'cash_reconciliations' || log.action.includes('CASHBOX') || log.action.includes('RECONCIL')) && (
+                      <div className="flex items-center gap-2 mt-1 font-mono text-xs flex-wrap">
+                        <span>Physical: <strong>{formatPHP(snapshot.physical_total ?? details.physical_total ?? 0)}</strong></span>
                         <span>•</span>
-                        <span>System: <strong>{formatPHP(snapshot.system_total)}</strong></span>
+                        <span>System: <strong>{formatPHP(snapshot.system_total ?? snapshot.ledger_cash_balance ?? details.ledger_cash_balance ?? details.system_total ?? 0)}</strong></span>
                         <span>•</span>
-                        <span className={snapshot.variance < 0 ? 'text-rose-500 font-bold' : snapshot.variance > 0 ? 'text-sky-500 font-bold' : 'text-emerald-500 font-bold'}>
-                          Var: {formatPHP(snapshot.variance)}
-                        </span>
+                        {(() => {
+                          const v = snapshot.variance ?? snapshot.variance_amount ?? details.variance_amount ?? details.variance ?? 0;
+                          return (
+                            <span className={v < 0 ? 'text-rose-500 font-bold' : v > 0 ? 'text-sky-500 font-bold' : 'text-emerald-500 font-bold'}>
+                              Var: {formatPHP(v)}
+                            </span>
+                          );
+                        })()}
                       </div>
                     )}
                   </div>
@@ -356,13 +501,13 @@ export default function AuditTrailDrawer({
                     {/* Actor Identity */}
                     <div className="flex items-center gap-2">
                       <UserAvatar
-                        src={log.actor_avatar_url}
+                        src={log.actor_avatar || log.actor_avatar_url}
                         name={log.actor_name || 'Officer'}
                         email={log.actor_email}
                         size="xs"
                         className="shrink-0"
                       />
-                      <div className="flex items-center gap-1.5">
+                      <div className="flex items-center gap-1.5 flex-wrap">
                         <span className="font-medium text-zinc-800 dark:text-zinc-200">
                           {log.actor_name || 'System'}
                         </span>

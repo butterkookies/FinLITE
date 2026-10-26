@@ -248,11 +248,13 @@ export async function PATCH(req, { params }) {
     if (Array.isArray(receipt_urls)) {
       try {
         await db.from('transaction_receipts').delete().eq('transaction_id', transactionId);
-        if (receipt_urls.length > 0) {
-          const receiptRows = receipt_urls.map((url, idx) => ({
+        const validReceiptUrls = receipt_urls.filter(
+          (url) => typeof url === 'string' && !url.startsWith('blob:') && url.trim().length > 0
+        );
+        if (validReceiptUrls.length > 0) {
+          const receiptRows = validReceiptUrls.map((url, idx) => ({
             transaction_id: transactionId,
-            public_url: url,
-            file_url: url,
+            public_url: url.trim(),
             sort_order: idx,
             uploaded_by: callerProfile?.id || null,
           }));
@@ -378,7 +380,7 @@ export async function DELETE(req, { params }) {
 
     const { data: existingTx } = await db
       .from('transactions')
-      .select('id, title, amount')
+      .select('*, profiles:logged_by (id, full_name, role, email, avatar_url), transaction_receipts (id, public_url, sort_order)')
       .eq('id', transactionId)
       .maybeSingle();
 
@@ -386,37 +388,136 @@ export async function DELETE(req, { params }) {
       return NextResponse.json({ error: 'Transaction not found.' }, { status: 404 });
     }
 
-    const { error: delErr } = await db
-      .from('transactions')
-      .delete()
-      .eq('id', transactionId);
+    // Extract void reason from JSON payload or query params
+    let voidReason = null;
+    try {
+      const body = await req.json().catch(() => ({}));
+      voidReason = body?.reason?.trim() || null;
+    } catch (_) {}
+    if (!voidReason) {
+      const { searchParams } = new URL(req.url);
+      voidReason = searchParams.get('reason')?.trim() || 'Voided by Administrator';
+    }
 
-    if (delErr) {
-      console.error('Delete transaction error:', delErr);
-      return NextResponse.json({ error: 'Failed to delete transaction.' }, { status: 500 });
+    const nowIso = new Date().toISOString();
+    let voidedTx = null;
+    let voidErr = null;
+
+    // 1. Soft-Delete / Void: Mark status as VOIDED with archival metadata
+    const voidPayload = {
+      status: 'VOIDED',
+      void_reason: voidReason,
+      archived_at: nowIso,
+      archived_by: callerProfile?.id || null,
+    };
+
+    const res = await db
+      .from('transactions')
+      .update(voidPayload)
+      .eq('id', transactionId)
+      .select(`
+        *,
+        categories (id, name, type),
+        semesters (id, academic_year, semester, label),
+        transaction_receipts (id, public_url, sort_order),
+        profiles:logged_by (id, full_name, role, email, avatar_url)
+      `)
+      .single();
+
+    voidedTx = res.data;
+    voidErr = res.error;
+
+    // Graceful fallback 1: if void_reason or archived_at columns are not yet present in schema
+    if (voidErr && (voidErr.code === '42703' || voidErr.code === 'PGRST204' || voidErr.message?.includes('void_reason') || voidErr.message?.includes('archived_at') || voidErr.message?.includes('schema cache'))) {
+      const fallbackPayload = {
+        status: 'VOIDED',
+        notes: existingTx.notes
+          ? `${existingTx.notes} | [ARCHIVED] | REASON: ${voidReason} | ARCHIVED_AT: ${nowIso}`
+          : `[ARCHIVED] | REASON: ${voidReason} | ARCHIVED_AT: ${nowIso}`,
+      };
+      const fallbackRes = await db
+        .from('transactions')
+        .update(fallbackPayload)
+        .eq('id', transactionId)
+        .select(`
+          *,
+          categories (id, name, type),
+          semesters (id, academic_year, semester, label),
+          transaction_receipts (id, public_url, sort_order),
+          profiles:logged_by (id, full_name, role, email, avatar_url)
+        `)
+        .single();
+      voidedTx = fallbackRes.data;
+      voidErr = fallbackRes.error;
+    }
+
+    // Graceful fallback 2: if transaction_status enum does not yet contain 'VOIDED' (code 22P02)
+    if (voidErr && (voidErr.code === '22P02' || voidErr.message?.includes('enum') || voidErr.message?.includes('VOIDED'))) {
+      const notesPayload = {
+        notes: existingTx.notes
+          ? `${existingTx.notes} | [ARCHIVED] | REASON: ${voidReason} | ARCHIVED_AT: ${nowIso}`
+          : `[ARCHIVED] | REASON: ${voidReason} | ARCHIVED_AT: ${nowIso}`,
+      };
+      const notesRes = await db
+        .from('transactions')
+        .update(notesPayload)
+        .eq('id', transactionId)
+        .select(`
+          *,
+          categories (id, name, type),
+          semesters (id, academic_year, semester, label),
+          transaction_receipts (id, public_url, sort_order),
+          profiles:logged_by (id, full_name, role, email, avatar_url)
+        `)
+        .single();
+      if (!notesRes.error) {
+        voidedTx = {
+          ...notesRes.data,
+          status: 'VOIDED',
+          void_reason: voidReason,
+          archived_at: nowIso,
+          archived_by: callerProfile?.id || null,
+        };
+        voidErr = null;
+      } else {
+        voidErr = notesRes.error;
+      }
+    }
+
+    if (voidErr) {
+      console.error('Void transaction error:', voidErr);
+      return NextResponse.json({ error: voidErr.message || 'Failed to void transaction.' }, { status: 500 });
     }
 
     const clientIp = getClientIp(req);
     try {
-      await db.from('audit_logs').insert([{
-        action: 'TRANSACTION_DELETED',
+      const auditPayload = {
+        action: 'TRANSACTION_VOIDED',
         entity_type: 'transactions',
         entity_id: transactionId,
-        user_id: callerProfile?.id || user.id,
+        user_id: callerProfile?.id || null,
         details: {
           title: existingTx.title,
           amount: existingTx.amount,
-          deleted_by: email,
+          type: existingTx.type,
+          previous_status: existingTx.status,
+          void_reason: voidReason,
+          voided_by: email,
           ip_address: clientIp,
         },
-      }]);
+      };
+      const { error: insErr } = await db.from('audit_logs').insert([auditPayload]);
+      if (insErr && insErr.code === '23503') {
+        await db.from('audit_logs').insert([{ ...auditPayload, user_id: null }]);
+      }
     } catch (auditErr) {
-      console.warn('Delete audit log warning:', auditErr?.message);
+      console.warn('Void audit log warning:', auditErr?.message);
     }
 
     return NextResponse.json({
       success: true,
-      message: 'Transaction successfully removed from the ledger.',
+      message: 'Transaction successfully voided and archived from the active ledger.',
+      transaction: voidedTx || { ...existingTx, status: 'VOIDED', void_reason: voidReason },
     });
   } catch (err) {
     console.error('API /api/transactions/[id] DELETE error:', err);
