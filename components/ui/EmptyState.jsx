@@ -21,7 +21,7 @@ export default function EmptyState({
       )}
     >
       {icon && (
-        <div className="w-12 h-12 rounded-2xl bg-zinc-100 dark:bg-zinc-850 flex items-center justify-center text-zinc-500 dark:text-zinc-400 mb-4 shrink-0 shadow-xs ring-1 ring-black/[0.04] dark:ring-white/[0.06]">
+        <div className="w-12 h-12 rounded-2xl bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center text-zinc-500 dark:text-zinc-400 mb-4 shrink-0 shadow-xs ring-1 ring-black/[0.04] dark:ring-white/[0.08]">
           {icon}
         </div>
       )}

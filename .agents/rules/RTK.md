@@ -1,6 +1,10 @@
 # Rule: FinLITE Project Context (RTK)
 
-**Context**: This project is FinLITE: A Web-Based Financial Assistant System for the League of Information Technology Enthusiasts (LITE) at Pambayang Dalubhasaan ng Marilao (PDM). It serves as a case study for ITE-Web and ITE-SAD for 3rd Year BSIT31A Finals.
+**Context**: This project is FinLITE: A Web-Based Financial Assistant System for the League of Information Technology Enthusiasts (LITE) at Pambayang Dalubhasaan ng Marilao (PDM). It serves as a dual-course capstone/case study for **ITE-SAD (Systems Analysis and Design)** and **IT31-DB2 (Database System Management 2)** for 3rd Year BSIT31A Finals.
+
+**Subject Compliance References**:
+- SAD Academic Manuscript & System Spec: See `.agents/rules/SAD_MANUSCRIPT_SPEC.md`
+- DB2 Database & Evaluation Spec (PostgreSQL): See `.agents/rules/DB2_SPEC.md`
 
 **Agent Instructions**:
 1. ALWAYS remember that the primary goal of this project is to build FinLITE: a responsive web-based financial assistant that replaces LITE's manual paper-based record-keeping with a secure, role-gated operational tool.

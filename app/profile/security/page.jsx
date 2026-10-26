@@ -412,7 +412,7 @@ export default function AccountSecurityPage() {
 
                   {/* Live Criteria Checklist */}
                   {newPassword.length > 0 && (
-                    <div className="p-3 rounded-xl bg-zinc-50 dark:bg-zinc-850/60 ring-1 ring-black/[0.04] dark:ring-white/[0.05] space-y-1.5 text-[11px]">
+                    <div className="p-3 rounded-xl bg-zinc-50 dark:bg-zinc-800/60 ring-1 ring-black/[0.04] dark:ring-white/[0.05] space-y-1.5 text-[11px]">
                       <div className={`flex items-center gap-1.5 ${newPassword.length >= 8 ? 'text-emerald-600 dark:text-emerald-400 font-semibold' : 'text-zinc-400 dark:text-zinc-500'}`}>
                         <Check className="w-3.5 h-3.5" />
                         <span>At least 8 characters long</span>

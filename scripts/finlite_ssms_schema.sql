@@ -20,6 +20,7 @@ GO
 -- ============================================================================
 -- DROP EXISTING TABLES (Reverse Dependency Order)
 -- ============================================================================
+IF OBJECT_ID('dbo.Audit_Logs', 'U') IS NOT NULL DROP TABLE dbo.Audit_Logs;
 IF OBJECT_ID('dbo.Cash_Reconciliation_Items', 'U') IS NOT NULL DROP TABLE dbo.Cash_Reconciliation_Items;
 IF OBJECT_ID('dbo.Cash_Reconciliations', 'U') IS NOT NULL DROP TABLE dbo.Cash_Reconciliations;
 IF OBJECT_ID('dbo.Denominations', 'U') IS NOT NULL DROP TABLE dbo.Denominations;
@@ -145,7 +146,6 @@ GO
 -- ============================================================================
 CREATE TABLE dbo.Semester_Signatories (
     id UNIQUEIDENTIFIER NOT NULL DEFAULT NEWID(),
-    semester_id UNIQUEIDENTIFIER NULL,
     academic_year VARCHAR(20) NOT NULL,
     semester VARCHAR(20) NOT NULL,
     role_key VARCHAR(50) NOT NULL,
@@ -156,8 +156,7 @@ CREATE TABLE dbo.Semester_Signatories (
     is_active BIT NOT NULL DEFAULT 1,
     created_at DATETIME2 NOT NULL DEFAULT GETDATE(),
     updated_at DATETIME2 NOT NULL DEFAULT GETDATE(),
-    CONSTRAINT PK_Semester_Signatories PRIMARY KEY (id),
-    CONSTRAINT FK_Semester_Signatories_Semesters FOREIGN KEY (semester_id) REFERENCES dbo.Semesters(id)
+    CONSTRAINT PK_Semester_Signatories PRIMARY KEY (id)
 );
 GO
 
@@ -396,5 +395,21 @@ CREATE TABLE dbo.Cash_Reconciliation_Items (
     CONSTRAINT PK_Cash_Reconciliation_Items PRIMARY KEY (id),
     CONSTRAINT FK_Cash_Reconciliation_Items_Reconciliations FOREIGN KEY (reconciliation_id) REFERENCES dbo.Cash_Reconciliations(id) ON DELETE CASCADE,
     CONSTRAINT FK_Cash_Reconciliation_Items_Denominations FOREIGN KEY (denomination_id) REFERENCES dbo.Denominations(id)
+);
+GO
+
+-- ============================================================================
+-- 19. Table: Audit_Logs (DFD Level 1 Db 6 — Immutable Financial Audit Trail)
+-- ============================================================================
+CREATE TABLE dbo.Audit_Logs (
+    id UNIQUEIDENTIFIER NOT NULL DEFAULT NEWID(),
+    user_id UNIQUEIDENTIFIER NULL,
+    action VARCHAR(100) NOT NULL,
+    entity_type VARCHAR(100) NOT NULL,
+    entity_id VARCHAR(100) NULL,
+    details NVARCHAR(MAX) NULL,
+    created_at DATETIME2 NOT NULL DEFAULT GETDATE(),
+    CONSTRAINT PK_Audit_Logs PRIMARY KEY (id),
+    CONSTRAINT FK_Audit_Logs_Profiles FOREIGN KEY (user_id) REFERENCES dbo.Profiles(id) ON DELETE SET NULL
 );
 GO

@@ -105,7 +105,18 @@ def replace_placeholders(doc, config):
                         if tag in p.text:
                             replace_text_in_paragraph(p, tag, val)
 
-def setup_footer(section, style="page_x_of_y"):
+def resolve_typography(data):
+    """Resolve font family and base size (Calibri 11pt default vs Times New Roman 12pt manuscript standard)."""
+    if not isinstance(data, dict):
+        return 'Calibri', 11
+    typography = str(data.get('typography') or '').strip().lower()
+    font_family = str(data.get('font_family') or '').strip()
+    font_size_pt = data.get('font_size_pt')
+    if typography == 'times' or font_family.lower() == 'times new roman':
+        return 'Times New Roman', float(font_size_pt or 12)
+    return (font_family or 'Calibri'), float(font_size_pt or 11)
+
+def setup_footer(section, style="page_x_of_y", font_name="Calibri"):
     """
     Configure dynamic Word OpenXML footer fields.
     Options:
@@ -123,9 +134,9 @@ def setup_footer(section, style="page_x_of_y"):
         p.alignment = docx.enum.text.WD_ALIGN_PARAGRAPH.RIGHT
         pPr = p._p.get_or_add_pPr()
         def make_run_xml(text):
-            return parse_xml(r'<w:r %s><w:rPr><w:rFonts w:ascii="Calibri" w:hAnsi="Calibri"/><w:sz w:val="22"/><w:color w:val="555555"/></w:rPr><w:t xml:space="preserve">%s</w:t></w:r>' % (nsdecls('w'), text))
+            return parse_xml(r'<w:r %s><w:rPr><w:rFonts w:ascii="%s" w:hAnsi="%s"/><w:sz w:val="22"/><w:color w:val="555555"/></w:rPr><w:t xml:space="preserve">%s</w:t></w:r>' % (nsdecls('w'), font_name, font_name, text))
         def make_field_xml(field_type, sample_text):
-            return parse_xml(r'<w:fldSimple %s w:instr="%s"><w:r><w:rPr><w:rFonts w:ascii="Calibri" w:hAnsi="Calibri"/><w:sz w:val="22"/><w:color w:val="555555"/></w:rPr><w:t>%s</w:t></w:r></w:fldSimple>' % (nsdecls('w'), field_type, sample_text))
+            return parse_xml(r'<w:fldSimple %s w:instr="%s"><w:r><w:rPr><w:rFonts w:ascii="%s" w:hAnsi="%s"/><w:sz w:val="22"/><w:color w:val="555555"/></w:rPr><w:t>%s</w:t></w:r></w:fldSimple>' % (nsdecls('w'), field_type, font_name, font_name, sample_text))
         
         p.text = ''
         if is_simple:
@@ -153,10 +164,10 @@ def setup_footer(section, style="page_x_of_y"):
         p_main = section.footer.paragraphs[0]
         populate_p(p_main, is_simple=False)
 
-def create_borderless_signatory_table(doc, signatories_list, num_cols):
+def create_borderless_signatory_table(doc, signatories_list, num_cols, font_name='Calibri', font_size_pt=11):
     """
     Build structured multi-column borderless table for student officers.
-    Guarantees exact column widths, zero tab wrapping misalignment, and Calibri 11pt.
+    Guarantees exact column widths, zero tab wrapping misalignment, and consistent typography.
     Guards against division by zero if num_cols <= 0.
     """
     if num_cols <= 0 or not signatories_list:
@@ -186,8 +197,8 @@ def create_borderless_signatory_table(doc, signatories_list, num_cols):
 
         if sig.get('name'):
             r_name = p_name.add_run(sig['name'])
-            r_name.font.name = 'Calibri'
-            r_name.font.size = Pt(11)
+            r_name.font.name = font_name
+            r_name.font.size = Pt(font_size_pt)
             r_name.bold = True
             
         p_role = cell.add_paragraph()
@@ -197,8 +208,8 @@ def create_borderless_signatory_table(doc, signatories_list, num_cols):
         
         if sig.get('role'):
             r_role = p_role.add_run(sig['role'])
-            r_role.font.name = 'Calibri'
-            r_role.font.size = Pt(11)
+            r_role.font.name = font_name
+            r_role.font.size = Pt(font_size_pt)
 
     # Fill remaining columns with empty cells to keep left-alignment without stretching
     for empty_idx in range(len(signatories_list), num_cols):
@@ -209,7 +220,7 @@ def create_borderless_signatory_table(doc, signatories_list, num_cols):
     tbl_elm.getparent().remove(tbl_elm)
     return tbl_elm
 
-def create_borderless_noted_table(doc, advisers, admins):
+def create_borderless_noted_table(doc, advisers, admins, font_name='Calibri', font_size_pt=11):
     """
     Build unified 2-column borderless table for institutional oversight:
     Row 0: Club Advisers
@@ -244,8 +255,8 @@ def create_borderless_noted_table(doc, advisers, admins):
                 p_name.paragraph_format.space_after = Pt(1)
                 p_name.paragraph_format.line_spacing = 1.0
                 r_name = p_name.add_run(sig.get('name', ''))
-                r_name.font.name = 'Calibri'
-                r_name.font.size = Pt(11)
+                r_name.font.name = font_name
+                r_name.font.size = Pt(font_size_pt)
                 r_name.bold = True
 
                 p_role = cell.add_paragraph()
@@ -253,8 +264,8 @@ def create_borderless_noted_table(doc, advisers, admins):
                 p_role.paragraph_format.space_after = Pt(4)
                 p_role.paragraph_format.line_spacing = 1.0
                 r_role = p_role.add_run(sig.get('role', ''))
-                r_role.font.name = 'Calibri'
-                r_role.font.size = Pt(11)
+                r_role.font.name = font_name
+                r_role.font.size = Pt(font_size_pt)
         curr_row_idx += 1
 
     if has_admins:
@@ -272,8 +283,8 @@ def create_borderless_noted_table(doc, advisers, admins):
                 p_name.paragraph_format.space_after = Pt(1)
                 p_name.paragraph_format.line_spacing = 1.0
                 r_name = p_name.add_run(sig.get('name', ''))
-                r_name.font.name = 'Calibri'
-                r_name.font.size = Pt(11)
+                r_name.font.name = font_name
+                r_name.font.size = Pt(font_size_pt)
                 r_name.bold = True
 
                 p_role = cell.add_paragraph()
@@ -281,17 +292,18 @@ def create_borderless_noted_table(doc, advisers, admins):
                 p_role.paragraph_format.space_after = Pt(4)
                 p_role.paragraph_format.line_spacing = 1.0
                 r_role = p_role.add_run(sig.get('role', ''))
-                r_role.font.name = 'Calibri'
-                r_role.font.size = Pt(11)
+                r_role.font.name = font_name
+                r_role.font.size = Pt(font_size_pt)
 
     tbl_elm = table._element
     tbl_elm.getparent().remove(tbl_elm)
     return tbl_elm
 
-def add_receipt_sheets_table(doc, receipts, academic_year, semester):
+def add_receipt_sheets_table(doc, receipts, academic_year, semester, font_name='Calibri', font_size_pt=11):
     """
     Renders 2-column Word table holding up to 4 receipts per page (2 rows x 2 cols).
     Scales pictures proportionally into max 3.1" x 3.0" bounding box.
+    First receipt sheet displays 'Receipts' heading; subsequent sheets show only the 2x2 grid.
     """
     if not receipts:
         return
@@ -299,37 +311,22 @@ def add_receipt_sheets_table(doc, receipts, academic_year, semester):
     from PIL import Image
 
     chunks = [receipts[i:i + 4] for i in range(0, len(receipts), 4)]
-    total_sheets = len(chunks)
 
     for sheet_idx, chunk in enumerate(chunks):
         if sheet_idx > 0 or len(doc.paragraphs) > 0:
             p_break = parse_xml(r'<w:p %s><w:r><w:br w:type="page"/></w:r></w:p>' % nsdecls('w'))
             doc._element.body.append(p_break)
 
-        p_title = doc.add_paragraph()
-        p_title.alignment = docx.enum.text.WD_ALIGN_PARAGRAPH.CENTER
-        p_title.paragraph_format.space_before = Pt(4)
-        p_title.paragraph_format.space_after = Pt(4)
+        if sheet_idx == 0:
+            p_title = doc.add_paragraph()
+            p_title.alignment = docx.enum.text.WD_ALIGN_PARAGRAPH.CENTER
+            p_title.paragraph_format.space_before = Pt(4)
+            p_title.paragraph_format.space_after = Pt(6)
 
-        r1 = p_title.add_run("PAMBAYANG DALUBHASAAN NG MARILAO\n")
-        r1.font.name = 'Calibri'
-        r1.font.size = Pt(9.5)
-        r1.bold = True
-
-        r2 = p_title.add_run("RECEIPTS & PROOFS OF DISBURSEMENT\n")
-        r2.font.name = 'Calibri'
-        r2.font.size = Pt(11)
-        r2.bold = True
-
-        r3 = p_title.add_run(f"{semester} • ACADEMIC YEAR {academic_year}\n")
-        r3.font.name = 'Calibri'
-        r3.font.size = Pt(9.5)
-        r3.font.color.rgb = docx.shared.RGBColor(80, 80, 80)
-
-        r4 = p_title.add_run(f"Receipts Attachment Sheet {sheet_idx + 1} of {total_sheets}")
-        r4.font.name = 'Calibri'
-        r4.font.size = Pt(8.5)
-        r4.font.color.rgb = docx.shared.RGBColor(120, 120, 120)
+            r_heading = p_title.add_run("Receipts")
+            r_heading.font.name = font_name
+            r_heading.font.size = Pt(font_size_pt)
+            r_heading.bold = True
 
         table = doc.add_table(rows=2, cols=2)
         tblPr = table._element.tblPr
@@ -394,35 +391,35 @@ def add_receipt_sheets_table(doc, receipts, academic_year, semester):
             p_cap.paragraph_format.line_spacing = 1.0
 
             r_d = p_cap.add_run(f"{rc.get('date', '')}  •  ")
-            r_d.font.name = 'Calibri'
+            r_d.font.name = font_name
             r_d.font.size = Pt(9.5)
 
             r_a = p_cap.add_run(f"P{float(rc.get('amount', 0)):,.2f}\n")
-            r_a.font.name = 'Calibri'
+            r_a.font.name = font_name
             r_a.font.size = Pt(9.5)
             r_a.bold = True
 
             r_t = p_cap.add_run(f"{rc.get('title', 'Disbursement Particulars')}\n")
-            r_t.font.name = 'Calibri'
+            r_t.font.name = font_name
             r_t.font.size = Pt(9.5)
             r_t.bold = True
 
             r_c = p_cap.add_run(f"{rc.get('category', 'Disbursement')}")
-            r_c.font.name = 'Calibri'
+            r_c.font.name = font_name
             r_c.font.size = Pt(8.5)
             r_c.font.color.rgb = docx.shared.RGBColor(100, 100, 100)
 
-def enforce_calibri_11(doc):
-    """Strictly enforce Calibri size 11 across all runs in all paragraphs and table cells."""
+def enforce_calibri_11(doc, font_name='Calibri', font_size_pt=11):
+    """Strictly enforce the selected typography (Calibri 11pt or Times New Roman 12pt) across all runs in paragraphs and table cells."""
     for style in doc.styles:
         if hasattr(style, 'font') and style.font is not None:
-            style.font.name = 'Calibri'
-            style.font.size = Pt(11)
+            style.font.name = font_name
+            style.font.size = Pt(font_size_pt)
 
     for p in doc.paragraphs:
         for r in p.runs:
-            r.font.name = 'Calibri'
-            r.font.size = Pt(11)
+            r.font.name = font_name
+            r.font.size = Pt(font_size_pt)
 
     for tbl in doc.tables:
         ensure_invisible_table_borders(tbl)
@@ -430,14 +427,14 @@ def enforce_calibri_11(doc):
             for cell in row.cells:
                 for p in cell.paragraphs:
                     for r in p.runs:
-                        r.font.name = 'Calibri'
-                        r.font.size = Pt(11)
+                        r.font.name = font_name
+                        r.font.size = Pt(font_size_pt)
 
     for s in doc.sections:
         for p in s.header.paragraphs:
             for r in p.runs:
-                r.font.name = 'Calibri'
-                r.font.size = Pt(11)
+                r.font.name = font_name
+                r.font.size = Pt(font_size_pt)
 
 def populate_report(data, template_path=DEFAULT_TEMPLATE, output_path=DEFAULT_OUTPUT):
     if not os.path.exists(template_path):
@@ -463,9 +460,10 @@ def populate_report(data, template_path=DEFAULT_TEMPLATE, output_path=DEFAULT_OU
         s.right_margin = Inches(1.0)
         s.footer_distance = Inches(0.35)
 
-    # Dynamic Bottom-Right Footer Page Numbers
+    # Dynamic Bottom-Right Footer Page Numbers & Typography Resolution
+    font_name, font_size_pt = resolve_typography(data)
     page_number_style = data.get('page_number_style', 'page_x_of_y')
-    setup_footer(doc.sections[0], style=page_number_style)
+    setup_footer(doc.sections[0], style=page_number_style, font_name=font_name)
 
     include_cc = bool(data.get('include_cc', False))
     cc_recipients = data.get('cc_recipients', ['cc: Co-Curricular', "cc: Dean's Office"])
@@ -526,8 +524,8 @@ def populate_report(data, template_path=DEFAULT_TEMPLATE, output_path=DEFAULT_OU
             p_elm = p._element
             p_elm.getparent().remove(p_elm)
 
-        add_receipt_sheets_table(doc, receipts, academic_year, semester)
-        setup_footer(doc.sections[0], style=page_number_style)
+        add_receipt_sheets_table(doc, receipts, academic_year, semester, font_name=font_name, font_size_pt=font_size_pt)
+        setup_footer(doc.sections[0], style=page_number_style, font_name=font_name)
         doc.save(output_path)
         print(f"Successfully generated standalone receipts report: {output_path}")
         return output_path
@@ -582,8 +580,8 @@ def populate_report(data, template_path=DEFAULT_TEMPLATE, output_path=DEFAULT_OU
     ensure_invisible_table_borders(tbl0)
     tbl0.rows[0].cells[0].text = 'INITIAL BUDGET / BEGINNING BALANCE (Carried over from prior semester)'
     for r in tbl0.rows[0].cells[0].paragraphs[0].runs:
-        r.font.name = 'Calibri'
-        r.font.size = Pt(11)
+        r.font.name = font_name
+        r.font.size = Pt(font_size_pt)
         r.bold = True
     tbl0.rows[1].cells[4].text = f"P{initial_budget:,.2f}"
 
@@ -731,10 +729,10 @@ def populate_report(data, template_path=DEFAULT_TEMPLATE, output_path=DEFAULT_OU
             p.paragraph_format.space_after = Pt(2)
             p.paragraph_format.line_spacing = 1.0
             if p.runs:
-                p.runs[0].font.name = 'Calibri'
-                p.runs[0].font.size = Pt(11)
+                p.runs[0].font.name = font_name
+                p.runs[0].font.size = Pt(font_size_pt)
                 p.runs[0].bold = True
-            tbl = create_borderless_signatory_table(doc, officers, min(max(len(officers), 3), 4))
+            tbl = create_borderless_signatory_table(doc, officers, min(max(len(officers), 3), 4), font_name=font_name, font_size_pt=font_size_pt)
             if tbl is not None:
                 p._element.addnext(tbl)
         else:
@@ -758,10 +756,10 @@ def populate_report(data, template_path=DEFAULT_TEMPLATE, output_path=DEFAULT_OU
             p.paragraph_format.space_after = Pt(2)
             p.paragraph_format.line_spacing = 1.0
             if p.runs:
-                p.runs[0].font.name = 'Calibri'
-                p.runs[0].font.size = Pt(11)
+                p.runs[0].font.name = font_name
+                p.runs[0].font.size = Pt(font_size_pt)
                 p.runs[0].bold = True
-            tbl = create_borderless_noted_table(doc, advisers, admins)
+            tbl = create_borderless_noted_table(doc, advisers, admins, font_name=font_name, font_size_pt=font_size_pt)
             if tbl is not None:
                 p._element.addnext(tbl)
                 if idx == 0:
@@ -801,9 +799,10 @@ def populate_report(data, template_path=DEFAULT_TEMPLATE, output_path=DEFAULT_OU
             last_p1_note_tbl.addnext(p_break)
     else:
         anchor = last_p1_note_tbl
+        half_pt_val = int(font_size_pt * 2)
         for rec in cc_recipients:
             if rec.strip():
-                p_cc = parse_xml(r'<w:p %s><w:pPr><w:spacing w:before="60" w:after="20"/><w:rPr><w:rFonts w:ascii="Calibri"/><w:sz w:val="22"/><w:color w:val="000000"/></w:rPr></w:pPr><w:r><w:rPr><w:rFonts w:ascii="Calibri"/><w:sz w:val="22"/><w:color w:val="000000"/></w:rPr><w:t>%s</w:t></w:r></w:p>' % (nsdecls('w'), rec.strip()))
+                p_cc = parse_xml(r'<w:p %s><w:pPr><w:spacing w:before="60" w:after="20"/><w:rPr><w:rFonts w:ascii="%s" w:hAnsi="%s"/><w:sz w:val="%d"/><w:color w:val="000000"/></w:rPr></w:pPr><w:r><w:rPr><w:rFonts w:ascii="%s" w:hAnsi="%s"/><w:sz w:val="%d"/><w:color w:val="000000"/></w:rPr><w:t>%s</w:t></w:r></w:p>' % (nsdecls('w'), font_name, font_name, half_pt_val, font_name, font_name, half_pt_val, rec.strip()))
                 anchor.addnext(p_cc)
                 anchor = p_cc
         p_break = parse_xml(r'<w:p %s><w:r><w:br w:type="page"/></w:r></w:p>' % nsdecls('w'))
@@ -871,15 +870,15 @@ def populate_report(data, template_path=DEFAULT_TEMPLATE, output_path=DEFAULT_OU
             prev_empty = False
 
     # -------------------------------------------------------------
-    # 10. STRICT CALIBRI 11PT ENFORCEMENT & BORDERLESS TABLE STYLING
+    # 10. STRICT TYPOGRAPHY ENFORCEMENT & BORDERLESS TABLE STYLING
     # -------------------------------------------------------------
-    enforce_calibri_11(doc)
+    enforce_calibri_11(doc, font_name=font_name, font_size_pt=font_size_pt)
 
     # -------------------------------------------------------------
     # 11. ATTACHED RECEIPT SHEETS (PAGE 5+)
     # -------------------------------------------------------------
     if receipts_mode == 'APPEND' and receipts:
-        add_receipt_sheets_table(doc, receipts, academic_year, semester)
+        add_receipt_sheets_table(doc, receipts, academic_year, semester, font_name=font_name, font_size_pt=font_size_pt)
 
     doc.save(output_path)
     print(f"Successfully generated institutional financial report: {output_path}")

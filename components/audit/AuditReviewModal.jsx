@@ -285,7 +285,7 @@ export default function AuditReviewModal({
               <span className="text-zinc-600 dark:text-zinc-400 text-[11px] font-medium block mb-1">
                 Author's Note / Context
               </span>
-              <p className="text-zinc-800 dark:text-zinc-200 italic leading-relaxed bg-zinc-100/60 dark:bg-zinc-850/60 p-3 rounded-xl">
+              <p className="text-zinc-800 dark:text-zinc-200 italic leading-relaxed bg-zinc-100/60 dark:bg-zinc-800/60 p-3 rounded-xl">
                 "{transaction.description}"
               </p>
             </div>
@@ -301,7 +301,7 @@ export default function AuditReviewModal({
             </div>
 
             {receiptUrls.length === 0 ? (
-              <div className="p-4 rounded-xl bg-zinc-100/60 dark:bg-zinc-850/60 text-center text-xs text-zinc-500 italic">
+              <div className="p-4 rounded-xl bg-zinc-100/60 dark:bg-zinc-800/60 text-center text-xs text-zinc-500 italic">
                 No receipt or invoice was attached to this transaction.
               </div>
             ) : (
@@ -334,7 +334,7 @@ export default function AuditReviewModal({
                 <span>Audit History &amp; Remarks ({comments.length})</span>
               </span>
 
-              <div className="max-h-40 overflow-y-auto rounded-xl bg-zinc-100/60 dark:bg-zinc-850/60 p-3 space-y-2.5 text-xs">
+              <div className="max-h-40 overflow-y-auto rounded-xl bg-zinc-100/60 dark:bg-zinc-800/60 p-3 space-y-2.5 text-xs">
                 {comments.map((c) => (
                   <div key={c.id} className="pb-2 border-b border-zinc-200/50 dark:border-zinc-700/50 last:border-none last:pb-0">
                     <div className="flex items-center justify-between gap-2">
@@ -386,7 +386,7 @@ export default function AuditReviewModal({
 
             {/* Selected Chips & Trigger */}
             <div className="relative" ref={ccPickerRef}>
-              <div className="flex items-center flex-wrap gap-1.5 p-2 rounded-xl bg-zinc-100/60 dark:bg-zinc-850/60 min-h-[40px]">
+              <div className="flex items-center flex-wrap gap-1.5 p-2 rounded-xl bg-zinc-100/60 dark:bg-zinc-800/60 min-h-[40px]">
                 {selectedCcEmails.map((email) => {
                   const officer = availableOfficers.find((o) => o.email === email);
                   const label = officer?.full_name || email.split('@')[0];
@@ -411,7 +411,7 @@ export default function AuditReviewModal({
                 <button
                   type="button"
                   onClick={() => setIsCcPickerOpen(!isCcPickerOpen)}
-                  className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold text-zinc-600 dark:text-zinc-300 hover:bg-zinc-200/60 dark:hover:bg-zinc-750 transition-colors cursor-pointer"
+                  className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold text-zinc-600 dark:text-zinc-300 hover:bg-zinc-200/60 dark:hover:bg-zinc-700 transition-colors cursor-pointer"
                 >
                   <Plus className="w-3.5 h-3.5 text-zinc-500" />
                   <span>{selectedCcEmails.length === 0 ? 'CC Officer...' : 'Add another'}</span>
@@ -429,7 +429,7 @@ export default function AuditReviewModal({
                       value={ccSearchQuery}
                       onChange={(e) => setCcSearchQuery(e.target.value)}
                       autoFocus
-                      className="w-full h-8 pl-8 pr-3 text-xs bg-zinc-100/80 dark:bg-zinc-850/80 rounded-xl ring-1 ring-black/[0.04] dark:ring-white/[0.06] focus:outline-none focus:ring-2 focus:ring-emerald-500/50 text-zinc-900 dark:text-zinc-100"
+                      className="w-full h-8 pl-8 pr-3 text-xs bg-zinc-100/80 dark:bg-zinc-800/80 rounded-xl ring-1 ring-black/[0.04] dark:ring-white/[0.06] focus:outline-none focus:ring-2 focus:ring-emerald-500/50 text-zinc-900 dark:text-zinc-100"
                     />
                   </div>
 

@@ -182,7 +182,7 @@ export async function POST(req) {
         categories (id, name, type),
         semesters (id, academic_year, semester, label),
         transaction_receipts (id, public_url, sort_order),
-        profiles (id, full_name, role, email, avatar_url)
+        profiles:logged_by (id, full_name, role, email, avatar_url)
       `)
       .single();
 

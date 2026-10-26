@@ -77,7 +77,7 @@ export default function NewSemesterModal({
       <form onSubmit={handleSubmit} noValidate className="p-5 sm:p-6 space-y-5 text-xs text-zinc-700 dark:text-zinc-300">
         
         {/* Ending Balance Summary Card */}
-        <div className="bg-zinc-100/60 dark:bg-zinc-850/60 rounded-2xl p-4 space-y-2.5 ring-1 ring-black/[0.04] dark:ring-white/[0.06]">
+        <div className="bg-zinc-100/60 dark:bg-zinc-800/60 rounded-2xl p-4 space-y-2.5 ring-1 ring-black/[0.04] dark:ring-white/[0.06]">
           <div className="flex items-center justify-between">
             <span className="text-[11px] font-semibold text-zinc-700 dark:text-zinc-300 uppercase tracking-wider">
               Ending Balances: {currentSemester?.label}
@@ -156,7 +156,7 @@ export default function NewSemesterModal({
             Carry-Over &amp; Beginning Balance Options
           </h4>
 
-          <label className="flex items-start gap-2.5 p-3 bg-zinc-100/60 dark:bg-zinc-850/60 ring-1 ring-black/[0.04] dark:ring-white/[0.06] rounded-xl cursor-pointer hover:bg-zinc-100 dark:hover:bg-zinc-800/80 transition-colors">
+          <label className="flex items-start gap-2.5 p-3 bg-zinc-100/60 dark:bg-zinc-800/60 ring-1 ring-black/[0.04] dark:ring-white/[0.06] rounded-xl cursor-pointer hover:bg-zinc-100 dark:hover:bg-zinc-800/80 transition-colors">
             <input
               type="checkbox"
               checked={rolloverCash}

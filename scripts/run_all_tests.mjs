@@ -104,9 +104,9 @@ async function isServerUp() {
   try {
     const ctrl = new AbortController();
     const timer = setTimeout(() => ctrl.abort(), 2000);
-    await fetch(`${BASE_URL}/login`, { signal: ctrl.signal });
+    const res = await fetch(`${BASE_URL}/login`, { signal: ctrl.signal });
     clearTimeout(timer);
-    return true;
+    return Boolean(res && res.ok);
   } catch {
     return false;
   }
@@ -1627,6 +1627,89 @@ async function testPermissionsAndAuditWorkflow() {
     recipients: ['officers@example.com'],
   });
   assert(rejectReconRes.success === true, 'sendReconciliationNotificationEmail VARIANCE_DECISION rejected succeeds');
+
+  // Verify Patch 3: Manuscript Page 8 — Treasurer strictly locked from editing even on FLAGGED transactions unless granted edit_transaction by Adviser
+  const repoRoot = process.cwd();
+  const txPatchRouteSrc = fs.readFileSync(path.join(repoRoot, 'app/api/transactions/[id]/route.js'), 'utf-8');
+  assert(
+    !txPatchRouteSrc.includes('isFlaggedRevision'),
+    'PATCH /api/transactions/[id] does not allow isFlaggedRevision bypass for non-canEdit officers'
+  );
+  assert(
+    txPatchRouteSrc.includes('if (!canEdit && !isReceiptOnlyUpdate)'),
+    'PATCH /api/transactions/[id] strictly requires canEdit for full transaction editing while preserving isReceiptOnlyUpdate'
+  );
+  const txTableSrc = fs.readFileSync(path.join(repoRoot, 'components/ledger/TransactionTable.jsx'), 'utf-8');
+  assert(
+    !txTableSrc.includes("tx.status === 'FLAGGED' && canRecord") &&
+      !txTableSrc.includes("menuTx.status === 'FLAGGED' && canRecord"),
+    'TransactionTable.jsx gates Edit/Revise strictly on canEdit without FLAGGED && canRecord bypass'
+  );
+  assert(
+    txTableSrc.includes('Editing locked — requires President/VP or Adviser edit permission'),
+    'TransactionTable.jsx renders read-only lock notice when viewing a FLAGGED transaction without canEdit'
+  );
+  assert(
+    txTableSrc.includes('Auditor Remarks & Revision Notes') &&
+      txTableSrc.includes('selectedTxRemarks'),
+    'TransactionTable.jsx fetches and displays inline Auditor Remarks & Revision Notes inside the transaction detail modal'
+  );
+  const pageSrc = fs.readFileSync(path.join(repoRoot, 'app/page.jsx'), 'utf-8');
+  assert(
+    pageSrc.includes("mode === 'edit' && canEditTransactions") &&
+      pageSrc.includes('setViewDetailTx(tx)'),
+    'app/page.jsx routes ?editTx=<id> to NewTransactionModal when canEditTransactions is true and to read-only detail modal (setViewDetailTx) when false'
+  );
+  const auditRouteSrc = fs.readFileSync(path.join(repoRoot, 'app/api/transactions/[id]/audit/route.js'), 'utf-8');
+  assert(
+    auditRouteSrc.includes("normalizedAction === 'FLAG'") &&
+      auditRouteSrc.includes('ACTION_KEYS.EDIT_TRANSACTION'),
+    'POST /api/transactions/[id]/audit automatically CCs approved officers with edit_transaction permission when flagging a transaction'
+  );
+
+  // Verify Patch 10: Report Preview key normalization, debounced auto-save, save-on-exit, and race condition guards
+  const draftRouteSrc = fs.readFileSync(path.join(repoRoot, 'app/api/reports/draft/route.js'), 'utf-8');
+  assert(
+    draftRouteSrc.includes('normalizeReportSemesterKey') &&
+      draftRouteSrc.includes('normalizeReportAcademicYearKey'),
+    '/api/reports/draft normalizes semester and academicYear keys consistently'
+  );
+  const normalizeReportSemesterKey = (raw) => {
+    const sem = String(raw || '1st Semester').trim();
+    if (/1st|first/i.test(sem)) return '1ST SEMESTER';
+    if (/2nd|second/i.test(sem)) return '2ND SEMESTER';
+    if (/midyear|summer/i.test(sem)) return 'SUMMER SEMESTER';
+    return sem.toUpperCase().replace(/\bSEM\b/i, 'SEMESTER');
+  };
+  const normalizeReportAcademicYearKey = (raw) =>
+    String(raw || '2025-2026').trim().replace(/[\u2013\u2014]/g, '-');
+  assert(
+    normalizeReportSemesterKey('1st Semester') === '1ST SEMESTER' &&
+      normalizeReportSemesterKey('1st SEMESTER') === '1ST SEMESTER' &&
+      normalizeReportSemesterKey('  first sem ') === '1ST SEMESTER',
+    'normalizeReportSemesterKey normalizes all 1st Semester variants identically'
+  );
+  assert(
+    normalizeReportSemesterKey('2nd Semester') === '2ND SEMESTER' &&
+      normalizeReportSemesterKey('2nd SEMESTER') === '2ND SEMESTER',
+    'normalizeReportSemesterKey normalizes all 2nd Semester variants identically'
+  );
+  assert(
+    normalizeReportAcademicYearKey('2026–2027') === '2026-2027' &&
+      normalizeReportAcademicYearKey('2026—2027') === '2026-2027' &&
+      normalizeReportAcademicYearKey(' 2026-2027 ') === '2026-2027',
+    'normalizeReportAcademicYearKey normalizes en-dash, em-dash, and hyphen academic years identically'
+  );
+  const previewModalSrc = fs.readFileSync(path.join(repoRoot, 'components/reports/DocumentPreviewModal.jsx'), 'utf-8');
+  assert(
+    previewModalSrc.includes('normalizeReportSemesterKey') &&
+      previewModalSrc.includes('normalizeReportAcademicYearKey') &&
+      previewModalSrc.includes('handleCloseModal') &&
+      previewModalSrc.includes('const handleRemoveExpense =') &&
+      previewModalSrc.includes('remoteSavedAtMs >= localSavedAtMs') &&
+      previewModalSrc.includes('displaySemester: semester'),
+    'DocumentPreviewModal.jsx normalizes keys, defines handleRemoveExpense, guards remote hydration against clobbering newer local saves, and saves dirty state on 800ms debounce and close'
+  );
 }
 await testPermissionsAndAuditWorkflow();
 

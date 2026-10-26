@@ -57,6 +57,45 @@ export default function AppShell({ children }) {
     }
   }, [router, isAuthRoute]);
 
+  // 15-Minute Inactivity Auto-Logout Timer (Section 2.1 Security Requirements)
+  useEffect(() => {
+    if (isAuthRoute) return;
+
+    const IDLE_TIMEOUT_MS = 15 * 60 * 1000; // 15 minutes
+    let idleTimer = null;
+    let isLoggingOut = false;
+
+    const handleIdleTimeout = async () => {
+      if (isLoggingOut) return;
+      isLoggingOut = true;
+      try {
+        await fetch('/api/auth/logout', { method: 'POST' });
+      } catch (_) {}
+      try {
+        const supabase = createClient();
+        if (supabase) {
+          await supabase.auth.signOut();
+        }
+      } catch (_) {}
+      window.location.href = '/login?error=idle_timeout';
+    };
+
+    const resetIdleTimer = () => {
+      if (isLoggingOut) return;
+      if (idleTimer) clearTimeout(idleTimer);
+      idleTimer = setTimeout(handleIdleTimeout, IDLE_TIMEOUT_MS);
+    };
+
+    const activityEvents = ['mousemove', 'keydown', 'click', 'touchstart', 'scroll'];
+    activityEvents.forEach((evt) => window.addEventListener(evt, resetIdleTimer, { passive: true }));
+    resetIdleTimer();
+
+    return () => {
+      if (idleTimer) clearTimeout(idleTimer);
+      activityEvents.forEach((evt) => window.removeEventListener(evt, resetIdleTimer));
+    };
+  }, [isAuthRoute]);
+
   const handleToggleCollapse = (val) => {
     setIsSidebarCollapsed(val);
     try {

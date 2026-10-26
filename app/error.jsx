@@ -19,21 +19,22 @@ export default function GlobalErrorPage({ error, reset }) {
   }, [error]);
 
   return (
-    <div className="min-h-screen bg-[#f8faf9] flex items-center justify-center p-4">
-      <div className="max-w-md w-full bg-white rounded-2xl border border-black/[0.08] shadow-xs p-6 sm:p-7 text-center space-y-4">
-        <div className="w-12 h-12 rounded-2xl bg-gray-100 border border-black/[0.06] flex items-center justify-center mx-auto text-amber-600">
+    <div className="min-h-screen bg-[#f8faf9] dark:bg-[#09090b] flex items-center justify-center p-4">
+      <div className="max-w-md w-full bg-white dark:bg-[#121214] rounded-2xl border border-black/[0.08] dark:border-zinc-800 shadow-xs p-6 sm:p-7 text-center space-y-4">
+        <div className="w-12 h-12 rounded-2xl bg-gray-100 dark:bg-zinc-800/80 border border-black/[0.06] dark:border-zinc-700/60 flex items-center justify-center mx-auto text-amber-600 dark:text-amber-400">
           <AlertCircle className="w-6 h-6" />
         </div>
         <div>
-          <h2 className="text-base sm:text-lg font-bold text-gray-950 tracking-tight">
+          <h2 className="text-base sm:text-lg font-bold text-gray-950 dark:text-zinc-100 tracking-tight">
             Unexpected Session Error
           </h2>
-          <p className="text-xs text-gray-500 mt-1 leading-relaxed">
+          <p className="text-xs text-gray-500 dark:text-zinc-400 mt-1 leading-relaxed">
             FinLITE encountered a temporary interface interruption. Your financial ledger data is preserved safely in the database.
           </p>
         </div>
         <div className="pt-2 flex items-center justify-center gap-2">
           <button
+            type="button"
             onClick={() => {
               if (typeof window !== 'undefined') {
                 window.location.reload();
@@ -41,7 +42,7 @@ export default function GlobalErrorPage({ error, reset }) {
                 reset();
               }
             }}
-            className="h-10 px-5 bg-emerald-700 hover:bg-emerald-800 active:bg-emerald-900 text-white rounded-xl text-xs font-semibold shadow-xs transition-all flex items-center gap-1.5 cursor-pointer"
+            className="h-10 px-5 bg-emerald-700 hover:bg-emerald-800 dark:bg-emerald-600 dark:hover:bg-emerald-500 active:bg-emerald-900 text-white rounded-xl text-xs font-semibold shadow-xs transition-all flex items-center gap-1.5 cursor-pointer"
           >
             <RefreshCw className="w-3.5 h-3.5" />
             <span>Reload Dashboard</span>

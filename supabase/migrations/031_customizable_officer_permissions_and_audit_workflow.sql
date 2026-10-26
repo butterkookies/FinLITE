@@ -32,8 +32,8 @@ END $$;
 -- 3. Seed default permissions for existing approved profiles based on their roles
 -- Role defaults:
 -- Admin: all permissions
--- President: record_inflow, record_outflow, record_abono, edit_transaction, export_reports
--- Treasurer: record_inflow, record_outflow, record_abono, edit_transaction, cash_reconciliation, export_reports
+-- President / Vice President: record_inflow, record_outflow, record_abono, edit_transaction, export_reports
+-- Treasurer: record_inflow, record_outflow, record_abono, cash_reconciliation, export_reports (edit_transaction = false by default)
 -- Auditor: audit_approve, cash_reconciliation, export_reports
 -- Adviser: export_reports
 
@@ -61,14 +61,14 @@ SET permissions = jsonb_build_object(
   'cash_reconciliation', false,
   'export_reports', true
 )
-WHERE role = 'president' AND (permissions IS NULL OR permissions = '{}'::jsonb);
+WHERE role IN ('president', 'vice_president') AND (permissions IS NULL OR permissions = '{}'::jsonb);
 
 UPDATE public.profiles
 SET permissions = jsonb_build_object(
   'record_inflow', true,
   'record_outflow', true,
   'record_abono', true,
-  'edit_transaction', true,
+  'edit_transaction', false,
   'delete_transaction', false,
   'audit_approve', false,
   'cash_reconciliation', true,

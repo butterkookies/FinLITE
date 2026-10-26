@@ -134,7 +134,7 @@ export default function AuditDiffViewer({ log, isLight }) {
                 "px-2 py-0.5 rounded-md font-medium transition-all flex items-center gap-1 cursor-pointer",
                 viewMode === 'visual'
                   ? "bg-white dark:bg-zinc-700 text-zinc-900 dark:text-zinc-100 shadow-2xs font-semibold"
-                  : "text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-200"
+                  : "text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100"
               )}
             >
               <Eye className="w-3 h-3" />
@@ -147,7 +147,7 @@ export default function AuditDiffViewer({ log, isLight }) {
                 "px-2 py-0.5 rounded-md font-medium transition-all flex items-center gap-1 cursor-pointer",
                 viewMode === 'raw'
                   ? "bg-white dark:bg-zinc-700 text-zinc-900 dark:text-zinc-100 shadow-2xs font-semibold"
-                  : "text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-200"
+                  : "text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100"
               )}
             >
               <Code2 className="w-3 h-3" />

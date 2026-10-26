@@ -25,7 +25,7 @@ export async function GET(req) {
         entity_id,
         details,
         created_at,
-        profiles (
+        profiles:user_id (
           id,
           full_name,
           first_name,

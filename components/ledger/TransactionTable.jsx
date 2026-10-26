@@ -36,7 +36,8 @@ import {
   CreditCard,
   Edit2,
   Trash2,
-  MoreHorizontal
+  MoreHorizontal,
+  Lock
 } from 'lucide-react';
 import { formatPHP } from '@/lib/utils/currency';
 import { compressReceiptImage } from '@/lib/utils/compression';
@@ -72,19 +73,21 @@ export default function TransactionTable({
   currentRole,
   isDbConnected = false,
   userPermissions = null,
+  externalSelectedTx = null,
+  onClearExternalSelectedTx = null,
   onAuditTransaction = null,
   onEditTransaction = null,
   onDeleteTransaction = null,
 }) {
-  const canViewAudit = ['admin', 'auditor', 'treasurer', 'president', 'adviser'].includes(currentRole);
+  const canViewAudit = ['admin', 'auditor', 'treasurer', 'president', 'vice_president', 'adviser'].includes(currentRole);
 
   const canRecord = userPermissions
     ? Boolean(userPermissions.record_inflow || userPermissions.record_outflow || userPermissions.record_abono)
-    : (currentRole === 'admin' || currentRole === 'treasurer' || currentRole === 'auditor' || currentRole === 'president');
+    : (currentRole === 'admin' || currentRole === 'treasurer' || currentRole === 'auditor' || currentRole === 'president' || currentRole === 'vice_president');
 
   const canEdit = userPermissions
     ? Boolean(userPermissions.edit_transaction)
-    : (currentRole === 'admin' || currentRole === 'treasurer' || currentRole === 'president');
+    : (currentRole === 'admin' || currentRole === 'president' || currentRole === 'vice_president');
 
   const canAudit = userPermissions
     ? Boolean(userPermissions.audit_approve)
@@ -129,6 +132,36 @@ export default function TransactionTable({
   // Expanded transaction details modal state
   const [selectedTx, setSelectedTx] = useState(null);
   const [activeTxPhotoIndex, setActiveTxPhotoIndex] = useState(0);
+  const [selectedTxRemarks, setSelectedTxRemarks] = useState([]);
+
+  useEffect(() => {
+    if (externalSelectedTx) {
+      setSelectedTx(externalSelectedTx);
+      setActiveTxPhotoIndex(0);
+      onClearExternalSelectedTx?.();
+    }
+  }, [externalSelectedTx, onClearExternalSelectedTx]);
+
+  useEffect(() => {
+    if (!selectedTx?.id) {
+      setSelectedTxRemarks([]);
+      return;
+    }
+    let cancelled = false;
+    fetch(`/api/transactions/${selectedTx.id}/comments`)
+      .then((r) => r.json())
+      .then((d) => {
+        if (!cancelled && Array.isArray(d?.comments)) {
+          setSelectedTxRemarks(d.comments);
+        }
+      })
+      .catch(() => {
+        if (!cancelled) setSelectedTxRemarks([]);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [selectedTx?.id]);
 
   // Transaction Comments & Audit Remarks drawer state
   const [commentTx, setCommentTx] = useState(null);
@@ -202,7 +235,7 @@ export default function TransactionTable({
   }, [transactions]);
 
   const isAuthorized = currentRole === 'admin' || currentRole === 'treasurer' || currentRole === 'auditor';
-  const canSettleAbono = currentRole === 'admin' || currentRole === 'treasurer' || currentRole === 'president' || currentRole === 'adviser';
+  const canSettleAbono = currentRole === 'admin' || currentRole === 'treasurer' || currentRole === 'president' || currentRole === 'vice_president' || currentRole === 'adviser';
 
   const handleConfirmSettle = async () => {
     if (!settleTx) return;
@@ -414,7 +447,7 @@ export default function TransactionTable({
   return (
     <div className="rounded-2xl transition-colors relative overflow-hidden bg-white dark:bg-[#121214] ring-1 ring-black/[0.04] dark:ring-white/[0.06] shadow-sm shadow-zinc-950/5">
       {/* Table Header Controls */}
-      <div className="p-3.5 sm:p-5 border-b flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 border-zinc-100/80 dark:border-zinc-850/60 bg-zinc-50/50 dark:bg-[#121214]">
+      <div className="p-3.5 sm:p-5 border-b flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 border-zinc-100/80 dark:border-zinc-800 bg-zinc-50/50 dark:bg-[#121214]">
         <div className="min-w-0">
           <h2 className="text-lg sm:text-2xl font-black tracking-tight text-zinc-950 dark:text-white">
             Financial Ledger &amp; Transactions
@@ -470,7 +503,7 @@ export default function TransactionTable({
       </div>
 
       {/* Filter & Search Bar */}
-      <div className="px-4 sm:px-6 py-3 border-b flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5 sm:gap-3 border-zinc-100/80 dark:border-zinc-850/60 bg-white dark:bg-[#121214]">
+      <div className="px-4 sm:px-6 py-3 border-b flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5 sm:gap-3 border-zinc-100/80 dark:border-zinc-800 bg-white dark:bg-[#121214]">
         
         {/* Search Input */}
         <div className="w-full sm:w-80 shrink-0">
@@ -515,14 +548,14 @@ export default function TransactionTable({
           </div>
 
           {/* View Mode Toggle: Spreadsheet vs Slim Cards (Hidden on mobile where Cards are native) */}
-          <div className="hidden sm:flex items-center gap-0.5 p-1 rounded-xl ring-1 ring-black/[0.04] dark:ring-white/[0.06] bg-zinc-100/80 dark:bg-zinc-900/90 shrink-0">
+          <div className="hidden sm:flex items-center gap-0.5 p-1 rounded-xl ring-1 ring-black/[0.04] dark:ring-white/[0.08] bg-zinc-100/80 dark:bg-zinc-900/90 shrink-0">
             <button
               type="button"
               onClick={() => setViewMode('table')}
               className={`h-7 px-2.5 text-xs font-semibold rounded-md flex items-center gap-1.5 transition-colors duration-150 cursor-pointer ${
                 viewMode === 'table' || (viewMode === 'auto')
                   ? 'bg-white dark:bg-zinc-800 text-zinc-950 dark:text-white shadow-xs'
-                  : 'text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100'
+                  : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100'
               }`}
               title="Dense Spreadsheet Table View"
             >
@@ -535,7 +568,7 @@ export default function TransactionTable({
               className={`h-7 px-2.5 text-xs font-semibold rounded-md flex items-center gap-1.5 transition-colors duration-150 cursor-pointer ${
                 viewMode === 'cards'
                   ? 'bg-white dark:bg-zinc-800 text-zinc-950 dark:text-white shadow-xs'
-                  : 'text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100'
+                  : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100'
               }`}
               title="Mobile Slim Cards View"
             >
@@ -884,7 +917,7 @@ export default function TransactionTable({
                             <button
                               type="button"
                               onClick={(e) => handleOpenRowMenu(e, tx)}
-                              className="w-7 h-7 rounded-lg flex items-center justify-center text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors cursor-pointer shrink-0"
+                              className="w-7 h-7 rounded-lg flex items-center justify-center text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors cursor-pointer shrink-0"
                               title="More options"
                             >
                               <MoreHorizontal className="w-4 h-4" />
@@ -945,7 +978,7 @@ export default function TransactionTable({
                 setSelectedTx(tx);
                 setActiveTxPhotoIndex(0);
               }}
-              className="p-3 sm:p-3.5 rounded-xl bg-white dark:bg-zinc-900/60 ring-1 ring-black/[0.04] dark:ring-white/[0.06] hover:bg-zinc-50 dark:hover:bg-zinc-850/50 shadow-2xs cursor-pointer flex items-center justify-between gap-3 transition-[background-color,transform] duration-150 active:scale-[0.99]"
+              className="p-3 sm:p-3.5 rounded-xl bg-white dark:bg-zinc-900/60 ring-1 ring-black/[0.04] dark:ring-white/[0.06] hover:bg-zinc-50 dark:hover:bg-zinc-800/60 shadow-2xs cursor-pointer flex items-center justify-between gap-3 transition-[background-color,transform] duration-150 active:scale-[0.99]"
             >
               {/* Left: Icon & Metadata */}
               <div className="flex items-center gap-3 min-w-0 flex-1">
@@ -1235,7 +1268,7 @@ export default function TransactionTable({
       })()}
 
       {/* Desktop Pagination & Ledger Summary Footer */}
-      <div className="hidden md:flex px-6 py-3.5 border-t items-center justify-between gap-3 text-xs border-zinc-100/80 dark:border-zinc-850/60 bg-zinc-50/60 dark:bg-[#121214] text-zinc-600 dark:text-zinc-400">
+      <div className="hidden md:flex px-6 py-3.5 border-t items-center justify-between gap-3 text-xs border-zinc-100/80 dark:border-zinc-800 bg-zinc-50/60 dark:bg-[#121214] text-zinc-600 dark:text-zinc-400">
         {/* Left: Record Count Summary */}
         <div className="flex items-center gap-2">
           <span className="font-medium">
@@ -1725,6 +1758,16 @@ export default function TransactionTable({
                     </Button>
                   )}
 
+                  {tx.status === 'FLAGGED' && !canEdit && (
+                    <span
+                      className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-amber-500/10 border border-amber-500/30 text-[11px] font-medium text-amber-700 dark:text-amber-300"
+                      title="Per FinLITE governance rules, the Treasurer is locked from editing unless granted edit permission by the Club Adviser."
+                    >
+                      <Lock className="w-3 h-3 shrink-0" />
+                      <span>Editing locked — requires President/VP or Adviser edit permission</span>
+                    </span>
+                  )}
+
                   {canAudit && (
                     <Button
                       type="button"
@@ -1982,6 +2025,42 @@ export default function TransactionTable({
                     </div>
                   </div>
                 </div>
+
+                {/* Inline Auditor Remarks & Revision Notes (Manuscript Page 8) */}
+                {(tx.status === 'FLAGGED' || selectedTxRemarks.length > 0) && (
+                  <div className={`p-3 rounded-xl border ${
+                    tx.status === 'FLAGGED'
+                      ? 'bg-rose-500/10 border-rose-500/30 text-rose-900 dark:text-rose-200'
+                      : 'bg-zinc-50 dark:bg-zinc-900/60 border-zinc-200 dark:border-zinc-800 text-zinc-800 dark:text-zinc-200'
+                  }`}>
+                    <div className="flex items-center justify-between gap-2 mb-1.5">
+                      <span className="text-[10px] font-bold uppercase tracking-wider flex items-center gap-1.5">
+                        <MessageSquare className="w-3.5 h-3.5 shrink-0" />
+                        <span>Auditor Remarks &amp; Revision Notes</span>
+                      </span>
+                      {tx.status === 'FLAGGED' && !canEdit && (
+                        <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-amber-700 dark:text-amber-300">
+                          <Lock className="w-3 h-3 shrink-0" />
+                          <span>Read-Only View</span>
+                        </span>
+                      )}
+                    </div>
+                    {selectedTxRemarks.length > 0 ? (
+                      <div className="space-y-1.5">
+                        {selectedTxRemarks.map((rem) => (
+                          <div key={rem.id} className="text-xs leading-relaxed">
+                            <span className="font-bold">{rem.author_name || 'Auditor'}: </span>
+                            <span className="italic">&ldquo;{rem.comment}&rdquo;</span>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="text-xs italic opacity-80">
+                        Flagged by the Auditor for revision. Click &ldquo;Remarks&rdquo; below to view or post audit notes.
+                      </p>
+                    )}
+                  </div>
+                )}
               </div>
 
               {/* Frameless Receipts Gallery Section */}
@@ -2145,7 +2224,7 @@ export default function TransactionTable({
                   <span className="font-bold text-xs uppercase tracking-wider text-zinc-700 dark:text-zinc-300">
                     Disbursement Amount
                   </span>
-                  <span className="text-xs text-zinc-500">
+                  <span className="text-xs text-zinc-500 dark:text-zinc-400">
                     Total Claim: <strong className="text-zinc-900 dark:text-zinc-100">{formatPHP(settleTx.amount)}</strong>
                   </span>
                 </div>
@@ -2165,7 +2244,7 @@ export default function TransactionTable({
                     className="w-full text-base font-bold pl-7 pr-3 py-2 rounded-xl bg-white dark:bg-zinc-800/80 border border-zinc-200 dark:border-zinc-700 text-zinc-900 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500"
                   />
                 </div>
-                <div className="flex items-center justify-between text-[11px] text-zinc-500">
+                <div className="flex items-center justify-between text-[11px] text-zinc-500 dark:text-zinc-400">
                   <span>
                     Remaining after payout:{' '}
                     <strong className="text-zinc-800 dark:text-zinc-200">

@@ -80,6 +80,20 @@ function OfficialHeaderBanner() {
   );
 }
 
+function normalizeReportSemesterKey(raw) {
+  const sem = String(raw || '1st Semester').trim();
+  if (/1st|first/i.test(sem)) return '1ST SEMESTER';
+  if (/2nd|second/i.test(sem)) return '2ND SEMESTER';
+  if (/midyear|summer/i.test(sem)) return 'SUMMER SEMESTER';
+  return sem.toUpperCase().replace(/\bSEM\b/i, 'SEMESTER');
+}
+
+function normalizeReportAcademicYearKey(raw) {
+  return String(raw || '2025-2026')
+    .trim()
+    .replace(/[\u2013\u2014]/g, '-');
+}
+
 export default function DocumentPreviewModal({ isOpen, onClose, documentData, data }) {
   const activeDocData = documentData || data;
   const isProposal = activeDocData?.type === 'PROPOSAL';
@@ -169,119 +183,534 @@ export default function DocumentPreviewModal({ isOpen, onClose, documentData, da
   // Export & Attachment Scope: 'APPEND' (Report + Receipts), 'NONE' (Report Only), 'STANDALONE' (Receipts Only)
   const [receiptsMode, setReceiptsMode] = useState('APPEND');
 
+  // Report Typography Mode (Patch 14): 'calibri' (Calibri 11pt) | 'times' (Times New Roman 12pt)
+  const [typography, setTypography] = useState('calibri');
+
+  // 4-Stage Pre-Print Routing & Draft Persistence (Patch 10)
+  const ROUTING_STAGES = [
+    { stage: 1, label: 'Stage 1: Treasurer Prepared', short: '1. Treasurer' },
+    { stage: 2, label: 'Stage 2: Auditor Certified', short: '2. Auditor' },
+    { stage: 3, label: 'Stage 3: President/VP Approved', short: '3. President/VP' },
+    { stage: 4, label: 'Stage 4: Club Advisers Signed Off', short: '4. Advisers' },
+  ];
+  const [routingStage, setRoutingStage] = useState(1);
+  const [routingStatus, setRoutingStatus] = useState('DRAFT'); // 'DRAFT' | 'ROUTING' | 'RETURNED_FOR_REVISION' | 'READY_FOR_PRINT'
+  const [routingComment, setRoutingComment] = useState('');
+  const [returnReasonInput, setReturnReasonInput] = useState('');
+  const [showReturnPrompt, setShowReturnPrompt] = useState(false);
+  const [routingHistory, setRoutingHistory] = useState([]);
+  const [isSavingDraft, setIsSavingDraft] = useState(false);
+  const [draftSavedAt, setDraftSavedAt] = useState(null);
+
   const [isExporting, setIsExporting] = useState(false);
 
-  // Sync state strictly with incoming real activeDocData
-  useEffect(() => {
-    if (activeDocData) {
-      if (activeDocData.transmittalDate) {
-        setTransmittalDate(activeDocData.transmittalDate);
-        setFinalAsOf(`As of ${activeDocData.transmittalDate}`);
-      }
-      if (activeDocData.eventName) setPeriodDesc(activeDocData.eventName);
-      else if (activeDocData.activityTitle) setPeriodDesc(activeDocData.activityTitle);
-
-      if (activeDocData.semester) {
-        const sem = String(activeDocData.semester).trim();
-        let semClean = sem.toUpperCase();
-        if (/1st|first/i.test(sem)) semClean = '1st SEMESTER';
-        else if (/2nd|second/i.test(sem)) semClean = '2nd SEMESTER';
-        else if (/midyear|summer/i.test(sem)) semClean = 'SUMMER / MIDYEAR';
-        else semClean = semClean.replace(/\bSEM\b/i, 'SEMESTER');
-        setSemester(semClean);
-      }
-      if (activeDocData.academicYear) setAcademicYear(activeDocData.academicYear);
-      
-      // Sync real signatories if provided
-      if (activeDocData.signatories) {
-        const sigs = activeDocData.signatories;
-        const pName = (sigs.notedBy || sigs.presidentName || '').toUpperCase();
-        const pRole = (sigs.notedRole || sigs.presidentRole || 'LITE PRESIDENT').toUpperCase();
-        const vpName = (sigs.vicePresidentName || sigs.vice_president || '').toUpperCase();
-        const vpRole = (sigs.vicePresidentRole || 'LITE VICE PRESIDENT').toUpperCase();
-        const tName = (sigs.preparedBy || sigs.treasurerName || '').toUpperCase();
-        const tRole = (sigs.preparedRole || sigs.treasurerRole || 'LITE TREASURER').toUpperCase();
-        const aName = (sigs.reviewedBy || sigs.auditorName || '').toUpperCase();
-        const aRole = (sigs.reviewedRole || sigs.auditorRole || 'LITE AUDITOR').toUpperCase();
-        const adv1 = (sigs.adviser1 || sigs.adviser1Name || sigs.adviserName || '').toUpperCase();
-        const adv1R = (sigs.adviser1Role || sigs.adviserRole || 'LITE CLUB ADVISER').toUpperCase();
-        const adv2 = (sigs.adviser2 || sigs.adviser2Name || '').toUpperCase();
-        const adv2R = (sigs.adviser2Role || sigs.adviserRole || 'LITE CLUB ADVISER').toUpperCase();
-        const dir = (sigs.directorName || '').toUpperCase();
-        const dirR = (sigs.directorRole || 'PROGRAM DIRECTOR, BSIT').toUpperCase();
-        const dean = (sigs.deanName || '').toUpperCase();
-        const deanR = (sigs.deanRole || 'DEAN, COLLEGE OF COMPUTER STUDIES').toUpperCase();
-
-        setSignatories(prev => ({
-          presidentName: pName || prev.presidentName,
-          presidentRole: pRole || prev.presidentRole,
-          vicePresidentName: vpName !== undefined ? vpName : prev.vicePresidentName,
-          vicePresidentRole: vpRole || prev.vicePresidentRole,
-          treasurerName: tName || prev.treasurerName,
-          treasurerRole: tRole || prev.treasurerRole,
-          auditorName: aName || prev.auditorName,
-          auditorRole: aRole || prev.auditorRole,
-          adviser1Name: adv1 || prev.adviser1Name,
-          adviser1Role: adv1R || prev.adviser1Role,
-          adviser2Name: adv2 !== undefined ? adv2 : prev.adviser2Name,
-          adviser2Role: adv2R || prev.adviser2Role,
-          directorName: dir || prev.directorName,
-          directorRole: dirR || prev.directorRole,
-          deanName: dean || prev.deanName,
-          deanRole: deanR || prev.deanRole,
-        }));
-
-        setIncludedSignatories(prev => ({
-          ...prev,
-          treasurer: Boolean(tName || prev.treasurerName),
-          auditor: Boolean(aName || prev.auditorName),
-          vicePresident: Boolean(vpName),
-          president: Boolean(pName || prev.presidentName),
-          adviser1: Boolean(adv1 || prev.adviser1Name),
-          adviser2: Boolean(adv2),
-          director: Boolean(dir),
-          dean: Boolean(dean),
-        }));
-      }
-
-      const txs = activeDocData.transactions || [];
-
-      // 1. Auto-detect rollover beginning balance
-      const rolloverTxs = txs.filter(t => 
-        t.type === 'INFLOW' && (
-          (t.category_name && t.category_name.toLowerCase().includes('rollover')) || 
-          (t.title && t.title.toLowerCase().includes('beginning'))
-        )
-      );
-      const rolloverIds = new Set(rolloverTxs.map(t => t.id));
-      const totalRollover = rolloverTxs.reduce((sum, t) => sum + (Number(t.amount) || 0), 0);
-      setInitialBudget(totalRollover);
-
-      // 2. Real inflows (excluding rollover to prevent double-counting)
-      const realInflows = txs
-        .filter(t => t.type === 'INFLOW' && !rolloverIds.has(t.id))
-        .map(t => ({
-          id: t.id,
-          desc: t.title,
-          amount: Number(t.amount) || 0,
-          category: t.category_name || 'Income Collection',
-          date: t.transaction_date,
-        }));
-      setInflowRows(realInflows);
-
-      // 3. Real outflows / disbursements
-      const realOutflows = txs
-        .filter(t => t.type === 'OUTFLOW')
-        .map(t => ({
-          id: t.id,
-          desc: t.title,
-          amount: Number(t.amount) || 0,
-          category: t.category_name || 'Operating Expense',
-          date: t.transaction_date,
-        }));
-      setExpenseRows(realOutflows);
+  const populateFromLiveDocData = useCallback((docData) => {
+    if (!docData) return;
+    if (docData.transmittalDate) {
+      setTransmittalDate(docData.transmittalDate);
+      setFinalAsOf(`As of ${docData.transmittalDate}`);
     }
-  }, [activeDocData]);
+    if (docData.eventName) setPeriodDesc(docData.eventName);
+    else if (docData.activityTitle) setPeriodDesc(docData.activityTitle);
+
+    if (docData.semester) {
+      const sem = String(docData.semester).trim();
+      let semClean = sem.toUpperCase();
+      if (/1st|first/i.test(sem)) semClean = '1st SEMESTER';
+      else if (/2nd|second/i.test(sem)) semClean = '2nd SEMESTER';
+      else if (/midyear|summer/i.test(sem)) semClean = 'SUMMER / MIDYEAR';
+      else semClean = semClean.replace(/\bSEM\b/i, 'SEMESTER');
+      setSemester(semClean);
+    }
+    if (docData.academicYear) setAcademicYear(docData.academicYear);
+
+    // Sync real signatories if provided
+    if (docData.signatories) {
+      const sigs = docData.signatories;
+      const pName = (sigs.notedBy || sigs.presidentName || '').toUpperCase();
+      const pRole = (sigs.notedRole || sigs.presidentRole || 'LITE PRESIDENT').toUpperCase();
+      const vpName = (sigs.vicePresidentName || sigs.vice_president || '').toUpperCase();
+      const vpRole = (sigs.vicePresidentRole || 'LITE VICE PRESIDENT').toUpperCase();
+      const tName = (sigs.preparedBy || sigs.treasurerName || '').toUpperCase();
+      const tRole = (sigs.preparedRole || sigs.treasurerRole || 'LITE TREASURER').toUpperCase();
+      const aName = (sigs.reviewedBy || sigs.auditorName || '').toUpperCase();
+      const aRole = (sigs.reviewedRole || sigs.auditorRole || 'LITE AUDITOR').toUpperCase();
+      const adv1 = (sigs.adviser1 || sigs.adviser1Name || sigs.adviserName || '').toUpperCase();
+      const adv1R = (sigs.adviser1Role || sigs.adviserRole || 'LITE CLUB ADVISER').toUpperCase();
+      const adv2 = (sigs.adviser2 || sigs.adviser2Name || '').toUpperCase();
+      const adv2R = (sigs.adviser2Role || sigs.adviserRole || 'LITE CLUB ADVISER').toUpperCase();
+      const dir = (sigs.directorName || '').toUpperCase();
+      const dirR = (sigs.directorRole || 'PROGRAM DIRECTOR, BSIT').toUpperCase();
+      const dean = (sigs.deanName || '').toUpperCase();
+      const deanR = (sigs.deanRole || 'DEAN, COLLEGE OF COMPUTER STUDIES').toUpperCase();
+
+      setSignatories((prev) => ({
+        presidentName: pName || prev.presidentName,
+        presidentRole: pRole || prev.presidentRole,
+        vicePresidentName: vpName !== undefined ? vpName : prev.vicePresidentName,
+        vicePresidentRole: vpRole || prev.vicePresidentRole,
+        treasurerName: tName || prev.treasurerName,
+        treasurerRole: tRole || prev.treasurerRole,
+        auditorName: aName || prev.auditorName,
+        auditorRole: aRole || prev.auditorRole,
+        adviser1Name: adv1 || prev.adviser1Name,
+        adviser1Role: adv1R || prev.adviser1Role,
+        adviser2Name: adv2 !== undefined ? adv2 : prev.adviser2Name,
+        adviser2Role: adv2R || prev.adviser2Role,
+        directorName: dir || prev.directorName,
+        directorRole: dirR || prev.directorRole,
+        deanName: dean || prev.deanName,
+        deanRole: deanR || prev.deanRole,
+      }));
+
+      setIncludedSignatories((prev) => ({
+        ...prev,
+        treasurer: Boolean(tName || prev.treasurerName),
+        auditor: Boolean(aName || prev.auditorName),
+        vicePresident: Boolean(vpName),
+        president: Boolean(pName || prev.presidentName),
+        adviser1: Boolean(adv1 || prev.adviser1Name),
+        adviser2: Boolean(adv2),
+        director: Boolean(dir),
+        dean: Boolean(dean),
+      }));
+    }
+
+    const txs = docData.transactions || [];
+
+    // 1. Auto-detect rollover beginning balance
+    const rolloverTxs = txs.filter(
+      (t) =>
+        t.type === 'INFLOW' &&
+        ((t.category_name && t.category_name.toLowerCase().includes('rollover')) ||
+          (t.title && t.title.toLowerCase().includes('beginning')))
+    );
+    const rolloverIds = new Set(rolloverTxs.map((t) => t.id));
+    const totalRollover = rolloverTxs.reduce((sum, t) => sum + (Number(t.amount) || 0), 0);
+    setInitialBudget(totalRollover);
+
+    // 2. Real inflows (excluding rollover to prevent double-counting)
+    const realInflows = txs
+      .filter((t) => t.type === 'INFLOW' && !rolloverIds.has(t.id))
+      .map((t) => ({
+        id: t.id,
+        desc: t.title,
+        amount: Number(t.amount) || 0,
+        category: t.category_name || 'Income Collection',
+        date: t.transaction_date,
+      }));
+    setInflowRows(realInflows);
+
+    // 3. Real outflows / disbursements
+    const realOutflows = txs
+      .filter((t) => t.type === 'OUTFLOW')
+      .map((t) => ({
+        id: t.id,
+        desc: t.title,
+        amount: Number(t.amount) || 0,
+        category: t.category_name || 'Operating Expense',
+        date: t.transaction_date,
+      }));
+    setExpenseRows(realOutflows);
+  }, []);
+
+  const [isDraftHydrated, setIsDraftHydrated] = useState(false);
+  const baselineSnapshotRef = useRef(null);
+  const isDirtyRef = useRef(false);
+  const autoSaveTimerRef = useRef(null);
+  const latestDraftPayloadRef = useRef(null);
+
+  const currentDraftPayload = useMemo(() => {
+    const semKey = normalizeReportSemesterKey(activeDocData?.semester || semester);
+    const ayKey = normalizeReportAcademicYearKey(activeDocData?.academicYear || academicYear);
+    return {
+      semester: semKey,
+      academicYear: ayKey,
+      routingStage,
+      routingStatus,
+      routingComment,
+      routingHistory,
+      typography,
+      draftData: {
+        displaySemester: semester,
+        displayAcademicYear: academicYear,
+        transmittalDate,
+        coordinatorName,
+        coordinatorRole,
+        salutation,
+        periodDesc,
+        finalAsOf,
+        includeCc,
+        ccRecipients,
+        pageNumberStyle,
+        initialBudget,
+        inflowRows,
+        expenseRows,
+        signatories,
+        includedSignatories,
+        receiptsMode,
+      },
+    };
+  }, [
+    activeDocData?.semester,
+    activeDocData?.academicYear,
+    semester,
+    academicYear,
+    routingStage,
+    routingStatus,
+    routingComment,
+    routingHistory,
+    typography,
+    transmittalDate,
+    coordinatorName,
+    coordinatorRole,
+    salutation,
+    periodDesc,
+    finalAsOf,
+    includeCc,
+    ccRecipients,
+    pageNumberStyle,
+    initialBudget,
+    inflowRows,
+    expenseRows,
+    signatories,
+    includedSignatories,
+    receiptsMode,
+  ]);
+
+  const currentDraftSnapshot = useMemo(
+    () => JSON.stringify(currentDraftPayload),
+    [currentDraftPayload]
+  );
+
+  useEffect(() => {
+    latestDraftPayloadRef.current = currentDraftPayload;
+  }, [currentDraftPayload]);
+
+  // Sync state strictly with incoming real activeDocData and load persisted draft if available
+  useEffect(() => {
+    if (!activeDocData) return;
+    setIsDraftHydrated(false);
+    baselineSnapshotRef.current = null;
+    isDirtyRef.current = false;
+    populateFromLiveDocData(activeDocData);
+
+    if (isProposal) return;
+
+    const semKey = normalizeReportSemesterKey(activeDocData.semester || semester);
+    const ayKey = normalizeReportAcademicYearKey(activeDocData.academicYear || academicYear);
+    const localKey = `finlite_report_draft_${ayKey}_${semKey}`;
+    const legacyLocalKey = `finlite_report_draft_${activeDocData.academicYear || academicYear}_${activeDocData.semester || semester}`;
+
+    const applySavedDraft = (saved) => {
+      if (!saved || typeof saved !== 'object') return;
+      if (saved.routingStage) setRoutingStage(Number(saved.routingStage) || 1);
+      if (saved.routingStatus) setRoutingStatus(saved.routingStatus);
+      if (saved.routingComment !== undefined) setRoutingComment(saved.routingComment || '');
+      if (Array.isArray(saved.routingHistory)) setRoutingHistory(saved.routingHistory);
+      if (saved.typography === 'times' || saved.typography === 'calibri') {
+        setTypography(saved.typography);
+      }
+      if (saved.savedAt) setDraftSavedAt(saved.savedAt);
+
+      const d = saved.draftData;
+      if (d && typeof d === 'object') {
+        if (d.displaySemester) setSemester(d.displaySemester);
+        if (d.displayAcademicYear) setAcademicYear(d.displayAcademicYear);
+        if (d.transmittalDate) setTransmittalDate(d.transmittalDate);
+        if (d.coordinatorName) setCoordinatorName(d.coordinatorName);
+        if (d.coordinatorRole) setCoordinatorRole(d.coordinatorRole);
+        if (d.salutation) setSalutation(d.salutation);
+        if (d.periodDesc) setPeriodDesc(d.periodDesc);
+        if (d.finalAsOf) setFinalAsOf(d.finalAsOf);
+        if (typeof d.includeCc === 'boolean') setIncludeCc(d.includeCc);
+        if (Array.isArray(d.ccRecipients)) setCcRecipients(d.ccRecipients);
+        if (d.pageNumberStyle) setPageNumberStyle(d.pageNumberStyle);
+        if (typeof d.initialBudget === 'number') setInitialBudget(d.initialBudget);
+        if (Array.isArray(d.inflowRows)) setInflowRows(d.inflowRows);
+        if (Array.isArray(d.expenseRows)) setExpenseRows(d.expenseRows);
+        if (d.signatories && typeof d.signatories === 'object') {
+          setSignatories((prev) => ({ ...prev, ...d.signatories }));
+        }
+        if (d.includedSignatories && typeof d.includedSignatories === 'object') {
+          setIncludedSignatories((prev) => ({ ...prev, ...d.includedSignatories }));
+        }
+        if (d.receiptsMode) setReceiptsMode(d.receiptsMode);
+      }
+    };
+
+    let localSavedAtMs = 0;
+    let parsedLocalDraft = null;
+    try {
+      const localRaw = localStorage.getItem(localKey) || localStorage.getItem(legacyLocalKey);
+      if (localRaw) {
+        parsedLocalDraft = JSON.parse(localRaw);
+        localSavedAtMs = parsedLocalDraft?.savedAt ? new Date(parsedLocalDraft.savedAt).getTime() || 0 : 0;
+        applySavedDraft(parsedLocalDraft);
+      }
+    } catch (_) {}
+
+    let isCancelled = false;
+    fetch(
+      `/api/reports/draft?semester=${encodeURIComponent(semKey)}&academicYear=${encodeURIComponent(ayKey)}`
+    )
+      .then((r) => r.json())
+      .then((res) => {
+        if (isCancelled || isDirtyRef.current) return;
+        if (res?.draft) {
+          const remoteSavedAtMs = res.draft?.savedAt ? new Date(res.draft.savedAt).getTime() || 0 : 0;
+          if (!localSavedAtMs || remoteSavedAtMs >= localSavedAtMs) {
+            applySavedDraft(res.draft);
+          } else if (parsedLocalDraft) {
+            // Local draft is newer than server (e.g., fast exit/reopen while keepalive POST was in flight); sync to server
+            fetch('/api/reports/draft', {
+              method: 'POST',
+              keepalive: true,
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(parsedLocalDraft),
+            }).catch(() => {});
+          }
+        }
+      })
+      .catch(() => {})
+      .finally(() => {
+        if (!isCancelled) {
+          setIsDraftHydrated(true);
+        }
+      });
+
+    return () => {
+      isCancelled = true;
+    };
+  }, [activeDocData, isProposal, populateFromLiveDocData]);
+
+  const handleSaveDraft = useCallback(
+    async ({
+      nextStage = routingStage,
+      nextStatus = routingStatus,
+      nextComment = routingComment,
+      nextHistory = routingHistory,
+      silent = false,
+    } = {}) => {
+      if (!silent) setIsSavingDraft(true);
+      const nowIso = new Date().toISOString();
+      const semKey = normalizeReportSemesterKey(activeDocData?.semester || semester);
+      const ayKey = normalizeReportAcademicYearKey(activeDocData?.academicYear || academicYear);
+
+      const basePayload = {
+        semester: semKey,
+        academicYear: ayKey,
+        routingStage: nextStage,
+        routingStatus: nextStatus,
+        routingComment: nextComment,
+        routingHistory: nextHistory,
+        typography,
+        draftData: {
+          displaySemester: semester,
+          displayAcademicYear: academicYear,
+          transmittalDate,
+          coordinatorName,
+          coordinatorRole,
+          salutation,
+          periodDesc,
+          finalAsOf,
+          includeCc,
+          ccRecipients,
+          pageNumberStyle,
+          initialBudget,
+          inflowRows,
+          expenseRows,
+          signatories,
+          includedSignatories,
+          receiptsMode,
+        },
+      };
+
+      baselineSnapshotRef.current = JSON.stringify(basePayload);
+      isDirtyRef.current = false;
+
+      const draftPayload = {
+        ...basePayload,
+        savedAt: nowIso,
+      };
+
+      const localKey = `finlite_report_draft_${ayKey}_${semKey}`;
+      try {
+        localStorage.setItem(localKey, JSON.stringify(draftPayload));
+      } catch (_) {}
+
+      try {
+        const res = await fetch('/api/reports/draft', {
+          method: 'POST',
+          keepalive: true,
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(draftPayload),
+        });
+        const data = await res.json();
+        setDraftSavedAt(data?.savedAt || nowIso);
+      } catch (_) {
+        setDraftSavedAt(nowIso);
+      } finally {
+        if (!silent) setIsSavingDraft(false);
+      }
+    },
+    [
+      activeDocData?.semester,
+      activeDocData?.academicYear,
+      semester,
+      academicYear,
+      routingStage,
+      routingStatus,
+      routingComment,
+      routingHistory,
+      typography,
+      transmittalDate,
+      coordinatorName,
+      coordinatorRole,
+      salutation,
+      periodDesc,
+      finalAsOf,
+      includeCc,
+      ccRecipients,
+      pageNumberStyle,
+      initialBudget,
+      inflowRows,
+      expenseRows,
+      signatories,
+      includedSignatories,
+      receiptsMode,
+    ]
+  );
+
+  // Automatic debounced save (800ms) whenever user edits any report line, metadata, signatory, or typography
+  useEffect(() => {
+    if (isProposal || !isDraftHydrated) return;
+    if (baselineSnapshotRef.current === null) {
+      baselineSnapshotRef.current = currentDraftSnapshot;
+      isDirtyRef.current = false;
+      return;
+    }
+    if (currentDraftSnapshot === baselineSnapshotRef.current) {
+      return;
+    }
+
+    isDirtyRef.current = true;
+    const nowIso = new Date().toISOString();
+    const immediatePayload = {
+      ...currentDraftPayload,
+      savedAt: nowIso,
+    };
+    const localKey = `finlite_report_draft_${currentDraftPayload.academicYear}_${currentDraftPayload.semester}`;
+    try {
+      localStorage.setItem(localKey, JSON.stringify(immediatePayload));
+    } catch (_) {}
+
+    if (autoSaveTimerRef.current) {
+      clearTimeout(autoSaveTimerRef.current);
+    }
+    autoSaveTimerRef.current = setTimeout(() => {
+      autoSaveTimerRef.current = null;
+      handleSaveDraft({ silent: true });
+    }, 800);
+
+    return () => {
+      if (autoSaveTimerRef.current) {
+        clearTimeout(autoSaveTimerRef.current);
+      }
+    };
+  }, [currentDraftSnapshot, currentDraftPayload, isDraftHydrated, isProposal, handleSaveDraft]);
+
+  const handleCloseModal = useCallback(() => {
+    if (!isProposal && isDirtyRef.current && latestDraftPayloadRef.current) {
+      if (autoSaveTimerRef.current) {
+        clearTimeout(autoSaveTimerRef.current);
+        autoSaveTimerRef.current = null;
+      }
+      isDirtyRef.current = false;
+      const nowIso = new Date().toISOString();
+      const payload = {
+        ...latestDraftPayloadRef.current,
+        savedAt: nowIso,
+      };
+      const localKey = `finlite_report_draft_${payload.academicYear}_${payload.semester}`;
+      try {
+        localStorage.setItem(localKey, JSON.stringify(payload));
+      } catch (_) {}
+      fetch('/api/reports/draft', {
+        method: 'POST',
+        keepalive: true,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      }).catch(() => {});
+    }
+    onClose?.();
+  }, [isProposal, onClose]);
+
+  const handleAdvanceRoutingStage = async () => {
+    const nextStage = Math.min(4, routingStage + 1);
+    const nextStatus = nextStage === 4 ? 'READY_FOR_PRINT' : 'ROUTING';
+    const stageObj = ROUTING_STAGES.find((s) => s.stage === nextStage);
+    const nextHistory = [
+      ...routingHistory,
+      {
+        stage: nextStage,
+        action: 'APPROVED_STAGE',
+        label: stageObj?.label || `Stage ${nextStage}`,
+        timestamp: new Date().toISOString(),
+      },
+    ];
+    setRoutingStage(nextStage);
+    setRoutingStatus(nextStatus);
+    setRoutingComment('');
+    setRoutingHistory(nextHistory);
+    await handleSaveDraft({
+      nextStage,
+      nextStatus,
+      nextComment: '',
+      nextHistory,
+    });
+  };
+
+  const handleReturnToDraft = async () => {
+    const reason = returnReasonInput.trim() || 'Returned to Treasurer draft for revision.';
+    const nextHistory = [
+      ...routingHistory,
+      {
+        stage: 1,
+        action: 'RETURNED_TO_DRAFT',
+        label: 'Returned to Stage 1 (Treasurer Draft)',
+        comment: reason,
+        timestamp: new Date().toISOString(),
+      },
+    ];
+    setRoutingStage(1);
+    setRoutingStatus('RETURNED_FOR_REVISION');
+    setRoutingComment(reason);
+    setRoutingHistory(nextHistory);
+    setShowReturnPrompt(false);
+    setReturnReasonInput('');
+    await handleSaveDraft({
+      nextStage: 1,
+      nextStatus: 'RETURNED_FOR_REVISION',
+      nextComment: reason,
+      nextHistory,
+    });
+  };
+
+  const handleResetToLiveLedger = () => {
+    const semKey = normalizeReportSemesterKey(activeDocData?.semester || semester);
+    const ayKey = normalizeReportAcademicYearKey(activeDocData?.academicYear || academicYear);
+    const localKey = `finlite_report_draft_${ayKey}_${semKey}`;
+    try {
+      localStorage.removeItem(localKey);
+    } catch (_) {}
+    baselineSnapshotRef.current = null;
+    setRoutingStage(1);
+    setRoutingStatus('DRAFT');
+    setRoutingComment('');
+    setDraftSavedAt(null);
+    populateFromLiveDocData(activeDocData);
+  };
 
   // Derived Calculations from Real Ledger Data
   const totalInflows = inflowRows.reduce((sum, item) => sum + (Number(item.amount) || 0), 0);
@@ -315,6 +744,10 @@ export default function DocumentPreviewModal({ isOpen, onClose, documentData, da
 
   const handleAddExpense = () => {
     setExpenseRows(prev => [...prev, { id: `manual-out-${Date.now()}`, desc: 'New Expense Particulars', amount: 0, category: 'Operating Expense' }]);
+  };
+
+  const handleRemoveExpense = (idx) => {
+    setExpenseRows(prev => prev.filter((_, i) => i !== idx));
   };
 
   const handleUpdateCcRecipient = (idx, val) => {
@@ -549,6 +982,9 @@ export default function DocumentPreviewModal({ isOpen, onClose, documentData, da
         cc_recipients: ccRecipients,
         page_number_style: pageNumberStyle,
         receiptsMode: receiptsMode,
+        typography: typography,
+        font_family: typography === 'times' ? 'Times New Roman' : 'Calibri',
+        font_size_pt: typography === 'times' ? 12 : 11,
         includedSignatories: includedSignatories,
         active_signatories: Object.keys(includedSignatories).filter((k) => includedSignatories[k]),
         receipts: receiptItems,
@@ -696,7 +1132,7 @@ export default function DocumentPreviewModal({ isOpen, onClose, documentData, da
       if (e.key === 'Escape') {
         if (isSettingsOpen) setIsSettingsOpen(false);
         else if (isPageSelectorOpen) setIsPageSelectorOpen(false);
-        else onClose?.();
+        else handleCloseModal();
       } else if (e.key === 'ArrowLeft' || e.key === 'PageUp') {
         e.preventDefault();
         handlePrevPage();
@@ -717,7 +1153,7 @@ export default function DocumentPreviewModal({ isOpen, onClose, documentData, da
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isOpen, isSettingsOpen, isPageSelectorOpen, activePage, availablePages, currentPageIndex]);
+  }, [isOpen, isSettingsOpen, isPageSelectorOpen, activePage, availablePages, currentPageIndex, handleCloseModal]);
 
   // Touch Swipe Gesture on Mobile
   const touchStartX = useRef(null);
@@ -752,7 +1188,7 @@ export default function DocumentPreviewModal({ isOpen, onClose, documentData, da
   if (!isOpen || !activeDocData) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex flex-col document-preview-overlay">
+    <div className={`fixed inset-0 z-50 flex flex-col document-preview-overlay ${typography === 'times' ? 'typography-times' : 'typography-calibri'}`}>
       
       {/* Top Floating Action & Navigation Bar (Streamlined 1-Row) */}
       <header className="sticky top-0 z-40 bg-zinc-950/95 backdrop-blur-md border-b border-zinc-800 text-zinc-100 px-3 sm:px-6 py-2 sm:py-2.5 no-print shadow-xl">
@@ -770,6 +1206,15 @@ export default function DocumentPreviewModal({ isOpen, onClose, documentData, da
                 <Badge variant="emerald" size="xs" className="hidden xs:inline-flex">
                   Letter 8.5" × 11"
                 </Badge>
+                {!isProposal && (
+                  <Badge
+                    variant={routingStage === 4 ? 'emerald' : routingStatus === 'RETURNED_FOR_REVISION' ? 'rose' : 'amber'}
+                    size="xs"
+                    className="hidden md:inline-flex"
+                  >
+                    {ROUTING_STAGES.find((s) => s.stage === routingStage)?.label || `Stage ${routingStage}`}
+                  </Badge>
+                )}
               </div>
               <div className="flex items-center gap-2 text-[10px] sm:text-[11px] text-zinc-400 truncate">
                 <span className="flex items-center gap-1 text-amber-400">
@@ -782,12 +1227,35 @@ export default function DocumentPreviewModal({ isOpen, onClose, documentData, da
                     ? (availablePages[currentPageIndex]?.label || `Page ${activePage}`)
                     : `Continuous View (${availablePages.length} Pages)`}
                 </span>
+                {draftSavedAt && (
+                  <>
+                    <span className="hidden lg:inline text-zinc-600">•</span>
+                    <span className="hidden lg:inline text-emerald-400">
+                      Draft saved {new Date(draftSavedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                    </span>
+                  </>
+                )}
               </div>
             </div>
           </div>
 
           {/* Right: Actions */}
           <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
+            {/* Save Draft Button (Patch 10) */}
+            {!isProposal && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => handleSaveDraft()}
+                loading={isSavingDraft}
+                className="hidden sm:flex bg-zinc-900 text-emerald-300 border-emerald-800/60 hover:bg-zinc-800 text-xs px-2.5 sm:px-3 h-8 shadow-sm"
+                leftIcon={<Check className="w-3.5 h-3.5 text-emerald-400" />}
+                title="Save Report Draft & Pre-Print Routing State"
+              >
+                <span>{isSavingDraft ? 'Saving...' : 'Save Draft'}</span>
+              </Button>
+            )}
+
             {/* View Mode Toggle (Continuous vs Single) on Desktop */}
             <button
               onClick={() => setViewMode(viewMode === 'single' ? 'continuous' : 'single')}
@@ -848,7 +1316,7 @@ export default function DocumentPreviewModal({ isOpen, onClose, documentData, da
             <Button
               variant="ghost"
               size="icon"
-              onClick={onClose}
+              onClick={handleCloseModal}
               className="text-zinc-400 hover:text-white hover:bg-zinc-800 w-8 h-8 ml-0.5"
               title="Close Preview (Esc)"
             >
@@ -1782,21 +2250,14 @@ export default function DocumentPreviewModal({ isOpen, onClose, documentData, da
                 <article key={`receipt-sheet-${pageIdx}`} className="document-sheet">
                   <OfficialHeaderBanner />
 
-                  {/* Sheet Institutional Header */}
-                  <div className="text-center mb-6">
-                    <div className="font-bold tracking-wide text-xs uppercase text-gray-700">
-                      PAMBAYANG DALUBHASAAN NG MARILAO
+                  {/* Sheet Header: Show "Receipts" only on the first receipt sheet (Patch 15) */}
+                  {pageIdx === 0 && (
+                    <div className="text-center mb-6">
+                      <div className="font-black tracking-wide text-sm uppercase text-gray-900">
+                        Receipts
+                      </div>
                     </div>
-                    <div className="font-black tracking-wide text-sm uppercase text-gray-900 mt-0.5">
-                      RECEIPTS &amp; PROOFS OF DISBURSEMENT
-                    </div>
-                    <div className="font-semibold text-xs text-gray-600 uppercase mt-0.5">
-                      {semester} &bull; ACADEMIC YEAR {academicYear}
-                    </div>
-                    <div className="text-[10px] text-gray-500 mt-1 uppercase tracking-wider font-semibold">
-                      Receipts Attachment Sheet {currentSheetNum} of {totalReceiptSheets}
-                    </div>
-                  </div>
+                  )}
 
                   {/* 2-Column Grid (Up to 4 receipts per page: 2 rows of 2) */}
                   <div className="grid grid-cols-2 gap-4">
@@ -2215,11 +2676,150 @@ export default function DocumentPreviewModal({ isOpen, onClose, documentData, da
                 </div>
               )}
 
-              {/* Section 3: CC Routing & Page Numbering */}
+              {/* Section 2.5: 4-Stage Pre-Print Routing & Draft Persistence (Patch 10) */}
+              {!isProposal && (
+                <div className="space-y-3 pb-5 border-b border-zinc-800/80">
+                  <div className="flex items-center justify-between">
+                    <span className="font-semibold text-zinc-200 text-xs uppercase tracking-wider">
+                      Pre-Print Routing &amp; Draft
+                    </span>
+                    <Badge
+                      variant={routingStage === 4 ? 'emerald' : routingStatus === 'RETURNED_FOR_REVISION' ? 'rose' : 'amber'}
+                      size="xs"
+                    >
+                      Stage {routingStage} of 4
+                    </Badge>
+                  </div>
+
+                  {/* 4-Stage Stepper */}
+                  <div className="grid grid-cols-2 gap-1.5">
+                    {ROUTING_STAGES.map((st) => {
+                      const isActive = routingStage === st.stage;
+                      const isCompleted = routingStage > st.stage;
+                      return (
+                        <button
+                          key={st.stage}
+                          type="button"
+                          onClick={() => setRoutingStage(st.stage)}
+                          className={`p-2 rounded-lg text-left border transition-colors cursor-pointer ${
+                            isActive
+                              ? 'bg-emerald-950/60 border-emerald-500/60 text-emerald-300 font-bold'
+                              : isCompleted
+                                ? 'bg-zinc-900/90 border-emerald-800/40 text-emerald-400/80'
+                                : 'bg-zinc-900/40 border-zinc-800 text-zinc-400 hover:bg-zinc-900'
+                          }`}
+                        >
+                          <div className="text-[11px] truncate">{st.short}</div>
+                          <div className="text-[9px] opacity-75">
+                            {isCompleted ? 'Certified ✓' : isActive ? 'Current Stage' : 'Pending'}
+                          </div>
+                        </button>
+                      );
+                    })}
+                  </div>
+
+                  {routingComment && (
+                    <div className="p-2.5 rounded-lg bg-rose-500/10 border border-rose-500/30 text-rose-300 text-[11px]">
+                      <span className="font-bold">Revision Note:</span> {routingComment}
+                    </div>
+                  )}
+
+                  {/* Routing Actions */}
+                  <div className="flex flex-wrap items-center gap-1.5 pt-1">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleSaveDraft()}
+                      loading={isSavingDraft}
+                      className="bg-zinc-900 text-zinc-200 border-zinc-700 hover:bg-zinc-800 text-[11px] h-7 px-2.5"
+                    >
+                      {isSavingDraft ? 'Saving...' : 'Save Draft'}
+                    </Button>
+                    {routingStage < 4 && (
+                      <Button
+                        variant="primary"
+                        size="sm"
+                        onClick={handleAdvanceRoutingStage}
+                        className="text-[11px] h-7 px-2.5"
+                      >
+                        Advance to Stage {routingStage + 1}
+                      </Button>
+                    )}
+                    {routingStage > 1 && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setShowReturnPrompt(!showReturnPrompt)}
+                        className="bg-rose-950/40 text-rose-300 border-rose-800/60 hover:bg-rose-900/50 text-[11px] h-7 px-2.5"
+                      >
+                        Return to Draft
+                      </Button>
+                    )}
+                    <button
+                      type="button"
+                      onClick={handleResetToLiveLedger}
+                      className="text-[10px] text-zinc-400 hover:text-zinc-200 underline ml-auto cursor-pointer"
+                    >
+                      Reset to Live Ledger
+                    </button>
+                  </div>
+
+                  {showReturnPrompt && (
+                    <div className="p-2.5 rounded-xl bg-zinc-900 border border-rose-500/30 space-y-2">
+                      <label className="block text-[11px] font-semibold text-rose-300">
+                        Reason for Returning to Stage 1 (Treasurer Draft):
+                      </label>
+                      <input
+                        type="text"
+                        value={returnReasonInput}
+                        onChange={(e) => setReturnReasonInput(e.target.value)}
+                        placeholder="e.g. Adjust food expense description on Page 3"
+                        className="w-full bg-zinc-950 border border-zinc-800 rounded px-2.5 py-1.5 text-xs text-white"
+                      />
+                      <div className="flex justify-end gap-1.5">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => setShowReturnPrompt(false)}
+                          className="text-[11px] h-7 px-2"
+                        >
+                          Cancel
+                        </Button>
+                        <Button
+                          variant="primary"
+                          size="sm"
+                          onClick={handleReturnToDraft}
+                          className="bg-rose-600 hover:bg-rose-500 text-white text-[11px] h-7 px-2.5"
+                        >
+                          Confirm Return to Draft
+                        </Button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Section 3: CC Routing, Typography & Page Numbering */}
               {!isProposal && (
                 <div className="space-y-3 pb-5 border-b border-zinc-800/80">
                   <div className="font-semibold text-zinc-200 text-xs uppercase tracking-wider">
-                    Routing &amp; Formatting
+                    Routing, Typography &amp; Formatting
+                  </div>
+
+                  {/* Report Typography Selector (Patch 14) */}
+                  <div>
+                    <label className="text-[11px] font-medium text-zinc-400 block mb-1">
+                      Document Typography Standard
+                    </label>
+                    <Select
+                      value={typography}
+                      onChange={setTypography}
+                      options={[
+                        { value: 'calibri', label: 'Calibri 11pt (PDM Institutional Template)' },
+                        { value: 'times', label: 'Times New Roman 12pt (Manuscript Standard)' },
+                      ]}
+                      size="sm"
+                    />
                   </div>
 
                   {/* CC Routing */}

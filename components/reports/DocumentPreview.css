@@ -59,6 +59,34 @@
   font-family: Calibri, 'Segoe UI', Arial, sans-serif !important;
 }
 
+/* Typography Mode: Times New Roman 12pt (Manuscript Section 2.1 User Characteristics) */
+.typography-times .document-sheet {
+  font-family: 'Times New Roman', Times, Georgia, serif !important;
+  font-size: 12pt !important;
+}
+
+.typography-times .document-sheet * {
+  font-family: 'Times New Roman', Times, Georgia, serif !important;
+}
+
+.typography-times .document-sheet *:not(.pdm-banner-school):not(.pdm-banner-club):not(.pdm-banner-course),
+.typography-times .transmittal-date,
+.typography-times .transmittal-recipient,
+.typography-times .transmittal-salutation,
+.typography-times .transmittal-body,
+.typography-times .transmittal-closing,
+.typography-times .sig-section-header,
+.typography-times .sig-name,
+.typography-times .sig-role,
+.typography-times .pdm-input,
+.typography-times .fin-table,
+.typography-times .fin-table td,
+.typography-times .fin-table th,
+.typography-times .sheet-page-footer {
+  font-family: 'Times New Roman', Times, Georgia, serif !important;
+  font-size: 12pt !important;
+}
+
 /* Official Header Banner */
 .pdm-banner-container {
   width: 100%;
@@ -450,6 +478,11 @@
 
   .document-sheet * {
     font-size: 11pt !important;
+  }
+
+  .typography-times .document-sheet,
+  .typography-times .document-sheet *:not(.pdm-banner-school):not(.pdm-banner-club):not(.pdm-banner-course) {
+    font-size: 12pt !important;
   }
 
   .sig-table, .fin-table {

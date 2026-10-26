@@ -94,7 +94,7 @@ export default function FloatingSidebar({
   const email = userProfile?.email || currentUser?.email || '';
   const isSuperAdmin = isSuperAdminEmail(email);
   const isAdmin = currentRole === 'admin' || isSuperAdmin;
-  const isOfficer = isAdmin || ['treasurer', 'president', 'auditor', 'adviser'].includes(currentRole);
+  const isOfficer = isAdmin || ['treasurer', 'president', 'vice_president', 'auditor', 'adviser'].includes(currentRole);
 
   const fullName = userProfile?.full_name || currentUser?.user_metadata?.full_name || 'FinLITE Member';
   const avatarUrl = userProfile?.avatar_url || currentUser?.user_metadata?.avatar_url || currentUser?.user_metadata?.picture || null;
@@ -427,7 +427,7 @@ export default function FloatingSidebar({
                       ${isCollapsed && !isMobileOpen ? 'justify-center p-2.5' : 'px-3 py-2'}
                       ${isActive 
                         ? 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 font-semibold shadow-xs' 
-                        : 'text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-900 hover:text-zinc-900 dark:hover:text-zinc-100'}
+                        : 'text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800/70 hover:text-zinc-900 dark:hover:text-zinc-100'}
                     `}
                   >
                     <Icon className={`w-4 h-4 shrink-0 transition-transform duration-150 group-hover:scale-110 ${isActive ? 'text-emerald-700 dark:text-emerald-400' : 'text-zinc-600 dark:text-zinc-400'}`} />
@@ -467,7 +467,7 @@ export default function FloatingSidebar({
                         ${isCollapsed && !isMobileOpen ? 'justify-center p-2.5' : 'px-3 py-2'}
                         ${isLinkActive
                           ? 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 font-semibold shadow-xs'
-                          : 'text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-900 hover:text-zinc-900 dark:hover:text-zinc-100'}
+                          : 'text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800/70 hover:text-zinc-900 dark:hover:text-zinc-100'}
                       `}
                     >
                       <Icon className={`w-4 h-4 shrink-0 transition-transform duration-150 group-hover:scale-110 ${isLinkActive ? 'text-emerald-700 dark:text-emerald-400' : 'text-zinc-600 dark:text-zinc-400'}`} />
@@ -494,7 +494,7 @@ export default function FloatingSidebar({
                       ${isCollapsed && !isMobileOpen ? 'justify-center p-2.5' : 'px-3 py-2'}
                       ${item.highlight
                         ? 'text-amber-600 dark:text-amber-400 hover:bg-amber-500/10'
-                        : 'text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-900 hover:text-zinc-900 dark:hover:text-zinc-100'}
+                        : 'text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800/70 hover:text-zinc-900 dark:hover:text-zinc-100'}
                     `}
                   >
                     <Icon className={`w-4 h-4 shrink-0 transition-transform group-hover:scale-110 ${item.highlight ? 'text-amber-500 dark:text-amber-400' : 'text-zinc-600 dark:text-zinc-400'}`} />
@@ -581,7 +581,7 @@ export default function FloatingSidebar({
             <button
               type="button"
               onClick={handleSignOut}
-              className="h-8 w-8 flex items-center justify-center rounded-lg text-zinc-500 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/30 transition-colors cursor-pointer"
+              className="h-8 w-8 flex items-center justify-center rounded-lg text-zinc-500 dark:text-zinc-400 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/30 transition-colors cursor-pointer"
               title="Sign Out"
               aria-label="Sign Out"
             >

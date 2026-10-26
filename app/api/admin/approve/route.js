@@ -4,7 +4,8 @@ import { createAdminClient } from '@/lib/supabase/server';
 import { getAuthMethods } from '@/lib/auth/methods';
 import { sendAccountStatusChangedEmail } from '@/lib/email/mailer';
 
-const VALID_ROLES = ['treasurer', 'auditor', 'president', 'adviser', 'admin'];
+const VALID_ROLES = ['treasurer', 'auditor', 'president', 'vice_president', 'adviser', 'admin'];
+const SINGLE_HOLDER_CUSTODIAN_ROLES = ['treasurer', 'auditor'];
 
 // POST /api/admin/approve
 export async function POST(req) {
@@ -14,7 +15,7 @@ export async function POST(req) {
       return NextResponse.json({ error: auth.error }, { status: auth.status });
     }
 
-    const { requestId, role = 'treasurer' } = await req.json();
+    const { requestId, role = 'treasurer', replaceExisting = false } = await req.json();
 
     if (!requestId) {
       return NextResponse.json({ error: 'Request ID is required.' }, { status: 400 });
@@ -36,6 +37,28 @@ export async function POST(req) {
 
     if (fetchErr || !request) {
       return NextResponse.json({ error: 'Registration request not found.' }, { status: 404 });
+    }
+
+    // 1.05 Role Mutual Exclusion Validation (Use Case 2.5.5, p. 27)
+    if (SINGLE_HOLDER_CUSTODIAN_ROLES.includes(normalizedRole)) {
+      const { data: existingHolders } = await supabase
+        .from('profiles')
+        .select('id, email, full_name, role, status')
+        .eq('role', normalizedRole)
+        .eq('status', 'approved')
+        .neq('email', (request.email || '').toLowerCase());
+
+      if (existingHolders && existingHolders.length > 0 && !replaceExisting) {
+        const holder = existingHolders[0];
+        return NextResponse.json(
+          {
+            error: `Role Mutual Exclusion Conflict: Another active officer (${holder.full_name || holder.email}) already holds the ${normalizedRole.toUpperCase()} role. Please suspend or reassign the existing ${normalizedRole} first.`,
+            code: 'ROLE_MUTUAL_EXCLUSION_CONFLICT',
+            conflictingUser: holder,
+          },
+          { status: 409 }
+        );
+      }
     }
 
     // 1.1 An email/password applicant must have proven they own the inbox.

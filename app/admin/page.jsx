@@ -49,6 +49,7 @@ const ROLE_OPTIONS = [
   { value: 'treasurer', label: 'Treasurer', desc: 'Disbursements & Collections' },
   { value: 'auditor', label: 'Auditor', desc: 'Audit & Denomination Verification' },
   { value: 'president', label: 'President', desc: 'Budget & Approval Authority' },
+  { value: 'vice_president', label: 'Vice President', desc: 'Executive Co-Oversight & Approval' },
   { value: 'adviser', label: 'Adviser', desc: 'Faculty Oversight & Signatory' },
   { value: 'admin', label: 'Admin', desc: 'Full System & Access Control' },
 ];
@@ -2035,8 +2036,8 @@ export default function AdminPage() {
                                         ? 'bg-emerald-100 text-emerald-800 hover:bg-emerald-200'
                                         : 'bg-emerald-500/20 text-emerald-300 hover:bg-emerald-500/30'
                                       : isLight
-                                      ? 'bg-gray-100 text-gray-500 hover:bg-gray-200'
-                                      : 'bg-zinc-800 text-zinc-500 hover:bg-zinc-700'
+                                      ? 'bg-gray-100 text-gray-600 hover:bg-gray-200 hover:text-gray-900'
+                                      : 'bg-zinc-800 text-zinc-400 hover:bg-zinc-700 hover:text-zinc-200'
                                   }`}
                                 >
                                   {sig.is_active ? (

@@ -293,7 +293,7 @@ export default function AuditTrailDrawer({
               return (
                 <div
                   key={log.id}
-                  className="p-3.5 sm:p-4 rounded-xl bg-white dark:bg-zinc-900/50 ring-1 ring-black/[0.04] dark:ring-white/[0.05] shadow-2xs hover:bg-zinc-50 dark:hover:bg-zinc-850/40 transition-all duration-150"
+                  className="p-3.5 sm:p-4 rounded-xl bg-white dark:bg-zinc-900/50 ring-1 ring-black/[0.04] dark:ring-white/[0.05] shadow-2xs hover:bg-zinc-50 dark:hover:bg-zinc-800/60 transition-all duration-150"
                 >
                   {/* Top Row: Action Badge + Timestamp */}
                   <div className="flex items-center justify-between gap-2 mb-2">

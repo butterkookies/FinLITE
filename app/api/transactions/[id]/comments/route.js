@@ -28,7 +28,7 @@ export async function GET(req, { params }) {
         user_id,
         comment,
         created_at,
-        profiles (
+        profiles:user_id (
           id,
           full_name,
           first_name,

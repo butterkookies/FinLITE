@@ -70,7 +70,7 @@ export async function POST(req, { params }) {
       .select(`
         *,
         categories (id, name, type),
-        profiles (id, full_name, first_name, last_name, role, email),
+        profiles:logged_by (id, full_name, first_name, last_name, role, email),
         transaction_receipts (id, public_url, sort_order)
       `)
       .eq('id', transactionId)
@@ -99,7 +99,7 @@ export async function POST(req, { params }) {
       .select(`
         *,
         categories (id, name, type),
-        profiles (id, full_name, first_name, last_name, role, email),
+        profiles:logged_by (id, full_name, first_name, last_name, role, email),
         transaction_receipts (id, public_url, sort_order)
       `)
       .single();
@@ -172,7 +172,26 @@ export async function POST(req, { params }) {
       reviewerTitle = 'Club Adviser';
     }
 
-    if (authorEmail) {
+    let effectiveCcEmails = Array.isArray(ccEmails) ? [...ccEmails] : [];
+    if (normalizedAction === 'FLAG') {
+      try {
+        let { data: officerRows, error: offErr } = await db
+          .from('profiles')
+          .select('id, email, permissions, role, status')
+          .eq('status', 'approved');
+        if (offErr && (offErr.code === '42703' || offErr.message?.includes('permissions'))) {
+          const fb = await db.from('profiles').select('id, email, role, status').eq('status', 'approved');
+          officerRows = fb.data;
+        }
+        const editorEmails = (officerRows || [])
+          .filter((o) => o.email && hasPermission(o, ACTION_KEYS.EDIT_TRANSACTION, o.email))
+          .map((o) => o.email.trim().toLowerCase());
+        effectiveCcEmails = Array.from(new Set([...effectiveCcEmails, ...editorEmails]));
+      } catch (_) {}
+    }
+
+    const primaryRecipient = authorEmail || effectiveCcEmails[0] || null;
+    if (primaryRecipient) {
       sendAuditDecisionEmail({
         transaction: updatedTx || tx,
         decision: normalizedAction,
@@ -180,9 +199,9 @@ export async function POST(req, { params }) {
         auditorEmail: email,
         reviewerTitle,
         comment: comment?.trim() || null,
-        authorEmail,
+        authorEmail: primaryRecipient,
         authorName,
-        ccEmails,
+        ccEmails: effectiveCcEmails,
       }).catch((mailErr) => console.warn('[Audit Email] Dispatch warning:', mailErr));
     }
 

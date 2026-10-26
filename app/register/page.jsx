@@ -182,19 +182,19 @@ function RegisterForm() {
 
   if (success) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#f8faf9] px-4">
+      <div className="min-h-screen flex items-center justify-center bg-[#f8faf9] dark:bg-[#09090b] px-4">
         <div className="w-full max-w-md text-center">
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-emerald-100 mb-5">
-            <CheckCircle2 className="w-8 h-8 text-emerald-600" />
+          <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-emerald-100 dark:bg-emerald-950/40 mb-5">
+            <CheckCircle2 className="w-8 h-8 text-emerald-600 dark:text-emerald-400" />
           </div>
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">Request Submitted!</h2>
-          <p className="text-gray-500 text-sm mb-6 leading-relaxed">
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-zinc-100 mb-2">Request Submitted!</h2>
+          <p className="text-gray-500 dark:text-zinc-400 text-sm mb-6 leading-relaxed">
             Your registration request has been submitted and is now pending admin approval.
             You will be notified once an administrator reviews your account.
           </p>
-          <div className="bg-amber-50 border border-amber-100 rounded-xl px-5 py-4 text-sm text-amber-800 text-left mb-6">
+          <div className="bg-amber-50 dark:bg-amber-950/30 border border-amber-100 dark:border-amber-900/50 rounded-xl px-5 py-4 text-sm text-amber-800 dark:text-amber-300 text-left mb-6">
             <p className="font-semibold mb-1">What happens next?</p>
-            <ul className="space-y-1 list-disc list-inside text-amber-700">
+            <ul className="space-y-1 list-disc list-inside text-amber-700 dark:text-amber-400">
               <li>Your request is reviewed by the LITE admin or adviser</li>
               <li>Once approved, you can sign in to FinLITE</li>
               <li>You may be contacted via your registered Gmail</li>
@@ -202,7 +202,7 @@ function RegisterForm() {
           </div>
           <Link
             href="/login"
-            className="inline-flex items-center gap-2 px-5 py-2.5 bg-emerald-600 text-white text-sm font-semibold rounded-xl hover:bg-emerald-700 transition-all"
+            className="inline-flex items-center gap-2 px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 dark:bg-emerald-600 dark:hover:bg-emerald-500 text-white text-sm font-semibold rounded-xl transition-all"
           >
             Go to Login
           </Link>
@@ -212,7 +212,7 @@ function RegisterForm() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#f8faf9] px-4 py-10">
+    <div className="min-h-screen flex items-center justify-center bg-[#f8faf9] dark:bg-[#09090b] px-4 py-10">
       <div className="w-full max-w-md">
 
         {/* Logo & Header */}
@@ -220,8 +220,8 @@ function RegisterForm() {
           <div className="inline-flex items-center justify-center w-14 h-14 mb-3">
             <Image src="/assets/lite-logo.png" alt="LITE Logo" width={48} height={48} className="object-contain" priority />
           </div>
-          <h1 className="text-2xl font-bold text-gray-950 tracking-tight">Request Access</h1>
-          <p className="text-xs text-gray-500 mt-1">
+          <h1 className="text-2xl font-bold text-gray-950 dark:text-zinc-100 tracking-tight">Request Access</h1>
+          <p className="text-xs text-gray-500 dark:text-zinc-400 mt-1">
             {isGoogleFlow
               ? 'Complete your profile to request access to FinLITE'
               : 'Register to join the LITE Financial System'}
@@ -229,20 +229,20 @@ function RegisterForm() {
         </div>
 
         {/* Card */}
-        <div className="bg-white rounded-2xl shadow-xs border border-black/[0.08] p-7">
+        <div className="bg-white dark:bg-[#121214] rounded-2xl shadow-xs border border-black/[0.08] dark:border-zinc-800 p-7">
 
           {/* Google OAuth pre-fill notice */}
           {isGoogleFlow && (
-            <div className="flex items-start gap-2.5 bg-gray-50 border border-black/[0.08] text-blue-800 rounded-xl px-4 py-3 mb-5 text-xs font-medium">
-              <Info className="w-4 h-4 mt-0.5 shrink-0 text-blue-600" />
+            <div className="flex items-start gap-2.5 bg-gray-50 dark:bg-zinc-850 border border-black/[0.08] dark:border-zinc-700/80 text-blue-800 dark:text-blue-300 rounded-xl px-4 py-3 mb-5 text-xs font-medium">
+              <Info className="w-4 h-4 mt-0.5 shrink-0 text-blue-600 dark:text-blue-400" />
               <span>You&apos;re registering via Google as <strong>{googleEmail}</strong>. Review your details and submit your request.</span>
             </div>
           )}
 
           {/* Error Banner */}
           {error && (
-            <div className="flex items-start gap-2.5 bg-gray-50 border border-black/[0.08] text-rose-700 rounded-xl px-4 py-3 mb-5 text-xs font-medium">
-              <AlertCircle className="w-4 h-4 mt-0.5 shrink-0 text-rose-600" />
+            <div className="flex items-start gap-2.5 bg-gray-50 dark:bg-zinc-850 border border-black/[0.08] dark:border-zinc-700/80 text-rose-700 dark:text-rose-400 rounded-xl px-4 py-3 mb-5 text-xs font-medium">
+              <AlertCircle className="w-4 h-4 mt-0.5 shrink-0 text-rose-600 dark:text-rose-400" />
               <span>{error}</span>
             </div>
           )}
@@ -254,18 +254,18 @@ function RegisterForm() {
                 type="button"
                 onClick={handleGoogleRegister}
                 disabled={isGoogleLoading || isLoading}
-                className="w-full h-11 flex items-center justify-center gap-3 px-4 border border-black/[0.08] rounded-xl text-xs font-semibold text-gray-800 bg-white hover:bg-gray-50 active:bg-gray-100 transition-all disabled:opacity-50 mb-5 cursor-pointer shadow-2xs"
+                className="w-full h-11 flex items-center justify-center gap-3 px-4 border border-black/[0.08] dark:border-zinc-700 rounded-xl text-xs font-semibold text-gray-800 dark:text-zinc-200 bg-white dark:bg-zinc-800 hover:bg-gray-50 dark:hover:bg-zinc-700 active:bg-gray-100 dark:active:bg-zinc-600 transition-all disabled:opacity-50 mb-5 cursor-pointer shadow-2xs"
               >
                 {isGoogleLoading ? (
-                  <div className="w-5 h-5 border-2 border-gray-300 border-t-gray-600 rounded-full animate-spin" />
+                  <div className="w-5 h-5 border-2 border-gray-300 dark:border-zinc-600 border-t-gray-600 dark:border-t-zinc-200 rounded-full animate-spin" />
                 ) : <GoogleIcon />}
                 <span>{isGoogleLoading ? 'Redirecting...' : 'Register for FinLITE with Google'}</span>
               </button>
 
               <div className="flex items-center gap-3 mb-5">
-                <div className="flex-1 h-px bg-gray-100" />
-                <span className="text-xs text-gray-400 font-medium">or fill in the form</span>
-                <div className="flex-1 h-px bg-gray-100" />
+                <div className="flex-1 h-px bg-gray-100 dark:bg-zinc-800" />
+                <span className="text-xs text-gray-400 dark:text-zinc-500 font-medium">or fill in the form</span>
+                <div className="flex-1 h-px bg-gray-100 dark:bg-zinc-800" />
               </div>
             </>
           )}
@@ -276,32 +276,32 @@ function RegisterForm() {
             {/* First Name + Last Name */}
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="block text-xs font-semibold text-gray-700 mb-1.5">First Name <span className="text-red-500">*</span></label>
+                <label className="block text-xs font-semibold text-gray-700 dark:text-zinc-300 mb-1.5">First Name <span className="text-red-500">*</span></label>
                 <input
                   type="text"
                   value={form.firstName}
                   onChange={set('firstName')}
                   placeholder="Juan"
                   required
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all"
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 dark:border-zinc-700 bg-white dark:bg-zinc-800/80 text-sm text-gray-900 dark:text-zinc-100 placeholder-gray-400 dark:placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all"
                 />
               </div>
               <div>
-                <label className="block text-xs font-semibold text-gray-700 mb-1.5">Last Name <span className="text-red-500">*</span></label>
+                <label className="block text-xs font-semibold text-gray-700 dark:text-zinc-300 mb-1.5">Last Name <span className="text-red-500">*</span></label>
                 <input
                   type="text"
                   value={form.lastName}
                   onChange={set('lastName')}
                   placeholder="dela Cruz"
                   required
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all"
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 dark:border-zinc-700 bg-white dark:bg-zinc-800/80 text-sm text-gray-900 dark:text-zinc-100 placeholder-gray-400 dark:placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all"
                 />
               </div>
             </div>
 
             {/* Gmail */}
             <div>
-              <label className="block text-xs font-semibold text-gray-700 mb-1.5">Gmail Address <span className="text-red-500">*</span></label>
+              <label className="block text-xs font-semibold text-gray-700 dark:text-zinc-300 mb-1.5">Gmail Address <span className="text-red-500">*</span></label>
               <input
                 type="text"
                 value={form.email}
@@ -313,41 +313,41 @@ function RegisterForm() {
                 placeholder="yourname@gmail.com"
                 required
                 readOnly={isGoogleFlow}
-                className={`w-full px-3.5 py-2.5 rounded-xl border text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 transition-all ${
+                className={`w-full px-3.5 py-2.5 rounded-xl border text-sm text-gray-900 dark:text-zinc-100 placeholder-gray-400 dark:placeholder-zinc-500 focus:outline-none focus:ring-2 transition-all ${
                   isGoogleFlow
-                    ? 'bg-gray-50 border-gray-100 text-gray-500 cursor-not-allowed'
+                    ? 'bg-gray-50 dark:bg-zinc-850 border-gray-100 dark:border-zinc-800 text-gray-500 dark:text-zinc-400 cursor-not-allowed'
                     : emailValidationError
-                    ? 'border-red-300 bg-red-50/20 focus:ring-red-400'
+                    ? 'border-red-300 dark:border-rose-800 bg-red-50/20 dark:bg-rose-950/20 focus:ring-red-400'
                     : emailTouched && form.email
-                    ? 'border-emerald-300 focus:ring-emerald-500'
-                    : 'border-gray-200 focus:ring-emerald-500 focus:border-transparent'
+                    ? 'border-emerald-300 dark:border-emerald-700 bg-white dark:bg-zinc-800/80 focus:ring-emerald-500'
+                    : 'border-gray-200 dark:border-zinc-700 bg-white dark:bg-zinc-800/80 focus:ring-emerald-500 focus:border-transparent'
                 }`}
               />
               {!isGoogleFlow && emailValidationError && (
-                <div className="flex items-start gap-1.5 text-xs text-red-600 mt-1.5 font-medium">
+                <div className="flex items-start gap-1.5 text-xs text-red-600 dark:text-rose-400 mt-1.5 font-medium">
                   <AlertCircle className="w-3.5 h-3.5 mt-0.5 shrink-0" />
                   <span>{emailValidationError}</span>
                 </div>
               )}
               {!isGoogleFlow && !emailValidationError && emailTouched && form.email && (
-                <div className="flex items-center gap-1.5 text-xs text-emerald-600 mt-1.5 font-medium">
+                <div className="flex items-center gap-1.5 text-xs text-emerald-600 dark:text-emerald-400 mt-1.5 font-medium">
                   <CheckCircle2 className="w-3.5 h-3.5 shrink-0" />
                   <span>Valid Gmail address</span>
                 </div>
               )}
               {!isGoogleFlow && !emailTouched && (
-                <p className="text-[11px] text-gray-400 mt-1">Only active @gmail.com addresses are accepted</p>
+                <p className="text-[11px] text-gray-400 dark:text-zinc-500 mt-1">Only active @gmail.com addresses are accepted</p>
               )}
             </div>
 
             {/* Contact Number */}
             <div>
               <div className="flex items-center justify-between mb-1.5">
-                <label className="text-xs font-semibold text-gray-700">
-                  Contact Number <span className="text-gray-400 font-normal">(optional, 11 digits)</span>
+                <label className="text-xs font-semibold text-gray-700 dark:text-zinc-300">
+                  Contact Number <span className="text-gray-400 dark:text-zinc-500 font-normal">(optional, 11 digits)</span>
                 </label>
                 {form.contactNumber && (
-                  <span className={`text-[11px] font-medium ${form.contactNumber.length === 11 ? 'text-emerald-600' : 'text-gray-400'}`}>
+                  <span className={`text-[11px] font-medium ${form.contactNumber.length === 11 ? 'text-emerald-600 dark:text-emerald-400' : 'text-gray-400 dark:text-zinc-500'}`}>
                     {form.contactNumber.length} / 11
                   </span>
                 )}
@@ -369,7 +369,7 @@ function RegisterForm() {
                   // Strictly block typing if already 11 digits
                   if (e.target.value.length >= 11 && e.target.selectionStart === e.target.selectionEnd) {
                     e.preventDefault();
-                  }
+                    }
                 }}
                 onChange={(e) => {
                   // Strictly strip non-digits and cap at exactly 11 digits
@@ -379,28 +379,28 @@ function RegisterForm() {
                 }}
                 onBlur={() => setContactTouched(true)}
                 placeholder="09123456789"
-                className={`w-full px-3.5 py-2.5 rounded-xl border text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 transition-all ${
+                className={`w-full px-3.5 py-2.5 rounded-xl border text-sm text-gray-900 dark:text-zinc-100 placeholder-gray-400 dark:placeholder-zinc-500 focus:outline-none focus:ring-2 transition-all ${
                   contactValidationError
-                    ? 'border-red-300 bg-red-50/20 focus:ring-red-400'
+                    ? 'border-red-300 dark:border-rose-800 bg-red-50/20 dark:bg-rose-950/20 focus:ring-red-400'
                     : contactTouched && form.contactNumber && form.contactNumber.length === 11
-                    ? 'border-emerald-300 focus:ring-emerald-500'
-                    : 'border-gray-200 focus:ring-emerald-500 focus:border-transparent'
+                    ? 'border-emerald-300 dark:border-emerald-700 bg-white dark:bg-zinc-800/80 focus:ring-emerald-500'
+                    : 'border-gray-200 dark:border-zinc-700 bg-white dark:bg-zinc-800/80 focus:ring-emerald-500 focus:border-transparent'
                 }`}
               />
               {contactValidationError && (
-                <div className="flex items-start gap-1.5 text-xs text-red-600 mt-1.5 font-medium">
+                <div className="flex items-start gap-1.5 text-xs text-red-600 dark:text-rose-400 mt-1.5 font-medium">
                   <AlertCircle className="w-3.5 h-3.5 mt-0.5 shrink-0" />
                   <span>{contactValidationError}</span>
                 </div>
               )}
               {!contactValidationError && contactTouched && form.contactNumber && form.contactNumber.length === 11 && (
-                <div className="flex items-center gap-1.5 text-xs text-emerald-600 mt-1.5 font-medium">
+                <div className="flex items-center gap-1.5 text-xs text-emerald-600 dark:text-emerald-400 mt-1.5 font-medium">
                   <CheckCircle2 className="w-3.5 h-3.5 shrink-0" />
                   <span>Valid 11-digit mobile number</span>
                 </div>
               )}
               {!contactValidationError && (!contactTouched || !form.contactNumber) && (
-                <p className="text-[11px] text-gray-400 mt-1">Must be exactly 11 digits (e.g. 09123456789)</p>
+                <p className="text-[11px] text-gray-400 dark:text-zinc-500 mt-1">Must be exactly 11 digits (e.g. 09123456789)</p>
               )}
             </div>
 
@@ -408,7 +408,7 @@ function RegisterForm() {
             {!isGoogleFlow && (
               <>
                 <div>
-                  <label className="block text-xs font-semibold text-gray-700 mb-1.5">Password <span className="text-red-500">*</span></label>
+                  <label className="block text-xs font-semibold text-gray-700 dark:text-zinc-300 mb-1.5">Password <span className="text-red-500">*</span></label>
                   <div className="relative">
                     <input
                       type={showPass ? 'text' : 'password'}
@@ -418,16 +418,16 @@ function RegisterForm() {
                       required
                       minLength={8}
                       autoComplete="new-password"
-                      className="w-full px-3.5 py-2.5 pr-10 rounded-xl border border-gray-200 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all"
+                      className="w-full px-3.5 py-2.5 pr-10 rounded-xl border border-gray-200 dark:border-zinc-700 bg-white dark:bg-zinc-800/80 text-sm text-gray-900 dark:text-zinc-100 placeholder-gray-400 dark:placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all"
                     />
-                    <button type="button" onClick={() => setShowPass(!showPass)} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600" tabIndex={-1}>
+                    <button type="button" onClick={() => setShowPass(!showPass)} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-zinc-200 cursor-pointer" tabIndex={-1}>
                       {showPass ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                     </button>
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-gray-700 mb-1.5">Confirm Password <span className="text-red-500">*</span></label>
+                  <label className="block text-xs font-semibold text-gray-700 dark:text-zinc-300 mb-1.5">Confirm Password <span className="text-red-500">*</span></label>
                   <div className="relative">
                     <input
                       type={showConfirm ? 'text' : 'password'}
@@ -436,32 +436,32 @@ function RegisterForm() {
                       placeholder="Re-enter your password"
                       required
                       autoComplete="new-password"
-                      className={`w-full px-3.5 py-2.5 pr-10 rounded-xl border text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:border-transparent transition-all ${
-                        passwordMismatch ? 'border-red-300 focus:ring-red-400' :
-                        passwordsMatch ? 'border-emerald-300 focus:ring-emerald-500' :
-                        'border-gray-200 focus:ring-emerald-500'
+                      className={`w-full px-3.5 py-2.5 pr-10 rounded-xl border text-sm text-gray-900 dark:text-zinc-100 placeholder-gray-400 dark:placeholder-zinc-500 focus:outline-none focus:ring-2 focus:border-transparent transition-all ${
+                        passwordMismatch ? 'border-red-300 dark:border-rose-800 bg-white dark:bg-zinc-800/80 focus:ring-red-400' :
+                        passwordsMatch ? 'border-emerald-300 dark:border-emerald-700 bg-white dark:bg-zinc-800/80 focus:ring-emerald-500' :
+                        'border-gray-200 dark:border-zinc-700 bg-white dark:bg-zinc-800/80 focus:ring-emerald-500'
                       }`}
                     />
-                    <button type="button" onClick={() => setShowConfirm(!showConfirm)} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600" tabIndex={-1}>
+                    <button type="button" onClick={() => setShowConfirm(!showConfirm)} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-zinc-200 cursor-pointer" tabIndex={-1}>
                       {showConfirm ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                     </button>
                   </div>
-                  {passwordMismatch && <p className="text-[11px] text-red-500 mt-1">Passwords do not match</p>}
-                  {passwordsMatch && <p className="text-[11px] text-emerald-600 mt-1 flex items-center gap-1"><CheckCircle2 className="w-3 h-3" /> Passwords match</p>}
+                  {passwordMismatch && <p className="text-[11px] text-red-500 dark:text-rose-400 mt-1">Passwords do not match</p>}
+                  {passwordsMatch && <p className="text-[11px] text-emerald-600 dark:text-emerald-400 mt-1 flex items-center gap-1"><CheckCircle2 className="w-3 h-3" /> Passwords match</p>}
                 </div>
               </>
             )}
 
             {/* Notice */}
-            <div className="flex items-start gap-2.5 bg-amber-50 border border-amber-100 rounded-xl px-4 py-3 text-xs text-amber-800">
-              <Info className="w-3.5 h-3.5 mt-0.5 shrink-0" />
+            <div className="flex items-start gap-2.5 bg-amber-50 dark:bg-amber-950/30 border border-amber-100 dark:border-amber-900/50 rounded-xl px-4 py-3 text-xs text-amber-800 dark:text-amber-300">
+              <Info className="w-3.5 h-3.5 mt-0.5 shrink-0 text-amber-600 dark:text-amber-400" />
               <span>After submitting, your account will be reviewed by an admin before you can access FinLITE.</span>
             </div>
 
             <button
               type="submit"
               disabled={isLoading || isGoogleLoading}
-              className="w-full flex items-center justify-center gap-2 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-sm font-semibold transition-all shadow-sm disabled:opacity-50"
+              className="w-full flex items-center justify-center gap-2 py-2.5 bg-emerald-600 hover:bg-emerald-700 dark:bg-emerald-600 dark:hover:bg-emerald-500 text-white rounded-xl text-sm font-semibold transition-all shadow-sm disabled:opacity-50 cursor-pointer"
             >
               {isLoading ? (
                 <div className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" />
@@ -472,14 +472,14 @@ function RegisterForm() {
         </div>
 
         {/* Footer Link */}
-        <p className="text-center text-sm text-gray-500 mt-5">
+        <p className="text-center text-sm text-gray-500 dark:text-zinc-400 mt-5">
           Already have an account?{' '}
-          <Link href="/login" className="text-emerald-600 hover:text-emerald-700 font-semibold">
+          <Link href="/login" className="text-emerald-600 hover:text-emerald-700 dark:text-emerald-400 dark:hover:text-emerald-300 font-semibold">
             Sign In
           </Link>
         </p>
 
-        <p className="text-center text-xs text-gray-400 mt-6">
+        <p className="text-center text-xs text-gray-400 dark:text-zinc-600 mt-6">
           Pambayang Dalubhasaan ng Marilao — LITE
         </p>
       </div>

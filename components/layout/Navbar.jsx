@@ -34,7 +34,7 @@ export default function Navbar({
   // Check admin privileges
   const email = userProfile?.email || currentUser?.email || '';
   const isAdmin = currentRole === 'admin' || email.toLowerCase() === 'geronimoandreijohn.pdm@gmail.com';
-  const isOfficer = isAdmin || ['treasurer', 'president', 'auditor', 'adviser'].includes(currentRole);
+  const isOfficer = isAdmin || ['treasurer', 'president', 'vice_president', 'auditor', 'adviser'].includes(currentRole);
 
   const fullName = userProfile?.full_name || currentUser?.user_metadata?.full_name || 'FinLITE Member';
   const avatarUrl = userProfile?.avatar_url || currentUser?.user_metadata?.avatar_url || currentUser?.user_metadata?.picture || null;
@@ -236,7 +236,7 @@ export default function Navbar({
           <div className="relative pl-1" ref={profileMenuRef}>
             <button
               onClick={() => setIsProfileOpen(!isProfileOpen)}
-              className="h-8 flex items-center gap-2 px-2 rounded-lg transition-colors cursor-pointer focus:outline-none focus:ring-1 focus:ring-emerald-500/40 border bg-zinc-100/80 hover:bg-zinc-200/80 dark:bg-zinc-900/60 dark:hover:bg-zinc-900 border-zinc-200 dark:border-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-700 text-zinc-800 dark:text-zinc-100"
+              className="h-8 flex items-center gap-2 px-2 rounded-lg transition-colors cursor-pointer focus:outline-none focus:ring-1 focus:ring-emerald-500/40 border bg-zinc-100/80 hover:bg-zinc-200/80 dark:bg-zinc-900/60 dark:hover:bg-zinc-800 border-zinc-200 dark:border-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-700 text-zinc-800 dark:text-zinc-100"
               title="View Account Profile"
             >
               <UserAvatar
@@ -350,7 +350,7 @@ export default function Navbar({
         <button
           type="button"
           onClick={() => setIsMobileSemesterOpen(!isMobileSemesterOpen)}
-          className="h-8 w-full text-xs font-medium px-2.5 rounded-lg flex items-center justify-between cursor-pointer focus:outline-none focus:ring-1 focus:ring-emerald-500/40 truncate transition-colors border bg-zinc-100/80 hover:bg-zinc-200/80 dark:bg-zinc-900/60 dark:hover:bg-zinc-900 text-zinc-900 dark:text-zinc-200 border-zinc-200 dark:border-zinc-800"
+          className="h-8 w-full text-xs font-medium px-2.5 rounded-lg flex items-center justify-between cursor-pointer focus:outline-none focus:ring-1 focus:ring-emerald-500/40 truncate transition-colors border bg-zinc-100/80 hover:bg-zinc-200/80 dark:bg-zinc-900/60 dark:hover:bg-zinc-800 text-zinc-900 dark:text-zinc-200 border-zinc-200 dark:border-zinc-800"
         >
           <div className="flex items-center gap-2 truncate">
             <Calendar className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 shrink-0" />

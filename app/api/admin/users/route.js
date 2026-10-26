@@ -5,7 +5,8 @@ import { createAdminClient } from '@/lib/supabase/server';
 import { sendAccountStatusChangedEmail } from '@/lib/email/mailer';
 import { ACTION_KEYS, resolveUserPermissions } from '@/lib/auth/permissions';
 
-const VALID_ROLES = ['treasurer', 'auditor', 'president', 'adviser', 'admin'];
+const VALID_ROLES = ['treasurer', 'auditor', 'president', 'vice_president', 'adviser', 'admin'];
+const SINGLE_HOLDER_CUSTODIAN_ROLES = ['treasurer', 'auditor'];
 
 // GET /api/admin/users — list approved members or check ledger dependencies
 export async function GET(req) {
@@ -19,25 +20,34 @@ export async function GET(req) {
     const checkDeps = searchParams.get('checkDeps') === 'true';
     const checkUserId = searchParams.get('userId');
     const supabase = auth.supabase;
+    const adminClient = createAdminClient();
+    const db = adminClient || supabase;
 
     // Check financial ledger dependencies for account removal
     if (checkDeps && checkUserId) {
-      const { count: txCount } = await supabase
-        .from('transactions')
-        .select('id', { count: 'exact', head: true })
-        .eq('logged_by', checkUserId);
+      const [
+        { count: txCount },
+        { count: countedCount },
+        { count: verifiedCount },
+        { count: commentCount },
+        { count: debtCount },
+        { count: advanceCount },
+      ] = await Promise.all([
+        db.from('transactions').select('id', { count: 'exact', head: true }).eq('logged_by', checkUserId),
+        db.from('cash_reconciliations').select('id', { count: 'exact', head: true }).eq('counted_by', checkUserId),
+        db.from('cash_reconciliations').select('id', { count: 'exact', head: true }).eq('verified_by', checkUserId),
+        db.from('transaction_comments').select('id', { count: 'exact', head: true }).eq('user_id', checkUserId),
+        db.from('debts_receivables').select('id', { count: 'exact', head: true }).eq('created_by', checkUserId),
+        db.from('advances_payable').select('id', { count: 'exact', head: true }).eq('created_by', checkUserId),
+      ]);
 
-      const { count: countedCount } = await supabase
-        .from('cash_reconciliations')
-        .select('id', { count: 'exact', head: true })
-        .eq('counted_by', checkUserId);
-
-      const { count: verifiedCount } = await supabase
-        .from('cash_reconciliations')
-        .select('id', { count: 'exact', head: true })
-        .eq('verified_by', checkUserId);
-
-      const totalLedgerOps = (txCount || 0) + (countedCount || 0) + (verifiedCount || 0);
+      const totalLedgerOps =
+        (txCount || 0) +
+        (countedCount || 0) +
+        (verifiedCount || 0) +
+        (commentCount || 0) +
+        (debtCount || 0) +
+        (advanceCount || 0);
 
       return NextResponse.json({
         success: true,
@@ -46,14 +56,14 @@ export async function GET(req) {
         breakdown: {
           transactions: txCount || 0,
           cashReconciliations: (countedCount || 0) + (verifiedCount || 0),
+          comments: commentCount || 0,
+          debts: debtCount || 0,
+          advances: advanceCount || 0,
         },
       });
     }
 
     // List all users with graceful fallback if permissions column does not exist yet (migration 031 pending)
-    const adminClient = createAdminClient();
-    const db = adminClient || supabase;
-
     let { data: users, error } = await db
       .from('profiles')
       .select('id, auth_user_id, full_name, first_name, last_name, email, role, status, contact_number, auth_provider, avatar_url, permissions, created_at, approved_at')
@@ -202,6 +212,69 @@ export async function PATCH(req) {
       });
     }
 
+    // Role Mutual Exclusion & Segregation of Duties Validation (Use Case 2.5.5, p. 27)
+    const effectiveRole = (updates.role || existingUser.role || '').toLowerCase();
+    const effectiveStatus = updates.status || existingUser.status || 'approved';
+    const roleOrStatusChanged =
+      (updates.role && updates.role !== existingUser.role) ||
+      (updates.status && updates.status !== existingUser.status);
+
+    if (
+      roleOrStatusChanged &&
+      effectiveStatus === 'approved' &&
+      SINGLE_HOLDER_CUSTODIAN_ROLES.includes(effectiveRole) &&
+      !body.replaceExisting
+    ) {
+      const { data: existingHolders } = await db
+        .from('profiles')
+        .select('id, email, full_name, role, status')
+        .eq('role', effectiveRole)
+        .eq('status', 'approved')
+        .neq('id', userId);
+
+      if (existingHolders && existingHolders.length > 0) {
+        const holder = existingHolders[0];
+        return NextResponse.json(
+          {
+            error: `Role Mutual Exclusion Conflict: Another active officer (${holder.full_name || holder.email}) already holds the ${effectiveRole.toUpperCase()} role. Please suspend or reassign the existing ${effectiveRole} first.`,
+            code: 'ROLE_MUTUAL_EXCLUSION_CONFLICT',
+            conflictingUser: holder,
+          },
+          { status: 409 }
+        );
+      }
+    }
+
+    if (
+      updates.permissions &&
+      effectiveRole !== 'admin' &&
+      !isTargetSuperAdmin &&
+      !body.allowSegregationOverride
+    ) {
+      if (effectiveRole === 'treasurer' && updates.permissions[ACTION_KEYS.AUDIT_APPROVE] === true) {
+        return NextResponse.json(
+          {
+            error: 'Role Mutual Exclusion Conflict: The Treasurer (financial custodian) cannot simultaneously hold Audit & Approve authority due to segregation of duties.',
+            code: 'SEGREGATION_OF_DUTIES_CONFLICT',
+          },
+          { status: 409 }
+        );
+      }
+      if (
+        effectiveRole === 'auditor' &&
+        (updates.permissions[ACTION_KEYS.RECORD_INFLOW] === true ||
+          updates.permissions[ACTION_KEYS.RECORD_OUTFLOW] === true)
+      ) {
+        return NextResponse.json(
+          {
+            error: 'Role Mutual Exclusion Conflict: The Auditor cannot simultaneously hold Inflow/Outflow custodian recording authority due to segregation of duties.',
+            code: 'SEGREGATION_OF_DUTIES_CONFLICT',
+          },
+          { status: 409 }
+        );
+      }
+    }
+
     // Apply updates
     let { data: updated, error: updateErr } = await db
       .from('profiles')
@@ -343,28 +416,42 @@ export async function DELETE(req) {
     }
 
     // 2. Financial Ledger Dependency Check
-    const { count: txCount } = await supabase
-      .from('transactions')
-      .select('id', { count: 'exact', head: true })
-      .eq('logged_by', userId);
+    const [
+      { count: txCount },
+      { count: countedCount },
+      { count: verifiedCount },
+      { count: commentCount },
+      { count: debtCount },
+      { count: advanceCount },
+    ] = await Promise.all([
+      db.from('transactions').select('id', { count: 'exact', head: true }).eq('logged_by', userId),
+      db.from('cash_reconciliations').select('id', { count: 'exact', head: true }).eq('counted_by', userId),
+      db.from('cash_reconciliations').select('id', { count: 'exact', head: true }).eq('verified_by', userId),
+      db.from('transaction_comments').select('id', { count: 'exact', head: true }).eq('user_id', userId),
+      db.from('debts_receivables').select('id', { count: 'exact', head: true }).eq('created_by', userId),
+      db.from('advances_payable').select('id', { count: 'exact', head: true }).eq('created_by', userId),
+    ]);
 
-    const { count: countedCount } = await supabase
-      .from('cash_reconciliations')
-      .select('id', { count: 'exact', head: true })
-      .eq('counted_by', userId);
-
-    const { count: verifiedCount } = await supabase
-      .from('cash_reconciliations')
-      .select('id', { count: 'exact', head: true })
-      .eq('verified_by', userId);
-
-    const totalLedgerOps = (txCount || 0) + (countedCount || 0) + (verifiedCount || 0);
+    const totalLedgerOps =
+      (txCount || 0) +
+      (countedCount || 0) +
+      (verifiedCount || 0) +
+      (commentCount || 0) +
+      (debtCount || 0) +
+      (advanceCount || 0);
 
     if (totalLedgerOps > 0) {
       return NextResponse.json({
-        error: `Cannot delete account with recorded ledger transactions (${totalLedgerOps} recorded). Suspend the account instead to preserve financial audit history.`,
+        error: `Cannot delete account with recorded ledger transactions, audit comments, debts, or advances (${totalLedgerOps} recorded). Suspend the account instead to preserve financial audit history.`,
         hasTransactions: true,
         transactionCount: totalLedgerOps,
+        breakdown: {
+          transactions: txCount || 0,
+          cashReconciliations: (countedCount || 0) + (verifiedCount || 0),
+          comments: commentCount || 0,
+          debts: debtCount || 0,
+          advances: advanceCount || 0,
+        },
       }, { status: 409 });
     }
 

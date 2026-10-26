@@ -113,6 +113,7 @@ export default function Dashboard() {
   const [isLoading, setIsLoading] = useState(!dashboardCache);
   const [isNewTxOpen, setIsNewTxOpen] = useState(false);
   const [editingTx, setEditingTx] = useState(null);
+  const [viewDetailTx, setViewDetailTx] = useState(null);
   const [auditModalTx, setAuditModalTx] = useState(null);
   const [isDenomOpen, setIsDenomOpen] = useState(false);
   const [isAIOpen, setIsAIOpen] = useState(false);
@@ -188,45 +189,6 @@ export default function Dashboard() {
     };
   }, []);
 
-  // Handle Deep-Links from Audit & Revision Emails (?auditTx=id, ?editTx=id)
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const params = new URLSearchParams(window.location.search);
-      const auditTxId = params.get('auditTx');
-      const editTxId = params.get('editTx');
-
-      if (auditTxId) {
-        const found = transactions.find((t) => t.id === auditTxId);
-        if (found) {
-          setAuditModalTx(found);
-        } else {
-          fetch(`/api/transactions/${auditTxId}`)
-            .then((r) => r.json())
-            .then((d) => {
-              if (d.transaction) setAuditModalTx(d.transaction);
-            })
-            .catch(() => {});
-        }
-      } else if (editTxId) {
-        const found = transactions.find((t) => t.id === editTxId);
-        if (found) {
-          setEditingTx(found);
-          setIsNewTxOpen(true);
-        } else {
-          fetch(`/api/transactions/${editTxId}`)
-            .then((r) => r.json())
-            .then((d) => {
-              if (d.transaction) {
-                setEditingTx(d.transaction);
-                setIsNewTxOpen(true);
-              }
-            })
-            .catch(() => {});
-        }
-      }
-    }
-  }, [transactions]);
-
   const supabase = createClient();
   const isSuperAdmin = isSuperAdminEmail(currentUser?.email || userProfile?.email);
 
@@ -234,11 +196,66 @@ export default function Dashboard() {
     return resolveUserPermissions(userProfile, currentUser?.email);
   }, [userProfile, currentUser]);
 
+  const canEditTransactions =
+    isSuperAdmin || Boolean(userPermissions?.[ACTION_KEYS.EDIT_TRANSACTION]);
+
+  // Handle Deep-Links from Audit & Revision Emails (?auditTx=id, ?editTx=id, ?viewTx=id)
+  // Per Manuscript Page 8: President/VP (or Treasurer with Adviser-granted edit_transaction) open the
+  // amendment modal; Treasurer without edit_transaction is redirected to view the full transaction details
+  // and auditor remarks in read-only mode (strictly locked from editing).
+  useEffect(() => {
+    if (typeof window === 'undefined' || isLoading) return;
+    const params = new URLSearchParams(window.location.search);
+    const auditTxId = params.get('auditTx');
+    const editTxId = params.get('editTx');
+    const viewTxId = params.get('viewTx');
+
+    const openTargetTx = (tx, mode) => {
+      if (!tx) return;
+      if (mode === 'audit') {
+        setAuditModalTx(tx);
+      } else if (mode === 'edit' && canEditTransactions) {
+        setEditingTx(tx);
+        setIsNewTxOpen(true);
+      } else {
+        setViewDetailTx(tx);
+      }
+    };
+
+    if (auditTxId) {
+      const found = transactions.find((t) => t.id === auditTxId);
+      if (found) {
+        openTargetTx(found, 'audit');
+      } else {
+        fetch(`/api/transactions/${auditTxId}`)
+          .then((r) => r.json())
+          .then((d) => {
+            if (d.transaction) openTargetTx(d.transaction, 'audit');
+          })
+          .catch(() => {});
+      }
+    } else if (editTxId || viewTxId) {
+      const targetId = editTxId || viewTxId;
+      const mode = editTxId ? 'edit' : 'view';
+      const found = transactions.find((t) => t.id === targetId);
+      if (found) {
+        openTargetTx(found, mode);
+      } else {
+        fetch(`/api/transactions/${targetId}`)
+          .then((r) => r.json())
+          .then((d) => {
+            if (d.transaction) openTargetTx(d.transaction, mode);
+          })
+          .catch(() => {});
+      }
+    }
+  }, [transactions, isLoading, canEditTransactions]);
+
   const canManageFinancials = isSuperAdmin ||
     Boolean(userPermissions[ACTION_KEYS.RECORD_INFLOW]) ||
     Boolean(userPermissions[ACTION_KEYS.RECORD_OUTFLOW]) ||
     Boolean(userPermissions[ACTION_KEYS.AUDIT_APPROVE]) ||
-    currentRole === 'treasurer' || currentRole === 'president' || currentRole === 'admin';
+    currentRole === 'treasurer' || currentRole === 'president' || currentRole === 'vice_president' || currentRole === 'admin';
 
   // Load user profile, semesters, categories, denominations & transactions from Supabase on mount
   useEffect(() => {
@@ -305,7 +322,7 @@ export default function Dashboard() {
             categories (id, name, type),
             semesters (id, academic_year, semester, label),
             transaction_receipts (id, public_url, sort_order),
-            profiles (id, full_name, role, email, avatar_url)
+            profiles:logged_by (id, full_name, role, email, avatar_url)
           `)
           .order('transaction_date', { ascending: false })
           .order('created_at', { ascending: false });
@@ -750,6 +767,32 @@ export default function Dashboard() {
     });
   }, [advances, currentSemester?.id, currentSemester?.academicYear, currentSemester?.semester]);
 
+  // 7-Day Post-Activity Abono Liquidation Window Alerts (Section 2.4.1 / Use Case 2.5.2)
+  const liquidationWindowAlerts = useMemo(() => {
+    const now = new Date();
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const overdue = [];
+    const expiringSoon = [];
+
+    activeAdvances.forEach((adv) => {
+      const rem = Math.max(0, Number(adv.total_amount || 0) - Number(adv.amount_reimbursed || 0));
+      if (adv.status === 'SETTLED' || adv.status === 'CANCELLED' || rem <= 0) return;
+      const dateStr = adv.advance_date || adv.created_at?.slice(0, 10);
+      if (!dateStr) return;
+      const start = new Date(`${dateStr}T00:00:00`);
+      if (Number.isNaN(start.getTime())) return;
+      const diffDays = Math.floor((today.getTime() - start.getTime()) / (1000 * 60 * 60 * 24));
+      const daysLeft = 7 - diffDays;
+      if (daysLeft < 0) {
+        overdue.push({ ...adv, daysLeft });
+      } else if (daysLeft <= 2) {
+        expiringSoon.push({ ...adv, daysLeft });
+      }
+    });
+
+    return { overdue, expiringSoon };
+  }, [activeAdvances]);
+
   // Recalculate summary totals atomically with precision centavo math
   const calculateSummary = (txs, debtsList = [], advancesList = []) => {
     let inflows_c = 0;
@@ -831,11 +874,25 @@ export default function Dashboard() {
   // Manual entry from the New Transaction form: enforce ₱99,999.99 cap and cashbox balance check.
   const handleManualSaveTransaction = async (newTx) => {
     if (validateTransactionAmount(newTx.amount)) return;
+    let effectiveCash = Number(summary.cash_on_hand) || 0;
+    if (newTx.id) {
+      const existingTx = transactions.find((t) => t.id === newTx.id);
+      if (existingTx) {
+        const prevAmt = Number(existingTx.amount) || 0;
+        if (existingTx.type === 'OUTFLOW') {
+          const wasPendingAbono =
+            existingTx.is_reimbursement && existingTx.status === 'PENDING_REIMBURSEMENT';
+          if (!wasPendingAbono) effectiveCash += prevAmt;
+        } else if (existingTx.type === 'INFLOW') {
+          effectiveCash = Math.max(0, effectiveCash - prevAmt);
+        }
+      }
+    }
     if (validateOutflowBalance({
       type: newTx.type,
       isReimbursement: newTx.is_reimbursement,
       amount: newTx.amount,
-      cashBalance: summary.cash_on_hand,
+      cashBalance: effectiveCash,
     })) return;
     return handleSaveTransaction(newTx);
   };
@@ -1242,7 +1299,7 @@ export default function Dashboard() {
 
   // Handler for settling an out-of-pocket advance (abono)
   const handleSettleReimbursement = async (transactionId, { amount = null } = {}) => {
-    const isAuthorized = currentRole === 'admin' || currentRole === 'treasurer' || currentRole === 'president' || currentRole === 'adviser';
+    const isAuthorized = currentRole === 'admin' || currentRole === 'treasurer' || currentRole === 'president' || currentRole === 'vice_president' || currentRole === 'adviser';
     if (!isAuthorized) {
       return { success: false, error: 'Unauthorized. Only club officers and advisers can settle abono advances.' };
     }
@@ -1486,7 +1543,7 @@ export default function Dashboard() {
   // Handler for disbursing partial or full reimbursement payouts directly from AdvancesManagementModal
   const handleRecordAdvanceDisbursement = async (advanceId, { amount, notes = '' }) => {
     try {
-      const isAuthorized = currentRole === 'admin' || currentRole === 'treasurer' || currentRole === 'president' || currentRole === 'adviser';
+      const isAuthorized = currentRole === 'admin' || currentRole === 'treasurer' || currentRole === 'president' || currentRole === 'vice_president' || currentRole === 'adviser';
       if (!isAuthorized) {
         return { error: 'Unauthorized. Only club officers and advisers can disburse reimbursements.' };
       }
@@ -1794,7 +1851,7 @@ export default function Dashboard() {
   // Handler for collecting payments on uncollected member debts and pre-orders
   const handleRecordDebtPayment = async (debtId, { amount, tendered, notes = '' }) => {
     try {
-      const isAuthorized = currentRole === 'admin' || currentRole === 'treasurer' || currentRole === 'president' || currentRole === 'adviser';
+      const isAuthorized = currentRole === 'admin' || currentRole === 'treasurer' || currentRole === 'president' || currentRole === 'vice_president' || currentRole === 'adviser';
       if (!isAuthorized) {
         return { error: 'Unauthorized. Only club officers and advisers can collect debt payments.' };
       }
@@ -2358,6 +2415,47 @@ export default function Dashboard() {
             </div>
           </div>
 
+          {/* 7-Day Post-Activity Abono Liquidation Reminder Banner */}
+          {(liquidationWindowAlerts.overdue.length > 0 || liquidationWindowAlerts.expiringSoon.length > 0) && (
+            <div className={`p-3.5 rounded-xl border flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs ${
+              liquidationWindowAlerts.overdue.length > 0
+                ? 'bg-rose-500/10 border-rose-500/30 text-rose-800 dark:text-rose-200'
+                : 'bg-amber-500/10 border-amber-500/30 text-amber-800 dark:text-amber-200'
+            }`}>
+              <div className="space-y-0.5">
+                <p className="font-bold flex items-center gap-1.5">
+                  <span>7-Day Abono Liquidation Window Alert</span>
+                  {liquidationWindowAlerts.overdue.length > 0 && (
+                    <Badge variant="rose" size="xs">{liquidationWindowAlerts.overdue.length} Overdue</Badge>
+                  )}
+                  {liquidationWindowAlerts.expiringSoon.length > 0 && (
+                    <Badge variant="amber" size="xs">{liquidationWindowAlerts.expiringSoon.length} Expiring Soon</Badge>
+                  )}
+                </p>
+                <p className="text-[11px] opacity-90">
+                  {liquidationWindowAlerts.overdue.length > 0 && (
+                    <span>
+                      {liquidationWindowAlerts.overdue.length} advance claim{liquidationWindowAlerts.overdue.length > 1 ? 's have' : ' has'} passed the 7-day liquidation window.{' '}
+                    </span>
+                  )}
+                  {liquidationWindowAlerts.expiringSoon.length > 0 && (
+                    <span>
+                      {liquidationWindowAlerts.expiringSoon.length} advance claim{liquidationWindowAlerts.expiringSoon.length > 1 ? 's are' : ' is'} expiring within 2 days.
+                    </span>
+                  )}
+                </p>
+              </div>
+              <Button
+                variant="secondary"
+                size="sm"
+                onClick={() => setIsAdvancesOpen(true)}
+                className="shrink-0 self-start sm:self-center"
+              >
+                Review Claims
+              </Button>
+            </div>
+          )}
+
           {/* KPI Metric Cards (6 Preserved Account Containers) */}
           <ModuleErrorBoundary moduleName="Financial Overview">
             <StatCards
@@ -2389,8 +2487,14 @@ export default function Dashboard() {
                 currentRole={currentRole}
                 isDbConnected={isDbConnected}
                 userPermissions={userPermissions}
+                externalSelectedTx={viewDetailTx}
+                onClearExternalSelectedTx={() => setViewDetailTx(null)}
                 onAuditTransaction={(tx) => setAuditModalTx(tx)}
                 onEditTransaction={(tx) => {
+                  if (!canEditTransactions) {
+                    setViewDetailTx(tx);
+                    return;
+                  }
                   setEditingTx(tx);
                   setIsNewTxOpen(true);
                 }}

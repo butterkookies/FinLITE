@@ -108,6 +108,7 @@ export default function ProfilePage() {
     treasurer: 'LITE Treasurer',
     auditor: 'LITE Auditor',
     president: 'LITE President',
+    vice_president: 'LITE Vice President',
     adviser: 'LITE Club Adviser',
     member: 'General Officer / Member',
   };

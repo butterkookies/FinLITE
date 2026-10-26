@@ -86,14 +86,19 @@ export default function DebtsManagementModal({
       return;
     }
 
+    if (amountVal > remaining) {
+      setPaymentError(
+        `Installment amount exceeds remaining debt balance of ${formatPHP(remaining)}. Excess contributions must be logged as a separate Inflow.`
+      );
+      return;
+    }
+
     setIsSubmittingPayment(true);
     setPaymentError('');
 
     try {
-      // If user paid more than remaining, we cap the logged debt settlement at remaining
-      const effectivePayment = Math.min(amountVal, remaining);
       const res = await onRecordPayment(selectedDebtForPayment.id, {
-        amount: effectivePayment,
+        amount: amountVal,
         tendered: amountVal,
         notes: paymentNotes,
       });
@@ -201,8 +206,8 @@ export default function DebtsManagementModal({
                 onClick={() => setActiveTab(tab.id)}
                 className={`px-3 py-1 text-xs font-semibold rounded-lg transition-colors cursor-pointer select-none ${
                   activeTab === tab.id
-                    ? 'bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900'
-                    : 'text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800'
+                    ? 'bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900 shadow-xs'
+                    : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-800'
                 }`}
               >
                 {tab.label}
@@ -348,7 +353,7 @@ export default function DebtsManagementModal({
             {(() => {
               const remaining = Math.max(0, Number(selectedDebtForPayment.total_amount || 0) - Number(selectedDebtForPayment.amount_paid || 0));
               const entered = parseFloat(paymentAmount) || 0;
-              const sukli = entered > remaining ? entered - remaining : 0;
+              const isOverpaid = entered > remaining;
 
               return (
                 <div className="space-y-3">
@@ -359,20 +364,24 @@ export default function DebtsManagementModal({
                         {formatPHP(remaining)}
                       </p>
                     </div>
-                    {sukli > 0 && (
-                      <div className="text-right">
-                        <p className="text-[11px] text-emerald-600 dark:text-emerald-400 font-bold">Change to Return (Sukli)</p>
-                        <p className="text-lg font-extrabold tabular-nums text-emerald-600 dark:text-emerald-400">
-                          {formatPHP(sukli)}
+                  </div>
+
+                  {isOverpaid && (
+                    <div className="p-3 rounded-xl border border-amber-500/40 bg-amber-500/10 text-amber-800 dark:text-amber-200 flex items-start gap-2.5 text-xs">
+                      <AlertCircle className="w-4 h-4 shrink-0 mt-0.5 text-amber-600 dark:text-amber-400" />
+                      <div>
+                        <p className="font-bold">Overpayment Blocked</p>
+                        <p className="text-[11px] mt-0.5">
+                          Installment amount exceeds remaining debt balance of {formatPHP(remaining)}. Excess contributions must be logged as a separate Inflow.
                         </p>
                       </div>
-                    )}
-                  </div>
+                    </div>
+                  )}
 
                   {/* Input: Amount Received */}
                   <div>
                     <label className="block text-xs font-semibold mb-1 text-zinc-700 dark:text-zinc-300">
-                      Amount Tendered / Received (₱)
+                      Installment Amount Received (₱)
                     </label>
                     <Input
                       type="text"
@@ -392,14 +401,14 @@ export default function DebtsManagementModal({
                       <button
                         type="button"
                         onClick={() => setPaymentAmount(remaining.toString())}
-                        className="text-[11px] px-2 py-0.5 rounded bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-200 cursor-pointer font-medium"
+                        className="text-[11px] px-2 py-0.5 rounded border border-zinc-200 dark:border-zinc-700 bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-200 hover:bg-zinc-200 dark:hover:bg-zinc-700 dark:hover:text-zinc-100 cursor-pointer font-medium transition-colors"
                       >
                         Full (100%)
                       </button>
                       <button
                         type="button"
                         onClick={() => setPaymentAmount((remaining / 2).toFixed(2))}
-                        className="text-[11px] px-2 py-0.5 rounded bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-200 cursor-pointer font-medium"
+                        className="text-[11px] px-2 py-0.5 rounded border border-zinc-200 dark:border-zinc-700 bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-200 hover:bg-zinc-200 dark:hover:bg-zinc-700 dark:hover:text-zinc-100 cursor-pointer font-medium transition-colors"
                       >
                         50% (₱{(remaining / 2).toFixed(2)})
                       </button>
@@ -444,6 +453,7 @@ export default function DebtsManagementModal({
                       variant="primary"
                       size="sm"
                       isLoading={isSubmittingPayment}
+                      disabled={isSubmittingPayment || isOverpaid}
                     >
                       Record Inflow &amp; Settle
                     </Button>

@@ -38,6 +38,7 @@ function LoginForm() {
     errorParam === 'account_conflict' ? 'This Gmail is already tied to a different sign-in. Please contact your adviser or admin.' :
     errorParam === 'account_rejected' ? 'Your registration request was not approved. Please contact the admin.' :
     errorParam === 'account_suspended' ? 'Your account has been suspended by an administrator. Please contact your adviser or admin.' :
+    errorParam === 'idle_timeout' ? 'Your session expired after 15 minutes of inactivity. Please sign in again.' :
     errorParam === 'server_error' ? 'A server error occurred. Please try again.' : ''
   );
 

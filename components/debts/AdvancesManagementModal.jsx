@@ -21,6 +21,18 @@ import { formatPHP } from '@/lib/utils/currency';
 import { sanitizeAmountInput } from '@/lib/utils/validation';
 import { Modal, Button, Badge, Input } from '@/components/ui';
 
+export function getLiquidationWindowInfo(adv) {
+  const dateStr = adv?.advance_date || adv?.created_at?.slice(0, 10);
+  if (!dateStr) return null;
+  const start = new Date(`${dateStr}T00:00:00`);
+  if (Number.isNaN(start.getTime())) return null;
+  const now = new Date();
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const diffDays = Math.floor((today.getTime() - start.getTime()) / (1000 * 60 * 60 * 24));
+  const daysLeft = 7 - diffDays;
+  return { diffDays, daysLeft };
+}
+
 export default function AdvancesManagementModal({
   isOpen,
   onClose,
@@ -58,6 +70,20 @@ export default function AdvancesManagementModal({
   const totalAdvances = advances.reduce((sum, a) => sum + Number(a.total_amount || 0), 0);
   const totalReimbursed = advances.reduce((sum, a) => sum + Number(a.amount_reimbursed || 0), 0);
   const totalRemaining = Math.max(0, totalAdvances - totalReimbursed);
+
+  // 7-Day Liquidation Window alerts for unsettled advances
+  const unsettledWithWindow = advances
+    .filter((a) => {
+      const rem = Math.max(0, Number(a.total_amount || 0) - Number(a.amount_reimbursed || 0));
+      return a.status !== 'SETTLED' && a.status !== 'CANCELLED' && rem > 0;
+    })
+    .map((a) => ({ adv: a, windowInfo: getLiquidationWindowInfo(a) }))
+    .filter((item) => item.windowInfo !== null);
+
+  const overdueAdvances = unsettledWithWindow.filter((item) => item.windowInfo.daysLeft < 0);
+  const expiringSoonAdvances = unsettledWithWindow.filter(
+    (item) => item.windowInfo.daysLeft >= 0 && item.windowInfo.daysLeft <= 2
+  );
 
   // Filter advances
   const filteredAdvances = advances.filter((a) => {
@@ -206,6 +232,35 @@ export default function AdvancesManagementModal({
           </div>
         </div>
 
+        {/* 7-Day Liquidation Window Alert Banner */}
+        {(overdueAdvances.length > 0 || expiringSoonAdvances.length > 0) && (
+          <div className={`p-3 rounded-xl border flex items-start gap-2.5 text-xs ${
+            overdueAdvances.length > 0
+              ? 'bg-rose-500/10 border-rose-500/30 text-rose-800 dark:text-rose-200'
+              : 'bg-amber-500/10 border-amber-500/30 text-amber-800 dark:text-amber-200'
+          }`}>
+            <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
+            <div className="space-y-0.5">
+              <p className="font-bold">
+                7-Day Post-Activity Liquidation Reminder
+              </p>
+              <p className="text-[11px] opacity-90">
+                {overdueAdvances.length > 0 && (
+                  <span>
+                    <strong>{overdueAdvances.length}</strong> unsettled claim{overdueAdvances.length > 1 ? 's' : ''} exceeded the 7-day liquidation window.{' '}
+                  </span>
+                )}
+                {expiringSoonAdvances.length > 0 && (
+                  <span>
+                    <strong>{expiringSoonAdvances.length}</strong> unsettled claim{expiringSoonAdvances.length > 1 ? 's are' : ' is'} expiring soon (≤ 2 days left).
+                  </span>
+                )}{' '}
+                Please verify attached physical receipts and complete liquidation promptly.
+              </p>
+            </div>
+          </div>
+        )}
+
         {/* Action Header & Tabs */}
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5">
           {/* Filter Pills */}
@@ -222,8 +277,8 @@ export default function AdvancesManagementModal({
                 onClick={() => setActiveTab(tab.id)}
                 className={`px-3 py-1 text-xs font-semibold rounded-lg transition-colors cursor-pointer select-none ${
                   activeTab === tab.id
-                    ? 'bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900'
-                    : 'text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800'
+                    ? 'bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900 shadow-xs'
+                    : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-800'
                 }`}
               >
                 {tab.label}
@@ -274,6 +329,7 @@ export default function AdvancesManagementModal({
               const isSettled = adv.status === 'SETTLED' || remaining === 0;
               const isExpanded = expandedAdvanceId === adv.id;
               const disbursements = adv.advance_disbursements || [];
+              const windowInfo = !isSettled && adv.status !== 'CANCELLED' ? getLiquidationWindowInfo(adv) : null;
 
               return (
                 <div
@@ -295,6 +351,25 @@ export default function AdvancesManagementModal({
                           <Badge variant="amber" size="xs">{pct}% Reimbursed</Badge>
                         ) : (
                           <Badge variant="rose" size="xs">Pending Claim</Badge>
+                        )}
+                        {windowInfo && (
+                          windowInfo.daysLeft < 0 ? (
+                            <Badge variant="rose" size="xs">
+                              Overdue by {Math.abs(windowInfo.daysLeft)}d
+                            </Badge>
+                          ) : windowInfo.daysLeft === 0 ? (
+                            <Badge variant="amber" size="xs">
+                              Expiring Today (7d window)
+                            </Badge>
+                          ) : windowInfo.daysLeft <= 2 ? (
+                            <Badge variant="amber" size="xs">
+                              Expiring Soon ({windowInfo.daysLeft}d left to liquidate)
+                            </Badge>
+                          ) : (
+                            <Badge variant="blue" size="xs">
+                              {windowInfo.daysLeft}d left to liquidate
+                            </Badge>
+                          )
                         )}
                         <span className="text-[10px] text-zinc-400 flex items-center gap-1">
                           <Calendar className="w-3 h-3" /> {adv.advance_date || adv.created_at?.slice(0, 10)}
@@ -351,7 +426,7 @@ export default function AdvancesManagementModal({
                       <button
                         type="button"
                         onClick={() => setExpandedAdvanceId(isExpanded ? null : adv.id)}
-                        className="text-[11px] font-medium text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-200 flex items-center gap-1 cursor-pointer transition-colors"
+                        className="text-[11px] font-medium text-zinc-500 dark:text-zinc-400 hover:text-zinc-800 dark:hover:text-zinc-200 flex items-center gap-1 cursor-pointer transition-colors"
                       >
                         {isExpanded ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
                         <span>{disbursements.length} disbursement {disbursements.length === 1 ? 'record' : 'records'}</span>

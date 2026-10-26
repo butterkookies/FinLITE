@@ -112,7 +112,8 @@ export default function TransactionCommentsDrawer({
       case 'admin': return 'rose';
       case 'treasurer': return 'emerald';
       case 'auditor': return 'amber';
-      case 'president': return 'sky';
+      case 'president':
+      case 'vice_president': return 'sky';
       default: return 'neutral';
     }
   };

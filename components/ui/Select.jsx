@@ -65,9 +65,9 @@ export default function Select({
         onClick={() => setIsOpen((prev) => !prev)}
         className={cn(
           'w-full flex items-center justify-between gap-2 text-left font-medium transition-all select-none cursor-pointer',
-          'bg-zinc-100/75 dark:bg-zinc-850/80 text-zinc-900 dark:text-zinc-100',
-          'ring-1 ring-black/[0.04] dark:ring-white/[0.06]',
-          'hover:bg-zinc-200/60 dark:hover:bg-zinc-800',
+          'bg-zinc-100/75 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100',
+          'ring-1 ring-black/[0.04] dark:ring-white/[0.08]',
+          'hover:bg-zinc-200/60 dark:hover:bg-zinc-700',
           'focus:outline-none focus:ring-2 focus:ring-emerald-500/50 dark:focus:ring-emerald-400/50',
           'disabled:opacity-50 disabled:cursor-not-allowed disabled:pointer-events-none',
           triggerSize,

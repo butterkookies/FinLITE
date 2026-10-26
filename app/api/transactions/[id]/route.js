@@ -30,7 +30,7 @@ export async function GET(req, { params }) {
         categories (id, name, type),
         semesters (id, academic_year, semester, label),
         transaction_receipts (id, public_url, sort_order),
-        profiles (id, full_name, role, email, avatar_url)
+        profiles:logged_by (id, full_name, role, email, avatar_url)
       `)
       .eq('id', transactionId)
       .maybeSingle();
@@ -78,15 +78,7 @@ export async function PATCH(req, { params }) {
 
     const callerProfile = await fetchProfileWithPermissions(db, { userId: user.id, email });
 
-    const canEdit = isSuperAdmin || hasPermission(callerProfile, ACTION_KEYS.EDIT_TRANSACTION, email);
-    if (!canEdit) {
-      return NextResponse.json(
-        { error: 'Forbidden: You do not have permission to edit transactions.' },
-        { status: 403 }
-      );
-    }
-
-    // Fetch existing transaction
+    // Fetch existing transaction first so we can evaluate FLAGGED revision & receipt-attachment rules
     const { data: existingTx, error: fetchErr } = await db
       .from('transactions')
       .select('*')
@@ -112,6 +104,41 @@ export async function PATCH(req, { params }) {
       event_name,
       receipt_urls,
     } = body;
+
+    const canEdit = isSuperAdmin || hasPermission(callerProfile, ACTION_KEYS.EDIT_TRANSACTION, email);
+    const canRecord =
+      isSuperAdmin ||
+      hasPermission(callerProfile, ACTION_KEYS.RECORD_INFLOW, email) ||
+      hasPermission(callerProfile, ACTION_KEYS.RECORD_OUTFLOW, email) ||
+      hasPermission(callerProfile, ACTION_KEYS.RECORD_ABONO, email);
+
+    // Patch 3 (Manuscript Page 8): Full transaction editing—including revising FLAGGED transactions—
+    // strictly requires edit_transaction (canEdit: President, Vice President, or Adviser-granted override).
+    // Post-entry receipt photo attachment (receipt_urls only, without altering ledger fields) remains allowed for recorders.
+    const isReceiptOnlyUpdate =
+      Array.isArray(receipt_urls) &&
+      title === undefined &&
+      description === undefined &&
+      amount === undefined &&
+      type === undefined &&
+      category_id === undefined &&
+      semester_id === undefined &&
+      transaction_date === undefined &&
+      is_reimbursement === undefined &&
+      reimbursement_recipient === undefined &&
+      advanced_by_name === undefined &&
+      event_name === undefined &&
+      (canRecord || existingTx.logged_by === callerProfile?.id);
+
+    if (!canEdit && !isReceiptOnlyUpdate) {
+      return NextResponse.json(
+        {
+          error:
+            'Forbidden: Editing is locked for your role. Only the President, Vice President, or an officer explicitly granted edit permission by the Club Adviser can edit or revise transactions.',
+        },
+        { status: 403 }
+      );
+    }
 
     const updates = {
       updated_at: new Date().toISOString(),
@@ -141,6 +168,64 @@ export async function PATCH(req, { params }) {
       updates.status = 'PENDING_AUDIT';
     }
 
+    // CASHBOX SOLVENCY GUARD (Patch 7): When editing an OUTFLOW (or changing an INFLOW to an OUTFLOW),
+    // verify that the new outflow amount does not exceed available physical cash on hand.
+    const nextType = updates.type !== undefined ? updates.type : existingTx.type;
+    const nextAmount = updates.amount !== undefined ? updates.amount : Number(existingTx.amount || 0);
+    const nextIsReimbursement =
+      updates.is_reimbursement !== undefined ? updates.is_reimbursement : Boolean(existingTx.is_reimbursement);
+    const nextSemesterId = updates.semester_id !== undefined ? updates.semester_id : existingTx.semester_id;
+
+    if (nextType === 'OUTFLOW' && !nextIsReimbursement && nextSemesterId) {
+      let availableCash = null;
+      try {
+        const { data: rpcCash, error: rpcErr } = await db.rpc('get_available_cash_on_hand', {
+          p_semester_id: nextSemesterId,
+        });
+        if (!rpcErr && rpcCash !== null && rpcCash !== undefined) {
+          availableCash = Number(rpcCash);
+        }
+      } catch (_) {}
+
+      if (availableCash === null) {
+        const { data: txs } = await db
+          .from('transactions')
+          .select('id, amount, type')
+          .eq('semester_id', nextSemesterId)
+          .eq('status', 'COMPLETED');
+        if (txs) {
+          let inf = 0;
+          let outf = 0;
+          txs.forEach((t) => {
+            if (t.type === 'INFLOW') inf += Number(t.amount || 0);
+            if (t.type === 'OUTFLOW') outf += Number(t.amount || 0);
+          });
+          availableCash = inf - outf;
+        }
+      }
+
+      if (availableCash !== null) {
+        // Adjust availableCash for existingTx's prior contribution if it was already COMPLETED in the same semester
+        if (existingTx.semester_id === nextSemesterId && existingTx.status === 'COMPLETED') {
+          const prevAmt = Number(existingTx.amount || 0);
+          if (existingTx.type === 'OUTFLOW') {
+            availableCash += prevAmt;
+          } else if (existingTx.type === 'INFLOW') {
+            availableCash -= prevAmt;
+          }
+        }
+
+        if (nextAmount > availableCash) {
+          return NextResponse.json(
+            {
+              error: `Insufficient physical cashbox balance. Available: ₱${availableCash.toLocaleString('en-PH', { minimumFractionDigits: 2 })}, Requested: ₱${nextAmount.toLocaleString('en-PH', { minimumFractionDigits: 2 })}. Cash outflows cannot exceed cash on hand.`,
+            },
+            { status: 400 }
+          );
+        }
+      }
+    }
+
     const { data: updatedTx, error: updateErr } = await db
       .from('transactions')
       .update(updates)
@@ -150,7 +235,7 @@ export async function PATCH(req, { params }) {
         categories (id, name, type),
         semesters (id, academic_year, semester, label),
         transaction_receipts (id, public_url, sort_order),
-        profiles (id, full_name, role, email, avatar_url)
+        profiles:logged_by (id, full_name, role, email, avatar_url)
       `)
       .single();
 

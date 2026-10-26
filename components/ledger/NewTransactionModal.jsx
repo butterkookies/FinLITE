@@ -58,8 +58,26 @@ export default function NewTransactionModal({
   const [previewUrls, setPreviewUrls] = useState([]);
   const [compressing, setCompressing] = useState(false);
   const [croppingIndex, setCroppingIndex] = useState(null);
+  const [auditorRemarks, setAuditorRemarks] = useState([]);
+  const [loadingAuditorRemarks, setLoadingAuditorRemarks] = useState(false);
 
   // Amount validation: format/limit first, then physical cashbox balance check
+  // When editing an existing transaction, reverse its prior contribution to cashBalance so we don't double-count it
+  const effectiveCashBalance = (() => {
+    const baseCash = Number(cashBalance) || 0;
+    if (!transactionToEdit) return baseCash;
+    const prevAmt = Number(transactionToEdit.amount) || 0;
+    if (transactionToEdit.type === 'OUTFLOW') {
+      const wasPendingAbono =
+        transactionToEdit.is_reimbursement && transactionToEdit.status === 'PENDING_REIMBURSEMENT';
+      return wasPendingAbono ? baseCash : baseCash + prevAmt;
+    }
+    if (transactionToEdit.type === 'INFLOW') {
+      return Math.max(0, baseCash - prevAmt);
+    }
+    return baseCash;
+  })();
+
   const amountError = validateTransactionAmount(amount);
   const balanceError = amountError
     ? null
@@ -67,11 +85,11 @@ export default function NewTransactionModal({
         type,
         isReimbursement,
         amount,
-        cashBalance,
+        cashBalance: effectiveCashBalance,
       });
   const fieldError = (amountTouched && amountError) || balanceError;
   const showOutflowBalance = type === 'OUTFLOW' && !isReimbursement;
-  const availableBalance = cashBalance;
+  const availableBalance = effectiveCashBalance;
 
   // Sync categoryId with categoryName / type whenever categories or type changes
   useEffect(() => {
@@ -92,6 +110,7 @@ export default function NewTransactionModal({
 
   // Populate fields when opening modal (either blank or pre-filled for editing)
   useEffect(() => {
+    let isCancelled = false;
     if (isOpen) {
       if (transactionToEdit) {
         setTitle(transactionToEdit.title || '');
@@ -110,6 +129,24 @@ export default function NewTransactionModal({
           (transactionToEdit.receipt_url ? [transactionToEdit.receipt_url] : []);
         setPreviewUrls(existingReceipts);
         setReceiptFiles([]);
+        if (transactionToEdit.id) {
+          setLoadingAuditorRemarks(true);
+          fetch(`/api/transactions/${transactionToEdit.id}/comments`)
+            .then((r) => r.json())
+            .then((data) => {
+              if (!isCancelled) {
+                setAuditorRemarks(Array.isArray(data?.comments) ? data.comments : []);
+              }
+            })
+            .catch(() => {
+              if (!isCancelled) setAuditorRemarks([]);
+            })
+            .finally(() => {
+              if (!isCancelled) setLoadingAuditorRemarks(false);
+            });
+        } else {
+          setAuditorRemarks([]);
+        }
       } else {
         setType(canOutflow ? 'OUTFLOW' : 'INFLOW');
         setTitle('');
@@ -121,12 +158,17 @@ export default function NewTransactionModal({
         setIsProxyClaimant(false);
         setReceiptFiles([]);
         setPreviewUrls([]);
+        setAuditorRemarks([]);
+        setLoadingAuditorRemarks(false);
       }
       setAmountTouched(false);
       setFormErrors({});
       setShakeKey(0);
       setCroppingIndex(null);
     }
+    return () => {
+      isCancelled = true;
+    };
   }, [isOpen, transactionToEdit, canOutflow]);
 
   useEffect(() => {
@@ -315,9 +357,47 @@ export default function NewTransactionModal({
       >
         {/* Form Body */}
         <form id="new-transaction-form" onSubmit={handleSubmit} noValidate className="space-y-4 text-xs">
-          
+          {transactionToEdit && (transactionToEdit.status === 'FLAGGED' || auditorRemarks.length > 0) && (
+            <div className="rounded-xl p-3 bg-rose-50/70 dark:bg-rose-950/30 ring-1 ring-rose-500/25 space-y-1.5">
+              <div className="flex items-center justify-between gap-2">
+                <span className="text-2xs uppercase tracking-wider font-bold text-rose-700 dark:text-rose-400">
+                  Auditor Revision Remarks
+                </span>
+                <span className="text-2xs font-semibold text-rose-600 dark:text-rose-400">
+                  Resubmits to Pending Audit
+                </span>
+              </div>
+              {loadingAuditorRemarks ? (
+                <p className="text-2xs text-zinc-500 dark:text-zinc-400">Loading auditor remarks...</p>
+              ) : auditorRemarks.length === 0 ? (
+                <p className="text-2xs text-zinc-600 dark:text-zinc-400">
+                  Please review the transaction details and attached receipt proof before resubmitting.
+                </p>
+              ) : (
+                <div className="space-y-1.5 max-h-32 overflow-y-auto pr-1">
+                  {auditorRemarks.map((c) => (
+                    <div
+                      key={c.id}
+                      className="rounded-lg bg-white/90 dark:bg-zinc-900/80 p-2 ring-1 ring-black/[0.04] dark:ring-white/[0.06]"
+                    >
+                      <div className="flex items-center justify-between gap-2 mb-0.5">
+                        <span className="text-2xs font-bold text-zinc-900 dark:text-zinc-100">
+                          {c.author_name || 'Auditor'}{' '}
+                          <span className="font-normal text-zinc-500">({c.author_role || 'Auditor'})</span>
+                        </span>
+                      </div>
+                      <p className="text-xs text-zinc-700 dark:text-zinc-300 whitespace-pre-wrap leading-relaxed">
+                        {c.comment_text}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
           {/* Type Toggle: Inflow vs Outflow */}
-          <div className="grid grid-cols-2 gap-2 bg-zinc-100/80 dark:bg-zinc-850/80 p-1 rounded-2xl ring-1 ring-black/[0.04] dark:ring-white/[0.06]">
+          <div className="grid grid-cols-2 gap-2 bg-zinc-100/80 dark:bg-zinc-900/90 p-1 rounded-2xl ring-1 ring-black/[0.04] dark:ring-white/[0.08]">
             <Button
               type="button"
               disabled={!canInflow && !transactionToEdit}
@@ -370,7 +450,7 @@ export default function NewTransactionModal({
                 }}
                 onBlur={() => setAmountTouched(true)}
                 aria-invalid={Boolean(formErrors.amount || fieldError)}
-                className={`w-full h-10 text-sm font-bold pl-7 pr-3 bg-zinc-100/70 dark:bg-zinc-850/80 text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 rounded-xl ring-1 ring-black/[0.04] dark:ring-white/[0.06] focus:outline-none focus:bg-white dark:focus:bg-zinc-850 transition-all tabular-nums select-text ${
+                className={`w-full h-10 text-sm font-bold pl-7 pr-3 bg-zinc-100/70 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 rounded-xl ring-1 ring-black/[0.04] dark:ring-white/[0.08] focus:outline-none focus:bg-white dark:focus:bg-zinc-800 transition-all tabular-nums select-text ${
                   (formErrors.amount || fieldError)
                     ? 'ring-2 ring-rose-500/50'
                     : 'focus:ring-2 focus:ring-emerald-500/40'
@@ -409,7 +489,7 @@ export default function NewTransactionModal({
                 }
               }}
               aria-invalid={Boolean(formErrors.title)}
-              className={`w-full h-10 px-3 bg-zinc-100/70 dark:bg-zinc-850/80 rounded-xl ring-1 ring-black/[0.04] dark:ring-white/[0.06] focus:outline-none focus:bg-white dark:focus:bg-zinc-850 transition-all text-zinc-900 dark:text-zinc-100 select-text ${
+              className={`w-full h-10 px-3 bg-zinc-100/70 dark:bg-zinc-800 rounded-xl ring-1 ring-black/[0.04] dark:ring-white/[0.08] focus:outline-none focus:bg-white dark:focus:bg-zinc-800 transition-all text-zinc-900 dark:text-zinc-100 select-text ${
                 formErrors.title
                   ? 'ring-2 ring-rose-500/50'
                   : 'focus:ring-2 focus:ring-emerald-500/40'
@@ -430,7 +510,7 @@ export default function NewTransactionModal({
               <button
                 type="button"
                 onClick={() => setIsCategoryOpen(!isCategoryOpen)}
-                className="w-full h-10 px-3 bg-zinc-100/70 dark:bg-zinc-850/80 hover:bg-zinc-200/60 dark:hover:bg-zinc-800 ring-1 ring-black/[0.04] dark:ring-white/[0.06] rounded-xl flex items-center justify-between text-zinc-900 dark:text-zinc-100 font-medium transition-colors cursor-pointer text-left"
+                className="w-full h-10 px-3 bg-zinc-100/70 dark:bg-zinc-800 hover:bg-zinc-200/60 dark:hover:bg-zinc-700 ring-1 ring-black/[0.04] dark:ring-white/[0.08] rounded-xl flex items-center justify-between text-zinc-900 dark:text-zinc-100 font-medium transition-colors cursor-pointer text-left"
               >
                 <span className="truncate">{categoryName}</span>
                 <ChevronDown className="w-3.5 h-3.5 text-zinc-400 shrink-0 ml-1" />
@@ -477,7 +557,7 @@ export default function NewTransactionModal({
                 placeholder="e.g. Club Week 2026"
                 value={eventName}
                 onChange={(e) => setEventName(e.target.value)}
-                className="w-full h-10 px-3 bg-zinc-100/70 dark:bg-zinc-850/80 rounded-xl ring-1 ring-black/[0.04] dark:ring-white/[0.06] focus:outline-none focus:ring-2 focus:ring-emerald-500/40 focus:bg-white dark:focus:bg-zinc-850 text-zinc-900 dark:text-zinc-100 select-text transition-all"
+                className="w-full h-10 px-3 bg-zinc-100/70 dark:bg-zinc-800 rounded-xl ring-1 ring-black/[0.04] dark:ring-white/[0.08] focus:outline-none focus:ring-2 focus:ring-emerald-500/40 focus:bg-white dark:focus:bg-zinc-800 text-zinc-900 dark:text-zinc-100 select-text transition-all"
               />
             </div>
           </div>
@@ -525,7 +605,7 @@ export default function NewTransactionModal({
                           placeholder="e.g. Ms. Kimberly Dawn Jatulan"
                           value={advancedByName}
                           onChange={(e) => setAdvancedByName(e.target.value)}
-                          className="w-full h-9 px-3 bg-zinc-100/70 dark:bg-zinc-850/80 rounded-xl ring-1 ring-black/[0.04] dark:ring-white/[0.06] focus:outline-none focus:ring-2 focus:ring-emerald-500/40 text-zinc-900 dark:text-zinc-100 text-xs"
+                          className="w-full h-9 px-3 bg-zinc-100/70 dark:bg-zinc-800 rounded-xl ring-1 ring-black/[0.04] dark:ring-white/[0.08] focus:outline-none focus:ring-2 focus:ring-emerald-500/40 text-zinc-900 dark:text-zinc-100 text-xs"
                         />
                       </div>
                       <div className={formErrors.recipient ? 'animate-field-shake' : ''} key={`rec-${shakeKey}`}>
@@ -541,7 +621,7 @@ export default function NewTransactionModal({
                             setRecipient(e.target.value);
                             if (formErrors.recipient) setFormErrors((prev) => ({ ...prev, recipient: null }));
                           }}
-                          className={`w-full h-9 px-3 bg-zinc-100/70 dark:bg-zinc-850/80 rounded-xl ring-1 ring-black/[0.04] dark:ring-white/[0.06] focus:outline-none focus:ring-2 focus:ring-emerald-500/40 text-zinc-900 dark:text-zinc-100 text-xs ${formErrors.recipient ? 'ring-2 ring-rose-500/50' : ''}`}
+                          className={`w-full h-9 px-3 bg-zinc-100/70 dark:bg-zinc-800 rounded-xl ring-1 ring-black/[0.04] dark:ring-white/[0.08] focus:outline-none focus:ring-2 focus:ring-emerald-500/40 text-zinc-900 dark:text-zinc-100 text-xs ${formErrors.recipient ? 'ring-2 ring-rose-500/50' : ''}`}
                         />
                       </div>
                     </div>
@@ -562,7 +642,7 @@ export default function NewTransactionModal({
                           }
                         }}
                         aria-invalid={Boolean(formErrors.recipient)}
-                        className={`w-full h-9 px-3 bg-zinc-100/70 dark:bg-zinc-850/80 rounded-xl ring-1 ring-black/[0.04] dark:ring-white/[0.06] focus:outline-none focus:bg-white dark:focus:bg-zinc-850 transition-all text-zinc-900 dark:text-zinc-100 select-text ${
+                        className={`w-full h-9 px-3 bg-zinc-100/70 dark:bg-zinc-800 rounded-xl ring-1 ring-black/[0.04] dark:ring-white/[0.08] focus:outline-none focus:bg-white dark:focus:bg-zinc-800 transition-all text-zinc-900 dark:text-zinc-100 select-text ${
                           formErrors.recipient
                             ? 'ring-2 ring-rose-500/50'
                             : 'focus:ring-2 focus:ring-emerald-500/40'
@@ -628,7 +708,7 @@ export default function NewTransactionModal({
 
             {/* Add / Upload Photo Button */}
             {receiptFiles.length < 3 && (
-              <label className="h-10 flex items-center justify-center gap-2 px-3 bg-zinc-100/70 dark:bg-zinc-850/80 hover:bg-zinc-200/60 dark:hover:bg-zinc-800 rounded-xl ring-1 ring-black/[0.04] dark:ring-white/[0.06] cursor-pointer transition-colors shadow-xs">
+              <label className="h-10 flex items-center justify-center gap-2 px-3 bg-zinc-100/70 dark:bg-zinc-800 hover:bg-zinc-200/60 dark:hover:bg-zinc-700 rounded-xl ring-1 ring-black/[0.04] dark:ring-white/[0.08] cursor-pointer transition-colors shadow-xs">
                 <Camera className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
                 <span className="text-zinc-700 dark:text-zinc-300 font-medium">
                   {compressing ? 'Compressing photo...' : receiptFiles.length === 0 ? 'Take or Upload Photo (Up to 3)' : `Add Another Photo (${receiptFiles.length}/3)`}

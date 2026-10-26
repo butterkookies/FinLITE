@@ -24,6 +24,7 @@ import { useTheme } from '@/components/theme/ThemeProvider';
 
 const ROLE_OPTIONS = [
   { value: 'president', label: 'President', description: 'Executive oversight & operational approval' },
+  { value: 'vice_president', label: 'Vice President', description: 'Executive co-oversight & operational approval' },
   { value: 'treasurer', label: 'Treasurer', description: 'Disbursements, inflows & cash custody' },
   { value: 'auditor', label: 'Auditor', description: 'Audit review, receipt verification & counts' },
   { value: 'adviser', label: 'Adviser', description: 'Faculty oversight & signatory' },
@@ -258,7 +259,7 @@ export default function UserPermissionsModal({
                 type="button"
                 onClick={() => handleSelectAll(false)}
                 disabled={isPrimarySuperAdmin}
-                className="text-[11px] font-bold text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-200 hover:underline cursor-pointer"
+                className="text-[11px] font-bold text-zinc-500 dark:text-zinc-400 hover:text-zinc-800 dark:hover:text-zinc-200 hover:underline cursor-pointer"
               >
                 Clear All
               </button>
@@ -276,7 +277,7 @@ export default function UserPermissionsModal({
                   className={`p-3 rounded-xl transition-all cursor-pointer flex items-start gap-3 select-none ${
                     isEnabled
                       ? 'bg-emerald-500/10 text-zinc-950 dark:text-zinc-50 ring-1 ring-emerald-500/30'
-                      : 'bg-zinc-50/60 dark:bg-zinc-900/40 hover:bg-zinc-100/80 dark:hover:bg-zinc-850/60 text-zinc-800 dark:text-zinc-200 ring-1 ring-black/[0.04] dark:ring-white/[0.05]'
+                      : 'bg-zinc-50/60 dark:bg-zinc-900/40 hover:bg-zinc-100/80 dark:hover:bg-zinc-800/60 text-zinc-800 dark:text-zinc-200 ring-1 ring-black/[0.04] dark:ring-white/[0.08]'
                   }`}
                 >
                   <input

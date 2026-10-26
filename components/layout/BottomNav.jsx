@@ -52,7 +52,7 @@ export default function BottomNav({
         <button
           type="button"
           onClick={onOpenNewTx}
-          className="-mt-5 w-12 h-12 rounded-2xl flex items-center justify-center shadow-lg transition-transform active:scale-90 cursor-pointer bg-emerald-600 dark:bg-emerald-500 text-white dark:text-black shadow-emerald-600/30 dark:shadow-emerald-500/30 border-2 border-white dark:border-[#09090b]"
+          className="-mt-5 w-12 h-12 rounded-2xl flex items-center justify-center shadow-lg transition-transform active:scale-90 cursor-pointer bg-emerald-600 hover:bg-emerald-500 text-white shadow-emerald-600/30 dark:shadow-emerald-500/30 border-2 border-white dark:border-[#09090b]"
           title="Record New Transaction"
         >
           <Plus className="w-6 h-6 stroke-[3]" />
