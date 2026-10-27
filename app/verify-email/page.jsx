@@ -90,7 +90,7 @@ function VerifyEmailContent() {
         <div className="bg-white dark:bg-[#121214] rounded-2xl shadow-xs border border-black/[0.08] dark:border-zinc-800 p-7">
 
           {error && (
-            <div className="flex items-start gap-2.5 bg-gray-50 dark:bg-zinc-850 border border-black/[0.08] dark:border-zinc-700/80 text-rose-700 dark:text-rose-400 rounded-xl px-4 py-3 mb-5 text-xs font-medium">
+            <div className="flex items-start gap-2.5 bg-rose-50 dark:bg-rose-950/30 border border-rose-100 dark:border-rose-900/50 text-rose-700 dark:text-rose-400 rounded-xl px-4 py-3 mb-5 text-xs font-medium">
               <AlertCircle className="w-4 h-4 mt-0.5 shrink-0 text-rose-600 dark:text-rose-400" strokeWidth={1.75} />
               <span>{error}</span>
             </div>
@@ -116,19 +116,19 @@ function VerifyEmailContent() {
               </div>
 
               {sendFailed && (
-                <div className="flex items-start gap-2.5 bg-gray-50 dark:bg-zinc-850 border border-black/[0.08] dark:border-zinc-700/80 text-amber-800 dark:text-amber-300 rounded-xl px-4 py-3 text-xs font-medium">
+                <div className="flex items-start gap-2.5 bg-amber-50 dark:bg-amber-950/30 border border-amber-100 dark:border-amber-900/50 text-amber-800 dark:text-amber-300 rounded-xl px-4 py-3 text-xs font-medium">
                   <AlertCircle className="w-4 h-4 mt-0.5 shrink-0 text-amber-600 dark:text-amber-400" strokeWidth={1.75} />
                   <span>Your request was saved, but the first email could not be sent. Use the button below to send it again.</span>
                 </div>
               )}
 
-              <div className="flex items-start gap-2.5 bg-gray-50 dark:bg-zinc-850 border border-black/[0.08] dark:border-zinc-700/80 text-gray-700 dark:text-zinc-300 rounded-xl px-4 py-3 text-xs">
+              <div className="flex items-start gap-2.5 bg-gray-50 dark:bg-zinc-800/60 border border-gray-200 dark:border-zinc-700/60 text-gray-700 dark:text-zinc-300 rounded-xl px-4 py-3 text-xs">
                 <Clock className="w-4 h-4 mt-0.5 shrink-0 text-gray-500 dark:text-zinc-400" strokeWidth={1.75} />
                 <span>The link works once and expires soon. Check your spam folder if you do not see it.</span>
               </div>
 
               {notice && (
-                <div className="flex items-start gap-2.5 bg-gray-50 dark:bg-zinc-850 border border-black/[0.08] dark:border-zinc-700/80 text-emerald-800 dark:text-emerald-300 rounded-xl px-4 py-3 text-xs font-medium">
+                <div className="flex items-start gap-2.5 bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-100 dark:border-emerald-900/50 text-emerald-800 dark:text-emerald-300 rounded-xl px-4 py-3 text-xs font-medium">
                   <CheckCircle2 className="w-4 h-4 mt-0.5 shrink-0 text-emerald-600 dark:text-emerald-400" strokeWidth={1.75} />
                   <span>{notice}</span>
                 </div>
@@ -206,7 +206,7 @@ function VerifyEmailContent() {
               </div>
 
               {notice && (
-                <div className="flex items-start gap-2.5 bg-gray-50 dark:bg-zinc-850 border border-black/[0.08] dark:border-zinc-700/80 text-emerald-800 dark:text-emerald-300 rounded-xl px-4 py-3 text-xs font-medium">
+                <div className="flex items-start gap-2.5 bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-100 dark:border-emerald-900/50 text-emerald-800 dark:text-emerald-300 rounded-xl px-4 py-3 text-xs font-medium">
                   <CheckCircle2 className="w-4 h-4 mt-0.5 shrink-0 text-emerald-600 dark:text-emerald-400" strokeWidth={1.75} />
                   <span>{notice}</span>
                 </div>

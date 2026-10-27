@@ -233,7 +233,7 @@ function RegisterForm() {
 
           {/* Google OAuth pre-fill notice */}
           {isGoogleFlow && (
-            <div className="flex items-start gap-2.5 bg-gray-50 dark:bg-zinc-850 border border-black/[0.08] dark:border-zinc-700/80 text-blue-800 dark:text-blue-300 rounded-xl px-4 py-3 mb-5 text-xs font-medium">
+            <div className="flex items-start gap-2.5 bg-blue-50/80 dark:bg-blue-950/30 border border-blue-100 dark:border-blue-900/50 text-blue-800 dark:text-blue-300 rounded-xl px-4 py-3 mb-5 text-xs font-medium">
               <Info className="w-4 h-4 mt-0.5 shrink-0 text-blue-600 dark:text-blue-400" />
               <span>You&apos;re registering via Google as <strong>{googleEmail}</strong>. Review your details and submit your request.</span>
             </div>
@@ -241,7 +241,7 @@ function RegisterForm() {
 
           {/* Error Banner */}
           {error && (
-            <div className="flex items-start gap-2.5 bg-gray-50 dark:bg-zinc-850 border border-black/[0.08] dark:border-zinc-700/80 text-rose-700 dark:text-rose-400 rounded-xl px-4 py-3 mb-5 text-xs font-medium">
+            <div className="flex items-start gap-2.5 bg-rose-50 dark:bg-rose-950/30 border border-rose-100 dark:border-rose-900/50 text-rose-700 dark:text-rose-400 rounded-xl px-4 py-3 mb-5 text-xs font-medium">
               <AlertCircle className="w-4 h-4 mt-0.5 shrink-0 text-rose-600 dark:text-rose-400" />
               <span>{error}</span>
             </div>
@@ -315,7 +315,7 @@ function RegisterForm() {
                 readOnly={isGoogleFlow}
                 className={`w-full px-3.5 py-2.5 rounded-xl border text-sm text-gray-900 dark:text-zinc-100 placeholder-gray-400 dark:placeholder-zinc-500 focus:outline-none focus:ring-2 transition-all ${
                   isGoogleFlow
-                    ? 'bg-gray-50 dark:bg-zinc-850 border-gray-100 dark:border-zinc-800 text-gray-500 dark:text-zinc-400 cursor-not-allowed'
+                    ? 'bg-gray-100/80 dark:bg-zinc-800/50 border-gray-200 dark:border-zinc-700/60 text-gray-500 dark:text-zinc-400 cursor-not-allowed'
                     : emailValidationError
                     ? 'border-red-300 dark:border-rose-800 bg-red-50/20 dark:bg-rose-950/20 focus:ring-red-400'
                     : emailTouched && form.email
